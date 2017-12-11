@@ -394,6 +394,7 @@ void StImageViewerGUI::fillPanoramaMenu(StGLMenu* theMenu) {
                      myImage->params.ViewMode, StViewSurface_Plain);
     theMenu->addItem(tr(MENU_VIEW_SURFACE_SPHERE),
                      myImage->params.ViewMode, StViewSurface_Sphere);
+	theMenu->addItem("Hemi Sphere", myImage->params.ViewMode, StViewSurface_HemiSphere);
     theMenu->addItem(tr(MENU_VIEW_SURFACE_CUBEMAP),
                      myImage->params.ViewMode, StViewSurface_Cubemap);
     if(myWindow->hasOrientationSensor()) {
@@ -1461,6 +1462,7 @@ void StImageViewerGUI::setVisibility(const StPointD_t& theCursor,
             switch(aViewMode) {
                 case StViewSurface_Plain:   aTrPano = MENU_VIEW_SURFACE_PLANE;   break;
                 case StViewSurface_Sphere:  aTrPano = MENU_VIEW_SURFACE_SPHERE;  break;
+				case StViewSurface_HemiSphere: aTrPano = MENU_VIEW_SURFACE_HEMISPHERE; break;
                 case StViewSurface_Cubemap: aTrPano = MENU_VIEW_SURFACE_CUBEMAP; break;
             }
             myDescr->setText(tr(MENU_VIEW_PANORAMA) + "\n" + tr(aTrPano));

@@ -117,6 +117,7 @@ namespace StMoviePlayerStrings {
         MENU_VIEW_TRACK_HEAD_POOR   = 1286,
         MENU_VIEW_TRACK_HEAD_AUDIO  = 1287,
         MENU_VIEW_STICK_PANORAMA360 = 1288,
+		MENU_VIEW_SURFACE_HEMISPHERE= 1289,
 
         // Root -> Audio menu
         MENU_AUDIO = 1300,

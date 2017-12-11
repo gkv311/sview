@@ -11,6 +11,11 @@
 
 #include "StGLMesh.h"
 
+enum StGLUVSphereType {
+	StGLUVSphereTypeFull,
+	StGLUVSphereTypeHemi,
+};
+
 class StBndSphere;
 
 /**
@@ -20,6 +25,11 @@ class StBndSphere;
 class StGLUVSphere : public StGLMesh {
 
         public:
+
+	ST_CPPEXPORT StGLUVSphere(const StGLVec3&        theCenter,
+							  const GLfloat          theRadius,
+							  const size_t           theRings,
+							  const StGLUVSphereType theType);
 
     /**
      * Defines the UV sphere mesh with specified parameters.
@@ -55,6 +65,7 @@ class StGLUVSphere : public StGLMesh {
     StGLVec3             myCenter;
     GLfloat              myRadius;
     size_t               myRings;
+	StGLUVSphereType     myType;
 
 };
 
