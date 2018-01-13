@@ -99,7 +99,7 @@ namespace StImageViewerStrings {
         MENU_VIEW_STICK_PANORAMA360 = 1288,
         MENU_VIEW_FLIPZ_CUBE6x1     = 1291,
         MENU_VIEW_FLIPZ_CUBE3x2     = 1292,
-		MENU_VIEW_SURFACE_HEMISPHERE= 1293,
+        MENU_VIEW_SURFACE_HEMISPHERE= 1293,
 
         // Root -> Output -> Change Device menu
         MENU_CHANGE_DEVICE  = 1400,

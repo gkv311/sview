@@ -20,17 +20,17 @@ namespace {
 };
 
 StGLUVSphere::StGLUVSphere(const StGLVec3& theCenter,
-	const GLfloat   theRadius,
-	const size_t    theRings,
-	const StGLUVSphereType theType)
-	: StGLMesh(GL_TRIANGLE_STRIP),
-	myPrimCounts(1),
-	myIndPointers(1),
-	myCenter(theCenter),
-	myRadius(theRadius),
-	myRings(theRings),
-	myType(theType) {
-	//
+    const GLfloat   theRadius,
+    const size_t    theRings,
+    const StGLUVSphereType theType)
+    : StGLMesh(GL_TRIANGLE_STRIP),
+    myPrimCounts(1),
+    myIndPointers(1),
+    myCenter(theCenter),
+    myRadius(theRadius),
+    myRings(theRings),
+    myType(theType) {
+    //
 }
 
 StGLUVSphere::StGLUVSphere(const StGLVec3& theCenter,
@@ -84,7 +84,7 @@ bool StGLUVSphere::computeMesh() {
     StGLVec3* aVert = NULL;
     StGLVec2 tcrd(0.0f, 0.0f);
 
-	GLfloat projections = myType == StGLUVSphereTypeFull ? 1 : 0.5;
+    GLfloat projections = myType == StGLUVSphereTypeFull ? 1 : 0.5;
 
     for(size_t ringId = 0; ringId <= aRingsCount; ++ringId) {
         theta = GLfloat(ringId) * ST_PI / GLfloat(aRingsCount) - ST_PIDIV2;

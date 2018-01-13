@@ -395,7 +395,7 @@ StGLImageRegion::~StGLImageRegion() {
     myTextureQueue->getQTexture().release(aCtx);
     myQuad.release(aCtx);
     myUVSphere.release(aCtx);
-	myUVHemiSphere.release(aCtx);
+    myUVHemiSphere.release(aCtx);
     myProgram.release(aCtx);
 
     // simplify debugging - nullify pointer to this widget
@@ -442,9 +442,9 @@ bool StGLImageRegion::stglInit() {
         return false;
     } else if(!myUVSphere.initVBOs(aCtx)) {
         ST_ERROR_LOG("Fail to init StGLUVSphere");
-	} else if(!myUVHemiSphere.initVBOs(aCtx)) {
-		ST_ERROR_LOG("Fail to init StGLUVSphere");
-	}
+    } else if(!myUVHemiSphere.initVBOs(aCtx)) {
+        ST_ERROR_LOG("Fail to init StGLUVSphere");
+    }
 
     // setup texture filter
     myTextureQueue->getQTexture().setMinMagFilter(aCtx, params.TextureFilter->getValue() == StGLImageProgram::FILTER_NEAREST ? GL_NEAREST : GL_LINEAR);
@@ -873,7 +873,7 @@ void StGLImageRegion::stglDrawView(unsigned int theView) {
             break;
         }
         case StViewSurface_Sphere:
-		case StViewSurface_HemiSphere: {
+        case StViewSurface_HemiSphere: {
             if(!myProgram.init(aCtx, aTextures.getColorModel(), aTextures.getColorScale(), aColorGetter)) {
                 break;
             }
@@ -897,11 +897,11 @@ void StGLImageRegion::stglDrawView(unsigned int theView) {
             myProgram.getActiveProgram()->setProjMat (aCtx, myProjCam.getProjMatrixMono());
             myProgram.getActiveProgram()->setModelMat(aCtx, aModelMat);
 
-			if (aViewMode == StViewSurface_Sphere) {
-				myUVSphere.draw(aCtx, *myProgram.getActiveProgram());
-			} else {
-				myUVHemiSphere.draw(aCtx, *myProgram.getActiveProgram());
-			}
+            if (aViewMode == StViewSurface_Sphere) {
+                myUVSphere.draw(aCtx, *myProgram.getActiveProgram());
+            } else {
+                myUVHemiSphere.draw(aCtx, *myProgram.getActiveProgram());
+            }
 
             myProgram.getActiveProgram()->unuse(aCtx);
             break;
@@ -990,7 +990,7 @@ bool StGLImageRegion::tryUnClick(const StClickEvent& theEvent,
             }
             case StViewSurface_Cubemap:
             case StViewSurface_Sphere: 
-			case StViewSurface_HemiSphere: {
+            case StViewSurface_HemiSphere: {
                 aParams->moveSphere(getMouseMoveSphere(myClickPntZo, aCursor));
                 break;
             }
@@ -1071,7 +1071,7 @@ void StGLImageRegion::scaleAt(const StPointD_t& thePoint,
         }
         case StViewSurface_Cubemap:
         case StViewSurface_Sphere:
-		case StViewSurface_HemiSphere: {
+        case StViewSurface_HemiSphere: {
             if(theStep < 0.0f
             && aParams->ScaleFactor <= 0.24f) {
                 break;

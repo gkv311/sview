@@ -928,7 +928,7 @@ void StOutDistorted::stglDrawVR() {
             hasComposError = true;
         }
 
-	      if(myVrTrackedPoses[vr::k_unTrackedDeviceIndex_Hmd].bPoseIsValid) {
+        if(myVrTrackedPoses[vr::k_unTrackedDeviceIndex_Hmd].bPoseIsValid) {
             const vr::HmdMatrix34_t& aHeadPos = myVrTrackedPoses[vr::k_unTrackedDeviceIndex_Hmd].mDeviceToAbsoluteTracking;
             double aRotMat[3][3];
             for(int aRow = 0; aRow < 3; ++aRow) {
@@ -937,7 +937,7 @@ void StOutDistorted::stglDrawVR() {
                 }
             }
             myVrOrient.setMatrix(aRotMat);
-	      }
+        }
     }
 
     // real screen buffer
