@@ -49,6 +49,17 @@ extern "C" {
     #define AV_NUM_DATA_POINTERS 4
 #endif
 
+// Compatibility with older FFmpeg (API change since 2015-07-27 - lavc 56.56.100 / 56.35.0)
+#ifndef AV_INPUT_BUFFER_PADDING_SIZE
+    #define AV_INPUT_BUFFER_PADDING_SIZE FF_INPUT_BUFFER_PADDING_SIZE
+#endif
+#ifndef AV_CODEC_FLAG_GLOBAL_HEADER
+    #define AV_CODEC_FLAG_GLOBAL_HEADER CODEC_FLAG_GLOBAL_HEADER
+#endif
+#ifndef AV_CODEC_FLAG2_IGNORE_CROP
+    #define AV_CODEC_FLAG2_IGNORE_CROP CODEC_FLAG2_IGNORE_CROP
+#endif
+
 #ifdef _MSC_VER
     #pragma warning(default : 4244)
 #endif

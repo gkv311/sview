@@ -309,7 +309,7 @@ bool StVideoQueue::init(AVFormatContext*   theFormatCtx,
                           && (getCodedSizeY() == 1080 || getCodedSizeY() == 1088);
 #if(LIBAVCODEC_VERSION_INT >= AV_VERSION_INT(55, 0, 0))
     if(is720in1080) {
-        myCodecCtx->flags2 |= CODEC_FLAG2_IGNORE_CROP;
+        myCodecCtx->flags2 |= AV_CODEC_FLAG2_IGNORE_CROP;
     }
 #endif
 

@@ -219,7 +219,7 @@ bool StAVVideoMuxer::addStream(AVFormatContext* theContext,
     }
 
     if(theContext->oformat->flags & AVFMT_GLOBALHEADER) {
-        aCodecCtxNew->flags |= CODEC_FLAG_GLOBAL_HEADER;
+        aCodecCtxNew->flags |= AV_CODEC_FLAG_GLOBAL_HEADER;
     }
     return true;
 }

@@ -108,9 +108,9 @@ void StAVPacket::setAVpkt(const AVPacket& theCopy) {
 #endif
 
     // now copy data with special padding space
-    myPacket.data = stMemAllocAligned<uint8_t*>((theCopy.size + FF_INPUT_BUFFER_PADDING_SIZE), 16); // data must be aligned to 16 bytes for SSE!
+    myPacket.data = stMemAllocAligned<uint8_t*>((theCopy.size + AV_INPUT_BUFFER_PADDING_SIZE), 16); // data must be aligned to 16 bytes for SSE!
     stMemCpy (myPacket.data, theCopy.data, theCopy.size);
-    stMemZero(myPacket.data + (ptrdiff_t )theCopy.size, FF_INPUT_BUFFER_PADDING_SIZE);
+    stMemZero(myPacket.data + (ptrdiff_t )theCopy.size, AV_INPUT_BUFFER_PADDING_SIZE);
 
 #if(LIBAVCODEC_VERSION_INT >= AV_VERSION_INT(52, 118, 0))
     if(myPacket.side_data_elems > 0) {
@@ -121,9 +121,9 @@ void StAVPacket::setAVpkt(const AVPacket& theCopy) {
         for(int anIter = 0; anIter < theCopy.side_data_elems; ++anIter) {
             aSize = theCopy.side_data[anIter].size;
             myPacket.side_data[anIter] = theCopy.side_data[anIter];
-            myPacket.side_data[anIter].data = stMemAllocAligned<uint8_t*>(aSize + FF_INPUT_BUFFER_PADDING_SIZE, 16);
+            myPacket.side_data[anIter].data = stMemAllocAligned<uint8_t*>(aSize + AV_INPUT_BUFFER_PADDING_SIZE, 16);
             stMemCpy (myPacket.side_data[anIter].data, theCopy.side_data[anIter].data, aSize);
-            stMemZero(myPacket.side_data[anIter].data + (ptrdiff_t )aSize, FF_INPUT_BUFFER_PADDING_SIZE);
+            stMemZero(myPacket.side_data[anIter].data + (ptrdiff_t )aSize, AV_INPUT_BUFFER_PADDING_SIZE);
         }
     }
 #endif
