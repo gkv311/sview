@@ -89,7 +89,7 @@ class StGLMessageBox : public StGLWidget {
                                        const bool      theIsDefault = false,
                                        const int       theWidth = 0);
 
-    ST_CPPEXPORT virtual bool doKeyDown(const StKeyEvent& theEvent);
+    ST_CPPEXPORT virtual bool doKeyDown(const StKeyEvent& theEvent) ST_ATTR_OVERRIDE;
 
     ST_LOCAL int getMarginLeft()   const { return myMarginLeft; }
     ST_LOCAL int getMarginRight()  const { return myMarginRight; }

@@ -73,7 +73,7 @@ class StImageViewer : public StApplication {
     /**
      * Reset device - release GL resources in old window and re-create them in new window.
      */
-    ST_CPPEXPORT virtual bool resetDevice();
+    ST_CPPEXPORT virtual bool resetDevice() ST_ATTR_OVERRIDE;
 
         private: //! @name window events slots
 

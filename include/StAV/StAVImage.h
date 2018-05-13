@@ -61,7 +61,7 @@ class StAVImage : public StImageFile {
     /**
      * Close currently opened image context and release memory.
      */
-    ST_CPPEXPORT virtual void close();
+    ST_CPPEXPORT virtual void close() ST_ATTR_OVERRIDE;
 
     /**
      * Decode image from specified file or memory pointer.
@@ -77,7 +77,7 @@ class StAVImage : public StImageFile {
      */
     ST_CPPEXPORT virtual bool save(const StString& theFilePath,
                                    ImageType       theImageType,
-                                   StFormat        theSrcFormat = StFormat_AUTO);
+                                   StFormat        theSrcFormat = StFormat_AUTO) ST_ATTR_OVERRIDE;
 
         private:
 

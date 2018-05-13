@@ -134,7 +134,7 @@ class StOutDistorted : public StWindow {
      * Show/Hide mouse cursor.
      * @param theToShow true to show cursor
      */
-    ST_CPPEXPORT virtual void showCursor(const bool theToShow);
+    ST_CPPEXPORT virtual void showCursor(const bool theToShow) ST_ATTR_OVERRIDE;
 
     /**
      * Return true if device has orientation sensor.
