@@ -391,11 +391,16 @@ void StAndroidGlue::updateMonitors() {
 
     StMonitor aMon;
     aMon.setId(0);
+
+    const StString aBuildDevice = myBuildDevice.lowerCased();
+    const StString aBuildModel  = myBuildModel.lowerCased();
     if(myStereoApiId == "S3DV") {
         aMon.setPnPId("ST@S3DV");
-    } else if(myBuildDevice == "KING7S" || myBuildModel == "PP6000") { // PPTV King 7S
+    } else if(aBuildDevice == "king7s" || aBuildModel == "pp6000") { // PPTV King 7S
         aMon.setPnPId("ST@COL0");
-    } else if(myBuildModel == "Y6 MAX 3D") { // DOOGEE Y6 Max 3D
+    } else if(aBuildModel == "y6 max 3d") { // DOOGEE Y6 Max 3D
+        aMon.setPnPId("ST@COL0");
+    } else if(aBuildModel == "p8 3d" || aBuildModel == "p8_3d") { // Elephone P8 3D
         aMon.setPnPId("ST@COL0");
     }
     aMon.changeVRect().top()    = 0;
