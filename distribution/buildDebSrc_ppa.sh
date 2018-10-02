@@ -26,15 +26,16 @@ aCurrentDate=`date --rfc-2822`
 # Ubuntu 17.04     (Zesty Zapus)
 # Ubuntu 17.10     (Artful Aardvark)
 # Ubuntu 18.04 LTS (Bionic Beaver)
-# Ubuntu 18.10
-# Ubuntu 10.04
-aDistribs=("xenial" "zesty" "artful" "bionic")
+# Ubuntu 18.10     (Cosmic Cuttlefish)
+# Ubuntu 19.04
+aDistribs=("xenial" "zesty" "artful" "bionic" "cosmic")
 
 # Debian
 #aDistribs=("stable" "unstable" "testing-proposed-updates" "experimental")
 
 # remove temporary files
 rm -f temp/*.build
+rm -f temp/*.buildinfo
 rm -f temp/*.changes
 rm -f temp/*.dsc
 rm -f temp/*.tar.gz
@@ -45,18 +46,20 @@ cd ${aDebSrcRoot}
 for aDistr in "${aDistribs[@]}"
 do
   echo "Prepare source package for '$aDistr'"
-  sed "s/unknown_distrib/${aDistr}/g"                "debian/changelog.tmpl" > "debian/changelogtmp1"
-  sed "s/unknown_version/${aDebVersion}~${aDistr}/g" "debian/changelogtmp1"  > "debian/changelogtmp2"
-  sed "s/unknown_date/${aCurrentDate}/g"             "debian/changelogtmp2"  > "debian/changelog"
+  sed "s/unknown_distrib/${aDistr}/g"                  "debian/changelog.tmpl" > "debian/changelogtmp1"
+  sed "s/unknown_version/1:${aDebVersion}~${aDistr}/g" "debian/changelogtmp1"  > "debian/changelogtmp2"
+  sed "s/unknown_date/${aCurrentDate}/g"               "debian/changelogtmp2"  > "debian/changelog"
   rm -f debian/changelogtmp*
 
   mkdir -p ../$aDistr
   debuild -S
-  mv -f ../*.build   ../$aDistr
-  mv -f ../*.changes ../$aDistr
-  mv -f ../*.dsc     ../$aDistr
-  mv -f ../*.tar.gz  ../$aDistr
-  mv -f ../*.tar.xz  ../$aDistr
+  mv -f ../*.build     ../$aDistr
+  mv -f ../*.buildinfo ../$aDistr
+  mv -f ../*.changes   ../$aDistr
+  mv -f ../*.dsc       ../$aDistr
+  mv -f ../*.tar.*z    ../$aDistr
+  #mv -f ../*.tar.gz    ../$aDistr
+  #mv -f ../*.tar.xz    ../$aDistr
 done
 
 #for aDistr in "${aDistribs[@]}"
