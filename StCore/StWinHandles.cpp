@@ -116,14 +116,21 @@ StWinGlrc::StWinGlrc(EGLDisplay theDisplay,
     #define ST_EGL_CONTEXT_OPENGL_CORE_PROFILE_BIT_KHR          0x00000001
     #define ST_EGL_CONTEXT_OPENGL_COMPATIBILITY_PROFILE_BIT_KHR 0x00000002
 
+    // for EGL_KHR_context_flush_control
+    #define ST_EGL_CONTEXT_RELEASE_BEHAVIOR_KHR       0x2097
+    #define ST_EGL_CONTEXT_RELEASE_BEHAVIOR_NONE_KHR  0x0000
+    #define ST_EGL_CONTEXT_RELEASE_BEHAVIOR_FLUSH_KHR 0x2098
+
     const char* anEglExts = eglQueryString(myDisplay, EGL_EXTENSIONS);
     if(StGLContext::stglCheckExtension(anEglExts, "EGL_KHR_create_context")) {
+        const bool khrFlushControl = StGLContext::stglCheckExtension(anEglExts, "EGL_KHR_context_flush_control");
         const EGLint anEglCtxAttribs[] = {
             ST_EGL_CONTEXT_FLAGS_KHR, theDebugCtx ? ST_EGL_CONTEXT_OPENGL_DEBUG_BIT_KHR : 0,
         #if defined(GL_ES_VERSION_2_0)
             EGL_CONTEXT_CLIENT_VERSION, 2,
         #endif
             //EGL_CONTEXT_OPENGL_PROFILE_MASK_KHR, ST_EGL_CONTEXT_OPENGL_COMPATIBILITY_PROFILE_BIT_KHR,
+            khrFlushControl ? ST_EGL_CONTEXT_RELEASE_BEHAVIOR_KHR : 0, khrFlushControl ? ST_EGL_CONTEXT_RELEASE_BEHAVIOR_NONE_KHR : 0,
             EGL_NONE
         };
 
@@ -248,13 +255,15 @@ StWinGlrc::StWinGlrc(StHandle<StXDisplay>& theDisplay,
   myRC(NULL) {
     const char* aGlxExts = glXQueryExtensionsString(theDisplay->hDisplay, DefaultScreen(theDisplay->hDisplay));
     if(StGLContext::stglCheckExtension(aGlxExts, "GLX_ARB_create_context_profile")) {
+        const bool khrFlushControl = StGLContext::stglCheckExtension(aGlxExts, "GLX_ARB_create_context_profile");
         glXCreateContextAttribsARB_t aCreateCtxFunc = (glXCreateContextAttribsARB_t )glXGetProcAddress((const GLubyte* )"glXCreateContextAttribsARB");
 
         int aCtxAttribs[] = {
             //GLX_CONTEXT_MAJOR_VERSION_ARB, 2,
             //GLX_CONTEXT_MINOR_VERSION_ARB, 0,
-            GLX_CONTEXT_FLAGS_ARB,        theDebugCtx ? GLX_CONTEXT_DEBUG_BIT_ARB : 0,
             //GLX_CONTEXT_PROFILE_MASK_ARB, GLX_CONTEXT_COMPATIBILITY_PROFILE_BIT_ARB,
+            GLX_CONTEXT_FLAGS_ARB, theDebugCtx ? GLX_CONTEXT_DEBUG_BIT_ARB : 0,
+            khrFlushControl ? GLX_CONTEXT_RELEASE_BEHAVIOR_ARB : 0, khrFlushControl ? GLX_CONTEXT_RELEASE_BEHAVIOR_NONE_ARB : 0,
             None
         };
 
@@ -482,11 +491,12 @@ int StWinHandles::glCreateContext(StWinHandles*    theSlave,
       if(aCtx.extAll->wglCreateContextAttribsARB != NULL) {
           // Beware! NVIDIA drivers reject context creation when WGL_CONTEXT_PROFILE_MASK_ARB are specified
           // but not WGL_CONTEXT_MAJOR_VERSION_ARB/WGL_CONTEXT_MINOR_VERSION_ARB
-          int aCtxAttribs[] = {
+          const int aCtxAttribs[] = {
               //WGL_CONTEXT_MAJOR_VERSION_ARB, 3,
               //WGL_CONTEXT_MINOR_VERSION_ARB, 2,
               //WGL_CONTEXT_PROFILE_MASK_ARB,  WGL_CONTEXT_COMPATIBILITY_PROFILE_BIT_ARB, //WGL_CONTEXT_CORE_PROFILE_BIT_ARB,
-              WGL_CONTEXT_FLAGS_ARB,         theDebugCtx ? WGL_CONTEXT_DEBUG_BIT_ARB : 0,
+              WGL_CONTEXT_FLAGS_ARB, theDebugCtx ? WGL_CONTEXT_DEBUG_BIT_ARB : 0,
+              aCtx.khrFlushControl ? WGL_CONTEXT_RELEASE_BEHAVIOR_ARB : 0, aCtx.khrFlushControl ? WGL_CONTEXT_RELEASE_BEHAVIOR_NONE_ARB : 0,
               0, 0
           };
 

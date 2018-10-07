@@ -166,6 +166,7 @@ class StGLContext {
     bool            extTexBGRA8;//!< GL_EXT_texture_format_BGRA8888 for OpenGL ES
     StGLFunctions*  extAll;     //!< access to ALL extensions for advanced users
     bool            extSwapTear;//!< WGL_EXT_swap_control_tear/GLX_EXT_swap_control_tear
+    bool            khrFlushControl; //!< GL_KHR_context_flush_control / WGL_ARB_context_flush_control / GLX_ARB_context_flush_control / EGL_KHR_context_flush_control
 
         public:    //! @name class interface
 

@@ -1462,6 +1462,12 @@ struct StGLFunctions {
                                                          const int* theAttribs);
     wglCreateContextAttribsARB_t wglCreateContextAttribsARB;
 
+        // WGL_ARB_context_flush_control
+
+    #define WGL_CONTEXT_RELEASE_BEHAVIOR_ARB       0x2097
+    #define WGL_CONTEXT_RELEASE_BEHAVIOR_NONE_ARB  0x0000
+    #define WGL_CONTEXT_RELEASE_BEHAVIOR_FLUSH_ARB 0x2098
+
         // WGL_NV_DX_interop
 
     typedef BOOL   (WINAPI *wglDXSetResourceShareHandleNV_t)(void* theObjectD3d, HANDLE theShareHandle);
@@ -1533,6 +1539,14 @@ struct StGLFunctions {
 
     typedef int         (*glXSwapIntervalSGI_t)(int theInterval);
     glXSwapIntervalSGI_t glXSwapIntervalSGI;
+
+        public: //! @name GLX_ARB_context_flush_control
+
+#ifndef GLX_CONTEXT_RELEASE_BEHAVIOR_ARB
+    #define GLX_CONTEXT_RELEASE_BEHAVIOR_ARB       0x2097
+    #define GLX_CONTEXT_RELEASE_BEHAVIOR_NONE_ARB  0x0000
+    #define GLX_CONTEXT_RELEASE_BEHAVIOR_FLUSH_ARB 0x2098
+#endif
 
         // GLX_MESA_query_renderer
 

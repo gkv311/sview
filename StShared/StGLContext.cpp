@@ -65,6 +65,7 @@ StGLContext::StGLContext(const StHandle<StResourceManager>& theResMgr)
 #endif
   extAll(NULL),
   extSwapTear(false),
+  khrFlushControl(false),
   myFuncs(new StGLFunctions()),
   myResMgr(theResMgr),
   myGlVendor(GlVendor_UNKNOWN),
@@ -118,6 +119,7 @@ StGLContext::StGLContext(const bool theToInitialize)
 #endif
   extAll(NULL),
   extSwapTear(false),
+  khrFlushControl(false),
   myFuncs(new StGLFunctions()),
   myGlVendor(GlVendor_UNKNOWN),
   myGpuName(GPU_UNKNOWN),
@@ -694,7 +696,8 @@ bool StGLContext::stglInit() {
 
     // retrieve platform-dependent extensions
 #if defined(ST_HAVE_EGL)
-    //const char* aEglExts = eglQueryString(eglGetCurrentDisplay(), EGL_EXTENSIONS);
+    const char* anEglExts = eglQueryString(eglGetCurrentDisplay(), EGL_EXTENSIONS);
+    khrFlushControl = stglCheckExtension(anEglExts, "EGL_KHR_context_flush_control");
 #elif defined(_WIN32)
     if(STGL_READ_FUNC(wglGetExtensionsStringARB)) {
         const char* aWglExts = myFuncs->wglGetExtensionsStringARB(wglGetCurrentDC());
@@ -708,6 +711,7 @@ bool StGLContext::stglInit() {
         }
         if(stglCheckExtension(aWglExts, "WGL_ARB_create_context_profile")) {
             STGL_READ_FUNC(wglCreateContextAttribsARB);
+            khrFlushControl = stglCheckExtension(aWglExts, "WGL_ARB_context_flush_control");
         }
         extSwapTear = stglCheckExtension(aWglExts, "WGL_EXT_swap_control_tear");
         if(stglCheckExtension(aWglExts, "WGL_NV_DX_interop")) {
@@ -744,6 +748,7 @@ bool StGLContext::stglInit() {
         STGL_READ_FUNC(glXQueryCurrentRendererStringMESA);
     }
     extSwapTear = stglCheckExtension(aGlxExts, "GLX_EXT_swap_control_tear");
+    khrFlushControl = stglCheckExtension(aGlxExts, "GLX_ARB_context_flush_control");
 #endif
 
 #if defined(GL_ES_VERSION_2_0)
