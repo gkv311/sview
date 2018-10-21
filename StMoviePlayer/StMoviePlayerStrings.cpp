@@ -225,6 +225,8 @@ void loadDefaults(StLangMap& theStrings) {
                "About Plugin...");
     theStrings(MENU_FPS,
                "FPS Control");
+    theStrings(MENU_EXCLUSIVE_FULLSCREEN,
+               "Exclusive Fullscreen mode");
     theStrings(MENU_FPS_VSYNC,
                "VSync");
     theStrings(MENU_FPS_METER,

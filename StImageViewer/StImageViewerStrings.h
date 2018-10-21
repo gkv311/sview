@@ -105,6 +105,7 @@ namespace StImageViewerStrings {
         MENU_ABOUT_RENDERER = 1401,
         MENU_SHOW_FPS       = 1402,
         MENU_VSYNC          = 1403,
+        MENU_EXCLUSIVE_FULLSCREEN = 1404,
 
         // Root -> Help menu
         MENU_HELP         = 1500,

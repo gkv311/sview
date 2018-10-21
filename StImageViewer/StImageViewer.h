@@ -145,6 +145,7 @@ class StImageViewer : public StApplication {
         StHandle<StBoolParam>         IsMobileUISwitch; //!< display mobile interface (actual value)
         StHandle<StBoolParamNamed>    ToHideStatusBar;  //!< hide system-provided status bar
         StHandle<StBoolParamNamed>    ToHideNavBar;     //!< hide system-provided navigation bar
+        StHandle<StBoolParamNamed>    IsExclusiveFullScreen; //!< exclusive fullscreen mode
         StHandle<StBoolParamNamed>    IsVSyncOn;        //!< flag to use VSync
         StHandle<StBoolParamNamed>    ToOpenLast;       //!< option to open last file from recent list by default
         StHandle<StBoolParamNamed>    ToSaveRecent;     //!< load/save recent file

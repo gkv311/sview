@@ -161,6 +161,8 @@ void loadDefaults(StLangMap& theStrings) {
                "Show FPS");
     theStrings(MENU_VSYNC,
                "VSync");
+    theStrings(MENU_EXCLUSIVE_FULLSCREEN,
+               "Exclusive Fullscreen mode");
     theStrings(ABOUT_DPLUGIN_NAME,
                "sView - Image Viewer");
     theStrings(ABOUT_VERSION,

@@ -617,7 +617,7 @@ void StOutPageFlip::releaseResources() {
     // read windowed placement
     StWindow::hide();
     if(isMovable()) {
-        StWindow::setFullScreen(false);
+        setFullScreen(false);
     }
 }
 
@@ -742,7 +742,7 @@ void StOutPageFlip::dxActivate() {
             // Direct3D device will fail to Reset if GL fullscreen device is active
             // so we switch out main GL window into windowed state temporarily
             // (we need to wait some time to ensure system perform needed movements)
-            StWindow::setFullScreen(false);
+            setFullScreen(false);
             StWindow::hide();
             ++myOutD3d.ActivateStep;
             return;
@@ -754,7 +754,7 @@ void StOutPageFlip::dxActivate() {
         if(myOutD3d.ActivateStep == 1) {
             // at second step switch out main GL window back to fullscreen
             myOutD3d.ActivateStep = 0;
-            StWindow::setFullScreen(true);
+            setFullScreen(true);
             StWindow::hide();
 
             if(myOutD3d.WglDxBuffer.isNull()
@@ -853,6 +853,9 @@ bool StOutPageFlip::create() {
 
     // request Quad Buffer
     StWindow::setAttribute(StWinAttr_GlQuadStereo, params.QuadBuffer->getValue() == QUADBUFFER_HARD_OPENGL);
+    if (params.QuadBuffer->getValue() == QUADBUFFER_SOFT) {
+        StWindow::setAttribute(StWinAttr_ExclusiveFullScreen, true);
+    }
     if(!StWindow::create()) {
         return false;
     }

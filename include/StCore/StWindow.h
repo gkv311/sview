@@ -96,6 +96,7 @@ enum StWinAttr {
     StWinAttr_SlaveMon,            //!< integer, slave window monitor id, 1 by default
     StWinAttr_SplitCfg,            //!< StWinSplit, split master window
     StWinAttr_ToAlignEven,         //!< boolean, align window position to even numbers, FALSE by default
+    StWinAttr_ExclusiveFullScreen, //!< boolean, exclusive fullscreen mode, FALSE by default
 };
 
 typedef struct tagStSlaveWindowCfg {

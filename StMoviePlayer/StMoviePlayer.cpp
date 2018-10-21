@@ -141,6 +141,7 @@ void StMoviePlayer::updateStrings() {
     params.ToShowMenu->setName(stCString("Show main menu"));
     params.ToShowTopbar->setName(stCString("Show top toolbar"));
     params.IsMobileUI->setName(stCString("Mobile UI"));
+    params.IsExclusiveFullScreen->setName(tr(MENU_EXCLUSIVE_FULLSCREEN));
     params.IsVSyncOn->setName(tr(MENU_FPS_VSYNC));
     params.ToLimitFps->setName(tr(MENU_FPS_BOUND));
     params.StartWebUI->setName(stCString("Web UI start option"));
@@ -270,6 +271,7 @@ StMoviePlayer::StMoviePlayer(const StHandle<StResourceManager>& theResMgr,
     params.IsMobileUI->signals.onChanged = stSlot(this, &StMoviePlayer::doChangeMobileUI);
     params.IsMobileUISwitch = new StBoolParam(params.IsMobileUI->getValue());
     params.IsMobileUISwitch->signals.onChanged = stSlot(this, &StMoviePlayer::doScaleHiDPI);
+    params.IsExclusiveFullScreen = new StBoolParamNamed(false, stCString("isExclusiveFullScreen"));
     params.IsVSyncOn   = new StBoolParamNamed(true, stCString("vsync"));
     params.IsVSyncOn->signals.onChanged = stSlot(this, &StMoviePlayer::doSwitchVSync);
     StApplication::params.VSyncMode->setValue(StGLContext::VSync_ON);
@@ -331,6 +333,7 @@ StMoviePlayer::StMoviePlayer(const StHandle<StResourceManager>& theResMgr,
     mySettings->loadParam (params.AudioAlHrtf);
     mySettings->loadParam (params.ToShowFps);
     mySettings->loadParam (params.IsMobileUI);
+    mySettings->loadParam (params.IsExclusiveFullScreen);
     mySettings->loadParam (params.IsVSyncOn);
     mySettings->loadParam (params.ToLimitFps);
     mySettings->loadParam (params.UseGpu);
@@ -580,6 +583,7 @@ void StMoviePlayer::saveAllParams() {
         mySettings->saveParam (params.ToForceBFormat);
         mySettings->saveParam (params.ToShowFps);
         mySettings->saveParam (params.IsMobileUI);
+        mySettings->saveParam (params.IsExclusiveFullScreen);
         mySettings->saveParam (params.IsVSyncOn);
         mySettings->saveParam (params.ToLimitFps);
         mySettings->saveParam (params.UseGpu);
@@ -1943,6 +1947,7 @@ void StMoviePlayer::doSwitchSubtitlesStream(const int32_t theStreamId) {
 
 void StMoviePlayer::doFullscreen(const bool theIsFullscreen) {
     if(!myWindow.isNull()) {
+        myWindow->setAttribute(StWinAttr_ExclusiveFullScreen, params.IsExclusiveFullScreen->getValue());
         myWindow->setFullScreen(theIsFullscreen);
     }
 }

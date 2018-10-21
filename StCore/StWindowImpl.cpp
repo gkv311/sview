@@ -381,6 +381,9 @@ void StWindowImpl::getAttributes(StWinAttr* theAttributes) const {
             case StWinAttr_ToAlignEven:
                 anIter[1] = (StWinAttr )attribs.ToAlignEven;
                 break;
+            case StWinAttr_ExclusiveFullScreen:
+                anIter[1] = (StWinAttr)attribs.IsExclusiveFullScr;
+                break;
             default:
                 ST_DEBUG_LOG("UNKNOWN window attribute #" + anIter[0] + " requested");
                 break;
@@ -491,6 +494,9 @@ void StWindowImpl::setAttributes(const StWinAttr* theAttributes) {
                 break;
             case StWinAttr_ToAlignEven:
                 attribs.ToAlignEven = (anIter[1] == 1);
+                break;
+            case StWinAttr_ExclusiveFullScreen:
+                attribs.IsExclusiveFullScr = (anIter[1] == 1);
                 break;
             default:
                 ST_DEBUG_LOG("UNKNOWN window attribute #" + anIter[0] + " requested");

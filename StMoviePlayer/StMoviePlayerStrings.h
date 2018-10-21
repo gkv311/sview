@@ -148,6 +148,7 @@ namespace StMoviePlayerStrings {
         MENU_CHANGE_DEVICE  = 1400, // Root -> Output -> Change Device menu
         MENU_ABOUT_RENDERER = 1401,
         MENU_FPS            = 1402,
+        MENU_EXCLUSIVE_FULLSCREEN = 1404,
 
         // Root -> Output -> FPS Control menu
         MENU_FPS_VSYNC      = 1420,

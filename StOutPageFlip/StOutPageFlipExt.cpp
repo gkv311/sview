@@ -138,6 +138,13 @@ bool StOutPageFlipExt::create() {
     return true;
 }
 
+void StOutPageFlipExt::setFullScreen(const bool theFullScreen) {
+    if(StOutPageFlip::params.QuadBuffer->getValue() == QUADBUFFER_SOFT) {
+        setAttribute(StWinAttr_ExclusiveFullScreen, true);
+    }
+    StOutPageFlip::setFullScreen(theFullScreen);
+}
+
 void StOutPageFlipExt::processEvents() {
     StOutPageFlip::processEvents();
     if(!StOutPageFlip::params.ToShowExtra->getValue()) {

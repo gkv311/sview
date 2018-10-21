@@ -53,6 +53,11 @@ class StOutPageFlipExt : public StOutPageFlip {
     ST_CPPEXPORT virtual void processEvents() ST_ATTR_OVERRIDE;
 
     /**
+     * @param theFullScreen fullscreen state
+     */
+    ST_CPPEXPORT virtual void setFullScreen(const bool theFullScreen) ST_ATTR_OVERRIDE;
+
+    /**
      * Retrieve options list.
      */
     ST_CPPEXPORT virtual void getOptions(StParamsList& theList) const ST_ATTR_OVERRIDE;

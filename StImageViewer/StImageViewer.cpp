@@ -112,6 +112,7 @@ void StImageViewer::updateStrings() {
     params.IsMobileUI->setName(stCString("Mobile UI"));
     params.ToHideStatusBar->setName("Hide system status bar");
     params.ToHideNavBar   ->setName(tr(OPTION_HIDE_NAVIGATION_BAR));
+    params.IsExclusiveFullScreen->setName(tr(MENU_EXCLUSIVE_FULLSCREEN));
     params.IsVSyncOn->setName(tr(MENU_VSYNC));
     params.ToOpenLast->setName(tr(OPTION_OPEN_LAST_ON_STARTUP));
     params.ToSaveRecent->setName(stCString("Remember recent file"));
@@ -189,6 +190,7 @@ StImageViewer::StImageViewer(const StHandle<StResourceManager>& theResMgr,
     params.ToHideStatusBar->signals.onChanged = stSlot(this, &StImageViewer::doHideSystemBars);
     params.ToHideNavBar    = new StBoolParamNamed(true, stCString("toHideNavBar"));
     params.ToHideNavBar   ->signals.onChanged = stSlot(this, &StImageViewer::doHideSystemBars);
+    params.IsExclusiveFullScreen = new StBoolParamNamed(false, stCString("isExclusiveFullScreen"));
     params.IsVSyncOn     = new StBoolParamNamed(true,  stCString("vsync"));
     params.IsVSyncOn->signals.onChanged = stSlot(this, &StImageViewer::doSwitchVSync);
     StApplication::params.VSyncMode->setValue(StGLContext::VSync_ON);
@@ -217,6 +219,7 @@ StImageViewer::StImageViewer(const StHandle<StResourceManager>& theResMgr,
     mySettings->loadParam (params.ToHideStatusBar);
     mySettings->loadParam (params.ToHideNavBar);
     mySettings->loadParam (params.ToOpenLast);
+    mySettings->loadParam (params.IsExclusiveFullScreen);
     mySettings->loadParam (params.IsVSyncOn);
     mySettings->loadParam (params.ToShowPlayList);
     mySettings->loadParam (params.ToShowAdjustImage);
@@ -373,6 +376,7 @@ void StImageViewer::saveAllParams() {
         mySettings->saveParam (params.ToHideStatusBar);
         mySettings->saveParam (params.ToHideNavBar);
         mySettings->saveParam (params.ToOpenLast);
+        mySettings->saveParam (params.IsExclusiveFullScreen);
         mySettings->saveParam (params.IsVSyncOn);
         mySettings->saveParam (params.ToShowPlayList);
         mySettings->saveParam (params.ToShowAdjustImage);
@@ -1339,6 +1343,7 @@ void StImageViewer::doSwitchVSync(const bool theValue) {
 
 void StImageViewer::doFullscreen(const bool theIsFullscreen) {
     if(!myWindow.isNull()) {
+        myWindow->setAttribute(StWinAttr_ExclusiveFullScreen, params.IsExclusiveFullScreen->getValue());
         myWindow->setFullScreen(theIsFullscreen);
     }
 }

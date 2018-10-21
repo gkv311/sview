@@ -1139,10 +1139,19 @@ void StWindowImpl::updateWindowPos() {
         } else {
             // resize Master GL-subwindow
             myTiledCfg = TiledCfg_Separate;
-            const GLsizei aSizeX = (attribs.IsFullScreen) ? myRectFull.width()  : myRectNorm.width();
-            const GLsizei aSizeY = (attribs.IsFullScreen) ? myRectFull.height() : myRectNorm.height();
+            int aTop   = 0;
+            int aSizeX = (attribs.IsFullScreen) ? myRectFull.width()  : myRectNorm.width();
+            int aSizeY = (attribs.IsFullScreen) ? myRectFull.height() : myRectNorm.height();
+            if (attribs.IsFullScreen
+            && !attribs.IsExclusiveFullScr)
+            {
+              // workaround slow switching into fullscreen mode and back on Windows 10
+              // due to OpenGL driver implicitly activating an exclusive GPU usage mode
+              aTop   -= 2;
+              aSizeY += 2;
+            }
             SetWindowPos(myMaster.hWindowGl, HWND_TOP,
-                         0, 0, aSizeX, aSizeY,
+                         0, aTop, aSizeX, aSizeY,
                          SWP_NOACTIVATE);
         }
     }
