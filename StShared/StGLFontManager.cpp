@@ -107,6 +107,9 @@ const StHandle<StGLFont>& StGLFontManager::findCreate(const StFTFont::Typeface t
     aGenFont                                    = findCreate(aPack.Western.FamilyName, theSize);
     aFont->changeFont(StFTFont::Subset_CJK)     = findCreate(aPack.CJK    .FamilyName, theSize);
     aFont->changeFont(StFTFont::Subset_Korean)  = findCreate(aPack.Korean .FamilyName, theSize);
+    if(aGenFont.isNull() || !aGenFont->hasSubset(StFTFont::Subset_Arabic)) {
+        aFont->changeFont(StFTFont::Subset_Arabic) = findCreate(aPack.Arabic.FamilyName, theSize);
+    }
 
     if(aGenFont.isNull()) {
         aGenFont = findCreateFallback(theSize);

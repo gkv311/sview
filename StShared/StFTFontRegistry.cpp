@@ -222,6 +222,10 @@ void StFTFontRegistry::init(const bool theToSearchAll) {
     const StFTFontFamily& aKor = aMalgun.FamilyName.isEmpty() && !aGulim.FamilyName.isEmpty()
                                ? aGulim
                                : aMalgun;
+    const StFTFontFamily& anArabic = findFont(stCString("Times New Roman"));
+    aSerif.Arabic  = anArabic;
+    aSans .Arabic  = anArabic;
+    aMono .Arabic  = anArabic;
     aSerif.Korean  = aKor;
     aSans .Korean  = aKor;
     aMono .Korean  = aKor;
@@ -239,6 +243,9 @@ void StFTFontRegistry::init(const bool theToSearchAll) {
     aSerif.CJK     = findFont(stCString("STFangsong"));
     aSans .CJK     = findFont(stCString("STFangsong"));
     aMono .CJK     = findFont(stCString("STFangsong"));
+    aSerif.Arabic  = findFont(stCString("DecoType Naskh"));
+    aSans .Arabic  = findFont(stCString("DecoType Naskh"));
+    aMono .Arabic  = findFont(stCString("DecoType Naskh"));
 #elif defined(__ANDROID__)
     aSerif.Western = findFont(stCString("Noto Serif"));
     if(aSerif.Western.FamilyName.isEmpty()) {
@@ -261,6 +268,15 @@ void StFTFontRegistry::init(const bool theToSearchAll) {
         aSerif.CJK = findFont(stCString("Noto Sans SC"));
         aSans .CJK = findFont(stCString("Noto Sans SC"));
         aMono .CJK = findFont(stCString("Noto Sans SC"));
+    }
+
+    aSerif.Arabic = findFont(stCString("Droid Arabic Naskh"));
+    aSans .Arabic = findFont(stCString("Droid Arabic Naskh"));
+    aMono .Arabic = findFont(stCString("Droid Arabic Naskh"));
+    if(aSerif.Arabic.FamilyName.isEmpty()) {
+        aSerif.Arabic = findFont(stCString("Noto Naskh Arabic"));
+        aSans .Arabic = findFont(stCString("Noto Naskh Arabic"));
+        aMono .Arabic = findFont(stCString("Noto Naskh Arabic"));
     }
 #else
     aSerif.Western = findFont(stCString("FreeSerif"));

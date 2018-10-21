@@ -33,6 +33,7 @@ struct StFTFontPack {
     StFTFontFamily Western;
     StFTFontFamily CJK;
     StFTFontFamily Korean;
+    StFTFontFamily Arabic; //!< fallback font for Arabic letters
 };
 
 /**
@@ -72,6 +73,7 @@ class StFTFont {
         Subset_General,
         Subset_Korean,  //!< modern Korean letters
         Subset_CJK,     //!< Chinese characters (Chinese, Japanese, Korean and Vietnam)
+        Subset_Arabic,  //!< Arabic  characters
         SubsetsNB
     };
 
@@ -98,6 +100,20 @@ class StFTFont {
     }
 
     /**
+     * @return true if specified character is within subset of Arabic characters
+     */
+    ST_LOCAL static bool isArabic(stUtf32_t theUChar) {
+        return (theUChar >= 0x00600 && theUChar <= 0x006FF);
+    }
+
+    /**
+     * @return true if specified character should be displayed in Right-to-Left order.
+     */
+    ST_LOCAL static bool isRightToLeft(stUtf32_t theUChar) {
+        return (theUChar >= 0x00600 && theUChar <= 0x006FF); // Arabic
+    }
+
+    /**
      * Determine Unicode subset for specified character
      */
     ST_LOCAL static Subset subset(const stUtf32_t theUChar) {
@@ -105,6 +121,8 @@ class StFTFont {
             return Subset_CJK;
         } else if(isKorean(theUChar)) {
             return Subset_Korean;
+        } else if(isArabic(theUChar)) {
+            return Subset_Arabic;
         }
         return Subset_General;
     }
@@ -332,6 +350,13 @@ class StFTFont {
      */
     ST_LOCAL bool hasKorean() const {
         return mySubsets[Subset_Korean];
+    }
+
+    /**
+     * @return true if this font contains glyphs of specified subset
+     */
+    ST_LOCAL bool hasSubset(Subset theSubset) const {
+        return mySubsets[theSubset];
     }
 
         protected:

@@ -145,6 +145,14 @@ class StGLFontEntry : public StGLResource {
     }
 
     /**
+     * @return true if this font contains glyphs of specified subset
+     */
+    ST_LOCAL bool hasSubset(StFTFont::Subset theSubset) const {
+        return !myFont.isNull()
+             && myFont->hasSubset(theSubset);
+    }
+
+    /**
      * Compute glyph rectangle at specified pen position (on baseline)
      * and render it to texture if not already.
      * @param theCtx         active context
