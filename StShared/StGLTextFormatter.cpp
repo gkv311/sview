@@ -1,5 +1,5 @@
 /**
- * Copyright © 2012-2017 Kirill Gavrilov <kirill@sview.ru>
+ * Copyright © 2012-2018 Kirill Gavrilov <kirill@sview.ru>
  *
  * Distributed under the Boost Software License, Version 1.0.
  * See accompanying file license-boost.txt or copy at
@@ -9,6 +9,8 @@
 #include <StGL/StGLTextFormatter.h>
 
 #include <StGL/StGLVertexBuffer.h>
+
+#include <algorithm>
 
 /**
  * Auxiliary function to translate rectangles by the vector.
@@ -395,6 +397,27 @@ void StGLTextFormatter::newLine(const size_t theLastRect) {
     }
 }
 
+void StGLTextFormatter::flipLeftRight(size_t theCharFrom, size_t theCharTo) {
+    if(theCharFrom == theCharTo
+    || theCharTo == size_t(-1)) {
+        return;
+    }
+
+    float aRight = myRects[theCharTo].px.right();
+    for(size_t aCharIter = theCharFrom; aCharIter < theCharTo; ++aCharIter) {
+        StGLRect&       aRect1 = myRects[aCharIter + 0].px;
+        const StGLRect& aRect2 = myRects[aCharIter + 1].px;
+        float aStepX = aRect2.left() - aRect1.left();
+        aRect1.moveRightTo(aRight);
+        aRight -= aStepX;
+    }
+
+    StGLRect& aRectLast = myRects[theCharTo].px;
+    aRectLast.moveRightTo(aRight);
+
+    std::reverse (myRects.begin() + theCharFrom, (theCharTo + 1) == myRects.size() ? myRects.end() : myRects.begin() + theCharTo + 1);
+}
+
 void StGLTextFormatter::format(const GLfloat theWidth,
                                const GLfloat theHeight) {
     if(myRectsNb == 0 || myIsFormatted) {
@@ -412,6 +435,8 @@ void StGLTextFormatter::format(const GLfloat theWidth,
     // split text into lines and apply horizontal alignment
     myPenCurrLine = -myAscender;
     size_t aRectIter = 0;
+    size_t aFlipLower = 0, aFlipInnerLower = 0;
+    bool isRight2Left = false, isLeft2RightInner = false;
     for(StUtf8Iter anIter = myString.iterator(); *anIter != 0; ++anIter) {
         const stUtf32_t aCharThis = *anIter;
         if(aCharThis == '\x0D') {
@@ -423,11 +448,41 @@ void StGLTextFormatter::format(const GLfloat theWidth,
                 myAlignWidth = myRects[aLastRect].px.right();
                 ///toCorrectXAlignment = true;
             }
+            if(isRight2Left) {
+                if(isLeft2RightInner) {
+                    flipLeftRight(aFlipInnerLower, aLastRect);
+                    isLeft2RightInner = false;
+                }
+                flipLeftRight(aFlipLower, aLastRect);
+                aFlipLower = aLastRect + 1;
+            }
             newLine(aLastRect);
             continue;
         } else if(aCharThis == ' ') {
             myRectWordStart = aRectIter;
             continue;
+        }
+
+        if(StFTFont::isRightToLeft(aCharThis)) {
+            if(!isRight2Left) {
+                isRight2Left = true;
+                aFlipLower = aRectIter;
+            } else if(isLeft2RightInner) {
+                flipLeftRight(aFlipInnerLower, aRectIter - 1);
+                isLeft2RightInner = false;
+            }
+        } else if(isRight2Left) {
+            if(aCharThis >= '0' && aCharThis <= '9'
+            || (isLeft2RightInner && (aCharThis == '.' || aCharThis == ','))) {
+                if(!isLeft2RightInner) {
+                    isLeft2RightInner = true;
+                    aFlipInnerLower = aRectIter;
+                }
+            } else {
+                isRight2Left = false;
+                flipLeftRight(aFlipLower, aRectIter - 1);
+                aFlipLower = aRectIter;
+            }
         }
 
         GLfloat aWidth = myRects[aRectIter].px.right() - myLineLeft;
@@ -439,6 +494,14 @@ void StGLTextFormatter::format(const GLfloat theWidth,
                 aLastRect = aRectIter - 1;
             }
 
+            if(isRight2Left) {
+                if(isLeft2RightInner) {
+                    flipLeftRight(aFlipInnerLower, aLastRect);
+                    isLeft2RightInner = false;
+                }
+                flipLeftRight(aFlipLower, aLastRect);
+                aFlipLower = aLastRect + 1;
+            }
             newLine(aLastRect);
         }
 
@@ -448,6 +511,13 @@ void StGLTextFormatter::format(const GLfloat theWidth,
     // move last line
     if(myRectsNb != 0) {
         myTextWidth = stMax(myTextWidth, myRects[myRectsNb - 1].px.right() - myLineLeft);
+    }
+    if(isRight2Left) {
+        if(isLeft2RightInner) {
+            flipLeftRight(aFlipInnerLower, myRectsNb - 1);
+            isLeft2RightInner = false;
+        }
+        flipLeftRight(aFlipLower, myRectsNb - 1);
     }
     newLine(myRectsNb - 1);
     if(myRectsNb != 0

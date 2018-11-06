@@ -177,6 +177,11 @@ class StGLTextFormatter {
      */
     ST_CPPEXPORT void newLine(const size_t theLastRect);
 
+    /**
+     * Flip left to right order.
+     */
+    ST_CPPEXPORT void flipLeftRight(size_t theCharFrom, size_t theCharTo);
+
         protected: //! @name configuration
 
     StAlignX              myAlignX;        //!< horizontal alignment style
