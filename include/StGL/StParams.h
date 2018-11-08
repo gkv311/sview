@@ -21,6 +21,7 @@ enum StViewSurface {
     StViewSurface_Plain,   //!< normal 2D image
     StViewSurface_Cubemap, //!< cubemap texture
     StViewSurface_Sphere,  //!< spherical panorama
+    StViewSurface_HemiSphere, //!< hemispherical panorama
     //StViewSurface_Cylinder, //!< cylindrical panorama
 };
 
@@ -35,6 +36,7 @@ class StStereoParams {
         switch(theViewMode) {
             case StViewSurface_Cubemap: return "cubemap";
             case StViewSurface_Sphere:  return "sphere";
+            case StViewSurface_HemiSphere: return "hemisphere";
             case StViewSurface_Plain:   return "flat";
         }
         return "flat";
@@ -43,8 +45,11 @@ class StStereoParams {
     static StViewSurface GET_VIEW_MODE_FROM_STRING(const StString& theViewModeStr) {
         if(theViewModeStr.isStartsWithIgnoreCase(stCString("cubemap"))) {
             return StViewSurface_Cubemap;
-        } else if(theViewModeStr.isStartsWithIgnoreCase(stCString("sphere"))) {
+        }
+        else if (theViewModeStr.isStartsWithIgnoreCase(stCString("sphere"))) {
             return StViewSurface_Sphere;
+        } else if (theViewModeStr.isStartsWithIgnoreCase(stCString("hemisphere"))) {
+            return StViewSurface_HemiSphere;
         } else {
             return StViewSurface_Plain;
         }
@@ -272,6 +277,7 @@ class StStereoParams {
     void moveToRight(const float theDuration = 0.02f) {
         switch(ViewingMode) {
             case StViewSurface_Sphere:
+            case StViewSurface_HemiSphere:
             case StViewSurface_Cubemap:
                 myPanYaw += 100.0f * theDuration;
                 break;
@@ -284,6 +290,7 @@ class StStereoParams {
     void moveToLeft(const float theDuration = 0.02f) {
         switch(ViewingMode) {
             case StViewSurface_Sphere:
+            case StViewSurface_HemiSphere:
             case StViewSurface_Cubemap:
                 myPanYaw -= 100.0f * theDuration;
                 break;
@@ -308,6 +315,7 @@ class StStereoParams {
     void moveToDown(const float theDuration = 0.02f) {
         switch(ViewingMode) {
             case StViewSurface_Sphere:
+            case StViewSurface_HemiSphere:
             case StViewSurface_Cubemap:
                 myPanPitch = clipPitch(myPanPitch - 100.0f * theDuration);
                 break;
@@ -320,6 +328,7 @@ class StStereoParams {
     void moveToUp(const float theDuration = 0.02f) {
         switch(ViewingMode) {
             case StViewSurface_Sphere:
+            case StViewSurface_HemiSphere:
             case StViewSurface_Cubemap:
                 myPanPitch = clipPitch(myPanPitch + 100.0f * theDuration);
                 break;

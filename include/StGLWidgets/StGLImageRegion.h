@@ -310,6 +310,7 @@ class StGLImageRegion : public StGLWidget {
 
     StGLQuads                  myQuad;           //!< flat quad
     StGLUVSphere               myUVSphere;       //!< sphere output helper class
+    StGLUVSphere               myUVHemiSphere;
     StGLProjCamera             myProjCam;        //!< copy of projection camera
     StGLImageProgram           myProgram;        //!< GL program to draw flat image
     StHandle<StGLTextureQueue> myTextureQueue;   //!< shared texture queue

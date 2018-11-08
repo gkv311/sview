@@ -23,7 +23,7 @@
 
 typedef unsigned int   ILenum;
 typedef unsigned char  ILboolean;
-typedef int     	   ILint;
+typedef int            ILint;
 typedef size_t         ILsizei;
 typedef unsigned char  ILubyte;
 typedef unsigned int   ILuint;
@@ -59,7 +59,7 @@ typedef unsigned int   ILuint;
 #define IL_BGRA             0x80E1
 #define IL_LUMINANCE        0x1909
 #define IL_LUMINANCE_ALPHA  0x190A
-#define IL_ALPHA			0x190B
+#define IL_ALPHA            0x190B
 
 #define IL_UNSIGNED_BYTE  0x1401
 #define IL_FLOAT          0x1406
