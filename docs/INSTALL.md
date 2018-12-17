@@ -38,6 +38,14 @@ rpm -Uvh http://download1.rpmfusion.org/free/fedora/rpmfusion-free-release-stabl
 yum install ffmpeg-devel
 ~~~~~
 
+ALT Linux:
+~~~~~
+apt-get install \
+  gcc8-c++ gcc-c++ libGLU-devel libgtk+2-devel libXrandr-devel libfreetype-devel \
+  libopenal-devel libconfig-devel libconfig-c++-devel libXpm-devel libwebp-devel \
+  libavcodec-devel libavdevice-devel libavformat-devel libavutil-devel libswscale-devel
+~~~~~
+
 On Windows and macOS please refer to official documentation for each project.
 Notice that DevIL and FreeImage libraries are optional and are not required for building sView
 (libraries are loaded dynamically if available).

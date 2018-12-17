@@ -472,7 +472,7 @@ void StGLTextFormatter::format(const GLfloat theWidth,
                 isLeft2RightInner = false;
             }
         } else if(isRight2Left) {
-            if(aCharThis >= '0' && aCharThis <= '9'
+            if((aCharThis >= '0' && aCharThis <= '9')
             || (isLeft2RightInner && (aCharThis == '.' || aCharThis == ','))) {
                 if(!isLeft2RightInner) {
                     isLeft2RightInner = true;

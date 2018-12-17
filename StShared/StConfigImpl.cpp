@@ -134,7 +134,7 @@ bool StSettings::saveInt32(const StString& theParamPath,
     } catch(ParseException& ex) {
         ST_DEBUG_LOG("StSettings, error on line " + ex.getLine() + ": " + ex.getError());
         return false;
-    } catch(SettingNotFoundException nfex) {
+    } catch(SettingNotFoundException& nfex) {
         ST_DEBUG_LOG("StSettings, setting not found: " + nfex.getPath());
         return false;
     } catch(ConfigException& cex) {
@@ -189,7 +189,7 @@ bool StSettings::saveString(const StString& theParamPath,
     } catch(ParseException& ex) {
         ST_DEBUG_LOG("StSettings, error on line " + ex.getLine() + ": " + ex.getError());
         return false;
-    } catch(SettingNotFoundException nfex) {
+    } catch(SettingNotFoundException& nfex) {
         ST_DEBUG_LOG("StSettings, setting not found: " + nfex.getPath());
         return false;
     } catch(ConfigException& cex) {
