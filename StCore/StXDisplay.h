@@ -16,6 +16,14 @@
 #include <X11/Xlib.h>
 #include <X11/Xatom.h>
 #include <X11/Xutil.h>
+
+// exclude modern definitions and system-provided glext.h, should be defined before gl.h inclusion
+#ifndef GL_GLEXT_LEGACY
+    #define GL_GLEXT_LEGACY
+#endif
+#ifndef GLX_GLXEXT_LEGACY
+    #define GLX_GLXEXT_LEGACY
+#endif
 #include <GL/glx.h>
 
 #include <StStrings/StString.h>

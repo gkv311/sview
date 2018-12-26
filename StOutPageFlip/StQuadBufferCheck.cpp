@@ -36,6 +36,13 @@ static bool wndRegisterClass(HINSTANCE              theInstance,
     return (RegisterClassW(&aClass) != 0);
 }
 #elif !defined(__APPLE__) && !defined(ST_HAVE_EGL)
+    // exclude modern definitions and system-provided glext.h, should be defined before gl.h inclusion
+    #ifndef GL_GLEXT_LEGACY
+        #define GL_GLEXT_LEGACY
+    #endif
+    #ifndef GLX_GLXEXT_LEGACY
+        #define GLX_GLXEXT_LEGACY
+    #endif
     #include <GL/glx.h>
 #endif
 
