@@ -398,10 +398,16 @@ inline void* stMemAllocAligned(const size_t& theNbBytes,
                                const size_t& theAlign = ST_ALIGNMENT) {
 #if defined(_MSC_VER)
     return _aligned_malloc(theNbBytes, theAlign);
-#elif defined(__ANDROID__)
+#elif defined(__ANDROID__) || defined(__QNX__)
     return memalign(theAlign, theNbBytes);
-#else
+#elif (defined(__GNUC__) && __GNUC__ >= 4 && __GNUC_MINOR__ >= 1 && (defined(__i386) || defined(__x86_64)))
     return _mm_malloc(theNbBytes, theAlign);
+#else
+    void* aPtr;
+    if(posix_memalign(&aPtr, theAlign, theNbBytes)) {
+        return NULL;
+    }
+    return aPtr;
 #endif
 }
 
@@ -417,16 +423,6 @@ inline void* stMemAllocZeroAligned(const size_t& theNbBytes,
     return aPtr;
 }
 
-inline void* stMemReallocAligned(void* thePtrAligned, const size_t& theNbBytes,
-                                 const size_t& theAlign = ST_ALIGNMENT) {
-#if defined(_MSC_VER)
-    return _aligned_realloc(thePtrAligned, theNbBytes, theAlign);
-#else
-    /// TODO (Kirill Gavrilov#4) what should we call here???
-    return realloc(thePtrAligned, theNbBytes);
-#endif
-}
-
 /**
  * Deallocate space in memory.
  * @param ptr (void* ) - pointer to a memory block previously allocated with stMemAllocAligned() to be deallocated.
@@ -434,10 +430,12 @@ inline void* stMemReallocAligned(void* thePtrAligned, const size_t& theNbBytes,
 inline void stMemFreeAligned(void* thePtrAligned) {
 #if defined(_MSC_VER)
     _aligned_free(thePtrAligned);
-#elif defined(__ANDROID__)
+#elif defined(__ANDROID__) || defined(__QNX__)
     free(thePtrAligned);
-#else
+#elif (defined(__GNUC__) && __GNUC__ >= 4 && __GNUC_MINOR__ >= 1 && (defined(__i386) || defined(__x86_64)))
     _mm_free(thePtrAligned);
+#else
+    free(thePtrAligned);
 #endif
 }
 

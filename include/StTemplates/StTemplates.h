@@ -36,13 +36,6 @@ inline TypePtr stMemAllocZeroAligned(const size_t& bytesCount,
     return (TypePtr )::stMemAllocZeroAligned(bytesCount, align);
 }
 
-template<typename TypePtr>
-inline TypePtr stMemReallocAligned(TypePtr ptrAligned,
-                                   const size_t& bytesCount,
-                                   const size_t& align = ST_ALIGNMENT) {
-    return (TypePtr )::stMemReallocAligned(ptrAligned, bytesCount, align);
-}
-
 /**
  * Auxiliary functions.
  */
