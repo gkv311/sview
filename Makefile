@@ -14,6 +14,7 @@ HAVE_MONGOOSE := -DST_HAVE_MONGOOSE
 	$(CXX) -c $(CXXFLAGS) $< -o $@
 
 TARGET_OS = linux
+TARGET_ARCH2 =
 
 #ANDROID_NDK = $(HOME)/develop/android-ndk-r12b
 ifeq ($(OS),Windows_NT)
@@ -128,6 +129,19 @@ ifeq ($(TARGET_OS),osx)
 LDZDEF =
 endif
 
+CCVERSION := $(shell $(CC) -dumpversion)
+CCMACHINE := $(shell $(CC) -dumpmachine)
+
+ifneq (,$(findstring i586,$(CCMACHINE)))
+TARGET_ARCH2 = x86
+else ifneq (,$(findstring i686,$(CCMACHINE)))
+TARGET_ARCH2 = x86
+else ifneq (,$(findstring x86,$(CCMACHINE)))
+TARGET_ARCH2 = x86
+else ifneq (,$(findstring mingw,$(CCMACHINE)))
+TARGET_ARCH2 = x86
+endif
+
 # to activate debug build
 #EXTRA_CXXFLAGS = -DST_DEBUG_LOG_TO_FILE=\"/sdcard/Android/data/com.sview/files/sview.log\" -DST_DEBUG
 #EXTRA_CXXFLAGS += -DST_DEBUG_GL
@@ -143,7 +157,8 @@ EXTRA_CFLAGS   += $(ANDROID_SYSROOT) $(ANDROID_MARCH)
 EXTRA_CXXFLAGS += $(ANDROID_SYSROOT) $(ANDROID_MARCH)
 EXTRA_CXXFLAGS += -I$(ANDROID_NDK)/sources/cxx-stl/gnu-libstdc++/4.9/include -I$(ANDROID_NDK)/sources/cxx-stl/gnu-libstdc++/4.9/libs/$(ANDROID_EABI)/include -DST_HAVE_EGL -DST_NO_UPDATES_CHECK
 EXTRA_LDFLAGS  += $(ANDROID_SYSROOT) -L$(ANDROID_NDK)/sources/cxx-stl/gnu-libstdc++/4.9/libs/$(ANDROID_EABI) -lstdc++ -lgnustl_shared
-else
+else ifeq ($(TARGET_ARCH2),x86)
+# necessary for 32-bit x86 builds, where MMX and SSE are not enabled by default
 EXTRA_CFLAGS   += -mmmx -msse
 EXTRA_CXXFLAGS += -mmmx -msse
 endif
