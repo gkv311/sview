@@ -249,6 +249,30 @@
 		<Unit filename="Resources/English.lproj/MainMenu.xib" />
 		<Unit filename="Resources/sView.icns" />
 		<Unit filename="Resources/sView_Media.icns" />
+		<Unit filename="src/com/sview/CrashReportActivity.java">
+			<Option compile="0" />
+			<Option link="0" />
+		</Unit>
+		<Unit filename="src/com/sview/MainActivity.java">
+			<Option compile="0" />
+			<Option link="0" />
+		</Unit>
+		<Unit filename="src/com/sview/StActivity.java">
+			<Option compile="0" />
+			<Option link="0" />
+		</Unit>
+		<Unit filename="src/com/sview/StImageActivity.java">
+			<Option compile="0" />
+			<Option link="0" />
+		</Unit>
+		<Unit filename="src/com/sview/StMovieActivity.java">
+			<Option compile="0" />
+			<Option link="0" />
+		</Unit>
+		<Unit filename="src/com/sview/StS3dvSurface.java">
+			<Option compile="0" />
+			<Option link="0" />
+		</Unit>
 		<Unit filename="StAppResponder.h">
 			<Option target="MAC_gcc" />
 			<Option target="MAC_gcc_DEBUG" />

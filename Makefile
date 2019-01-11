@@ -2,6 +2,7 @@
 
 WORKDIR = $(shell pwd)
 SRCDIR = $(WORKDIR)
+JAVA_HOME = /usr
 
 $(info SRCDIR=$(SRCDIR))
 
@@ -12,6 +13,15 @@ HAVE_MONGOOSE := -DST_HAVE_MONGOOSE
 .SUFFIXES: .o .mm
 .mm.o:
 	$(CXX) -c $(CXXFLAGS) $< -o $@
+
+# Compile java files.
+# javac takes output folder, not file, and actually sometimes generates multiple files from single .java input.
+# To fool make (avoid recompiling on each build) - copy result .class file to source folder;
+# this, however, might lead to incomplete build on .java change without make clean.
+.SUFFIXES: .class .java
+.java.class:
+	$(JAVA_HOME)/bin/javac -source 1.7 -target 1.7 -d $(BUILD_ROOT)/java/classes -classpath $(ANDROID_PLATFORM) -sourcepath $(SRCDIR)/sview/src $<
+	cp -f $(BUILD_ROOT)/java/classes/com/sview/$(@F) $@
 
 TARGET_OS = linux
 TARGET_ARCH2 =
@@ -47,6 +57,12 @@ OPENAL_ROOT =
 LIBCONFIG_ROOT =
 LIBSUBFOLDER = lib
 LIBSUFFIX = so
+ANDROID_BUILD_TOOLS = $(ANDROID_HOME)/build-tools/26.0.3
+ANDROID_PLATFORM = $(ANDROID_HOME)/platforms/android-15/android.jar
+ANDROID_KEYSTORE = $(BUILD_ROOT)/sview_debug.key
+ANDROID_KEYSTORE_PASSWORD = sview_store_pswd
+ANDROID_KEY = "sview android key"
+ANDROID_KEY_PASSWORD = sview_pswd
 
 # function defining library install_name to @executable_path on OS X
 libinstname =
@@ -222,13 +238,16 @@ aStCADViewer    := libStCADViewer.$(LIBSUFFIX)
 sViewAndroidCad := libsviewcad.$(LIBSUFFIX)
 sView           := sView
 sViewAndroid    := libsview.$(LIBSUFFIX)
+sViewApk        := $(SRCDIR)/build/sView.apk
+sViewApkSigned  := $(SRCDIR)/build/sView.signed.apk.tmp
+sViewApkUnsigned:= $(SRCDIR)/build/sView.unsigned.apk.tmp
+aDestAndroid    := build/apk-tmp
+sViewDex        := $(aDestAndroid)/classes.dex
 
-aDestAndroid    := sview
-
-all:         pre_all $(aStShared) $(aStGLWidgets) $(aStCore) $(aStOutAnaglyph) $(aStOutDual) $(aStOutInterlace) $(aStOutPageFlip) $(aStOutIZ3D) $(aStOutDistorted) $(aStImageViewer) $(aStMoviePlayer) $(aStDiagnostics) $(sView)
-android_cad: aDestAndroid = StCADViewer
-android_cad: pre_all $(aStShared) $(aStGLWidgets) $(aStCore) $(aStOutAnaglyph) $(aStOutInterlace) $(aStOutDistorted) $(aStImageViewer) $(aStMoviePlayer) $(sViewAndroidCad) install_android install_android_cad_libs
-android:     pre_all $(aStShared) $(aStGLWidgets) $(aStCore) $(aStOutAnaglyph) $(aStOutInterlace) $(aStOutDistorted) $(aStImageViewer) $(aStMoviePlayer) $(sViewAndroid)    install_android install_android_libs
+all:         shared $(aStDiagnostics) $(sView)
+android_cad: pre_all_android shared $(sViewAndroidCad) $(sViewApk) install_android install_android_cad_libs
+android:     pre_all_android shared $(sViewAndroid)    $(sViewApk) install_android install_android_libs
+shared:      pre_all $(aStShared) $(aStGLWidgets) $(aStCore) outputs_all $(aStImageViewer) $(aStMoviePlayer)
 clean:       clean_StShared clean_StGLWidgets clean_StCore clean_sView clean_StOutAnaglyph clean_StOutDual clean_StOutInterlace clean_StOutPageFlip clean_StOutIZ3D clean_StOutDistorted clean_StImageViewer clean_StMoviePlayer clean_StDiagnostics clean_StCADViewer clean_sViewAndroid
 distclean:   clean
 
@@ -284,44 +303,44 @@ install_android:
 	cp -f    license-gpl-3.0.txt           $(aDestAndroid)/assets/info/license.txt
 
 install_android_libs: $(aStShared) $(aStGLWidgets) $(aStCore) $(aStOutAnaglyph) $(aStOutInterlace) $(aStOutDistorted) $(aStImageViewer) $(aStMoviePlayer) $(sViewAndroid)
-	cp -f $(BUILD_ROOT)/$(aStShared)       $(aDestAndroid)/libs/$(ANDROID_EABI)/
-	cp -f $(BUILD_ROOT)/$(aStGLWidgets)    $(aDestAndroid)/libs/$(ANDROID_EABI)/
-	cp -f $(BUILD_ROOT)/$(aStCore)         $(aDestAndroid)/libs/$(ANDROID_EABI)/
-	cp -f $(BUILD_ROOT)/$(aStOutAnaglyph)  $(aDestAndroid)/libs/$(ANDROID_EABI)/
-	cp -f $(BUILD_ROOT)/$(aStOutInterlace) $(aDestAndroid)/libs/$(ANDROID_EABI)/
-	cp -f $(BUILD_ROOT)/$(aStOutDistorted) $(aDestAndroid)/libs/$(ANDROID_EABI)/
-	cp -f $(BUILD_ROOT)/$(aStImageViewer)  $(aDestAndroid)/libs/$(ANDROID_EABI)/
-	cp -f $(BUILD_ROOT)/$(aStMoviePlayer)  $(aDestAndroid)/libs/$(ANDROID_EABI)/
-	cp -f $(BUILD_ROOT)/$(sViewAndroid)    $(aDestAndroid)/libs/$(ANDROID_EABI)/
-	cp -f $(ANDROID_NDK)/sources/cxx-stl/gnu-libstdc++/4.9/libs/$(ANDROID_EABI)/libgnustl_shared.so $(aDestAndroid)/libs/$(ANDROID_EABI)/
-	$(STRIP) $(STRIPFLAGS) $(aDestAndroid)/libs/$(ANDROID_EABI)/libgnustl_shared.so
-	cp -f $(FREETYPE_ROOT)/libs/$(ANDROID_EABI)/libfreetype.so    $(aDestAndroid)/libs/$(ANDROID_EABI)/
-	cp -f $(OPENAL_ROOT)/libs/$(ANDROID_EABI)/libopenal.so        $(aDestAndroid)/libs/$(ANDROID_EABI)/
-	cp -f $(FFMPEG_ROOT)/libs/$(ANDROID_EABI)/libavcodec.so       $(aDestAndroid)/libs/$(ANDROID_EABI)/
-	cp -f $(FFMPEG_ROOT)/libs/$(ANDROID_EABI)/libavdevice.so      $(aDestAndroid)/libs/$(ANDROID_EABI)/
-	cp -f $(FFMPEG_ROOT)/libs/$(ANDROID_EABI)/libavformat.so      $(aDestAndroid)/libs/$(ANDROID_EABI)/
-	cp -f $(FFMPEG_ROOT)/libs/$(ANDROID_EABI)/libavutil.so        $(aDestAndroid)/libs/$(ANDROID_EABI)/
-	cp -f $(FFMPEG_ROOT)/libs/$(ANDROID_EABI)/libswresample.so    $(aDestAndroid)/libs/$(ANDROID_EABI)/
-	cp -f $(FFMPEG_ROOT)/libs/$(ANDROID_EABI)/libswscale.so       $(aDestAndroid)/libs/$(ANDROID_EABI)/
+	cp -f $(BUILD_ROOT)/$(aStShared)       $(aDestAndroid)/lib/$(ANDROID_EABI)/
+	cp -f $(BUILD_ROOT)/$(aStGLWidgets)    $(aDestAndroid)/lib/$(ANDROID_EABI)/
+	cp -f $(BUILD_ROOT)/$(aStCore)         $(aDestAndroid)/lib/$(ANDROID_EABI)/
+	cp -f $(BUILD_ROOT)/$(aStOutAnaglyph)  $(aDestAndroid)/lib/$(ANDROID_EABI)/
+	cp -f $(BUILD_ROOT)/$(aStOutInterlace) $(aDestAndroid)/lib/$(ANDROID_EABI)/
+	cp -f $(BUILD_ROOT)/$(aStOutDistorted) $(aDestAndroid)/lib/$(ANDROID_EABI)/
+	cp -f $(BUILD_ROOT)/$(aStImageViewer)  $(aDestAndroid)/lib/$(ANDROID_EABI)/
+	cp -f $(BUILD_ROOT)/$(aStMoviePlayer)  $(aDestAndroid)/lib/$(ANDROID_EABI)/
+	cp -f $(BUILD_ROOT)/$(sViewAndroid)    $(aDestAndroid)/lib/$(ANDROID_EABI)/
+	cp -f $(ANDROID_NDK)/sources/cxx-stl/gnu-libstdc++/4.9/libs/$(ANDROID_EABI)/libgnustl_shared.so $(aDestAndroid)/lib/$(ANDROID_EABI)/
+	$(STRIP) $(STRIPFLAGS) $(aDestAndroid)/lib/$(ANDROID_EABI)/libgnustl_shared.so
+	cp -f $(FREETYPE_ROOT)/libs/$(ANDROID_EABI)/libfreetype.so    $(aDestAndroid)/lib/$(ANDROID_EABI)/
+	cp -f $(OPENAL_ROOT)/libs/$(ANDROID_EABI)/libopenal.so        $(aDestAndroid)/lib/$(ANDROID_EABI)/
+	cp -f $(FFMPEG_ROOT)/libs/$(ANDROID_EABI)/libavcodec.so       $(aDestAndroid)/lib/$(ANDROID_EABI)/
+	cp -f $(FFMPEG_ROOT)/libs/$(ANDROID_EABI)/libavdevice.so      $(aDestAndroid)/lib/$(ANDROID_EABI)/
+	cp -f $(FFMPEG_ROOT)/libs/$(ANDROID_EABI)/libavformat.so      $(aDestAndroid)/lib/$(ANDROID_EABI)/
+	cp -f $(FFMPEG_ROOT)/libs/$(ANDROID_EABI)/libavutil.so        $(aDestAndroid)/lib/$(ANDROID_EABI)/
+	cp -f $(FFMPEG_ROOT)/libs/$(ANDROID_EABI)/libswresample.so    $(aDestAndroid)/lib/$(ANDROID_EABI)/
+	cp -f $(FFMPEG_ROOT)/libs/$(ANDROID_EABI)/libswscale.so       $(aDestAndroid)/lib/$(ANDROID_EABI)/
 
 install_android_cad_libs: $(aStShared) $(aStGLWidgets) $(aStCore) $(aStOutAnaglyph) $(aStOutInterlace) $(aStOutDistorted) $(aStImageViewer) $(aStMoviePlayer) $(sViewAndroidCad)
-	cp -f $(BUILD_ROOT)/$(aStShared)       $(aDestAndroid)/libs/$(ANDROID_EABI)/
-	cp -f $(BUILD_ROOT)/$(aStGLWidgets)    $(aDestAndroid)/libs/$(ANDROID_EABI)/
-	cp -f $(BUILD_ROOT)/$(aStCore)         $(aDestAndroid)/libs/$(ANDROID_EABI)/
-	cp -f $(BUILD_ROOT)/$(aStOutAnaglyph)  $(aDestAndroid)/libs/$(ANDROID_EABI)/
-	cp -f $(BUILD_ROOT)/$(aStOutInterlace) $(aDestAndroid)/libs/$(ANDROID_EABI)/
-	cp -f $(BUILD_ROOT)/$(aStOutDistorted) $(aDestAndroid)/libs/$(ANDROID_EABI)/
-	cp -f $(BUILD_ROOT)/$(aStImageViewer)  $(aDestAndroid)/libs/$(ANDROID_EABI)/
-	cp -f $(BUILD_ROOT)/$(aStMoviePlayer)  $(aDestAndroid)/libs/$(ANDROID_EABI)/
-	cp -f $(BUILD_ROOT)/$(sViewAndroidCad) $(aDestAndroid)/libs/$(ANDROID_EABI)/
-	cp -f $(FREETYPE_ROOT)/libs/$(ANDROID_EABI)/libfreetype.so    $(aDestAndroid)/libs/$(ANDROID_EABI)/
-	cp -f $(OPENAL_ROOT)/libs/$(ANDROID_EABI)/libopenal.so        $(aDestAndroid)/libs/$(ANDROID_EABI)/
-	cp -f $(FFMPEG_ROOT)/libs/$(ANDROID_EABI)/libavcodec.so       $(aDestAndroid)/libs/$(ANDROID_EABI)/
-	cp -f $(FFMPEG_ROOT)/libs/$(ANDROID_EABI)/libavdevice.so      $(aDestAndroid)/libs/$(ANDROID_EABI)/
-	cp -f $(FFMPEG_ROOT)/libs/$(ANDROID_EABI)/libavformat.so      $(aDestAndroid)/libs/$(ANDROID_EABI)/
-	cp -f $(FFMPEG_ROOT)/libs/$(ANDROID_EABI)/libavutil.so        $(aDestAndroid)/libs/$(ANDROID_EABI)/
-	cp -f $(FFMPEG_ROOT)/libs/$(ANDROID_EABI)/libswresample.so    $(aDestAndroid)/libs/$(ANDROID_EABI)/
-	cp -f $(FFMPEG_ROOT)/libs/$(ANDROID_EABI)/libswscale.so       $(aDestAndroid)/libs/$(ANDROID_EABI)/
+	cp -f $(BUILD_ROOT)/$(aStShared)       $(aDestAndroid)/lib/$(ANDROID_EABI)/
+	cp -f $(BUILD_ROOT)/$(aStGLWidgets)    $(aDestAndroid)/lib/$(ANDROID_EABI)/
+	cp -f $(BUILD_ROOT)/$(aStCore)         $(aDestAndroid)/lib/$(ANDROID_EABI)/
+	cp -f $(BUILD_ROOT)/$(aStOutAnaglyph)  $(aDestAndroid)/lib/$(ANDROID_EABI)/
+	cp -f $(BUILD_ROOT)/$(aStOutInterlace) $(aDestAndroid)/lib/$(ANDROID_EABI)/
+	cp -f $(BUILD_ROOT)/$(aStOutDistorted) $(aDestAndroid)/lib/$(ANDROID_EABI)/
+	cp -f $(BUILD_ROOT)/$(aStImageViewer)  $(aDestAndroid)/lib/$(ANDROID_EABI)/
+	cp -f $(BUILD_ROOT)/$(aStMoviePlayer)  $(aDestAndroid)/lib/$(ANDROID_EABI)/
+	cp -f $(BUILD_ROOT)/$(sViewAndroidCad) $(aDestAndroid)/lib/$(ANDROID_EABI)/
+	cp -f $(FREETYPE_ROOT)/libs/$(ANDROID_EABI)/libfreetype.so    $(aDestAndroid)/lib/$(ANDROID_EABI)/
+	cp -f $(OPENAL_ROOT)/libs/$(ANDROID_EABI)/libopenal.so        $(aDestAndroid)/lib/$(ANDROID_EABI)/
+	cp -f $(FFMPEG_ROOT)/libs/$(ANDROID_EABI)/libavcodec.so       $(aDestAndroid)/lib/$(ANDROID_EABI)/
+	cp -f $(FFMPEG_ROOT)/libs/$(ANDROID_EABI)/libavdevice.so      $(aDestAndroid)/lib/$(ANDROID_EABI)/
+	cp -f $(FFMPEG_ROOT)/libs/$(ANDROID_EABI)/libavformat.so      $(aDestAndroid)/lib/$(ANDROID_EABI)/
+	cp -f $(FFMPEG_ROOT)/libs/$(ANDROID_EABI)/libavutil.so        $(aDestAndroid)/lib/$(ANDROID_EABI)/
+	cp -f $(FFMPEG_ROOT)/libs/$(ANDROID_EABI)/libswresample.so    $(aDestAndroid)/lib/$(ANDROID_EABI)/
+	cp -f $(FFMPEG_ROOT)/libs/$(ANDROID_EABI)/libswscale.so       $(aDestAndroid)/lib/$(ANDROID_EABI)/
 	mkdir -p $(aDestAndroid)/assets/shaders
 	mkdir -p $(aDestAndroid)/assets/lang
 
@@ -335,9 +354,12 @@ pre_all:
 	mkdir -p $(BUILD_ROOT)/lang/Korean
 	mkdir -p $(BUILD_ROOT)/textures
 	mkdir -p $(BUILD_ROOT)/web
-	mkdir -p sview/libs/$(ANDROID_EABI)
-	mkdir -p StCADViewer/libs/$(ANDROID_EABI)
 	cp -f -r textures/* $(BUILD_ROOT)/textures/
+
+pre_all_android:
+	mkdir -p $(aDestAndroid)/lib/$(ANDROID_EABI)
+	mkdir -p $(BUILD_ROOT)/java/gen
+	mkdir -p $(BUILD_ROOT)/java/classes
 
 # StShared shared library
 aStShared_SRCS1 := $(sort $(wildcard $(SRCDIR)/StShared/*.cpp))
@@ -616,6 +638,13 @@ $(sViewAndroid) : $(aStImageViewer) $(aStMoviePlayer) $(sViewAndroid_OBJS)
 clean_sViewAndroid:
 	rm -f $(BUILD_ROOT)/$(sViewAndroid)
 	rm -rf sview/jni/*.o
+	rm -rf $(BUILD_ROOT)/java/classes/com/sview/*.class
+	rm -rf $(SRCDIR)/sview/src/com/sview/*class
+	rm -f $(sViewDex)
+	rm -f $(sViewApkUnsigned)
+	rm -f $(sViewApkSigned)
+	rm -f $(sViewApk)
+	rm -rf $(BUILD_ROOT)/java/gen/com/sview/*.java
 
 # sView executable
 sView_SRCS1 := $(sort $(wildcard $(SRCDIR)/sview/*.cpp))
@@ -655,6 +684,48 @@ endif
 endif
 	@echo sView building is DONE
 
+$(sViewApk): $(sViewApkSigned)
+	$(ANDROID_BUILD_TOOLS)/zipalign -v -f 4 $< $(sViewApk)
+
+# There are three options:
+# 1) Passwords are specified within Makefile / passed as make arguments
+# 2) Passwords are asked by jarsigner itself (requires console input)
+# 3) Passwords are asked using zenity message window (requires GUI input)
+ifeq ($(MAKECMDGOALS), android)
+ifeq ($(ANDROID_KEY_PASSWORD),)
+ifeq ($(ANDROID_KEYSTORE_PASSWORD),)
+#ANDROID_KEYSTORE_PASSWORD := $(shell zenity --password --title="Android keystore password")
+endif
+#ANDROID_KEY_PASSWORD := $(shell zenity --password --title="Android key password")
+$(sViewApkSigned): $(sViewApkUnsigned) sView_keystore_debug
+	$(JAVA_HOME)/bin/jarsigner -verbose -keystore $(ANDROID_KEYSTORE) -signedjar $(sViewApkSigned) $< $(ANDROID_KEY)
+else
+$(sViewApkSigned): $(sViewApkUnsigned) sView_keystore_debug
+	$(JAVA_HOME)/bin/jarsigner -verbose -keystore $(ANDROID_KEYSTORE) -storepass $(ANDROID_KEYSTORE_PASSWORD) -keypass $(ANDROID_KEY_PASSWORD) -signedjar $(sViewApkSigned) $< $(ANDROID_KEY)
+endif
+endif
+
+$(sViewApkUnsigned): $(sViewDex) install_android_libs
+	rm -f $(sViewApkUnsigned)
+	$(ANDROID_BUILD_TOOLS)/aapt package -v -f -M $(SRCDIR)/sview/AndroidManifest.xml -S $(SRCDIR)/sview/res -I $(ANDROID_PLATFORM) -F $(sViewApkUnsigned) $(aDestAndroid)
+
+sView_SRCS_JAVA1 := $(sort $(wildcard $(SRCDIR)/sview/src/com/sview/*.java))
+sView_OBJS_JAVA1 := ${sView_SRCS_JAVA1:.java=.class}
+$(sViewDex): $(BUILD_ROOT)/java/gen/com/sview/R.class $(sView_OBJS_JAVA1)
+	$(ANDROID_BUILD_TOOLS)/dx --dex --verbose --output=$(sViewDex) $(BUILD_ROOT)/java/classes
+
+$(BUILD_ROOT)/java/gen/com/sview/R.java: install_android $(shell find $(SRCDIR)/sview/res -type f)
+	$(ANDROID_BUILD_TOOLS)/aapt package -v -f -m -S $(SRCDIR)/sview/res -J $(BUILD_ROOT)/java/gen -M $(SRCDIR)/sview/AndroidManifest.xml -I $(ANDROID_PLATFORM)
+
+# This target generates a dummy signing key for debugging purposes.
+# Executed only when ANDROID_KEYSTORE points to non-existing file.
+ifeq (,$(wildcard $(ANDROID_KEYSTORE)))
+sView_keystore_debug:
+	$(JAVA_HOME)/bin/keytool -genkeypair -validity 1000 -dname "CN=sview_dummy,O=Android,C=JPN" -keystore $(ANDROID_KEYSTORE) \
+	-storepass $(ANDROID_KEYSTORE_PASSWORD) -keypass $(ANDROID_KEY_PASSWORD) -alias $(ANDROID_KEY) -keyalg RSA -v
+else
+sView_keystore_debug:
+endif
 
 clean_sView:
 	rm -f $(BUILD_ROOT)/$(sView)

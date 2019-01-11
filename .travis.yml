@@ -25,6 +25,9 @@ matrix:
 sudo: required
 dist: trusty
 
+# require Ubuntu 16.04 Xenial Xerus
+#dist: xenial
+
 addons:
   apt:
     packages:
