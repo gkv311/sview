@@ -28,6 +28,7 @@ extern "C" {
         VP8_STATUS_NOT_ENOUGH_DATA
     } VP8StatusCode;
 
+#ifdef ST_HAVE_WEBP
     static const char* const WebPStatusMessages[] = {
         "OK",                  // VP8_STATUS_OK
         "OUT_OF_MEMORY",       // VP8_STATUS_OUT_OF_MEMORY
@@ -38,6 +39,7 @@ extern "C" {
         "USER_ABORT",          // VP8_STATUS_USER_ABORT
         "NOT_ENOUGH_DATA"      // VP8_STATUS_NOT_ENOUGH_DATA
     };
+#endif
 
     extern int WebPInitDecoderConfigInternal(StWebPImage::WebPDecoderConfig* theConfig, int theVersion);
 
@@ -70,8 +72,7 @@ bool StWebPImage::init() {
 }
 
 StWebPImage::StWebPImage()
-: StImageFile(),
-  myIsCompat(false) {
+: myIsCompat(false) {
 #ifdef ST_HAVE_WEBP
     myIsCompat = WebPInitDecoderConfig(&myConfig) != 0;
 #endif
@@ -86,6 +87,9 @@ void StWebPImage::close() {
     if(myIsCompat) {
         WebPFreeDecBuffer(&myConfig.output);
     }
+#else
+    (void )myConfig;
+    (void )myIsCompat;
 #endif
 }
 

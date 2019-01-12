@@ -923,6 +923,8 @@ bool StAudioQueue::stalQueue(const double thePts) {
         );
     }
     myDbgPrevQueued = aQueued;
+#else
+    (void )myDbgPrevQueued;
 #endif
 
     if((aState == AL_PLAYING

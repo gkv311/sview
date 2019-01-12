@@ -215,6 +215,12 @@ ifeq ($(TARGET_OS),linux)
 EXTRA_CXXFLAGS += `pkg-config gtk+-2.0 --cflags`
 endif
 
+# optionally fail on any compiler warning except #warning and deprecations
+WERROR_LEVEL = 0
+ifeq ($(WERROR_LEVEL),1)
+EXTRA_CXXFLAGS += -Werror -Wno-error=cpp -Wno-error=deprecated-declarations
+endif
+
 INC =  -I$(SRCDIR)/3rdparty/include -I$(SRCDIR)/include
 CFLAGS   = -fPIC $(HAVE_MONGOOSE) $(INC) $(EXTRA_CFLAGS)
 CXXFLAGS = -O3 -std=c++0x -Wall -fPIC $(HAVE_MONGOOSE) $(INC) $(EXTRA_CXXFLAGS)

@@ -10,4 +10,4 @@ aNbJobs="$(getconf _NPROCESSORS_ONLN)"
 
 # perform building itself
 make --directory=$aScriptPath/.. clean
-make --directory=$aScriptPath/.. -j $aNbJobs
+make --directory=$aScriptPath/.. -j $aNbJobs WERROR_LEVEL=1
