@@ -146,6 +146,8 @@ public class StActivity extends NativeActivity implements SensorEventListener {
         myContext = new ContextWrapper(this);
         myContext.getExternalFilesDir(null);
 
+        askUserPermission(android.Manifest.permission.WRITE_EXTERNAL_STORAGE, null);
+
         mySensorMgr = (SensorManager )getSystemService(Context.SENSOR_SERVICE);
         mySensorOri = mySensorMgr.getDefaultSensor(Sensor.TYPE_ROTATION_VECTOR);
         if(mySensorOri == null) {
@@ -170,6 +172,53 @@ public class StActivity extends NativeActivity implements SensorEventListener {
         }
 
         updateHideSystemBars(myToHideStatusBar, myToHideNavBar);
+    }
+
+    /**
+     * Request user permission.
+     */
+    protected void askUserPermission(String thePermission, String theRationale) {
+        // Dynamically load methods introduced by API level 23.
+        // On older system this permission is granted by user during application installation.
+        java.lang.reflect.Method aMetPtrCheckSelfPermission, aMetPtrRequestPermissions, aMetPtrShouldShowRequestPermissionRationale;
+        try {
+            aMetPtrCheckSelfPermission = myContext.getClass().getMethod("checkSelfPermission", String.class);
+            aMetPtrRequestPermissions = getClass().getMethod("requestPermissions", String[].class, int.class);
+            aMetPtrShouldShowRequestPermissionRationale = getClass().getMethod("shouldShowRequestPermissionRationale", String.class);
+        } catch(SecurityException theError) {
+            //postMessage("Unable to find permission methods:\n" + theError.getMessage());
+            return;
+        } catch(NoSuchMethodException theError) {
+            //postMessage("Unable to find permission methods:\n" + theError.getMessage());
+            return;
+        }
+
+        try {
+            //int isAlreadyGranted = myContext.checkSelfPermission(thePermission);
+            int isAlreadyGranted = (Integer )aMetPtrCheckSelfPermission.invoke(myContext, thePermission);
+            if(isAlreadyGranted == android.content.pm.PackageManager.PERMISSION_GRANTED) {
+                return;
+            }
+
+            //boolean toShowInfo = shouldShowRequestPermissionRationale(thePermission);
+            boolean toShowInfo = theRationale != null && (Boolean )aMetPtrShouldShowRequestPermissionRationale.invoke(this, thePermission);
+            if(toShowInfo) {
+                postMessage(theRationale);
+            }
+
+            // show dialog to user
+            //requestPermissions (new String[]{thePermission}, 0);
+            aMetPtrRequestPermissions.invoke(this, new String[]{thePermission}, 0);
+        } catch(IllegalArgumentException theError) {
+            postMessage("Internal error: Unable to call permission method:\n" + theError.getMessage());
+            return;
+        } catch(IllegalAccessException theError) {
+            postMessage("Internal error: Unable to call permission method:\n" + theError.getMessage());
+            return;
+        } catch(java.lang.reflect.InvocationTargetException theError) {
+            postMessage("Internal error: Unable to call permission method:\n" + theError.getMessage());
+            return;
+        }
     }
 
     /**
