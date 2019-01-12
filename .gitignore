@@ -33,6 +33,7 @@ custom.sh
 Doxygen/
 distribution/repository/
 distribution/temp/
+distribution/build-*
 3rdparty/atlmfc
 3rdparty/OCCT/inc/
 3rdparty/OCCT/lib/

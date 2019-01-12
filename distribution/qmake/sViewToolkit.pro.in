@@ -1,0 +1,2 @@
+ST_TOOLKIT_NAME = \$\$TARGET
+include(../tk.pri)
