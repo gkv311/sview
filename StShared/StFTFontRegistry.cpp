@@ -130,6 +130,7 @@ StFTFontRegistry::StFTFontRegistry() {
     myFilesMajor.add(stCString("NanumMyeongjoBold.ttf"));
     myFilesMajor.add(stCString("NanumGothic.ttf"));
     myFilesMajor.add(stCString("NanumGothicBold.ttf"));
+    myFilesMinor.add(stCString("NotoSerifCJK-Regular.ttc"));
 
     // chinese
     //myFilesMajor.add(stCString("DroidSansJapanese.ttf"));
@@ -286,9 +287,17 @@ void StFTFontRegistry::init(const bool theToSearchAll) {
         aSans .Western = findFont(stCString("DejaVu Sans"));
     }
     aMono .Western = findFont(stCString("DejaVu Sans Mono"));
-    aSerif.Korean  = findFont(stCString("NanumMyeongjo"));
-    aSans .Korean  = findFont(stCString("NanumGothic"));
-    aMono .Korean  = findFont(stCString("NanumGothic"));
+
+    const StFTFontFamily& aNanumMyeon     = findFont(stCString("NanumMyeongjo"));
+    const StFTFontFamily& aNotoSerifCjkJp = findFont(stCString("Noto Serif CJK JP"));
+    const StFTFontFamily& aNanumGoth      = findFont(stCString("NanumGothic"));
+    aSerif.Korean  = aNanumMyeon.FamilyName.isEmpty() && !aNotoSerifCjkJp.FamilyName.isEmpty()
+                   ? aNotoSerifCjkJp
+                   : aNanumMyeon;;
+    aSans .Korean  = aNanumGoth.FamilyName.isEmpty() && !aNotoSerifCjkJp.FamilyName.isEmpty()
+                   ? aNotoSerifCjkJp
+                   : aNanumGoth;
+    aMono .Korean  = aSans.Korean;
     aSerif.CJK     = findFont(stCString("Droid Sans Fallback"));
     aSans .CJK     = findFont(stCString("Droid Sans Fallback"));
     aMono .CJK     = findFont(stCString("Droid Sans Fallback"));
