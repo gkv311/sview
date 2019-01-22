@@ -4,8 +4,8 @@
 
 echo "Usage: $0 [FFmpegPath] [GPL || LGPL] [DEBUG || RELEASE] [GCC_PREFIX]"
 
-rebuildTarget="FFmpeg"
-rebuildLicense="LGPL"
+rebuildTarget="ffmpeg.git"
+rebuildLicense="lgpl"
 rebuildDebug="false"
 rebuildAndroid="false"
 compilerPrefix=""
@@ -17,9 +17,9 @@ aPwdBack=$PWD
 for i in $*
 do
   if [ "$i" == "gpl"       ] || [ "$i" == "GPL" ]; then
-    rebuildLicense="GPL"
+    rebuildLicense="gpl"
   elif [ "$i" == "lgpl"    ] || [ "$i" == "LGPL" ]; then
-    rebuildLicense="LGPL"
+    rebuildLicense="lgpl"
   elif [ "$i" == "android" ]; then
     rebuildAndroid="true"
   elif [ "$i" == "debug"   ] || [ "$i" == "DEBUG" ]; then
@@ -72,18 +72,19 @@ fi
 echo "  Start building FFmpeg $rebuildLicense from $rebuildTarget"
 cd $rebuildTarget
 
-# releases extract the version number from the VERSION file
-ffmpegVersion=$(cat VERSION 2> /dev/null)
+# releases extract the version number from the RELEASE file
+ffmpegVersion=$(cat RELEASE 2> /dev/null)
 ffmpegRevision=$(git log -1 --pretty=format:%h 2> /dev/null)
 ffmpegDate=$(git show -s --format="%ci" 2> /dev/null)
 ffmpegDate=${ffmpegDate:0:10}
-test $ffmpegRevision && ffmpegRevision=git-$ffmpegRevision
+test $ffmpegRevision && ffmpegRevision=git-$ffmpegDate-$ffmpegRevision
 test $ffmpegVersion || ffmpegVersion=$ffmpegRevision
 
 # remove slashes
 rebuildTarget="${rebuildTarget//\//}"
-SOURCES_NAME="FFmpeg-$ffmpegDate-$ffmpegVersion"
-OUTPUT_NAME="$SOURCES_NAME-$gccMachine-$gccVersion-$rebuildLicense"
+SOURCES_NAME="ffmpeg-$ffmpegVersion"
+#OUTPUT_NAME="$SOURCES_NAME-$gccMachine-$gccVersion-$rebuildLicense"
+OUTPUT_NAME="$SOURCES_NAME-$gccMachine-$rebuildLicense"
 SOURCES_NAME="$SOURCES_NAME-src"
 if [ "$rebuildDebug" == "true" ]; then
   OUTPUT_NAME="$OUTPUT_NAME-debug"
@@ -115,6 +116,12 @@ mkdir -p $OUTPUT_FOLDER_INC/libavutil
 mkdir -p $OUTPUT_FOLDER_INC/libswscale
 mkdir -p $OUTPUT_FOLDER_INC/libswresample
 
+# include some information about FFmpeg into archive
+echo \<pre\>> $OUTPUT_FOLDER/VERSION.html
+git status >> $OUTPUT_FOLDER/VERSION.html
+git log -n 100 >> $OUTPUT_FOLDER/VERSION.html
+echo \</pre\>>> $OUTPUT_FOLDER/VERSION.html
+
 echo "  make distclean"
 make distclean &>/dev/null
 
@@ -125,6 +132,10 @@ then
   then
     echo "Sources archive '$SOURCES_NAME.7z' already exists"
   else
+
+    if [ ! -f ../exclude.lst ]; then
+      echo -e ".svn\n.git\n" > ../exclude.lst
+    fi
     7za a -t7z -m0=lzma -mx=9 -mfb=64 -md=32m -ms=on ../$SOURCES_NAME.7z ../$rebuildTarget '-xr@../exclude.lst'
   fi
 fi
@@ -138,7 +149,6 @@ configArguments="\
  --enable-avfilter \
  --enable-hardcoded-tables \
  --enable-pthreads \
- --disable-libopenjpeg \
  --disable-doc \
  --enable-runtime-cpudetect"
 
@@ -147,6 +157,8 @@ if [ "$aSystem" == "Darwin" ]; then
   configArguments="$configArguments --enable-vda --libdir=@executable_path/../Frameworks"
 fi
 
+export PKG_CONFIG_LIBDIR=
+
 #if [ "$gccMachine" != "$GCC_MACHINE_LINUX_64" ]; then
 if [ "$gccMachine" == "$GCC_MACHINE_MINGW_32" ] || [ "$gccMachine" == "$GCC_MACHINE_MINGW_32_1" ] \
 || [ "$gccMachine" == "$GCC_MACHINE_MINGW_64" ] || [ "$gccMachine" == "$GCC_MACHINE_MINGW_64_1" ]; then
@@ -154,14 +166,19 @@ if [ "$gccMachine" == "$GCC_MACHINE_MINGW_32" ] || [ "$gccMachine" == "$GCC_MACH
   # you should use with --enable-pthreads instead to enable full multithreading support!
   #configArguments="$configArguments --enable-w32threads"
   configArguments="$configArguments --disable-w32threads"
-  if [ "$rebuildLicense" == "GPL" ]; then
+  if [ "$rebuildLicense" == "gpl" ]; then
     configArguments="$configArguments --enable-avisynth"
   fi
+
+  aMingwRoot=${compilerPrefix::-1}
+  export PKG_CONFIG_LIBDIR=/usr/$aMingwRoot/share/pkgconfig
 
   configArguments="$configArguments --enable-libopenjpeg"
 
   # avoid dynamic linkage with libgcc_s_sjlj-1.dll
   configArguments="$configArguments --extra-ldflags=-static-libgcc"
+else
+  configArguments="$configArguments --disable-libopenjpeg"
 fi
 
 # cross-compiling options
@@ -200,7 +217,7 @@ fi
 # enable (L)GPL version 3
 configArguments="$configArguments --enable-version3"
 
-if [ "$rebuildLicense" == "GPL" ]; then
+if [ "$rebuildLicense" == "gpl" ]; then
   configArguments="$configArguments --enable-gpl"
   # enable libx264 encoder (should be compiled and installed!)
   #configArguments="$configArguments --enable-libx264"
