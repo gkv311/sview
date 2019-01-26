@@ -646,6 +646,7 @@ clean_sViewAndroid:
 	rm -rf sview/jni/*.o
 	rm -rf $(BUILD_ROOT)/java/classes/com/sview/*.class
 	rm -rf $(SRCDIR)/sview/src/com/sview/*class
+	rm -rf $(aDestAndroid)
 	rm -f $(sViewDex)
 	rm -f $(sViewApkUnsigned)
 	rm -f $(sViewApkSigned)
