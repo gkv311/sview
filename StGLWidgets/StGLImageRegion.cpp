@@ -216,6 +216,7 @@ StGLImageRegion::StGLImageRegion(StGLWidget* theParent,
   myClickPntZo(0.0, 0.0),
   myKeyFlags(ST_VF_NONE),
   myDragDelayMs(0.0),
+  myDragDelayTmpMs(0.0),
   myRotAngle(0.0f),
   myIsClickAborted(false),
 #ifdef ST_EXTRA_CONTROLS
@@ -707,10 +708,11 @@ void StGLImageRegion::stglDrawView(unsigned int theView) {
             myProgram.setTextureUVDataSize  (aCtx, aClampUV);
 
             // handle dragging timer
+            const double aDragDelayMs = myDragDelayMs > 0.0 ? myDragDelayMs : myDragDelayTmpMs;
             if( isClicked(ST_MOUSE_LEFT)
             && !myIsClickAborted
             &&  myClickTimer.isOn()) {
-                if(myClickTimer.getElapsedTimeInMilliSec() < myDragDelayMs) {
+                if(myClickTimer.getElapsedTimeInMilliSec() < aDragDelayMs) {
                     const StPointD_t aCurr = getRoot()->getCursorZo();
                     const int aDx = int((aCurr.x() - myClickPntZo.x()) * double(getRectPx().width()));
                     const int aDy = int((aCurr.y() - myClickPntZo.y()) * double(getRectPx().height()));
@@ -730,7 +732,7 @@ void StGLImageRegion::stglDrawView(unsigned int theView) {
             && !myClickTimer.isOn()) {
                 const GLfloat aRectRatio = GLfloat(getRectPx().ratio());
                 aParams->moveFlat(getMouseMoveFlat(myClickPntZo, getRoot()->getCursorZo()), aRectRatio);
-                if(myDragDelayMs > 1.0) {
+                if(aDragDelayMs > 1.0) {
                     const GLfloat    aScaleSteps = 0.1f;
                     const StPointD_t aCenterCursor(0.5, 0.5);
                     const StGLVec2   aVec = getMouseMoveFlat(aCenterCursor, getRoot()->getCursorZo()) * (-aScaleSteps);
@@ -946,6 +948,14 @@ bool StGLImageRegion::tryClick(const StClickEvent& theEvent,
             myClickPntZo = StPointD_t(theEvent.PointX, theEvent.PointY);
             myClickTimer.restart();
             myIsClickAborted = false;
+
+            myDragDelayTmpMs = 0.0f;
+            if(aParams->ViewingMode == StViewSurface_Plain
+            && fabs(aParams->ScaleFactor - 1.0f) < 0.00001f
+            && fabs(aParams->PanCenter.x()) < 0.00001f
+            && fabs(aParams->PanCenter.y()) < 0.00001f) {
+                myDragDelayTmpMs = 250.0;
+            }
         }
         theIsItemClicked = true;
         return true;

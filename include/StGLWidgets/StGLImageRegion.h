@@ -318,6 +318,7 @@ class StGLImageRegion : public StGLWidget {
     StGLQuaternion             myDeviceQuat;     //!< device orientation
     StVirtFlags                myKeyFlags;       //!< active key flags
     double                     myDragDelayMs;    //!< dragging delay in milliseconds
+    double                     myDragDelayTmpMs; //!< temporary dragging delay
     float                      myRotAngle;       //!< rotation angle gesture progress
     bool                       myIsClickAborted;
     bool                       myToRightRotate;
