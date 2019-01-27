@@ -117,7 +117,7 @@ void StOutIZ3D::updateStrings() {
     StString& aDescr     = aLangMap.changeValueId(STTR_PLUGIN_DESCRIPTION,
         "(C) {0} Kirill Gavrilov <{1}>\nOfficial site: {2}\n\nThis library is distributed under LGPL3.0");
     myAbout = aTitle + '\n' + aVerString + " " + StVersionInfo::getSDKVersionString() + "\n \n"
-            + aDescr.format("2009-2017", "kirill@sview.ru", "www.sview.ru");
+            + aDescr.format("2009-2019", "kirill@sview.ru", "www.sview.ru");
 }
 
 StOutIZ3D::StOutIZ3D(const StHandle<StResourceManager>& theResMgr,
