@@ -982,6 +982,14 @@ StPointD_t StWindowImpl::getMousePos() {
         CURSORINFO aCursor;
         aCursor.cbSize = sizeof(aCursor);
         if(GetCursorInfo(&aCursor) != FALSE) {
+            if (attribs.IsFullScreen
+            && !attribs.IsExclusiveFullScr
+            &&  myTiledCfg == TiledCfg_Separate
+            &&  myParentWin == NULL) {
+                // workaround for non-exclusive fullscreen mode
+                aCursor.ptScreenPos.y += 2;
+            }
+
             return StPointD_t((double(aCursor.ptScreenPos.x) - double(aWinRect.left())) / double(aWinRect.width()),
                               (double(aCursor.ptScreenPos.y) - double(aWinRect.top()))  / double(aWinRect.height()));
         }
