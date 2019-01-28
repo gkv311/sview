@@ -25,31 +25,18 @@ if "%1"=="ST_RELEASE_CANDIDATE" (
 
 if exist "%~dp0env.bat" call "%~dp0env.bat"
 
-set YEAR=%date:~-2,4%
-set MONTH00=%date:~-7,2%
-set MONTH=%date:~-7,2%
-set DAY=%date:~0,2%
-
-rem Remove first zero
-if "%MONTH%"=="01" set MONTH=1
-if "%MONTH%"=="02" set MONTH=2
-if "%MONTH%"=="03" set MONTH=3
-if "%MONTH%"=="04" set MONTH=4
-if "%MONTH%"=="05" set MONTH=5
-if "%MONTH%"=="06" set MONTH=6
-if "%MONTH%"=="07" set MONTH=7
-if "%MONTH%"=="08" set MONTH=8
-if "%MONTH%"=="09" set MONTH=9
-
-if "%DAY%"=="01" set DAY=1
-if "%DAY%"=="02" set DAY=2
-if "%DAY%"=="03" set DAY=3
-if "%DAY%"=="04" set DAY=4
-if "%DAY%"=="05" set DAY=5
-if "%DAY%"=="06" set DAY=6
-if "%DAY%"=="07" set DAY=7
-if "%DAY%"=="08" set DAY=8
-if "%DAY%"=="09" set DAY=9
+for /F "skip=1 delims=" %%F in ('
+  wmic PATH Win32_LocalTime GET Day^,Month^,Year /FORMAT:TABLE
+') do (
+  for /F "tokens=1-3" %%L in ("%%F") do (
+    set DAY=%%L
+    set DAY00=0%%L
+    set MONTH=%%M
+    set MONTH00=0%%M
+    set YEAR=%%N
+  )
+)
+set YEAR=%YEAR:~-2,4%
 
 set SVIEW_DISTR_PATH_X86=%~dp0temp\sView-win-x86
 set SVIEW_DISTR_PATH_AMD64=%~dp0temp\sView-win-amd64
@@ -109,9 +96,23 @@ rem END creating config file
 echo Perform rebuild MSVC x86
 rem www.codeblocks.org
 rem --multiple-instance
-start /WAIT /D "%CB_PATH%" codeblocks.exe --rebuild --target="WIN_vc_x86"   "%~dp0..\workspace.workspace"
+start /WAIT /D "%CB_PATH%" codeblocks.exe --rebuild --target="WIN_vc_x86" "%~dp0..\workspace.workspace"
+if errorlevel 1 (
+  move /Y ..\include\stconfig.conf.buildbak ..\include\stconfig.conf
+  echo Build FAILED
+  pause
+  exit /B
+  goto :eof
+)
 echo Perform rebuild MSVC x86_64
 start /WAIT /D "%CB_PATH%" codeblocks.exe --rebuild --target="WIN_vc_AMD64" "%~dp0..\workspace.workspace"
+if errorlevel 1 (
+  move /Y ..\include\stconfig.conf.buildbak ..\include\stconfig.conf
+  echo Build FAILED
+  pause
+  exit /B
+  goto :eof
+)
 
 rem move default config file back
 move /Y ..\include\stconfig.conf.buildbak ..\include\stconfig.conf
