@@ -127,6 +127,11 @@ class StApplication {
     ST_CPPEXPORT int exec();
 
     /**
+     * @return file to open in another drawer
+     */
+    const StHandle<StOpenInfo>& getOpenFileInOtherDrawer() const { return myOpenFileOtherApp; }
+
+    /**
      * Return active renderer and main application window.
      */
     ST_CPPEXPORT const StHandle<StWindow>& getMainWindow() const;
@@ -339,6 +344,7 @@ class StApplication {
     StHandle<StWindow>    myWindow;                //!< active renderer and main application window
     StHandle<StWindow>    mySwitchTo;              //!< new renderer to switch to
     StHandle<StOpenInfo>  myOpenFileInfo;          //!< file to open
+    StHandle<StOpenInfo>  myOpenFileOtherApp;      //!< file to open in another drawer
     std::map< int, StHandle<StAction> >
                           myActions;               //!< ID -> Action map
     std::map< std::string, int >

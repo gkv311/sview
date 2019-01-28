@@ -1158,7 +1158,7 @@ void StImageViewerGUI::createImageAdjustments() {
 
 void StImageViewerGUI::doOpenFile(const size_t ) {
     StGLOpenFile* aDialog = new StGLOpenFile(this, tr(DIALOG_OPEN_FILE), tr(BUTTON_CLOSE));
-    aDialog->setMimeList(myPlugin->myLoader->getMimeList());
+    aDialog->setMimeList(myPlugin->myLoader->getMimeListImages());
 
     const StString anSdCardPath = getResourceManager()->getFolder(StResourceManager::FolderId_SdCard);
     if(!anSdCardPath.isEmpty()) {

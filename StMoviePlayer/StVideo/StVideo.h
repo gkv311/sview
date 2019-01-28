@@ -91,18 +91,15 @@ class StVideo {
         public: //! @name public methods
 
     static const char* ST_VIDEOS_MIME_STRING;
+    static const char* ST_IMAGES_MIME_STRING;
 
-    ST_LOCAL const StMIMEList& getMimeListVideo() const {
-        return myMimesVideo;
-    }
+    ST_LOCAL const StMIMEList& getMimeListVideo() const { return myMimesVideo; }
 
-    ST_LOCAL const StMIMEList& getMimeListAudio() const {
-        return myMimesAudio;
-    }
+    ST_LOCAL const StMIMEList& getMimeListAudio() const { return myMimesAudio; }
 
-    ST_LOCAL const StMIMEList& getMimeListSubtitles() const {
-        return myMimesSubs;
-    }
+    ST_LOCAL const StMIMEList& getMimeListSubtitles() const { return myMimesSubs; }
+
+    ST_LOCAL const StMIMEList& getMimeListImages() const { return myMimesImages; }
 
     /**
      * Main constructor.
@@ -432,6 +429,7 @@ class StVideo {
     StMIMEList                    myMimesVideo;
     StMIMEList                    myMimesAudio;
     StMIMEList                    myMimesSubs;
+    StMIMEList                    myMimesImages;
     StHandle<StThread>            myThread;      //!< main loop thread
     StHandle<StResourceManager>   myResMgr;      //!< resource manager
     StHandle<StTranslations>      myLangMap;     //!< translations dictionary

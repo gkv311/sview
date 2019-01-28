@@ -1318,19 +1318,29 @@ void StMoviePlayer::doFileDrop(const StDNDropEvent& theEvent) {
             return;
         }
 
-        // just open the path
-        //if(myPlayList->checkExtension(aFile1)) {
-            const size_t aRecent = myPlayList->findRecent(aFile1);
-            if(aRecent != size_t(-1)) {
-                doOpenRecent(aRecent);
-                return;
-            }
+        if(!myPlayList->checkExtension(aFile1)
+         && myVideo->getMimeListImages().checkExtension(anExt1)) {
+            // redirect to StMoviePlayer
+            myOpenFileOtherApp = new StOpenInfo();
+            StArgumentsMap anArgs;
+            anArgs.add(StArgument("in", "image"));
+            myOpenFileOtherApp->setArgumentsMap(anArgs);
+            myOpenFileOtherApp->setPath(aFile1);
+            exit(0);
+            return;
+        }
 
-            myPlayList->open(aFile1);
-            doUpdateStateLoading();
-            myVideo->pushPlayEvent(ST_PLAYEVENT_RESUME);
-            myVideo->doLoadNext();
-        //}
+        // just open the path
+        const size_t aRecent = myPlayList->findRecent(aFile1);
+        if(aRecent != size_t(-1)) {
+            doOpenRecent(aRecent);
+            return;
+        }
+
+        myPlayList->open(aFile1);
+        doUpdateStateLoading();
+        myVideo->pushPlayEvent(ST_PLAYEVENT_RESUME);
+        myVideo->doLoadNext();
         return;
     } else if(theEvent.NbFiles == 2
           && !StFolder::isFolder(aFile2)
@@ -1425,8 +1435,19 @@ void StMoviePlayer::beforeDraw() {
             myPlayList->clear();
             myPlayList->addOneFile(myOpenDialog->getPathLeft(), myOpenDialog->getPathRight());
         } else {
-            aFilePath = myOpenDialog->getPathLeft();
-            myPlayList->open(myOpenDialog->getPathLeft());
+            if(!myPlayList->checkExtension(myOpenDialog->getPathLeft())
+             && myVideo->getMimeListImages().checkExtension(StFileNode::getExtension(myOpenDialog->getPathLeft()))) {
+                // redirect to StImageViewer
+                myOpenFileOtherApp = new StOpenInfo();
+                StArgumentsMap anArgs;
+                anArgs.add(StArgument("in", "image"));
+                myOpenFileOtherApp->setArgumentsMap(anArgs);
+                myOpenFileOtherApp->setPath(myOpenDialog->getPathLeft());
+                exit(0);
+            } else {
+                aFilePath = myOpenDialog->getPathLeft();
+                myPlayList->open(myOpenDialog->getPathLeft());
+            }
         }
 
         doUpdateStateLoading();

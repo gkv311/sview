@@ -21,12 +21,15 @@
 #include "StImageViewerStrings.h"
 #include "StImageViewerGUI.h"
 
+#include "../StMoviePlayer/StMoviePlayerInfo.h"
+
 #include <StAV/StAVImage.h>
 #include <StThreads/StThread.h>
 
 using namespace StImageViewerStrings;
 
 const char* StImageLoader::ST_IMAGES_MIME_STRING = ST_IMAGE_PLUGIN_MIME_CHAR;
+const char* StImageLoader::ST_VIDEOS_MIME_STRING = ST_VIDEO_PLUGIN_MIME_CHAR;
 
 namespace {
 
@@ -54,6 +57,7 @@ StImageLoader::StImageLoader(const StImageFile::ImageClass      theImageLib,
                              const StHandle<StGLTextureQueue>&  theTextureQueue,
                              const GLint                        theMaxTexDim)
 : myMimeList(ST_IMAGES_MIME_STRING),
+  myVideoMimeList(ST_VIDEOS_MIME_STRING),
   myResMgr(theResMgr),
   myLangMap(theLangMap),
   myPlayList(thePlayList),

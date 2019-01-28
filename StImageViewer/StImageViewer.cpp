@@ -980,9 +980,19 @@ void StImageViewer::doFileDrop(const StDNDropEvent& theEvent) {
     }
 
     const StString aFile1 = theEvent.Files[0];
-    /*if(!myPlayList->checkExtension(aFile1)) {
+    if(!myPlayList->checkExtension(aFile1)
+     && myLoader->getMimeListVideo().checkExtension(StFileNode::getExtension(aFile1))) {
+        // redirect to StMoviePlayer
+        myOpenFileOtherApp = new StOpenInfo();
+        StArgumentsMap anArgs;
+        anArgs.add(StArgument("in", "video"));
+        myOpenFileOtherApp->setArgumentsMap(anArgs);
+        myOpenFileOtherApp->setPath(aFile1);
+        exit(0);
         return;
-    } else */if(theEvent.NbFiles == 1) {
+    }
+
+    if(theEvent.NbFiles == 1) {
         myPlayList->open(aFile1);
         doUpdateStateLoading();
         myLoader->doLoadNext();
@@ -1028,7 +1038,18 @@ void StImageViewer::beforeDraw() {
             myPlayList->clear();
             myPlayList->addOneFile(myOpenDialog->getPathLeft(), myOpenDialog->getPathRight());
         } else {
-            myPlayList->open(myOpenDialog->getPathLeft());
+            if(!myPlayList->checkExtension(myOpenDialog->getPathLeft())
+             && myLoader->getMimeListVideo().checkExtension(StFileNode::getExtension(myOpenDialog->getPathLeft()))) {
+                // redirect to StMoviePlayer
+                myOpenFileOtherApp = new StOpenInfo();
+                StArgumentsMap anArgs;
+                anArgs.add(StArgument("in", "video"));
+                myOpenFileOtherApp->setArgumentsMap(anArgs);
+                myOpenFileOtherApp->setPath(myOpenDialog->getPathLeft());
+                exit(0);
+            } else {
+                myPlayList->open(myOpenDialog->getPathLeft());
+            }
         }
 
         doUpdateStateLoading();

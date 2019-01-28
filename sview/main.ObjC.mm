@@ -253,6 +253,16 @@ namespace {
         }
 
         if(myStApp->closingDown()) {
+            StHandle<StOpenInfo> anOther = myStApp->getOpenFileInOtherDrawer();
+            if(!anOther.isNull()) {
+                myStApp.nullify();
+                StHandle<StResourceManager> aResMgr = new StResourceManager();
+                myStApp = StMultiApp::getInstance(aResMgr, anOther);
+                if(!myStApp.isNull() && myStApp->open()) {
+                    return true;
+                }
+            }
+
             myStApp.nullify();
 
             // this will call exit(), so code below has no effect

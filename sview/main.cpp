@@ -52,10 +52,20 @@ int main(int , char** ) {
 
     StHandle<StResourceManager> aResMgr = new StResourceManager();
     StHandle<StApplication>     anApp   = StMultiApp::getInstance(aResMgr);
-    if(anApp.isNull() || !anApp->open()) {
-        return 1;
+    for(;;) {
+        if(anApp.isNull() || !anApp->open()) {
+            return 1;
+        }
+
+        int aResult = anApp->exec();
+        StHandle<StOpenInfo> anOther = anApp->getOpenFileInOtherDrawer();
+        if(anOther.isNull()) {
+            return aResult;
+        }
+
+        anApp.nullify();
+        anApp = StMultiApp::getInstance(aResMgr, anOther);
     }
-    return anApp->exec();
 }
 
 #endif // __APPLE__

@@ -96,14 +96,14 @@ void StImageOpenDialog::dialogLoop() {
                                  : StImageViewerStrings::DIALOG_OPEN_FILE);
 
     StString aDummy;
-    if(!StFileNode::openFileDialog(myFolder, aTitle, myPlugin->myLoader->getMimeList(), myPathLeft, false)) {
+    if(!StFileNode::openFileDialog(myFolder, aTitle, myPlugin->myLoader->getMimeListImages(), myPathLeft, false)) {
         StMutexAuto aLock(myMutex);
         myState = StImageOpenDialog::Dialog_Inactive;
         return;
     } else if(myState == StImageOpenDialog::Dialog_ActiveDouble) {
         aTitle = myPlugin->tr(StImageViewerStrings::DIALOG_OPEN_RIGHT);
         StFileNode::getFolderAndFile(myPathLeft, myFolder, aDummy);
-        if(!StFileNode::openFileDialog(myFolder, aTitle, myPlugin->myLoader->getMimeList(), myPathRight, false)) {
+        if(!StFileNode::openFileDialog(myFolder, aTitle, myPlugin->myLoader->getMimeListImages(), myPathRight, false)) {
             StMutexAuto aLock(myMutex);
             myState = StImageOpenDialog::Dialog_Inactive;
             return;

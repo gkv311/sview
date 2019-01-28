@@ -20,6 +20,8 @@
 #include "../StMoviePlayerInfo.h"
 #include "../StMoviePlayerStrings.h"
 
+#include "../StImageViewer/StImagePluginInfo.h"
+
 #include <StStrings/StFormatTime.h>
 
 using namespace StMoviePlayerStrings;
@@ -95,6 +97,7 @@ namespace {
     }
 }
 
+const char* StVideo::ST_IMAGES_MIME_STRING = ST_IMAGE_PLUGIN_MIME_CHAR;
 const char* StVideo::ST_VIDEOS_MIME_STRING = ST_VIDEO_PLUGIN_MIME_CHAR;
 
 StVideo::StVideo(const std::string&                 theALDeviceName,
@@ -107,6 +110,7 @@ StVideo::StVideo(const std::string&                 theALDeviceName,
 : myMimesVideo(ST_VIDEOS_MIME_STRING),
   myMimesAudio(ST_AUDIOS_MIME_STRING),
   myMimesSubs(ST_SUBTIT_MIME_STRING),
+  myMimesImages(ST_IMAGES_MIME_STRING),
   myResMgr(theResMgr),
   myLangMap(theLangMap),
   mySlaveCtx(NULL),

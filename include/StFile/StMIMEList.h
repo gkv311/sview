@@ -54,6 +54,19 @@ class StMIMEList : public StArrayList<StMIME> {
     }
 
     /**
+     * Verify the filename extension is in supported list.
+     */
+    bool checkExtension(const StString& theExt) const {
+        for(size_t aMimeId = 0; aMimeId < StArrayList<StMIME>::size(); ++aMimeId) {
+            const StString& anExt = StArrayList<StMIME>::getValue(aMimeId).getExtension();
+            if(anExt.isEqualsIgnoreCase(theExt)) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    /**
      * Returns toString, splitter argument should not be changed!
      * @param theSplitter (const StString& ) - splitter char should not be changed!
      * @return string (StString ).

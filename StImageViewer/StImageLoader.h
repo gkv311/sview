@@ -64,12 +64,13 @@ class StImageLoader {
         public:
 
     static const char* ST_IMAGES_MIME_STRING;
+    static const char* ST_VIDEOS_MIME_STRING;
 
         public:
 
-    ST_LOCAL const StMIMEList& getMimeList() const {
-        return myMimeList;
-    }
+    ST_LOCAL const StMIMEList& getMimeListImages() const { return myMimeList; }
+
+    ST_LOCAL const StMIMEList& getMimeListVideo() const { return myVideoMimeList; }
 
     ST_LOCAL StImageLoader(const StImageFile::ImageClass      theImageLib,
                            const StHandle<StResourceManager>& theResMgr,
@@ -197,6 +198,7 @@ class StImageLoader {
         private:
 
     const StMIMEList            myMimeList;
+    const StMIMEList            myVideoMimeList;
     StHandle<StThread>          myThread;        //!< main loop thread
     StHandle<StResourceManager> myResMgr;        //!< resource manager
     StHandle<StLangMap>         myLangMap;       //!< translations dictionary

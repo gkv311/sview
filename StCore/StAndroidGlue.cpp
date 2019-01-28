@@ -547,14 +547,26 @@ void StAndroidGlue::threadEntry() {
         postMessage("jp.co.sharp.android.stereo3dlcd !!!");
     }*/
 
-    createApplication();
-    if(!myApp.isNull()) {
-        if(!myApp->open()) {
+    for(;;) {
+        createApplication();
+        if(myApp.isNull()) {
+            stError("Error: no application to execute!");
+            break;
+        } else if(!myApp->open()) {
             stError("Error: application can not be executed!");
+            break;
         }
         myApp->exec();
-    } else {
-        stError("Error: no application to execute!");
+
+        StHandle<StOpenInfo> anOther = myApp->getOpenFileInOtherDrawer();
+        if(anOther.isNull()) {
+            break;
+        }
+
+        myApp.nullify();
+        StArgument aDrawerArg = anOther->getArgumentsMap()["in"];
+        myDndPath = anOther->getPath();
+        myStAppClass = aDrawerArg.getValue();
     }
     myApp.nullify();
 
