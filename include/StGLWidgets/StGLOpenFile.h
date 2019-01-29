@@ -42,7 +42,12 @@ class StGLOpenFile : public StGLMessageBox {
     ST_CPPEXPORT void setMimeList(const StMIMEList& theFilter);
 
     /**
-     * Open new folder.
+     * Add system drives to folders' list.
+     */
+    ST_CPPEXPORT void addSystemDrives();
+
+    /**
+     * Add item to folders' list.
      */
     ST_CPPEXPORT void addHotItem(const StString& theTarget,
                                  const StString& theName = "");

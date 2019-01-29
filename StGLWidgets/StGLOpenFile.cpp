@@ -14,10 +14,73 @@
 #include <StGLWidgets/StGLScrollArea.h>
 #include <StGLWidgets/StGLTextureButton.h>
 
+#include <StThreads/StThread.h>
+
 #include <fstream>
 
 #if !defined(_WIN32)
     #include <unistd.h>
+#endif
+
+#ifdef _WIN32
+/**
+ * Auxiliary tool resolving drive labels.
+ */
+struct StDriveNameResolver {
+
+    StMutex Mutex;
+    std::vector<StString> Drives;
+    std::vector<StString> Labels;
+    volatile int NbProcessed;
+    volatile bool ToAbort;
+
+public:
+    /**
+     * Empty constructor.
+     */
+    StDriveNameResolver() : NbProcessed(0), ToAbort(false) {}
+
+    /**
+     * Working thread callback.
+     */
+    void resolve() {
+        wchar_t aVolumeName[256];
+        wchar_t aFileSystemName[256];
+        StString aDriveLabel;
+        const StString aDriveA = "A:";
+        const StString aDriveB = "B:";
+        for(; NbProcessed < (int )Drives.size(); StAtomicOp::Increment(NbProcessed)) {
+            const StString& aDrivePath = Drives[NbProcessed];
+            const StStringUtfWide aDrivePathW = aDrivePath.toUtfWide();
+            DWORD aSerialNumber = 0, aMaxFileNameLength = 0, aFileSystemFlags = 0;
+            if(!aDrivePath.isStartsWithIgnoreCase(aDriveA)
+            && !aDrivePath.isStartsWithIgnoreCase(aDriveB)
+            && ::GetVolumeInformationW(aDrivePathW.toCString(),
+                                       aVolumeName, sizeof(aVolumeName) / sizeof(wchar_t),
+                                       &aSerialNumber, &aMaxFileNameLength, &aFileSystemFlags,
+                                       aFileSystemName, sizeof(aFileSystemName) / sizeof(wchar_t))) {
+                aDriveLabel.fromUnicode(aVolumeName);
+                if(!aDriveLabel.isEmpty() && !ToAbort) {
+                    StMutexAuto aLock(Mutex);
+                    Labels[NbProcessed] = aDrivePath + " [" + aDriveLabel + "]";
+                }
+            }
+
+            if(ToAbort) {
+                return;
+            }
+        }
+    }
+
+    /**
+     * Working thread callback.
+     */
+    static SV_THREAD_FUNCTION resolveThread(void* thePtr) {
+        StHandle<StDriveNameResolver> aThis = *static_cast<StHandle<StDriveNameResolver>* >(thePtr);
+        aThis->resolve();
+        return SV_THREAD_RETURN 0;
+    }
+};
 #endif
 
 StGLOpenFile::StGLOpenFile(StGLWidget*     theParent,
@@ -63,8 +126,34 @@ StGLOpenFile::StGLOpenFile(StGLWidget*     theParent,
         addButton(theCloseText);
     //}
 
-#if defined(_WIN32)
-    //
+    addSystemDrives();
+}
+
+void StGLOpenFile::addSystemDrives() {
+#ifdef _WIN32
+    const DWORD aMask = ::GetLogicalDrives();
+    StHandle<StDriveNameResolver> aResolver = new StDriveNameResolver();
+    for(int aLetterIter = 'A'; aLetterIter <= 'Z'; ++aLetterIter) {
+        const int aBit = 1 << (aLetterIter - 'A');
+        if((aMask & aBit) != 0) {
+            aResolver->Drives.push_back(StString()         + char(aLetterIter) + ":\\");
+            aResolver->Labels.push_back(StString("Drive ") + char(aLetterIter) + ":\\");
+        }
+    }
+    if(!aResolver->Drives.empty()) {
+        // name resolver might hang on resource unavailability
+        StThread aThread(StDriveNameResolver::resolveThread, &aResolver);
+        if(!aThread.wait(1000)) {
+            //aThread.kill();
+            aResolver->ToAbort = true;
+            aThread.detach();
+        }
+
+        StMutexAuto aLock(aResolver->Mutex);
+        for(size_t aDriveIter = 0; aDriveIter < aResolver->Drives.size(); ++aDriveIter) {
+            addHotItem(aResolver->Drives[aDriveIter], aResolver->Labels[aDriveIter]);
+        }
+    }
 #else
     // modern Android does not permit listing / content
     if(access("/", R_OK) == 0) {
