@@ -9,7 +9,6 @@
 #ifndef __APPLE__
 
 #include <StFile/StFileNode.h>
-#include <StFile/StMIMEList.h>
 #include <StStrings/StLogger.h>
 
 #ifdef _WIN32
@@ -29,23 +28,20 @@
  * in commonly used class.
  * This needed only for Windows.
  */
-bool StFileNode::openFileDialog(const StString& theFolder,
-                                const StString& theTitle,
-                                const StMIMEList& theFilter,
-                                StString& theFilePath,
-                                bool toSave) {
+bool StFileNode::openFileDialog(StString& theFilePath,
+                                const StOpenFileName& theInfo,
+                                bool theToSave) {
 #ifdef _WIN32
-    const StStringUtfWide aFolder = theFolder.toUtfWide();
-    const StStringUtfWide aTitle  = theTitle.toUtfWide();
+    const StStringUtfWide aFolder = theInfo.Folder.toUtfWide();
+    const StStringUtfWide aTitle  = theInfo.Title.toUtfWide();
 
     // use dummy \n symbol instead of NULL-termination symbol \0 inside string
     // because such string will be invalid for StString class
     const StStringUtfWide NULL_CHAR = '\n';
 
-    StStringUtfWide aFilterString;
-    StStringUtfWide anAllSupportedExt;
-    for(size_t aMimeId = 0; aMimeId < theFilter.size(); ++aMimeId) {
-        const StMIME& aMime = theFilter[aMimeId];
+    StStringUtfWide aFilterString, anAllSupportedExt, anExtraSupportedExt;
+    for(size_t aMimeId = 0; aMimeId < theInfo.Filter.size(); ++aMimeId) {
+        const StMIME& aMime = theInfo.Filter[aMimeId];
         if(aMimeId > 0) {
             anAllSupportedExt += StStringUtfWide(';');
         }
@@ -53,15 +49,38 @@ bool StFileNode::openFileDialog(const StString& theFolder,
     }
 
     // fill 'All supported'
-    if(!anAllSupportedExt.isEmpty() && theFilter.size() > 1) {
-        aFilterString += StStringUtfWide(L"All supported\n");
+    if(!anAllSupportedExt.isEmpty() && theInfo.Filter.size() > 1) {
+        if(!theInfo.FilterTitle.isEmpty()) {
+            aFilterString += theInfo.FilterTitle.toUtfWide();
+        } else {
+            aFilterString += StStringUtfWide(L"All supported");
+        }
+        aFilterString += StStringUtfWide(L"\n");
         aFilterString += anAllSupportedExt + NULL_CHAR;
     }
 
+    // fill 'Extra supported'
+    for(size_t aMimeId = 0; aMimeId < theInfo.ExtraFilter.size(); ++aMimeId) {
+        const StMIME& aMime = theInfo.ExtraFilter[aMimeId];
+        if(aMimeId > 0) {
+            anExtraSupportedExt += StStringUtfWide(';');
+        }
+        anExtraSupportedExt += StStringUtfWide(L"*.") + aMime.getExtension().toUtfWide();
+    }
+    if(!anExtraSupportedExt.isEmpty() && theInfo.ExtraFilter.size() > 1) {
+        if(!theInfo.ExtraFilterTitle.isEmpty()) {
+            aFilterString += theInfo.ExtraFilterTitle.toUtfWide();
+        } else {
+            aFilterString += StStringUtfWide(L"Extra supported");
+        }
+        aFilterString += StStringUtfWide(L"\n");
+        aFilterString += anExtraSupportedExt + NULL_CHAR;
+    }
+
     // fill MIME types
-    for(size_t aMimeId = 0; aMimeId < theFilter.size(); ++aMimeId) {
-        const StMIME& aMime = theFilter[aMimeId];
-        if((aMimeId > 0) && (aMime.getDescription() == theFilter[aMimeId - 1].getDescription())) {
+    for(size_t aMimeId = 0; aMimeId < theInfo.Filter.size(); ++aMimeId) {
+        const StMIME& aMime = theInfo.Filter[aMimeId];
+        if((aMimeId > 0) && (aMime.getDescription() == theInfo.Filter[aMimeId - 1].getDescription())) {
             // append extension to previous MIME (prevent duplication)
             aFilterString = aFilterString.subString(0, aFilterString.getLength() - 1); // backstep
             aFilterString += StStringUtfWide(L";*.") + aMime.getExtension().toUtfWide() + NULL_CHAR;
@@ -72,7 +91,7 @@ bool StFileNode::openFileDialog(const StString& theFolder,
     }
 
     // fill 'Any File'
-    aFilterString += StStringUtfWide(L"Any File (*)\n");
+    aFilterString += StStringUtfWide(L"All Files (*)\n");
     aFilterString += StStringUtfWide(L"*\n"); // last string should be terminated by \0\0
 
     // replace dummy CR symbol within '\0' using 'hack' code
@@ -104,7 +123,7 @@ bool StFileNode::openFileDialog(const StString& theFolder,
     anOpenStruct.nMaxFileTitle   = sizeof(aFileTitle);
     anOpenStruct.lpstrTitle      = aTitle.toCString();
     anOpenStruct.Flags = OFN_PATHMUSTEXIST | OFN_FILEMUSTEXIST;
-    if(!toSave) {
+    if(!theToSave) {
         if(GetOpenFileNameW(&anOpenStruct)
         && *anOpenStruct.lpstrFile != L'\0') {
             theFilePath = StString(anOpenStruct.lpstrFile);
@@ -125,17 +144,17 @@ bool StFileNode::openFileDialog(const StString& theFolder,
     }
     gdk_threads_enter();
     bool isFileSelected = false;
-    GtkWidget* aDialog = gtk_file_chooser_dialog_new(theTitle.toCString(), NULL, (toSave ? GTK_FILE_CHOOSER_ACTION_SAVE : GTK_FILE_CHOOSER_ACTION_OPEN),
-                                                     GTK_STOCK_CANCEL, GTK_RESPONSE_CANCEL, (toSave ? GTK_STOCK_SAVE : GTK_STOCK_OPEN),
+    GtkWidget* aDialog = gtk_file_chooser_dialog_new(theInfo.Folder.toCString(), NULL, (theToSave ? GTK_FILE_CHOOSER_ACTION_SAVE : GTK_FILE_CHOOSER_ACTION_OPEN),
+                                                     GTK_STOCK_CANCEL, GTK_RESPONSE_CANCEL, (theToSave ? GTK_STOCK_SAVE : GTK_STOCK_OPEN),
                                                      GTK_RESPONSE_ACCEPT, NULL);
-    gtk_file_chooser_set_current_folder(GTK_FILE_CHOOSER(aDialog), theFolder.toCString());
+    gtk_file_chooser_set_current_folder(GTK_FILE_CHOOSER(aDialog), theInfo.Folder.toCString());
     if(!theFilePath.isEmpty()) {
         gtk_file_chooser_set_filename(GTK_FILE_CHOOSER(aDialog), theFilePath.toCString());
     }
 
     GtkFileFilter* gtkFilter = gtk_file_filter_new();
-    for(size_t aMimeId = 0; aMimeId < theFilter.size(); ++aMimeId) {
-        const StMIME& aMime = theFilter[aMimeId];
+    for(size_t aMimeId = 0; aMimeId < theInfo.Filter.size(); ++aMimeId) {
+        const StMIME& aMime = theInfo.Filter[aMimeId];
         gtk_file_filter_add_pattern(gtkFilter, (StString("*.") + aMime.getExtension()).toCString());
     }
 

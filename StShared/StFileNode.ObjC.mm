@@ -9,7 +9,6 @@
 #if (defined(__APPLE__))
 
 #include <StFile/StFileNode.h>
-#include <StFile/StMIMEList.h>
 
 #include <StCocoa/StCocoaLocalPool.h>
 
@@ -80,11 +79,9 @@
 
 @end
 
-bool StFileNode::openFileDialog(const StString& theFolder,
-                                const StString& theTitle,
-                                const StMIMEList& theFilter,
-                                StString& theFilePath,
-                                bool toSave) {
+bool StFileNode::openFileDialog(StString& theFilePath,
+                                const StOpenFileName& theInfo,
+                                bool theToSave) {
     if(NSApp == nil) {
         return false;
     }
@@ -93,14 +90,14 @@ bool StFileNode::openFileDialog(const StString& theFolder,
     StFileNode::getFolderAndFile(theFilePath, aFolderSrc, aFileNameSrc);
 
     StCocoaLocalPool aLocalPool;
-    NSString* aTitle     = [NSString stringWithUTF8String: theTitle.toCString()];
-    NSString* aFolder    = [NSString stringWithUTF8String: theFolder.toCString()];
+    NSString* aTitle     = [NSString stringWithUTF8String: theInfo.Title.toCString()];
+    NSString* aFolder    = [NSString stringWithUTF8String: theInfo.Folder.toCString()];
     NSString* anInitFile = [NSString stringWithUTF8String: aFileNameSrc.toCString()];
     NSMutableArray* aFilter = NULL;
-    if(!theFilter.isEmpty()) {
-        aFilter = [NSMutableArray arrayWithCapacity: theFilter.size()];
-        for(size_t aMimeId = 0; aMimeId < theFilter.size(); ++aMimeId) {
-            const StMIME& aMime = theFilter[aMimeId];
+    if(!theInfo.Filter.isEmpty()) {
+        aFilter = [NSMutableArray arrayWithCapacity: theInfo.Filter.size()];
+        for(size_t aMimeId = 0; aMimeId < theInfo.Filter.size(); ++aMimeId) {
+            const StMIME& aMime = theInfo.Filter[aMimeId];
             [aFilter addObject: [NSString stringWithUTF8String: aMime.getExtension().toCString()]];
         }
     }
@@ -109,7 +106,7 @@ bool StFileNode::openFileDialog(const StString& theFolder,
                                                     withTitle: aTitle
                                                    withFolder: aFolder
                                                      withFile: anInitFile
-                                                       toSave: toSave];
+                                                       toSave: theToSave];
     if([NSThread isMainThread]) {
         [anOpenFile doDialog: NULL];
     } else {

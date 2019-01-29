@@ -101,28 +101,36 @@ void StMovieOpenDialog::dialogLoop() {
     myPathAudio .clear();
     myPathSubs  .clear();
 
-    StString aTitle;
-    const StMIMEList* aMimeList = &myPlugin->myVideo->getMimeListVideo();
+    StOpenFileName anOpenInfo;
+    anOpenInfo.Folder = myFolder;
     switch(myState) {
         case Dialog_DoubleMovie:
-            aTitle = myPlugin->tr(StMoviePlayerStrings::DIALOG_OPEN_LEFT);
+            anOpenInfo.Title = myPlugin->tr(StMoviePlayerStrings::DIALOG_OPEN_LEFT);
+            anOpenInfo.Filter = myPlugin->myVideo->getMimeListVideo();
+            anOpenInfo.FilterTitle = "Video Files";
             break;
         case Dialog_Audio:
-            aTitle    = "Choose audio file to attach";
-            aMimeList = &myPlugin->myVideo->getMimeListAudio();
+            anOpenInfo.Title = "Choose audio file to attach";
+            anOpenInfo.Filter = myPlugin->myVideo->getMimeListAudio();
+            anOpenInfo.FilterTitle = "Audio Files";
             break;
         case Dialog_Subtitles:
-            aTitle    = "Choose subtitles file to attach";
-            aMimeList = &myPlugin->myVideo->getMimeListSubtitles();
+            anOpenInfo.Title = "Choose subtitles file to attach";
+            anOpenInfo.Filter = myPlugin->myVideo->getMimeListSubtitles();
+            anOpenInfo.FilterTitle = "Subtitle Files";
             break;
         case Dialog_SingleMovie:
         default:
-            aTitle = myPlugin->tr(StMoviePlayerStrings::DIALOG_OPEN_FILE);
+            anOpenInfo.Title = myPlugin->tr(StMoviePlayerStrings::DIALOG_OPEN_FILE);
+            anOpenInfo.Filter = myPlugin->myVideo->getMimeListVideo();
+            anOpenInfo.FilterTitle = "Video Files";
+            anOpenInfo.ExtraFilter = myPlugin->myVideo->getMimeListImages();
+            anOpenInfo.ExtraFilterTitle = "Image files";
             break;
     }
 
-    StString aFilePath, aDummy;
-    if(!StFileNode::openFileDialog(myFolder, aTitle, *aMimeList, aFilePath, false)) {
+    StString aFilePath;
+    if(!StFileNode::openFileDialog(aFilePath, anOpenInfo, false)) {
         StMutexAuto aLock(myMutex);
         myState = StMovieOpenDialog::Dialog_Inactive;
         return;
@@ -130,10 +138,12 @@ void StMovieOpenDialog::dialogLoop() {
 
     switch(myState) {
         case Dialog_DoubleMovie: {
-            aTitle =  myPlugin->tr(StMoviePlayerStrings::DIALOG_OPEN_RIGHT);
+            anOpenInfo.Title = myPlugin->tr(StMoviePlayerStrings::DIALOG_OPEN_RIGHT);
+            StString aDummy;
             StFileNode::getFolderAndFile(aFilePath, myFolder, aDummy);
+            anOpenInfo.Folder = myFolder;
             myPathVideoL = aFilePath;
-            if(!StFileNode::openFileDialog(myFolder, aTitle, *aMimeList, myPathVideoR, false)) {
+            if(!StFileNode::openFileDialog(myPathVideoR, anOpenInfo, false)) {
                 StMutexAuto aLock(myMutex);
                 myState = StMovieOpenDialog::Dialog_Inactive;
                 return;

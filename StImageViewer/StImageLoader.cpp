@@ -586,18 +586,18 @@ bool StImageLoader::saveImage(const StHandle<StFileNode>&     theSource,
         aDataResult->initWrapper(aDataLeft);
     }
 
-    const StString& aTitle = myLangMap->getValue(StImageViewerStrings::DIALOG_SAVE_SNAPSHOT);
-    StMIMEList aFilter;
+    StOpenFileName anOpenInfo;
+    anOpenInfo.Title = myLangMap->getValue(StImageViewerStrings::DIALOG_SAVE_SNAPSHOT);
     StString aSaveExt;
     if(toSaveStereo) {
         switch(theImgType) {
             case StImageFile::ST_TYPE_PNG:
                 aSaveExt = ST_PNS_EXT;
-                aFilter.add(StMIME(ST_PNS_MIME, aSaveExt, ST_PNS_DESC));
+                anOpenInfo.Filter.add(StMIME(ST_PNS_MIME, aSaveExt, ST_PNS_DESC));
                 break;
             case StImageFile::ST_TYPE_JPEG:
                 aSaveExt = ST_JPS_EXT;
-                aFilter.add(StMIME(ST_JPS_MIME, aSaveExt, ST_JPS_DESC));
+                anOpenInfo.Filter.add(StMIME(ST_JPS_MIME, aSaveExt, ST_JPS_DESC));
                 break;
             default:
                 return false;
@@ -606,22 +606,22 @@ bool StImageLoader::saveImage(const StHandle<StFileNode>&     theSource,
         switch(theImgType) {
             case StImageFile::ST_TYPE_PNG:
                 aSaveExt = ST_PNG_EXT;
-                aFilter.add(StMIME(ST_PNG_MIME, aSaveExt, ST_PNG_DESC));
+                anOpenInfo.Filter.add(StMIME(ST_PNG_MIME, aSaveExt, ST_PNG_DESC));
                 break;
             case StImageFile::ST_TYPE_JPEG:
                 aSaveExt = ST_JPG_EXT;
-                aFilter.add(StMIME(ST_JPG_MIME, aSaveExt, ST_JPEG_DESC));
+                anOpenInfo.Filter.add(StMIME(ST_JPG_MIME, aSaveExt, ST_JPEG_DESC));
                 break;
             default:
                 return false;
         }
     }
 
-    StString aFileNameSrc, aFolderSrc, aNameSrc, anExtSrc;
-    StFileNode::getFolderAndFile(theSource->getPath(), aFolderSrc, aFileNameSrc);
+    StString aFileNameSrc, aNameSrc, anExtSrc;
+    StFileNode::getFolderAndFile(theSource->getPath(), anOpenInfo.Folder, aFileNameSrc);
     StFileNode::getNameAndExtension(aFileNameSrc, aNameSrc, anExtSrc);
-    StString aFileToSave = (!aFolderSrc.isEmpty() ? aFolderSrc : "") + ST_FILE_SPLITTER + aNameSrc;
-    if(StFileNode::openFileDialog(aFolderSrc, aTitle, aFilter, aFileToSave, true)) {
+    StString aFileToSave = (!anOpenInfo.Folder.isEmpty() ? anOpenInfo.Folder : "") + ST_FILE_SPLITTER + aNameSrc;
+    if(StFileNode::openFileDialog(aFileToSave, anOpenInfo, true)) {
         if(StFileNode::getExtension(aFileToSave) != aSaveExt) {
             aFileToSave += StString('.') + aSaveExt;
         }

@@ -1222,20 +1222,20 @@ bool StVideo::saveSnapshotAs(StImageFile::ImageType theImgType) {
         dataResult->initWrapper(dataLeft);
     }
 
-    StString title = myLangMap->getValue(StMoviePlayerStrings::DIALOG_SAVE_SNAPSHOT);
-    StMIMEList filter;
+    StOpenFileName anOpenInfo;
+    anOpenInfo.Title = myLangMap->getValue(StMoviePlayerStrings::DIALOG_SAVE_SNAPSHOT);
     StString saveExt;
     if(toSaveStereo) {
         switch(theImgType) {
             case StImageFile::ST_TYPE_PNG:
                 saveExt = "pns";
-                filter.add(StMIME("image/pns", saveExt,
-                                  "PNS - png  stereo image, lossless"));
+                anOpenInfo.Filter.add(StMIME("image/pns", saveExt,
+                                             "PNS - png  stereo image, lossless"));
                 break;
             case StImageFile::ST_TYPE_JPEG:
                 saveExt = "jps";
-                filter.add(StMIME("image/jps", saveExt,
-                                  "JPS - jpeg stereo image, lossy"));
+                anOpenInfo.Filter.add(StMIME("image/jps", saveExt,
+                                             "JPS - jpeg stereo image, lossy"));
                 break;
             default:
                 return false;
@@ -1244,13 +1244,13 @@ bool StVideo::saveSnapshotAs(StImageFile::ImageType theImgType) {
         switch(theImgType) {
             case StImageFile::ST_TYPE_PNG:
                 saveExt = "png";
-                filter.add(StMIME("image/png", saveExt,
-                                  "PNG image, lossless"));
+                anOpenInfo.Filter.add(StMIME("image/png", saveExt,
+                                             "PNG image, lossless"));
                 break;
             case StImageFile::ST_TYPE_JPEG:
                 saveExt = "jpg";
-                filter.add(StMIME("image/jpg", saveExt,
-                                  "JPEG image, lossy"));
+                anOpenInfo.Filter.add(StMIME("image/jpg", saveExt,
+                                             "JPEG image, lossy"));
                 break;
             default:
                 return false;
@@ -1258,7 +1258,8 @@ bool StVideo::saveSnapshotAs(StImageFile::ImageType theImgType) {
     }
 
     StString fileToSave;
-    if(StFileNode::openFileDialog(myCurrNode->getFolderPath(), title, filter, fileToSave, true)) {
+    anOpenInfo.Folder = myCurrNode->getFolderPath();
+    if(StFileNode::openFileDialog(fileToSave, anOpenInfo, true)) {
         if(StFileNode::getExtension(fileToSave) != saveExt) {
             fileToSave += StString('.') + saveExt;
         }

@@ -10,10 +10,21 @@
 #define __StFileNode_H__
 
 #include <StFile/StNode.h>
-#include <StFile/StMIME.h>
+#include <StFile/StMIMEList.h>
 #include <StTemplates/StHandle.h>
 
-class StMIMEList;
+/**
+ * Structure defining Open File dialog content.
+ */
+struct StOpenFileName {
+    StString   Folder;            //!< folder to open
+    StString   Title;             //!< dialog title
+    StMIMEList Filter;            //!< main file filter
+    StString   FilterTitle;       //!< main file filter title; "All supported" will be displayed when empty
+    StMIMEList ExtraFilter;       //!< extra file filter (optional)
+    StString   ExtraFilterTitle;  //!< extra file filter title
+};
+
 class StFileNode : public StNode {
 
         private:
@@ -275,18 +286,14 @@ class StFileNode : public StNode {
 
     /**
      * Open native system open file dialog.
-     * @param theFolder      path to open
-     * @param theTitle       dialog title
-     * @param theFilter      files filter
-     * @param theOutFilePath file selected by user
-     * @param toSave         flag this dialog to open or save file
+     * @param theFilePath [in] [out] file selected by user
+     * @param theInfo [in] file open dialog definition
+     * @param theToSave [in] flag this dialog to open or save file
      * @return
      */
-    ST_CPPEXPORT static bool openFileDialog(const StString&   theFolder,
-                                            const StString&   theTitle,
-                                            const StMIMEList& theFilter,
-                                            StString&         theOutFilePath,
-                                            bool              toSave);
+    ST_CPPEXPORT static bool openFileDialog(StString& theFilePath,
+                                            const StOpenFileName& theInfo,
+                                            bool theToSave);
 
     /**
      * Function used where not possible use native Unicode paths.

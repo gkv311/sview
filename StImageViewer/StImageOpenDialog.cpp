@@ -91,19 +91,25 @@ SV_THREAD_FUNCTION StImageOpenDialog::openDialogThread(void* theArg) {
 void StImageOpenDialog::dialogLoop() {
     myPathLeft .clear();
     myPathRight.clear();
-    StString aTitle = myPlugin->tr(myState == StImageOpenDialog::Dialog_ActiveDouble
+    StOpenFileName anOpenInfo;
+    anOpenInfo.Title = myPlugin->tr(myState == StImageOpenDialog::Dialog_ActiveDouble
                                  ? StImageViewerStrings::DIALOG_OPEN_LEFT
                                  : StImageViewerStrings::DIALOG_OPEN_FILE);
-
-    StString aDummy;
-    if(!StFileNode::openFileDialog(myFolder, aTitle, myPlugin->myLoader->getMimeListImages(), myPathLeft, false)) {
+    anOpenInfo.Folder = myFolder;
+    anOpenInfo.Filter = myPlugin->myLoader->getMimeListImages();
+    anOpenInfo.FilterTitle = "Image Files";
+    anOpenInfo.ExtraFilter = myPlugin->myLoader->getMimeListVideo();
+    anOpenInfo.ExtraFilterTitle = "Video Files";
+    if(!StFileNode::openFileDialog(myPathLeft, anOpenInfo, false)) {
         StMutexAuto aLock(myMutex);
         myState = StImageOpenDialog::Dialog_Inactive;
         return;
     } else if(myState == StImageOpenDialog::Dialog_ActiveDouble) {
-        aTitle = myPlugin->tr(StImageViewerStrings::DIALOG_OPEN_RIGHT);
+        anOpenInfo.Title = myPlugin->tr(StImageViewerStrings::DIALOG_OPEN_RIGHT);
+        StString aDummy;
         StFileNode::getFolderAndFile(myPathLeft, myFolder, aDummy);
-        if(!StFileNode::openFileDialog(myFolder, aTitle, myPlugin->myLoader->getMimeListImages(), myPathRight, false)) {
+        anOpenInfo.Folder = myFolder;
+        if(!StFileNode::openFileDialog(myPathRight, anOpenInfo, false)) {
             StMutexAuto aLock(myMutex);
             myState = StImageOpenDialog::Dialog_Inactive;
             return;
