@@ -27,7 +27,8 @@ StGLScrollArea::StGLScrollArea(StGLWidget*      theParent,
   myDragYCumul(0),
   myFlingAccel((double )myRoot->scale(200)),
   myFlingYSpeed(0.0),
-  myFlingYDone(0) {
+  myFlingYDone(0),
+  myScrollYAccum(0.0f) {
     //
 }
 
@@ -298,11 +299,12 @@ bool StGLScrollArea::doScroll(const StScrollEvent& theEvent) {
         return true;
     }
 
-    int aDeltaY = (int )fabs(theEvent.DeltaY * 2.0f);
-    if(theEvent.DeltaY > 0.001f) {
-        doScroll( myRoot->scale(aDeltaY));
-    } else if(theEvent.DeltaY < -0.001f) {
-        doScroll(-myRoot->scale(aDeltaY));
+    myScrollYAccum += theEvent.DeltaY * 20.0f;
+    const int aDeltaY = (int )myScrollYAccum;
+    if(aDeltaY != 0) {
+        myScrollYAccum -= float(aDeltaY);
+        const int aDeltaScaled = myRoot->scale(std::abs(aDeltaY));
+        doScroll(aDeltaY > 0 ? aDeltaScaled : -aDeltaScaled);
     }
     return true;
 }

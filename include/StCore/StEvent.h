@@ -186,6 +186,65 @@ struct StScrollEvent {
     float         DeltaY;           //!< precise  delta for vertical   scroll
     bool          IsFromMultiTouch; //!< when true, scrolling is simulated from multi-touch gesture by system (OS X) and touches will come in parallel
 
+    /**
+     * Reset event.
+     */
+    void reset() {
+        Type  = stEvent_Scroll;
+        Time  = 0.0;
+        PointX = 0.0;
+        PointY = 0.0;
+        StepsX = 0;
+        StepsY = 0;
+        DeltaX = 0.0f;
+        DeltaY = 0.0f;
+        IsFromMultiTouch = false;
+    }
+
+    /**
+     * Initialize event.
+     */
+    void init(double theTime,
+              double thePointX,
+              double thePointY,
+              float  theDeltaX,
+              float  theDeltaY,
+              bool   theIsFromMultiTouch) {
+        Type  = stEvent_Scroll;
+        Time  = theTime;
+        PointX = thePointX;
+        PointY = thePointY;
+        StepsX = 0;
+        StepsY = 0;
+        DeltaX = theDeltaX;
+        DeltaY = theDeltaY;
+        IsFromMultiTouch = theIsFromMultiTouch;
+    }
+
+    /**
+     * Compute accumulated integer steps from X scroll event.
+     */
+    int accumulateStepsX(int theInc, int theStepSize) { return accumulateSteps(StepsX, theInc, theStepSize); }
+
+    /**
+     * Compute accumulated integer steps from Y scroll event.
+     */
+    int accumulateStepsY(int theInc, int theStepSize) { return accumulateSteps(StepsY, theInc, theStepSize); }
+
+    /**
+     * Compute accumulated integer steps from scroll event.
+     */
+    static int accumulateSteps(int& theAcc, int theInc, int theStepSize) {
+        theAcc += theInc;
+        int aNbSteps = 0;
+        for(; theAcc <= -theStepSize; theAcc += theStepSize) {
+            --aNbSteps;
+        }
+        for(; theAcc >= theStepSize; theAcc -= theStepSize) {
+            ++aNbSteps;
+        }
+        return aNbSteps;
+    }
 };
 
 /**

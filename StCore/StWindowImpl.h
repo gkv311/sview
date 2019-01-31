@@ -477,6 +477,7 @@ class StWindowImpl {
     StEvent        myStEvent;          //!< temporary event object (to be used in message loop thread)
     StEvent        myStEvent2;         //!< temporary event object (to be used in message loop thread)
     StEvent        myStEventAux;       //!< extra temporary event object (to be used in StWindow creation thread)
+    StScrollEvent  myScrollAcc;        //!< extra temporary event object accumulating mouse scroll events
     int            myAlignDL;          //!< extra window shift applied for alignment (left)
     int            myAlignDR;          //!< extra window shift applied for alignment (right)
     int            myAlignDT;          //!< extra window shift applied for alignment (top)

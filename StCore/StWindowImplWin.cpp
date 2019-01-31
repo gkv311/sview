@@ -875,25 +875,32 @@ LRESULT StWindowImpl::stWndProc(HWND theWin, UINT uMsg, WPARAM wParam, LPARAM lP
             return 0;
         }
         case WM_MOUSEWHEEL:    // vertical wheel
-        //case WM_MOUSEHWHEEL:   // horizontal wheel (only Vista+)
+        case WM_MOUSEHWHEEL:   // horizontal wheel (only Vista+)
         {
             const StRectI_t aWinRect = getPlacement();
             int aMouseXPx = int(short(LOWORD(lParam))) - aWinRect.left();
             int aMouseYPx = int(short(HIWORD(lParam))) - aWinRect.top();
 
-            int aZDelta = GET_WHEEL_DELTA_WPARAM(wParam); // / WHEEL_DELTA;
-            //if(GET_X_LPARAM(lParam) != 0)
+            const bool  isVert   = (uMsg == WM_MOUSEWHEEL);
+            const int   aZDelta  = GET_WHEEL_DELTA_WPARAM(wParam);
+            const float aDeltaSt = float(aZDelta) / float(WHEEL_DELTA);
 
-            myStEvent.Type = stEvent_Scroll;
-            myStEvent.Scroll.Time   = getEventTime(myEvent.time);
-            myStEvent.Scroll.PointX = double(aMouseXPx) / double(aWinRect.width());
-            myStEvent.Scroll.PointY = double(aMouseYPx) / double(aWinRect.height());
-            myStEvent.Scroll.StepsX = 0;
-            myStEvent.Scroll.StepsY = (aZDelta > 0) ? 1 : -1;
-            myStEvent.Scroll.DeltaX = 0.0;
-            myStEvent.Scroll.DeltaY = 10.0f * myStEvent.Scroll.StepsY;
-            myStEvent.Scroll.IsFromMultiTouch = false;
-
+            myStEvent.Scroll.init(getEventTime(myEvent.time),
+                                  double(aMouseXPx) / double(aWinRect.width()),
+                                  double(aMouseYPx) / double(aWinRect.height()),
+                                  !isVert ? aDeltaSt : 0.0f,
+                                   isVert ? aDeltaSt : 0.0f,
+                                  false);
+            if((myStEvent.Scroll.Time - myScrollAcc.Time) > 0.1
+             || std::abs(aMouseXPx - (int)myScrollAcc.PointX) > 10
+             || std::abs(aMouseYPx - (int)myScrollAcc.PointY) > 10) {
+                myScrollAcc.reset();
+            }
+            myScrollAcc.Time = myStEvent.Scroll.Time;
+            myScrollAcc.PointX = aMouseXPx;
+            myScrollAcc.PointY = aMouseYPx;
+            myStEvent.Scroll.StepsX = myScrollAcc.accumulateStepsX(!isVert ? aZDelta : 0, WHEEL_DELTA);
+            myStEvent.Scroll.StepsY = myScrollAcc.accumulateStepsY( isVert ? aZDelta : 0, WHEEL_DELTA);
             myEventsBuffer.append(myStEvent);
             return 0;
         }

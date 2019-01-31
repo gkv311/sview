@@ -348,17 +348,17 @@ typedef NSUInteger NSEventPhase;
         CGFloat aDeltaY = [theEvent deltaY];
         if(!stAreEqual(aDeltaX, 0.0f, 0.01f)) {
             myStEvent.Scroll.StepsX = aDeltaX > 0.0f ? -1 :  1;
-            myStEvent.Scroll.DeltaX = 10.0f * myStEvent.Scroll.StepsX;
+            myStEvent.Scroll.DeltaX = myStEvent.Scroll.StepsX;
         }
         if(!stAreEqual(aDeltaY, 0.0f, 0.01f)) {
             myStEvent.Scroll.StepsY = aDeltaY > 0.0f ?  1 : -1;
-            myStEvent.Scroll.DeltaY = 10.0f * myStEvent.Scroll.StepsY;
+            myStEvent.Scroll.DeltaY = myStEvent.Scroll.StepsY;
         }
 
         if(myIsLionOS
         && [theEvent hasPreciseScrollingDeltas]) {
-            myStEvent.Scroll.DeltaX = [theEvent scrollingDeltaX];
-            myStEvent.Scroll.DeltaY = [theEvent scrollingDeltaY];
+            myStEvent.Scroll.DeltaX = 0.1f * [theEvent scrollingDeltaX];
+            myStEvent.Scroll.DeltaY = 0.1f * [theEvent scrollingDeltaY];
         }
 
         //if([theEvent subtype] == NSMouseEventSubtype) {

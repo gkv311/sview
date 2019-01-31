@@ -112,19 +112,22 @@ LRESULT StDXNVWindow::wndProcFunction(HWND   theWnd,
                                       LPARAM theParamL) {
     // we do stupid checks here...
     if(myStWin->isFullScreen() && myStWin->isStereoOutput()) {
-        if(theMsg == WM_MOUSEWHEEL) {
-            int zDelta = GET_WHEEL_DELTA_WPARAM(theParamW);
+        if(theMsg == WM_MOUSEWHEEL
+        || theMsg == WM_MOUSEHWHEEL) {
+            const bool  isVert   = (theMsg == WM_MOUSEWHEEL);
+            const int   aZDelta  = GET_WHEEL_DELTA_WPARAM(theParamW);
+            const int   aNbSteps = (aZDelta > 0) ? 1 : -1;
+            const float aDeltaSt = float(aZDelta) / float(WHEEL_DELTA);
             const StPointD_t aPnt = myStWin->getMousePos();
             StEvent anEvent;
-            anEvent.Type = stEvent_Scroll;
-            anEvent.Scroll.Time   = 0.0; //getEventTime(myEvent.time);
-            anEvent.Scroll.PointX = aPnt.x();
-            anEvent.Scroll.PointY = aPnt.y();
-            anEvent.Scroll.StepsX = 0;
-            anEvent.Scroll.StepsY = (zDelta > 0) ? 1 : -1;
-            anEvent.Scroll.DeltaX = 0.0;
-            anEvent.Scroll.DeltaY = 10.0f * anEvent.Scroll.StepsY;
-            anEvent.Scroll.IsFromMultiTouch = false;
+            anEvent.Scroll.init(0.0, //getEventTime(myEvent.time);
+                                aPnt.x(),
+                                aPnt.y(),
+                                !isVert ? aDeltaSt : 0.0f,
+                                 isVert ? aDeltaSt : 0.0f,
+                                false);
+            anEvent.Scroll.StepsX = !isVert ? aNbSteps : 0;
+            anEvent.Scroll.StepsY =  isVert ? aNbSteps : 0;
             myStWin->post(anEvent);
         }
 

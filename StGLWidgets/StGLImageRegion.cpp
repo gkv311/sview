@@ -1011,34 +1011,32 @@ bool StGLImageRegion::doScroll(const StScrollEvent& theEvent) {
         return false;
     }
 
-    const GLfloat SCALE_STEPS = fabs(theEvent.DeltaY) * 0.01f;
-    if(theEvent.DeltaY > 0.001f) {
-        if((myKeyFlags & ST_VF_CONTROL) == ST_VF_CONTROL) {
-            if((myKeyFlags & ST_VF_SHIFT) == ST_VF_SHIFT) {
+    if((myKeyFlags & ST_VF_CONTROL) == ST_VF_CONTROL) {
+        if(theEvent.StepsY == 0) {
+            return false;
+        }
+        if((myKeyFlags & ST_VF_SHIFT) == ST_VF_SHIFT) {
+            if(theEvent.StepsY > 0) {
                 doParamsSepZDec(0.01);
             } else {
-                doParamsSepX(size_t(-1));
-            }
-            return true;
-        } else if((myKeyFlags & ST_VF_SHIFT) == ST_VF_SHIFT) {
-            doParamsSepY(size_t(-1));
-            return true;
-        }
-
-        scaleAt(aCursor, SCALE_STEPS);
-    } else if(theEvent.DeltaY < -0.001f) {
-        if((myKeyFlags & ST_VF_CONTROL) == ST_VF_CONTROL) {
-            if((myKeyFlags & ST_VF_SHIFT) == ST_VF_SHIFT) {
                 doParamsSepZInc(0.01);
-            } else {
-                doParamsSepX(size_t(1));
             }
-            return true;
-        } else if((myKeyFlags & ST_VF_SHIFT) == ST_VF_SHIFT) {
-            doParamsSepY(size_t(1));
-            return true;
+        } else {
+            doParamsSepX(theEvent.StepsY > 0 ? size_t(-1) : size_t(1));
         }
+        return true;
+    } else if((myKeyFlags & ST_VF_SHIFT) == ST_VF_SHIFT) {
+        if(theEvent.StepsY == 0) {
+            return false;
+        }
+        doParamsSepY(theEvent.StepsY > 0 ? size_t(-1) : size_t(1));
+        return true;
+    }
 
+    const GLfloat SCALE_STEPS = fabs(theEvent.DeltaY) * 0.1f;
+    if(theEvent.DeltaY > 0.0001f) {
+        scaleAt(aCursor, SCALE_STEPS);
+    } else if(theEvent.DeltaY < -0.0001f) {
         scaleAt(aCursor, -SCALE_STEPS);
     }
     return true;

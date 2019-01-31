@@ -72,6 +72,7 @@ class StGLScrollArea : public StGLWidget {
     StTimer    myFlingTimer;  //!< timer for dragging inertia
     double     myFlingYSpeed; //!< the dragging velocity for inertial scrolling
     int        myFlingYDone;  //!< already animated inertial scrolling
+    float      myScrollYAccum;//!< accumulated scroll event value
 
 };
 

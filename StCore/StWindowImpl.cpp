@@ -97,6 +97,10 @@ StWindowImpl::StWindowImpl(const StHandle<StResourceManager>& theResMgr,
   myIsMouseMoved(false) {
     stMemZero(&attribs, sizeof(attribs));
     stMemZero(&signals, sizeof(signals));
+    myStEvent   .Type = stEvent_None;
+    myStEvent2  .Type = stEvent_None;
+    myStEventAux.Type = stEvent_None;
+    myScrollAcc.reset();
     attribs.IsNoDecor      = false;
     attribs.IsStereoOutput = false;
     attribs.IsGlStereo     = false;
