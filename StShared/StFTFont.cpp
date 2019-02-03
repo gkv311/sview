@@ -52,6 +52,7 @@ bool StFTFont::setActiveStyle(const StFTFont::Style theStyle) {
     }
 
     if(myFTFaces[theStyle] != NULL) {
+        myUChar  = 0;
         myStyle  = theStyle;
         myFTFace = myFTFaces[theStyle];
         return true;
