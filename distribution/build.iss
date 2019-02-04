@@ -38,6 +38,7 @@ InternalCompressLevel=normal
 SetupIconFile=media\sView_Setup.ico
 WizardImageFile=media\sView_WizImage.bmp
 WizardSmallImageFile=media\sView_WizImageSmall.bmp
+UninstallDisplayIcon={app}\{#SVIEW_EXE_NAME}
 ; Additional requirements
 ChangesAssociations=true
 ChangesEnvironment=true
