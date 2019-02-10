@@ -64,7 +64,11 @@ StAVPacket::StAVPacket(const StAVPacket& theCopy)
   myIsOwn(false) {
     avInitPacket();
     if(myType == DATA_PACKET) {
+    #if(LIBAVCODEC_VERSION_INT >= AV_VERSION_INT(57, 106, 102))
+        av_packet_ref(&myPacket, &theCopy.myPacket); // copy by reference
+    #else
         setAVpkt(theCopy.myPacket);
+    #endif
     }
 }
 
