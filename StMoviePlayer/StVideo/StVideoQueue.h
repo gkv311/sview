@@ -341,6 +341,13 @@ class StVideoQueue : public StAVPacketQueue {
 
 private:
 
+    ST_LOCAL bool decodeFrame(const StHandle<StAVPacket>& thePacket,
+                              bool& theToSendPacket,
+                              bool& theIsStarted,
+                              StString& theTagValue,
+                              double& theAverageDelaySec,
+                              double& thePrevPts);
+
     /**
      * Initialize adapter over AVframe or perform to RGB conversion.
      */
@@ -398,6 +405,7 @@ private:
 
     int64_t                    myFramesCounter;
     StImage                    myCachedFrame;
+    StImage                    myEmptyImage;
     bool                       myWasFlushed;
 
     volatile StFormat          myStFormatByUser;  //!< source format specified by user

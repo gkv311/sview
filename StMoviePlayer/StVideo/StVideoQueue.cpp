@@ -740,14 +740,10 @@ void StVideoQueue::pushFrame(const StImage&     theSrcDataLeft,
 }
 
 void StVideoQueue::decodeLoop() {
-    int isFrameFinished = 0;
     double anAverageDelaySec = 40.0;
     double aPrevPts  = 0.0;
-    double aSlavePts = 0.0;
     myFramePts = 0.0;
-    StImage* aSlaveData = NULL;
     StHandle<StAVPacket> aPacket;
-    StImage anEmptyImg;
     StString aTagValue;
     bool isStarted = false;
     for(;;) {
@@ -783,9 +779,14 @@ void StVideoQueue::decodeLoop() {
                 myVideoClock = 0.0;
                 myHasDataState.reset();
                 isStarted = true;
+                aPrevPts = 0.0;
                 continue;
             }
             case StAVPacket::END_PACKET: {
+                // TODO at the end of the stream it might be needed calling
+                // avcodec_send_packet with NULL to initiate draining data followed by avcodec_receive_frame
+                // to recieve last frames.
+
                 if(!myMaster.isNull()) {
                     while(myHasDataState.check() && !myMaster->isInDowntime()) {
                         StThread::sleep(10);
@@ -818,233 +819,278 @@ void StVideoQueue::decodeLoop() {
             //
         }
 
-        // decode video frame
-    #if(LIBAVCODEC_VERSION_INT >= AV_VERSION_INT(52, 23, 0))
-        bool toTryGpu  = myUseGpu && !myIsGpuFailed;
-        avcodec_decode_video2(myCodecCtx, myFrame.Frame, &isFrameFinished, aPacket->getAVpkt());
-        bool isGpuUsed = myUseGpu && !myIsGpuFailed;
-        if(isGpuUsed != toTryGpu) {
-            if(!initCodec(myCodecAuto, isGpuUsed)) {
-                signals.onError(stCString("FFmpeg: Could not re-open video codec"));
-                deinit();
-                aPacket.nullify();
-                continue;
-            }
-            isFrameFinished = 0;
-            avcodec_decode_video2(myCodecCtx, myFrame.Frame, &isFrameFinished, aPacket->getAVpkt());
-        }
-    #else
-        avcodec_decode_video(myCodecCtx, myFrame.Frame, &isFrameFinished,
-                             aPacket->getData(), aPacket->getSize());
-    #endif
-        if(isFrameFinished == 0) {
-            // need more packets to decode whole frame
-            aPacket.nullify();
-            continue;
-        }
-
-        if(aPacket->isKeyFrame()) {
-            myFramesCounter = 1;
-        }
-
-    #ifndef ST_AV_OLDSYNC
-        myVideoPktPts = myFrame.getBestEffortTimestamp();
-        if(myVideoPktPts == stAV::NOPTS_VALUE) {
-            myVideoPktPts = 0;
-        }
-
-        myFramePts  = double(myVideoPktPts) * av_q2d(myStream->time_base);
-        myFramePts -= myPtsStartBase; // normalize PTS
-    #else
-        // Save global pts to be stored in pFrame in first call
-        myVideoPktPts = aPacket->getPts();
-
-        myFramePts = 0.0;
-        if(aPacket->getDts() != stAV::NOPTS_VALUE) {
-            myFramePts = double(aPacket->getDts());
-        } else {
-            int64_t aPktPtsSync = stAV::NOPTS_VALUE;
-        #ifdef ST_USE64PTR
-            aPktPtsSync = (int64_t )myFrame.Frame->opaque;
-        #else
-            AVFrameSideData* aSideDataSync = av_frame_get_side_data(myFrame.Frame, (AVFrameSideDataType )1000);
-            if(aSideDataSync != NULL) {
-                memcpy(&aPktPtsSync, &aSideDataSync->data, sizeof(myVideoPktPts));
-            }
-        #endif
-            if(aPktPtsSync != stAV::NOPTS_VALUE) {
-                myFramePts = double(aPktPtsSync);
-            }
-        }
-        myFramePts *= av_q2d(myStream->time_base);
-        myFramePts -= myPtsStartBase; // normalize PTS
-
-        syncVideo(myFrame.Frame, &myFramePts);
-    #endif
-
-        const double aDelay = myFramePts - aPrevPts;
-        if(aDelay > 0.0 && aDelay < 1.0) {
-            anAverageDelaySec = aDelay;
-        }
-        aPrevPts = myFramePts;
-
-        // do we need to skip frames or not
-        static const double OVERR_LIMIT = 0.2;
-        static const double GREATER_LIMIT = 100.0;
-        if(myMaster.isNull()) {
-            const double anAudioClock = getAClock() + double(myAudioDelayMSec) * 0.001;
-            double diff = anAudioClock - myFramePts;
-            if(diff > OVERR_LIMIT && diff < GREATER_LIMIT) {
-                if(myAvDiscard != AVDISCARD_NONREF) {
-                    ST_DEBUG_LOG("skip frames: AVDISCARD_NONREF (on)"
-                        + " (aClock " + anAudioClock
-                        + " vClock " + myFramePts
-                        + " diff " + diff + ")"
-                    );
-                    myAvDiscard = AVDISCARD_NONREF;
-                    ///myCodecCtx->skip_frame = AVDISCARD_NONKEY;
-                    myCodecCtx->skip_frame = myAvDiscard;
-                    if(!mySlave.isNull()) {
-                        mySlave->myCodecCtx->skip_frame = myAvDiscard;
-                    }
-                }
-            } else {
-                if(myAvDiscard != AVDISCARD_DEFAULT) {
-                    ST_DEBUG_LOG("skip frames: AVDISCARD_DEFAULT (off)");
-                    myAvDiscard = AVDISCARD_DEFAULT;
-                    myCodecCtx->skip_frame = myAvDiscard;
-                    if(!mySlave.isNull()) {
-                        mySlave->myCodecCtx->skip_frame = myAvDiscard;
-                    }
-                }
-            }
-        }
-
-        // copy frame back from GPU to CPU memory
-        if(!myHWAccelCtx.isNull()) {
-            myHWAccelCtx->retrieveFrame(*this, myFrame.Frame);
-        }
-
-        // we currently allow to override source format stored in metadata
-    #ifdef ST_AV_NEWSTEREO
-        if(AVFrameSideData* aSideDataS3d = av_frame_get_side_data(myFrame.Frame, AV_FRAME_DATA_STEREO3D)) {
-            AVStereo3D* aStereo = (AVStereo3D* )aSideDataS3d->data;
-            myStFormatInStream = stAV::stereo3dAvToSt(aStereo->type);
-            if(aStereo->flags & AV_STEREO3D_FLAG_INVERT) {
-                myStFormatInStream = st::formatReversed(myStFormatInStream);
-            }
-        }
-    #endif
-    #if(LIBAVUTIL_VERSION_INT >= AV_VERSION_INT(55, 0, 0))
-        if(const AVFrameSideData* aSideDataRot = av_frame_get_side_data(myFrame.Frame, AV_FRAME_DATA_DISPLAYMATRIX)) {
-            if(aSideDataRot->size >= int(9 * sizeof(int32_t))) {
-                const double aRotDeg = -av_display_rotation_get((const int32_t* )aSideDataRot->data);
-                if(!st::isNaN(aRotDeg)) {
-                    myRotateDeg = -int(aRotDeg - 360 * std::floor(aRotDeg / 360 + 0.9 / 360));
-                }
-            }
-        }
-    #endif
-        if(stAV::meta::readTag(myFrame.Frame, THE_SRC_MODE_KEY, aTagValue)) {
-            for(size_t aSrcId = 0;; ++aSrcId) {
-                const StFFmpegStereoFormat& aFlag = STEREOFLAGS[aSrcId];
-                if(aFlag.stID == StFormat_AUTO || aFlag.name == NULL) {
-                    break;
-                } else if(aTagValue == aFlag.name) {
-                    myStFormatInStream = aFlag.stID;
-                    //ST_DEBUG_LOG("  read srcFormat from tags= " + myStFormatInStream);
-                    break;
-                }
-            }
-        }
-        // override source format stored in metadata
-        StFormat  aSrcFormat     = myStFormatByUser;
-        StCubemap aCubemapFormat = aPacket->getSource()->ViewingMode == StViewSurface_Cubemap ? StCubemap_Packed : StCubemap_OFF;
-        if(aSrcFormat == StFormat_AUTO) {
-            // prefer info stored in the stream itself
-            aSrcFormat = myStFormatInStream;
-        }
-        if(aSrcFormat == StFormat_AUTO) {
-            // try using format detected from file name
-            aSrcFormat = myStFormatByName;
-        }
-        /*if(aSrcFormat == StFormat_AUTO
-        && sizeY() != 0) {
-            // try detection based on aspect ratio
-            aSrcFormat = st::formatFromRatio(GLfloat(sizeX()) / GLfloat(sizeY()));
-        }*/
-
-        prepareFrame(aSrcFormat);
-
-        if(!mySlave.isNull()) {
-            if(isStarted) {
-                StHandle<StStereoParams> aParams = aPacket->getSource();
-                if(!aParams.isNull()) {
-                    aParams->setSeparationNeutral(myHParallax);
-                    aParams->setZRotateZero((float )myRotateDeg);
-                }
-                isStarted = false;
-            }
-
-            for(;;) {
-                // wait data from Slave
-                if(aSlaveData == NULL) {
-                    aSlaveData = mySlave->waitData(aSlavePts);
-                }
-                if(aSlaveData != NULL) {
-                    const double aPtsDiff = myFramePts - aSlavePts;
-                    if(aPtsDiff > 0.5 * anAverageDelaySec) {
-                        // wait for more recent frame from slave thread
-                        mySlave->unlockData();
-                        aSlaveData = NULL;
-                        StThread::sleep(10);
-                        continue;
-                    } else if(aPtsDiff < -0.5 * anAverageDelaySec) {
-                        // too far...
-                        if(aPtsDiff < -6.0) {
-                            // result of seeking?
-                            mySlave->unlockData();
-                            aSlaveData = NULL;
-                        }
-                        break;
-                    }
-
-                    pushFrame(myDataAdp, *aSlaveData, aPacket->getSource(), StFormat_SeparateFrames, aCubemapFormat, myFramePts);
-
-                    aSlaveData = NULL;
-                    mySlave->unlockData();
-                } else {
-                    pushFrame(myDataAdp, anEmptyImg, aPacket->getSource(), aSrcFormat, aCubemapFormat, myFramePts);
-                }
+        bool toSendPacket = true;
+        for(;;) {
+            if(!decodeFrame(aPacket, toSendPacket, isStarted, aTagValue, anAverageDelaySec, aPrevPts)) {
                 break;
             }
-        } else if(!myMaster.isNull()) {
-            // push data to Master
-            myHasDataState.set();
-        } else {
-            if(isStarted) {
-                StHandle<StStereoParams> aParams = aPacket->getSource();
-                if(!aParams.isNull()) {
-                    aParams->setSeparationNeutral(myHParallax);
-                    aParams->setZRotateZero((float )myRotateDeg);
-                }
-                isStarted = false;
-            }
+        }
+        aPacket.nullify();
+    }
+}
 
-            // simple one-stream case
-            if(aSrcFormat == StFormat_FrameSequence) {
-                if(isOddNumber(myFramesCounter)) {
-                    myCachedFrame.fill(myDataAdp, false);
-                } else {
-                    pushFrame(myCachedFrame, myDataAdp, aPacket->getSource(), StFormat_FrameSequence, aCubemapFormat, myFramePts);
+bool StVideoQueue::decodeFrame(const StHandle<StAVPacket>& thePacket,
+                               bool& theToSendPacket,
+                               bool& theIsStarted,
+                               StString& theTagValue,
+                               double& theAverageDelaySec,
+                               double& thePrevPts) {
+    bool toTryMoreFrames = false;
+    (void )theToSendPacket;
+    const bool toTryGpu = myUseGpu && !myIsGpuFailed;
+#if(LIBAVCODEC_VERSION_INT >= AV_VERSION_INT(57, 106, 102))
+    if(theToSendPacket) {
+        const int aRes = avcodec_send_packet(myCodecCtx, thePacket->getAVpkt());
+        if(aRes < 0 && aRes != AVERROR_EOF) {
+            return false;
+        }
+        theToSendPacket = false;
+    }
+
+    const int aRes2 = avcodec_receive_frame(myCodecCtx, myFrame.Frame);
+    const bool isGpuUsed = myUseGpu && !myIsGpuFailed;
+    if(isGpuUsed != toTryGpu) {
+        if(!initCodec(myCodecAuto, isGpuUsed)) {
+            signals.onError(stCString("FFmpeg: Could not re-open video codec"));
+            deinit();
+            return false;
+        }
+        theToSendPacket = true;
+        return true;
+    }
+
+    if(aRes2 < 0) {
+        return false;
+    }
+    toTryMoreFrames = true;
+#elif(LIBAVCODEC_VERSION_INT >= AV_VERSION_INT(52, 23, 0))
+    int isFrameFinished = 0;
+    avcodec_decode_video2(myCodecCtx, myFrame.Frame, &isFrameFinished, thePacket->getAVpkt());
+    const bool isGpuUsed = myUseGpu && !myIsGpuFailed;
+    if(isGpuUsed != toTryGpu) {
+        if(!initCodec(myCodecAuto, isGpuUsed)) {
+            signals.onError(stCString("FFmpeg: Could not re-open video codec"));
+            deinit();
+            return false;
+        }
+        return true;
+    }
+    if(isFrameFinished == 0) {
+        // need more packets to decode whole frame
+        return false;
+    }
+#else
+    int isFrameFinished = 0;
+    avcodec_decode_video(myCodecCtx, myFrame.Frame, &isFrameFinished,
+                         thePacket->getData(), thePacket->getSize());
+    if(isFrameFinished == 0) {
+        // need more packets to decode whole frame
+        return false;
+    }
+#endif
+    if(thePacket->isKeyFrame()) { // !theToSentPacket?
+        myFramesCounter = 1;
+    }
+
+#ifndef ST_AV_OLDSYNC
+    myVideoPktPts = myFrame.getBestEffortTimestamp();
+    if(myVideoPktPts == stAV::NOPTS_VALUE) {
+        myVideoPktPts = 0;
+    }
+
+    myFramePts  = double(myVideoPktPts) * av_q2d(myStream->time_base);
+    myFramePts -= myPtsStartBase; // normalize PTS
+#else
+    // Save global pts to be stored in pFrame in first call
+    myVideoPktPts = thePacket->getPts();
+
+    myFramePts = 0.0;
+    if(thePacket->getDts() != stAV::NOPTS_VALUE) {
+        myFramePts = double(thePacket->getDts());
+    } else {
+        int64_t aPktPtsSync = stAV::NOPTS_VALUE;
+    #ifdef ST_USE64PTR
+        aPktPtsSync = (int64_t )myFrame.Frame->opaque;
+    #else
+        AVFrameSideData* aSideDataSync = av_frame_get_side_data(myFrame.Frame, (AVFrameSideDataType )1000);
+        if(aSideDataSync != NULL) {
+            memcpy(&aPktPtsSync, &aSideDataSync->data, sizeof(myVideoPktPts));
+        }
+    #endif
+        if(aPktPtsSync != stAV::NOPTS_VALUE) {
+            myFramePts = double(aPktPtsSync);
+        }
+    }
+    myFramePts *= av_q2d(myStream->time_base);
+    myFramePts -= myPtsStartBase; // normalize PTS
+
+    syncVideo(myFrame.Frame, &myFramePts);
+#endif
+
+    const double aDelay = myFramePts - thePrevPts;
+    if(aDelay > 0.0 && aDelay < 1.0) {
+        theAverageDelaySec = aDelay;
+    }
+    thePrevPts = myFramePts;
+
+    // do we need to skip frames or not
+    static const double OVERR_LIMIT = 0.2;
+    static const double GREATER_LIMIT = 100.0;
+    if(myMaster.isNull()) {
+        const double anAudioClock = getAClock() + double(myAudioDelayMSec) * 0.001;
+        double diff = anAudioClock - myFramePts;
+        if(diff > OVERR_LIMIT && diff < GREATER_LIMIT) {
+            if(myAvDiscard != AVDISCARD_NONREF) {
+                ST_DEBUG_LOG("skip frames: AVDISCARD_NONREF (on)"
+                    + " (aClock " + anAudioClock
+                    + " vClock " + myFramePts
+                    + " diff " + diff + ")"
+                );
+                myAvDiscard = AVDISCARD_NONREF;
+                ///myCodecCtx->skip_frame = AVDISCARD_NONKEY;
+                myCodecCtx->skip_frame = myAvDiscard;
+                if(!mySlave.isNull()) {
+                    mySlave->myCodecCtx->skip_frame = myAvDiscard;
                 }
-                ++myFramesCounter;
-            } else {
-                pushFrame(myDataAdp, anEmptyImg, aPacket->getSource(), aSrcFormat, aCubemapFormat, myFramePts);
+            }
+        } else {
+            if(myAvDiscard != AVDISCARD_DEFAULT) {
+                ST_DEBUG_LOG("skip frames: AVDISCARD_DEFAULT (off)");
+                myAvDiscard = AVDISCARD_DEFAULT;
+                myCodecCtx->skip_frame = myAvDiscard;
+                if(!mySlave.isNull()) {
+                    mySlave->myCodecCtx->skip_frame = myAvDiscard;
+                }
             }
         }
-
-        myFrame.reset();
-        aPacket.nullify(); // and now packet finished
     }
+
+    // copy frame back from GPU to CPU memory
+    if(!myHWAccelCtx.isNull()) {
+        myHWAccelCtx->retrieveFrame(*this, myFrame.Frame);
+    }
+
+    // we currently allow to override source format stored in metadata
+#ifdef ST_AV_NEWSTEREO
+    if(AVFrameSideData* aSideDataS3d = av_frame_get_side_data(myFrame.Frame, AV_FRAME_DATA_STEREO3D)) {
+        AVStereo3D* aStereo = (AVStereo3D* )aSideDataS3d->data;
+        myStFormatInStream = stAV::stereo3dAvToSt(aStereo->type);
+        if(aStereo->flags & AV_STEREO3D_FLAG_INVERT) {
+            myStFormatInStream = st::formatReversed(myStFormatInStream);
+        }
+    }
+#endif
+#if(LIBAVUTIL_VERSION_INT >= AV_VERSION_INT(55, 0, 0))
+    if(const AVFrameSideData* aSideDataRot = av_frame_get_side_data(myFrame.Frame, AV_FRAME_DATA_DISPLAYMATRIX)) {
+        if(aSideDataRot->size >= int(9 * sizeof(int32_t))) {
+            const double aRotDeg = -av_display_rotation_get((const int32_t* )aSideDataRot->data);
+            if(!st::isNaN(aRotDeg)) {
+                myRotateDeg = -int(aRotDeg - 360 * std::floor(aRotDeg / 360 + 0.9 / 360));
+            }
+        }
+    }
+#endif
+    if(stAV::meta::readTag(myFrame.Frame, THE_SRC_MODE_KEY, theTagValue)) {
+        for(size_t aSrcId = 0;; ++aSrcId) {
+            const StFFmpegStereoFormat& aFlag = STEREOFLAGS[aSrcId];
+            if(aFlag.stID == StFormat_AUTO || aFlag.name == NULL) {
+                break;
+            } else if(theTagValue == aFlag.name) {
+                myStFormatInStream = aFlag.stID;
+                //ST_DEBUG_LOG("  read srcFormat from tags= " + myStFormatInStream);
+                break;
+            }
+        }
+    }
+    // override source format stored in metadata
+    StFormat  aSrcFormat     = myStFormatByUser;
+    StCubemap aCubemapFormat = thePacket->getSource()->ViewingMode == StViewSurface_Cubemap ? StCubemap_Packed : StCubemap_OFF;
+    if(aSrcFormat == StFormat_AUTO) {
+        // prefer info stored in the stream itself
+        aSrcFormat = myStFormatInStream;
+    }
+    if(aSrcFormat == StFormat_AUTO) {
+        // try using format detected from file name
+        aSrcFormat = myStFormatByName;
+    }
+    /*if(aSrcFormat == StFormat_AUTO
+    && sizeY() != 0) {
+        // try detection based on aspect ratio
+        aSrcFormat = st::formatFromRatio(GLfloat(sizeX()) / GLfloat(sizeY()));
+    }*/
+
+    prepareFrame(aSrcFormat);
+
+    if(!mySlave.isNull()) {
+        if(theIsStarted) {
+            StHandle<StStereoParams> aParams = thePacket->getSource();
+            if(!aParams.isNull()) {
+                aParams->setSeparationNeutral(myHParallax);
+                aParams->setZRotateZero((float )myRotateDeg);
+            }
+            theIsStarted = false;
+        }
+
+        StImage* aSlaveData = NULL;
+        double aSlavePts = 0.0;
+        for(;;) {
+            // wait data from Slave
+            if(aSlaveData == NULL) {
+                aSlaveData = mySlave->waitData(aSlavePts);
+            }
+            if(aSlaveData != NULL) {
+                const double aPtsDiff = myFramePts - aSlavePts;
+                if(aPtsDiff > 0.5 * theAverageDelaySec) {
+                    // wait for more recent frame from slave thread
+                    mySlave->unlockData();
+                    aSlaveData = NULL;
+                    StThread::sleep(10);
+                    continue;
+                } else if(aPtsDiff < -0.5 * theAverageDelaySec) {
+                    // too far...
+                    if(aPtsDiff < -6.0) {
+                        // result of seeking?
+                        mySlave->unlockData();
+                        aSlaveData = NULL;
+                    }
+                    break;
+                }
+
+                pushFrame(myDataAdp, *aSlaveData, thePacket->getSource(), StFormat_SeparateFrames, aCubemapFormat, myFramePts);
+
+                aSlaveData = NULL;
+                mySlave->unlockData();
+            } else {
+                pushFrame(myDataAdp, myEmptyImage, thePacket->getSource(), aSrcFormat, aCubemapFormat, myFramePts);
+            }
+            break;
+        }
+    } else if(!myMaster.isNull()) {
+        // push data to Master
+        myHasDataState.set();
+    } else {
+        if(theIsStarted) {
+            StHandle<StStereoParams> aParams = thePacket->getSource();
+            if(!aParams.isNull()) {
+                aParams->setSeparationNeutral(myHParallax);
+                aParams->setZRotateZero((float )myRotateDeg);
+            }
+            theIsStarted = false;
+        }
+
+        // simple one-stream case
+        if(aSrcFormat == StFormat_FrameSequence) {
+            if(isOddNumber(myFramesCounter)) {
+                myCachedFrame.fill(myDataAdp, false);
+            } else {
+                pushFrame(myCachedFrame, myDataAdp, thePacket->getSource(), StFormat_FrameSequence, aCubemapFormat, myFramePts);
+            }
+            ++myFramesCounter;
+        } else {
+            pushFrame(myDataAdp, myEmptyImage, thePacket->getSource(), aSrcFormat, aCubemapFormat, myFramePts);
+        }
+    }
+
+    myFrame.reset();
+    return toTryMoreFrames;
 }
