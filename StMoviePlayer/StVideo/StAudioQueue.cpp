@@ -1114,18 +1114,37 @@ void StAudioQueue::decodePacket(const StHandle<StAVPacket>& thePacket,
     int anAudioPktSize = thePacket->getSize();
     bool checkMoreFrames = false;
     int isGotFrame = 0;
+    bool toSendPacket = true;
     // packet could store multiple frames
     for(;;) {
         while(anAudioPktSize > 0) {
             int aDataSize = (int )myBufferSrc.getBufferSizeWhole();
 
-        #if(LIBAVCODEC_VERSION_INT >= AV_VERSION_INT(52, 23, 0))
+        #if(LIBAVCODEC_VERSION_INT >= AV_VERSION_INT(57, 106, 102))
+            if(toSendPacket) {
+                const int aRes = avcodec_send_packet(myCodecCtx, thePacket->getAVpkt());
+                if(aRes < 0 && aRes != AVERROR_EOF) {
+                    anAudioPktSize = 0;
+                    break;
+                }
+                toSendPacket = false;
+            }
+
+            myFrame.reset();
+            const int aRes2 = avcodec_receive_frame(myCodecCtx, myFrame.Frame);
+            if(aRes2 < 0) {
+                anAudioPktSize = 0;
+                break;
+            }
+            isGotFrame = 1;
+            int aLen1 = 0; // dummy for code compatible with old syntax
+        #elif(LIBAVCODEC_VERSION_INT >= AV_VERSION_INT(52, 23, 0))
             StAVPacket anAvPkt;
             anAvPkt.getAVpkt()->data = (uint8_t* )anAudioPktData;
             anAvPkt.getAVpkt()->size = anAudioPktSize;
+            (void )toSendPacket;
 
             #if(LIBAVCODEC_VERSION_INT >= AV_VERSION_INT(53, 40, 0))
-            //av_frame_unref(myFrame.Frame);
             (void )aDataSize;
             myFrame.reset();
             const int aLen1 = avcodec_decode_audio4(myCodecCtx, myFrame.Frame,
