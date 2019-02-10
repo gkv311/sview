@@ -36,6 +36,16 @@ void StAVFrame::reset() {
 #endif
 }
 
+int64_t StAVFrame::getBestEffortTimestamp() const {
+#if(LIBAVCODEC_VERSION_INT >= AV_VERSION_INT(57, 81, 102)) && !defined(ST_LIBAV_FORK)
+    return Frame->best_effort_timestamp;
+#elif(LIBAVCODEC_VERSION_INT >= AV_VERSION_INT(54, 18, 100)) && !defined(ST_LIBAV_FORK)
+    return av_frame_get_best_effort_timestamp(Frame);
+#else
+    return stAV::NOPTS_VALUE;
+#endif
+}
+
 void StAVFrame::getImageInfo(const AVCodecContext* theCodecCtx,
                              int&           theSizeX,
                              int&           theSizeY,

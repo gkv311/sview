@@ -848,7 +848,7 @@ void StVideoQueue::decodeLoop() {
         }
 
     #ifndef ST_AV_OLDSYNC
-        myVideoPktPts = av_frame_get_best_effort_timestamp(myFrame.Frame);
+        myVideoPktPts = myFrame.getBestEffortTimestamp();
         if(myVideoPktPts == stAV::NOPTS_VALUE) {
             myVideoPktPts = 0;
         }

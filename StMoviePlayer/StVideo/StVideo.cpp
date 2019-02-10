@@ -766,7 +766,12 @@ void StVideo::doSeekContext(AVFormatContext* theFormatCtx,
         isSeekDone = av_seek_frame(theFormatCtx, -1, aSeekTarget, aFlags) >= 0;
         if(!isSeekDone) {
         #ifdef ST_DEBUG
-            ST_ERROR_LOG("Disaster! Seeking to " + theSeekPts + " [" + theFormatCtx->filename + "] has failed.");
+        #if(LIBAVFORMAT_VERSION_INT >= AV_VERSION_INT(58, 7, 100))
+            const char* aFileName = theFormatCtx->url;
+        #else
+            const char* aFileName = theFormatCtx->filename;
+        #endif
+            ST_ERROR_LOG("Disaster! Seeking to " + theSeekPts + " [" + aFileName + "] has failed.");
         #endif
         }
     }

@@ -61,6 +61,11 @@ class StAVFrame {
         return Frame->linesize[thePlaneId];
     }
 
+    /**
+     * @return frame timestamp estimated using various heuristics, in stream time base
+     */
+    ST_CPPEXPORT int64_t getBestEffortTimestamp() const;
+
         public:
 
     AVFrame* Frame;

@@ -35,7 +35,8 @@ extern "C" {
     #endif
 #endif
 
-#if(LIBAVCODEC_VERSION_INT >= AV_VERSION_INT(52, 30, 0))
+#if(LIBAVCODEC_VERSION_INT >= AV_VERSION_INT(52, 30, 0)) \
+&& ((LIBAVCODEC_VERSION_INT < AV_VERSION_INT(58, 9, 100)) || defined(ST_LIBAV_FORK))
 class StFFMpegLocker {
 
         public:
@@ -263,17 +264,20 @@ namespace {
 #endif
 
     static bool initOnce() {
+    #if(LIBAVCODEC_VERSION_INT >= AV_VERSION_INT(52, 30, 0)) \
+    && ((LIBAVCODEC_VERSION_INT < AV_VERSION_INT(58, 9, 100)) || defined(ST_LIBAV_FORK))
         // register own mutex to prevent multithreading errors
         // while using FFmpeg functions
-    #if(LIBAVCODEC_VERSION_INT >= AV_VERSION_INT(52, 30, 0))
         stFFMpegLocker.init();
-    #else
-        #warning Ancient FFmpeg used, initialization performed in thread-unsafe manner!
     #endif
+
+    #if(LIBAVFORMAT_VERSION_INT < AV_VERSION_INT(58, 9, 100)) || defined(ST_LIBAV_FORK)
         // Notice, this call is absolutely not thread safe!
         // you should never call it first time from concurrent threads.
         // But after first initialization is done this is safe to call it anyhow
         av_register_all();
+    #endif
+
     #if(LIBAVFORMAT_VERSION_INT >= AV_VERSION_INT(53, 13, 0))
         avformat_network_init();
     #endif
@@ -583,7 +587,9 @@ bool stAV::meta::readTag(stAV::meta::Dict* theDict,
 }
 
 stAV::meta::Dict* stAV::meta::getFrameMetadata(AVFrame* theFrame) {
-#if(LIBAVCODEC_VERSION_INT >= AV_VERSION_INT(54, 38, 100)) && !defined(ST_LIBAV_FORK)
+#if(LIBAVCODEC_VERSION_INT >= AV_VERSION_INT(57, 81, 102)) && !defined(ST_LIBAV_FORK)
+    return theFrame->metadata;
+#elif(LIBAVCODEC_VERSION_INT >= AV_VERSION_INT(54, 38, 100)) && !defined(ST_LIBAV_FORK)
     return av_frame_get_metadata(theFrame);
 #else
     return NULL;
