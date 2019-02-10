@@ -68,6 +68,13 @@ class StRawFile : public StFileNode {
     ST_CPPEXPORT void initBuffer(size_t theDataSize);
 
     /**
+     * Wrap external buffer.
+     */
+    ST_CPPEXPORT void wrapBuffer(stUByte_t* theBuffer,
+                                 size_t theDataSize);
+
+
+    /**
      * Free current buffer.
      */
     ST_CPPEXPORT void freeBuffer();
@@ -159,6 +166,7 @@ class StRawFile : public StFileNode {
     stUByte_t*   myBuffer;     //!< buffer with file content
     size_t       myBuffSize;   //!< buffer size
     size_t       myLength;     //!< data length
+    bool         myIsOwnData;  //!< flag indicating that myBuffer was allocated by this class
 
 };
 

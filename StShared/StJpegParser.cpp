@@ -471,7 +471,10 @@ bool StJpegParser::insertSection(const uint8_t   theMarker,
             return false;
         }
         stMemCpy(aNewData, myBuffer, myLength);
-        stMemFreeAligned(myBuffer);
+        if(myIsOwnData) {
+            stMemFreeAligned(myBuffer);
+        }
+        myIsOwnData = true;
 
         // update pointers of image(s) data
         for(StHandle<StJpegParser::Image> anImg = myImages;

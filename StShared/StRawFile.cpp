@@ -42,7 +42,8 @@ StRawFile::StRawFile(const StCString& theFilePath,
   myFileHandle(NULL),
   myBuffer(NULL),
   myBuffSize(0),
-  myLength(0) {
+  myLength(0),
+  myIsOwnData(false) {
     //
 }
 
@@ -119,13 +120,25 @@ void StRawFile::initBuffer(size_t theDataSize) {
         return;
     }
     freeBuffer();
+    myIsOwnData = true;
     myBuffSize = theDataSize;
     myBuffer = stMemAllocAligned<stUByte_t*>(myBuffSize + 1);
     myBuffer[myBuffSize] = '\0'; // just for safe
 }
 
+void StRawFile::wrapBuffer(stUByte_t* theBuffer,
+                           size_t theDataSize) {
+    freeBuffer();
+    myIsOwnData = false;
+    myBuffSize = theDataSize;
+    myBuffer = theBuffer;
+}
+
 void StRawFile::freeBuffer() {
-    stMemFreeAligned(myBuffer);
+    if(myIsOwnData) {
+        stMemFreeAligned(myBuffer);
+        myIsOwnData = false;
+    }
     myBuffer = NULL;
     myBuffSize = 0;
 }

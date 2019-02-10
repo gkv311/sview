@@ -353,7 +353,12 @@ bool StAVImage::loadExtra(const StString& theFilePath,
 
     // decode one frame
     int isFrameFinished = 0;
-#if(LIBAVCODEC_VERSION_INT >= AV_VERSION_INT(52, 23, 0))
+#if(LIBAVCODEC_VERSION_INT >= AV_VERSION_INT(57, 106, 102))
+    if(avcodec_send_packet(myCodecCtx, anAvPkt.getAVpkt()) == 0
+    && avcodec_receive_frame(myCodecCtx, myFrame.Frame) == 0) {
+        isFrameFinished = 1;
+    }
+#elif(LIBAVCODEC_VERSION_INT >= AV_VERSION_INT(52, 23, 0))
     avcodec_decode_video2(myCodecCtx, myFrame.Frame, &isFrameFinished, anAvPkt.getAVpkt());
 #else
     avcodec_decode_video(myCodecCtx, myFrame.Frame, &isFrameFinished,
@@ -681,12 +686,20 @@ bool StAVImage::save(const StString& theFilePath,
         return false;
     }
 
+    // encode the image
+    StAVPacket aPacket;
+#if(LIBAVCODEC_VERSION_INT >= AV_VERSION_INT(57, 106, 102))
+    int anEncSize = 0;
+    if(avcodec_send_frame(myCodecCtx, myFrame.Frame) == 0
+    && avcodec_receive_packet(myCodecCtx, aPacket.getAVpkt()) == 0
+    && aPacket.getAVpkt()->data != NULL) {
+        anEncSize = aPacket.getSize();
+        aRawFile.wrapBuffer(aPacket.getAVpkt()->data, anEncSize);
+    }
+#else
     // allocate the buffer, large enough (stupid formula copied from ffmpeg.c)
     int aBuffSize = int(getSizeX() * getSizeY() * 10);
     aRawFile.initBuffer(aBuffSize);
-
-    // encode the image
-    StAVPacket aPacket;
     aPacket.getAVpkt()->data = (uint8_t* )aRawFile.changeBuffer();
     aPacket.getAVpkt()->size = aBuffSize;
 #if(LIBAVCODEC_VERSION_INT >= AV_VERSION_INT(54, 2, 100))
@@ -697,6 +710,7 @@ bool StAVImage::save(const StString& theFilePath,
     }
 #else
     int anEncSize = avcodec_encode_video(myCodecCtx, aPacket.changeData(), aPacket.getSize(), myFrame.Frame);
+#endif
 #endif
     if(anEncSize <= 0) {
         setState("AVCodec library, fail to encode the image");
