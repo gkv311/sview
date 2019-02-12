@@ -51,6 +51,11 @@ class StSubtitleQueue : public StAVPacketQueue {
     }
 
     /**
+     * Return codec type.
+     */
+    ST_LOCAL virtual AVMediaType getCodecType() const ST_ATTR_OVERRIDE { return AVMEDIA_TYPE_SUBTITLE; }
+
+    /**
      * Initialization function.
      * @param theFormatCtx pointer to video format context
      * @param streamId     stream id in video format context

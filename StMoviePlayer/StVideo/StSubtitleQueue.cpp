@@ -59,36 +59,24 @@ StSubtitleQueue::~StSubtitleQueue() {
 bool StSubtitleQueue::init(AVFormatContext*   theFormatCtx,
                            const unsigned int theStreamId,
                            const StString&    theFileName) {
-    if(!StAVPacketQueue::init(theFormatCtx, theStreamId, theFileName)
-    || myCodecCtx->codec_type != AVMEDIA_TYPE_SUBTITLE) {
+    if(!StAVPacketQueue::init(theFormatCtx, theStreamId, theFileName)) {
         signals.onError(stCString("FFmpeg: invalid stream"));
         deinit();
         return false;
     }
 
-#if(LIBAVCODEC_VERSION_INT >= AV_VERSION_INT(54, 51, 100))
-    if(myCodecCtx->codec_id != AV_CODEC_ID_TEXT) {
-#else
-    if(myCodecCtx->codec_id != CODEC_ID_TEXT) {
-#endif
-        // find the decoder for the subtitles stream
-        myCodec = avcodec_find_decoder(myCodecCtx->codec_id);
-        if(myCodec == NULL) {
-            signals.onError(stCString("FFmpeg: Subtitle decoder not found"));
-            deinit();
-            return false;
-        }
-
+    if(myCodecAutoId != AV_CODEC_ID_TEXT) {
         // open SUBTITLE codec
     #if(LIBAVCODEC_VERSION_INT >= AV_VERSION_INT(53, 8, 0))
-        if(avcodec_open2(myCodecCtx, myCodec, NULL) < 0) {
+        if(avcodec_open2(myCodecCtx, myCodecAuto, NULL) < 0) {
     #else
-        if(avcodec_open(myCodecCtx, myCodec) < 0) {
+        if(avcodec_open(myCodecCtx, myCodecAuto) < 0) {
     #endif
             signals.onError(stCString("FFmpeg: Could not open subtitle codec"));
             deinit();
             return false;
         }
+        myCodec = myCodecAuto;
 
         // initialize ASS parser
     #if(LIBAVCODEC_VERSION_INT >= AV_VERSION_INT(52, 95, 0))

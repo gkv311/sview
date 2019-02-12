@@ -59,6 +59,11 @@ class StAVPacketQueue {
     ST_LOCAL void clear();
 
     /**
+     * Return codec type.
+     */
+    ST_LOCAL virtual AVMediaType getCodecType() const = 0;
+
+    /**
      * Close stream.
      */
     ST_LOCAL virtual void deinit();
@@ -241,6 +246,7 @@ class StAVPacketQueue {
     AVCodecContext*  myCodecCtx;       //!< codec context
     AVCodec*         myCodec;          //!< codec
     AVCodec*         myCodecAuto;      //!< original codec (autodetected - before overriding)
+    AVCodecID        myCodecAutoId;    //!< original code id
     typedef AVPixelFormat (*aGetFrmt_t)(AVCodecContext* , const AVPixelFormat* );
     typedef int           (*aGetBuf2_t)(AVCodecContext* , AVFrame* frame, int );
     aGetFrmt_t       myGetFrmtInit;

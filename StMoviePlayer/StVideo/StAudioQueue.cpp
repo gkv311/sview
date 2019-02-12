@@ -736,29 +736,22 @@ bool StAudioQueue::init(AVFormatContext*   theFormatCtx,
         return false;
     }
 
-    if(!StAVPacketQueue::init(theFormatCtx, theStreamId, theFileName)
-    || myCodecCtx->codec_type != AVMEDIA_TYPE_AUDIO) {
+    if(!StAVPacketQueue::init(theFormatCtx, theStreamId, theFileName)) {
         signals.onError(stCString("FFmpeg: invalid stream"));
         deinit();
         return false;
     }
 
-    // get AUDIO codec
-    myCodec = avcodec_find_decoder(myCodecCtx->codec_id);
-    if(myCodec == NULL) {
-        signals.onError(stCString("FFmpeg: audio codec not found"));
-        deinit();
-        return false;
-    }
 #if(LIBAVCODEC_VERSION_INT >= AV_VERSION_INT(53, 8, 0))
-    if(avcodec_open2(myCodecCtx, myCodec, NULL) < 0) {
+    if(avcodec_open2(myCodecCtx, myCodecAuto, NULL) < 0) {
 #else
-    if(avcodec_open(myCodecCtx, myCodec) < 0) {
+    if(avcodec_open(myCodecCtx, myCodecAuto) < 0) {
 #endif
         signals.onError(stCString("FFmpeg: could not open audio codec"));
         deinit();
         return false;
     }
+    myCodec = myCodecAuto;
 
     // setup buffers
     if(!initBuffers()) {

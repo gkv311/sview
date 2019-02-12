@@ -209,6 +209,11 @@ class StVideoQueue : public StAVPacketQueue {
     ST_LOCAL virtual ~StVideoQueue();
 
     /**
+     * Return codec type.
+     */
+    ST_LOCAL virtual AVMediaType getCodecType() const ST_ATTR_OVERRIDE { return AVMEDIA_TYPE_VIDEO; }
+
+    /**
      * Initialization function.
      * @param theFormatCtx pointer to video format context
      * @param theStreamId  stream id in video format context
@@ -340,6 +345,15 @@ class StVideoQueue : public StAVPacketQueue {
     ST_LOCAL bool hwaccelInit();
 
 private:
+
+    /**
+     * Detect 720in1080 streams with cropping information
+     */
+    ST_LOCAL bool check720in1080() const {
+        return (sizeX() == 1280) && (sizeY() == 720)
+            && (getCodedSizeX() == 1920)
+            && (getCodedSizeY() == 1080 || getCodedSizeY() == 1088);
+    }
 
     ST_LOCAL bool decodeFrame(const StHandle<StAVPacket>& thePacket,
                               bool& theToSendPacket,

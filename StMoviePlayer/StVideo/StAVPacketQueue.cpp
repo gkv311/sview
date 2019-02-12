@@ -45,6 +45,7 @@ StAVPacketQueue::StAVPacketQueue(const size_t theSizeLimit)
   myCodecCtx(NULL),
   myCodec(NULL),
   myCodecAuto(NULL),
+  myCodecAutoId(AV_CODEC_ID_NONE),
   myGetFrmtInit(NULL),
   myGetBuffInit(NULL),
   myPtsStartBase(0.0),
@@ -103,14 +104,58 @@ bool StAVPacketQueue::init(AVFormatContext*   theFormatCtx,
     myFormatCtx      = theFormatCtx;
     myStream         = myFormatCtx->streams[theStreamId];
     myStreamId       = theStreamId;
-    myCodecCtx       = stAV::getCodecCtx(myStream);
     myPtsStartBase   = detectPtsStartBase(theFormatCtx);
     myPtsStartStream = unitsToSeconds(myStream->start_time);
+    myIsAttachedPic  = stAV::isAttachedPicture(myStream);
+    if(stAV::getCodecType(myStream) != getCodecType()) {
+        signals.onError(stCString("Internal error: unsupported codec type"));
+        deinit();
+        return false;
+    }
+#ifdef ST_AV_NEWCODECPAR
+    myCodecAutoId = myStream->codecpar->codec_id;
+    myCodecCtx = avcodec_alloc_context3(NULL);
+    if(avcodec_parameters_to_context(myCodecCtx, myStream->codecpar) < 0) {
+        signals.onError(stCString("Internal error: unable to copy codec parameters"));
+        deinit();
+        return false;
+    }
+
+#else
+    myCodecCtx    = stAV::getCodecCtx(myStream);
+    myCodecAutoId = myCodecCtx->codec_id;
+#endif
+
     myGetFrmtInit    = myCodecCtx->get_format;
 #if(LIBAVCODEC_VERSION_INT >= AV_VERSION_INT(55, 0, 0))
     myGetBuffInit    = myCodecCtx->get_buffer2;
 #endif
-    myIsAttachedPic = stAV::isAttachedPicture(myStream);
+
+    if(myCodecAutoId == AV_CODEC_ID_TEXT) {
+        return true; // special case - decoder is not needed
+    }
+
+    myCodec = NULL;
+    myCodecAuto = avcodec_find_decoder(myCodecAutoId);
+    if(myCodecAuto == NULL) {
+        switch(getCodecType()) {
+            case AVMEDIA_TYPE_VIDEO:
+                signals.onError(stCString("FFmpeg: Video codec not found"));
+                break;
+            case AVMEDIA_TYPE_AUDIO:
+                signals.onError(stCString("FFmpeg: Audio codec not found"));
+                break;
+            case AVMEDIA_TYPE_SUBTITLE:
+                signals.onError(stCString("FFmpeg: Subtitle codec not found"));
+                break;
+            default:
+                signals.onError(stCString("FFmpeg: codec not found"));
+                break;
+        }
+        deinit();
+        return false;
+    }
+
     return true;
 }
 
@@ -118,16 +163,25 @@ void StAVPacketQueue::deinit() {
     myFileName.clear();
     myFormatCtx = NULL;
     myStream    = NULL;
+    if(myCodec != NULL) {
+        fillCodecInfo(NULL);
+    }
+#ifdef ST_AV_NEWCODECPAR
+    if(myCodecCtx != NULL) {
+        avcodec_free_context(&myCodecCtx);
+    }
+#else
     if(myCodec != NULL && myCodecCtx != NULL) {
         avcodec_close(myCodecCtx);
         myCodecCtx->get_format  = myGetFrmtInit;
     #if(LIBAVCODEC_VERSION_INT >= AV_VERSION_INT(55, 0, 0))
         myCodecCtx->get_buffer2 = myGetBuffInit;
     #endif
-        fillCodecInfo(NULL);
     }
+#endif
     myCodec       = NULL;
     myCodecAuto   = NULL;
+    myCodecAutoId = AV_CODEC_ID_NONE;
     myCodecCtx    = NULL;
     myGetFrmtInit = NULL;
     myGetBuffInit = NULL;

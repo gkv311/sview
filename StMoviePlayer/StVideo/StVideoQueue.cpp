@@ -28,16 +28,6 @@
 
 namespace {
 
-#if defined(__APPLE__) || defined(__ANDROID__)
-    /**
-     * Override pixel format.
-     */
-    AVPixelFormat stGetFormatYUV420P(AVCodecContext*      /*theCtx*/,
-                                     const AVPixelFormat* /*theFmt*/) {
-        return stAV::PIX_FMT::YUV420P;
-    }
-#endif
-
 #if(LIBAVCODEC_VERSION_INT < AV_VERSION_INT(55, 0, 0))
     /**
      * Release the frame buffer (old API).
@@ -66,6 +56,11 @@ namespace {
 }
 
 AVPixelFormat StVideoQueue::getFrameFormat(const AVPixelFormat* theFormats) {
+#if defined(__APPLE__) || defined(__ANDROID__)
+    if(myCodecCtx->codec == myCodecH264HW) {
+        return stAV::PIX_FMT::YUV420P;
+    }
+#endif
     if(!myUseGpu || myIsGpuFailed) {
         return avcodec_default_get_format(myCodecCtx, theFormats);
     }
@@ -256,10 +251,31 @@ bool StVideoQueue::initCodec(AVCodec*   theCodec,
                              const bool theToUseGpu) {
     // close previous codec
     if(myCodec != NULL) {
-        avcodec_close(myCodecCtx);
+        myCodec = NULL;
         fillCodecInfo(NULL);
+    #ifdef ST_AV_NEWCODECPAR
+        avcodec_free_context(&myCodecCtx);
+        myCodecCtx = avcodec_alloc_context3(NULL);
+        if(avcodec_parameters_to_context(myCodecCtx, myStream->codecpar) < 0) {
+            signals.onError(stCString("Internal error: unable to copy codec parameters"));
+            return false;
+        }
+    #else
+        avcodec_close(myCodecCtx);
+    #endif
     }
-    myCodec = NULL;
+
+    myCodecCtx->opaque         = this;
+    myCodecCtx->get_format     = stGetFrameFormat;
+#if(LIBAVCODEC_VERSION_INT >= AV_VERSION_INT(55, 0, 0))
+    if(check720in1080()) {
+        myCodecCtx->flags2 |= AV_CODEC_FLAG2_IGNORE_CROP;
+    }
+    myCodecCtx->get_buffer2    = stGetFrameBuffer2;
+#else
+    myCodecCtx->get_buffer     = stGetFrameBuffer1;
+    myCodecCtx->release_buffer = stReleaseFrameBuffer;
+#endif
 
     // configure the codec
     myCodecCtx->codec_id = theCodec->id;
@@ -296,52 +312,24 @@ bool StVideoQueue::init(AVFormatContext*   theFormatCtx,
                         const unsigned int theStreamId,
                         const StString&    theFileName,
                         const StHandle<StStereoParams>& theNewParams) {
-    if(!StAVPacketQueue::init(theFormatCtx, theStreamId, theFileName)
-    || myCodecCtx->codec_type != AVMEDIA_TYPE_VIDEO) {
+    if(!StAVPacketQueue::init(theFormatCtx, theStreamId, theFileName)) {
         signals.onError(stCString("FFmpeg: invalid stream"));
         deinit();
         return false;
     }
 
-    // detect 720in1080 streams with cropping information
-    const bool is720in1080 = (sizeX() == 1280) && (sizeY() == 720)
-                          && (getCodedSizeX() == 1920)
-                          && (getCodedSizeY() == 1080 || getCodedSizeY() == 1088);
-#if(LIBAVCODEC_VERSION_INT >= AV_VERSION_INT(55, 0, 0))
-    if(is720in1080) {
-        myCodecCtx->flags2 |= AV_CODEC_FLAG2_IGNORE_CROP;
-    }
-#endif
-
-    // find the decoder for the video stream
-    myCodecCtx->opaque         = this;
-    myCodecCtx->get_format     = stGetFrameFormat;
-#if(LIBAVCODEC_VERSION_INT >= AV_VERSION_INT(55, 0, 0))
-    myCodecCtx->get_buffer2    = stGetFrameBuffer2;
-#else
-    myCodecCtx->get_buffer     = stGetFrameBuffer1;
-    myCodecCtx->release_buffer = stReleaseFrameBuffer;
-#endif
-
-    myCodecAuto = avcodec_find_decoder(myCodecCtx->codec_id);
-    if(myCodecAuto == NULL) {
-        signals.onError(stCString("FFmpeg: Video codec not found"));
-        deinit();
-        return false;
-    }
-
 #if defined(_WIN32)
-    myIsGpuFailed = myCodecCtx->codec_id != CodecIdMPEG2
-                 && myCodecCtx->codec_id != CodecIdH264
-                 && myCodecCtx->codec_id != CodecIdVC1
-                 && myCodecCtx->codec_id != CodecIdWMV3
-                 && myCodecCtx->codec_id != CodecIdVC1
-                 && myCodecCtx->codec_id != CodecIdHEVC;
+    myIsGpuFailed = myCodecAutoId != CodecIdMPEG2
+                 && myCodecAutoId != CodecIdH264
+                 && myCodecAutoId != CodecIdVC1
+                 && myCodecAutoId != CodecIdWMV3
+                 && myCodecAutoId != CodecIdVC1
+                 && myCodecAutoId != CodecIdHEVC;
 #endif
 
     bool isCodecOverridden = false;
     if(myUseOpenJpeg
-    && myCodecCtx->codec_id == CodecIdJpeg2K
+    && myCodecAutoId == CodecIdJpeg2K
     && myCodecOpenJpeg != NULL) {
         isCodecOverridden = initCodec(myCodecOpenJpeg, false);
     }
@@ -356,11 +344,7 @@ bool StVideoQueue::init(AVFormatContext*   theFormatCtx,
     }
 
     if(aCodecGpu != NULL) {
-        myCodecCtx->get_format = stGetFormatYUV420P;
         isCodecOverridden = initCodec(aCodecGpu, true);
-        if(!isCodecOverridden) {
-            myCodecCtx->get_format = myGetFrmtInit;
-        }
     }
     if(!isCodecOverridden && !initCodec(myCodecAuto, false)) {
         signals.onError(stCString("FFmpeg: Could not open video codec"));
@@ -464,7 +448,7 @@ bool StVideoQueue::init(AVFormatContext*   theFormatCtx,
 #endif
 
     // stereoscopic mode tags
-    myStFormatInStream = is720in1080 ? StFormat_Tiled4x : StFormat_AUTO;
+    myStFormatInStream = check720in1080() ? StFormat_Tiled4x : StFormat_AUTO;
     if(stAV::meta::readTag(myFormatCtx, THE_SRC_MODE_KEY,     aValue)
     || stAV::meta::readTag(myStream,    THE_SRC_MODE_KEY,     aValue)
     || stAV::meta::readTag(myFormatCtx, THE_SRC_MODE_KEY_WMV, aValue)) {
@@ -515,10 +499,9 @@ void StVideoQueue::deinit() {
     myFramesCounter = 1;
     myCachedFrame.nullify();
 
-    if(myCodecCtx  != NULL
-    && myCodecAuto != NULL) {
-        myCodecCtx->codec_id = myCodecAuto->id;
-    }
+#if !defined(ST_AV_NEWCODECPAR)
+    if(myCodecCtx != NULL) { myCodecCtx->codec_id = myCodecAutoId; }
+#endif
     StAVPacketQueue::deinit();
     if(myCodecCtx != NULL) {
         myCodecCtx->hwaccel_context = NULL;
