@@ -209,7 +209,7 @@ void StSubtitleQueue::decodeLoop() {
                         }
                         case SUBTITLE_ASS: {
                             StString aTextData = aRect->ass;
-                            StHandle<StSubItem> aNewSubItem = myASS.parseEvent(aTextData, aPts);
+                            StHandle<StSubItem> aNewSubItem = myASS.parseEvent(aTextData, aPts, aDuration);
                             if(!aNewSubItem.isNull()) {
                                 myOutQueue->push(aNewSubItem);
                             }

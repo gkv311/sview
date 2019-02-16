@@ -63,7 +63,8 @@ class StSubtitlesASS {
      * Parse the dialog event and returns a subtitle item.
      */
     ST_LOCAL StHandle<StSubItem> parseEvent(const StString& theString,
-                                            const double    thePts);
+                                            double thePts,
+                                            double theDuration);
 
         private:
 

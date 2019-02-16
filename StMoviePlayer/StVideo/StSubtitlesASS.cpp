@@ -223,7 +223,8 @@ void StSubtitlesASS::parseStyle(StString& theText) {
 }
 
 StHandle<StSubItem> StSubtitlesASS::parseEvent(const StString& theString,
-                                               const double    thePts) {
+                                               double thePts,
+                                               double theDuration) {
     if(!isValid() || !theString.isStartsWithIgnoreCase(HEADER_Dialog)) {
         return StHandle<StSubItem>();
     }
@@ -249,6 +250,9 @@ StHandle<StSubItem> StSubtitlesASS::parseEvent(const StString& theString,
     parseStyle(aText);
 
     double aDuration = parseTime(aList->getValue(myIdPtsEnd)) - parseTime(aList->getValue(myIdPtsStart));
+    if(aDuration <= 0.0) {
+        aDuration = theDuration; // why ASS information is wrong here on current FFmpeg?
+    }
     aText.replaceFast(ST_CRLF_REDUNDANT, ST_CRLF_REPLACEMENT);
     aText.replaceFast(ST_ASS_NEWLINE,    ST_NEWLINE_REPLACEMENT);
     aText.replaceFast(ST_ASS_NEWLINE2,   ST_NEWLINE_REPLACEMENT);
