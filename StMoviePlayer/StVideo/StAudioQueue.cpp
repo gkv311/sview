@@ -1114,6 +1114,7 @@ void StAudioQueue::decodePacket(const StHandle<StAVPacket>& thePacket,
             int aDataSize = (int )myBufferSrc.getBufferSizeWhole();
 
         #if(LIBAVCODEC_VERSION_INT >= AV_VERSION_INT(57, 106, 102))
+            (void )aDataSize;
             if(toSendPacket) {
                 const int aRes = avcodec_send_packet(myCodecCtx, thePacket->getAVpkt());
                 if(aRes < 0 && aRes != AVERROR_EOF) {
