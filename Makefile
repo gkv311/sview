@@ -704,13 +704,13 @@ ifeq ($(ANDROID_KEY_GUI), 1)
 $(sViewApkSigned): $(sViewApkUnsigned) sView_keystore_debug
 	$(eval ANDROID_KEYSTORE_PASSWORD := $(shell zenity --password --title="Android keystore"))
 	$(eval ANDROID_KEY_PASSWORD      := $(shell zenity --password --title="Android key"))
-	$(JAVA_HOME)/bin/jarsigner -verbose -keystore $(ANDROID_KEYSTORE) -storepass $(ANDROID_KEYSTORE_PASSWORD) -keypass $(ANDROID_KEY_PASSWORD) -signedjar $(sViewApkSigned) $< $(ANDROID_KEY)
+	$(JAVA_HOME)/bin/jarsigner -verbose -sigalg SHA1withRSA -digestalg SHA1 -keystore $(ANDROID_KEYSTORE) -storepass $(ANDROID_KEYSTORE_PASSWORD) -keypass $(ANDROID_KEY_PASSWORD) -signedjar $(sViewApkSigned) $< $(ANDROID_KEY)
 else ifeq ($(ANDROID_KEY_PASSWORD),)
 $(sViewApkSigned): $(sViewApkUnsigned) sView_keystore_debug
-	$(JAVA_HOME)/bin/jarsigner -verbose -keystore $(ANDROID_KEYSTORE) -signedjar $(sViewApkSigned) $< $(ANDROID_KEY)
+	$(JAVA_HOME)/bin/jarsigner -verbose -sigalg SHA1withRSA -digestalg SHA1 -keystore $(ANDROID_KEYSTORE) -signedjar $(sViewApkSigned) $< $(ANDROID_KEY)
 else
 $(sViewApkSigned): $(sViewApkUnsigned) sView_keystore_debug
-	$(JAVA_HOME)/bin/jarsigner -verbose -keystore $(ANDROID_KEYSTORE) -storepass $(ANDROID_KEYSTORE_PASSWORD) -keypass $(ANDROID_KEY_PASSWORD) -signedjar $(sViewApkSigned) $< $(ANDROID_KEY)
+	$(JAVA_HOME)/bin/jarsigner -verbose -sigalg SHA1withRSA -digestalg SHA1 -keystore $(ANDROID_KEYSTORE) -storepass $(ANDROID_KEYSTORE_PASSWORD) -keypass $(ANDROID_KEY_PASSWORD) -signedjar $(sViewApkSigned) $< $(ANDROID_KEY)
 endif
 endif
 
