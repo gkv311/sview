@@ -213,6 +213,7 @@ StGLImageRegion::StGLImageRegion(StGLWidget* theParent,
   myQuad(),
   myUVSphere  (StGLVec3(0.0f, 0.0f, 0.0f), 1.0f, 64, false),
   myHemisphere(StGLVec3(0.0f, 0.0f, 0.0f), 1.0f, 64, true),
+  myCylinder  (StGLVec3(0.0f, 0.0f, 0.0f), 1.0f, 1.0f, 64),
   myTextureQueue(theTextureQueue),
   myClickPntZo(0.0, 0.0),
   myKeyFlags(ST_VF_NONE),
@@ -397,6 +398,7 @@ StGLImageRegion::~StGLImageRegion() {
     myQuad.release(aCtx);
     myUVSphere.release(aCtx);
     myHemisphere.release(aCtx);
+    myCylinder.release(aCtx);
     myProgram.release(aCtx);
 
     // simplify debugging - nullify pointer to this widget
@@ -878,9 +880,17 @@ void StGLImageRegion::stglDrawView(unsigned int theView) {
             if(!myProgram.init(aCtx, aTextures.getColorModel(), aTextures.getColorScale(), aColorGetter)) {
                 break;
             }
+
+            GLfloat aVertScale = 1.0f;
             StGLMesh* aMesh = &myUVSphere;
             if(aViewMode == StViewSurface_Hemisphere) {
                 aMesh = &myHemisphere;
+            } else if(aViewMode == StViewSurface_Cylinder) {
+                aMesh = &myCylinder;
+                const StGLVec2 aSrcSize (aTextures.getPlane().getDataSize().x() * (float )aTextures.getPlane().getSizeX(),
+                                         aTextures.getPlane().getDataSize().y() * (float )aTextures.getPlane().getSizeY());
+                aVertScale = float(2.0 * M_PI * aSrcSize.y()) / aSrcSize.x();
+                //aVertScale *= aTextures.getPlane().getDisplayRatio();
             }
             if(!aMesh->changeVBO(ST_VBO_VERTEX)->isValid()) {
                 if(!aMesh->initVBOs(aCtx)) {
@@ -892,7 +902,7 @@ void StGLImageRegion::stglDrawView(unsigned int theView) {
 
             // perform scaling
             const float aScale = THE_SPHERE_RADIUS * THE_PANORAMA_DEF_ZOOM * aParams->ScaleFactor * aVrScale;
-            aModelMat.scale(aScale, aScale, THE_SPHERE_RADIUS);
+            aModelMat.scale(aScale, aScale * aVertScale, THE_SPHERE_RADIUS);
 
             // compute orientation
             const StGLQuaternion anOri = getHeadOrientation(theView, true);

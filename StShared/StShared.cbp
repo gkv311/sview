@@ -304,6 +304,7 @@
 		<Unit filename="StGLTexture.cpp" />
 		<Unit filename="StGLTextureData.cpp" />
 		<Unit filename="StGLTextureQueue.cpp" />
+		<Unit filename="StGLUVCylinder.cpp" />
 		<Unit filename="StGLUVSphere.cpp" />
 		<Unit filename="StGLVertexBuffer.cpp" />
 		<Unit filename="StImage.cpp" />
@@ -440,6 +441,7 @@
 		<Unit filename="../include/StGLMesh/StGLMesh.h" />
 		<Unit filename="../include/StGLMesh/StGLPrism.h" />
 		<Unit filename="../include/StGLMesh/StGLQuads.h" />
+		<Unit filename="../include/StGLMesh/StGLUVCylinder.h" />
 		<Unit filename="../include/StGLMesh/StGLUVSphere.h" />
 		<Unit filename="../include/StGLStereo/StFormatEnum.h" />
 		<Unit filename="../include/StGLStereo/StGLProjCamera.h" />

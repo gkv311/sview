@@ -1234,6 +1234,22 @@ void StImageViewer::doPanoramaOnOff(const size_t ) {
     StPanorama aPano = st::probePanorama(aParams->StereoFormat,
                                          aParams->Src1SizeX, aParams->Src1SizeY,
                                          aParams->Src2SizeX, aParams->Src2SizeY);
+    if(aPano == StPanorama_OFF) {
+        size_t aSizeX = aParams->Src1SizeX;
+        size_t aSizeY = aParams->Src1SizeY;
+        StPairRatio aPairRatio = st::formatToPairRatio(aParams->StereoFormat);
+        if(aPairRatio == StPairRatio_HalfWidth) {
+            aSizeX /= 2;
+        } else if(aPairRatio == StPairRatio_HalfHeight) {
+            aSizeY /= 2;
+        }
+        if(aSizeX > 8 && aSizeY > 8) {
+            if(double(aSizeX)/double(aSizeY) > 3.5) {
+                myGUI->myImage->params.ViewMode->setValue(StViewSurface_Cylinder);
+                return;
+            }
+        }
+    }
     myGUI->myImage->params.ViewMode->setValue(StStereoParams::getViewSurfaceForPanoramaSource(aPano, true));
 }
 

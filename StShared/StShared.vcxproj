@@ -251,6 +251,7 @@
     <ClCompile Include="StGLTexture.cpp" />
     <ClCompile Include="StGLTextureData.cpp" />
     <ClCompile Include="StGLTextureQueue.cpp" />
+    <ClCompile Include="StGLUVCylinder.cpp" />
     <ClCompile Include="StGLUVSphere.cpp" />
     <ClCompile Include="StGLVertexBuffer.cpp" />
     <ClCompile Include="StImage.cpp" />
@@ -353,6 +354,7 @@
     <ClInclude Include="..\include\StGLMesh\StGLMesh.h" />
     <ClInclude Include="..\include\StGLMesh\StGLPrism.h" />
     <ClInclude Include="..\include\StGLMesh\StGLQuads.h" />
+    <ClInclude Include="..\include\StGLMesh\StGLUVCylinder.h" />
     <ClInclude Include="..\include\StGLMesh\StGLUVSphere.h" />
     <ClInclude Include="..\include\StGLStereo\StFormatEnum.h" />
     <ClInclude Include="..\include\StGLStereo\StGLProjCamera.h" />

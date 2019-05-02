@@ -620,8 +620,8 @@ void StMoviePlayerGUI::doDisplayRatioCombo(const size_t ) {
 void StMoviePlayerGUI::fillPanoramaMenu(StGLMenu* theMenu) {
     theMenu->addItem(tr(MENU_VIEW_SURFACE_PLANE),
                      myImage->params.ViewMode, StViewSurface_Plain);
-    //theMenu->addItem(tr(MENU_VIEW_SURFACE_CYLINDER),
-    //                 myImage->params.ViewMode, StViewSurface_Cylinder);
+    theMenu->addItem(tr(MENU_VIEW_SURFACE_CYLINDER),
+                     myImage->params.ViewMode, StViewSurface_Cylinder);
     theMenu->addItem(tr(MENU_VIEW_SURFACE_HEMISPHERE),
                      myImage->params.ViewMode, StViewSurface_Hemisphere);
     theMenu->addItem(tr(MENU_VIEW_SURFACE_SPHERE),

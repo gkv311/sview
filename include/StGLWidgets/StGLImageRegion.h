@@ -10,6 +10,7 @@
 #ifndef __StGLImageRegion_h_
 #define __StGLImageRegion_h_
 
+#include <StGLMesh/StGLUVCylinder.h>
 #include <StGLMesh/StGLUVSphere.h>
 #include <StGLMesh/StGLQuads.h>
 
@@ -311,6 +312,7 @@ class StGLImageRegion : public StGLWidget {
     StGLQuads                  myQuad;           //!< flat quad
     StGLUVSphere               myUVSphere;       //!< sphere output helper class
     StGLUVSphere               myHemisphere;     //!< hemisphere output helper class
+    StGLUVCylinder             myCylinder;       //!< cylinder output helper class
     StGLProjCamera             myProjCam;        //!< copy of projection camera
     StGLImageProgram           myProgram;        //!< GL program to draw flat image
     StHandle<StGLTextureQueue> myTextureQueue;   //!< shared texture queue
