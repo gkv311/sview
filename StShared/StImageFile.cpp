@@ -1,5 +1,5 @@
 /**
- * Copyright © 2010-2015 Kirill Gavrilov <kirill@sview.ru>
+ * Copyright © 2010-2019 Kirill Gavrilov <kirill@sview.ru>
  *
  * Distributed under the Boost Software License, Version 1.0.
  * See accompanying file license-boost.txt or copy at
@@ -11,6 +11,7 @@
 #include <StImage/StDevILImage.h>
 #include <StImage/StFreeImage.h>
 #include <StImage/StWebPImage.h>
+#include <StImage/StStbImage.h>
 #include <StAV/StAVImage.h>
 #include <StFile/StFileNode.h>
 #include <StFile/StMIME.h>
@@ -41,6 +42,8 @@ StImageFile::ImageClass StImageFile::imgLibFromString(const StString& thePreferr
     } else if(thePreferred.isEqualsIgnoreCase(stCString("WebP")) ||
               thePreferred.isEqualsIgnoreCase(stCString("StWebPImage"))) {
         aPreferred = ST_WEBP;
+    } else if(thePreferred.isEqualsIgnoreCase(stCString("stb"))) {
+        aPreferred = ST_STB;
     }
     return aPreferred;
 }
@@ -50,6 +53,7 @@ StString StImageFile::imgLibToString(const ImageClass thePreferred) {
         case ST_FREEIMAGE: return "FreeImage";
         case ST_DEVIL:     return "DevIL";
         case ST_WEBP:      return "WebP";
+        case ST_STB:       return "stb";
         default:
         case ST_LIBAV:     return "FFmpeg";
     }
@@ -161,6 +165,12 @@ StHandle<StImageFile> StImageFile::create(StImageFile::ImageClass thePreferred,
         case ST_WEBP: {
             if(StWebPImage::init()) {
                 return new StWebPImage();
+            }
+            break;
+        }
+        case ST_STB: {
+            if(StStbImage::init()) {
+                return new StStbImage();
             }
             break;
         }

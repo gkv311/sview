@@ -340,6 +340,7 @@
 		</Unit>
 		<Unit filename="StResourceManager.cpp" />
 		<Unit filename="StSettings.cpp" />
+		<Unit filename="StStbImage.cpp" />
 		<Unit filename="StSocket.ObjC.mm">
 			<Option compile="1" />
 			<Option link="1" />
@@ -457,6 +458,7 @@
 		<Unit filename="../include/StImage/StImagePlane.h" />
 		<Unit filename="../include/StImage/StJpegParser.h" />
 		<Unit filename="../include/StImage/StPixelRGB.h" />
+		<Unit filename="../include/StImage/StStbImage.h" />
 		<Unit filename="../include/StImage/StWebPImage.h" />
 		<Unit filename="../include/StLibrary.h" />
 		<Unit filename="../include/StSettings/StEnumParam.h" />

@@ -271,6 +271,7 @@
     <ClCompile Include="StRegisterImpl.cpp" />
     <ClCompile Include="StResourceManager.cpp" />
     <ClCompile Include="StSettings.cpp" />
+    <ClCompile Include="StStbImage.cpp" />
     <ClCompile Include="StDictionary.cpp" />
     <ClCompile Include="StThread.cpp" />
     <ClCompile Include="StTranslations.cpp" />
@@ -370,6 +371,7 @@
     <ClInclude Include="..\include\StImage\StImagePlane.h" />
     <ClInclude Include="..\include\StImage\StJpegParser.h" />
     <ClInclude Include="..\include\StImage\StPixelRGB.h" />
+    <ClInclude Include="..\include\StImage\StStbImage.h" />
     <ClInclude Include="..\include\StImage\StWebPImage.h" />
     <ClInclude Include="..\include\StSettings\StEnumParam.h" />
     <ClInclude Include="..\include\StSettings\StFloat32Param.h  " />
