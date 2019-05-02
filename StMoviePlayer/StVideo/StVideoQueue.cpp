@@ -1,5 +1,5 @@
 /**
- * Copyright © 2009-2017 Kirill Gavrilov <kirill@sview.ru>
+ * Copyright © 2009-2019 Kirill Gavrilov <kirill@sview.ru>
  *
  * StMoviePlayer program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -409,6 +409,10 @@ bool StVideoQueue::init(AVFormatContext*   theFormatCtx,
         switch(aSpherical->projection) {
             case AV_SPHERICAL_EQUIRECTANGULAR: {
                 theNewParams->ViewingMode = StViewSurface_Sphere;
+                if(sizeX() == sizeY()) {
+                    // TODO - hemisphere information should be somewhere in the file
+                    //theNewParams->ViewingMode = StViewSurface_Hemisphere;
+                }
                 break;
             }
             case AV_SPHERICAL_CUBEMAP: {
@@ -708,9 +712,7 @@ void StVideoQueue::pushFrame(const StImage&     theSrcDataLeft,
         StPanorama aPano = st::probePanorama(theSrcFormat,
                                              theStParams->Src1SizeX, theStParams->Src1SizeY,
                                              theStParams->Src2SizeX, theStParams->Src2SizeY);
-        theStParams->ViewingMode = (aPano == StPanorama_Cubemap6_1 || aPano == StPanorama_Cubemap3_2)
-                                 ? StViewSurface_Cubemap
-                                 : StViewSurface_Sphere;
+        theStParams->ViewingMode = StStereoParams::getViewSurfaceForPanoramaSource(aPano, true);
     }
 
     myTextureQueue->push(theSrcDataLeft, theSrcDataRight, theStParams, theSrcFormat, theCubemapFormat, theSrcPTS);

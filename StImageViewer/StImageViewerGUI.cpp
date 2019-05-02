@@ -1,5 +1,5 @@
 /**
- * Copyright © 2009-2017 Kirill Gavrilov <kirill@sview.ru>
+ * Copyright © 2009-2019 Kirill Gavrilov <kirill@sview.ru>
  *
  * StImageViewer program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -392,6 +392,10 @@ StGLMenu* StImageViewerGUI::createDisplayRatioMenu() {
 void StImageViewerGUI::fillPanoramaMenu(StGLMenu* theMenu) {
     theMenu->addItem(tr(MENU_VIEW_SURFACE_PLANE),
                      myImage->params.ViewMode, StViewSurface_Plain);
+    //theMenu->addItem(tr(MENU_VIEW_SURFACE_CYLINDER),
+    //                 myImage->params.ViewMode, StViewSurface_Cylinder);
+    theMenu->addItem(tr(MENU_VIEW_SURFACE_HEMISPHERE),
+                     myImage->params.ViewMode, StViewSurface_Hemisphere);
     theMenu->addItem(tr(MENU_VIEW_SURFACE_SPHERE),
                      myImage->params.ViewMode, StViewSurface_Sphere);
     theMenu->addItem(tr(MENU_VIEW_SURFACE_CUBEMAP),
@@ -1462,9 +1466,11 @@ void StImageViewerGUI::setVisibility(const StPointD_t& theCursor,
         } else if(::isPointIn(myBtnPanorama, theCursor)) {
             size_t aTrPano = MENU_VIEW_SURFACE_PLANE;
             switch(aViewMode) {
-                case StViewSurface_Plain:   aTrPano = MENU_VIEW_SURFACE_PLANE;   break;
-                case StViewSurface_Sphere:  aTrPano = MENU_VIEW_SURFACE_SPHERE;  break;
-                case StViewSurface_Cubemap: aTrPano = MENU_VIEW_SURFACE_CUBEMAP; break;
+                case StViewSurface_Plain:      aTrPano = MENU_VIEW_SURFACE_PLANE;   break;
+                case StViewSurface_Sphere:     aTrPano = MENU_VIEW_SURFACE_SPHERE;  break;
+                case StViewSurface_Hemisphere: aTrPano = MENU_VIEW_SURFACE_HEMISPHERE; break;
+                case StViewSurface_Cubemap:    aTrPano = MENU_VIEW_SURFACE_CUBEMAP;  break;
+                case StViewSurface_Cylinder:   aTrPano = MENU_VIEW_SURFACE_CYLINDER; break;
             }
             myDescr->setText(tr(MENU_VIEW_PANORAMA) + "\n" + tr(aTrPano));
         } else {

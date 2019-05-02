@@ -1,5 +1,5 @@
 /**
- * Copyright © 2009-2017 Kirill Gavrilov <kirill@sview.ru>
+ * Copyright © 2009-2019 Kirill Gavrilov <kirill@sview.ru>
  *
  * StMoviePlayer program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -113,6 +113,7 @@ namespace StMoviePlayerStrings {
         MENU_VIEW_SURFACE_SPHERE    = 1281,
         MENU_VIEW_SURFACE_CYLINDER  = 1282,
         MENU_VIEW_SURFACE_CUBEMAP   = 1283,
+        MENU_VIEW_SURFACE_HEMISPHERE= 1284,
         MENU_VIEW_TRACK_HEAD        = 1285,
         MENU_VIEW_TRACK_HEAD_POOR   = 1286,
         MENU_VIEW_TRACK_HEAD_AUDIO  = 1287,

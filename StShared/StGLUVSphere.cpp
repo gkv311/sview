@@ -1,5 +1,5 @@
 /**
- * Copyright © 2010-2012 Kirill Gavrilov <kirill@sview.ru>
+ * Copyright © 2010-2019 Kirill Gavrilov <kirill@sview.ru>
  *
  * Distributed under the Boost Software License, Version 1.0.
  * See accompanying file license-boost.txt or copy at
@@ -12,22 +12,23 @@
 #include <StGLCore/StGLCore20.h>
 #include <StGL/StGLContext.h>
 
-/// TODO (Kirill Gavrilov#9) move to the common header
 namespace {
     static const GLfloat ST_PI     = 3.1415926535897932384626433832795f;
     static const GLfloat ST_TWOPI  = 6.2831853071795864769252867665590f;
     static const GLfloat ST_PIDIV2 = 1.5707963267948966192313216916397f;
-};
+}
 
 StGLUVSphere::StGLUVSphere(const StGLVec3& theCenter,
                            const GLfloat   theRadius,
-                           const size_t    theRings)
+                           const size_t    theRings,
+                           const bool      theIsHemisphere)
 : StGLMesh(GL_TRIANGLE_STRIP),
   myPrimCounts(1),
   myIndPointers(1),
   myCenter(theCenter),
   myRadius(theRadius),
-  myRings(theRings) {
+  myRings(theRings),
+  myIsHemisphere(theIsHemisphere) {
     //
 }
 
@@ -38,7 +39,8 @@ StGLUVSphere::StGLUVSphere(const StBndSphere& theBndSphere,
   myIndPointers(1),
   myCenter(theBndSphere.getCenter()),
   myRadius(theBndSphere.getRadius()),
-  myRings(theRings) {
+  myRings(theRings),
+  myIsHemisphere(false) {
     //
 }
 
@@ -73,7 +75,11 @@ bool StGLUVSphere::computeMesh() {
         tcrd.y() = GLfloat(ringId) / GLfloat(aRingsCount);
 
         for(size_t pointId = 0; pointId <= pointPerRing; ++pointId) {
-            phi = GLfloat(pointId) * ST_TWOPI / GLfloat(pointPerRing);
+            if(myIsHemisphere) {
+                phi = ST_PIDIV2 + GLfloat(pointId) * ST_PI / GLfloat(pointPerRing);
+            } else {
+                phi = GLfloat(pointId) * ST_TWOPI / GLfloat(pointPerRing);
+            }
 
             tcrd.x() = GLfloat(pointId) / GLfloat(pointPerRing);
 

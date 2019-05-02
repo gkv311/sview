@@ -1,5 +1,5 @@
 /**
- * Copyright © 2009-2015 Kirill Gavrilov <kirill@sview.ru>
+ * Copyright © 2009-2019 Kirill Gavrilov <kirill@sview.ru>
  *
  * Distributed under the Boost Software License, Version 1.0.
  * See accompanying file license-boost.txt or copy at
@@ -46,7 +46,8 @@ enum StCubemap {
 
 enum StPanorama {
     StPanorama_OFF  =  0,  //!< no cubemap data
-    StPanorama_Sphere,     //!< spherical panorama
+    StPanorama_Sphere,     //!< spherical panorama 360 degrees - 2:1
+    StPanorama_Hemisphere, //!< spherical panorama 180 degrees - 1:1
     StPanorama_Cubemap6_1, //!< cubemap data packed into single image frame - 6:1
     StPanorama_Cubemap3_2  //!< cubemap data packed into single image frame - 3:2
 };
@@ -150,6 +151,9 @@ namespace st {
         } else if(theSrc1SizeX / 3 == theSrc1SizeY / 2
                && theSrc2SizeX / 3 == theSrc2SizeY / 2) {
             return StPanorama_Cubemap3_2;
+        } else if(theSrc1SizeX == theSrc1SizeY
+               && theSrc2SizeX == theSrc2SizeY) {
+            return StPanorama_Hemisphere;
         }
         return StPanorama_OFF;
     }

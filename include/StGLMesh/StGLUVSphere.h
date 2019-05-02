@@ -1,5 +1,5 @@
 /**
- * Copyright © 2010-2013 Kirill Gavrilov <kirill@sview.ru>
+ * Copyright © 2010-2019 Kirill Gavrilov <kirill@sview.ru>
  *
  * Distributed under the Boost Software License, Version 1.0.
  * See accompanying file license-boost.txt or copy at
@@ -26,7 +26,8 @@ class StGLUVSphere : public StGLMesh {
      */
     ST_CPPEXPORT StGLUVSphere(const StGLVec3& theCenter,
                               const GLfloat   theRadius,
-                              const size_t    theRings);
+                              const size_t    theRings,
+                              const bool      theIsHemisphere);
 
     /**
      * Defines the UV sphere from boundary sphere.
@@ -55,6 +56,7 @@ class StGLUVSphere : public StGLMesh {
     StGLVec3             myCenter;
     GLfloat              myRadius;
     size_t               myRings;
+    bool                 myIsHemisphere;
 
 };
 

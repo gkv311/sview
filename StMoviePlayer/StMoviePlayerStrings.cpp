@@ -1,5 +1,5 @@
 /**
- * Copyright © 2013-2017 Kirill Gavrilov <kirill@sview.ru>
+ * Copyright © 2013-2019 Kirill Gavrilov <kirill@sview.ru>
  *
  * StMoviePlayer program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -185,6 +185,8 @@ void loadDefaults(StLangMap& theStrings) {
                "Plane");
     theStrings(MENU_VIEW_SURFACE_SPHERE,
                "Sphere");
+    theStrings(MENU_VIEW_SURFACE_HEMISPHERE,
+               "Hemisphere");
     theStrings(MENU_VIEW_SURFACE_CYLINDER,
                "Cylinder");
     theStrings(MENU_VIEW_SURFACE_CUBEMAP,

@@ -1,5 +1,5 @@
 /**
- * Copyright © 2007-2017 Kirill Gavrilov <kirill@sview.ru>
+ * Copyright © 2007-2019 Kirill Gavrilov <kirill@sview.ru>
  *
  * StImageViewer program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -438,9 +438,7 @@ bool StImageLoader::loadImage(const StHandle<StFileNode>& theSource,
         StPanorama aPano = st::probePanorama(aSrcFormatCurr,
                                              theParams->Src1SizeX, theParams->Src1SizeY,
                                              theParams->Src2SizeX, theParams->Src2SizeY);
-        theParams->ViewingMode = (aPano == StPanorama_Cubemap6_1 || aPano == StPanorama_Cubemap3_2)
-                               ? StViewSurface_Cubemap
-                               : StViewSurface_Sphere;
+        theParams->ViewingMode = StStereoParams::getViewSurfaceForPanoramaSource(aPano, true);
     }
     StCubemap aSrcCubemap = theParams->ViewingMode == StViewSurface_Cubemap ? StCubemap_Packed : StCubemap_OFF;
 

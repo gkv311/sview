@@ -1,5 +1,5 @@
 /**
- * Copyright © 2007-2017 Kirill Gavrilov <kirill@sview.ru>
+ * Copyright © 2007-2019 Kirill Gavrilov <kirill@sview.ru>
  *
  * StImageViewer program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -1234,9 +1234,7 @@ void StImageViewer::doPanoramaOnOff(const size_t ) {
     StPanorama aPano = st::probePanorama(aParams->StereoFormat,
                                          aParams->Src1SizeX, aParams->Src1SizeY,
                                          aParams->Src2SizeX, aParams->Src2SizeY);
-    myGUI->myImage->params.ViewMode->setValue(aPano == StPanorama_Cubemap6_1 || aPano == StPanorama_Cubemap3_2
-                                            ? StViewSurface_Cubemap
-                                            : StViewSurface_Sphere);
+    myGUI->myImage->params.ViewMode->setValue(StStereoParams::getViewSurfaceForPanoramaSource(aPano, true));
 }
 
 void StImageViewer::doChangeStickPano360(const bool ) {

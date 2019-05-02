@@ -1,6 +1,6 @@
 /**
  * StGLWidgets, small C++ toolkit for writing GUI using OpenGL.
- * Copyright © 2010-2016 Kirill Gavrilov <kirill@sview.ru>
+ * Copyright © 2010-2019 Kirill Gavrilov <kirill@sview.ru>
  *
  * Distributed under the Boost Software License, Version 1.0.
  * See accompanying file license-boost.txt or copy at
@@ -211,7 +211,8 @@ StGLImageRegion::StGLImageRegion(StGLWidget* theParent,
                                  bool theUsePanningKeys)
 : StGLWidget(theParent, 0, 0, StGLCorner(ST_VCORNER_TOP, ST_HCORNER_LEFT)),
   myQuad(),
-  myUVSphere(StGLVec3(0.0f, 0.0f, 0.0f), 1.0f, 64),
+  myUVSphere  (StGLVec3(0.0f, 0.0f, 0.0f), 1.0f, 64, false),
+  myHemisphere(StGLVec3(0.0f, 0.0f, 0.0f), 1.0f, 64, true),
   myTextureQueue(theTextureQueue),
   myClickPntZo(0.0, 0.0),
   myKeyFlags(ST_VF_NONE),
@@ -395,6 +396,7 @@ StGLImageRegion::~StGLImageRegion() {
     myTextureQueue->getQTexture().release(aCtx);
     myQuad.release(aCtx);
     myUVSphere.release(aCtx);
+    myHemisphere.release(aCtx);
     myProgram.release(aCtx);
 
     // simplify debugging - nullify pointer to this widget
@@ -439,9 +441,9 @@ bool StGLImageRegion::stglInit() {
         aCtx.pushError(StString("Fail to init StGLQuad"));
         ST_ERROR_LOG("Fail to init StGLQuad");
         return false;
-    } else if(!myUVSphere.initVBOs(aCtx)) {
+    }/* else if(!myUVSphere.initVBOs(aCtx)) {
         ST_ERROR_LOG("Fail to init StGLUVSphere");
-    }
+    }*/
 
     // setup texture filter
     myTextureQueue->getQTexture().setMinMagFilter(aCtx, params.TextureFilter->getValue() == StGLImageProgram::FILTER_NEAREST ? GL_NEAREST : GL_LINEAR);
@@ -870,9 +872,22 @@ void StGLImageRegion::stglDrawView(unsigned int theView) {
             aParams->PanCenter   = aPanBack;
             break;
         }
+        case StViewSurface_Cylinder:
+        case StViewSurface_Hemisphere:
         case StViewSurface_Sphere: {
             if(!myProgram.init(aCtx, aTextures.getColorModel(), aTextures.getColorScale(), aColorGetter)) {
                 break;
+            }
+            StGLMesh* aMesh = &myUVSphere;
+            if(aViewMode == StViewSurface_Hemisphere) {
+                aMesh = &myHemisphere;
+            }
+            if(!aMesh->changeVBO(ST_VBO_VERTEX)->isValid()) {
+                if(!aMesh->initVBOs(aCtx)) {
+                    aCtx.pushError(StString("Fail to init StGLUVSphere"));
+                    ST_ERROR_LOG("Fail to init StGLUVSphere");
+                    break;
+                }
             }
 
             // perform scaling
@@ -894,7 +909,7 @@ void StGLImageRegion::stglDrawView(unsigned int theView) {
             myProgram.getActiveProgram()->setProjMat (aCtx, myProjCam.getProjMatrixMono());
             myProgram.getActiveProgram()->setModelMat(aCtx, aModelMat);
 
-            myUVSphere.draw(aCtx, *myProgram.getActiveProgram());
+            aMesh->draw(aCtx, *myProgram.getActiveProgram());
 
             myProgram.getActiveProgram()->unuse(aCtx);
             break;
@@ -990,6 +1005,8 @@ bool StGLImageRegion::tryUnClick(const StClickEvent& theEvent,
                 break;
             }
             case StViewSurface_Cubemap:
+            case StViewSurface_Cylinder:
+            case StViewSurface_Hemisphere:
             case StViewSurface_Sphere: {
                 aParams->moveSphere(getMouseMoveSphere(myClickPntZo, aCursor));
                 break;
@@ -1068,6 +1085,8 @@ void StGLImageRegion::scaleAt(const StPointD_t& thePoint,
             break;
         }
         case StViewSurface_Cubemap:
+        case StViewSurface_Cylinder:
+        case StViewSurface_Hemisphere:
         case StViewSurface_Sphere: {
             if(theStep < 0.0f
             && aParams->ScaleFactor <= 0.24f) {
