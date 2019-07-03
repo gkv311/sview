@@ -232,7 +232,8 @@ StAndroidGlue::StAndroidGlue(ANativeActivity* theActivity,
     jmethodID aJMet_setCppInstance = aJniEnv->GetMethodID(aJClass_Activity, "setCppInstance", "(J)V");
     aJniEnv->CallVoidMethod(myActivity->clazz, aJMet_setCppInstance, (jlong )this);
 
-    readOpenPath();
+    // do not NULLify intent here since Activity.onCreate() crashes on some devices
+    readOpenPath(false);
 
     myCmdPollSource.id        = LooperId_MAIN;
     myCmdPollSource.app       = this;
@@ -273,11 +274,11 @@ StAndroidGlue::StAndroidGlue(ANativeActivity* theActivity,
     myMsgWrite = aMsgPipe[1];
 }
 
-void StAndroidGlue::readOpenPath() {
+void StAndroidGlue::readOpenPath(bool theToNullifyIntent) {
     JNIEnv*   aJniEnv = myActivity->env;
     jclass    aJClass_Activity   = aJniEnv->GetObjectClass(myActivity->clazz);
-    jmethodID aJMet_readOpenPath = aJniEnv->GetMethodID(aJClass_Activity, "readOpenPath", "()V");
-    aJniEnv->CallVoidMethod(myActivity->clazz, aJMet_readOpenPath);
+    jmethodID aJMet_readOpenPath = aJniEnv->GetMethodID(aJClass_Activity, "readOpenPath", "(Z)V");
+    aJniEnv->CallVoidMethod(myActivity->clazz, aJMet_readOpenPath, (jboolean )(theToNullifyIntent ? JNI_TRUE : JNI_FALSE));
 }
 
 void StAndroidGlue::setOpenPath(const jstring  theOpenPath,
@@ -803,7 +804,7 @@ void StAndroidGlue::setWindow(ANativeWindow* theWindow) {
 
 void StAndroidGlue::setActivityState(int8_t theState) {
     if(theState == StAndroidGlue::CommandId_Resume) {
-        readOpenPath();
+        readOpenPath(true);
     }
 
     pthread_mutex_lock(&myMutex);

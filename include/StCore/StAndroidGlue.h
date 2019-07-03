@@ -299,7 +299,7 @@ class StAndroidGlue {
      * Read the open file from currently set intent.
      * The method calls the Java method readOpenPath() of StActivity which will call setOpenPath().
      */
-    ST_CPPEXPORT void readOpenPath();
+    ST_CPPEXPORT void readOpenPath(bool theToNullifyIntent);
 
     ST_CPPEXPORT void printConfig();
     ST_CPPEXPORT void freeSavedState();

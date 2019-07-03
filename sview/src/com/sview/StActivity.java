@@ -175,6 +175,9 @@ public class StActivity extends NativeActivity implements SensorEventListener {
         }
 
         updateHideSystemBars(myToHideStatusBar, myToHideNavBar);
+
+        // readOpenPath(false) should be called - NULLify intent afterwards
+        setIntent(null);
     }
 
     /**
@@ -360,13 +363,15 @@ public class StActivity extends NativeActivity implements SensorEventListener {
      * Read the open path from current intent and nullify it.
      * This method is called by StAndroidGlue from C++.
      */
-    protected void readOpenPath() {
+    protected void readOpenPath(boolean theToNullifyIntent) {
         if(myCppGlue == 0) {
             return;
         }
 
         Intent anIntent = getIntent();
-        setIntent(null);
+        if(theToNullifyIntent) {
+            setIntent(null);
+        }
         if(anIntent == null) {
             cppSetOpenPath(myCppGlue, "", "", false);
             return;
