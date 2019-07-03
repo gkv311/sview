@@ -167,7 +167,10 @@ public class StActivity extends NativeActivity implements SensorEventListener {
             anInfo.append("Error: native library can not be loaded for security reasons:\n  " + theError.getMessage());
             StActivity.exitWithError(this, "Broken apk?\n" + anInfo);
         } catch(Exception theError) {
-            anInfo.append("Error: unhandled exception:\n  " + theError.getMessage());
+            java.io.StringWriter aStringWriter = new java.io.StringWriter();
+            theError.printStackTrace (new java.io.PrintWriter (aStringWriter));
+            anInfo.append("Error: unhandled exception:\n  " + theError.getMessage()
+                        + "\nCall stack:\n" + aStringWriter.toString());
             StActivity.exitWithError(this, "Broken apk?\n" + anInfo);
         }
 
