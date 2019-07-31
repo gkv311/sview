@@ -23,6 +23,7 @@
 #include "../StImageViewer/StImagePluginInfo.h"
 
 #include <StStrings/StFormatTime.h>
+#include <StAV/StAVIOJniHttpContext.h>
 
 using namespace StMoviePlayerStrings;
 
@@ -316,7 +317,6 @@ bool StVideo::addFile(const StString& theFileToLoad,
     // open video file
     StString aFileName, aDummy;
     StFileNode::getFolderAndFile(theFileToLoad, aDummy, aFileName);
-    AVFormatContext* aFormatCtx = NULL;
 
     StHandle<StAVIOContext> anIOContext;
     if(StFileNode::isContentProtocolPath(theFileToLoad)) {
@@ -324,11 +324,25 @@ bool StVideo::addFile(const StString& theFileToLoad,
         if(aFileDescriptor != -1) {
             StHandle<StAVIOFileContext> aFileCtx = new StAVIOFileContext();
             if(aFileCtx->openFromDescriptor(aFileDescriptor, "rb")) {
-                aFormatCtx = avformat_alloc_context();
-                aFormatCtx->pb = aFileCtx->getAvioContext();
                 anIOContext = aFileCtx;
             }
         }
+    }
+#if defined(__ANDROID__)
+    else if(theFileToLoad.isStartsWith(stCString("https://"))) {
+        static const bool hasHttpsProtocol = stAV::isEnabledInputProtocol("https");
+        if(!hasHttpsProtocol) {
+            StHandle<StAVIOJniHttpContext> aHttpCtx = new StAVIOJniHttpContext();
+            if(aHttpCtx->open(theFileToLoad)) {
+                anIOContext = aHttpCtx;
+            }
+        }
+    }
+#endif
+    AVFormatContext* aFormatCtx = NULL;
+    if(!anIOContext.isNull()) {
+        aFormatCtx = avformat_alloc_context();
+        aFormatCtx->pb = anIOContext->getAvioContext();
     }
 
 #if(LIBAVFORMAT_VERSION_INT >= AV_VERSION_INT(53, 2, 0))
@@ -1334,6 +1348,7 @@ void StVideo::mainLoop() {
         // wait for initial message
         waitEvent();
         if(toQuit) {
+            close();
             myQuitEvent.set();
             return;
         }
@@ -1393,6 +1408,9 @@ void StVideo::mainLoop() {
                 myPlayList->walkToNext(false);
             }
             if(toQuit) {
+                // make sure to close AVIO contexts from the same working thread,
+                // because some of them can be attached to specific thread (like StAVIOJniHttpContext to JavaVM)
+                close();
                 myQuitEvent.set();
                 return;
             }

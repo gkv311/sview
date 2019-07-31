@@ -382,6 +382,11 @@ namespace stAV {
     ST_CPPEXPORT bool setJavaVM(void* theJavaVM);
 
     /**
+     * avio_enum_protocols() wrapper for checking input protocol.
+     */
+    ST_CPPEXPORT bool isEnabledInputProtocol(const StString& theProtocol);
+
+    /**
      * Audio functions
      */
     namespace audio {

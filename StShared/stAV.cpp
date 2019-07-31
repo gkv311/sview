@@ -625,6 +625,16 @@ bool stAV::setJavaVM(void* theJavaVM) {
 #endif
 }
 
+bool stAV::isEnabledInputProtocol(const StString& theProtocol) {
+    void* anOpaque = NULL;
+    for(const char* aName = avio_enum_protocols(&anOpaque, 0); aName != NULL; aName = avio_enum_protocols(&anOpaque, 0)) {
+        if(stAreEqual(theProtocol.toCString(), aName, theProtocol.Size + 1)) {
+            return true;
+        }
+    }
+    return false;
+}
+
 StString stAV::getVersionInfo() {
 #if(LIBAVCODEC_VERSION_INT >= AV_VERSION_INT(57, 24, 0))
     return av_version_info();
