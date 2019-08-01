@@ -610,14 +610,19 @@ void StWindowImpl::updateBlockSleep() {
     }
 #elif defined(__ANDROID__)
     int aFlags = 0;
+    bool toWakeLock = false;
     if(attribs.ToBlockSleepDisplay) {
         aFlags |= AWINDOW_FLAG_KEEP_SCREEN_ON;
         myBlockSleep = BlockSleep_DISPLAY;
+    } else if(attribs.ToBlockSleepSystem) {
+        myBlockSleep = BlockSleep_SYSTEM;
+        toWakeLock = true;
     } else {
         myBlockSleep = BlockSleep_OFF;
     }
     if(myParentWin != NULL) {
         myParentWin->setWindowFlags(aFlags);
+        myParentWin->setWakeLock(toWakeLock);
     }
 #elif defined(__linux__)
     if(attribs.ToBlockSleepDisplay) { // || attribs.ToBlockSleepSystem

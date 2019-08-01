@@ -160,6 +160,11 @@ class StAndroidGlue {
     ST_CPPEXPORT void setWindowFlags(const int theFlags);
 
     /**
+     * Set/release WAKE_LOCK.
+     */
+    ST_CPPEXPORT void setWakeLock(bool theToLock);
+
+    /**
      * Turn stereo output on using device-specific API.
      */
     ST_CPPEXPORT void setHardwareStereoOn(const bool theToEnable);
@@ -420,6 +425,7 @@ class StAndroidGlue {
     ANativeWindow*          myWindow;            //!< native window to draw into
     ANativeWindow*          myWindowPending;
     bool                    myIsChangingSurface; //!< flag indicating surface changing state
+    bool                    myIsWakeLockSet;     //!< flag indicating WAKE_LOCK enabled state
     int                     myWindowFlags;       //!< active window flags
     int                     myActivityState;     //!< Current state of the app's activity (APP_CMD_START, APP_CMD_RESUME, APP_CMD_PAUSE, or APP_CMD_STOP)
     int                     myMemoryClassMiB;    //!< device memory class

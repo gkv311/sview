@@ -91,7 +91,19 @@ void StMoviePlayer::doChangeDevice(const int32_t theValue) {
 void StMoviePlayer::doPause(const StPauseEvent& theEvent) {
     StApplication::doPause(theEvent);
     saveAllParams();
-    if(!myVideo.isNull()) {
+    if(myVideo.isNull()) {
+        return;
+    }
+
+    // pause video but keep playing audio in background
+    StWinAttr anAttribs[] = {
+        StWinAttr_ToBlockSleepSystem,  (StWinAttr )0,
+        StWinAttr_ToBlockSleepDisplay, (StWinAttr )0,
+        StWinAttr_NULL
+    };
+    myWindow->getAttributes(anAttribs);
+    if(anAttribs[1] == (StWinAttr )0
+    || anAttribs[3] != (StWinAttr )0) {
         myVideo->pushPlayEvent(ST_PLAYEVENT_PAUSE);
     }
 }

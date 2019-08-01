@@ -148,6 +148,9 @@ public class StActivity extends NativeActivity implements SensorEventListener {
 
         askUserPermission(android.Manifest.permission.WRITE_EXTERNAL_STORAGE, null);
 
+        android.os.PowerManager aPowerManager = (android.os.PowerManager)getSystemService(Context.POWER_SERVICE);
+        myWakeLock = aPowerManager.newWakeLock(android.os.PowerManager.PARTIAL_WAKE_LOCK, "PartialWakeLock");
+
         mySensorMgr = (SensorManager )getSystemService(Context.SENSOR_SERVICE);
         mySensorOri = mySensorMgr.getDefaultSensor(Sensor.TYPE_ROTATION_VECTOR);
         if(mySensorOri == null) {
@@ -511,6 +514,21 @@ public class StActivity extends NativeActivity implements SensorEventListener {
     }
 
     /**
+     * Keep CPU on.
+     */
+    public void setPartialWakeLockOn(boolean theToLock) {
+        if(myWakeLock == null) {
+            return;
+        }
+
+        if(theToLock) {
+            myWakeLock.acquire();
+        } else {
+            myWakeLock.release();
+        }
+    }
+
+    /**
      * Method to turn stereo output on or off.
      */
     public void setHardwareStereoOn(boolean theToEnable) {
@@ -680,6 +698,8 @@ public class StActivity extends NativeActivity implements SensorEventListener {
 //region class fields
 
     protected ContextWrapper myContext;
+    protected android.os.PowerManager.WakeLock myWakeLock;
+
     protected SensorManager  mySensorMgr;
     protected Sensor         mySensorOri;
     protected float          myQuat[] = { 0.0f, 0.0f, 0.0f, 1.0f };

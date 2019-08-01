@@ -124,6 +124,7 @@ StAndroidGlue::StAndroidGlue(ANativeActivity* theActivity,
   myWindow(NULL),
   myWindowPending(NULL),
   myIsChangingSurface(false),
+  myIsWakeLockSet(false),
   myWindowFlags(0),
   myActivityState(0),
   myMemoryClassMiB(0),
@@ -820,6 +821,18 @@ void StAndroidGlue::setWindowFlags(const int theFlags) {
     myWindowFlags = theFlags;
 
     ANativeActivity_setWindowFlags(myActivity, aFlagsToAdd, aFlagsToRemove);
+}
+
+void StAndroidGlue::setWakeLock(bool theToLock) {
+    if(myIsWakeLockSet == theToLock
+    || myThJniEnv == NULL) {
+        return;
+    }
+
+    jclass    aJClassActivity = myThJniEnv->GetObjectClass(myActivity->clazz);
+    jmethodID aJMet           = myThJniEnv->GetMethodID(aJClassActivity, "setPartialWakeLockOn", "(Z)V");
+    myThJniEnv->CallVoidMethod(myActivity->clazz, aJMet, (jboolean )(theToLock ? JNI_TRUE : JNI_FALSE));
+    myIsWakeLockSet = theToLock;
 }
 
 void StAndroidGlue::setHardwareStereoOn(const bool theToEnable) {
