@@ -13,6 +13,7 @@
                   android:label="@string/app_movie_name"
                   android:launchMode="singleTask"
                   android:alwaysRetainTaskState="true"
+                  android:resizeableActivity="true"
                   android:configChanges="orientation|keyboardHidden|screenSize"
                   android:theme="@android:style/Theme.NoTitleBar.Fullscreen">
                   <!-- android:documentLaunchMode="always" - available since Android 5.0 -->
@@ -171,6 +172,7 @@
         <activity android:name="com.sview.StImageActivity"
                   android:label="@string/app_image_name"
                   android:launchMode="singleTask"
+                  android:resizeableActivity="true"
                   android:configChanges="orientation|keyboardHidden|screenSize"
                   android:theme="@android:style/Theme.NoTitleBar.Fullscreen">
                   <!-- android:documentLaunchMode="always" - available since Android 5.0 -->
