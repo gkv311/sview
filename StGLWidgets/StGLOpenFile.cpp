@@ -83,6 +83,26 @@ public:
 };
 #endif
 
+/**
+ * Dummy sub-class overriding scrollable behavior.
+ */
+class StGLOpenFileMenu : public StGLMenu {
+
+        public:
+
+    ST_LOCAL StGLOpenFileMenu(StGLWidget* theParent,
+                              int  theLeft,
+                              int  theTop,
+                              int  theOrient = MENU_VERTICAL,
+                              bool theIsRootMenu = false)
+    : StGLMenu(theParent, theLeft, theTop, theOrient, theIsRootMenu) {}
+
+    ST_LOCAL virtual bool doScroll(const StScrollEvent& theEvent) ST_ATTR_OVERRIDE {
+        return StGLWidget::doScroll(theEvent); // skip StGLMenu
+    }
+
+};
+
 StGLOpenFile::StGLOpenFile(StGLWidget*     theParent,
                            const StString& theTitle,
                            const StString& theCloseText)
@@ -117,7 +137,7 @@ StGLOpenFile::StGLOpenFile(StGLWidget*     theParent,
     myContent->changeRectPx().top()   = aMarginTop;
     myContent->changeRectPx().left()  = myMarginLeft + myHotSizeX;
 
-    myList = new StGLMenu(myContent, 0, 0, StGLMenu::MENU_VERTICAL_COMPACT);
+    myList = new StGLOpenFileMenu(myContent, 0, 0, StGLMenu::MENU_VERTICAL_COMPACT);
     myList->setOpacity(1.0f, true);
     myList->setColor(StGLVec4(0.0f, 0.0f, 0.0f, 0.0f));
     myList->setItemWidthMin(myContent->getRectPx().width());
