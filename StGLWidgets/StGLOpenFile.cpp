@@ -355,7 +355,8 @@ void StGLOpenFile::openFolder(const StString& theFolder) {
     myFolder = new StFolder(aFolder);
     myFolder->init(myExtensions, 1, true);
     StString aPath = myFolder->getPath();
-    myCurrentPath->setText(StString("<b>Location:*</b>") + aPath + (!aPath.isEmpty() ? ST_FILE_SPLITTER : ""));
+    myCurrentPath->setText(StString("<b>Location:*</b>") + aPath
+                         + (!aPath.isEmpty() && !aPath.isEndsWith(SYS_FS_SPLITTER) ? ST_FILE_SPLITTER : ""));
 
     StString aPathUp = StFileNode::getFolderUp(aPath);
     if(!aPathUp.isEmpty()) {

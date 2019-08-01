@@ -72,15 +72,18 @@ class StNode : public StArrayList<StNode*> {
     }
 
     virtual StString getPath() const {
-        if(getParent() != NULL) {
-            StString parentPath = getParent()->getPath();
-            if(parentPath.isEmpty()) {
-                return subPath;
-            } else {
-                return parentPath + StString(SYS_FS_SPLITTER) + subPath;
-            }
+        if(getParent() == NULL) {
+            return subPath;
         }
-        return subPath;
+
+        const StString parentPath = getParent()->getPath();
+        if(parentPath.isEmpty()) {
+            return subPath;
+        }
+
+        return parentPath.isEndsWith(SYS_FS_SPLITTER)
+             ? parentPath + subPath
+             : parentPath + StString(SYS_FS_SPLITTER) + subPath;
     }
 
     bool operator==(const StNode& compare) const {
