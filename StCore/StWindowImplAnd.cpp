@@ -169,8 +169,9 @@ void StWindowImpl::onAndroidInput(const AInputEvent* theEvent,
             const float      aWinSizeY = aWinRect.height();
 
             // at least single point is defined
-            StPointD_t aPos0(double(AMotionEvent_getX(theEvent, 0)) / double(aWinSizeX),
-                             double(AMotionEvent_getY(theEvent, 0)) / double(aWinSizeY));
+            StPointD_t aPos0Px(AMotionEvent_getX(theEvent, 0), AMotionEvent_getY(theEvent, 0));
+            StPointD_t aPos0(double(aPos0Px.x()) / double(aWinSizeX),
+                             double(aPos0Px.y()) / double(aWinSizeY));
 
             myStEvent.Type      = stEvent_None;
             myStEvent.Base.Time = getEventTime(); /// int64_t AMotionEvent_getEventTime(theEvent);
@@ -283,6 +284,23 @@ void StWindowImpl::onAndroidInput(const AInputEvent* theEvent,
             } else if(anAction == AMOTION_EVENT_ACTION_UP) {
                 myStEvent.Type = stEvent_MouseUp;
                 signals.onMouseUp->emit(myStEvent.Button);
+            } else if(anAction == AMOTION_EVENT_ACTION_SCROLL) {
+                float aScrollX = AMotionEvent_getAxisValue(theEvent, AMOTION_EVENT_AXIS_HSCROLL, 0);
+                float aScrollY = AMotionEvent_getAxisValue(theEvent, AMOTION_EVENT_AXIS_VSCROLL, 0);
+                myStEvent.Type = stEvent_Scroll;
+                myStEvent.Scroll.init(myStEvent.Base.Time, myMousePt.x(), myMousePt.y(),
+                                      aScrollX, aScrollY, false);
+                if((myStEvent.Scroll.Time - myScrollAcc.Time) > 0.1
+                 || std::abs(aPos0Px.x() - myScrollAcc.PointX) > 10
+                 || std::abs(aPos0Px.y() - myScrollAcc.PointY) > 10) {
+                    myScrollAcc.reset();
+                }
+                myScrollAcc.Time = myStEvent.Scroll.Time;
+                myScrollAcc.PointX = aPos0Px.x();
+                myScrollAcc.PointY = aPos0Px.y();
+                myStEvent.Scroll.StepsX = myScrollAcc.accumulateStepsX(int(aScrollX * 1000.0), 1000);
+                myStEvent.Scroll.StepsY = myScrollAcc.accumulateStepsY(int(aScrollY * 1000.0), 1000);
+                signals.onScroll->emit(myStEvent.Scroll);
             }
             return;
         }
