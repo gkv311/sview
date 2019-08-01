@@ -140,6 +140,14 @@
 #define ST_M4A_MIME_STRING ST_M4A_MIME ":" ST_M4A_EXT ":" ST_M4A_DESC
 
 /**
+ *.insv - Insta360 Video (mp4 unstitched panorama)
+ */
+#define ST_INSV_MIME "video/x-insv"
+#define ST_INSV_DESC "Insta360 Video"
+#define ST_INSV_EXT  "insv"
+#define ST_INSV_MIME_STRING ST_INSV_MIME ":" ST_INSV_EXT ":" ST_INSV_DESC
+
+/**
  *.mov;*.qt  - QuickTime Video (Apple)
  */
 #define ST_MOV_MIME "video/quicktime"
@@ -328,6 +336,7 @@ ST_MP4_MIME_STRING ";" \
 ST_M4V_MIME_STRING ";" \
 ST_MP4V_MIME_STRING ";" \
 ST_M4A_MIME_STRING ";" \
+ST_INSV_MIME_STRING ";" \
 ST_MOV_MIME_STRING ";" \
 ST_QT_MIME_STRING ";" \
 ST_FLV_MIME_STRING ";" \

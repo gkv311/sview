@@ -68,6 +68,13 @@
 #define ST_J2K_DESC "J2K - JPEG 2000 image, lossy"
 
 /**
+ *.insp - Insta360 Image (jpeg unstitched panorama)
+ */
+#define ST_INSP_MIME "image/x-insp"
+#define ST_INSP_EXT  "insp"
+#define ST_INSP_DESC "INSP - Insta360 Image (JPEG)"
+
+/**
  *.png - Portable Network Graphics image file, lossless
  */
 #define ST_PNG_MIME "image/x-png"
@@ -217,6 +224,7 @@ ST_MPO_MIME_STRING ";" ST_X_MPO_MIME_STRING ";" \
 ST_JPG_MIME ":" ST_JPG_EXT ":" ST_JPEG_DESC ";" \
 ST_JPE_MIME ":" ST_JPE_EXT ":" ST_JPEG_DESC ";" \
 ST_JPEG_MIME ":" ST_JPEG_EXT ":" ST_JPEG_DESC ";" \
+ST_INSP_MIME ":" ST_INSP_EXT ":" ST_INSP_DESC ";" \
 ST_JP2_MIME ":" ST_JP2_EXT ":" ST_JP2_DESC ";" \
 ST_J2K_MIME ":" ST_J2K_EXT ":" ST_J2K_DESC ";" \
 ST_PNG_MIME ":" ST_PNG_EXT ":" ST_PNG_DESC ";" \
