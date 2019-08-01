@@ -1,6 +1,6 @@
 /**
  * StGLWidgets, small C++ toolkit for writing GUI using OpenGL.
- * Copyright © 2015-2017 Kirill Gavrilov <kirill@sview.ru>
+ * Copyright © 2015-2019 Kirill Gavrilov <kirill@sview.ru>
  *
  * Distributed under the Boost Software License, Version 1.0.
  * See accompanying file license-boost.txt or copy at
@@ -11,6 +11,8 @@
 
 #include <StGLWidgets/StGLMenu.h>
 #include <StGLWidgets/StGLMenuItem.h>
+#include <StGLWidgets/StGLMenuCheckbox.h>
+#include <StGLWidgets/StGLCheckbox.h>
 #include <StGLWidgets/StGLScrollArea.h>
 #include <StGLWidgets/StGLTextureButton.h>
 
@@ -109,8 +111,13 @@ StGLOpenFile::StGLOpenFile(StGLWidget*     theParent,
 : StGLMessageBox(theParent, theTitle, "",
                  theParent->getRoot()->scale(512), theParent->getRoot()->scale(400)),
   myCurrentPath(NULL),
+  myHotListContent(NULL),
   myHotList(NULL),
   myList(NULL),
+  myMainFilterCheck(NULL),
+  myExtraFilterCheck(NULL),
+  myToShowMainFilter(new StBoolParam(true)),
+  myToShowExtraFilter(new StBoolParam(false)),
   myHighlightColor(0.5f, 0.5f, 0.5f, 1.0f),
   myItemColor     (1.0f, 1.0f, 1.0f, 1.0f),
   myFileColor     (0.7f, 0.7f, 0.7f, 1.0f),
@@ -120,6 +127,9 @@ StGLOpenFile::StGLOpenFile(StGLWidget*     theParent,
   myIconSizeX(theParent->getRoot()->scale(16)) {
     myToAdjustY = false;
 
+    myToShowMainFilter ->signals.onChanged = stSlot(this, &StGLOpenFile::doFilterCheck);
+    myToShowExtraFilter->signals.onChanged = stSlot(this, &StGLOpenFile::doFilterCheck);
+
     int aMarginTop = myMarginTop + myRoot->scale(30);
     myCurrentPath = new StGLTextArea(this, myMarginLeft, myMarginTop, StGLCorner(ST_VCORNER_TOP, ST_HCORNER_LEFT),
                                      myContent->getRectPx().width(), myContent->getRectPx().height());
@@ -127,15 +137,17 @@ StGLOpenFile::StGLOpenFile(StGLWidget*     theParent,
                                   StGLTextFormatter::ST_ALIGN_Y_TOP);
     myCurrentPath->setTextColor(myRoot->getColorForElement(StGLRootWidget::Color_MessageText));
 
-    myHotList = new StGLMenu(this, 0, 0, StGLMenu::MENU_VERTICAL_COMPACT);
+    myContent->changeRectPx().top()  = aMarginTop;
+    myContent->changeRectPx().left() = myMarginLeft + myHotSizeX;
+
+    myHotListContent = new StGLScrollArea(this, myMarginLeft, aMarginTop,
+                                          StGLCorner(ST_VCORNER_TOP, ST_HCORNER_LEFT),
+                                          myHotSizeX, myContent->getRectPx().height());
+
+    myHotList = new StGLOpenFileMenu(myHotListContent, 0, 0, StGLMenu::MENU_VERTICAL_COMPACT);
     myHotList->setOpacity(1.0f, true);
     myHotList->setItemWidth(myHotSizeX);
     myHotList->setColor(StGLVec4(0.0f, 0.0f, 0.0f, 0.0f));
-    myHotList->changeRectPx().top()   = aMarginTop;
-    myHotList->changeRectPx().left()  = myMarginLeft;
-    myHotList->changeRectPx().right() = myMarginLeft + myHotSizeX;
-    myContent->changeRectPx().top()   = aMarginTop;
-    myContent->changeRectPx().left()  = myMarginLeft + myHotSizeX;
 
     myList = new StGLOpenFileMenu(myContent, 0, 0, StGLMenu::MENU_VERTICAL_COMPACT);
     myList->setOpacity(1.0f, true);
@@ -252,13 +264,62 @@ StGLOpenFile::~StGLOpenFile() {
     }
 }
 
-void StGLOpenFile::setMimeList(const StMIMEList& theFilter) {
-    myFilter     = theFilter;
-    myExtensions = theFilter.getExtensionsList();
+void StGLOpenFile::setMimeList(const StMIMEList& theFilter,
+                               const StString& theName,
+                               const bool theIsExtra) {
+    if(theIsExtra) {
+        myExtraFilter = theFilter;
+    } else {
+        myFilter = theFilter;
+    }
+
+    StGLMenuCheckbox*& aFilterWidget = theIsExtra ? myExtraFilterCheck : myMainFilterCheck;
+    if(!theName.isEmpty() && aFilterWidget == NULL) {
+        StHandle<StBoolParam>& aFilterParam = theIsExtra ? myToShowExtraFilter : myToShowMainFilter;
+        aFilterWidget = new StGLMenuCheckbox(myHotList, aFilterParam);
+
+        StGLCheckbox* aCheckBox = aFilterWidget->getCheckbox();
+        aCheckBox->setColor(myHotColor);
+        aCheckBox->setCorner(StGLCorner(ST_VCORNER_CENTER, ST_HCORNER_RIGHT));
+        aCheckBox->changeRectPx().moveLeftTo(-aCheckBox->getRectPx().left());
+
+        aFilterWidget->changeMargins().left  = -(myMarginX + myIconSizeX + myMarginX); // TODO weird logic
+        aFilterWidget->setupStyle(StFTFont::Style_Italic);
+        aFilterWidget->setText(theName);
+        aFilterWidget->setupAlignment(StGLTextFormatter::ST_ALIGN_X_RIGHT, StGLTextFormatter::ST_ALIGN_Y_CENTER);
+        aFilterWidget->setTextColor(myHotColor);
+        aFilterWidget->setHilightColor(myHighlightColor);
+    }
+    if(aFilterWidget != NULL) {
+        aFilterWidget->setText(theName);
+    }
+    initExtensions();
+}
+
+void StGLOpenFile::initExtensions() {
+    myExtensions.clear();
+    StArrayList<StString> aList1 = myToShowMainFilter ->getValue() ? myFilter.getExtensionsList()      : StArrayList<StString>(1);
+    StArrayList<StString> aList2 = myToShowExtraFilter->getValue() ? myExtraFilter.getExtensionsList() : StArrayList<StString>(1);
+    size_t anExtent = aList1.size() + aList2.size();
+    myExtensions.initList(anExtent);
+    for(size_t anExtIter = 0; anExtIter < aList1.size(); ++anExtIter) {
+        myExtensions.add(aList1[anExtIter]);
+    }
+    for(size_t anExtIter = 0; anExtIter < aList2.size(); ++anExtIter) {
+        myExtensions.add(aList2[anExtIter]);
+    }
 }
 
 void StGLOpenFile::doHotItemClick(const size_t theItemId) {
     myItemToLoad = myHotPaths[theItemId];
+}
+
+void StGLOpenFile::doFilterCheck(const bool ) {
+    initExtensions();
+    if(!myFolder.isNull()) {
+        StString aPath = myFolder->getPath();
+        openFolder(aPath);
+    }
 }
 
 void StGLOpenFile::doFileItemClick(const size_t theItemId) {
@@ -314,6 +375,7 @@ void StGLOpenFile::addHotItem(const StString& theTarget,
 
     StGLMenuItem* anItem = new StGLPassiveMenuItem(myHotList);
     setItemIcon(anItem, myHotColor, true);
+    anItem->setupStyle(StFTFont::Style_Bold);
     anItem->setText(aName);
     anItem->setTextColor(myHotColor);
     anItem->setHilightColor(myHighlightColor);
@@ -323,7 +385,11 @@ void StGLOpenFile::addHotItem(const StString& theTarget,
     int aSizeX = anItem->getMargins().left + anItem->computeTextWidth() + anItem->getMargins().right;
     myHotSizeX = stMax(myHotSizeX, aSizeX);
 
-    myContent->changeRectPx().left() = myMarginLeft + myHotSizeX;
+    myHotListContent->changeRectPx().right() = myHotListContent->getRectPx().left() + myHotSizeX;
+    if(myMainFilterCheck != NULL) {
+        myMainFilterCheck->changeRectPx().right() = myHotSizeX;
+    }
+    myContent->changeRectPx().left() = myHotListContent->getRectPx().right();
     myList->setItemWidthMin(myContent->getRectPx().width());
 }
 

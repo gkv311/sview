@@ -1447,8 +1447,6 @@ void StMoviePlayerGUI::createImageAdjustments() {
 
 void StMoviePlayerGUI::doOpenFile(const size_t ) {
     StGLOpenFile* aDialog = new StGLOpenFile(this, tr(DIALOG_OPEN_FILE), tr(BUTTON_CLOSE));
-    aDialog->setMimeList(myPlugin->myVideo->getMimeListVideo());
-
     const StString anSdCardPath = getResourceManager()->getFolder(StResourceManager::FolderId_SdCard);
     if(!anSdCardPath.isEmpty()) {
         StString aFolder, aName;
@@ -1460,6 +1458,9 @@ void StMoviePlayerGUI::doOpenFile(const size_t ) {
     aDialog->addHotItem(getResourceManager()->getFolder(StResourceManager::FolderId_Videos));
     aDialog->addHotItem(getResourceManager()->getFolder(StResourceManager::FolderId_Music));
     aDialog->signals.onFileSelected = stSlot(myPlugin, &StMoviePlayer::doOpen1FileFromGui);
+
+    aDialog->setMimeList(myPlugin->myVideo->getMimeListVideo(),  "Videos", false);
+    aDialog->setMimeList(myPlugin->myVideo->getMimeListImages(), "Images", true);
 
     if(myPlugin->params.lastFolder.isEmpty()) {
         StHandle<StFileNode> aCurrFile = myPlugin->myPlayList->getCurrentFile();

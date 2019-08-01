@@ -23,6 +23,11 @@ class StGLMenuCheckbox : public StGLMenuItem {
     ST_CPPEXPORT StGLMenuCheckbox(StGLMenu* theParent,
                                   const StHandle<StBoolParam>& theTrackedValue);
 
+    /**
+     * Return checkbox widget.
+     */
+    StGLCheckbox* getCheckbox() { return myCheckbox; }
+
         private: //!< callback Slots (private overriders)
 
     ST_LOCAL void doItemClick(const size_t );

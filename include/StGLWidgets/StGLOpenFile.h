@@ -1,6 +1,6 @@
 /**
  * StGLWidgets, small C++ toolkit for writing GUI using OpenGL.
- * Copyright © 2015-2017 Kirill Gavrilov <kirill@sview.ru>
+ * Copyright © 2015-2019 Kirill Gavrilov <kirill@sview.ru>
  *
  * Distributed under the Boost Software License, Version 1.0.
  * See accompanying file license-boost.txt or copy at
@@ -13,9 +13,11 @@
 #include <StGLWidgets/StGLMessageBox.h>
 #include <StGLWidgets/StGLRootWidget.h>
 #include <StFile/StMIMEList.h>
+#include <StSettings/StParam.h>
 
 class StGLMenu;
 class StGLMenuItem;
+class StGLMenuCheckbox;
 
 /**
  * Widget for file system navigation.
@@ -39,7 +41,9 @@ class StGLOpenFile : public StGLMessageBox {
     /**
      * Define file filter.
      */
-    ST_CPPEXPORT void setMimeList(const StMIMEList& theFilter);
+    ST_CPPEXPORT void setMimeList(const StMIMEList& theFilter,
+                                  const StString& theName = "",
+                                  const bool theIsExtra = false);
 
     /**
      * Add system drives to folders' list.
@@ -81,6 +85,11 @@ class StGLOpenFile : public StGLMessageBox {
     ST_CPPEXPORT void doHotItemClick(const size_t theItemId);
 
     /**
+     * Handle filter check.
+     */
+    ST_CPPEXPORT void doFilterCheck(const bool theIsChecked);
+
+    /**
      * Handle item click event - just remember item id.
      */
     ST_CPPEXPORT void doFileItemClick(const size_t theItemId);
@@ -96,16 +105,27 @@ class StGLOpenFile : public StGLMessageBox {
     ST_CPPEXPORT virtual bool tryUnClick(const StClickEvent& theEvent,
                                          bool&               theIsItemUnclicked) ST_ATTR_OVERRIDE;
 
+    /**
+     * Reset extension list.
+     */
+    ST_CPPEXPORT void initExtensions();
+
         protected: //! @name class fields
 
     StHandle<StGLTextureArray> myTextureFolder;
     StHandle<StGLTextureArray> myTextureFile;
     StGLTextArea*              myCurrentPath;
+    StGLScrollArea*            myHotListContent;
     StGLMenu*                  myHotList;       //!< widget containing the list of predefined libraries
     StGLMenu*                  myList;          //!< widget containing the file list of currently opened folder
+    StGLMenuCheckbox*          myMainFilterCheck;  //!< main  file filter checkbox
+    StGLMenuCheckbox*          myExtraFilterCheck; //!< extra file filter checkbox
+    StHandle<StBoolParam>      myToShowMainFilter;
+    StHandle<StBoolParam>      myToShowExtraFilter;
     StArrayList<StString>      myHotPaths;      //!< array of hot-links
     StHandle<StFolder>         myFolder;        //!< currently opened folder
     StMIMEList                 myFilter;        //!< file filter
+    StMIMEList                 myExtraFilter;   //!< extra file filter
     StArrayList<StString>      myExtensions;    //!< extensions filter
     StString                   myItemToLoad;    //!< new item to open
 
