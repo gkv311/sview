@@ -1456,6 +1456,7 @@ void StMoviePlayerGUI::doOpenFile(const size_t ) {
         aDialog->addHotItem(anSdCardPath, stUtfTools::isInteger(aName) ? (StString("sdcard") + aName) : aName);
     }
     aDialog->addHotItem(getResourceManager()->getFolder(StResourceManager::FolderId_Downloads));
+    aDialog->addHotItem(getResourceManager()->getFolder(StResourceManager::FolderId_Documents));
     aDialog->addHotItem(getResourceManager()->getFolder(StResourceManager::FolderId_Videos));
     aDialog->addHotItem(getResourceManager()->getFolder(StResourceManager::FolderId_Music));
     aDialog->signals.onFileSelected = stSlot(myPlugin, &StMoviePlayer::doOpen1FileFromGui);

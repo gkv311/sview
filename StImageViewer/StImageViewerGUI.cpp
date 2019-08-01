@@ -1171,6 +1171,7 @@ void StImageViewerGUI::doOpenFile(const size_t ) {
         aDialog->addHotItem(anSdCardPath, stUtfTools::isInteger(aName) ? (StString("sdcard") + aName) : aName);
     }
     aDialog->addHotItem(getResourceManager()->getFolder(StResourceManager::FolderId_Downloads));
+    aDialog->addHotItem(getResourceManager()->getFolder(StResourceManager::FolderId_Documents));
     aDialog->addHotItem(getResourceManager()->getFolder(StResourceManager::FolderId_Pictures));
     aDialog->addHotItem(getResourceManager()->getFolder(StResourceManager::FolderId_Photos));
     aDialog->signals.onFileSelected = stSlot(myPlugin, &StImageViewer::doOpen1FileFromGui);

@@ -80,10 +80,13 @@ class StAssetResource : public StResource {
 
 StResourceManager::StResourceManager(const StString& theAppName)
 : myAppName(theAppName),
-  myUserHomeFolder(StProcess::getEnv(StString("HOME")) + SYS_FS_SPLITTER),
+  myUserHomeFolder(StProcess::getEnv(StString("HOME"))),
   myResFolder(StProcess::getStShareFolder()),
   myLang("en") {
-
+#if !defined(__ANDROID__)
+    myFolders[FolderId_Documents] = myUserHomeFolder;
+#endif
+    myUserHomeFolder += SYS_FS_SPLITTER;
 #if defined(_WIN32)
     StString anAppDataLocal, anAppDataLocalLow, anAppDataRoam;
     wchar_t* aPath = NULL;
@@ -101,6 +104,7 @@ StResourceManager::StResourceManager(const StString& theAppName)
     }
     if(::SHGetKnownFolderPath(FOLDERID_Documents, 0, NULL, &aPath) == S_OK) {
         myUserHomeFolder.fromUnicode(aPath);
+        myFolders[FolderId_Documents] = myUserHomeFolder;
         myUserHomeFolder += "\\";
         ::CoTaskMemFree(aPath);
     }

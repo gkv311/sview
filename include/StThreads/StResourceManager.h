@@ -93,6 +93,7 @@ class StResourceManager {
      */
     enum FolderId {
         FolderId_SdCard,
+        FolderId_Documents,
         FolderId_Downloads,
         FolderId_Pictures,
         FolderId_Photos,
