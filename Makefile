@@ -20,7 +20,7 @@ HAVE_MONGOOSE := -DST_HAVE_MONGOOSE
 # this, however, might lead to incomplete build on .java change without make clean.
 .SUFFIXES: .class .java
 .java.class:
-	$(JAVA_HOME)/bin/javac -source 1.7 -target 1.7 -d $(BUILD_ROOT)/java/classes -classpath $(ANDROID_PLATFORM) -sourcepath $(SRCDIR)/sview/src $<
+	$(JAVA_HOME)/bin/javac -source 1.7 -target 1.7 -d $(BUILD_ROOT)/java/classes -classpath $(ANDROID_PLATFORM) -sourcepath $(SRCDIR)/sview/src:$(BUILD_ROOT)/java/gen $<
 	cp -f $(BUILD_ROOT)/java/classes/com/sview/$(@F) $@
 
 TARGET_OS = linux
@@ -307,6 +307,7 @@ install_android:
 	cp -f -r $(BUILD_ROOT)/shaders/*       $(aDestAndroid)/assets/shaders/
 	cp -f -r $(BUILD_ROOT)/textures/*      $(aDestAndroid)/assets/textures/
 	cp -f    license-gpl-3.0.txt           $(aDestAndroid)/assets/info/license.txt
+	$(ANDROID_BUILD_TOOLS)/aapt package -v -f -m -S $(SRCDIR)/sview/res -J $(BUILD_ROOT)/java/gen -M $(SRCDIR)/sview/AndroidManifest.xml -I $(ANDROID_PLATFORM)
 
 install_android_libs: $(aStShared) $(aStGLWidgets) $(aStCore) $(aStOutAnaglyph) $(aStOutInterlace) $(aStOutDistorted) $(aStImageViewer) $(aStMoviePlayer) $(sViewAndroid)
 	cp -f $(BUILD_ROOT)/$(aStShared)       $(aDestAndroid)/lib/$(ANDROID_EABI)/

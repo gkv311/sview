@@ -493,18 +493,34 @@ void StWindowImpl::processEvents() {
 
     // check onNewIntent event
     StString aDndFile;
+    myParentWin->setWindowTitle(myWindowTitle);
     myParentWin->setHardwareStereoOn(myToEnableStereoHW);
     myParentWin->setTrackOrientation(myToTrackOrient);
     myParentWin->setHideSystemBars(myToHideStatusBar, myToHideNavBar);
     myParentWin->fetchState(aDndFile, myQuaternion, myToSwapEyesHW, myKeysState);
     if(!aDndFile.isEmpty()) {
-        std::vector<const char*> aDndList;
-        aDndList.push_back(aDndFile.toCString());
-        myStEvent.Type = stEvent_FileDrop;
-        myStEvent.DNDrop.Time = getEventTime();
-        myStEvent.DNDrop.NbFiles = aDndList.size();
-        myStEvent.DNDrop.Files   = &aDndList[0];
-        myEventsBuffer.append(myStEvent);
+        // notice - unpress event will NOT be generated!
+        myStEvent.Type      = stEvent_KeyDown;
+        myStEvent.Key.Time  = getEventTime();
+        myStEvent.Key.Flags = ST_VF_NONE;
+        if(aDndFile == "ACTION_PLAY_PREV") {
+            myStEvent.Key.VKey  = ST_VK_MEDIA_PREV_TRACK;
+            myEventsBuffer.append(myStEvent);
+        } else if(aDndFile == "ACTION_PLAY_NEXT") {
+            myStEvent.Key.VKey  = ST_VK_MEDIA_NEXT_TRACK;
+            myEventsBuffer.append(myStEvent);
+        } else if(aDndFile == "ACTION_PLAY_PAUSE") {
+            myStEvent.Key.VKey  = ST_VK_MEDIA_PLAY_PAUSE;
+            myEventsBuffer.append(myStEvent);
+        } else {
+            std::vector<const char*> aDndList;
+            aDndList.push_back(aDndFile.toCString());
+            myStEvent.Type = stEvent_FileDrop;
+            myStEvent.DNDrop.Time = getEventTime();
+            myStEvent.DNDrop.NbFiles = aDndList.size();
+            myStEvent.DNDrop.Files   = &aDndList[0];
+            myEventsBuffer.append(myStEvent);
+        }
     }
 
     updateActiveState();

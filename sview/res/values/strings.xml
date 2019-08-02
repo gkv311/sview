@@ -4,4 +4,5 @@
     <string name="app_image_name">sView - Image Viewer</string>
     <string name="app_movie_name">sView - Media Player</string>
     <string name="app_crash_name">sView - Crash Report</string>
+    <string name="app_movie_service_desc">sView - service playing audio in background</string>
 </resources>

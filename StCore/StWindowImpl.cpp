@@ -622,7 +622,7 @@ void StWindowImpl::updateBlockSleep() {
     }
     if(myParentWin != NULL) {
         myParentWin->setWindowFlags(aFlags);
-        myParentWin->setWakeLock(toWakeLock);
+        myParentWin->setWakeLock(myWindowTitle, toWakeLock);
     }
 #elif defined(__linux__)
     if(attribs.ToBlockSleepDisplay) { // || attribs.ToBlockSleepSystem

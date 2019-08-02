@@ -8,6 +8,12 @@
                  android:hasCode="true"
                  android:icon="@drawable/ic_launcher">
         <uses-library android:name="com.s3dv.s3dvsurface" android:required="false" />
+
+        <!-- Movie Player foreground service for background audio playback  -->
+        <service android:name="com.sview.StMovieService"
+                 android:exported="false"
+                 android:description="@string/app_movie_service_desc" />
+
         <!-- Movie Player -->
         <activity android:name="com.sview.StMovieActivity"
                   android:label="@string/app_movie_name"

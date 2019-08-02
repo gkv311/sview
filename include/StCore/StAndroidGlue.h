@@ -160,9 +160,14 @@ class StAndroidGlue {
     ST_CPPEXPORT void setWindowFlags(const int theFlags);
 
     /**
+     * Setup window title.
+     */
+    ST_CPPEXPORT void setWindowTitle(const StString& theTitle);
+
+    /**
      * Set/release WAKE_LOCK.
      */
-    ST_CPPEXPORT void setWakeLock(bool theToLock);
+    ST_CPPEXPORT void setWakeLock(const StString& theTitle, bool theToLock);
 
     /**
      * Turn stereo output on using device-specific API.
@@ -424,6 +429,8 @@ class StAndroidGlue {
     AInputQueue*            myInputQueuePending;
     ANativeWindow*          myWindow;            //!< native window to draw into
     ANativeWindow*          myWindowPending;
+    StString                myWindowTitle;       //!< window title
+    StString                myWakeLockTitle;     //!< wake lock title
     bool                    myIsChangingSurface; //!< flag indicating surface changing state
     bool                    myIsWakeLockSet;     //!< flag indicating WAKE_LOCK enabled state
     int                     myWindowFlags;       //!< active window flags

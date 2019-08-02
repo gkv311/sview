@@ -149,7 +149,7 @@ public class StActivity extends NativeActivity implements SensorEventListener {
         askUserPermission(android.Manifest.permission.WRITE_EXTERNAL_STORAGE, null);
 
         android.os.PowerManager aPowerManager = (android.os.PowerManager)getSystemService(Context.POWER_SERVICE);
-        myWakeLock = aPowerManager.newWakeLock(android.os.PowerManager.PARTIAL_WAKE_LOCK, "PartialWakeLock");
+        myWakeLock = aPowerManager.newWakeLock(android.os.PowerManager.PARTIAL_WAKE_LOCK, "sView.PartialWakeLock");
 
         mySensorMgr = (SensorManager )getSystemService(Context.SENSOR_SERVICE);
         mySensorOri = mySensorMgr.getDefaultSensor(Sensor.TYPE_ROTATION_VECTOR);
@@ -363,6 +363,42 @@ public class StActivity extends NativeActivity implements SensorEventListener {
 //region Auxiliary methods
 
     /**
+     * Action to play/pause.
+     */
+    public static final String THE_ACTION_PLAY_PAUSE = "ACTION_PLAY_PAUSE";
+
+    /**
+     * Action to open previous item in playlist.
+     */
+    public static final String THE_ACTION_PLAY_PREV = "ACTION_PLAY_PREV";
+
+    /**
+     * Action to open next item in playlist.
+     */
+    public static final String THE_ACTION_PLAY_NEXT = "ACTION_PLAY_NEXT";
+
+    /**
+     * Set playback action.
+     */
+    public boolean setPlaybackAction(Intent theIntent) {
+        if(myCppGlue == 0 || theIntent == null) {
+            return false;
+        }
+
+        if(THE_ACTION_PLAY_PAUSE.equals(theIntent.getAction())) {
+            cppSetOpenPath(myCppGlue, THE_ACTION_PLAY_PAUSE, "", false);
+            return true;
+        } else if(THE_ACTION_PLAY_PREV.equals(theIntent.getAction())) {
+            cppSetOpenPath(myCppGlue, THE_ACTION_PLAY_PREV, "", false);
+            return true;
+        } else if(THE_ACTION_PLAY_NEXT.equals(theIntent.getAction())) {
+            cppSetOpenPath(myCppGlue, THE_ACTION_PLAY_NEXT, "", false);
+            return true;
+        }
+        return false;
+    }
+
+    /**
      * Read the open path from current intent and nullify it.
      * This method is called by StAndroidGlue from C++.
      */
@@ -377,6 +413,9 @@ public class StActivity extends NativeActivity implements SensorEventListener {
         }
         if(anIntent == null) {
             cppSetOpenPath(myCppGlue, "", "", false);
+            return;
+        }
+        if(setPlaybackAction(anIntent)) {
             return;
         }
 
@@ -514,16 +553,27 @@ public class StActivity extends NativeActivity implements SensorEventListener {
     }
 
     /**
+     * Set new activity title.
+     */
+    public void setWindowTitle(String theTitle) {
+        final String aTitle = theTitle;
+        this.runOnUiThread (new Runnable() { public void run() {
+            //setTitle(aTitle); // sets window title, which we don't have...
+            setTaskDescription(new android.app.ActivityManager.TaskDescription(aTitle));
+        }});
+    }
+
+    /**
      * Keep CPU on.
      */
-    public void setPartialWakeLockOn(boolean theToLock) {
+    public void setPartialWakeLockOn(String theTitle, boolean theToLock) {
         if(myWakeLock == null) {
             return;
         }
 
         if(theToLock) {
             myWakeLock.acquire();
-        } else {
+        } else if(myWakeLock.isHeld()) {
             myWakeLock.release();
         }
     }

@@ -823,16 +823,34 @@ void StAndroidGlue::setWindowFlags(const int theFlags) {
     ANativeActivity_setWindowFlags(myActivity, aFlagsToAdd, aFlagsToRemove);
 }
 
-void StAndroidGlue::setWakeLock(bool theToLock) {
-    if(myIsWakeLockSet == theToLock
+void StAndroidGlue::setWakeLock(const StString& theTitle, bool theToLock) {
+    if((myIsWakeLockSet == theToLock
+     && myWakeLockTitle == theTitle)
     || myThJniEnv == NULL) {
         return;
     }
 
     jclass    aJClassActivity = myThJniEnv->GetObjectClass(myActivity->clazz);
-    jmethodID aJMet           = myThJniEnv->GetMethodID(aJClassActivity, "setPartialWakeLockOn", "(Z)V");
-    myThJniEnv->CallVoidMethod(myActivity->clazz, aJMet, (jboolean )(theToLock ? JNI_TRUE : JNI_FALSE));
+    jmethodID aJMet           = myThJniEnv->GetMethodID(aJClassActivity, "setPartialWakeLockOn", "(Ljava/lang/String;Z)V");
+    jstring   aJStrTitle      = myThJniEnv->NewStringUTF(theTitle.toCString());
+    myThJniEnv->CallVoidMethod(myActivity->clazz, aJMet, aJStrTitle, (jboolean )(theToLock ? JNI_TRUE : JNI_FALSE));
     myIsWakeLockSet = theToLock;
+    myThJniEnv->DeleteLocalRef(aJStrTitle);
+    myWakeLockTitle = theTitle;
+}
+
+void StAndroidGlue::setWindowTitle(const StString& theTitle) {
+    if(myWindowTitle == theTitle
+    || myThJniEnv == NULL) {
+        return;
+    }
+
+    jclass    aJClassActivity = myThJniEnv->GetObjectClass(myActivity->clazz);
+    jmethodID aJMet           = myThJniEnv->GetMethodID(aJClassActivity, "setWindowTitle", "(Ljava/lang/String;)V");
+    jstring   aJStrTitle      = myThJniEnv->NewStringUTF(theTitle.toCString());
+    myThJniEnv->CallVoidMethod(myActivity->clazz, aJMet, aJStrTitle);
+    myThJniEnv->DeleteLocalRef(aJStrTitle);
+    myWindowTitle = theTitle;
 }
 
 void StAndroidGlue::setHardwareStereoOn(const bool theToEnable) {
