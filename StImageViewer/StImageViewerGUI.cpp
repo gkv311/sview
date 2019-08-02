@@ -135,34 +135,34 @@ void StImageViewerGUI::createUpperToolbar() {
     const int      anIconStep = scale(48);
     aButtonMargins.extend(scale(8));
 
-    myPanelUpper = new StGLContainer(this, 0, 0, StGLCorner(ST_VCORNER_TOP, ST_HCORNER_LEFT), scale(4096), scale(128));
+    myPanelUpper = new StGLContainer(this, aLeft, aTop, StGLCorner(ST_VCORNER_TOP, ST_HCORNER_LEFT), scale(4096), scale(128));
 
     // append textured buttons
-    myBtnOpen   = new StGLTextureButton(myPanelUpper, aLeft + (aBtnIter++) * anIconStep, aTop);
+    myBtnOpen   = new StGLTextureButton(myPanelUpper, (aBtnIter++) * anIconStep, 0);
     myBtnOpen->signals.onBtnClick.connect(myPlugin, &StImageViewer::doOpen1FileAction);
     myBtnOpen->setTexturePath(iconTexture(stCString("actionOpen"), anIconSize));
     myBtnOpen->setDrawShadow(true);
     myBtnOpen->changeMargins() = aButtonMargins;
 
-    myBtnPrev   = new StGLTextureButton(myPanelUpper, aLeft + (aBtnIter++) * anIconStep, aTop);
+    myBtnPrev   = new StGLTextureButton(myPanelUpper, (aBtnIter++) * anIconStep, 0);
     myBtnPrev->signals.onBtnClick.connect(myPlugin, &StImageViewer::doListPrev);
     myBtnPrev->setTexturePath(iconTexture(stCString("actionBack"), anIconSize));
     myBtnPrev->setDrawShadow(true);
     myBtnPrev->changeMargins() = aButtonMargins;
 
-    myBtnNext   = new StGLTextureButton(myPanelUpper, aLeft + (aBtnIter++) * anIconStep, aTop);
+    myBtnNext   = new StGLTextureButton(myPanelUpper, (aBtnIter++) * anIconStep, 0);
     myBtnNext->signals.onBtnClick.connect(myPlugin, &StImageViewer::doListNext);
     myBtnNext->setTexturePath(iconTexture(stCString("actionNext"), anIconSize));
     myBtnNext->setDrawShadow(true);
     myBtnNext->changeMargins() = aButtonMargins;
 
-    myBtnInfo = new StGLTextureButton(myPanelUpper, aLeft + (aBtnIter++) * anIconStep, aTop);
+    myBtnInfo = new StGLTextureButton(myPanelUpper, (aBtnIter++) * anIconStep, 0);
     myBtnInfo->signals.onBtnClick += stSlot(myPlugin, &StImageViewer::doAboutImage);
     myBtnInfo->setTexturePath(iconTexture(stCString("actionInfo"),  anIconSize));
     myBtnInfo->setDrawShadow(true);
     myBtnInfo->changeMargins() = aButtonMargins;
 
-    StGLTextureButton* aSrcBtn = new StGLTextureButton(myPanelUpper, aLeft + (aBtnIter++) * anIconStep, aTop,
+    StGLTextureButton* aSrcBtn = new StGLTextureButton(myPanelUpper, (aBtnIter++) * anIconStep, 0,
                                                        StGLCorner(ST_VCORNER_TOP, ST_HCORNER_LEFT), StFormat_NB);
     aSrcBtn->changeMargins() = aButtonMargins;
     aSrcBtn->signals.onBtnClick += stSlot(this, &StImageViewerGUI::doDisplayStereoFormatCombo);
@@ -188,7 +188,7 @@ void StImageViewerGUI::createUpperToolbar() {
     myBtnSwapLR = new StGLCheckboxTextured(myPanelUpper, myImage->params.SwapLR,
                                            iconTexture(stCString("actionSwapLROff"), anIconSize),
                                            iconTexture(stCString("actionSwapLROn"),  anIconSize),
-                                           aLeft + (aBtnIter++) * anIconStep, aTop,
+                                           (aBtnIter++) * anIconStep, 0,
                                            StGLCorner(ST_VCORNER_TOP, ST_HCORNER_LEFT));
     myBtnSwapLR->setDrawShadow(true);
     myBtnSwapLR->changeMargins() = aButtonMargins;
@@ -197,7 +197,7 @@ void StImageViewerGUI::createUpperToolbar() {
     myBtnPanorama = new StGLCheckboxTextured(myPanelUpper, aTrackedPano,
                                              iconTexture(stCString("actionPanoramaOff"), anIconSize),
                                              iconTexture(stCString("actionPanorama"),    anIconSize),
-                                             aLeft + (aBtnIter++) * anIconStep, aTop,
+                                             (aBtnIter++) * anIconStep, 0,
                                              StGLCorner(ST_VCORNER_TOP, ST_HCORNER_LEFT));
     myBtnPanorama->signals.onBtnClick += stSlot(this, &StImageViewerGUI::doPanoramaCombo);
     myBtnPanorama->setDrawShadow(true);
@@ -206,7 +206,7 @@ void StImageViewerGUI::createUpperToolbar() {
     myBtnAdjust = new StGLCheckboxTextured(myPanelUpper, myPlugin->params.ToShowAdjustImage,
                                            iconTexture(stCString("actionColorAdjustOff"), anIconSize),
                                            iconTexture(stCString("actionColorAdjust"),    anIconSize),
-                                           aLeft + (aBtnIter++) * anIconStep, aTop,
+                                           (aBtnIter++) * anIconStep, 0,
                                            StGLCorner(ST_VCORNER_TOP, ST_HCORNER_LEFT));
     myBtnAdjust->setDrawShadow(true);
     myBtnAdjust->changeMargins() = aButtonMargins;
@@ -1506,7 +1506,20 @@ void StImageViewerGUI::stglResize(const StGLBoxPx&  theViewPort,
                                   float theAspect) {
     const int aNewSizeX  = theViewPort.width();
     const int aNewSizeY  = theViewPort.height();
-    const int aWorkRight = stMax(aNewSizeX - theMargins.right - theMargins.left, 2);
+    int aGapTopX = 0, aGapTopY = 0, aGapBotX = 0, aGapBotY = 0;
+    if(isMobile()) {
+        // add gap for hidden system navigation buttons
+        static const int THE_NAVIGATION_GAPX = 32;
+        static const int THE_NAVIGATION_GAPY = 16;
+        if(theAspect < 9.0 / 16.0 && theAspect > 0.0) {
+            aGapTopY = aGapBotY = stMax(0, scale(stMin(THE_NAVIGATION_GAPY, int((1.0 / theAspect * 360) - 360 * 2))));
+        } else if(theAspect > 9.0 / 16.0) {
+            aGapTopX = aGapBotX = stMax(0, scale(stMin(THE_NAVIGATION_GAPX, int((theAspect * 360) - 360 * 2))));
+        }
+    } else {
+        aGapTopY = scale(DISPL_Y_REGION_UPPER);
+        aGapTopX = scale(DISPL_X_REGION_UPPER);
+    }
 
     // image should fit entire view
     myImage->changeRectPx().top()    = -theMargins.top;
@@ -1515,12 +1528,16 @@ void StImageViewerGUI::stglResize(const StGLBoxPx&  theViewPort,
     myImage->changeRectPx().right()  = -theMargins.left + aNewSizeX;
 
     if(myPanelUpper != NULL) {
-        myPanelUpper->changeRectPx().right() = aWorkRight;
+        myPanelUpper->changeRectPx().top()   = aGapTopY;
+        myPanelUpper->changeRectPx().left()  = aGapTopX;
+        myPanelUpper->changeRectPx().right() = aGapTopX + stMax(aNewSizeX - theMargins.right - theMargins.left - 2 * aGapTopX, 2);
         myIsMinimalGUI = (myWindow->isMovable() || myWindow->hasFullscreenMode()) && !isMobile()
                      && (aNewSizeY < scale(400) || aNewSizeX < scale(400));
     }
     if(myPanelBottom != NULL) {
-        myPanelBottom->changeRectPx().right() = aWorkRight;
+        myPanelBottom->changeRectPx().top()   = -aGapBotY;
+        myPanelBottom->changeRectPx().left()  = aGapBotX;
+        myPanelBottom->changeRectPx().right() = aGapBotX + stMax(aNewSizeX - theMargins.right - theMargins.left - 2 * aGapBotX, 2);
     }
     StGLRootWidget::stglResize(theViewPort, theMargins, theAspect);
 }

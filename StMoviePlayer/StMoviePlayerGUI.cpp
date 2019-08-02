@@ -130,22 +130,22 @@ void StMoviePlayerGUI::createUpperToolbar() {
     const int      anIconStep = scale(48);
     aButtonMargins.extend(scale(8));
 
-    myPanelUpper = new StGLContainer(this, 0, 0, StGLCorner(ST_VCORNER_TOP, ST_HCORNER_LEFT), scale(4096), scale(128));
+    myPanelUpper = new StGLContainer(this, aLeft, aTop, StGLCorner(ST_VCORNER_TOP, ST_HCORNER_LEFT), scale(4096), scale(128));
 
     // append the textured buttons
-    myBtnOpen = new StGLTextureButton(myPanelUpper, aLeft + (aBtnIter++) * anIconStep, aTop);
+    myBtnOpen = new StGLTextureButton(myPanelUpper, (aBtnIter++) * anIconStep, 0);
     myBtnOpen->signals.onBtnClick.connect(myPlugin, &StMoviePlayer::doOpen1FileAction);
     myBtnOpen->setTexturePath(iconTexture(stCString("actionOpen"), anIconSize));
     myBtnOpen->setDrawShadow(true);
     myBtnOpen->changeMargins() = aButtonMargins;
 
-    myBtnInfo = new StGLTextureButton(myPanelUpper, aLeft + (aBtnIter++) * anIconStep, aTop);
+    myBtnInfo = new StGLTextureButton(myPanelUpper, (aBtnIter++) * anIconStep, 0);
     myBtnInfo->signals.onBtnClick += stSlot(myPlugin, &StMoviePlayer::doAboutFile);
     myBtnInfo->setTexturePath(iconTexture(stCString("actionInfo"),  anIconSize));
     myBtnInfo->setDrawShadow(true);
     myBtnInfo->changeMargins() = aButtonMargins;
 
-    StGLTextureButton* aSrcBtn = new StGLTextureButton(myPanelUpper, aLeft + (aBtnIter++) * anIconStep, aTop,
+    StGLTextureButton* aSrcBtn = new StGLTextureButton(myPanelUpper, (aBtnIter++) * anIconStep, 0,
                                                        StGLCorner(ST_VCORNER_TOP, ST_HCORNER_LEFT), StFormat_NB + 1);
     aSrcBtn->changeMargins() = aButtonMargins;
     aSrcBtn->signals.onBtnClick += stSlot(this, &StMoviePlayerGUI::doDisplayStereoFormatCombo);
@@ -172,7 +172,7 @@ void StMoviePlayerGUI::createUpperToolbar() {
     myBtnSwapLR = new StGLCheckboxTextured(myPanelUpper, myImage->params.SwapLR,
                                            iconTexture(stCString("actionSwapLROff"), anIconSize),
                                            iconTexture(stCString("actionSwapLROn"),  anIconSize),
-                                           aLeft + (aBtnIter++) * anIconStep, aTop,
+                                           (aBtnIter++) * anIconStep, 0,
                                            StGLCorner(ST_VCORNER_TOP, ST_HCORNER_LEFT));
     myBtnSwapLR->setDrawShadow(true);
     myBtnSwapLR->changeMargins() = aButtonMargins;
@@ -181,7 +181,7 @@ void StMoviePlayerGUI::createUpperToolbar() {
     myBtnPanorama = new StGLCheckboxTextured(myPanelUpper, aTrackedPano,
                                              iconTexture(stCString("actionPanoramaOff"), anIconSize),
                                              iconTexture(stCString("actionPanorama"),    anIconSize),
-                                             aLeft + (aBtnIter++) * anIconStep, aTop,
+                                             (aBtnIter++) * anIconStep, 0,
                                              StGLCorner(ST_VCORNER_TOP, ST_HCORNER_LEFT));
     myBtnPanorama->signals.onBtnClick += stSlot(this, &StMoviePlayerGUI::doPanoramaCombo);
     myBtnPanorama->setDrawShadow(true);
@@ -190,7 +190,7 @@ void StMoviePlayerGUI::createUpperToolbar() {
     myBtnAdjust = new StGLCheckboxTextured(myPanelUpper, myPlugin->params.ToShowAdjustImage,
                                            iconTexture(stCString("actionColorAdjustOff"), anIconSize),
                                            iconTexture(stCString("actionColorAdjust"),    anIconSize),
-                                           aLeft + (aBtnIter++) * anIconStep, aTop,
+                                           (aBtnIter++) * anIconStep, 0,
                                            StGLCorner(ST_VCORNER_TOP, ST_HCORNER_LEFT));
     myBtnAdjust->setDrawShadow(true);
     myBtnAdjust->changeMargins() = aButtonMargins;
@@ -200,7 +200,7 @@ void StMoviePlayerGUI::createUpperToolbar() {
     myBtnSubs = new StGLCheckboxTextured(myPanelUpper, aTrackedSubs,
                                          iconTexture(stCString("actionStreamSubtitlesOff"), anIconSize),
                                          iconTexture(stCString("actionStreamSubtitles"),    anIconSize),
-                                         (aNbBtnRight++) * (-anIconStep) - aLeft, aTop,
+                                         (aNbBtnRight++) * (-anIconStep), 0,
                                          StGLCorner(ST_VCORNER_TOP, ST_HCORNER_RIGHT));
     myBtnSubs->signals.onBtnClick = stSlot(this, &StMoviePlayerGUI::doSubtitlesStreamsCombo);
     myBtnSubs->setDrawShadow(true);
@@ -210,7 +210,7 @@ void StMoviePlayerGUI::createUpperToolbar() {
     myBtnAudio = new StGLCheckboxTextured(myPanelUpper, aTrackedAudio,
                                           iconTexture(stCString("actionStreamAudioOff"), anIconSize),
                                           iconTexture(stCString("actionStreamAudio"),    anIconSize),
-                                          (aNbBtnRight++) * (-anIconStep) - aLeft, aTop,
+                                          (aNbBtnRight++) * (-anIconStep), 0,
                                           StGLCorner(ST_VCORNER_TOP, ST_HCORNER_RIGHT));
     myBtnAudio->signals.onBtnClick = stSlot(this, &StMoviePlayerGUI::doAudioStreamsCombo);
     myBtnAudio->setDrawShadow(true);
@@ -1278,6 +1278,8 @@ void StMoviePlayerGUI::createMobileBottomToolbar() {
     const IconSize anIconSize = scaleIcon(32, aButtonMargins);
     aButtonMargins.extend(scale(12));
 
+    ///
+    ///const int aBotOffset = scale(56);
     myPanelBottom = new StGLContainer(this, 0, 0, StGLCorner(ST_VCORNER_BOTTOM, ST_HCORNER_LEFT), scale(4096), scale(56));
 
     const StGLCorner aLeftCorner = StGLCorner(ST_VCORNER_TOP, ST_HCORNER_LEFT);
@@ -1671,6 +1673,21 @@ void StMoviePlayerGUI::stglResize(const StGLBoxPx& theViewPort,
                                   float theAspect) {
     const int aNewSizeX = theViewPort.width();
     const int aNewSizeY = theViewPort.height();
+    int aGapTopX = 0, aGapTopY = 0, aGapBotX = 0, aGapBotY = 0;
+    if(isMobile()) {
+        // add gap for hidden system navigation buttons
+        static const int THE_NAVIGATION_GAPX = 32;
+        static const int THE_NAVIGATION_GAPY = 16;
+        if(theAspect < 9.0 / 16.0 && theAspect > 0.0) {
+            aGapTopY = aGapBotY = stMax(0, scale(stMin(THE_NAVIGATION_GAPY, int((1.0 / theAspect * 360) - 360 * 2))));
+        } else if(theAspect > 9.0 / 16.0) {
+            aGapTopX = aGapBotX = stMax(0, scale(stMin(THE_NAVIGATION_GAPX, int((theAspect * 360) - 360 * 2))));
+        }
+    } else {
+        aGapTopY = scale(DISPL_Y_REGION_UPPER);
+        aGapTopX = scale(DISPL_X_REGION_UPPER);
+        aGapBotX = scale(DISPL_X_REGION_BOTTOM);
+    }
 
     // image should fit entire view
     myImage->changeRectPx().top()    = -theMargins.top;
@@ -1679,11 +1696,14 @@ void StMoviePlayerGUI::stglResize(const StGLBoxPx& theViewPort,
     myImage->changeRectPx().right()  = -theMargins.left + aNewSizeX;
 
     if(myPanelUpper != NULL) {
-        myPanelUpper->changeRectPx().right()  = stMax(aNewSizeX - theMargins.right - theMargins.left, 2);
+        myPanelUpper->changeRectPx().top()   = aGapTopY;
+        myPanelUpper->changeRectPx().left()  = aGapTopX;
+        myPanelUpper->changeRectPx().right() = aGapTopX + stMax(aNewSizeX - theMargins.right - theMargins.left - 2 * aGapTopX, 2);
     }
     if(myPanelBottom != NULL) {
-        const int aGapX = myPanelBottom->changeRectPx().left();
-        myPanelBottom->changeRectPx().right() = aGapX + stMax(aNewSizeX - theMargins.right - theMargins.left - 2 * aGapX, 2);
+        myPanelBottom->changeRectPx().top()   = -aGapBotY;
+        myPanelBottom->changeRectPx().left()  = aGapBotX;
+        myPanelBottom->changeRectPx().right() = aGapBotX + stMax(aNewSizeX - theMargins.right - theMargins.left - 2 * aGapBotX, 2);
     }
 
     stglResizeSeekBar();
@@ -1693,7 +1713,7 @@ void StMoviePlayerGUI::stglResize(const StGLBoxPx& theViewPort,
 void StMoviePlayerGUI::stglResizeSeekBar() {
     if(mySeekBar != NULL
     && myPanelBottom != NULL) {
-        const int aPanelSizeY = myPanelBottom->getRectPx().height();
+        const int aPanelSizeY = myPanelBottom->getRectPx().top() + myPanelBottom->getRectPx().height();
         const int aPanelSizeX = myPanelBottom->getRectPx().width();
         const int aSeekSizeY  = mySeekBar->getRectPx().height();
         const int aBoxWidth   = myTimeBox->getRectPx().width();
