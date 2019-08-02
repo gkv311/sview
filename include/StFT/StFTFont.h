@@ -168,10 +168,12 @@ class StFTFont {
      * Load the font from specified path.
      * @param theFontPath path to the font
      * @param theStyle    the font style
+     * @param theToSyntItalic synthesize italic style
      * @return true on success
      */
-    ST_CPPEXPORT bool load(const StString&       theFontPath,
-                           const StFTFont::Style theStyle);
+    ST_CPPEXPORT bool load(const StString& theFontPath,
+                           const StFTFont::Style theStyle,
+                           const bool theToSyntItalic = false);
 
     /**
      * Load the font from data array.

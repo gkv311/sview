@@ -103,8 +103,9 @@ bool StFTFont::init(const unsigned int thePointSize,
     return true;
 }
 
-bool StFTFont::load(const StString&       theFontPath,
-                    const StFTFont::Style theStyle) {
+bool StFTFont::load(const StString& theFontPath,
+                    const StFTFont::Style theStyle,
+                    const bool theToSyntItalic) {
     if(!myFTLib->isValid()
     || theStyle <  Style_Regular
     || theStyle >= StylesNB
@@ -126,6 +127,21 @@ bool StFTFont::load(const StString&       theFontPath,
         FT_Done_Face(aFace);
         aFace = NULL;
         return false;
+    }
+
+    if(theToSyntItalic) {
+        const double THE_SHEAR_ANGLE = 10.0 * M_PI / 180.0;
+
+        FT_Matrix aMat;
+        aMat.xx = FT_Fixed(std::cos(-THE_SHEAR_ANGLE) * (1 << 16));
+        aMat.xy = 0;
+        aMat.yx = 0;
+        aMat.yy = aMat.xx;
+
+        FT_Fixed aFactor = FT_Fixed(std::tan(THE_SHEAR_ANGLE) * (1 << 16));
+        aMat.xy += FT_MulFix(aFactor, aMat.xx);
+
+        FT_Set_Transform(aFace, &aMat, 0);
     }
     return loadCharmap(aFontPath, aFace);
 }
