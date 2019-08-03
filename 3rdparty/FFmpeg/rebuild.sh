@@ -10,6 +10,7 @@ rebuildDebug="false"
 rebuildAndroid="false"
 compilerPrefix=""
 androidTarget=""
+androidAbi="armeabi-v7a"
 androidNdkRoot="$HOME/develop/android-ndk-r12b"
 aSystem=`uname -s`
 aPwdBack=$PWD
@@ -51,8 +52,10 @@ GCC_MACHINE_LINUX_64="x86_64-linux-gnu"
 if [ "$rebuildAndroid" == "true" ]; then
   if [ "$androidTarget" == "arm64" ]; then
     aPrefixShort="aarch64-linux-android"
+    androidAbi="arm64-v8a"
   else
     aPrefixShort="arm-linux-androideabi"
+    androidAbi="armeabi-v7a"
   fi
 
   compilerPrefix="${androidNdkRoot}/toolchains/${aPrefixShort}-4.8/prebuilt/linux-x86_64/bin/${aPrefixShort}-"
@@ -98,9 +101,9 @@ if [ "$aSystem" == "Darwin" ]; then
   OUTPUT_FOLDER_LIB="$OUTPUT_FOLDER/Frameworks"
 fi
 if [ "$androidTarget" == "arm64" ]; then
-  OUTPUT_FOLDER_LIB="$OUTPUT_FOLDER/libs/arm64-v8a"
+  OUTPUT_FOLDER_LIB="$OUTPUT_FOLDER/libs/$androidAbi"
 elif [ "$androidTarget" == "arm" ]; then
-  OUTPUT_FOLDER_LIB="$OUTPUT_FOLDER/libs/armeabi-v7a"
+  OUTPUT_FOLDER_LIB="$OUTPUT_FOLDER/libs/$androidAbi"
 fi
 
 rm -f -r $OUTPUT_FOLDER
@@ -139,6 +142,9 @@ then
     7za a -t7z -m0=lzma -mx=9 -mfb=64 -md=32m -ms=on ../$SOURCES_NAME.7z ../$rebuildTarget '-xr@../exclude.lst'
   fi
 fi
+
+# --extra-cflags parameters
+anExtraCFlags=
 
 #--enable-memalign-hack
 configArguments="\
@@ -186,19 +192,31 @@ if [ "$gccMachine" == "$GCC_MACHINE_MINGW_32" ] || [ "$gccMachine" == "$GCC_MACH
   targetFlags="--cross-prefix=$compilerPrefix --arch=x86_32"
   configArguments="$configArguments --enable-cross-compile --target-os=mingw32 $targetFlags"
 elif [ "$gccMachine" == "$GCC_MACHINE_MINGW_64" ] || [ "$gccMachine" == "$GCC_MACHINE_MINGW_64_1" ]; then
+  anExtraCFlags="$anExtraCFlags -Dstrtod=__strtod"
   targetFlags="--cross-prefix=$compilerPrefix --arch=x86_64 --extra-cflags=-Dstrtod=__strtod"
   configArguments="$configArguments --enable-cross-compile --target-os=mingw32 $targetFlags"
 elif [ "$rebuildAndroid" == "true" ]; then
+  anAndArch=arm
+  anAndSysRoot=${androidNdkRoot}/platforms/android-15/arch-arm
   if [ "$androidTarget" == "arm64" ]; then
-    targetFlags="--cross-prefix=$compilerPrefix --sysroot=${androidNdkRoot}/platforms/android-21/arch-arm64 --arch=aarch64"
+    anAndArch=aarch64
+    anAndSysRoot=${androidNdkRoot}/platforms/android-21/arch-arm64
+  fi
+  configArguments="$configArguments --enable-cross-compile --target-os=android --cross-prefix=$compilerPrefix --sysroot=${anAndSysRoot} --arch=${anAndArch}"
+  #if [ -x "${androidNdkRoot}/sysroot" ]; then
+    #configArguments="$configArguments --sysinclude=${androidNdkRoot}/sysroot/usr/include"
+  #fi
+
+  if [ "$androidTarget" == "arm64" ]; then
+    anExtraCFlags="$anExtraCFlags -march=armv8-a"
   else
-    targetFlags="--cross-prefix=$compilerPrefix --sysroot=${androidNdkRoot}/platforms/android-15/arch-arm --arch=arm"
+    anExtraCFlags="$anExtraCFlags -march=armv7-a -mfloat-abi=softfp -fno-builtin-sin -fno-builtin-sinf"
   fi
 
-  configArguments="$configArguments --enable-cross-compile --target-os=android $targetFlags"
-  #configArguments="$configArguments --extra-cflags='-fno-builtin-sin -fno-builtin-sinf'"
-
   configArguments="$configArguments --enable-jni --enable-mediacodec"
+
+  configArguments="$configArguments --enable-mbedtls --extra-ldflags=-L$aPwdBack/mbedtls-2.16.2-android/libs/$androidAbi"
+  anExtraCFlags="$anExtraCFlags -I$aPwdBack/mbedtls-2.16.2-android/include"
 fi
 
 # More options
@@ -229,29 +247,27 @@ fi
 set -o pipefail
 
 aNbJobs="$(getconf _NPROCESSORS_ONLN)"
+"$compilerPrefix"gcc --version > $OUTPUT_FOLDER/gccInfo-$gccMachine-$rebuildLicense.log
+
+# --extra-cflags should be passed as single dedicated argument
+anExtraCFlags="--extra-cflags=${anExtraCFlags}"
 
 echo
-echo "  ./configure $configArguments"
+echo "  ./configure $configArguments $anExtraCFlags"
 echo
 if [ "$rebuildAndroid" == "true" ]; then
-  if [ "$androidTarget" == "arm64" ]; then
-    ./configure $configArguments --disable-symver --extra-cflags='-march=armv8-a' 2>&1 | tee $OUTPUT_FOLDER/config.log
-  else
-    ./configure $configArguments --disable-symver --extra-cflags='-march=armv7-a -mfloat-abi=softfp -fno-builtin-sin -fno-builtin-sinf' 2>&1 | tee $OUTPUT_FOLDER/config.log
-  fi
+  ./configure $configArguments --disable-symver "$anExtraCFlags" 2>&1 | tee $OUTPUT_FOLDER/config-$gccMachine-$rebuildLicense.log
 else
-  ./configure $configArguments 2>&1 | tee -a $OUTPUT_FOLDER/config.log
+  ./configure $configArguments 2>&1 | tee -a $OUTPUT_FOLDER/config-$gccMachine-$rebuildLicense.log
 fi
 aResult=$?; if [[ $aResult != 0 ]]; then exit $aResult; fi
 
-make -j $aNbJobs 2>&1 | tee -a $OUTPUT_FOLDER/make.log
+make -j $aNbJobs 2>&1 | tee -a $OUTPUT_FOLDER/make-$gccMachine-$rebuildLicense.log
 aResult=$?; if [[ $aResult != 0 ]]; then exit $aResult; fi
 
 # Now copy result files
 echo
 echo "  Now copy result files into $OUTPUT_FOLDER"
-
-"$compilerPrefix"gcc --version > $OUTPUT_FOLDER/gccInfo.log
 
 if [ -f libavcodec/avcodec.dll ]; then
   cp -f libavcodec/*.dll $OUTPUT_FOLDER_BIN
