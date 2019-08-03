@@ -311,6 +311,16 @@ void StGLTextureButton::setAction(const StHandle<StAction>& theAction) {
 
 void StGLTextureButton::setTexturePath(const StString* theTexturesPaths,
                                        const size_t    theCount) {
+    if(myTextures.isNull()) {
+        if(theCount != 0) {
+            myTextures = new StGLTextureArray(theCount);
+        } else {
+        #ifdef ST_DEBUG
+            ST_DEBUG_LOG_AT("WARNING, Attempt to set an empty list of textures to StGLTextureButton!");
+        #endif
+            return;
+        }
+    }
     const size_t aNbTextures = (theCount > myTextures->size()) ? myTextures->size() : theCount;
 #ifdef ST_DEBUG
     if(theCount != myTextures->size()) {
@@ -369,6 +379,10 @@ void StGLTextureButton::stglResize() {
 }
 
 bool StGLTextureButton::stglInit() {
+    if(myTextures.isNull()) {
+        return false;
+    }
+
     StGLContext& aCtx = getContext();
     const StHandle<StResourceManager>& aResMgr = getRoot()->getResourceManager();
     for(size_t aFaceIter = 0; aFaceIter < myTextures->size(); ++aFaceIter) {

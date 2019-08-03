@@ -19,10 +19,12 @@
 #include <StGLStereo/StGLTextureQueue.h>
 
 #include <StGL/StParams.h>
+#include <StGL/StPlayList.h>
 
 #include <StSettings/StEnumParam.h>
 
 class StAction;
+class StGLIcon;
 
 class StGLImageRegion : public StGLWidget {
 
@@ -86,6 +88,30 @@ class StGLImageRegion : public StGLWidget {
     ST_CPPEXPORT StGLImageRegion(StGLWidget* theParent,
                                  const StHandle<StGLTextureQueue>& theTextureQueue,
                                  const bool  theUsePanningKeys);
+
+    /**
+     * Return playlist.
+     */
+    ST_LOCAL const StHandle<StPlayList>& getPlayList() const {
+        return myList;
+    }
+
+    /**
+     * Set playlist.
+     */
+    ST_LOCAL void setPlayList(const StHandle<StPlayList>& theList) {
+        myList = theList;
+    }
+
+    /**
+     * Return icon widget displayed on swipe gesture.
+     */
+    StGLIcon* changeIconPrev() { return myIconPrev; }
+
+    /**
+     * Return icon widget displayed on swipe gesture.
+     */
+    StGLIcon* changeIconNext() { return myIconNext; }
 
     /**
      * Setup device orientation.
@@ -185,6 +211,15 @@ class StGLImageRegion : public StGLWidget {
         StHandle<StFloat32Param>      SeparationRot;         //!< angle separation
 
     } params;
+
+        public:  //! @name Signals
+
+    struct {
+        /**
+         * Emit new item signal.
+         */
+        StSignal<void (void )> onOpenItem;
+    } signals;
 
         private:
 
@@ -308,6 +343,10 @@ class StGLImageRegion : public StGLWidget {
 
     StArrayList< StHandle<StAction> >
                                myActions;        //!< actions list
+    StHandle<StPlayList>       myList;           //!< handle to playlist
+
+    StGLIcon*                  myIconPrev;       //!< icon displayed on swipe gesture
+    StGLIcon*                  myIconNext;       //!< icon displayed on swipe gesture
 
     StGLQuads                  myQuad;           //!< flat quad
     StGLUVSphere               myUVSphere;       //!< sphere output helper class
@@ -318,6 +357,8 @@ class StGLImageRegion : public StGLWidget {
     StHandle<StGLTextureQueue> myTextureQueue;   //!< shared texture queue
     StPointD_t                 myClickPntZo;     //!< remembered mouse click position
     StTimer                    myClickTimer;     //!< timer to delay dragging action
+    StTimer                    myFadeTimer;      //!< timer for transition to the next file
+    StPointD_t                 myFadeFrom;       //!< fade starting delta
     StGLQuaternion             myDeviceQuat;     //!< device orientation
     StVirtFlags                myKeyFlags;       //!< active key flags
     double                     myDragDelayMs;    //!< dragging delay in milliseconds

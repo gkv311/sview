@@ -1597,7 +1597,13 @@ StMoviePlayerGUI::StMoviePlayerGUI(StMoviePlayer*  thePlugin,
     myPlugin->params.ToShowFps->signals.onChanged.connect(this, &StMoviePlayerGUI::doShowFPS);
 
     myImage = new StGLImageRegion(this, theTextureQueue, false);
-    myImage->setDragDelayMs(500.0);
+    myImage->changeIconPrev()->setTexturePath(iconTexture(stCString("actionBack"), scaleIcon(64)));
+    myImage->changeIconPrev()->setDrawShadow(true);
+    myImage->changeIconNext()->setTexturePath(iconTexture(stCString("actionNext"), scaleIcon(64)));
+    myImage->changeIconNext()->setDrawShadow(true);
+    myImage->signals.onOpenItem = stSlot(myPlugin, &StMoviePlayer::doFileNext);
+    myImage->setPlayList(thePlayList);
+    //myImage->setDragDelayMs(500.0);
     myImage->params.DisplayMode->setName(tr(MENU_VIEW_DISPLAY_MODE));
     myImage->params.DisplayMode->changeValues()[StGLImageRegion::MODE_STEREO]     = tr(MENU_VIEW_DISPLAY_MODE_STEREO);
     myImage->params.DisplayMode->changeValues()[StGLImageRegion::MODE_ONLY_LEFT]  = tr(MENU_VIEW_DISPLAY_MODE_LEFT);

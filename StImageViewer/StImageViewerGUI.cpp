@@ -1276,6 +1276,12 @@ StImageViewerGUI::StImageViewerGUI(StImageViewer*  thePlugin,
     }
 
     myImage = new StGLImageRegion(this, aTextureQueue, true);
+    myImage->changeIconPrev()->setTexturePath(iconTexture(stCString("actionBack"), scaleIcon(64)));
+    myImage->changeIconPrev()->setDrawShadow(true);
+    myImage->changeIconNext()->setTexturePath(iconTexture(stCString("actionNext"), scaleIcon(64)));
+    myImage->changeIconNext()->setDrawShadow(true);
+    myImage->signals.onOpenItem = stSlot(myPlugin, &StImageViewer::doFileNext);
+    myImage->setPlayList(thePlayList);
     myImage->params.DisplayMode->setName(tr(MENU_VIEW_DISPLAY_MODE));
     myImage->params.DisplayMode->changeValues()[StGLImageRegion::MODE_STEREO]     = tr(MENU_VIEW_DISPLAY_MODE_STEREO);
     myImage->params.DisplayMode->changeValues()[StGLImageRegion::MODE_ONLY_LEFT]  = tr(MENU_VIEW_DISPLAY_MODE_LEFT);

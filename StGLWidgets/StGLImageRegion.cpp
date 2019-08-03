@@ -9,6 +9,7 @@
 
 #include <StGLWidgets/StGLImageRegion.h>
 #include <StGLWidgets/StGLRootWidget.h>
+#include <StGLWidgets/StGLTextureButton.h>
 #include <StGL/StPlayList.h>
 #include <StGLStereo/StGLQuadTexture.h>
 
@@ -210,7 +211,8 @@ StGLImageRegion::StGLImageRegion(StGLWidget* theParent,
                                  const StHandle<StGLTextureQueue>& theTextureQueue,
                                  bool theUsePanningKeys)
 : StGLWidget(theParent, 0, 0, StGLCorner(ST_VCORNER_TOP, ST_HCORNER_LEFT)),
-  myQuad(),
+  myIconPrev(NULL),
+  myIconNext(NULL),
   myUVSphere  (StGLVec3(0.0f, 0.0f, 0.0f), 1.0f, 64, false),
   myHemisphere(StGLVec3(0.0f, 0.0f, 0.0f), 1.0f, 64, true),
   myCylinder  (StGLVec3(0.0f, 0.0f, 0.0f), 1.0f, 1.0f, 64),
@@ -228,6 +230,11 @@ StGLImageRegion::StGLImageRegion(StGLWidget* theParent,
 #endif
   myIsInitialized(false),
   myHasVideoStream(false) {
+    myIconPrev = new StGLIcon(this,  getRoot()->scale(48), 0, StGLCorner(ST_VCORNER_CENTER, ST_HCORNER_LEFT),  1);
+    myIconPrev->setOpacity(0.0f, false);
+    myIconNext = new StGLIcon(this, -getRoot()->scale(48), 0, StGLCorner(ST_VCORNER_CENTER, ST_HCORNER_RIGHT), 1);
+    myIconNext->setOpacity(0.0f, false);
+
     params.DisplayMode = new StEnumParam(MODE_STEREO, stCString("viewStereoMode"), stCString("Stereo Output"));
     params.DisplayMode->defineOption(MODE_STEREO,     stCString("Stereo"));
     params.DisplayMode->defineOption(MODE_ONLY_LEFT,  stCString("Left View"));
@@ -425,7 +432,10 @@ void StGLImageRegion::stglUpdate(const StPointD_t& thePointZo,
         StHandle<StStereoParams> aFileParams = myTextureQueue->getQTexture().getFront(StGLQuadTexture::LEFT_TEXTURE).getSource();
         if(params.stereoFile != aFileParams) {
             params.stereoFile = aFileParams;
+            myFadeTimer.stop();
             onParamsChanged();
+        } else if(!myHasVideoStream) {
+            myFadeTimer.stop();
         }
     }
 }
@@ -521,6 +531,8 @@ bool StGLImageRegion::getHeadOrientation(StGLQuaternion& theOrient,
 }
 
 void StGLImageRegion::stglDraw(unsigned int theView) {
+    myIconPrev->setOpacity(0.0f, false);
+    myIconNext->setOpacity(0.0f, false);
     StHandle<StStereoParams> aParams = getSource();
     if(!myIsInitialized || !isVisible() || aParams.isNull()
     || !myTextureQueue->getQTexture().getFront(StGLQuadTexture::LEFT_TEXTURE).isValid()
@@ -700,49 +712,87 @@ void StGLImageRegion::stglDrawView(unsigned int theView) {
                                                 : StGLImageProgram::FragGetColor_Normal;
     switch(aViewMode) {
         case StViewSurface_Plain: {
-            if(!myProgram.init(aCtx, aTextures.getColorModel(), aTextures.getColorScale(), aColorGetter)) {
-                break;
-            }
-
-            myProgram.getActiveProgram()->use(aCtx);
-
-            // setup data rectangle in the texture
-            myProgram.setTextureSizePx      (aCtx, aTextureSize);
-            myProgram.setTextureMainDataSize(aCtx, aClampVec);
-            myProgram.setTextureUVDataSize  (aCtx, aClampUV);
-
-            // handle dragging timer
+            const float aBrightnessBack = params.Brightness->getValue();
             const double aDragDelayMs = myDragDelayMs > 0.0 ? myDragDelayMs : myDragDelayTmpMs;
-            if( isClicked(ST_MOUSE_LEFT)
-            && !myIsClickAborted
-            &&  myClickTimer.isOn()) {
-                if(myClickTimer.getElapsedTimeInMilliSec() < aDragDelayMs) {
-                    const StPointD_t aCurr = getRoot()->getCursorZo();
-                    const int aDx = int((aCurr.x() - myClickPntZo.x()) * double(getRectPx().width()));
-                    const int aDy = int((aCurr.y() - myClickPntZo.y()) * double(getRectPx().height()));
-                    if(std::abs(aDx) > myRoot->getClickThreshold()
-                    || std::abs(aDy) > myRoot->getClickThreshold()) {
-                        myIsClickAborted = true;
+            if(isClicked(ST_MOUSE_LEFT)) {
+                // handle dragging timer
+                if(!myIsClickAborted
+                &&  myClickTimer.isOn()) {
+                    if(myClickTimer.getElapsedTimeInMilliSec() < aDragDelayMs) {
+                        const StPointD_t aCurr = getRoot()->getCursorZo();
+                        const int aDx = int((aCurr.x() - myClickPntZo.x()) * double(getRectPx().width()));
+                        const int aDy = int((aCurr.y() - myClickPntZo.y()) * double(getRectPx().height()));
+                        if(std::abs(aDx) > myRoot->getClickThreshold()
+                        || std::abs(aDy) > myRoot->getClickThreshold()) {
+                            myIsClickAborted = true;
+                            myClickTimer.stop();
+                        }
+                    } else {
                         myClickTimer.stop();
                     }
-                } else {
-                    myClickTimer.stop();
                 }
-            }
 
-            // handle dragging
-            if( isClicked(ST_MOUSE_LEFT)
-            && !myIsClickAborted
-            && !myClickTimer.isOn()) {
-                const GLfloat aRectRatio = GLfloat(getRectPx().ratio());
-                aParams->moveFlat(getMouseMoveFlat(myClickPntZo, getRoot()->getCursorZo()), aRectRatio);
-                if(aDragDelayMs > 1.0) {
-                    const GLfloat    aScaleSteps = 0.1f;
-                    const StPointD_t aCenterCursor(0.5, 0.5);
-                    const StGLVec2   aVec = getMouseMoveFlat(aCenterCursor, getRoot()->getCursorZo()) * (-aScaleSteps);
-                    aParams->scaleIn(aScaleSteps);
-                    aParams->moveFlat(aVec, aRectRatio);
+                // handle dragging
+                if(!myIsClickAborted
+                && !myClickTimer.isOn()) {
+                    // panning
+                    const GLfloat aRectRatio = GLfloat(getRectPx().ratio());
+                    aParams->moveFlat(getMouseMoveFlat(myClickPntZo, getRoot()->getCursorZo()), aRectRatio);
+                    if(aDragDelayMs > 1.0) {
+                        const GLfloat    aScaleSteps = 0.1f;
+                        const StPointD_t aCenterCursor(0.5, 0.5);
+                        const StGLVec2   aVec = getMouseMoveFlat(aCenterCursor, getRoot()->getCursorZo()) * (-aScaleSteps);
+                        aParams->scaleIn(aScaleSteps);
+                        aParams->moveFlat(aVec, aRectRatio);
+                    }
+                } else if(!myList.isNull()) {
+                    // previous / next swipe gesture
+                    StPlayList::CurrentPosition aPos = myList->getCurrentPosition();
+                    const double aMouseDX = myClickPntZo.x() - getRoot()->getCursorZo().x();
+                    const float aScaleSteps = (float )stMin(std::abs(aMouseDX), 1.0);
+                    if(aMouseDX < 0.0) {
+                        // previous
+                        if(aPos == StPlayList::CurrentPosition_Middle
+                        || aPos == StPlayList::CurrentPosition_Last) {
+                            //params.Brightness->setValue(aBrightnessBack - aScaleSteps);
+                            //aParams->scaleIn(-aScaleSteps);
+                            StGLVec2 aVec = getMouseMoveFlat(myClickPntZo, getRoot()->getCursorZo());
+                            aVec.y() = 0.0;
+                            aParams->moveFlat(aVec, float(getRectPx().ratio()));
+                            myIconPrev->setOpacity(aScaleSteps, false);
+                        }
+                    } else {
+                        // next
+                        if(aPos == StPlayList::CurrentPosition_Middle
+                        || aPos == StPlayList::CurrentPosition_First) {
+                            StGLVec2 aVec = getMouseMoveFlat(myClickPntZo, getRoot()->getCursorZo());
+                            aVec.y() = 0.0;
+                            aParams->moveFlat(aVec, float(getRectPx().ratio()));
+                            myIconNext->setOpacity(aScaleSteps, false);
+                        }
+                    }
                 }
+            } else if(myFadeTimer.isOn()) {
+                static const double THE_FADE_ANIM_MS = 1000.0;
+                const double aProgress  = myFadeTimer.getElapsedTimeInMilliSec() / THE_FADE_ANIM_MS;
+                const double aFadeClamp = stMin(1.0, aProgress);
+                const bool isNext = myFadeFrom.x() < myClickPntZo.x();
+                StPointD_t aFadeTo = myFadeFrom;
+                aFadeTo.x() += isNext ? -aFadeClamp : aFadeClamp;
+
+                StGLVec2 aVec = getMouseMoveFlat(myClickPntZo, aFadeTo);
+                aVec.y() = 0.0;
+                aParams->moveFlat(aVec, float(getRectPx().ratio()));
+                params.Brightness->setValue(aBrightnessBack - (float )aFadeClamp * 3.0f);
+
+                // animate icon opacity in loop
+                const double anOpacityFrom = stMin(std::abs(myClickPntZo.x() - myFadeFrom.x()), 1.0);
+                double anIconProgress = anOpacityFrom + aProgress;
+                const bool isEven = (int(anIconProgress) % 2) == 0;
+                anIconProgress -= int(anIconProgress);
+                if(!isEven) { anIconProgress = 1.0 - anIconProgress; }
+                StGLIcon* anIcon = isNext ? myIconNext : myIconPrev;
+                anIcon->setOpacity((float )anIconProgress, false);
             }
 
             GLfloat anXRotate = aParams->getXRotate();
@@ -821,20 +871,30 @@ void StGLImageRegion::stglDrawView(unsigned int theView) {
                 aModelMat.translate(StGLVec3( aSepDeltaX * 0.5f,  aSepDeltaY * 0.5f, 0.0f));
             }
 
-            StGLMatrix anOrthoMat;
-            anOrthoMat.initOrtho(StGLVolume(-aRectRatio * aFrustrumL, aRectRatio * aFrustrumR,
-                                            -1.0f       * aFrustrumB, 1.0f       * aFrustrumT,
-                                            -1.0f, 1.0f));
-            myProgram.getActiveProgram()->setProjMat (aCtx, anOrthoMat);
-            myProgram.getActiveProgram()->setModelMat(aCtx, aModelMat);
+            if(myProgram.init(aCtx, aTextures.getColorModel(), aTextures.getColorScale(), aColorGetter)) {
+                myProgram.getActiveProgram()->use(aCtx);
 
-            myQuad.draw(aCtx, *myProgram.getActiveProgram());
+                // setup data rectangle in the texture
+                myProgram.setTextureSizePx      (aCtx, aTextureSize);
+                myProgram.setTextureMainDataSize(aCtx, aClampVec);
+                myProgram.setTextureUVDataSize  (aCtx, aClampUV);
 
-            myProgram.getActiveProgram()->unuse(aCtx);
+                StGLMatrix anOrthoMat;
+                anOrthoMat.initOrtho(StGLVolume(-aRectRatio * aFrustrumL, aRectRatio * aFrustrumR,
+                                                -1.0f       * aFrustrumB, 1.0f       * aFrustrumT,
+                                                -1.0f, 1.0f));
+                myProgram.getActiveProgram()->setProjMat (aCtx, anOrthoMat);
+                myProgram.getActiveProgram()->setModelMat(aCtx, aModelMat);
+
+                myQuad.draw(aCtx, *myProgram.getActiveProgram());
+
+                myProgram.getActiveProgram()->unuse(aCtx);
+            }
 
             // restore changed parameters
             aParams->ScaleFactor = aScaleBack;
             aParams->PanCenter   = aPanBack;
+            params.Brightness->setValue(aBrightnessBack);
             break;
         }
         case StViewSurface_Cubemap: {
@@ -960,7 +1020,10 @@ void StGLImageRegion::doRightUnclick(const StPointD_t& theCursorZo) {
 bool StGLImageRegion::tryClick(const StClickEvent& theEvent,
                                bool&               theIsItemClicked) {
     StHandle<StStereoParams> aParams = getSource();
-    if(!myIsInitialized || aParams.isNull()) {
+    const bool hasImage = !aParams.isNull()
+                        && myHasVideoStream
+                        && myTextureQueue->getQTexture().getFront(StGLQuadTexture::LEFT_TEXTURE).isValid();
+    if(!myIsInitialized || !hasImage) {
         return false;
     }
 
@@ -991,7 +1054,10 @@ bool StGLImageRegion::tryClick(const StClickEvent& theEvent,
 bool StGLImageRegion::tryUnClick(const StClickEvent& theEvent,
                                  bool&               theIsItemUnclicked) {
     StHandle<StStereoParams> aParams = getSource();
-    if(!myIsInitialized || aParams.isNull()) {
+    const bool hasImage = !aParams.isNull()
+                        && myHasVideoStream
+                        && myTextureQueue->getQTexture().getFront(StGLQuadTexture::LEFT_TEXTURE).isValid();
+    if(!myIsInitialized || !hasImage) {
         if(isClicked(theEvent.Button)) {
             theIsItemUnclicked = true;
             setClicked(theEvent.Button, false);
@@ -1011,6 +1077,31 @@ bool StGLImageRegion::tryUnClick(const StClickEvent& theEvent,
             case StViewSurface_Plain: {
                 if(!myIsClickAborted) {
                     aParams->moveFlat(getMouseMoveFlat(myClickPntZo, aCursor), GLfloat(getRectPx().ratio()));
+                } else if(!myList.isNull()) {
+                    // previous / next swipe gesture
+                    StPlayList::CurrentPosition aPos = myList->getCurrentPosition();
+                    const double aMouseDX = myClickPntZo.x() - getRoot()->getCursorZo().x();
+                    if(std::abs(aMouseDX) >= 0.25) {
+                        if(aMouseDX < 0.0) {
+                            if(aPos == StPlayList::CurrentPosition_Middle
+                            || aPos == StPlayList::CurrentPosition_Last) {
+                                if(myList->walkToPrev()) {
+                                    signals.onOpenItem();
+                                    myFadeTimer.restart();
+                                    myFadeFrom = getRoot()->getCursorZo();
+                                }
+                            }
+                        } else {
+                            if(aPos == StPlayList::CurrentPosition_Middle
+                            || aPos == StPlayList::CurrentPosition_First) {
+                                if(myList->walkToNext()) {
+                                    signals.onOpenItem();
+                                    myFadeTimer.restart();
+                                    myFadeFrom = getRoot()->getCursorZo();
+                                }
+                            }
+                        }
+                    }
                 }
                 break;
             }
