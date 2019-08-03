@@ -1445,9 +1445,33 @@ void StWindowImpl::swapEventsBuffers() {
             case stEvent_MouseDown:
                 signals.onMouseDown->emit(anEvent.Button);
                 break;
-            case stEvent_MouseUp:
+            case stEvent_MouseUp: {
                 signals.onMouseUp->emit(anEvent.Button);
+                if(anEvent.Button.Button != ST_MOUSE_LEFT) {
+                    myDoubleClickTimer.stop();
+                    break;
+                }
+
+                // check double click
+                const StRectI_t& aWinRect = attribs.IsFullScreen ? myRectFull : myRectNorm;
+                const StPointD_t aNewPnt(anEvent.Button.PointX, anEvent.Button.PointY);
+                const StPointD_t aDeltaPx = (myDoubleClickPnt - aNewPnt) * StPointD_t(aWinRect.width(), aWinRect.height());
+                if(myDoubleClickTimer.isOn()
+                && myDoubleClickTimer.getElapsedTime() < 0.4
+                && aDeltaPx.cwiseAbs().maxComp() < 3) {
+                    myStEvent2.Type = stEvent_Gesture1DoubleTap;
+                    myStEvent2.Gesture.clearGesture();
+                    myStEvent2.Gesture.Time = anEvent.Button.Time;
+                    myStEvent2.Gesture.Point1X = (float )anEvent.Button.PointX;
+                    myStEvent2.Gesture.Point1Y = (float )anEvent.Button.PointY;
+                    myDoubleClickTimer.stop();
+                    signals.onGesture->emit(myStEvent2.Gesture);
+                } else {
+                    myDoubleClickTimer.restart();
+                }
+                myDoubleClickPnt = aNewPnt;
                 break;
+            }
             case stEvent_TouchDown:
             case stEvent_TouchUp:
             case stEvent_TouchMove:

@@ -234,6 +234,27 @@ class StVec2 {
                       v[1] / theInvFactor);
     }
 
+    /**
+     * Compute component-wise modulus of the vector.
+     */
+    StVec2 cwiseAbs() const {
+        return StVec2(std::abs(v[0]), std::abs(v[1]));
+    }
+
+    /**
+     * Compute maximum component of the vector.
+     */
+    Element_t maxComp() const {
+        return v[0] > v[1] ? v[0] : v[1];
+    }
+
+    /**
+     * Compute minimum component of the vector.
+     */
+    Element_t minComp() const {
+        return v[0] < v[1] ? v[0] : v[1];
+    }
+
 };
 
 // help structures
