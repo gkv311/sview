@@ -190,7 +190,22 @@ class StGLTexture : public StGLResource {
                                 const GLenum        theTarget,
                                 const GLsizei       theRowFrom,
                                 const GLsizei       theRowTo,
-                                const GLsizei       theBatchRows = 128);
+                                const GLsizei       theBatchRows);
+
+    /**
+     * Fill the texture with the image plane.
+     * @param theCtx       current context
+     * @param theData      the image plane to copy data from
+     * @param theTarget    texture target
+     * @param theRowFrom   fill data from row (for both - input image plane and the texture!)
+     * @param theRowTo     fill data up to the row (0 means all rows)
+     * @return true on success
+     */
+    ST_CPPEXPORT bool fillPatch(StGLContext&        theCtx,
+                                const StImagePlane& theData,
+                                const GLenum        theTarget,
+                                const GLsizei       theRowFrom,
+                                const GLsizei       theRowTo);
 
     /**
      * @return GL texture ID.

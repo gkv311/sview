@@ -595,6 +595,19 @@ bool StGLTexture::init(StGLContext&        theCtx,
 
 bool StGLTexture::fillPatch(StGLContext&        theCtx,
                             const StImagePlane& theData,
+                            const GLenum        theTarget,
+                            const GLsizei       theRowFrom,
+                            const GLsizei       theRowTo) {
+#ifdef __ANDROID__
+    GLsizei aBatchRows = 0;
+#else
+    GLsizei aBatchRows = 128; // TODO does it makes sense nowadays?
+#endif
+    return fillPatch(theCtx, theData, theTarget, theRowFrom, theRowTo, aBatchRows);
+}
+
+bool StGLTexture::fillPatch(StGLContext&        theCtx,
+                            const StImagePlane& theData,
                             GLenum              theTarget,
                             const GLsizei       theRowFrom,
                             const GLsizei       theRowTo,
