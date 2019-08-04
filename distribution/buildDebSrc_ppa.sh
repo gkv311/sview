@@ -29,7 +29,7 @@ aCurrentDate=`date --rfc-2822`
 # Ubuntu 18.10     (Cosmic Cuttlefish)
 # Ubuntu 19.04     (Disco Dingo)
 # Ubuntu 19.10
-aDistribs=("xenial" "bionic" "cosmic" "disco")
+aDistribs=("xenial" "bionic" "disco")
 
 # Debian
 #aDistribs=("stable" "unstable" "testing-proposed-updates" "experimental")
