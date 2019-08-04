@@ -56,16 +56,15 @@ namespace {
 }
 
 AVPixelFormat StVideoQueue::getFrameFormat(const AVPixelFormat* theFormats) {
-#if defined(__APPLE__) || defined(__ANDROID__)
-    if(myCodecCtx->codec == myCodecH264HW) {
-        return stAV::PIX_FMT::YUV420P;
-    }
+#if defined(__APPLE__)
+    // TODO - this decoder is no more available in FFmpeg
+    if(myCodecCtx->codec == myCodecH264HW) { return stAV::PIX_FMT::YUV420P; }
 #endif
     if(!myUseGpu || myIsGpuFailed) {
         return avcodec_default_get_format(myCodecCtx, theFormats);
     }
 
-    for(const AVPixelFormat* aFormatIter = theFormats; *aFormatIter != -1; ++aFormatIter) {
+    for(const AVPixelFormat* aFormatIter = theFormats; *aFormatIter != stAV::PIX_FMT::NONE; ++aFormatIter) {
         /*const AVPixFmtDescriptor* aDesc = av_pix_fmt_desc_get(*aFormatIter);
         if(!(aDesc->flags & AV_PIX_FMT_FLAG_HWACCEL)) {
             return *aFormatIter;
@@ -77,6 +76,11 @@ AVPixelFormat StVideoQueue::getFrameFormat(const AVPixelFormat* theFormats) {
                 myIsGpuFailed = true;
                 return avcodec_default_get_format(myCodecCtx, theFormats);
             }
+            return *aFormatIter;
+        }
+    #elif defined(__ANDROID__)
+        if(*aFormatIter == AV_PIX_FMT_MEDIACODEC) {
+            // decoding into surface (like android.graphics.SurfaceTexture) is not yet support
             return *aFormatIter;
         }
     #endif
@@ -825,11 +829,14 @@ bool StVideoQueue::decodeFrame(const StHandle<StAVPacket>& thePacket,
     const bool toTryGpu = myUseGpu && !myIsGpuFailed;
 #if(LIBAVCODEC_VERSION_INT >= AV_VERSION_INT(57, 106, 102))
     if(theToSendPacket) {
+        theToSendPacket = false;
         const int aRes = avcodec_send_packet(myCodecCtx, thePacket->getAVpkt());
-        if(aRes < 0 && aRes != AVERROR_EOF) {
+        if(aRes == AVERROR(EAGAIN)) {
+            // special case used by some hardware decoders - new packet cannot be sent until decoded frame is retrieved
+            theToSendPacket = true;
+        } else if(aRes < 0 && aRes != AVERROR_EOF) {
             return false;
         }
-        theToSendPacket = false;
     }
 
     const int aRes2 = avcodec_receive_frame(myCodecCtx, myFrame.Frame);
@@ -845,7 +852,11 @@ bool StVideoQueue::decodeFrame(const StHandle<StAVPacket>& thePacket,
     }
 
     if(aRes2 < 0) {
-        return false;
+        // polling - if packet was not sent and new frame is not yet ready, we need to try again and again...
+        if(theToSendPacket) {
+            StThread::sleep(10);
+        }
+        return theToSendPacket;
     }
     toTryMoreFrames = true;
 #elif(LIBAVCODEC_VERSION_INT >= AV_VERSION_INT(52, 23, 0))
@@ -879,6 +890,10 @@ bool StVideoQueue::decodeFrame(const StHandle<StAVPacket>& thePacket,
 
 #ifndef ST_AV_OLDSYNC
     myVideoPktPts = myFrame.getBestEffortTimestamp();
+    if(myVideoPktPts == stAV::NOPTS_VALUE) {
+        // TODO why best_effort_timestamp is invalid in case of h264_mediacodec?
+        myVideoPktPts = myFrame.Frame->pts;
+    }
     if(myVideoPktPts == stAV::NOPTS_VALUE) {
         myVideoPktPts = 0;
     }
