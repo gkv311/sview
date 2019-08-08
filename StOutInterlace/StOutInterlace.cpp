@@ -902,6 +902,16 @@ void StOutInterlace::stglDraw() {
     myContext->stglResizeViewport(aVPort);
     StWindow::signals.onRedraw(ST_DRAW_LEFT);
 
+    if(myIsFirstDraw) {
+        myIsFirstDraw = false;
+
+        // fall-back on known problematic devices
+        const StString aGlRenderer((const char* )myContext->core11fwd->glGetString(GL_RENDERER));
+        if(aGlRenderer.isContains(stCString("PowerVR Rogue G6200"))) {
+            params.ToUseMask->setValue(true);
+        }
+    }
+
     if(!StWindow::isStereoOutput() || myIsBroken) {
         if(myToCompressMem) {
             myFrmBuffer->release(*myContext);
@@ -930,16 +940,6 @@ void StOutInterlace::stglDraw() {
         StWindow::stglSwap(ST_WIN_MASTER);
         ++myFPSControl;
         return;
-    }
-
-    if(myIsFirstDraw) {
-        myIsFirstDraw = false;
-
-        // fall-back on known problematic devices
-        const StString aGlRenderer((const char* )myContext->core11fwd->glGetString(GL_RENDERER));
-        if(aGlRenderer.isContains(stCString("PowerVR Rogue G6200"))) {
-            params.ToUseMask->setValue(true);
-        }
     }
 
     // reverse L/R according to window position
