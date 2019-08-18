@@ -556,6 +556,10 @@ public class StActivity extends NativeActivity implements SensorEventListener {
      * Set new activity title.
      */
     public void setWindowTitle(String theTitle) {
+        if(android.os.Build.VERSION.SDK_INT < 21) {
+            return;
+        }
+
         final String aTitle = theTitle;
         this.runOnUiThread (new Runnable() { public void run() {
             //setTitle(aTitle); // sets window title, which we don't have...
