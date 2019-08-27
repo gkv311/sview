@@ -139,8 +139,8 @@ void StVideoTimer::mainLoop() {
                 if(mySpeedSlow * myDelayTimer > myDelayVVAver) {
                     myDelayTimer = mySpeedSlowRev * myDelayVVAver;
                 } else if(mySpeedFastSkip * myDelayTimer < myDelayVVAver) {
-                    //myVideo->getTextureQueue()->drop(2);
-                    myVideo->getTextureQueue()->drop(1);
+                    //myVideo->getTextureQueue()->drop(2, myVideoPtsNextSec);
+                    myVideo->getTextureQueue()->drop(1, myVideoPtsNextSec);
                     myDelayTimer = mySpeedFastRev * myDelayVVAver;
                 } else if(mySpeedFast * myDelayTimer < myDelayVVAver) {
                     myDelayTimer = mySpeedFastRev * myDelayVVAver;

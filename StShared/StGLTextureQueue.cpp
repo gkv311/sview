@@ -194,12 +194,13 @@ void StGLTextureQueue::clear() {
     myMutexPop.unlock();
 }
 
-void StGLTextureQueue::drop(const size_t theCount) {
+void StGLTextureQueue::drop(const size_t theCount,
+                            double& thePtsFront) {
     myMutexPop.lock();
     myMutexPush.lock();
     myMutexSize.lock();
         if(myQueueSize < 2) {
-            // to small queue
+            // too small queue
             myMutexSize.unlock();
             myMutexPush.unlock();
             myMutexPop.unlock();
@@ -211,6 +212,7 @@ void StGLTextureQueue::drop(const size_t theCount) {
         for(size_t i = 0; i < decr; ++i, myDataFront = myDataFront->getNext()) {
             myDataFront->resetStParams();
         }
+        thePtsFront = myDataFront->getPTS();
         // reset queue
         myQueueSize -= decr;
         // empty texture update sequence

@@ -214,7 +214,8 @@ class StGLTextureQueue {
      * This function clean up only requested number of frames but prevents queue emptying.
      * At least one frame will remain in queue.
      */
-    ST_CPPEXPORT void drop(const size_t theCount);
+    ST_CPPEXPORT void drop(const size_t theCount,
+                           double& thePtsFront);
 
     /**
      * Function used to get current showed source format.
