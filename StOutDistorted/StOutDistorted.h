@@ -173,6 +173,11 @@ class StOutDistorted : public StWindow {
      */
     ST_LOCAL virtual void doChangeLanguage() ST_ATTR_OVERRIDE { updateStrings(); }
 
+    /**
+     * Return HMD framerate.
+     */
+    ST_LOCAL virtual float getMaximumTargetFps() const ST_ATTR_OVERRIDE;
+
         private:
 
     /**
@@ -289,6 +294,7 @@ class StOutDistorted : public StWindow {
     double                    myVrMarginsRight;
     int                       myVrRendSizeX;     //!< FBO width  for rendering into VR (can be greater then actual HMD resolution to compensate distortion)
     int                       myVrRendSizeY;     //!< FBO height for rendering into VR
+    float                     myVrFrequency;     //!< HMD frequency
     bool                      myVrTrackOrient;   //!< track orientation flag
     bool                      myVrToDrawMsg;
     StHandle<StGLTextureQuad> myVrFullscreenMsg;

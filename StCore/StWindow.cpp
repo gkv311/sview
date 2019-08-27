@@ -136,6 +136,15 @@ bool StWindow::isStereoSource() const {
     return myWin->isStereoOutput();
 }
 
+float StWindow::getMaximumTargetFps() const {
+    const StSearchMonitors& aMonitors = myWin->getMonitors();;
+    const StRectI_t aRect = myWin->getPlacement();
+    StMonitor aMon = aMonitors[aRect.center()];
+    return aMon.getFreq() >= 24
+         ? aMon.getFreq()
+         : 60; // fallback for unknown values
+}
+
 double StWindow::getTargetFps() const {
     return myTargetFps;
 }

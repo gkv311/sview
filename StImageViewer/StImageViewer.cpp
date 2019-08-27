@@ -1091,6 +1091,9 @@ void StImageViewer::beforeDraw() {
     myGUI->setVisibility(myWindow->getMousePos(), myToHideUIFullScr && isFullScreen);
     bool toHideCursor = isFullScreen && myGUI->toHideCursor();
     myWindow->showCursor(!toHideCursor);
+
+    // for image viewer it is OK to make longer smoothed uploads
+    myGUI->myImage->getTextureQueue()->getUploadParams().MaxUploadIterations = 10;
 }
 
 void StImageViewer::stglDraw(unsigned int theView) {

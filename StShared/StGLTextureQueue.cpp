@@ -23,14 +23,22 @@ StGLTextureQueue::StGLTextureQueue(const size_t theQueueSizeMax)
   myIsInUpdTexture(false),
   myIsReadyToSwap(false),
   myToCompress(false),
-  myHasStream(false) {
+  myHasStream(false),
+  myUploadParams(new StGLTextureUploadParams()) {
     ST_ASSERT(myQueueSizeMax >= 2, "StGLTextureQueue() - queue size limit should be >= 2");
+    // 1920x1080@YUV420p   ~  3 MiB
+    // 1920x1080@RGB8      ~  6 MiB
+    // 3840x2160@YUV420p   ~ 12 MiB
+    // 3840x2160@RGB8      ~ 24 MiB
+    // 3840x2160@YUV420p16 ~ 24 MiB
+    myUploadParams->MaxUploadChunkMiB   = 6;
+    myUploadParams->MaxUploadIterations = 1;
 
     // we create 'empty' queue
-    myDataFront = new StGLTextureData();
+    myDataFront = new StGLTextureData(myUploadParams);
     StGLTextureData* iter = myDataFront;
     for(size_t i = 1; i < myQueueSizeMax; ++i) {
-        iter->setNext(new StGLTextureData());
+        iter->setNext(new StGLTextureData(myUploadParams));
         iter = iter->getNext();
     }
     iter->setNext(myDataFront); // data in loop

@@ -118,30 +118,22 @@ class StMonitor {
     /**
      * @return current vertical refresh rate
      */
-    ST_LOCAL int getFreq() const {
-        return myFreq;
-    }
+    ST_LOCAL float getFreq() const { return myFreq; }
 
     /**
      * @param theFrequency current vertical refresh rate
      */
-    ST_LOCAL void setFreq(const int theFrequency) {
-        myFreq = theFrequency;
-    }
+    ST_LOCAL void setFreq(float theFrequency) { myFreq = theFrequency; }
 
     /**
      * @return maximal vertical refresh rate
      */
-    ST_LOCAL int getFreqMax() const {
-        return myFreqMax;
-    }
+    ST_LOCAL float getFreqMax() const { return myFreqMax; }
 
     /**
      * @param theFrequencyMax maximal vertical refresh rate
      */
-    ST_LOCAL void setFreqMax(const int theFrequencyMax) {
-        myFreqMax = theFrequencyMax;
-    }
+    ST_LOCAL void setFreqMax(float theFrequencyMax) { myFreqMax = theFrequencyMax; }
 
     /**
      * @return GPU to which monitor is connected to
@@ -227,8 +219,8 @@ class StMonitor {
     StEDIDParser myEdid;    //!< EDID data block if available
     StRectI_t    myRect;    //!< virtual space (rectangle)
     int          mySysId;   //!< monitor id
-    int          myFreq;    //!< frequency in Hertz
-    int          myFreqMax; //!< maximum frequency in Hertz
+    float        myFreq;    //!< frequency in Hertz
+    float        myFreqMax; //!< maximum frequency in Hertz
     float        myScale;   //!< hight pixel density scale factor
     Orientation  myOrient;  //!< monitor orientation
 

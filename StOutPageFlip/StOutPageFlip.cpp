@@ -357,7 +357,7 @@ class StOutPageFlip::StGLDXFrameBuffer {
 
 static StMonitor getHigestFreqMonitor(const StSearchMonitors& theMonitors) {
     size_t hfreqMon = 0;
-    int hfreqMax = 0;
+    float hfreqMax = 0;
     for(size_t aMonIter = 0; aMonIter < theMonitors.size(); ++aMonIter) {
         const StMonitor& aMon = theMonitors[aMonIter];
         if(aMon.getFreqMax() > hfreqMax) {

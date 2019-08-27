@@ -58,6 +58,11 @@ class StGLTextureQueue {
     }
 
     /**
+     * Return texture streaming parameters.
+     */
+    ST_LOCAL StGLTextureUploadParams& getUploadParams() { return *myUploadParams; }
+
+    /**
      * @return input stream connection state
      */
     ST_LOCAL bool hasConnectedStream() const {
@@ -276,6 +281,7 @@ class StGLTextureQueue {
     volatile bool    myHasStream;      //!< flag indicates that some stream connected to this queue
 
     StGLDeviceCaps   myDeviceCaps;     //!< device capabilities
+    StHandle<StGLTextureUploadParams> myUploadParams; //!< texture streaming parameters
 
 };
 

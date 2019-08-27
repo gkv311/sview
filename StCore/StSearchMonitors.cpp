@@ -222,9 +222,9 @@ void StSearchMonitors::findMonitorsWinAPI() {
         StRectI_t stRect(monInfo.rcMonitor.top, monInfo.rcMonitor.bottom, monInfo.rcMonitor.left, monInfo.rcMonitor.right);
         aMon.setVRect(stRect);
         aMon.setId(monCount);
-        aMon.setFreq((int )dm.dmDisplayFrequency);
+        aMon.setFreq((float )dm.dmDisplayFrequency);
         // TODO
-        aMon.setFreqMax((int )dm.dmDisplayFrequency);
+        aMon.setFreqMax((float )dm.dmDisplayFrequency);
 
         // ddMon.DeviceString = "Plug and Play monitor"
         // ddMon.DeviceName = "\\.\DISPLAY2\Monitor0"
@@ -424,7 +424,7 @@ void StSearchMonitors::findMonitorsXRandr() {
                 break;
             }
             double aRate = std::floor(double(aMode.dotClock) / (double(aMode.hTotal) * double(aMode.vTotal)) + 0.5);
-            aMonitor.setFreq(int(aRate));
+            aMonitor.setFreq(float(aRate));
             break;
         }
 
@@ -461,7 +461,7 @@ void StSearchMonitors::findMonitorsXRandr() {
                 aMaxRate = stMax(aMaxRate, aRate);
             }
         }
-        aMonitor.setFreqMax(int(aMaxRate));
+        aMonitor.setFreqMax(float(aMaxRate));
         XRRFreeOutputInfo(anOutputInfo);
 
         XRRFreeCrtcInfo(aCrtcInfo);

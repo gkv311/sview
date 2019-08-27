@@ -1,5 +1,5 @@
 /**
- * Copyright © 2009-2016 Kirill Gavrilov <kirill@sview.ru>
+ * Copyright © 2009-2019 Kirill Gavrilov <kirill@sview.ru>
  *
  * Distributed under the Boost Software License, Version 1.0.
  * See accompanying file license-boost.txt or copy at
@@ -10,6 +10,7 @@
 #define __StGLTextureData_h_
 
 #include <StImage/StImage.h>
+#include <StGLStereo/StGLTextureUploadParams.h>
 #include <StGLStereo/StGLQuadTexture.h>
 #include <StGL/StGLDeviceCaps.h>
 
@@ -38,7 +39,7 @@ class StGLTextureData {
     /**
      * Default constructor
      */
-    ST_CPPEXPORT StGLTextureData();
+    ST_CPPEXPORT StGLTextureData(const StHandle<StGLTextureUploadParams>& theUploadParams);
 
     /**
      * Destructor.
@@ -191,6 +192,7 @@ class StGLTextureData {
     StFormat                 mySrcFormat;
     StCubemap                myCubemapFormat;
 
+    StHandle<StGLTextureUploadParams> myUploadParams; //!< texture streaming parameters
     GLsizei                  myFillFromRow;
     GLsizei                  myFillRows;
 

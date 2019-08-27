@@ -421,6 +421,11 @@ class StWindow {
     ST_CPPEXPORT void setStereoOutput(bool theStereoState);
 
     /**
+    * Return maximum display update framerate.
+    */
+    ST_CPPEXPORT virtual float getMaximumTargetFps() const;
+
+    /**
      * @return FPS control rule
      */
     ST_CPPEXPORT double getTargetFps() const;

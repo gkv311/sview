@@ -213,6 +213,7 @@ class StMoviePlayer : public StApplication {
         StHandle<StBoolParam>         IsMobileUISwitch;  //!< display mobile interface (actual value)
         StHandle<StBoolParamNamed>    IsExclusiveFullScreen; //!< exclusive fullscreen mode
         StHandle<StBoolParamNamed>    ToLimitFps;        //!< limit CPU usage or not
+        StHandle<StBoolParamNamed>    ToSmoothUploads;   //!< smooth texture uploads
         StHandle<StBoolParamNamed>    IsVSyncOn;         //!< flag to use VSync
         StHandle<StEnumParam>         StartWebUI;        //!< to start Web UI or not
         StHandle<StBoolParamNamed>    ToPrintWebErrors;  //!< print Web UI starting errors

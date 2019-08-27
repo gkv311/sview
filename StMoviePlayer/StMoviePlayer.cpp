@@ -156,6 +156,7 @@ void StMoviePlayer::updateStrings() {
     params.IsExclusiveFullScreen->setName(tr(MENU_EXCLUSIVE_FULLSCREEN));
     params.IsVSyncOn->setName(tr(MENU_FPS_VSYNC));
     params.ToLimitFps->setName(tr(MENU_FPS_BOUND));
+    params.ToSmoothUploads->setName("Smooth texture uploading");
     params.StartWebUI->setName(stCString("Web UI start option"));
     params.StartWebUI->defineOption(WEBUI_OFF,  tr(MENU_MEDIA_WEBUI_OFF));
     params.StartWebUI->defineOption(WEBUI_ONCE, tr(MENU_MEDIA_WEBUI_ONCE));
@@ -288,6 +289,7 @@ StMoviePlayer::StMoviePlayer(const StHandle<StResourceManager>& theResMgr,
     params.IsVSyncOn->signals.onChanged = stSlot(this, &StMoviePlayer::doSwitchVSync);
     StApplication::params.VSyncMode->setValue(StGLContext::VSync_ON);
     params.ToLimitFps       = new StBoolParamNamed(true, stCString("toLimitFps"));
+    params.ToSmoothUploads  = new StBoolParamNamed(true, stCString("toSmoothUploads"));
     params.StartWebUI       = new StEnumParam(WEBUI_OFF, stCString("webuiOn"));
     params.ToPrintWebErrors = new StBoolParamNamed(true,  stCString("webuiShowErrors"));
     params.IsLocalWebUI     = new StBoolParamNamed(false, stCString("isLocalWebUI"));
@@ -348,6 +350,7 @@ StMoviePlayer::StMoviePlayer(const StHandle<StResourceManager>& theResMgr,
     mySettings->loadParam (params.IsExclusiveFullScreen);
     mySettings->loadParam (params.IsVSyncOn);
     mySettings->loadParam (params.ToLimitFps);
+    mySettings->loadParam (params.ToSmoothUploads);
     mySettings->loadParam (params.UseGpu);
     mySettings->loadParam (params.UseOpenJpeg);
 
@@ -598,6 +601,7 @@ void StMoviePlayer::saveAllParams() {
         mySettings->saveParam (params.IsExclusiveFullScreen);
         mySettings->saveParam (params.IsVSyncOn);
         mySettings->saveParam (params.ToLimitFps);
+        mySettings->saveParam (params.ToSmoothUploads);
         mySettings->saveParam (params.UseGpu);
         mySettings->saveParam (params.UseOpenJpeg);
         if(!params.IsLocalWebUI->getValue()) {
@@ -1567,6 +1571,9 @@ void StMoviePlayer::beforeDraw() {
     }
     myWindow->setStereoOutput(hasStereoSource);
 
+    const double aDispMaxFps = myWindow->getMaximumTargetFps();
+    double aTargetFps = myVideo->getAverFps();
+    int aMaxUploadFrames = int((double(aDispMaxFps) + 0.1) / stMax(aTargetFps, 1.0));
     if(params.Benchmark->getValue()
     || !params.ToLimitFps->getValue()) {
         // do not limit FPS
@@ -1574,16 +1581,25 @@ void StMoviePlayer::beforeDraw() {
     } else if(params.TargetFps->getValue() >= 1
            && params.TargetFps->getValue() <= 3) {
         // set rendering FPS to 2x averageFPS
-        double aTargetFps = myVideo->getAverFps();
+        const bool toTrackOrientation = myWindow->toTrackOrientation();
         if(aTargetFps < 17.0
         || aTargetFps > 120.0) {
             aTargetFps = 0.0;
         } else if(aTargetFps < 40.0) {
+            if(!toTrackOrientation) {
+                aMaxUploadFrames = 2; // maximum 2 frames to upload single frame
+            }
             aTargetFps *= double(params.TargetFps->getValue());
+        } else {
+            if(!toTrackOrientation) {
+                aMaxUploadFrames = 1; // uploads should be done within single frame
+            }
         }
 
-        if(myWindow->toTrackOrientation()) {
+        if(toTrackOrientation) {
             // do not limit FPS within head-tracking mode
+            aTargetFps = 0.0;
+        } else if(aTargetFps > aDispMaxFps) {
             aTargetFps = 0.0;
         }
 
@@ -1591,8 +1607,13 @@ void StMoviePlayer::beforeDraw() {
     } else {
         // set rendering FPS to set value in settings
         myWindow->setTargetFps(double(params.TargetFps->getValue()));
+        aMaxUploadFrames = 1; // uploads should be done within single frame
     }
 
+    if(!params.ToSmoothUploads->getValue()) {
+        aMaxUploadFrames = 1;
+    }
+    myVideo->getTextureQueue()->getUploadParams().MaxUploadIterations = stMax(stMin(aMaxUploadFrames, 3), 1);
 }
 
 void StMoviePlayer::doUpdateOpenALDeviceList(const size_t ) {

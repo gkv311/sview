@@ -246,6 +246,7 @@ StOutDistorted::StOutDistorted(const StHandle<StResourceManager>& theResMgr,
   myVrMarginsRight(0.33),
   myVrRendSizeX(0),
   myVrRendSizeY(0),
+  myVrFrequency(0),
   myVrTrackOrient(false),
   myVrToDrawMsg(false),
 #ifdef ST_HAVE_OPENVR
@@ -460,6 +461,7 @@ bool StOutDistorted::create() {
     myContext = StWindow::getContext();
     myContext->setMessagesQueue(myMsgQueue);
     myIsBroken = false;
+    myVrFrequency = 0;
     if(!myContext->isGlGreaterEqual(2, 0)) {
         myMsgQueue->pushError(stCString("OpenGL 2.0 is required by Distorted Output"));
         myIsBroken = true;
@@ -538,12 +540,13 @@ bool StOutDistorted::create() {
         const StString aVrManuf   = getVrTrackedDeviceString(myVrHmd, vr::k_unTrackedDeviceIndex_Hmd, vr::Prop_ManufacturerName_String);
         const StString aVrDriver  = getVrTrackedDeviceString(myVrHmd, vr::k_unTrackedDeviceIndex_Hmd, vr::Prop_TrackingSystemName_String);
         const StString aVrDisplay = getVrTrackedDeviceString(myVrHmd, vr::k_unTrackedDeviceIndex_Hmd, vr::Prop_SerialNumber_String);
+        myVrFrequency = myVrHmd->GetFloatTrackedDeviceProperty(vr::k_unTrackedDeviceIndex_Hmd, vr::Prop_DisplayFrequency_Float);
 
         uint32_t aRenderSizeX = 0;
         uint32_t aRenderSizeY = 0;
         myVrHmd->GetRecommendedRenderTargetSize(&aRenderSizeX, &aRenderSizeY);
         myAboutVrDevice = aVrManuf + " " + aVrDriver + "\n"
-                        + aVrDisplay + " [" + aRenderSizeX + "x" + aRenderSizeY + "]";
+                        + aVrDisplay + " [" + aRenderSizeX + "x" + aRenderSizeY + "@" + myVrFrequency + "]";
         myVrRendSizeX = int(aRenderSizeX);
         myVrRendSizeY = int(aRenderSizeY);
         updateAbout();
@@ -636,6 +639,12 @@ bool StOutDistorted::create() {
     }
 
     return true;
+}
+
+float StOutDistorted::getMaximumTargetFps() const {
+    return myVrFrequency > 24
+         ? myVrFrequency
+         : StWindow::getMaximumTargetFps();
 }
 
 void StOutDistorted::processEvents() {

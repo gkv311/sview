@@ -1,5 +1,5 @@
 /**
- * Copyright © 2009-2015 Kirill Gavrilov <kirill@sview.ru>
+ * Copyright © 2009-2019 Kirill Gavrilov <kirill@sview.ru>
  *
  * Distributed under the Boost Software License, Version 1.0.
  * See accompanying file license-boost.txt or copy at
@@ -11,7 +11,7 @@
 
 #include <StGLCore/StGLCore11.h>
 
-StGLTextureData::StGLTextureData()
+StGLTextureData::StGLTextureData(const StHandle<StGLTextureUploadParams>& theUploadParams)
 : myPrev(NULL),
   myNext(NULL),
   myDataPtr(NULL),
@@ -20,6 +20,7 @@ StGLTextureData::StGLTextureData()
   myPts(0.0),
   mySrcFormat(StFormat_AUTO),
   myCubemapFormat(StCubemap_OFF),
+  myUploadParams(theUploadParams),
   myFillFromRow(0),
   myFillRows(0) {
     //
@@ -743,16 +744,35 @@ bool StGLTextureData::fillTexture(StGLContext&     theCtx,
         theQTexture.getBack(StGLQuadTexture::LEFT_TEXTURE).setSource(StHandle<StStereoParams>());
         theQTexture.getBack(StGLQuadTexture::RIGHT_TEXTURE).setSource(StHandle<StStereoParams>());
 
-        // TODO (Kirill Gavrilov#9) this value is meanfull only for PageFlip,
-        //                          also rows number may be replaced with bytes count
-        static const GLsizei UPDATED_ROWS_MAX = 1088; // we use optimal value to update 1080p video frame at-once
-        GLsizei maxRows    = stMin(GLsizei(myDataL.getSizeY()), theQTexture.getBack(StGLQuadTexture::LEFT_TEXTURE).getSizeY());
-        GLsizei iterations = (maxRows / (UPDATED_ROWS_MAX * 2)) + 1;
-        if(!myDataR.isNull()) {
-            maxRows    = stMax(maxRows, stMin(GLsizei(myDataR.getSizeY()), theQTexture.getBack(StGLQuadTexture::RIGHT_TEXTURE).getSizeY()));
-            iterations = maxRows / UPDATED_ROWS_MAX + 1;
+        const int aNbRowsL = stMin(int(myDataL.getSizeY()), theQTexture.getBack(StGLQuadTexture::LEFT_TEXTURE).getSizeY());
+        const int aNbRowsR = !myDataR.isNull()
+                           ? stMin(int(myDataR.getSizeY()), theQTexture.getBack(StGLQuadTexture::RIGHT_TEXTURE).getSizeY())
+                           : 0;
+        const int aNbMaxRows = stMax(aNbRowsL, aNbRowsR);
+
+        const int aMaxUploadChunkMiB   = myUploadParams->MaxUploadChunkMiB;
+        const int aMaxUploadIterations = myUploadParams->MaxUploadIterations;
+        int aNbIters = 1;
+        if(aMaxUploadChunkMiB > 0 && aMaxUploadIterations > 1) {
+            size_t aStride = 0;
+            for(int aPlaneIter = 0; aPlaneIter < 4; ++aPlaneIter) {
+                const StImagePlane& aPlaneL = myDataL.getPlane(aPlaneIter);
+                if(!aPlaneL.isNull()) {
+                    // don't use aPlane.getSizeRowBytes() here since it may contain extra padding for side-by-side input
+                    aStride += aPlaneL.getSizeX() * aPlaneL.getSizePixelBytes();
+                }
+                if(!myDataR.isNull()) {
+                    const StImagePlane& aPlaneR = myDataR.getPlane(aPlaneIter);
+                    if(!aPlaneR.isNull()) {
+                        aStride += aPlaneR.getSizeX() * aPlaneR.getSizePixelBytes();
+                    }
+                }
+            }
+
+            const int aNbMaxFrameRows = int((size_t(aMaxUploadChunkMiB) * 1024 * 1024) / aStride);
+            aNbIters = stMin(aMaxUploadIterations, aNbMaxRows / aNbMaxFrameRows);
         }
-        myFillRows = maxRows / iterations;
+        myFillRows = (aNbIters > 0) ? (aNbMaxRows / aNbIters) : aNbMaxRows;
         myFillFromRow = 0;
     }
 
