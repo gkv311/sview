@@ -38,6 +38,9 @@
     //#define GL_ALPHA4   0x803B
     #define GL_ALPHA8   0x803C
     #define GL_ALPHA16  0x803E
+
+    #define GL_HALF_FLOAT                     0x140B
+    #define GL_UNSIGNED_INT_2_10_10_10_REV    0x8368
 #endif
 
 bool StGLTexture::getInternalFormat(const StGLContext& theCtx,
@@ -354,6 +357,49 @@ static inline GLenum getDataFormat(const GLint theInternalFormat) {
     }
 }
 
+/**
+ * Return appropriate data type for specified internal format.
+ */
+static GLenum getDataType(GLint theInternalFormat) {
+    switch(theInternalFormat) {
+        case GL_RED:
+        case GL_R8:
+        case GL_RGB:
+        case GL_RGB8:
+        case GL_RGBA:
+        case GL_RGBA8:
+        case GL_BGRA_EXT:
+        case GL_ALPHA:
+        case GL_ALPHA8:
+        case GL_LUMINANCE:
+        case GL_LUMINANCE_ALPHA:
+            return GL_UNSIGNED_BYTE;
+        case GL_R16:
+        case GL_RGB16:
+        case GL_RGBA16:
+        case GL_ALPHA16:
+            return GL_UNSIGNED_SHORT;
+        case GL_R16F:
+        case GL_RGB16F:
+        case GL_RGBA16F:
+            return GL_HALF_FLOAT;
+        case GL_R32F:
+        case GL_RGB32F:
+        case GL_RGBA32F:
+            return GL_FLOAT;
+        /*case GL_RGB4:
+        case GL_RGB5:
+        case GL_RGB10:
+        case GL_RGB12:
+        case GL_RGBA12:
+            return GL_UNSIGNED_BYTE;*/
+        case GL_RGB10_A2:
+            return GL_UNSIGNED_INT_2_10_10_10_REV;
+        default:
+            return GL_UNSIGNED_BYTE;
+    }
+}
+
 StGLTexture::StGLTexture()
 : mySizeX(0),
   mySizeY(0),
@@ -489,9 +535,12 @@ bool StGLTexture::create(StGLContext&   theCtx,
         return false;
     }
 
+    // NULL is passed to glTexImage2D(), so that there is no actual data to be interpreted.
+    // However, OpenGL ES raises GL_INVALID_OPERATION if invalid type is passed.
+    const GLenum aDataType = getDataType(myTextFormat);
     GLint anInternalFormat = myTextFormat;
 #if defined(GL_ES_VERSION_2_0)
-    if(!theCtx.isGlGreaterEqual(3, 0)) {
+    if(!theCtx.isGlGreaterEqual(3, 0) && aDataType == GL_UNSIGNED_BYTE) {
         // sized formats are not supported here
         anInternalFormat = theDataFormat;
     }
@@ -507,12 +556,12 @@ bool StGLTexture::create(StGLContext&   theCtx,
         for(int aTargetIter = 0; aTargetIter < 6; ++aTargetIter) {
             theCtx.core20fwd->glTexImage2D(aTargets[aTargetIter], 0, anInternalFormat,
                                        mySizeX, mySizeY, 0,
-                                       theDataFormat, GL_UNSIGNED_BYTE, theData);
+                                       theDataFormat, aDataType, theData);
         }
     } else {
         theCtx.core20fwd->glTexImage2D(myTarget, 0, anInternalFormat,
                                        mySizeX, mySizeY, 0,
-                                       theDataFormat, GL_UNSIGNED_BYTE, theData);
+                                       theDataFormat, aDataType, theData);
     }
 #if defined(GL_ES_VERSION_2_0)
     // proxy texture is unavailable - check for errors
