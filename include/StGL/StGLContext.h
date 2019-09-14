@@ -159,11 +159,13 @@ class StGLContext {
     StGLArbFbo*     arbFbo;     //!< GL_ARB_framebuffer_object
     bool            arbNPTW;    //!< GL_ARB_texture_non_power_of_two
     bool            arbTexRG;   //!< GL_ARB_texture_rg
+    bool            arbTexFloat;//!< GL_ARB_texture_float (on desktop OpenGL - since 3.0 or as extension GL_ARB_texture_float; on OpenGL ES - since 3.0)
     bool            arbTexClear;//!< GL_ARB_clear_texture
     bool            hasUnpack;  //!< GL_PACK_ROW_LENGTH / GL_UNPACK_ROW_LENGTH can be used - OpenGL ES 3.0+ or any desktop
     bool            hasHighp;   //!< highp in GLSL ES fragment shader is supported
     bool            hasTexRGBA8;//!< always available on desktop; on OpenGL ES - since 3.0 or as extension GL_OES_rgb8_rgba8
     bool            extTexBGRA8;//!< GL_EXT_texture_format_BGRA8888 for OpenGL ES
+    bool            extTexR16;  //!< GL_EXT_texture_norm16 on OpenGL ES
     StGLFunctions*  extAll;     //!< access to ALL extensions for advanced users
     bool            extSwapTear;//!< WGL_EXT_swap_control_tear/GLX_EXT_swap_control_tear
     bool            khrFlushControl; //!< GL_KHR_context_flush_control / WGL_ARB_context_flush_control / GLX_ARB_context_flush_control / EGL_KHR_context_flush_control

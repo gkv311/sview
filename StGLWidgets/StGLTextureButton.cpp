@@ -222,26 +222,20 @@ class StGLTextureButton::ButtonPrograms : public StGLProgramMatrix<1, 2, StGLTex
      * Initialize all programs.
      */
     bool init(StGLContext& theCtx) {
-        /**const char FRAGMENT_GET_RED[] =
+        const char* FRAGMENT_GET_ALPHA = theCtx.arbTexRG
+                                       ? "#define stTextureAlpha(theSampler, theCoords) texture2D(theSampler, theCoords).r\n"
+                                       : "#define stTextureAlpha(theSampler, theCoords) texture2D(theSampler, theCoords).a\n";
+        const char FRAGMENT_GET_COLOR[] =
             "uniform sampler2D uTexture;\n"
             "uniform vec4      uColor;\n"
             "vec4 getColor(in vec2 theTexCoord) {\n"
             "     vec4 aColor = uColor;\n"
-            "     aColor.a *= 1.0 - texture2D(uTexture, theTexCoord).r;\n"
-            "     return aColor;\n"
-            "}\n\n";*/
-
-        const char FRAGMENT_GET_ALPHA[] =
-            "uniform sampler2D uTexture;\n"
-            "uniform vec4      uColor;\n"
-            "vec4 getColor(in vec2 theTexCoord) {\n"
-            "     vec4 aColor = uColor;\n"
-            "     aColor.a *= 1.0 - texture2D(uTexture, theTexCoord).a;\n"
+            "     aColor.a *= 1.0 - stTextureAlpha(uTexture, theTexCoord);\n"
             "     return aColor;\n"
             "}\n\n";
+
         registerFragmentShaderPart(FragSection_GetColor, FragGetColor_Alpha,
-                                   ///theCtx.arbTexRG ? FRAGMENT_GET_RED :
-                                     FRAGMENT_GET_ALPHA);
+                                   StString(FRAGMENT_GET_ALPHA) + FRAGMENT_GET_COLOR);
 
         setFragmentShaderPart(theCtx, FragSection_GetColor, FragGetColor_RGB);
         if(!initProgram(theCtx)) {

@@ -51,17 +51,20 @@ StGLContext::StGLContext(const StHandle<StResourceManager>& theResMgr)
   arbFbo(NULL),
   arbNPTW(false),
   arbTexRG(false),
+  arbTexFloat(false),
   arbTexClear(false),
 #if defined(GL_ES_VERSION_2_0)
   hasUnpack(false),
   hasHighp(false),
   hasTexRGBA8(false),
   extTexBGRA8(false),
+  extTexR16(false),
 #else
   hasUnpack(true),
   hasHighp(true),
   hasTexRGBA8(true), // always available on desktop
   extTexBGRA8(true),
+  extTexR16(true),
 #endif
   extAll(NULL),
   extSwapTear(false),
@@ -105,17 +108,20 @@ StGLContext::StGLContext(const bool theToInitialize)
   arbFbo(NULL),
   arbNPTW(false),
   arbTexRG(false),
+  arbTexFloat(false),
   arbTexClear(false),
 #if defined(GL_ES_VERSION_2_0)
   hasUnpack(false),
   hasHighp(false),
   hasTexRGBA8(false),
   extTexBGRA8(false),
+  extTexR16(false),
 #else
   hasUnpack(true), // always available on desktop
   hasHighp(true),
   hasTexRGBA8(true),
   extTexBGRA8(true),
+  extTexR16(true),
 #endif
   extAll(NULL),
   extSwapTear(false),
@@ -759,8 +765,10 @@ bool StGLContext::stglInit() {
     hasTexRGBA8 = isGlGreaterEqual(3, 0)
                || stglCheckExtension("GL_OES_rgb8_rgba8");
     extTexBGRA8 = stglCheckExtension("GL_EXT_texture_format_BGRA8888");
+    extTexR16   = stglCheckExtension("GL_EXT_texture_norm16");
     arbTexRG    = isGlGreaterEqual(3, 0)
                || stglCheckExtension("GL_EXT_texture_rg");
+    arbTexFloat = isGlGreaterEqual(3, 0);
     const bool hasFBO = isGlGreaterEqual(2, 0)
                      || stglCheckExtension("GL_OES_framebuffer_object");
     hasUnpack = isGlGreaterEqual(3, 0);
@@ -806,8 +814,11 @@ bool StGLContext::stglInit() {
 #else
     hasTexRGBA8 = true;
     extTexBGRA8 = true;
+    extTexR16   = true;
     arbNPTW     = stglCheckExtension("GL_ARB_texture_non_power_of_two");
     arbTexRG    = stglCheckExtension("GL_ARB_texture_rg");
+    arbTexFloat = isGlGreaterEqual(3, 0)
+               || stglCheckExtension("GL_ARB_texture_float");
 
     // load OpenGL 1.2 new functions
     has12 = isGlGreaterEqual(1, 2)

@@ -14,25 +14,65 @@
 #include <StFile/StRawFile.h>
 
 namespace {
-    const char F_DEF_2D[] =
+    const char F_DEF_2D_ALPHA[] =
         "#define stSampler sampler2D\n"
-        "#define stTexture(theSampler, theCoords) texture2D(theSampler, theCoords.xy)\n";
-    const char F_DEF_CUBEMAP[] =
+        "#define stTexture(theSampler, theCoords) texture2D(theSampler, theCoords.xy)\n"
+        "#define stAlpha a\n";
+    const char F_DEF_2D_RED[] =
+        "#define stSampler sampler2D\n"
+        "#define stTexture(theSampler, theCoords) texture2D(theSampler, theCoords.xy)\n"
+        "#define stAlpha r\n";
+    const char F_DEF_CUBEMAP_ALPHA[] =
         "#define stSampler samplerCube\n"
-        "#define stTexture(theSampler, theCoords) textureCube(theSampler, theCoords)\n";
+        "#define stTexture(theSampler, theCoords) textureCube(theSampler, theCoords)\n"
+        "#define stAlpha a\n";
+    const char F_DEF_CUBEMAP_RED[] =
+        "#define stSampler samplerCube\n"
+        "#define stTexture(theSampler, theCoords) textureCube(theSampler, theCoords)\n"
+        "#define stAlpha r\n";
 }
 
-void StGLImageProgram::regToRgb(const int       thePartIndex,
+void StGLImageProgram::regToRgb(const StGLContext& theCtx,
+                                const int       thePartIndex,
                                 const StString& theText) {
   registerFragmentShaderPart(FragSection_ToRgb, thePartIndex,
-                             StString(F_DEF_2D)      + theText);
+                             StString(theCtx.arbTexRG ? F_DEF_2D_RED : F_DEF_2D_ALPHA) + theText);
   registerFragmentShaderPart(FragSection_ToRgb, FragToRgb_CUBEMAP + thePartIndex,
-                             StString(F_DEF_CUBEMAP) + theText);
+                             StString(theCtx.arbTexRG ? F_DEF_CUBEMAP_RED : F_DEF_CUBEMAP_ALPHA) + theText);
 }
 
 StGLImageProgram::StGLImageProgram()
-: myColorScale(1.0f, 1.0f, 1.0f) {
+: myColorScale(1.0f, 1.0f, 1.0f),
+  myIsRegistered(false) {
     myTitle = "StGLImageProgram";
+
+    params.gamma = new StFloat32Param(1.0f);
+    params.gamma->setMinMaxValues(0.05f, 99.0f);
+    params.gamma->setEffectiveMinMaxValues(0.05f, 2.0f);
+    params.gamma->setDefValue(1.0f);
+    params.gamma->setStep(0.05f);
+    params.gamma->setTolerance(0.0001f);
+
+    params.brightness = new StFloat32Param(1.0f);
+    params.brightness->setMinMaxValues(0.0f, 99.0f);
+    params.brightness->setDefValue(1.0f);
+    params.brightness->setEffectiveMinMaxValues(0.0f, 5.0f);
+    params.brightness->setStep(0.05f);
+    params.brightness->setTolerance(0.0001f);
+
+    params.saturation = new StFloat32Param(1.0f);
+    params.saturation->setMinMaxValues(-10.0f, 99.0f);
+    params.saturation->setEffectiveMinMaxValues(0.0f, 2.0f);
+    params.saturation->setDefValue(1.0f);
+    params.saturation->setStep(0.05f);
+    params.saturation->setTolerance(0.0001f);
+}
+
+void StGLImageProgram::registerFragments(const StGLContext& theCtx) {
+    if(myIsRegistered) {
+        return;
+    }
+    myIsRegistered = true;
 
     const char F_SHADER_GET_COLOR_BLEND[] =
        "uniform sampler2D uTexture;\n"
@@ -94,11 +134,12 @@ StGLImageProgram::StGLImageProgram()
         "    }\n"
         "    color = mix(backColor, color, color.a);\n"
         "}\n\n");
-    registerFragmentShaderPart(FragSection_ToRgb, FragToRgb_FromGray,
+
+    regToRgb(theCtx, FragToRgb_FromGray,
         "void convertToRGB(inout vec4 color, in vec3 texCoord) {\n"
-        "    color.r = color.a;\n" // gray scale stored in alpha
-        "    color.g = color.a;\n"
-        "    color.b = color.a;\n"
+        "    color.r = color.stAlpha;\n" // gray scale stored in alpha
+        "    color.g = color.stAlpha;\n"
+        "    color.b = color.stAlpha;\n"
         "}\n\n");
 
     // color conversion shaders
@@ -121,7 +162,7 @@ StGLImageProgram::StGLImageProgram()
        "uniform stSampler uTextureU;\n"
        "uniform stSampler uTextureV;\n"
        "void convertToRGB(inout vec4 color, in vec3 texCoordUV) {\n"
-       "    vec3 colorYUV = vec3(color.a, stTexture(uTextureU, texCoordUV).a, stTexture(uTextureV, texCoordUV).a);\n"
+       "    vec3 colorYUV = vec3(color.stAlpha, stTexture(uTextureU, texCoordUV).stAlpha, stTexture(uTextureV, texCoordUV).stAlpha);\n"
        "    colorYUV   *= TheRangeBits;\n"
        "    colorYUV.x  = 1.1643 * (colorYUV.x - 0.0625);\n"
        "    colorYUV.y -= 0.5;\n"
@@ -135,7 +176,7 @@ StGLImageProgram::StGLImageProgram()
        "uniform stSampler uTextureU;\n"
        "uniform stSampler uTextureV;\n"
        "void convertToRGB(inout vec4 color, in vec3 texCoordUV) {\n"
-       "    vec3 colorYUV = vec3(color.a, stTexture(uTextureU, texCoordUV).a, stTexture(uTextureV, texCoordUV).a);\n"
+       "    vec3 colorYUV = vec3(color.stAlpha, stTexture(uTextureU, texCoordUV).stAlpha, stTexture(uTextureV, texCoordUV).stAlpha);\n"
        "    colorYUV   *= TheRangeBits;\n"
        "    colorYUV.x  = colorYUV.x;\n"
        "    colorYUV.y -= 0.5;\n"
@@ -171,58 +212,37 @@ StGLImageProgram::StGLImageProgram()
        "    color.b = colorYUV.x + 1.772 * colorYUV.y;\n"
        "}\n\n";
 
-    regToRgb(FragToRgb_FromYuvFull, StString()
+    regToRgb(theCtx, FragToRgb_FromYuvFull, StString()
         + "const float TheRangeBits = 1.0;\n"
         + F_SHADER_YUV2RGB_FULL);
 
-    regToRgb(FragToRgb_FromYuvMpeg, StString()
+    regToRgb(theCtx, FragToRgb_FromYuvMpeg, StString()
         + "const float TheRangeBits = 1.0;\n"
         + F_SHADER_YUV2RGB_MPEG);
 
-    regToRgb(FragToRgb_FromYuv9Full, StString()
+    regToRgb(theCtx, FragToRgb_FromYuv9Full, StString()
         + "const float TheRangeBits = 65535.0 / 511.0;\n"
         + F_SHADER_YUV2RGB_FULL);
 
-    regToRgb(FragToRgb_FromYuv9Mpeg, StString()
+    regToRgb(theCtx, FragToRgb_FromYuv9Mpeg, StString()
         + "const float TheRangeBits = 65535.0 / 511.0;\n"
         + F_SHADER_YUV2RGB_MPEG);
 
-    regToRgb(FragToRgb_FromYuv10Full, StString()
+    regToRgb(theCtx, FragToRgb_FromYuv10Full, StString()
         + "const float TheRangeBits = 65535.0 / 1023.0;\n"
         + F_SHADER_YUV2RGB_FULL);
 
-    regToRgb(FragToRgb_FromYuv10Mpeg, StString()
+    regToRgb(theCtx, FragToRgb_FromYuv10Mpeg, StString()
         + "const float TheRangeBits = 65535.0 / 1023.0;\n"
         + F_SHADER_YUV2RGB_MPEG);
 
-    regToRgb(FragToRgb_FromYuvNvFull, StString()
+    regToRgb(theCtx, FragToRgb_FromYuvNvFull, StString()
         + "const float TheRangeBits = 1.0;\n"
         + F_SHADER_YUVNV2RGB_FULL);
 
-    regToRgb(FragToRgb_FromYuvNvMpeg, StString()
+    regToRgb(theCtx, FragToRgb_FromYuvNvMpeg, StString()
         + "const float TheRangeBits = 1.0;\n"
         + F_SHADER_YUVNV2RGB_MPEG);
-
-    params.gamma = new StFloat32Param(1.0f);
-    params.gamma->setMinMaxValues(0.05f, 99.0f);
-    params.gamma->setEffectiveMinMaxValues(0.05f, 2.0f);
-    params.gamma->setDefValue(1.0f);
-    params.gamma->setStep(0.05f);
-    params.gamma->setTolerance(0.0001f);
-
-    params.brightness = new StFloat32Param(1.0f);
-    params.brightness->setMinMaxValues(0.0f, 99.0f);
-    params.brightness->setDefValue(1.0f);
-    params.brightness->setEffectiveMinMaxValues(0.0f, 5.0f);
-    params.brightness->setStep(0.05f);
-    params.brightness->setTolerance(0.0001f);
-
-    params.saturation = new StFloat32Param(1.0f);
-    params.saturation->setMinMaxValues(-10.0f, 99.0f);
-    params.saturation->setEffectiveMinMaxValues(0.0f, 2.0f);
-    params.saturation->setDefValue(1.0f);
-    params.saturation->setStep(0.05f);
-    params.saturation->setTolerance(0.0001f);
 
     // main shader parts
     const char V_SHADER_FLAT[] =
@@ -366,6 +386,7 @@ bool StGLImageProgram::init(StGLContext&                 theCtx,
                             const StImage::ImgColorModel theColorModel,
                             const StImage::ImgColorScale theColorScale,
                             const FragGetColor           theFilter) {
+    registerFragments(theCtx);
 
     // re-configure shader parts when required
     bool isChanged = myActiveProgram.isNull();

@@ -1,5 +1,5 @@
 /**
- * Copyright © 2009-2015 Kirill Gavrilov <kirill@sview.ru>
+ * Copyright © 2009-2019 Kirill Gavrilov <kirill@sview.ru>
  *
  * Distributed under the Boost Software License, Version 1.0.
  * See accompanying file license-boost.txt or copy at
@@ -16,43 +16,67 @@
 #include <StStrings/StLogger.h>
 #include <stAssert.h>
 
+#ifndef GL_R16
+    #define GL_R16      0x822A
+    #define GL_R16F     0x822D
+    #define GL_R32F     0x822E
+    #define GL_RGB16F   0x881B
+    #define GL_RGBA32F  0x8814
+    #define GL_RGB32F   0x8815
+    #define GL_RGBA16F  0x881A
+    #define GL_RGB16F   0x881B
+    #define GL_RGB4     0x804F
+    #define GL_RGB5     0x8050
+    #define GL_RGB8     0x8051
+    #define GL_RGB10    0x8052
+    #define GL_RGB12    0x8053
+    #define GL_RGB16    0x8054
+    #define GL_RGBA8    0x8058
+    #define GL_RGB10_A2 0x8059
+    #define GL_RGBA12   0x805A
+    #define GL_RGBA16   0x805B
+    //#define GL_ALPHA4   0x803B
+    #define GL_ALPHA8   0x803C
+    #define GL_ALPHA16  0x803E
+#endif
+
 bool StGLTexture::getInternalFormat(const StGLContext&  theCtx,
                                     const StImagePlane& theData,
                                     GLint&              theInternalFormat) {
-    (void )theCtx;
-    // sized formats are not supported by OpenGL ES
     switch(theData.getFormat()) {
         case StImagePlane::ImgRGBAF:
-        case StImagePlane::ImgBGRAF:
-        #if defined(GL_ES_VERSION_2_0)
-            theInternalFormat = GL_RGBA;
-        #else
+        case StImagePlane::ImgBGRAF: // BGRA requires texture swizzling on OpenGL ES
             theInternalFormat = GL_RGBA32F;
-        #endif
+            if(!theCtx.arbTexFloat) {
+            #if defined(GL_ES_VERSION_2_0)
+                return false;
+            #else
+                theInternalFormat = GL_RGBA8;
+            #endif
+            }
             return true;
         case StImagePlane::ImgRGBF:
-        case StImagePlane::ImgBGRF:
-        #if defined(GL_ES_VERSION_2_0)
-            theInternalFormat = GL_RGB;
-        #else
+        case StImagePlane::ImgBGRF: // BGR requires texture swizzling on OpenGL ES
             theInternalFormat = GL_RGB32F;
-        #endif
+            if(!theCtx.arbTexFloat) {
+            #if defined(GL_ES_VERSION_2_0)
+                return false;
+            #else
+                theInternalFormat = GL_RGB8;
+            #endif
+            }
             return true;
         case StImagePlane::ImgRGBA:
         case StImagePlane::ImgBGRA:
         #if defined(GL_ES_VERSION_2_0)
-            theInternalFormat = GL_RGBA;
+            theInternalFormat = GL_RGBA; // non-sized for compatibility with OpenGL ES 2.0
         #else
             theInternalFormat = GL_RGBA8;
         #endif
             return true;
         case StImagePlane::ImgRGBA64:
-        #if defined(GL_ES_VERSION_2_0)
-            theInternalFormat = GL_RGBA;
-        #else
-            theInternalFormat = GL_RGBA16;
-        #endif
-            return true;
+            theInternalFormat = theCtx.arbTexRG ? GL_RGBA16 : GL_RGBA8;
+            return theCtx.extTexR16;
         case StImagePlane::ImgRGB: {
             theInternalFormat = GL_RGB8;
             return true;
@@ -68,61 +92,52 @@ bool StGLTexture::getInternalFormat(const StGLContext&  theCtx,
         case StImagePlane::ImgBGR: {
             theInternalFormat = GL_RGB8;
         #if defined(GL_ES_VERSION_2_0)
-            return false;
+            return false; // still can be done via swizzling...
         #else
             return true;
         #endif
         }
         case StImagePlane::ImgBGR32:
+            theInternalFormat = GL_RGB8;
         #if defined(GL_ES_VERSION_2_0)
-            theInternalFormat = GL_RGB8;
-            if(!theCtx.extTexBGRA8) {
-                return false;
+            if(theCtx.extTexBGRA8) {
+                // GL_EXT_texture_format_BGRA8888 has been introduced for OpenGL ES 1.0
+                // and does not defined sized format supported by OpenGL ES 3.0+
+                theInternalFormat = GL_BGRA_EXT;
+            } else {
+                return false; // still can be done via swizzling...
             }
-
-            // GL_EXT_texture_format_BGRA8888 has been introduced for OpenGL ES 1.0
-            // and does not defined sized format supported by OpenGL ES 3.0+
-            theInternalFormat = GL_BGRA_EXT;
-        #else
-            theInternalFormat = GL_RGB8;
         #endif
             return true;
         case StImagePlane::ImgRGB48:
-        #if defined(GL_ES_VERSION_2_0)
-            theInternalFormat = GL_RGB;
-        #else
             theInternalFormat = GL_RGB16;
-        #endif
-            return true;
+            return theCtx.extTexR16;
         case StImagePlane::ImgGrayF:
-        #if defined(GL_ES_VERSION_2_0)
-            theInternalFormat = GL_ALPHA;
-        #else
-            //theInternalFormat = GL_R32F;    // OpenGL3+ hardware
-            //theInternalFormat = GL_ALPHA32F_ARB;
-            theInternalFormat = GL_ALPHA16; // backward compatibility
-        #endif
+            theInternalFormat = GL_R32F;
+            if(!theCtx.arbTexFloat || !theCtx.arbTexRG) {
+            #if defined(GL_ES_VERSION_2_0)
+                return false;
+            #else
+                // there is also GL_ALPHA32F_ARB
+                theInternalFormat = theCtx.arbTexRG ? GL_R16 : GL_ALPHA16;
+            #endif
+            }
             return true;
         case StImagePlane::ImgGray16:
-        #if defined(GL_ES_VERSION_2_0)
-            theInternalFormat = GL_ALPHA;
-        #else
-            //theInternalFormat = GL_R16;   // OpenGL3+ hardware
-            theInternalFormat = GL_ALPHA16; // backward compatibility
+            theInternalFormat = GL_R16; // equals to GL_R16_EXT on OpenGL ES extension
+        #if !defined(GL_ES_VERSION_2_0)
+            theInternalFormat = theCtx.arbTexRG ? GL_R16 : GL_ALPHA16;
         #endif
-            return true;
+            return theCtx.extTexR16;
         case StImagePlane::ImgGray:
         #if defined(GL_ES_VERSION_2_0)
-            theInternalFormat = GL_ALPHA;
+            theInternalFormat = theCtx.arbTexRG ? GL_R8 : GL_ALPHA;
         #else
-            // this texture format is deprecated with OpenGL3+, use GL_R8 (GL_RED) instead
-            //theInternalFormat = GL_R8;   // OpenGL3+ hardware
-            theInternalFormat = GL_ALPHA8; // backward compatibility
+            theInternalFormat = theCtx.arbTexRG ? GL_R8 : GL_ALPHA8;
         #endif
             return true;
         case StImagePlane::ImgUV:
-            // this texture format is deprecated with OpenGL3+, use GL_R8 (GL_RED) instead
-            //theInternalFormat = GL_RG8;   // OpenGL3+ hardware
+            //theInternalFormat = theCtx.arbTexRG ? GL_RG8 : GL_LUMINANCE_ALPHA; // OpenGL3+
             theInternalFormat = GL_LUMINANCE_ALPHA;
             return true;
         default:
@@ -134,28 +149,21 @@ bool StGLTexture::getDataFormat(const StGLContext&  theCtx,
                                 const StImagePlane& theData,
                                 GLenum& thePixelFormat,
                                 GLenum& theDataType) {
-#if !defined(GL_ES_VERSION_2_0)
-    (void )theCtx;
-#endif
     thePixelFormat = GL_RGB;
     theDataType    = GL_UNSIGNED_BYTE;
     switch(theData.getFormat()) {
         case StImagePlane::ImgGray: {
-            // we fill ALPHA channel in the texture!
-            //thePixelFormat = GL_RED;
-            thePixelFormat = GL_ALPHA;
+            thePixelFormat = theCtx.arbTexRG ? GL_RED : GL_ALPHA;
             theDataType = GL_UNSIGNED_BYTE;
             return true;
         }
         case StImagePlane::ImgGray16: {
-            // we fill ALPHA channel in the texture!
-            //thePixelFormat = GL_RED;
-            thePixelFormat = GL_ALPHA;
+            thePixelFormat = theCtx.arbTexRG ? GL_RED : GL_ALPHA;
             theDataType = GL_UNSIGNED_SHORT;
             return true;
         }
         case StImagePlane::ImgUV: {
-            //thePixelFormat = GL_RG;
+            //thePixelFormat = theCtx.arbTexRG ? GL_RG : GL_LUMINANCE_ALPHA;
             thePixelFormat = GL_LUMINANCE_ALPHA;
             theDataType = GL_UNSIGNED_BYTE;
             return true;
@@ -204,8 +212,7 @@ bool StGLTexture::getDataFormat(const StGLContext&  theCtx,
             return true;
         }
         case StImagePlane::ImgGrayF: {
-            //thePixelFormat = GL_RED;
-            thePixelFormat = GL_ALPHA;
+            thePixelFormat = theCtx.arbTexRG ? GL_RED : GL_ALPHA;
             theDataType = GL_FLOAT;
             return true;
         }
@@ -240,30 +247,6 @@ bool StGLTexture::getDataFormat(const StGLContext&  theCtx,
         default: return false;
     }
 }
-
-#ifndef GL_R16
-    #define GL_R16      0x822A
-    #define GL_R16F     0x822D
-    #define GL_R32F     0x822E
-    #define GL_RGB16F   0x881B
-    #define GL_RGBA32F  0x8814
-    #define GL_RGB32F   0x8815
-    #define GL_RGBA16F  0x881A
-    #define GL_RGB16F   0x881B
-    #define GL_RGB4     0x804F
-    #define GL_RGB5     0x8050
-    #define GL_RGB8     0x8051
-    #define GL_RGB10    0x8052
-    #define GL_RGB12    0x8053
-    #define GL_RGB16    0x8054
-    #define GL_RGBA8    0x8058
-    #define GL_RGB10_A2 0x8059
-    #define GL_RGBA12   0x805A
-    #define GL_RGBA16   0x805B
-    //#define GL_ALPHA4   0x803B
-    #define GL_ALPHA8   0x803C
-    #define GL_ALPHA16  0x803E
-#endif
 
 bool StGLTexture::isAlphaFormat(const GLint theInternalFormat) {
     switch(theInternalFormat) {

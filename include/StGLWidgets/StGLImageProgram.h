@@ -146,8 +146,10 @@ class StGLImageProgram : public StGLProgramMatrix<1, 5, StGLMeshProgram> {
         private: //!< callback Slots
 
     ST_LOCAL void setupCorrection(StGLContext& theCtx);
-    ST_LOCAL void regToRgb(const int       thePartIndex,
+    ST_LOCAL void regToRgb(const StGLContext& theCtx,
+                           const int       thePartIndex,
                            const StString& theText);
+    ST_LOCAL void registerFragments(const StGLContext& theCtx);
 
         protected:
 
@@ -168,6 +170,7 @@ class StGLImageProgram : public StGLProgramMatrix<1, 5, StGLMeshProgram> {
     StGLVarLocation uniGammaLoc;
 
     StGLVec3        myColorScale; //!< scale filter for de-anaglyph processing
+    bool            myIsRegistered;
 
 };
 
