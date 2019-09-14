@@ -42,6 +42,11 @@ class StGLTextureQueue {
     ST_CPPEXPORT ~StGLTextureQueue();
 
     /**
+     * Get device capabilities.
+     */
+    ST_LOCAL const StGLDeviceCaps& getDeviceCaps() const { return myDeviceCaps; }
+
+    /**
      * Set device capabilities.
      */
     ST_LOCAL void setDeviceCaps(const StGLDeviceCaps& theCaps) {

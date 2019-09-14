@@ -11,8 +11,8 @@
 
 #include <StGL/StGLResource.h>
 #include <StStrings/StString.h>
+#include <StImage/StImagePlane.h>
 
-class StImagePlane;
 class StGLContext;
 
 #define GL_TEXTURE0 0x84C0
@@ -32,9 +32,9 @@ class StGLTexture : public StGLResource {
      * Currently GL_ALPHA is returned for grayscale image data.
      * @return true if internal format was found.
      */
-    ST_CPPEXPORT static bool getInternalFormat(const StGLContext&  theCtx,
-                                               const StImagePlane& theData,
-                                               GLint&              theInternalFormat);
+    ST_CPPEXPORT static bool getInternalFormat(const StGLContext& theCtx,
+                                               const StImagePlane::ImgFormat theFormat,
+                                               GLint& theInternalFormat);
 
     /**
      * Return true for GL_ALPHA / GL_RED formats.

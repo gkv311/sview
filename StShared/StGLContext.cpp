@@ -1,5 +1,5 @@
 /**
- * Copyright © 2012-2016 Kirill Gavrilov <kirill@sview.ru>
+ * Copyright © 2012-2019 Kirill Gavrilov <kirill@sview.ru>
  *
  * Distributed under the Boost Software License, Version 1.0.
  * See accompanying file license-boost.txt or copy at
@@ -15,6 +15,7 @@
 
 #include <StGLCore/StGLCore44.h>
 #include <StGL/StGLArbFbo.h>
+#include <StGL/StGLTexture.h>
 
 #include <StStrings/StDictionary.h>
 #include <StStrings/StLogger.h>
@@ -54,13 +55,11 @@ StGLContext::StGLContext(const StHandle<StResourceManager>& theResMgr)
   arbTexFloat(false),
   arbTexClear(false),
 #if defined(GL_ES_VERSION_2_0)
-  hasUnpack(false),
   hasHighp(false),
   hasTexRGBA8(false),
   extTexBGRA8(false),
   extTexR16(false),
 #else
-  hasUnpack(true),
   hasHighp(true),
   hasTexRGBA8(true), // always available on desktop
   extTexBGRA8(true),
@@ -75,7 +74,6 @@ StGLContext::StGLContext(const StHandle<StResourceManager>& theResMgr)
   myGpuName(GPU_UNKNOWN),
   myVerMajor(0),
   myVerMinor(0),
-  myMaxTexDim(0),
   myWasInit(false),
   myFramebufferDraw(0),
   myFramebufferRead(0),
@@ -87,6 +85,12 @@ StGLContext::StGLContext(const StHandle<StResourceManager>& theResMgr)
     stMemZero(&myFBOBits,    sizeof(BufferBits));
 #ifdef __APPLE__
     mySysLib.loadSimple("/System/Library/Frameworks/OpenGL.framework/Versions/Current/OpenGL");
+#endif
+
+#if defined(GL_ES_VERSION_2_0)
+    myDevCaps.hasUnpack = false;
+#else
+    myDevCaps.hasUnpack = true;
 #endif
 }
 
@@ -111,13 +115,11 @@ StGLContext::StGLContext(const bool theToInitialize)
   arbTexFloat(false),
   arbTexClear(false),
 #if defined(GL_ES_VERSION_2_0)
-  hasUnpack(false),
   hasHighp(false),
   hasTexRGBA8(false),
   extTexBGRA8(false),
   extTexR16(false),
 #else
-  hasUnpack(true), // always available on desktop
   hasHighp(true),
   hasTexRGBA8(true),
   extTexBGRA8(true),
@@ -131,7 +133,6 @@ StGLContext::StGLContext(const bool theToInitialize)
   myGpuName(GPU_UNKNOWN),
   myVerMajor(0),
   myVerMinor(0),
-  myMaxTexDim(0),
   myWasInit(false),
   myFramebufferDraw(0),
   myFramebufferRead(0),
@@ -143,6 +144,12 @@ StGLContext::StGLContext(const bool theToInitialize)
     stMemZero(&myFBOBits,    sizeof(BufferBits));
 #ifdef __APPLE__
     mySysLib.loadSimple("/System/Library/Frameworks/OpenGL.framework/Versions/Current/OpenGL");
+#endif
+
+#if defined(GL_ES_VERSION_2_0)
+    myDevCaps.hasUnpack = false;
+#else
+    myDevCaps.hasUnpack = true; // always available on desktop
 #endif
     if(theToInitialize) {
         stglInit();
@@ -468,7 +475,7 @@ void StGLContext::stglFullInfo(StDictionary& theMap) const {
     theMap.add(StDictEntry("GLdevice",    (const char* )glGetString(GL_RENDERER)));
     theMap.add(StDictEntry("GLversion",   (const char* )glGetString(GL_VERSION)));
     theMap.add(StDictEntry("GLSLversion", (const char* )glGetString(GL_SHADING_LANGUAGE_VERSION)));
-    theMap.add(StDictEntry("Max texture size", myMaxTexDim));
+    theMap.add(StDictEntry("Max texture size", myDevCaps.maxTexDim));
     theMap.add(StDictEntry("Window Info", StString()
             + myViewport.width() + "x" + myViewport.height()
             + " RGB" + myWindowBits.RGB + " A" + myWindowBits.Alpha
@@ -677,8 +684,8 @@ bool StGLContext::stglInit() {
     core11    = (StGLCore11*    )(&(*myFuncs));
     core11fwd = (StGLCore11Fwd* )(&(*myFuncs));
 
-    myMaxTexDim = 2048;
-    glGetIntegerv(GL_MAX_TEXTURE_SIZE, &myMaxTexDim);
+    myDevCaps.maxTexDim = 2048;
+    glGetIntegerv(GL_MAX_TEXTURE_SIZE, &myDevCaps.maxTexDim);
 
 #if !defined(GL_ES_VERSION_2_0)
     bool has12 = false;
@@ -771,7 +778,7 @@ bool StGLContext::stglInit() {
     arbTexFloat = isGlGreaterEqual(3, 0);
     const bool hasFBO = isGlGreaterEqual(2, 0)
                      || stglCheckExtension("GL_OES_framebuffer_object");
-    hasUnpack = isGlGreaterEqual(3, 0);
+    myDevCaps.hasUnpack = isGlGreaterEqual(3, 0);
 
     if(isGlGreaterEqual(2, 0)) {
         // enable compatible functions
@@ -1623,6 +1630,12 @@ bool StGLContext::stglInit() {
             arbFbo->glGetFramebufferAttachmentParameteriv(GL_FRAMEBUFFER, GL_STENCIL,   GL_FRAMEBUFFER_ATTACHMENT_STENCIL_SIZE, &myWindowBits.Stencil);
             myWindowBits.RGB = aBitsRed + aBitsGreen + aBitsBlue;
         }*/
+    }
+
+    for(int aFormatIter = 0; aFormatIter < StImagePlane::ImgNB; ++aFormatIter) {
+        const StImagePlane::ImgFormat aFormat = (StImagePlane::ImgFormat )aFormatIter;
+        GLint aDummy = 0;
+        myDevCaps.setSupportedFormat(aFormat, StGLTexture::getInternalFormat(*this, aFormat, aDummy));
     }
 
     // log OpenGL info

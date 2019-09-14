@@ -1,5 +1,5 @@
 /**
- * Copyright © 2012-2016 Kirill Gavrilov <kirill@sview.ru>
+ * Copyright © 2012-2019 Kirill Gavrilov <kirill@sview.ru>
  *
  * Distributed under the Boost Software License, Version 1.0.
  * See accompanying file license-boost.txt or copy at
@@ -161,7 +161,6 @@ class StGLContext {
     bool            arbTexRG;   //!< GL_ARB_texture_rg
     bool            arbTexFloat;//!< GL_ARB_texture_float (on desktop OpenGL - since 3.0 or as extension GL_ARB_texture_float; on OpenGL ES - since 3.0)
     bool            arbTexClear;//!< GL_ARB_clear_texture
-    bool            hasUnpack;  //!< GL_PACK_ROW_LENGTH / GL_UNPACK_ROW_LENGTH can be used - OpenGL ES 3.0+ or any desktop
     bool            hasHighp;   //!< highp in GLSL ES fragment shader is supported
     bool            hasTexRGBA8;//!< always available on desktop; on OpenGL ES - since 3.0 or as extension GL_OES_rgb8_rgba8
     bool            extTexBGRA8;//!< GL_EXT_texture_format_BGRA8888 for OpenGL ES
@@ -246,12 +245,7 @@ class StGLContext {
     /**
      * Return capabilities of currently active device.
      */
-    ST_LOCAL StGLDeviceCaps getDeviceCaps() const {
-        StGLDeviceCaps aCaps;
-        aCaps.maxTexDim = myMaxTexDim;
-        aCaps.hasUnpack = hasUnpack;
-        return aCaps;
-    }
+    ST_LOCAL const StGLDeviceCaps& getDeviceCaps() const { return myDevCaps; }
 
     ST_LOCAL GLint getVersionMajor() const {
         return myVerMajor;
@@ -269,7 +263,7 @@ class StGLContext {
      * @return value for GL_MAX_TEXTURE_SIZE.
      */
     ST_LOCAL GLint getMaxTextureSize() const {
-        return myMaxTexDim;
+        return myDevCaps.maxTexDim;
     }
 
     /**
@@ -446,11 +440,11 @@ class StGLContext {
     StHandle<StResourceManager>
                             myResMgr;             //!< file resources manager
     StHandle<StMsgQueue>    myMsgQueue;           //!< messages queue
+    StGLDeviceCaps          myDevCaps;            //!< device caps
     GlVendor                myGlVendor;           //!< driver vendor
     GPU_Name                myGpuName;            //!< GPU name
     GLint                   myVerMajor;           //!< cached GL version major number
     GLint                   myVerMinor;           //!< cached GL version minor number
-    GLint                   myMaxTexDim;          //!< maximum texture dimension
     BufferBits              myWindowBits;         //!< default buffer (window) bits
     BufferBits              myFBOBits;            //!< FBO bits
     bool                    myWasInit;            //!< initialization state

@@ -702,7 +702,7 @@ static void prepareTextures(StGLContext&       theCtx,
             continue;
         }
 
-        if(!StGLTexture::getInternalFormat(theCtx, anImgPlane, anInternalFormat)) {
+        if(!StGLTexture::getInternalFormat(theCtx, anImgPlane.getFormat(), anInternalFormat)) {
             aTexture.release(theCtx);
             continue;
         }

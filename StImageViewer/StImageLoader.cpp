@@ -117,6 +117,7 @@ void StImageLoader::metadataFromExif(const StHandle<StExifDir>& theDir,
 }
 
 inline StHandle<StImage> scaledImage(StHandle<StImageFile>& theRef,
+                                     const StGLDeviceCaps&  theCaps,
                                      const size_t           theMaxSizeX,
                                      const size_t           theMaxSizeY,
                                      StCubemap              theCubemap,
@@ -124,6 +125,25 @@ inline StHandle<StImage> scaledImage(StHandle<StImageFile>& theRef,
                                      StPairRatio            thePairRatio) {
     if(theRef->isNull()) {
         return theRef;
+    }
+
+    const bool toConvertRgb = !theCaps.isSupportedFormat(theRef->getPlane().getFormat());
+    StImagePlane::ImgFormat anRgbImgFormat = StImagePlane::ImgRGB;
+    if(toConvertRgb) {
+        switch(theRef->getColorModel()) {
+            case StImage::ImgColor_RGB:
+                anRgbImgFormat = StImagePlane::ImgRGB;
+                break;
+            case StImage::ImgColor_RGBA:
+                anRgbImgFormat = StImagePlane::ImgRGBA;
+                break;
+            case StImage::ImgColor_GRAY:
+                anRgbImgFormat = StImagePlane::ImgGray;
+                break;
+            default:
+                anRgbImgFormat = StImagePlane::ImgRGB;
+                break;
+        }
     }
 
     if(theCubemap == StCubemap_Packed) {
@@ -140,18 +160,36 @@ inline StHandle<StImage> scaledImage(StHandle<StImageFile>& theRef,
                 toResize = true;
             }
         }
-        if(!toResize) {
+        if(!toResize && !toConvertRgb) {
             return theRef;
         }
 
         StHandle<StImage> anImage = new StImage();
-        anImage->setColorModel(theRef->getColorModel());
-        anImage->setColorScale(theRef->getColorScale());
+        if(toConvertRgb) {
+            anImage->setColorModelPacked(anRgbImgFormat);
+            anImage->setColorScale(StImage::ImgScale_Full);
+        } else {
+            anImage->setColorModel(theRef->getColorModel());
+            anImage->setColorScale(theRef->getColorScale());
+        }
 
         double aRatioX = double(aSizesY[0] * theCubeCoeffs[0] * aMulX) / double(theRef->getSizeX());
         double aRatioY = double(aSizesY[0] * theCubeCoeffs[1] * aMulY) / double(theRef->getSizeY());
         anImage->setPixelRatio(float(double(theRef->getPixelRatio()) * aRatioY / aRatioX));
         for(size_t aPlaneId = 0; aPlaneId < 4; ++aPlaneId) {
+            if(toConvertRgb) {
+                if(aPlaneId != 0) {
+                    continue;
+                }
+                if(!anImage->changePlane(0).initTrash(anRgbImgFormat,
+                                                      aSizesY[0] * theCubeCoeffs[0] * aMulX,
+                                                      aSizesY[0] * theCubeCoeffs[1] * aMulY)) {
+                    ST_ERROR_LOG("Scale failed!");
+                    return theRef;
+                }
+                continue;
+            }
+
             const StImagePlane& aFromPlane = theRef->getPlane(aPlaneId);
             if(aFromPlane.isNull()) {
                 continue;
@@ -174,17 +212,28 @@ inline StHandle<StImage> scaledImage(StHandle<StImageFile>& theRef,
     }
 
     if(theRef->getSizeX() <= theMaxSizeX
-    && theRef->getSizeY() <= theMaxSizeY) {
+    && theRef->getSizeY() <= theMaxSizeY
+    && !toConvertRgb) {
         return theRef;
     }
 
     StHandle<StImage> anImage = new StImage();
     const size_t aSizeX = stMin(theRef->getSizeX(), theMaxSizeX);
     const size_t aSizeY = stMin(theRef->getSizeY(), theMaxSizeY);
-    if(!anImage->initTrashLimited(*theRef, aSizeX, aSizeY)
-    || !StAVImage::resize(*theRef, *anImage)) {
-        ST_ERROR_LOG("Scale failed!");
-        return theRef;
+    if(toConvertRgb) {
+        anImage->setColorModelPacked(anRgbImgFormat);
+        anImage->setColorScale(StImage::ImgScale_Full);
+        if(!anImage->changePlane().initTrash(anRgbImgFormat, aSizeX, aSizeY)
+        || !StAVImage::resize(*theRef, *anImage)) {
+            ST_ERROR_LOG("Scale failed!");
+            return theRef;
+        }
+    } else {
+        if(!anImage->initTrashLimited(*theRef, aSizeX, aSizeY)
+        || !StAVImage::resize(*theRef, *anImage)) {
+            ST_ERROR_LOG("Scale failed!");
+            return theRef;
+        }
     }
     theRef->close();
     return anImage;
@@ -468,8 +517,10 @@ bool StImageLoader::loadImage(const StHandle<StFileNode>& theSource,
         }
     }
 
-    StHandle<StImage> anImageL = scaledImage(anImageFileL, aSizeXLim, aSizeYLim, aSrcCubemap, aCubeCoeffs, aPairRatio);
-    StHandle<StImage> anImageR = scaledImage(anImageFileR, aSizeXLim, aSizeYLim, aSrcCubemap, aCubeCoeffs, aPairRatio);
+    StHandle<StImage> anImageL = scaledImage(anImageFileL, myTextureQueue->getDeviceCaps(), aSizeXLim, aSizeYLim,
+                                             aSrcCubemap, aCubeCoeffs, aPairRatio);
+    StHandle<StImage> anImageR = scaledImage(anImageFileR, myTextureQueue->getDeviceCaps(), aSizeXLim, aSizeYLim,
+                                             aSrcCubemap, aCubeCoeffs, aPairRatio);
 #ifdef ST_DEBUG
     const double aScaleTimeMSec = aLoadTimer.getElapsedTimeInMilliSec() - aLoadTimeMSec;
     if(anImageL != anImageFileL) {

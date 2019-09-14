@@ -23,7 +23,7 @@ class StImagePlane {
     /**
      * This enumeration define packed image plane formats.
      */
-    typedef enum tagFormat {
+    enum ImgFormat {
         ImgUNKNOWN = 0, //!< not supported or unknown format
         ImgGray    = 1, //!< 1 byte  per pixel (1-component plane, could be part of multiple-plane image)
         ImgGray16,      //!< 2 bytes per pixel (1-component plane)
@@ -41,7 +41,8 @@ class StImagePlane {
         ImgRGBAF,       //!< 4 floats (16-bytes) RGBA image plane
         ImgBGRAF,       //!< same as RGBAF but with different components order
         ImgUV,          //!< 2 bytes packed UV image plane
-    } ImgFormat;
+    };
+    enum { ImgNB = ImgUV + 1 };
 
     ST_CPPEXPORT static StString formatImgFormat(ImgFormat theImgFormat);
     inline StString formatImgFormat() const { return formatImgFormat(myImgFormat); }

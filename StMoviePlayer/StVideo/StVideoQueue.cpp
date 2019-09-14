@@ -545,20 +545,24 @@ void StVideoQueue::prepareFrame(const StFormat theSrcFormat) {
     stAV::dimYUV  aDimsYUV;
     myFrame.getImageInfo(myCodecCtx, aFrameSizeX, aFrameSizeY, aPixFmt);
     myDataAdp.setBufferCounter(NULL);
-    if(aPixFmt == stAV::PIX_FMT::XYZ12) {
+    if(aPixFmt == stAV::PIX_FMT::XYZ12
+    && myTextureQueue->getDeviceCaps().isSupportedFormat(StImagePlane::ImgRGB48)) {
         myDataAdp.setColorModel(StImage::ImgColor_XYZ);
         myDataAdp.setColorScale(StImage::ImgScale_Full);
         myDataAdp.setPixelRatio(getPixelRatio());
         myDataAdp.changePlane(0).initWrapper(StImagePlane::ImgRGB48, myFrame.getPlane(0),
                                              size_t(aFrameSizeX), size_t(aFrameSizeY),
                                              myFrame.getLineSize(0));
-    } else if(aPixFmt == stAV::PIX_FMT::RGB24) {
+        return;
+    } else if(aPixFmt == stAV::PIX_FMT::RGB24
+           && myTextureQueue->getDeviceCaps().isSupportedFormat(StImagePlane::ImgRGB)) {
         myDataAdp.setColorModel(StImage::ImgColor_RGB);
         myDataAdp.setColorScale(StImage::ImgScale_Full);
         myDataAdp.setPixelRatio(getPixelRatio());
         myDataAdp.changePlane(0).initWrapper(StImagePlane::ImgRGB, myFrame.getPlane(0),
                                              size_t(aFrameSizeX), size_t(aFrameSizeY),
                                              myFrame.getLineSize(0));
+        return;
 #if(LIBAVCODEC_VERSION_INT >= AV_VERSION_INT(53, 5, 0))
     } else if(stAV::isFormatYUVPlanar(myFrame.Frame,
 #else
@@ -597,17 +601,21 @@ void StVideoQueue::prepareFrame(const StFormat theSrcFormat) {
         } else if(aDimsYUV.bitsPerComp == 16) {
             aPlaneFrmt = StImagePlane::ImgGray16;
         }
-        myDataAdp.setColorModel(StImage::ImgColor_YUV);
-        myDataAdp.setPixelRatio(getPixelRatio());
-        myDataAdp.changePlane(0).initWrapper(aPlaneFrmt, myFrame.getPlane(0),
-                                             size_t(aDimsYUV.widthY), size_t(aDimsYUV.heightY), myFrame.getLineSize(0));
-        myDataAdp.changePlane(1).initWrapper(aPlaneFrmt, myFrame.getPlane(1),
-                                             size_t(aDimsYUV.widthU), size_t(aDimsYUV.heightU), myFrame.getLineSize(1));
-        myDataAdp.changePlane(2).initWrapper(aPlaneFrmt, myFrame.getPlane(2),
-                                             size_t(aDimsYUV.widthV), size_t(aDimsYUV.heightV), myFrame.getLineSize(2));
 
-        myFrameBufRef->moveReferenceFrom(myFrame.Frame);
-        myDataAdp.setBufferCounter(myFrameBufRef);
+        if(myTextureQueue->getDeviceCaps().isSupportedFormat(aPlaneFrmt)) {
+            myDataAdp.setColorModel(StImage::ImgColor_YUV);
+            myDataAdp.setPixelRatio(getPixelRatio());
+            myDataAdp.changePlane(0).initWrapper(aPlaneFrmt, myFrame.getPlane(0),
+                                                 size_t(aDimsYUV.widthY), size_t(aDimsYUV.heightY), myFrame.getLineSize(0));
+            myDataAdp.changePlane(1).initWrapper(aPlaneFrmt, myFrame.getPlane(1),
+                                                 size_t(aDimsYUV.widthU), size_t(aDimsYUV.heightU), myFrame.getLineSize(1));
+            myDataAdp.changePlane(2).initWrapper(aPlaneFrmt, myFrame.getPlane(2),
+                                                 size_t(aDimsYUV.widthV), size_t(aDimsYUV.heightV), myFrame.getLineSize(2));
+
+            myFrameBufRef->moveReferenceFrom(myFrame.Frame);
+            myDataAdp.setBufferCounter(myFrameBufRef);
+            return;
+        }
     } else if(aPixFmt == stAV::PIX_FMT::NV12) {
         aDimsYUV.isFullScale = false;
     #if(LIBAVCODEC_VERSION_INT >= AV_VERSION_INT(52, 29, 0))
@@ -626,7 +634,10 @@ void StVideoQueue::prepareFrame(const StFormat theSrcFormat) {
 
         myFrameBufRef->moveReferenceFrom(myFrame.Frame);
         myDataAdp.setBufferCounter(myFrameBufRef);
-    } else if(!myToRgbIsBroken) {
+        return;
+    }
+
+    if(!myToRgbIsBroken) {
         if(myToRgbCtx    == NULL
         || myToRgbPixFmt != aPixFmt
         || size_t(aFrameSizeX) != myDataRGB.getSizeX()
@@ -654,6 +665,12 @@ void StVideoQueue::prepareFrame(const StFormat theSrcFormat) {
                     signals.onError(stCString("FFmpeg: Failed allocation of RGB frame (out of memory)"));
                     myToRgbIsBroken = true;
                 } else {
+                    ST_DEBUG_LOG(" !!! Performance warning! Using SWScaler for " + stAV::PIX_FMT::getString(aPixFmt) + " pixel format.");
+                    {
+                        StMutexAuto aLock(myMutexInfo);
+                        myCodecStr += StString("\n[SWScaler] Software converter (from ") + stAV::PIX_FMT::getString(aPixFmt) + stCString(" into RGB)");
+                    }
+
                     myFrameRGB.Frame->data[0]     = (uint8_t* )myDataRGB.changeData();
                     myFrameRGB.Frame->linesize[0] = (int      )myDataRGB.getSizeRowBytes();
                     for(int aPlaneIter = 1; aPlaneIter < AV_NUM_DATA_POINTERS; ++aPlaneIter) {

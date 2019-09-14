@@ -40,10 +40,10 @@
     #define GL_ALPHA16  0x803E
 #endif
 
-bool StGLTexture::getInternalFormat(const StGLContext&  theCtx,
-                                    const StImagePlane& theData,
-                                    GLint&              theInternalFormat) {
-    switch(theData.getFormat()) {
+bool StGLTexture::getInternalFormat(const StGLContext& theCtx,
+                                    const StImagePlane::ImgFormat theFormat,
+                                    GLint& theInternalFormat) {
+    switch(theFormat) {
         case StImagePlane::ImgRGBAF:
         case StImagePlane::ImgBGRAF: // BGRA requires texture swizzling on OpenGL ES
             theInternalFormat = GL_RGBA32F;
@@ -635,13 +635,13 @@ bool StGLTexture::fillPatch(StGLContext&        theCtx,
         toBatchCopy  = false;
     }
 
-    if(!theCtx.hasUnpack
+    if(!theCtx.getDeviceCaps().hasUnpack
     && anExtraBytes >= anAligment) {
         toBatchCopy = false;
     }
 
     if(toBatchCopy) {
-        if(theCtx.hasUnpack) {
+        if(theCtx.getDeviceCaps().hasUnpack) {
             theCtx.core20fwd->glPixelStorei(GL_UNPACK_ROW_LENGTH, GLint(aPixelsWidth));
         }
 
@@ -663,12 +663,12 @@ bool StGLTexture::fillPatch(StGLContext&        theCtx,
                                               theData.getData(aRow, 0));
         }
 
-        if(theCtx.hasUnpack) {
+        if(theCtx.getDeviceCaps().hasUnpack) {
             theCtx.core20fwd->glPixelStorei(GL_UNPACK_ROW_LENGTH, 0);
         }
     } else {
         // copy row by row copy (the image plane greater than texture or batch copy is impossible)
-        if(theCtx.hasUnpack) {
+        if(theCtx.getDeviceCaps().hasUnpack) {
             theCtx.core20fwd->glPixelStorei(GL_UNPACK_ROW_LENGTH, 0);
         }
 

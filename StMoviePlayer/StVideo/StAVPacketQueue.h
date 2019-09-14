@@ -276,6 +276,8 @@ class StAVPacketQueue {
     double           mySizeSeconds;    //!< cumulative packets length in seconds
     mutable StMutex  myMutex;          //!< lock for thread-safety
 
+        protected:
+
     StString         myCodecName;      //!< active codec name
     StString         myCodecDesc;      //!< active codec description
     StString         myCodecStr;       //!< active codec description

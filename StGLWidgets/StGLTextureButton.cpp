@@ -411,7 +411,7 @@ bool StGLTextureButton::stglInit() {
         }
 
         GLint anInternalFormat = GL_RGB;
-        if(!StGLTexture::getInternalFormat(aCtx, anImage.getPlane(), anInternalFormat)) {
+        if(!StGLTexture::getInternalFormat(aCtx, anImage.getPlane().getFormat(), anInternalFormat)) {
             ST_ERROR_LOG("StGLTextureButton, texture '" + aTexture.getName() + "' has unsupported format!");
             continue;
         }
