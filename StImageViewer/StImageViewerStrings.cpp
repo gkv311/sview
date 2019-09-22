@@ -155,6 +155,8 @@ void loadDefaults(StLangMap& theStrings) {
                "Nearest");
     theStrings(MENU_VIEW_TEXFILTER_LINEAR,
                "Linear"),
+    theStrings(MENU_VIEW_TEXFILTER_TRILINEAR,
+               "Trilinear"),
     theStrings(MENU_CHANGE_DEVICE,
                "Change Device");
     theStrings(MENU_ABOUT_RENDERER,

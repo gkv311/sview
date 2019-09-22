@@ -422,6 +422,8 @@ StGLMenu* StImageViewerGUI::createSmoothFilterMenu() {
                    myImage->params.TextureFilter, StGLImageProgram::FILTER_NEAREST);
     aMenu->addItem(tr(MENU_VIEW_TEXFILTER_LINEAR),
                    myImage->params.TextureFilter, StGLImageProgram::FILTER_LINEAR);
+    aMenu->addItem(tr(MENU_VIEW_TEXFILTER_TRILINEAR),
+                   myImage->params.TextureFilter, StGLImageProgram::FILTER_TRILINEAR);
     return aMenu;
 }
 

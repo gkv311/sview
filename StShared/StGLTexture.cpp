@@ -11,6 +11,7 @@
 #include <StImage/StImagePlane.h>
 
 #include <StGLCore/StGLCore20.h>
+#include <StGL/StGLArbFbo.h>
 #include <StGL/StGLContext.h>
 
 #include <StStrings/StLogger.h>
@@ -407,7 +408,9 @@ StGLTexture::StGLTexture()
   myTextFormat(GL_RGBA8),
   myTextureId(NO_TEXTURE),
   myTextureUnit(GL_TEXTURE0),
-  myTextureFilt(GL_LINEAR) {
+  myFilterMin(GL_LINEAR),
+  myFilterMag(GL_LINEAR),
+  myHasMipMaps(0) {
     //
 }
 
@@ -418,7 +421,9 @@ StGLTexture::StGLTexture(const GLint theTextureFormat)
   myTextFormat(theTextureFormat),
   myTextureId(NO_TEXTURE),
   myTextureUnit(GL_TEXTURE0),
-  myTextureFilt(GL_LINEAR) {
+  myFilterMin(GL_LINEAR),
+  myFilterMag(GL_LINEAR),
+  myHasMipMaps(0) {
     //
 }
 
@@ -519,14 +524,15 @@ bool StGLTexture::create(StGLContext&   theCtx,
     theCtx.stglResetErrors();
 #endif
 
+    myHasMipMaps = 0;
     if(!isValid()) {
         theCtx.core20fwd->glGenTextures(1, &myTextureId); // Create The Texture
     }
     bind(theCtx);
 
     // texture interpolation parameters - could be overridden later
-    theCtx.core20fwd->glTexParameteri(myTarget, GL_TEXTURE_MAG_FILTER, myTextureFilt);
-    theCtx.core20fwd->glTexParameteri(myTarget, GL_TEXTURE_MIN_FILTER, myTextureFilt);
+    theCtx.core20fwd->glTexParameteri(myTarget, GL_TEXTURE_MIN_FILTER, myFilterMin);
+    theCtx.core20fwd->glTexParameteri(myTarget, GL_TEXTURE_MAG_FILTER, myFilterMag);
     theCtx.core20fwd->glTexParameteri(myTarget, GL_TEXTURE_WRAP_S,     GL_CLAMP_TO_EDGE);
     theCtx.core20fwd->glTexParameteri(myTarget, GL_TEXTURE_WRAP_T,     GL_CLAMP_TO_EDGE);
 
@@ -600,17 +606,40 @@ bool StGLTexture::create(StGLContext&   theCtx,
 }
 
 void StGLTexture::setMinMagFilter(StGLContext& theCtx,
-                                  const GLenum theMinMagFilter) {
-    if(!isValid()) {
-        myTextureFilt = theMinMagFilter;
-        return;
-    } else if(myTextureFilt == theMinMagFilter) {
+                                  const GLenum theMinFilter,
+                                  const GLenum theMagFilter) {
+    const bool needsMipMaps = theMinFilter != GL_NEAREST
+                           && theMinFilter != GL_LINEAR;
+    if(myFilterMin == theMinFilter
+    && myFilterMag == theMagFilter
+    && (!needsMipMaps || myHasMipMaps != 0)) {
         return;
     }
-    myTextureFilt = theMinMagFilter;
+
+    myFilterMin = theMinFilter;
+    myFilterMag = theMagFilter;
+    if(!isValid()) {
+        return;
+    }
+
     bind(theCtx);
-        theCtx.core20fwd->glTexParameteri(myTarget, GL_TEXTURE_MAG_FILTER, myTextureFilt);
-        theCtx.core20fwd->glTexParameteri(myTarget, GL_TEXTURE_MIN_FILTER, myTextureFilt);
+        if(needsMipMaps && myHasMipMaps == 0) {
+            theCtx.arbFbo->glGenerateMipmap(myTarget);
+            const GLenum anErr = glGetError();
+            if(anErr != GL_NO_ERROR) {
+                // note that OpenGL ES 2.0 does not support mip-map generation of non-power-of-two textures
+                ST_ERROR_LOG("Failed to generate mipmap levels with error " + theCtx.stglErrorToString(anErr));
+                myHasMipMaps = -1;
+            } else {
+                myHasMipMaps = 1;
+            }
+        }
+        GLenum aMinFilter = !needsMipMaps || myHasMipMaps == 1
+                          ? myFilterMin
+                          : GL_LINEAR;
+        theCtx.core20fwd->glTexParameteri(myTarget, GL_TEXTURE_MIN_FILTER, aMinFilter);
+        theCtx.core20fwd->glTexParameteri(myTarget, GL_TEXTURE_MAG_FILTER, myFilterMag);
+
     unbind(theCtx);
 }
 
@@ -650,6 +679,7 @@ bool StGLTexture::fillPatch(StGLContext&        theCtx,
     if(theData.isNull() || !isValid()) {
         return false;
     }
+
     GLenum aPixelFormat, aDataType;
     if(!getDataFormat(theCtx, theData, aPixelFormat, aDataType)) {
         return false;
@@ -665,6 +695,7 @@ bool StGLTexture::fillPatch(StGLContext&        theCtx,
         return false;
     }
 
+    myHasMipMaps = 0;
     bind(theCtx);
 
     // setup the alignment

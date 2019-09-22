@@ -161,7 +161,17 @@ class StGLFrameTextures : public StGLResource {
      * After this call current bound texture will be undefined.
      */
     ST_CPPEXPORT void setMinMagFilter(StGLContext& theCtx,
-                                      const GLenum theMinMagFilter);
+                                      const GLenum theMinFilter,
+                                      const GLenum theMagFilter);
+
+    /**
+     * Change Min and Mag filter.
+     * After this call current bound texture will be undefined.
+     */
+    ST_LOCAL void setMinMagFilter(StGLContext& theCtx,
+                                  const GLenum theMinMagFilter) {
+        setMinMagFilter(theCtx, theMinMagFilter, theMinMagFilter);
+    }
 
         private:
 
@@ -229,7 +239,17 @@ class StGLQuadTexture : public StGLResource {
      * After this call current bound texture will be undefined.
      */
     ST_CPPEXPORT void setMinMagFilter(StGLContext& theCtx,
-                                      const GLenum theMinMagFilter);
+                                      const GLenum theMinFilter,
+                                      const GLenum theMagFilter);
+
+    /**
+     * Change Min and Mag filter.
+     * After this call current bound texture will be undefined.
+     */
+    ST_LOCAL void setMinMagFilter(StGLContext& theCtx,
+                                  const GLenum theMinMagFilter) {
+        setMinMagFilter(theCtx, theMinMagFilter, theMinMagFilter);
+    }
 
         private:
 

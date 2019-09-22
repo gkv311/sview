@@ -25,9 +25,10 @@ class StGLImageProgram : public StGLProgramMatrix<1, 5, StGLMeshProgram> {
         public:
 
     typedef enum tagTextureFilter {
-        FILTER_NEAREST, //!< ugly filter
-        FILTER_LINEAR,  //!< linear filter
-        FILTER_BLEND,   //!< blend deinterlace filter
+        FILTER_NEAREST,   //!< ugly filter
+        FILTER_LINEAR,    //!< linear filter
+        FILTER_BLEND,     //!< blend deinterlace filter
+        FILTER_TRILINEAR, //!< trilinear filter (generate mip-maps)
     } TextureFilter;
 
     /**

@@ -253,9 +253,10 @@ StGLImageRegion::StGLImageRegion(StGLWidget* theParent,
 
     params.ToHealAnamorphicRatio = new StBoolParamNamed(false, stCString("toHealAnamorphic"), stCString("Heal Anamorphic Ratio"));
     params.TextureFilter = new StEnumParam(StGLImageProgram::FILTER_LINEAR, stCString("viewTexFilter"), stCString("Texture Filter"));
-    params.TextureFilter->defineOption(StGLImageProgram::FILTER_NEAREST, stCString("Nearest"));
-    params.TextureFilter->defineOption(StGLImageProgram::FILTER_LINEAR,  stCString("Linear"));
-    params.TextureFilter->defineOption(StGLImageProgram::FILTER_BLEND,   stCString("Blend"));
+    params.TextureFilter->defineOption(StGLImageProgram::FILTER_NEAREST,   stCString("Nearest"));
+    params.TextureFilter->defineOption(StGLImageProgram::FILTER_LINEAR,    stCString("Linear"));
+    params.TextureFilter->defineOption(StGLImageProgram::FILTER_TRILINEAR, stCString("Trilinear"));
+    params.TextureFilter->defineOption(StGLImageProgram::FILTER_BLEND,     stCString("Blend"));
 
     params.Gamma         = myProgram.params.gamma;
     params.Brightness    = myProgram.params.brightness;
@@ -458,7 +459,9 @@ bool StGLImageRegion::stglInit() {
     }*/
 
     // setup texture filter
-    myTextureQueue->getQTexture().setMinMagFilter(aCtx, params.TextureFilter->getValue() == StGLImageProgram::FILTER_NEAREST ? GL_NEAREST : GL_LINEAR);
+    myTextureQueue->getQTexture().setMinMagFilter(aCtx,
+                                                  params.TextureFilter->getValue() == StGLImageProgram::FILTER_NEAREST
+                                                ? GL_NEAREST : GL_LINEAR);
 
     myIsInitialized = true;
     return myIsInitialized && isInit;
@@ -643,7 +646,11 @@ void StGLImageRegion::stglDrawView(unsigned int theView) {
         aClampUV.z() = aTextures.getPlane(1).getDataSize().x();
         aClampUV.w() = aTextures.getPlane(1).getDataSize().y();
     } else {
-        myTextureQueue->getQTexture().setMinMagFilter(aCtx, GL_LINEAR);
+        if(params.TextureFilter->getValue() == StGLImageProgram::FILTER_TRILINEAR) {
+            myTextureQueue->getQTexture().setMinMagFilter(aCtx, GL_LINEAR_MIPMAP_LINEAR, GL_LINEAR);
+        } else {
+            myTextureQueue->getQTexture().setMinMagFilter(aCtx, GL_LINEAR);
+        }
         //
         aClampVec.x() = 0.5f / aTextureSize.x();
         aClampVec.y() = 0.5f / aTextureSize.y();

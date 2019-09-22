@@ -100,20 +100,24 @@ void StGLFrameTextures::preparePlane(StGLContext&  theCtx,
 }
 
 void StGLFrameTextures::setMinMagFilter(StGLContext& theCtx,
-                                        const GLenum theMinMagFilter) {
-    myTextures[0].setMinMagFilter(theCtx, theMinMagFilter);
+                                        const GLenum theMinFilter,
+                                        const GLenum theMagFilter) {
+    myTextures[0].setMinMagFilter(theCtx, theMinFilter, theMagFilter);
     /// TODO (Kirill Gavrilov#4) investigate
-    myTextures[1].setMinMagFilter(theCtx, GL_LINEAR);
-    myTextures[2].setMinMagFilter(theCtx, GL_LINEAR);
-    myTextures[3].setMinMagFilter(theCtx, GL_LINEAR);
+    const GLenum aMinFilter = theMinFilter != GL_NEAREST ? theMinFilter : GL_LINEAR;
+    const GLenum aMagFilter = theMagFilter != GL_NEAREST ? theMagFilter : GL_LINEAR;
+    myTextures[1].setMinMagFilter(theCtx, aMinFilter, aMagFilter);
+    myTextures[2].setMinMagFilter(theCtx, aMinFilter, aMagFilter);
+    myTextures[3].setMinMagFilter(theCtx, aMinFilter, aMagFilter);
 }
 
 void StGLQuadTexture::setMinMagFilter(StGLContext& theCtx,
-                                      const GLenum theMinMagFilter) {
-    myTextures[FRONT_TEXTURE +  LEFT_TEXTURE].setMinMagFilter(theCtx, theMinMagFilter);
-    myTextures[FRONT_TEXTURE + RIGHT_TEXTURE].setMinMagFilter(theCtx, theMinMagFilter);
-    myTextures[BACK_TEXTURE  +  LEFT_TEXTURE].setMinMagFilter(theCtx, theMinMagFilter);
-    myTextures[BACK_TEXTURE  + RIGHT_TEXTURE].setMinMagFilter(theCtx, theMinMagFilter);
+                                        const GLenum theMinFilter,
+                                        const GLenum theMagFilter) {
+    myTextures[FRONT_TEXTURE +  LEFT_TEXTURE].setMinMagFilter(theCtx, theMinFilter, theMagFilter);
+    myTextures[FRONT_TEXTURE + RIGHT_TEXTURE].setMinMagFilter(theCtx, theMinFilter, theMagFilter);
+    myTextures[BACK_TEXTURE  +  LEFT_TEXTURE].setMinMagFilter(theCtx, theMinFilter, theMagFilter);
+    myTextures[BACK_TEXTURE  + RIGHT_TEXTURE].setMinMagFilter(theCtx, theMinFilter, theMagFilter);
 }
 
 StGLQuadTexture::StGLQuadTexture()

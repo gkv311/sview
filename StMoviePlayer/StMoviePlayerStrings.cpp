@@ -219,6 +219,8 @@ void loadDefaults(StLangMap& theStrings) {
                "Nearest");
     theStrings(MENU_VIEW_TEXFILTER_LINEAR,
                "Linear");
+    theStrings(MENU_VIEW_TEXFILTER_TRILINEAR,
+               "Trilinear");
     theStrings(MENU_VIEW_TEXFILTER_BLEND,
                "Blend Deinterlace");
     theStrings(MENU_CHANGE_DEVICE,

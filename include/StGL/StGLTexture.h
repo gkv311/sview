@@ -165,7 +165,17 @@ class StGLTexture : public StGLResource {
      * After this call current texture will be undefined.
      */
     ST_CPPEXPORT void setMinMagFilter(StGLContext& theCtx,
-                                      const GLenum theMinMagFilter);
+                                      const GLenum theMinFilter,
+                                      const GLenum theMagFilter);
+
+    /**
+     * Change Min and Mag filter.
+     * After this call current texture will be undefined.
+     */
+    ST_LOCAL void setMinMagFilter(StGLContext& theCtx,
+                                  const GLenum theMinMagFilter) {
+        setMinMagFilter(theCtx, theMinMagFilter, theMinMagFilter);
+    }
 
     ST_LOCAL bool fill(StGLContext&        theCtx,
                        const StImagePlane& theData) {
@@ -237,7 +247,9 @@ class StGLTexture : public StGLResource {
     GLint   myTextFormat;  //!< texture format - GL_RGB, GL_RGBA,...
     GLuint  myTextureId;   //!< GL texture ID
     GLenum  myTextureUnit; //!< texture unit
-    GLenum  myTextureFilt; //!< current texture filter
+    GLenum  myFilterMin;   //!< current minify  texture filter (GL_TEXTURE_MIN_FILTER)
+    GLenum  myFilterMag;   //!< current magnify texture filter (GL_TEXTURE_MAG_FILTER)
+    int     myHasMipMaps;  //!< indicates if mip levels have been generated
 
         private:
 
