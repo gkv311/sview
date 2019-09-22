@@ -622,7 +622,6 @@ void StGLImageRegion::stglDrawView(unsigned int theView) {
     aCtx.core20fwd->glDisable(GL_BLEND);
 
     StGLFrameTextures& aTextures = myTextureQueue->getQTexture().getFront(aLeftOrRight);
-    aTextures.bind(aCtx);
 
     StGLVec2 aTextureSize  (GLfloat(aTextures.getPlane(0).getSizeX()),
                             GLfloat(aTextures.getPlane(0).getSizeY()));
@@ -659,6 +658,7 @@ void StGLImageRegion::stglDrawView(unsigned int theView) {
             aClampUV.w() = aTextures.getPlane(1).getDataSize().y() - 2.0f * aClampUV.y();
         }
     }
+    aTextures.bind(aCtx);
 
     // select (de)anaglyph color filter
     StGLVec3 aColorScale(1.0f, 1.0f, 1.0f);
