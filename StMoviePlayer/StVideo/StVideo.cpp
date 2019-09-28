@@ -451,7 +451,7 @@ bool StVideo::addFile(const StString& theFileToLoad,
                 }
             } else if(!myVideoSlave->isInitialized()
                    && !stAV::isAttachedPicture(aStream)) {
-                myVideoSlave->init(aFormatCtx, aStreamId, "", theNewParams);
+                myVideoSlave->init(aFormatCtx, aStreamId, aTitleString, theNewParams);
                 if(myVideoSlave->isInitialized()) {
                     mySlaveCtx    = aFormatCtx;
                     mySlaveStream = aStreamId;
@@ -513,7 +513,7 @@ bool StVideo::addFile(const StString& theFileToLoad,
 
             if(!myAudio->isInitialized()
             && (aPrefLangAudio.isEmpty() || aLang == aPrefLangAudio)
-            &&  myAudio->init(aFormatCtx, aStreamId, "")) {
+            &&  myAudio->init(aFormatCtx, aStreamId, aTitleString)) {
                 theInfo.LoadedAudio = (int32_t )(theInfo.AudioList->size() - 1);
             }
         } else if(aCodecType == AVMEDIA_TYPE_SUBTITLE) {
@@ -552,7 +552,7 @@ bool StVideo::addFile(const StString& theFileToLoad,
             aLanguage = aStream->language;
         #endif
             if(aLanguage != aPrefLangAudio
-            && myAudio->init(aFormatCtx, aStreamId, "")) {
+            && myAudio->init(aFormatCtx, aStreamId, aTitleString)) {
                 theInfo.LoadedAudio = anAudioStreamId;
                 break;
             }
@@ -768,6 +768,15 @@ void StVideo::doSeekContext(AVFormatContext* theFormatCtx,
         isSeekDone = doSeekStream(theFormatCtx, myVideoMaster->getId(), theSeekPts, toSeekBack);
     } else if(myVideoSlave->isInContext(theFormatCtx)) {
         isSeekDone = doSeekStream(theFormatCtx, myVideoSlave->getId(), theSeekPts, toSeekBack);
+    } else if(myAudio->isInContext(theFormatCtx)) {
+        //
+    } else if(mySubtitles->isInContext(theFormatCtx)) {
+        if(mySubtitles->getFileName().isEndsWithIgnoreCase(stCString(".srt"))) {
+            // workaround SRT seeking issues - make a heavy seek (usual size of SRT file is not greater than 200 KiB)
+            isSeekDone = doSeekStream(theFormatCtx, mySubtitles->getId(), 0.0, true);
+        } else {
+            isSeekDone = doSeekStream(theFormatCtx, mySubtitles->getId(), theSeekPts, toSeekBack);
+        }
     }
     if(!isSeekDone && myAudio->isInContext(theFormatCtx)) {
         // if no video stream or seeking was failed - try to seek Audio stream
@@ -842,6 +851,7 @@ void StVideo::checkInitVideoStreams() {
         doFlush();
         if(myVideoMaster->isInitialized()) {
             const StString   aFileNameMaster = myVideoMaster->getFileName();
+            const StString   aFileNameSlave  = myVideoSlave ->getFileName();
             AVFormatContext* aCtxMaster      = myVideoMaster->getContext();
             const signed int aStreamIdMaster = myVideoMaster->getId();
             myVideoMaster->pushEnd();
@@ -865,7 +875,7 @@ void StVideo::checkInitVideoStreams() {
             myVideoMaster->init(aCtxMaster, aStreamIdMaster, aFileNameMaster, myCurrParams);
             myVideoMaster->setSlave(NULL);
             if(toDecodeSlave) {
-                myVideoSlave->init(mySlaveCtx, mySlaveStream, "", myCurrParams);
+                myVideoSlave->init(mySlaveCtx, mySlaveStream, aFileNameSlave, myCurrParams);
                 myVideoMaster->setSlave(myVideoSlave);
             }
             myVideoMaster->pushStart();
@@ -1046,7 +1056,7 @@ void StVideo::packetsLoop() {
                     for(unsigned int aStreamId = 0; aStreamId < aFormatCtx->nb_streams; ++aStreamId) {
                         if(stAV::getCodecType(aFormatCtx->streams[aStreamId]) == AVMEDIA_TYPE_AUDIO) {
                             if(aCounter == anActiveStreamId) {
-                                myAudio->init(aFormatCtx, aStreamId, "");
+                                myAudio->init(aFormatCtx, aStreamId, myFileList[aCtxId]);
                                 myAudio->pushStart();
                                 break;
                             }
@@ -1100,7 +1110,7 @@ void StVideo::packetsLoop() {
                     for(unsigned int aStreamId = 0; aStreamId < aFormatCtx->nb_streams; ++aStreamId) {
                         if(stAV::getCodecType(aFormatCtx->streams[aStreamId]) == AVMEDIA_TYPE_SUBTITLE) {
                             if(aCounter == anActiveStreamId) {
-                                mySubtitles->init(aFormatCtx, aStreamId, "");
+                                mySubtitles->init(aFormatCtx, aStreamId, myFileList[aCtxId]);
                                 mySubtitles->pushStart();
                                 break;
                             }
