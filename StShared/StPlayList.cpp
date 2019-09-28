@@ -1120,7 +1120,10 @@ void StPlayList::open(const StCString& thePath,
         }
     } else {
         // not a filesystem element - probably url or invalid path
-        StFileNode* aFileNode = new StFileNode(thePath, &myFoldersRoot);
+        StFolder* aSubFolder = new StFolder(stCString(""), &myFoldersRoot);
+        myFoldersRoot.add(aSubFolder);
+
+        StFileNode* aFileNode = new StFileNode(thePath, aSubFolder);
         myFoldersRoot.add(aFileNode);
         addRecentFile(*aFileNode); // append to recent files list
         addPlayItem(new StPlayItem(aFileNode, myDefStParams));
