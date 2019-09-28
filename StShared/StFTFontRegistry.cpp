@@ -90,6 +90,7 @@ StFTFontRegistry::StFTFontRegistry() {
     myFilesMajor.add(stCString("DroidSansMono.ttf"));
 
     // not all phones have the following fonts
+    myFilesMinor.add(stCString("NotoSansCJK-Regular.ttc"));
 
     // Korean
     myFilesMinor.add(stCString("NanumGothic.ttf"));
@@ -104,6 +105,10 @@ StFTFontRegistry::StFTFontRegistry() {
 
     // Japanese
     //myFilesMinor.add(stCString("NotoSansJP-Regular.otf"));
+
+    // Arabic
+    myFilesMinor.add(stCString("NotoNaskhArabic-Regular.ttf"));
+    //myFilesMinor.add(stCString("NotoNaskhArabic-Bold.ttf"));
 #else
     myFolders.add(stCString("/usr/share/fonts"));
     myFolders.add(stCString("/usr/local/share/fonts"));
@@ -254,30 +259,41 @@ void StFTFontRegistry::init(const bool theToSearchAll) {
     }
     aSans .Western = findFont(stCString("Roboto")); // actually DroidSans.ttf
     aMono .Western = findFont(stCString("Droid Sans Mono"));
+
     aSerif.Korean  = findFont(stCString("NanumGothic")); // no serif
-    aSans .Korean  = findFont(stCString("NanumGothic"));
-    aMono .Korean  = findFont(stCString("NanumGothic"));
+    aSans .Korean  = aSerif.Korean;
+    aMono .Korean  = aSerif.Korean;
     if(aSerif.Korean.FamilyName.isEmpty()) {
         aSerif.Korean = findFont(stCString("Noto Sans KR"));
-        aSans .Korean = findFont(stCString("Noto Sans KR"));
-        aMono .Korean = findFont(stCString("Noto Sans KR"));
+        aSans .Korean = aSerif.Korean;
+        aMono .Korean = aSerif.Korean;
     }
     aSerif.CJK     = findFont(stCString("Droid Sans Fallback"));
-    aSans .CJK     = findFont(stCString("Droid Sans Fallback"));
-    aMono .CJK     = findFont(stCString("Droid Sans Fallback"));
+    aSans .CJK     = aSerif.CJK;
+    aMono .CJK     = aSerif.CJK;
     if(aSerif.CJK.FamilyName.isEmpty()) {
         aSerif.CJK = findFont(stCString("Noto Sans SC"));
-        aSans .CJK = findFont(stCString("Noto Sans SC"));
-        aMono .CJK = findFont(stCString("Noto Sans SC"));
+        aSans .CJK = aSerif.CJK;
+        aMono .CJK = aSerif.CJK;
+    }
+    if(aSerif.CJK.FamilyName.isEmpty()) {
+        aSerif.CJK = findFont(stCString("Noto Sans CJK JP"));
+        aSans .CJK = aSerif.CJK;
+        aMono .CJK = aSerif.CJK;
+    }
+    if(aSerif.Korean.FamilyName.isEmpty()) {
+        aSerif.Korean = aSerif.CJK;
+        aSans .Korean = aSerif.CJK;
+        aMono .Korean = aSerif.CJK;
     }
 
     aSerif.Arabic = findFont(stCString("Droid Arabic Naskh"));
-    aSans .Arabic = findFont(stCString("Droid Arabic Naskh"));
-    aMono .Arabic = findFont(stCString("Droid Arabic Naskh"));
+    aSans .Arabic = aSerif.Arabic;
+    aMono .Arabic = aSerif.Arabic;
     if(aSerif.Arabic.FamilyName.isEmpty()) {
         aSerif.Arabic = findFont(stCString("Noto Naskh Arabic"));
-        aSans .Arabic = findFont(stCString("Noto Naskh Arabic"));
-        aMono .Arabic = findFont(stCString("Noto Naskh Arabic"));
+        aSans .Arabic = aSerif.Arabic;
+        aMono .Arabic = aSerif.Arabic;
     }
 #else
     aSerif.Western = findFont(stCString("FreeSerif"));
