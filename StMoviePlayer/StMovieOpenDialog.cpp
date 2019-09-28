@@ -74,18 +74,42 @@ void StMovieOpenDialog::resetResults() {
 }
 
 void StMovieOpenDialog::setPaths(const StString& thePathLeft,
-                                 const StString& thePathRight) {
+                                 const StString& thePathRight,
+                                 const StMovieOpenDialog::DialogState theMode) {
     StMutexAuto aLock(myMutex);
     if(myState != StMovieOpenDialog::Dialog_Inactive) {
         return;
     }
 
-    myPathVideoL = thePathLeft;
-    myPathVideoR = thePathRight;
+    myPathVideoL.clear();
+    myPathVideoR.clear();
     myPathAudio.clear();
     myPathSubs .clear();
-    if(!myPathVideoL.isEmpty()) {
-        myState = StMovieOpenDialog::Dialog_HasFiles;
+    switch(theMode) {
+        case Dialog_Audio: {
+            myPathAudio = thePathLeft;
+            if(!myPathAudio.isEmpty()) {
+                myState = StMovieOpenDialog::Dialog_HasFiles;
+            }
+            break;
+        }
+        case Dialog_Subtitles: {
+            myPathSubs = thePathLeft;
+            if(!myPathSubs.isEmpty()) {
+                myState = StMovieOpenDialog::Dialog_HasFiles;
+            }
+            break;
+        }
+        case Dialog_SingleMovie:
+        case Dialog_DoubleMovie:
+        default: {
+            myPathVideoL = thePathLeft;
+            myPathVideoR = thePathRight;
+            if(!myPathVideoL.isEmpty()) {
+                myState = StMovieOpenDialog::Dialog_HasFiles;
+            }
+            break;
+        }
     }
 }
 
@@ -110,12 +134,12 @@ void StMovieOpenDialog::dialogLoop() {
             anOpenInfo.FilterTitle = "Video Files";
             break;
         case Dialog_Audio:
-            anOpenInfo.Title = "Choose audio file to attach";
+            anOpenInfo.Title = myPlugin->tr(StMoviePlayerStrings::DIALOG_OPEN_AUDIO);
             anOpenInfo.Filter = myPlugin->myVideo->getMimeListAudio();
             anOpenInfo.FilterTitle = "Audio Files";
             break;
         case Dialog_Subtitles:
-            anOpenInfo.Title = "Choose subtitles file to attach";
+            anOpenInfo.Title = myPlugin->tr(StMoviePlayerStrings::DIALOG_OPEN_SUBTITLES);
             anOpenInfo.Filter = myPlugin->myVideo->getMimeListSubtitles();
             anOpenInfo.FilterTitle = "Subtitle Files";
             break;

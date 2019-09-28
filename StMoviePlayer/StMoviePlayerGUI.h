@@ -196,7 +196,7 @@ class StMoviePlayerGUI : public StGLRootWidget {
     ST_LOCAL void doChangeHotKey1(const size_t );
     ST_LOCAL void doChangeHotKey2(const size_t );
 
-    ST_LOCAL void doOpenFile(const size_t );
+    ST_LOCAL void doOpenFile(const size_t theFileType);
     ST_LOCAL void doShowMobileExMenu(const size_t );
     ST_LOCAL void doMobileSettings(const size_t );
     ST_LOCAL void doAudioStreamsCombo(const size_t );

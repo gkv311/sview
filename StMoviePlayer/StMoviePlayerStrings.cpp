@@ -337,6 +337,10 @@ void loadDefaults(StLangMap& theStrings) {
                "Choose the video file to open");
     theStrings(DIALOG_OPEN_RIGHT,
                "Choose RIGHT video file to open");
+    theStrings(DIALOG_OPEN_AUDIO,
+               "Choose audio file to attach");
+    theStrings(DIALOG_OPEN_SUBTITLES,
+               "Choose subtitles file to attach");
     theStrings(DIALOG_FILE_INFO,
                "File Info");
     theStrings(DIALOG_FILE_NOINFO,

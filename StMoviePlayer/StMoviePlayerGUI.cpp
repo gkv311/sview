@@ -24,6 +24,7 @@
 
 #include "StVideo/StALContext.h"
 #include "StVideo/StVideo.h"
+#include "StMovieOpenDialog.h"
 
 #include <StCore/StSearchMonitors.h>
 #include <StImage/StImageFile.h>
@@ -1449,8 +1450,26 @@ void StMoviePlayerGUI::createImageAdjustments() {
     myBtnReset3d->changeMargins() = aButtonMargins;
 }
 
-void StMoviePlayerGUI::doOpenFile(const size_t ) {
-    StGLOpenFile* aDialog = new StGLOpenFile(this, tr(DIALOG_OPEN_FILE), tr(BUTTON_CLOSE));
+void StMoviePlayerGUI::doOpenFile(const size_t theFileType) {
+    StString aTitle;
+    switch(theFileType) {
+        case StMovieOpenDialog::Dialog_Audio: {
+            aTitle = tr(DIALOG_OPEN_AUDIO);
+            break;
+        }
+        case StMovieOpenDialog::Dialog_Subtitles: {
+            aTitle = tr(DIALOG_OPEN_SUBTITLES);
+            break;
+        }
+        case StMovieOpenDialog::Dialog_SingleMovie:
+        case StMovieOpenDialog::Dialog_DoubleMovie:
+        default: {
+            aTitle = tr(DIALOG_OPEN_FILE);
+            break;
+        }
+    }
+
+    StGLOpenFile* aDialog = new StGLOpenFile(this, aTitle, tr(BUTTON_CLOSE));
     const StString anSdCardPath = getResourceManager()->getFolder(StResourceManager::FolderId_SdCard);
     if(!anSdCardPath.isEmpty()) {
         StString aFolder, aName;
@@ -1461,10 +1480,27 @@ void StMoviePlayerGUI::doOpenFile(const size_t ) {
     aDialog->addHotItem(getResourceManager()->getFolder(StResourceManager::FolderId_Documents));
     aDialog->addHotItem(getResourceManager()->getFolder(StResourceManager::FolderId_Videos));
     aDialog->addHotItem(getResourceManager()->getFolder(StResourceManager::FolderId_Music));
-    aDialog->signals.onFileSelected = stSlot(myPlugin, &StMoviePlayer::doOpen1FileFromGui);
 
-    aDialog->setMimeList(myPlugin->myVideo->getMimeListVideo(),  "Videos", false);
-    aDialog->setMimeList(myPlugin->myVideo->getMimeListImages(), "Images", true);
+    switch(theFileType) {
+        case StMovieOpenDialog::Dialog_Audio: {
+            aDialog->signals.onFileSelected = stSlot(myPlugin, &StMoviePlayer::doOpen1AudioFromGui);
+            aDialog->setMimeList(myPlugin->myVideo->getMimeListAudio(), "Audio", false);
+            break;
+        }
+        case StMovieOpenDialog::Dialog_Subtitles: {
+            aDialog->signals.onFileSelected = stSlot(myPlugin, &StMoviePlayer::doOpen1SubtitleFromGui);
+            aDialog->setMimeList(myPlugin->myVideo->getMimeListSubtitles(), "Subtitles", false);
+            break;
+        }
+        case StMovieOpenDialog::Dialog_SingleMovie:
+        case StMovieOpenDialog::Dialog_DoubleMovie:
+        default: {
+            aDialog->signals.onFileSelected = stSlot(myPlugin, &StMoviePlayer::doOpen1FileFromGui);
+            aDialog->setMimeList(myPlugin->myVideo->getMimeListVideo(),  "Videos", false);
+            aDialog->setMimeList(myPlugin->myVideo->getMimeListImages(), "Images", true);
+            break;
+        }
+    }
 
     if(myPlugin->params.lastFolder.isEmpty()) {
         StHandle<StFileNode> aCurrFile = myPlugin->myPlayList->getCurrentFile();

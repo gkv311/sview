@@ -99,7 +99,8 @@ class StMovieOpenDialog {
      * Set paths to open.
      */
     ST_LOCAL void setPaths(const StString& thePathLeft,
-                           const StString& thePathRight);
+                           const StString& thePathRight,
+                           const StMovieOpenDialog::DialogState theMode);
 
         private:
 

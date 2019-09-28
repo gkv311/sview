@@ -129,6 +129,8 @@ class StMoviePlayer : public StApplication {
 
     ST_LOCAL void doFileNext();
     ST_LOCAL void doOpen1FileFromGui(StHandle<StString> thePath);
+    ST_LOCAL void doOpen1AudioFromGui(StHandle<StString> thePath);
+    ST_LOCAL void doOpen1SubtitleFromGui(StHandle<StString> thePath);
     ST_LOCAL void doOpen1FileAction(const size_t dummy = 0);
     ST_LOCAL void doOpen2Files(const size_t dummy = 0);
     ST_LOCAL void doSaveFileInfo(const size_t theToSave);

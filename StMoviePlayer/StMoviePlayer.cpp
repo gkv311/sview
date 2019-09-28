@@ -1900,18 +1900,30 @@ void StMoviePlayer::doQuit(const size_t ) {
 }
 
 void StMoviePlayer::doOpen1FileFromGui(StHandle<StString> thePath) {
-    myOpenDialog->setPaths(*thePath, "");
+    myOpenDialog->setPaths(*thePath, "", StMovieOpenDialog::Dialog_SingleMovie);
+}
+
+void StMoviePlayer::doOpen1AudioFromGui(StHandle<StString> thePath) {
+    myOpenDialog->setPaths(*thePath, "", StMovieOpenDialog::Dialog_Audio);
+}
+
+void StMoviePlayer::doOpen1SubtitleFromGui(StHandle<StString> thePath) {
+    myOpenDialog->setPaths(*thePath, "", StMovieOpenDialog::Dialog_Subtitles);
 }
 
 void StMoviePlayer::doOpen1FileAction(const size_t ) {
     if(!myGUI.isNull() && (myWindow->isFullScreen() || myGUI->isMobile())) {
-        myGUI->doOpenFile(0);
+        myGUI->doOpenFile(StMovieOpenDialog::Dialog_SingleMovie);
         return;
     }
     myOpenDialog->openDialog(StMovieOpenDialog::Dialog_SingleMovie);
 }
 
 void StMoviePlayer::doOpen2Files(const size_t ) {
+    if(!myGUI.isNull() && (myWindow->isFullScreen() || myGUI->isMobile())) {
+        //myGUI->doOpenFile(StMovieOpenDialog::Dialog_DoubleMovie);
+        //return;
+    }
     myOpenDialog->openDialog(StMovieOpenDialog::Dialog_DoubleMovie);
 }
 
@@ -1943,10 +1955,18 @@ void StMoviePlayer::doClearRecent(const size_t ) {
 }
 
 void StMoviePlayer::doAddAudioStream(const size_t ) {
+    if(!myGUI.isNull() && (myWindow->isFullScreen() || myGUI->isMobile())) {
+        myGUI->doOpenFile(StMovieOpenDialog::Dialog_Audio);
+        return;
+    }
     myOpenDialog->openDialog(StMovieOpenDialog::Dialog_Audio);
 }
 
 void StMoviePlayer::doAddSubtitleStream(const size_t ) {
+    if(!myGUI.isNull() && (myWindow->isFullScreen() || myGUI->isMobile())) {
+        myGUI->doOpenFile(StMovieOpenDialog::Dialog_Subtitles);
+        return;
+    }
     myOpenDialog->openDialog(StMovieOpenDialog::Dialog_Subtitles);
 }
 
