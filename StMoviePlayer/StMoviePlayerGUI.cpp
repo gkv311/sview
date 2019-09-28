@@ -1531,11 +1531,17 @@ void StMoviePlayerGUI::doShowMobileExMenu(const size_t ) {
         anItem = aMenu->addItem(tr(BUTTON_DELETE), myPlugin->getAction(StMoviePlayer::Action_DeleteFile));
         anItem->setIcon(stCMenuIcon("actionDiscard"));
 
+        const bool hasVideo = myPlugin->myVideo->hasVideoStream();
         const StHandle< StArrayList<StString> >& anAudioStreams = myPlugin->myVideo->params.activeAudio->getList();
         if(!anAudioStreams.isNull()
         && !anAudioStreams->isEmpty()) {
             anItem = aMenu->addItem(tr(MENU_AUDIO));
             anItem->setIcon(stCMenuIcon("actionStreamAudio"));
+            anItem->signals.onItemClick += stSlot(this, &StMoviePlayerGUI::doAudioStreamsCombo);
+        } else if(hasVideo) {
+            anItem = aMenu->addItem(tr(MENU_AUDIO));
+            anItem->setIcon(stCMenuIcon("actionStreamAudio"));
+            //anItem->signals.onItemClick += stSlot(myPlugin,  &StMoviePlayer::doAddAudioStream);
             anItem->signals.onItemClick += stSlot(this, &StMoviePlayerGUI::doAudioStreamsCombo);
         }
 
@@ -1545,9 +1551,15 @@ void StMoviePlayerGUI::doShowMobileExMenu(const size_t ) {
             anItem = aMenu->addItem(tr(MENU_SUBTITLES));
             anItem->setIcon(stCMenuIcon("actionStreamSubtitles"));
             anItem->signals.onItemClick += stSlot(this, &StMoviePlayerGUI::doSubtitlesStreamsCombo);
+        } else if(myPlugin->myVideo->hasAudioStream()
+               || hasVideo) {
+            anItem = aMenu->addItem(tr(MENU_SUBTITLES));
+            anItem->setIcon(stCMenuIcon("actionStreamSubtitles"));
+            //anItem->signals.onItemClick += stSlot(myPlugin,  &StMoviePlayer::doAddSubtitleStream);
+            anItem->signals.onItemClick += stSlot(this, &StMoviePlayerGUI::doSubtitlesStreamsCombo);
         }
 
-        if(myPlugin->myVideo->hasVideoStream()) {
+        if(hasVideo) {
             anItem = aMenu->addItem(tr(MENU_VIEW_DISPLAY_RATIO));
             anItem->setIcon(stCMenuIcon("actionDisplayRatio"));
             anItem->signals.onItemClick += stSlot(this, &StMoviePlayerGUI::doDisplayRatioCombo);
@@ -2060,10 +2072,6 @@ void StMoviePlayerGUI::doAudioStreamsCombo(const size_t ) {
             aBuilder.getMenu()->addItem(myPlugin->params.ToForceBFormat);
         }
     }
-    if(myWindow->isMobile()) {
-        aBuilder.display();
-        return;
-    }
 
     //aBuilder.getMenu()->addSplitter();
     StGLMenuItem* aDelayItem = NULL;
@@ -2110,13 +2118,10 @@ void StMoviePlayerGUI::doSubtitlesStreamsCombo(const size_t ) {
             aBuilder.getMenu()->addItem(aStreams->getValue(aStreamId), myPlugin->params.SubtitlesStream, int32_t(aStreamId));
         }
     }
-    if(myWindow->isMobile()) {
-        aBuilder.display();
-        return;
-    }
 
     if(!aStreams.isNull()
-    && !aStreams->isEmpty()) {
+    && !aStreams->isEmpty()
+    && !myWindow->isMobile()) {
         //myMenuSubtitles->addSplitter();
         StGLMenuItem* anItem = aBuilder.getMenu()->addItem(tr(MENU_SUBTITLES_SIZE));
         anItem->setIcon(stCMenuIcon("actionFontSize"), false);
@@ -2164,8 +2169,10 @@ void StMoviePlayerGUI::doSubtitlesStreamsCombo(const size_t ) {
         anItem = aBuilder.getMenu()->addItem(tr(MENU_SUBTITLES_PLACEMENT), aPlaceMenu);
     }
 
-    aBuilder.getMenu()->addItem(tr(MENU_SUBTITLES_PARSER), aParserMenu)
-                      ->setIcon(stCMenuIcon("actionTextFormat"), false);
+    if(!myWindow->isMobile()) {
+        aBuilder.getMenu()->addItem(tr(MENU_SUBTITLES_PARSER), aParserMenu)
+                          ->setIcon(stCMenuIcon("actionTextFormat"), false);
+    }
     if(myPlugin->myVideo->hasAudioStream()
     || myPlugin->myVideo->hasVideoStream()) {
         //aBuilder.getMenu()->addSplitter();
