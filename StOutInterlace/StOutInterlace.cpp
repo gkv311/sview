@@ -645,15 +645,21 @@ bool StOutInterlace::create() {
     // discard mask texture
     StGLFragmentShader aShaderMask(myGlProgramMask->getTitle());
     StGLAutoRelease aTmp8(*myContext, aShaderMask);
-    if(!aShaderMask.init(*myContext,
-                         "uniform sampler2D uTexture;\n"
-                         "uniform sampler2D uMaskTexture;\n"
-                         "varying vec2 fTexCoord;\n"
-                         "void main(void) {\n"
-                         "  float aMask = texture2D(uMaskTexture, fTexCoord).a;\n"
-                         "  if(aMask < 0.5) { discard; }\n"
-                         "  gl_FragColor = texture2D(uTexture, fTexCoord);\n"
-                         "}\n")) {
+
+    const char* FRAGMENT_GET_ALPHA = myContext->arbTexRG
+                                   ? "#define stTextureAlpha(theSampler, theCoords) texture2D(theSampler, theCoords).r\n"
+                                   : "#define stTextureAlpha(theSampler, theCoords) texture2D(theSampler, theCoords).a\n";
+    const StString aMaskProgram = StString() + FRAGMENT_GET_ALPHA
+     + "uniform sampler2D uTexture;\n"
+       "uniform sampler2D uMaskTexture;\n"
+       "varying vec2 fTexCoord;\n"
+       "void main(void) {\n"
+       "  float aMask = stTextureAlpha(uMaskTexture, fTexCoord);\n"
+       "  if(aMask < 0.5) { discard; }\n"
+       "  gl_FragColor = texture2D(uTexture, fTexCoord);\n"
+       "}\n";
+
+    if(!aShaderMask.init(*myContext, aMaskProgram.toCString())) {
         myMsgQueue->pushError(aShadersError);
         myIsBroken = true;
         return true;
@@ -830,6 +836,11 @@ bool StOutInterlace::initTextureMask(int  theDevice,
                     break;
             }
         }
+    }
+
+    const GLint aTexFormat = myContext->arbTexRG ? GL_R8 : GL_ALPHA;
+    if(myTextureMask->getTextureFormat() != aTexFormat) {
+        myTextureMask->setTextureFormat(aTexFormat);
     }
 
     if(!myTextureMask->init(*myContext, anImage)) {
