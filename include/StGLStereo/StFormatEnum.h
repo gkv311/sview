@@ -49,6 +49,7 @@ enum StPanorama {
     StPanorama_Sphere,     //!< spherical panorama 360 degrees - 2:1
     StPanorama_Hemisphere, //!< spherical panorama 180 degrees - 1:1
     StPanorama_Cubemap6_1, //!< cubemap data packed into single image frame - 6:1
+    StPanorama_Cubemap1_6, //!< cubemap data packed into single image frame - 1:6
     StPanorama_Cubemap3_2  //!< cubemap data packed into single image frame - 3:2
 };
 
@@ -148,6 +149,9 @@ namespace st {
         } else if(theSrc1SizeX / 6 == theSrc1SizeY
                && theSrc2SizeX / 6 == theSrc2SizeY) {
             return StPanorama_Cubemap6_1;
+        } else if(theSrc1SizeY / 6 == theSrc1SizeX
+               && theSrc2SizeY / 6 == theSrc2SizeX) {
+            return StPanorama_Cubemap1_6;
         } else if(theSrc1SizeX / 3 == theSrc1SizeY / 2
                && theSrc2SizeX / 3 == theSrc2SizeY / 2) {
             return StPanorama_Cubemap3_2;

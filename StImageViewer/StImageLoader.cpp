@@ -497,6 +497,10 @@ bool StImageLoader::loadImage(const StHandle<StFileNode>& theSource,
             aCubeCoeffs[0] = 6;
             aCubeCoeffs[1] = 1;
             theParams->ToFlipCubeZ = myToFlipCubeZ6x1;
+        } else if(aSizeY1 / 6 == aSizeX1) {
+            aCubeCoeffs[0] = 1;
+            aCubeCoeffs[1] = 6;
+            theParams->ToFlipCubeZ = myToFlipCubeZ6x1;
         } else if(aSizeX1 / 3 == aSizeY1 / 2) {
             aCubeCoeffs[0] = 3;
             aCubeCoeffs[1] = 2;

@@ -63,6 +63,7 @@ class StStereoParams {
     static StViewSurface getViewSurfaceForPanoramaSource(StPanorama thePano, bool theToFallbackSphere) {
         switch(thePano) {
             case StPanorama_Cubemap6_1:
+            case StPanorama_Cubemap1_6:
             case StPanorama_Cubemap3_2:
                 return StViewSurface_Cubemap;
             case StPanorama_Sphere:

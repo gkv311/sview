@@ -317,6 +317,10 @@ inline bool checkCubeMap(const StImagePlane& thePlane,
             theCoeffX = 6;
             theCoeffY = 1;
             return true;
+        } else if(thePlane.getSizeY() / 6 == thePlane.getSizeX()) {
+            theCoeffX = 1;
+            theCoeffY = 6;
+            return true;
         } else if(thePlane.getSizeX() / 3 == thePlane.getSizeY() / 2) {
             theCoeffX = 3;
             theCoeffY = 2;
@@ -647,9 +651,33 @@ void StGLTextureData::fillTexture(StGLContext&        theCtx,
                                  GL_TEXTURE_CUBE_MAP_NEGATIVE_Z };
     for(size_t aTargetIter = 0; aTargetIter < 6; ++aTargetIter) {
         StImagePlane aPlane;
-        const bool isSecondRow = (aCoeffs[1] == 2 && aTargetIter >= 3);
-        const size_t aLeft = isSecondRow ? (aPatch * (aTargetIter - 3)) : (aPatch * aTargetIter);
-        const size_t aTop  = isSecondRow ? aPatch : 0;
+        size_t aTop = 0, aLeft = 0;
+        switch(aCoeffs[1]) {
+            case 1: {
+                // 6x1
+                aLeft = aPatch * aTargetIter;
+                aTop  = 0;
+                break;
+            }
+            case 2: { // 3x2
+                if(aTargetIter >= 3) {
+                    // second row
+                    aLeft = aPatch * (aTargetIter - 3);
+                    aTop  = aPatch;
+                } else {
+                    // first row
+                    aLeft = aPatch * aTargetIter;
+                    aTop  = 0;
+                }
+                break;
+            }
+            case 6: {
+                // 1x6
+                aLeft = 0;
+                aTop  = aPatch * aTargetIter;
+                break;
+            }
+        }
         if(!aPlane.initWrapper(theData.getFormat(), const_cast<GLubyte* >(theData.getData(aTop, aLeft)),
                                aPatch, aPatch, theData.getSizeRowBytes())) {
             ST_DEBUG_LOG("StGLTextureData::fillTexture(). wrapping failure");
