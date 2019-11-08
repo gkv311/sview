@@ -55,6 +55,7 @@ FlatComponentsList=false
 ;InfoBeforeFile: {#SVIEW_DISTR_PATH_x86}\info\ReadMeEn.rtf
 Name: english; MessagesFile: compiler:Default.isl;           LicenseFile: {#SVIEW_DISTR_PATH_x86}\info\license.rtf
 Name: russian; MessagesFile: compiler:Languages\Russian.isl; LicenseFile: {#SVIEW_DISTR_PATH_x86}\info\license.rtf
+Name: spanish; MessagesFile: compiler:Languages\Spanish.isl; LicenseFile: {#SVIEW_DISTR_PATH_x86}\info\license.rtf
 Name: french;  MessagesFile: compiler:Languages\French.isl;  LicenseFile: {#SVIEW_DISTR_PATH_x86}\info\license.rtf
 Name: german;  MessagesFile: compiler:Languages\German.isl;  LicenseFile: {#SVIEW_DISTR_PATH_x86}\info\license.rtf
 Name: korean;  MessagesFile: compiler:Languages\Korean.isl;  LicenseFile: {#SVIEW_DISTR_PATH_x86}\info\license.rtf
@@ -64,11 +65,13 @@ Name: chinese; MessagesFile: compiler:Languages\ChineseSimplified.isl; LicenseFi
 ; Installation types
 english.FullInstallation=Full Installation
 russian.FullInstallation=Полная установка
+spanish.FullInstallation=Instalación completa
 french.FullInstallation=Installation complète
 german.FullInstallation=Vollständige Installation
 korean.FullInstallation=전체 설치
 chinese.FullInstallation=全部安装
 english.CustomInstallation=Custom Installation
+spanish.CustomInstallation=Instalación personalizada
 russian.CustomInstallation=Выборочная установка
 french.CustomInstallation=Installation personnalisée
 german.CustomInstallation=Benutzerdefinierte Installation
@@ -76,53 +79,72 @@ korean.CustomInstallation=사용자 설치
 chinese.CustomInstallation=自定义安装
 ; Components
 english.StCore=Core files
+spanish.StCore=Archivos compartidos
 russian.StCore=Общие файлы
 german.StCore=Core-Dateien
 english.StBrowserPlugins=NPAPI Browser plugin (Firefox, Google Chrome, Opera,...)
+spanish.StBrowserPlugins=Plugin de navegador NPAPI (Firefox, Google Chrome, Opera,...)
 russian.StBrowserPlugins=NPAPI плагин для браузеров Firefox, Google Chrome, Opera,...
 english.StActiveXPlugin=ActiveX control for Internet Explorer
+spanish.StActiveXPlugin=Control ActiveX para Internet Explorer
 russian.StActiveXPlugin=ActiveX плагин для браузера Internet Explorer
 english.StDrawers=Media types support
+spanish.StDrawers=Soporte de tipos de medios
 russian.StDrawers=Поддержка медиа-типов
 english.StImageViewer=Stereoscopic Image Viewer
+spanish.StImageViewer=Visor de imagen estereoscópica
 russian.StImageViewer=Просмотр стереоизображений
 english.StMoviePlayer=Stereoscopic Movie Player
+spanish.StMoviePlayer=Reproductor de películas estereoscópicas
 russian.StMoviePlayer=Воспроизведение стереовидео
 english.StRenderers=Device support
+spanish.StRenderers=Soporte del dispositivo
 russian.StRenderers=Поддержка устройств стереовывода
 german.StRenderers=Geräteunterstützung
 english.StOutAnaglyph=Anaglyph glasses
+spanish.StOutAnaglyph=Gafas anaglíficas
 russian.StOutAnaglyph=Анаглифные очки
 german.StOutAnaglyph=Anaglyphenbrille
 english.StOutDual=Mirror Displays, Dual Projectors
+spanish.StOutDual=Salida espejo, Salida dual
 russian.StOutDual=Зеркальные системы, 2х-проекторные системы
 english.StOutInterlace=Interlaced Displays, DLP TV
+spanish.StOutInterlace=Filas entrelazadas, DLP TV
 russian.StOutInterlace=Чересстрочные мониторы, DLP ТВ
 english.StOutIZ3D=IZ3D Display
+spanish.StOutIZ3D=Visualización IZ3D
 russian.StOutIZ3D=Монитор IZ3D
 german.StOutIZ3D=iZ3D-Bildschirmen
 english.StOutPageFlip=Shutter glasses
+spanish.StOutPageFlip=Gafas de obturador
 russian.StOutPageFlip=Затворные очки
 german.StOutPageFlip=Shutterbrille
 english.StOutDistorted=Distorted output
+spanish.StOutDistorted=Salida distorsionada
 russian.StOutDistorted=Искажённый вывод
 ; File associations
 english.FileAssociations=File associations
+spanish.FileAssociations=Asociaciones de archivos
 russian.FileAssociations=Файловые ассоциации
 german.FileAssociations=Dateizuordnungen
 english.AssocStereoImages=Associate stereoscopic images with sView (*.jps; *.pns; *.mpo)
+spanish.AssocStereoImages=Asociar imágenes estereoscópicas con sView (*.jps; *.pns; *.mpo)
 russian.AssocStereoImages=Связать с sView стереоизображения (*.jps; *.pns; *.mpo)
 german.AssocStereoImages=Associate stereoskopische Bilder mit sView (*.jps; *.pns; *.mpo)
 english.AssocImages=Associate common images with sView (*.jpg; *.png; *.webp; *.bmp; *.exr; *.hdr; *.tga)
+spanish.AssocImages=Asociar imágenes comunes con sView (*.jpg; *.png; *.webp; *.bmp; *.exr; *.hdr; *.tga)
 russian.AssocImages=Связать с sView обычные изображения (*.jpg; *.png; *.webp; *.bmp; *.exr; *.hdr; *.tga)
 german.AssocImages=Associate normale Bilder mit sView (*.jpg; *.png; *.webp; *.bmp; *.exr; *.hdr; *.tga)
 english.AssocMovies=Associate video files with sView (*.avi; *.mkv; *.mk3d; *.webm; *.wmv; *.ts)
+spanish.AssocMovies=Asociar archivos de video con sView (*.avi; *.mkv; *.mk3d; *.webm; *.wmv; *.ts)
 russian.AssocMovies=Связать с sView видеофайлы (*.avi; *.mkv; *.mk3d; *.webm; *.wmv; *.ts)
 german.AssocMovies=Associate Videodateien mit sView (*.avi; *.mkv; *.mk3d; *.webm; *.wmv; *.ts)
 english.AssocMusic=Associate music files with sView (*.mp3; *.ogg; *.wav; *.flac; *.ape)
+spanish.AssocMusic=Asociar archivos de música con sView (*.mp3; *.ogg; *.wav; *.flac; *.ape)
 russian.AssocMusic=Связать с sView музыкальные файлы (*.mp3; *.ogg; *.wav; *.flac; *.ape)
 german.AssocMusic=Associate Musikdateien mit sView (*.mp3; *.ogg; *.wav; *.flac; *.ape)
 english.AssocPlaylists=Associate playlist files with sView (*.m3u)
+spanish.AssocPlaylists=Asociar archivos de lista de reproducción con sView (*.m3u)
 ; OpenAL soft
 english.OpenALSoft51=OpenAL soft - force 5.1 channel output
 russian.OpenALSoft51=OpenAL soft - force 5.1 channel output
@@ -285,6 +307,7 @@ Filename: regsvr32; Parameters: "/s ""{app}\amd64\npStBrowserPlugin.dll"""; Comp
 Root: HKCU; Subkey: SOFTWARE\sView;       ValueType: none; Flags: uninsdeletekey; Tasks: ; Languages: ; ValueData: sView 2011
 Root: HKCU; Subkey: Software\sView\sView; ValueType: string; ValueName: language; ValueData: русский;  Tasks: ; Languages: russian; Flags: uninsdeletekey
 Root: HKCU; Subkey: Software\sView\sView; ValueType: string; ValueName: language; ValueData: English;  Tasks: ; Languages: english; Flags: uninsdeletekey
+Root: HKCU; Subkey: Software\sView\sView; ValueType: string; ValueName: language; ValueData: Español;  Tasks: ; Languages: spanish; Flags: uninsdeletekey
 Root: HKCU; Subkey: Software\sView\sView; ValueType: string; ValueName: language; ValueData: français; Tasks: ; Languages: french;  Flags: uninsdeletekey
 Root: HKCU; Subkey: Software\sView\sView; ValueType: string; ValueName: language; ValueData: Deutsch;  Tasks: ; Languages: german;  Flags: uninsdeletekey
 Root: HKCU; Subkey: Software\sView\sView; ValueType: string; ValueName: language; ValueData: Korean;   Tasks: ; Languages: korean;  Flags: uninsdeletekey

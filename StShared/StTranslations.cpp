@@ -58,6 +58,10 @@ void StTranslations::reload() {
             params.language->changeValues().add("English");
             myLangFolderList.add("English");
         }
+        if(myResMgr->isResourceExist(StString("lang" ST_FILE_SPLITTER "Spanish" ST_FILE_SPLITTER) + myModuleName + StTranslations::DEFAULT_SUFFIX)) {
+            params.language->changeValues().add("Español");
+            myLangFolderList.add("Spanish");
+        }
         if(myResMgr->isResourceExist(StString("lang" ST_FILE_SPLITTER "Russian" ST_FILE_SPLITTER) + myModuleName + StTranslations::DEFAULT_SUFFIX)) {
             params.language->changeValues().add("русский");
             myLangFolderList.add("Russian");
@@ -107,6 +111,12 @@ void StTranslations::reload() {
         } else if(aLang.isEqualsIgnoreCase(stCString("de"))) {
             if(myLangFolderList.contains(stCString("German"),   anIdInList)
             || myLangFolderList.contains(stCString("Deutsch"),  anIdInList)) {
+                params.language->setValue(int32_t(anIdInList));
+                isLangSet = true;
+            }
+        } else if(aLang.isEqualsIgnoreCase(stCString("es"))) {
+            if(myLangFolderList.contains(stCString("Spanish"), anIdInList)
+            || myLangFolderList.contains(stCString("Español"), anIdInList)) {
                 params.language->setValue(int32_t(anIdInList));
                 isLangSet = true;
             }
@@ -170,6 +180,8 @@ void StTranslations::updateLangCode(const int32_t theNewLang) {
     const StString& aLang = params.language->getValues()[theNewLang];
     if(aLang == stCString("русский")) {
         myLangCode = "rus";
+    } else if(aLang == stCString("Español")) {
+        myLangCode = "spa";
     } else if(aLang == stCString("français")) {
         myLangCode = "fre";
         //myLangCode = "fra";

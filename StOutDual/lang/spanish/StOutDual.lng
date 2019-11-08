@@ -1,0 +1,11 @@
+# Spanish translation file for StOutDual
+--------
+1000=Salida dual
+1001=Dispositivo estéreo con entrada dual: algunos HMD, monitores estéreo reflejados, proyectores duales
+1002=Salida espejo
+1003=Monitores estéreo reflejados hechos a mano (espejo en la dirección X)
+1102=Monitor esclavo
+1103=Mostrar mono en estéreo
+2000=sView - Módulo de salida dual
+2001=versión
+2002=© {0} Kirill Gavrilov <{1}>\nSitio oficial: {2}

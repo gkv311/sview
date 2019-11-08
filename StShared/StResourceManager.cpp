@@ -191,6 +191,8 @@ StResourceManager::StResourceManager(const StString& theAppName)
         myLang = aSysLoc.subString(0, 2);
     } else if(aSysLoc.isStartsWith(stCString("russian"))) {
         myLang = "ru";
+    } else if(aSysLoc.isStartsWith(stCString("spanish"))) {
+        myLang = "es";
     } else if(aSysLoc.isStartsWith(stCString("french"))) {
         myLang = "fr";
     } else if(aSysLoc.isStartsWith(stCString("german"))) {

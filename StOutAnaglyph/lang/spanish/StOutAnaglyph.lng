@@ -1,0 +1,19 @@
+# Spanish translation file for StOutAnalygph
+--------
+1000=Gafas anaglíficas
+1001=Gafas simples con filtros de color. Usadas comúnmente
+1010=Tipo de gafas
+1011=Rojo-cian (R+GB)
+1012=Amarillo-azul (RG+B)
+1013=Verde-magenta (G+RB)
+1102=Filtro rojo-cian
+1120=Simple
+1121=Optimizado
+1122=En gris
+1123=Oscuro
+1103=Filtro amarillo-azul
+1130=Simple
+1131=Dubios
+2000=sView - Módulo de salida anaglífica
+2001=versión
+2002=© {0} Kirill Gavrilov <{1}>\nSitio oficial: {2}

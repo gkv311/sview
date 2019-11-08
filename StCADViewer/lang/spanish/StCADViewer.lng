@@ -1,0 +1,27 @@
+# Spanish translation file for StCADViewer
+--------
+1200=Ver
+1202=Pantalla completa
+1204=Mostrar triedro
+1206=Proyección
+1208=Ajustar TODO
+1240=Ortogonal
+1241=Perspectiva
+1242=Estéreo
+1402=Mostrar FPS
+1500=Ayuda
+1501=Acerca de...
+1503=Texto de la licencia
+1504=Idioma (Language)
+1511=Ajustes
+3000=sView - Mini visor de CAD
+3001=versión
+3002=El visualizador CAD te permite ver archivos CAD en formatos IGES, STEP y BREP usando tecnología OpenCASCADE.\n © {0} Kirill Gavrilov <{1}>\nSitio oficial: {2}\n\nEste programa se distribuye bajo licencia GPL 3.0
+3004=Información del sistema
+4000=Cerrar
+4001=Cancelar
+4006=Guardar
+4007=Eliminar
+4008=Predeterminado
+4009=Predeterminados
+4010=Asignar

@@ -1,0 +1,17 @@
+# Spanish translation file for StOutDistorted
+--------
+1000=TV (par paralelo)
+1001=Salida distorsionada
+1002=OpenVR HMD
+1003=Distorsión de barril
+1110=Disposición
+1111=Adyacente
+1112=Arriba y abajo
+1113=Paralela (anamórfica)
+1114=Arriba y abajo (anamórfica)
+1120=Distorsión
+1121=Ninguna
+1123=Mostrar mono en estéreo
+2000=sView - Módulo de salida distorsionada
+2001=versión
+2002=© {0} Kirill Gavrilov <{1}>\nSitio oficial: {2}

@@ -1,0 +1,24 @@
+# Spanish translation file for StOutPageFlip
+--------
+1000=Gafas de obturador
+1001=Gafas de obturador
+1002=Vuzix HMD
+1003=Vuzix HMD
+1102=Tipo búfer cuádruple
+1103=Códigos de control de gafas
+1120=OpenGL emulado
+1122=OpenGL por hardware
+1123=Direct3D (Pantalla completa)
+1124=Direct3D (No disponible)
+1125=Direct3D AMD (Pantalla completa)
+1126=Direct3D AMD (No disponible)
+1127=Direct3D NVIDIA (Pantalla completa)
+1128=Direct3D NVIDIA (Desactivado)
+1130=Sin códigos
+1131=Sincronización de línea azul
+1132=Sincronización de línea blanca
+1134=Apagado/encendido automático de eDimensional
+2000=sView - Módulo de salida PageFlip
+2001=versión
+2002=© {0} Kirill Gavrilov <{1}>\nSitio oficial: {2}
+3001=¡El búfer cuádruple OpenGL por hardware no está disponible!\n\nPuedes probar otro tipo de búfer cuádruple\n(Incluido OpenGL emulado en la sección Extra).
