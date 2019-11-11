@@ -121,12 +121,16 @@ static void fillPointersAV(const StImage& theImage,
     }
 }
 
+static const int THE_SWSCALE_FLAGS_FAST    = SWS_BICUBIC;
+static const int THE_SWSCALE_FLAGS_QUALITY = SWS_LANCZOS | SWS_ACCURATE_RND | SWS_FULL_CHR_H_INT;
+
 /**
  * Convert image from one format to another using swscale.
  * Image buffers should be already initialized!
  */
 static bool convert(const StImage& theImageFrom, AVPixelFormat theFormatFrom,
-                          StImage& theImageTo,   AVPixelFormat theFormatTo) {
+                          StImage& theImageTo,   AVPixelFormat theFormatTo,
+                    int theSwsFlags) {
     ST_DEBUG_LOG("StAVImage, convert from " + stAV::PIX_FMT::getString(theFormatFrom) + " " + theImageFrom.getSizeX() + "x" + theImageFrom.getSizeY()
                + " to " + stAV::PIX_FMT::getString(theFormatTo) + " " + theImageTo.getSizeX() + "x" + theImageTo.getSizeY());
     if(theFormatFrom == stAV::PIX_FMT::NONE
@@ -136,7 +140,7 @@ static bool convert(const StImage& theImageFrom, AVPixelFormat theFormatFrom,
 
     SwsContext* aCtxToRgb = sws_getContext((int )theImageFrom.getSizeX(), (int )theImageFrom.getSizeY(), theFormatFrom, // source
                                            (int )theImageTo.getSizeX(),   (int )theImageTo.getSizeY(),   theFormatTo,   // destination
-                                           SWS_BICUBIC, NULL, NULL, NULL);
+                                           theSwsFlags, NULL, NULL, NULL);
     if(aCtxToRgb == NULL) {
         return false;
     }
@@ -173,7 +177,8 @@ bool StAVImage::resize(const StImage& theImageFrom,
     return aFormatFrom != stAV::PIX_FMT::NONE
         && aFormatTo   != stAV::PIX_FMT::NONE
         && convert(theImageFrom, aFormatFrom,
-                   theImageTo,   aFormatTo);
+                   theImageTo,   aFormatTo,
+                   THE_SWSCALE_FLAGS_FAST);
 }
 
 void StAVImage::close() {
@@ -571,7 +576,8 @@ bool StAVImage::save(const StString& theFilePath,
                 anImage.changePlane().initTrash(StImagePlane::ImgRGB, getSizeX(), getSizeY(), getAligned(getSizeX() * 3));
                 AVPixelFormat aPFrmtTarget = stAV::PIX_FMT::RGB24;
                 if(!convert(*this,   aPFormatAV,
-                            anImage, aPFrmtTarget)) {
+                            anImage, aPFrmtTarget,
+                            THE_SWSCALE_FLAGS_QUALITY)) {
                     setState("SWScale library, failed to create SWScaler context");
                     close();
                     return false;
@@ -621,7 +627,8 @@ bool StAVImage::save(const StString& theFilePath,
                 anImage.changePlane(2).initTrash(StImagePlane::ImgGray, getSizeX(), getSizeY(), getAligned(getSizeX()));
                 stMemSet(anImage.changePlane(2).changeData(), '\0', anImage.getPlane(2).getSizeBytes());
                 if(!convert(*this,   aPFormatAV,
-                            anImage, aPFrmtTarget)) {
+                            anImage, aPFrmtTarget,
+                            THE_SWSCALE_FLAGS_QUALITY)) {
                     setState("SWScale library, failed to create SWScaler context");
                     close();
                     return false;
