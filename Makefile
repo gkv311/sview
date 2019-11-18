@@ -3,6 +3,7 @@
 WORKDIR = $(shell pwd)
 SRCDIR = $(WORKDIR)
 JAVA_HOME = /usr
+APP_PREFIX = /usr
 
 $(info SRCDIR=$(SRCDIR))
 
@@ -139,7 +140,7 @@ STRIPFLAGS = --strip-unneeded
 LDSTRIP = -s
 LDZDEF = -z defs
 EXTRA_CFLAGS   =
-EXTRA_CXXFLAGS =
+EXTRA_CXXFLAGS = -DAPP_PREFIX="\"$(APP_PREFIX)\""
 EXTRA_LDFLAGS  =
 ifeq ($(TARGET_OS),osx)
 LDZDEF =
@@ -266,27 +267,27 @@ outputs_all: $(aStOutAnaglyph) $(aStOutDual) $(aStOutInterlace) $(aStOutPageFlip
 endif
 
 install:
-	mkdir -p $(DESTDIR)/usr/bin
-	mkdir -p $(DESTDIR)/usr/$(USR_LIB)/sView
-	mkdir -p $(DESTDIR)/usr/$(USR_LIB)/firefox/plugins
-	mkdir -p $(DESTDIR)/usr/$(USR_LIB)/mozilla/plugins
-	mkdir -p $(DESTDIR)/usr/share
-	mkdir -p $(DESTDIR)/usr/share/sView/info
-	mkdir -p $(DESTDIR)/usr/share/sView/lang
-	mkdir -p $(DESTDIR)/usr/share/sView/shaders
-	mkdir -p $(DESTDIR)/usr/share/sView/textures
-	mkdir -p $(DESTDIR)/usr/share/sView/web
-	cp -f -r share/*                     $(DESTDIR)/usr/share/
-	cp -f -r $(BUILD_ROOT)/lang/*        $(DESTDIR)/usr/share/sView/lang/
-	cp -f -r $(BUILD_ROOT)/shaders/*     $(DESTDIR)/usr/share/sView/shaders/
-	cp -f -r $(BUILD_ROOT)/textures/*    $(DESTDIR)/usr/share/sView/textures/
-	cp -f -r $(BUILD_ROOT)/web/*         $(DESTDIR)/usr/share/sView/web/
-	cp -f    license-gpl-3.0.txt         $(DESTDIR)/usr/share/sView/info/license.txt
-	cp -f -r $(BUILD_ROOT)/*.$(LIBSUFFIX) $(DESTDIR)/usr/$(USR_LIB)/
-	cp -f    $(BUILD_ROOT)/sView         $(DESTDIR)/usr/$(USR_LIB)/sView/sView
-	ln --force --symbolic ../$(USR_LIB)/sView/sView       $(DESTDIR)/usr/bin/sView
-	ln --force --symbolic ../../share/sView/demo/demo.jps $(DESTDIR)/usr/$(USR_LIB)/sView/demo.jps
-	rm -f    $(DESTDIR)/usr/$(USR_LIB)/sView/*.a
+	mkdir -p $(DESTDIR)/$(APP_PREFIX)/bin
+	mkdir -p $(DESTDIR)/$(APP_PREFIX)/$(USR_LIB)/sView
+	mkdir -p $(DESTDIR)/$(APP_PREFIX)/$(USR_LIB)/firefox/plugins
+	mkdir -p $(DESTDIR)/$(APP_PREFIX)/$(USR_LIB)/mozilla/plugins
+	mkdir -p $(DESTDIR)/$(APP_PREFIX)/share
+	mkdir -p $(DESTDIR)/$(APP_PREFIX)/share/sView/info
+	mkdir -p $(DESTDIR)/$(APP_PREFIX)/share/sView/lang
+	mkdir -p $(DESTDIR)/$(APP_PREFIX)/share/sView/shaders
+	mkdir -p $(DESTDIR)/$(APP_PREFIX)/share/sView/textures
+	mkdir -p $(DESTDIR)/$(APP_PREFIX)/share/sView/web
+	cp -f -r share/*                     $(DESTDIR)/$(APP_PREFIX)/share/
+	cp -f -r $(BUILD_ROOT)/lang/*        $(DESTDIR)/$(APP_PREFIX)/share/sView/lang/
+	cp -f -r $(BUILD_ROOT)/shaders/*     $(DESTDIR)/$(APP_PREFIX)/share/sView/shaders/
+	cp -f -r $(BUILD_ROOT)/textures/*    $(DESTDIR)/$(APP_PREFIX)/share/sView/textures/
+	cp -f -r $(BUILD_ROOT)/web/*         $(DESTDIR)/$(APP_PREFIX)/share/sView/web/
+	cp -f    license-gpl-3.0.txt         $(DESTDIR)/$(APP_PREFIX)/share/sView/info/license.txt
+	cp -f -r $(BUILD_ROOT)/*.$(LIBSUFFIX) $(DESTDIR)/$(APP_PREFIX)/$(USR_LIB)/
+	cp -f    $(BUILD_ROOT)/sView         $(DESTDIR)/$(APP_PREFIX)/$(USR_LIB)/sView/sView
+	ln --force --symbolic ../$(USR_LIB)/sView/sView       $(DESTDIR)/$(APP_PREFIX)/bin/sView
+	ln --force --symbolic ../../share/sView/demo/demo.jps $(DESTDIR)/$(APP_PREFIX)/$(USR_LIB)/sView/demo.jps
+	rm -f    $(DESTDIR)/$(APP_PREFIX)/$(USR_LIB)/sView/*.a
 
 install_android:
 	mkdir -p $(aDestAndroid)/assets/info
