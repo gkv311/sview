@@ -35,7 +35,7 @@ namespace {
     static const StString STCORE_NAME = StString("StCore")    + ST_DLIB_SUFFIX;
 #else
     static const StString STCORE_NAME = StString("libStCore") + ST_DLIB_SUFFIX;
-    static const StString ST_DEFAULT_PATH = "/usr/share/sView/";
+    static const StString ST_DEFAULT_PATH = APP_PREFIX"/share/sView/";
 #endif
 
     inline bool isValidStSharePath(const StString& thePath) {

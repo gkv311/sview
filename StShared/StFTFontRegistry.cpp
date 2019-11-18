@@ -112,6 +112,7 @@ StFTFontRegistry::StFTFontRegistry() {
 #else
     myFolders.add(stCString("/usr/share/fonts"));
     myFolders.add(stCString("/usr/local/share/fonts"));
+    myFolders.add(stCString(APP_PREFIX"/share/fonts"));
 
     // western
     myFilesMajor.add(stCString("DejaVuSerif.ttf"));
