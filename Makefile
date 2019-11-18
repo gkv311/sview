@@ -158,6 +158,10 @@ else ifneq (,$(findstring mingw,$(CCMACHINE)))
 TARGET_ARCH2 = x86
 endif
 
+ifneq ($(DISABLE_UPDATER),)
+EXTRA_CXXFLAGS += -DST_NO_UPDATES_CHECK
+endif
+
 # to activate debug build
 #EXTRA_CXXFLAGS = -DST_DEBUG_LOG_TO_FILE=\"/sdcard/Android/data/com.sview/files/sview.log\" -DST_DEBUG
 #EXTRA_CXXFLAGS += -DST_DEBUG_GL
