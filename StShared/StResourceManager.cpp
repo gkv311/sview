@@ -162,20 +162,35 @@ StResourceManager::StResourceManager(const StString& theAppName)
     StFolder::createFolder(myUserHomeFolder + "Library/Caches");
 #else
     // Linux world
-    myUserDataFolder = myUserHomeFolder + ".local/share/" + myAppName + "/";
-    mySettingsFolder = myUserHomeFolder + ".config/"      + myAppName + "/";
-    myCacheFolder    = myUserHomeFolder + ".cache/"       + myAppName + "/";
+    myUserDataFolder = StProcess::getEnv(StString("XDG_DATA_HOME"));
+    if (myUserDataFolder.isEmpty()) {
+        myUserDataFolder = myUserHomeFolder + ".local/share/" + myAppName + "/";
+        StFolder::createFolder(myUserHomeFolder + ".local");
+        StFolder::createFolder(myUserHomeFolder + ".local/share");
+    } else {
+        myUserDataFolder = myUserDataFolder + "/";
+    }
+
+    mySettingsFolder = StProcess::getEnv(StString("XDG_CONFIG_HOME"));
+    if (mySettingsFolder.isEmpty()) {
+        mySettingsFolder = myUserHomeFolder + ".config/"      + myAppName + "/";
+        StFolder::createFolder(myUserHomeFolder + ".config");
+    } else {
+        mySettingsFolder = mySettingsFolder + "/";
+    }
+
+    myCacheFolder = StProcess::getEnv(StString("XDG_CACHE_HOME"));
+    if (myCacheFolder.isEmpty()) {
+        myCacheFolder = myUserHomeFolder + ".cache/"       + myAppName + "/";
+        StFolder::createFolder(myUserHomeFolder + ".cache");
+    } else {
+        myCacheFolder = myCacheFolder + "/";
+    }
 
     myFolders[FolderId_Downloads] = myUserHomeFolder + "Downloads";
     myFolders[FolderId_Pictures]  = myUserHomeFolder + "Pictures";
     myFolders[FolderId_Music]     = myUserHomeFolder + "Music";
     myFolders[FolderId_Videos]    = myUserHomeFolder + "Videos";
-
-    // make sure parent paths are also exist (on broken home)
-    StFolder::createFolder(myUserHomeFolder + ".local");
-    StFolder::createFolder(myUserHomeFolder + ".local/share");
-    StFolder::createFolder(myUserHomeFolder + ".config");
-    StFolder::createFolder(myUserHomeFolder + ".cache");
 #endif
 
     StFolder::createFolder(myUserDataFolder);
