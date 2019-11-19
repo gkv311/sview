@@ -13,9 +13,14 @@
 #include <StThreads/StProcess.h>
 #include <stAssert.h>
 
+#if !defined(_WIN32) && !defined(__ANDROID__) && !defined(__APPLE__) && !defined(__EMSCRIPTEN__)
+  // use fontconfig library on Linux
+  #include <fontconfig/fontconfig.h>
+#endif
+
 namespace {
-    const StFTFontFamily THE_NO_FAMILY;
-};
+    static const StFTFontFamily THE_NO_FAMILY;
+}
 
 StFTFontRegistry::StFTFontRegistry() {
     myFTLib = new StFTLibrary();
@@ -110,8 +115,27 @@ StFTFontRegistry::StFTFontRegistry() {
     myFilesMinor.add(stCString("NotoNaskhArabic-Regular.ttf"));
     //myFilesMinor.add(stCString("NotoNaskhArabic-Bold.ttf"));
 #else
-    myFolders.add(stCString("/usr/share/fonts"));
-    myFolders.add(stCString("/usr/local/share/fonts"));
+
+#if !defined(__EMSCRIPTEN__)
+    if(FcConfig* aFcCfg = FcInitLoadConfig()) {
+        if(FcStrList* aFcFontDir = FcConfigGetFontDirs(aFcCfg)) {
+            for(;;) {
+                FcChar8* aFcFolder = FcStrListNext(aFcFontDir);
+                if(aFcFolder == NULL) {
+                    break;
+                }
+
+                myFolders.add(StString((const char* )aFcFolder));
+            }
+            FcStrListDone(aFcFontDir);
+        }
+        FcConfigDestroy(aFcCfg);
+    }
+#endif
+    if(myFolders.isEmpty()) {
+        myFolders.add(stCString("/usr/share/fonts"));
+        myFolders.add(stCString("/usr/local/share/fonts"));
+    }
 
     // western
     myFilesMajor.add(stCString("DejaVuSerif.ttf"));
