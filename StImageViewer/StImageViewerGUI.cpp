@@ -805,7 +805,7 @@ void StImageViewerGUI::doMobileSettings(const size_t ) {
         aParams.add(myPlugin->params.ToOpenLast);
     }
     aParams.add(myPlugin->params.ExitOnEscape);
-#if !defined(ST_NO_UPDATES_CHECK)
+#if defined(ST_UPDATES_CHECK)
     aParams.add(myPlugin->params.CheckUpdatesDays);
 #endif
 

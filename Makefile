@@ -171,7 +171,7 @@ ifdef ANDROID_NDK
 LIBSUBFOLDER = libs/$(ANDROID_EABI)
 EXTRA_CFLAGS   += $(ANDROID_SYSROOT) $(ANDROID_MARCH)
 EXTRA_CXXFLAGS += $(ANDROID_SYSROOT) $(ANDROID_MARCH)
-EXTRA_CXXFLAGS += -I$(ANDROID_NDK)/sources/cxx-stl/gnu-libstdc++/4.9/include -I$(ANDROID_NDK)/sources/cxx-stl/gnu-libstdc++/4.9/libs/$(ANDROID_EABI)/include -DST_HAVE_EGL -DST_NO_UPDATES_CHECK
+EXTRA_CXXFLAGS += -I$(ANDROID_NDK)/sources/cxx-stl/gnu-libstdc++/4.9/include -I$(ANDROID_NDK)/sources/cxx-stl/gnu-libstdc++/4.9/libs/$(ANDROID_EABI)/include -DST_HAVE_EGL
 EXTRA_LDFLAGS  += $(ANDROID_SYSROOT) -L$(ANDROID_NDK)/sources/cxx-stl/gnu-libstdc++/4.9/libs/$(ANDROID_EABI) -lstdc++ -lgnustl_shared
 else ifeq ($(TARGET_ARCH2),x86)
 # necessary for 32-bit x86 builds, where MMX and SSE are not enabled by default
@@ -213,6 +213,8 @@ endif
 
 ifeq ($(TARGET_OS),linux)
 EXTRA_CXXFLAGS += `pkg-config gtk+-2.0 --cflags`
+# notification about updates available on sview.ru
+#EXTRA_CXXFLAGS += -DST_UPDATES_CHECK
 endif
 
 # optionally fail on any compiler warning except #warning and deprecations

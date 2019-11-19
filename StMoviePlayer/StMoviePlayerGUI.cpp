@@ -2368,7 +2368,7 @@ void StMoviePlayerGUI::doMobileSettings(const size_t ) {
         aParams.add(myPlugin->params.BlockSleeping);
         aParams.add(myPlugin->params.ToOpenLast);
     }
-#if !defined(ST_NO_UPDATES_CHECK)
+#if defined(ST_UPDATES_CHECK)
     aParams.add(myPlugin->params.CheckUpdatesDays);
 #endif
 

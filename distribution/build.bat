@@ -74,6 +74,8 @@ echo #endif>> "%SVIEW_BUILD_CONF%"
 
 rem Activate experimental WebP support
 echo #define ST_HAVE_WEBP>> "%SVIEW_BUILD_CONF%"
+rem Activate notifications about sView updates available on sview.ru
+echo #define ST_UPDATES_CHECK>> "%SVIEW_BUILD_CONF%"
 
 rem Create configuration for InnoSetup build script
 echo #define SVIEW_VER      "%YEAR%.%MONTH%.%SVIEW_VER_TYPE_NUM%.%DAY%"> config.iss

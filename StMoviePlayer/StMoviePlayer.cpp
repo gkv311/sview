@@ -890,7 +890,7 @@ bool StMoviePlayer::init() {
     // load this parameter AFTER video thread creation
     mySettings->loadParam(params.SrcStereoFormat);
 
-#if !defined(ST_NO_UPDATES_CHECK)
+#if defined(ST_UPDATES_CHECK)
     // read the current time
     time_t aRawtime;
     time(&aRawtime);
