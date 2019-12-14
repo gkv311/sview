@@ -127,10 +127,11 @@
 5004=Load time
 5005=ms
 5006=Pixel ratio
-5007=Color model
+5007=Pixel format
 5008=(does not stored in metadata)
 5009=(does not match metadata)
 5011=(does not stored in metadata,\nbut detected from file name)
+5012=Color model
 5100=JPEG Comment
 5101=JPS Comment
 5200=Camera Maker

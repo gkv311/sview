@@ -101,7 +101,7 @@ int StAVImage::getAVPixelFormat(const StImage& theImage) {
                 }
             } else if(aDelimX == 1 && aDelimY == 2) {
                 return theImage.getColorScale() == StImage::ImgScale_Mpeg
-                     ? stAV::PIX_FMT::YUVJ440P : stAV::PIX_FMT::YUV440P;
+                     ? stAV::PIX_FMT::YUV440P : stAV::PIX_FMT::YUVJ440P;
             } else if(aDelimX == 4 && aDelimY == 1) {
                 return stAV::PIX_FMT::YUV411P;
             } else if(aDelimX == 4 && aDelimY == 4) {

@@ -126,10 +126,11 @@
 5004=Tiempo de carga
 5005=ms
 5006=Relación de pixeles
-5007=Modelo de color
+5007=Formato de píxel
 5008=(no almacenado en los metadatos)
 5009=(no coincide con los metadatos)
 5011=(no almacenado en los metadatos,\npero detectado en el nombre de archivo)
+5012=Modelo de color
 5100=Comentario JPEG
 5101=Comentario JPS
 5200=Marca de la cámara

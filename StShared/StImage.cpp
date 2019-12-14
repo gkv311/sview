@@ -1,5 +1,5 @@
 /**
- * Copyright © 2010-2015 Kirill Gavrilov <kirill@sview.ru>
+ * Copyright © 2010-2019 Kirill Gavrilov <kirill@sview.ru>
  *
  * Distributed under the Boost Software License, Version 1.0.
  * See accompanying file license-boost.txt or copy at
@@ -14,24 +14,145 @@ StString StImage::formatImgColorModel(ImgColorModel theColorModel) {
         case ImgColor_RGB:     return "ImgColor_RGB";
         case ImgColor_RGBA:    return "ImgColor_RGBA";
         case ImgColor_GRAY:    return "ImgColor_GRAY";
+        case ImgColor_XYZ:     return "ImgColor_XYZ";
         case ImgColor_YUV:     return "ImgColor_YUV";
         case ImgColor_CMYK:    return "ImgColor_CMYK";
         case ImgColor_HSV:     return "ImgColor_HSV";
         case ImgColor_HSL:     return "ImgColor_HSL";
-        default:               return "ImgColor_UNKNOWN";
     }
+    return "ImgColor_UNKNOWN";
 #else
     switch(theColorModel) {
         case ImgColor_RGB:     return "RGB";
         case ImgColor_RGBA:    return "RGBA";
         case ImgColor_GRAY:    return "Grayscale";
+        case ImgColor_XYZ:     return "XYZ";
         case ImgColor_YUV:     return "YUV";
         case ImgColor_CMYK:    return "CMYK";
         case ImgColor_HSV:     return "HSV";
         case ImgColor_HSL:     return "HSL";
-        default:               return StString("UNKNOWN[") + theColorModel + "]";
     }
+    return StString("UNKNOWN[") + theColorModel + "]";
 #endif
+}
+
+const char* StImage::formatImgPixelFormat() const {
+    switch(myColorModel) {
+        case ImgColor_RGB:
+        case ImgColor_RGBA:
+        case ImgColor_GRAY: {
+            switch(myPlanes[0].getFormat()) {
+                case StImagePlane::ImgGray:    return "gray8";
+                case StImagePlane::ImgGray16:  return "gray16";
+                case StImagePlane::ImgRGB:     return "rgb24";
+                case StImagePlane::ImgBGR:     return "bgr24";
+                case StImagePlane::ImgRGB32:   return "rgb32";
+                case StImagePlane::ImgBGR32:   return "bgr32";
+                case StImagePlane::ImgRGB48:   return "rgb48";
+                case StImagePlane::ImgRGBA:    return "rgba32";
+                case StImagePlane::ImgBGRA:    return "bgra32";
+                case StImagePlane::ImgRGBA64:  return "rgba64";
+                case StImagePlane::ImgGrayF:   return "grayf";
+                case StImagePlane::ImgRGBF:    return "rgbf";
+                case StImagePlane::ImgBGRF:    return "bgrf";
+                case StImagePlane::ImgRGBAF:   return "rgbaf";
+                case StImagePlane::ImgBGRAF:   return "bgraf";
+                case StImagePlane::ImgUV:      return "uv";
+                case StImagePlane::ImgUNKNOWN: return "unknown";
+            }
+            return "invalid_rgb";
+        }
+        case ImgColor_XYZ: {
+            switch(myPlanes[0].getFormat()) {
+                case StImagePlane::ImgRGB:     return "xyz8";
+                case StImagePlane::ImgRGB48:   return "xyz12";
+                case StImagePlane::ImgRGBF:    return "xyzf";
+                default: break;
+            }
+            return "invalid_xyz";
+        }
+        case ImgColor_YUV: {
+            const size_t aDelimX = (myPlanes[1].getSizeX() > 0) ? (myPlanes[0].getSizeX() / myPlanes[1].getSizeX()) : 1;
+            const size_t aDelimY = (myPlanes[1].getSizeY() > 0) ? (myPlanes[0].getSizeY() / myPlanes[1].getSizeY()) : 1;
+            if(myPlanes[1].getFormat() == StImagePlane::ImgUV) {
+                return "nv12";
+            } else if(aDelimX == 1 && aDelimY == 1) {
+                switch(myColorScale) {
+                    case StImage::ImgScale_Mpeg:
+                        return myPlanes[0].getFormat() == StImagePlane::ImgGray16
+                             ? "yuv444p16"
+                             : "yuv444p";
+                    case StImage::ImgScale_Mpeg9:
+                    case StImage::ImgScale_Jpeg9:
+                        return "yuv444p9";
+                    case StImage::ImgScale_Mpeg10:
+                    case StImage::ImgScale_Jpeg10:
+                        return "yuv444p10";
+                    case StImage::ImgScale_Full:
+                    default:
+                        return myPlanes[0].getFormat() == StImagePlane::ImgGray16
+                             ? "yuvj444p16"
+                             : "yuvj444p";
+                }
+            } else if(aDelimX == 2 && aDelimY == 2) {
+                switch(myColorScale) {
+                    case StImage::ImgScale_Mpeg:
+                        return myPlanes[0].getFormat() == StImagePlane::ImgGray16
+                             ? "yuv420p16"
+                             : "yuv420p";
+                    case StImage::ImgScale_Mpeg9:
+                    case StImage::ImgScale_Jpeg9:
+                        return "yuv420p9";
+                    case StImage::ImgScale_Mpeg10:
+                    case StImage::ImgScale_Jpeg10:
+                        return "yuv420p10";
+                    case StImage::ImgScale_Full:
+                    default:
+                        return myPlanes[0].getFormat() == StImagePlane::ImgGray16
+                             ? "yuvj420p16"
+                             : "yuvj420p";
+                }
+            } else if(aDelimX == 2 && aDelimY == 1) {
+                switch(myColorScale) {
+                    case StImage::ImgScale_Mpeg:
+                        return myPlanes[0].getFormat() == StImagePlane::ImgGray16
+                             ? "yuv422p16"
+                             : "yuv422p";
+                    case StImage::ImgScale_Mpeg9:
+                    case StImage::ImgScale_Jpeg9:
+                        return "yuv422p9";
+                    case StImage::ImgScale_Mpeg10:
+                    case StImage::ImgScale_Jpeg10:
+                        return "yuv422p10";
+                    case StImage::ImgScale_Full:
+                    default:
+                        return myPlanes[0].getFormat() == StImagePlane::ImgGray16
+                             ? "yuvj422p16"
+                             : "yuvj422p";
+                }
+            } else if(aDelimX == 1 && aDelimY == 2) {
+                return myColorScale == StImage::ImgScale_Mpeg
+                     ? "yuv440p"
+                     : "yuvj440p";
+            } else if(aDelimX == 4 && aDelimY == 1) {
+                return myColorScale == StImage::ImgScale_Mpeg
+                     ? "yuv411p"
+                     : "yuvj411p";
+            } else if(aDelimX == 4 && aDelimY == 4) {
+                return myColorScale == StImage::ImgScale_Mpeg
+                     ? "yuv410p"
+                     : "yuvj410p";
+            }
+            return "yuv_unknown";
+        }
+        case ImgColor_CMYK:
+            return "CMYK";
+        case ImgColor_HSV:
+            return "HSV";
+        case ImgColor_HSL:
+            return "HSL";
+    }
+    return "unknown";
 }
 
 StImage::StImage()

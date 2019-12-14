@@ -128,10 +128,11 @@
 5004=Načítání
 5005=ms
 5006=Poměr stran pixelu
-5007=Barevný model
+5007=Formát pixelu
 5008=(metada nejsou v informaci obsažena)
 5009=(neobsahuje metadata)
 5011=(informace není obsažena v metadatech,\nale byla přidělena podle jména souboru)
+5012=Barevný model
 5100=JPEG komentář
 5101=JPS komentář
 5200=Výrobce kamery

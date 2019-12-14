@@ -1,5 +1,5 @@
 /**
- * Copyright © 2010-2015 Kirill Gavrilov <kirill@sview.ru>
+ * Copyright © 2010-2019 Kirill Gavrilov <kirill@sview.ru>
  *
  * Distributed under the Boost Software License, Version 1.0.
  * See accompanying file license-boost.txt or copy at
@@ -74,6 +74,12 @@ class StImage {
 
     ST_CPPEXPORT static StString formatImgColorModel(ImgColorModel theColorModel);
     ST_LOCAL inline StString formatImgColorModel() const { return formatImgColorModel(myColorModel); }
+
+    /**
+     * Format image pixel format.
+     * @sa stAV::PIX_FMT::getString()
+     */
+    ST_CPPEXPORT const char* formatImgPixelFormat() const;
 
         public: //! @name initializers
 

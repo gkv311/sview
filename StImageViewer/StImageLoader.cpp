@@ -560,27 +560,27 @@ bool StImageLoader::loadImage(const StHandle<StFileNode>& theSource,
         anImgInfo->Info.add(StArgument(tr(INFO_PIXEL_RATIO),
                                        StString(anImageFileL->getPixelRatio())));
     }
-    const StString aModelL = anImageFileL->formatImgColorModel();
+    const StString aFormatL = anImageFileL->formatImgPixelFormat();
     if(!anImageFileR->isNull()) {
         anImgInfo->Info.add(StArgument(tr(INFO_DIMENSIONS),
                                        formatSize(anImageL->getSizeX(), anImageL->getSizeY(),
                                                   theParams->Src1SizeX, theParams->Src1SizeY) + " " + tr(INFO_LEFT) + "\n"
                                      + formatSize(anImageR->getSizeX(), anImageR->getSizeY(),
                                                   theParams->Src2SizeX, theParams->Src2SizeY) + " " + tr(INFO_RIGHT)));
-        const StString aModelR = anImageFileR->formatImgColorModel();
-        if(aModelL == aModelR) {
-            anImgInfo->Info.add(StArgument(tr(INFO_COLOR_MODEL), aModelL));
+        const StString aFormatR = anImageFileR->formatImgPixelFormat();
+        if(aFormatL == aFormatR) {
+            anImgInfo->Info.add(StArgument(tr(INFO_PIXEL_FORMAT), aFormatL));
         } else {
-            anImgInfo->Info.add(StArgument(tr(INFO_COLOR_MODEL),
-                                aModelL + " " + tr(INFO_LEFT) + "\n"
-                              + aModelR + " " + tr(INFO_RIGHT)));
+            anImgInfo->Info.add(StArgument(tr(INFO_PIXEL_FORMAT),
+                                aFormatL + " " + tr(INFO_LEFT) + "\n"
+                              + aFormatR + " " + tr(INFO_RIGHT)));
         }
     } else {
         anImgInfo->Info.add(StArgument(tr(INFO_DIMENSIONS),
                                        formatSize(anImageL->getSizeX(), anImageL->getSizeY(),
                                                   theParams->Src1SizeX, theParams->Src1SizeY)));
-        anImgInfo->Info.add(StArgument(tr(INFO_COLOR_MODEL),
-                                       aModelL));
+        anImgInfo->Info.add(StArgument(tr(INFO_PIXEL_FORMAT),
+                                       aFormatL));
     }
     anImgInfo->Info.add(StArgument(tr(INFO_LOAD_TIME), StString(aLoadTimeMSec) + " " + tr(INFO_TIME_MSEC)));
     myLock.lock();

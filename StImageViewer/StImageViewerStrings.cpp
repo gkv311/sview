@@ -292,6 +292,8 @@ void loadDefaults(StLangMap& theStrings) {
                "msec");
     theStrings(INFO_PIXEL_RATIO,
                "Pixel ratio");
+    theStrings(INFO_PIXEL_FORMAT,
+               "Pixel format");
     theStrings(INFO_COLOR_MODEL,
                "Color model");
     theStrings(INFO_NO_SRCFORMAT,

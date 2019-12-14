@@ -26,9 +26,9 @@ StString StImagePlane::formatImgFormat(ImgFormat theImgFormat) {
         case ImgRGBAF:   return "ImgRGBAF";
         case ImgBGRAF:   return "ImgBGRAF";
         case ImgUV:      return "ImgUV";
-        case ImgUNKNOWN:
-        default:         return "ImgUNKNOWN";
+        case ImgUNKNOWN: return "ImgUNKNOWN";
     }
+    return "unknown";
 }
 
 StImagePlane::StImagePlane()

@@ -265,6 +265,9 @@ namespace stAV {
         // HWAccel formats
         ST_SHARED_CPPEXPORT AVPixelFormat DXVA2_VLD;
 
+        /**
+         * @sa StImage::formatImgPixelFormat()
+         */
         ST_CPPEXPORT StCString getString(const AVPixelFormat theFrmt);
     }
 

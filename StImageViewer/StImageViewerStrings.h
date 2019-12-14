@@ -184,10 +184,11 @@ namespace StImageViewerStrings {
         INFO_LOAD_TIME         = 5004,
         INFO_TIME_MSEC         = 5005,
         INFO_PIXEL_RATIO       = 5006,
-        INFO_COLOR_MODEL       = 5007,
+        INFO_PIXEL_FORMAT      = 5007,
         INFO_NO_SRCFORMAT      = 5008,
         INFO_WRONG_SRCFORMAT   = 5009,
         INFO_NO_SRCFORMAT_EX   = 5011,
+        INFO_COLOR_MODEL       = 5012,
 
         // metadata keys
         METADATA_JPEG_COMMENT     = 5100,
