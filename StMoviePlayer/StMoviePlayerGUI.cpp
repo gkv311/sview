@@ -1496,8 +1496,10 @@ void StMoviePlayerGUI::doOpenFile(const size_t theFileType) {
         case StMovieOpenDialog::Dialog_DoubleMovie:
         default: {
             aDialog->signals.onFileSelected = stSlot(myPlugin, &StMoviePlayer::doOpen1FileFromGui);
+            aDialog->setDisplayExtra(myPlugin->params.ToMixImagesVideos->getValue());
             aDialog->setMimeList(myPlugin->myVideo->getMimeListVideo(),  "Videos", false);
             aDialog->setMimeList(myPlugin->myVideo->getMimeListImages(), "Images", true);
+            aDialog->addHotCheckbox(myPlugin->params.ToMixImagesVideos, myPlugin->params.ToMixImagesVideos->getName());
             break;
         }
     }
@@ -2351,6 +2353,7 @@ void StMoviePlayerGUI::doMobileSettings(const size_t ) {
     }
 
     aParams.add(myLangMap->params.language);
+    aParams.add(myPlugin->params.ToMixImagesVideos);
     aParams.add(myPlugin->params.SlideShowDelay);
     aParams.add(myPlugin->params.IsMobileUI);
 #if defined(_WIN32) || defined(__APPLE__) // implemented only on Windows and macOS

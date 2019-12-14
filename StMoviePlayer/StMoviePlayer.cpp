@@ -152,6 +152,7 @@ void StMoviePlayer::updateStrings() {
     params.ToShowFps->setName(tr(MENU_FPS_METER));
     params.ToShowMenu->setName(stCString("Show main menu"));
     params.ToShowTopbar->setName(stCString("Show top toolbar"));
+    params.ToMixImagesVideos->setName(stCString("Mix images & videos"));
     params.SlideShowDelay->setName(stCString("Slideshow delay"));
     params.IsMobileUI->setName(stCString("Mobile UI"));
     params.IsExclusiveFullScreen->setName(tr(MENU_EXCLUSIVE_FULLSCREEN));
@@ -281,6 +282,8 @@ StMoviePlayer::StMoviePlayer(const StHandle<StResourceManager>& theResMgr,
     params.ToShowFps   = new StBoolParamNamed(false, stCString("toShowFps"));
     params.ToShowMenu  = new StBoolParamNamed(true,  stCString("toShowMenu"));
     params.ToShowTopbar= new StBoolParamNamed(true,  stCString("toShowTopbar"));
+    params.ToMixImagesVideos = new StBoolParamNamed(false,  stCString("toMixImagesVideos"));
+    params.ToMixImagesVideos->signals.onChanged = stSlot(this, &StMoviePlayer::doChangeMixImagesVideos);
     params.SlideShowDelay = new StFloat32Param(4.0f, stCString("slideShowDelay2"));
     params.SlideShowDelay->setMinMaxValues(1.0f, 10.0f);
     params.SlideShowDelay->setDefValue(4.0f);
@@ -354,6 +357,7 @@ StMoviePlayer::StMoviePlayer(const StHandle<StResourceManager>& theResMgr,
     mySettings->loadParam (params.AudioAlHrtf);
     mySettings->loadParam (params.ToShowFps);
     mySettings->loadParam (params.SlideShowDelay);
+    mySettings->loadParam (params.ToMixImagesVideos);
     mySettings->loadParam (params.IsMobileUI);
     mySettings->loadParam (params.IsExclusiveFullScreen);
     mySettings->loadParam (params.IsVSyncOn);
@@ -606,6 +610,7 @@ void StMoviePlayer::saveAllParams() {
         mySettings->saveParam (params.ToForceBFormat);
         mySettings->saveParam (params.ToShowFps);
         mySettings->saveParam (params.SlideShowDelay);
+        mySettings->saveParam (params.ToMixImagesVideos);
         mySettings->saveParam (params.IsMobileUI);
         mySettings->saveParam (params.IsExclusiveFullScreen);
         mySettings->saveParam (params.IsVSyncOn);
@@ -876,6 +881,7 @@ bool StMoviePlayer::init() {
         myVideo->params.SlideShowDelay = params.SlideShowDelay;
         myVideo->setStickPano360(params.ToStickPanorama->getValue());
         myVideo->setForceBFormat(params.ToForceBFormat->getValue());
+        doChangeMixImagesVideos(params.ToMixImagesVideos->getValue());
 
     #ifdef ST_HAVE_MONGOOSE
         doStartWebUI();
@@ -926,6 +932,7 @@ void StMoviePlayer::parseArguments(const StArgumentsMap& theArguments) {
     StArgument anArgBenchmark  = theArguments[params.Benchmark->getKey()];
     StArgument anArgShowMenu   = theArguments[params.ToShowMenu->getKey()];
     StArgument anArgShowTopbar = theArguments[params.ToShowTopbar->getKey()];
+    StArgument anArgMixImages  = theArguments[params.ToMixImagesVideos->getKey()];
 
     StArgument anArgFullscreen = theArguments[params.IsFullscreen->getKey()];
     StArgument anArgMonitor    = theArguments[ST_ARGUMENT_MONITOR];
@@ -990,6 +997,9 @@ void StMoviePlayer::parseArguments(const StArgumentsMap& theArguments) {
     }
     if(anArgShowTopbar.isValid()) {
         params.ToShowTopbar->setValue(!anArgShowTopbar.isValueOff());
+    }
+    if(anArgMixImages.isValid()) {
+        params.ToMixImagesVideos->setValue(!anArgMixImages.isValueOff());
     }
 }
 
@@ -1871,6 +1881,22 @@ void StMoviePlayer::doScaleHiDPI(const bool ) {
         return;
     }
     myToRecreateMenu = true;
+}
+
+void StMoviePlayer::doChangeMixImagesVideos(const bool theToMix) {
+    if(myVideo.isNull()) {
+        return;
+    }
+    if(theToMix) {
+        StArrayList<StString> aMediaExt = myVideo->getMimeListVideo().getExtensionsList();
+        StArrayList<StString> anImgExt  = myVideo->getMimeListImages().getExtensionsList();
+        for(size_t anExtIter = 0; anExtIter < anImgExt.size(); ++anExtIter) {
+            aMediaExt.add(anImgExt.getValue(anExtIter));
+        }
+        myPlayList->setExtensions(aMediaExt);
+    } else {
+        myPlayList->setExtensions(myVideo->getMimeListVideo().getExtensionsList());
+    }
 }
 
 void StMoviePlayer::doLoaded() {

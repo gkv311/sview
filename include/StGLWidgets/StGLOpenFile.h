@@ -46,6 +46,19 @@ class StGLOpenFile : public StGLMessageBox {
                                   const bool theIsExtra = false);
 
     /**
+     * Check/uncheck extra files.
+     */
+    ST_LOCAL void setDisplayExtra(bool theToDisplay) {
+        myToShowExtraFilter->setValue(theToDisplay);
+    }
+
+    /**
+    * Add checkbox.
+    */
+    ST_CPPEXPORT StGLMenuCheckbox* addHotCheckbox(const StHandle<StBoolParam>& theParam,
+                                                  const StString& theName);
+
+    /**
      * Add system drives to folders' list.
      */
     ST_CPPEXPORT void addSystemDrives();

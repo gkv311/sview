@@ -276,24 +276,30 @@ void StGLOpenFile::setMimeList(const StMIMEList& theFilter,
     StGLMenuCheckbox*& aFilterWidget = theIsExtra ? myExtraFilterCheck : myMainFilterCheck;
     if(!theName.isEmpty() && aFilterWidget == NULL) {
         StHandle<StBoolParam>& aFilterParam = theIsExtra ? myToShowExtraFilter : myToShowMainFilter;
-        aFilterWidget = new StGLMenuCheckbox(myHotList, aFilterParam);
-
-        StGLCheckbox* aCheckBox = aFilterWidget->getCheckbox();
-        aCheckBox->setColor(myHotColor);
-        aCheckBox->setCorner(StGLCorner(ST_VCORNER_CENTER, ST_HCORNER_RIGHT));
-        aCheckBox->changeRectPx().moveLeftTo(-aCheckBox->getRectPx().left());
-
-        aFilterWidget->changeMargins().left  = -(myMarginX + myIconSizeX + myMarginX); // TODO weird logic
-        aFilterWidget->setupStyle(StFTFont::Style_Italic);
-        aFilterWidget->setText(theName);
-        aFilterWidget->setupAlignment(StGLTextFormatter::ST_ALIGN_X_RIGHT, StGLTextFormatter::ST_ALIGN_Y_CENTER);
-        aFilterWidget->setTextColor(myHotColor);
-        aFilterWidget->setHilightColor(myHighlightColor);
+        aFilterWidget = addHotCheckbox(aFilterParam, theName);
     }
     if(aFilterWidget != NULL) {
         aFilterWidget->setText(theName);
     }
     initExtensions();
+}
+
+StGLMenuCheckbox* StGLOpenFile::addHotCheckbox(const StHandle<StBoolParam>& theParam,
+                                               const StString& theName) {
+    StGLMenuCheckbox* aFilterWidget = new StGLMenuCheckbox(myHotList, theParam);
+
+    StGLCheckbox* aCheckBox = aFilterWidget->getCheckbox();
+    aCheckBox->setColor(myHotColor);
+    aCheckBox->setCorner(StGLCorner(ST_VCORNER_CENTER, ST_HCORNER_RIGHT));
+    aCheckBox->changeRectPx().moveLeftTo(-aCheckBox->getRectPx().left());
+
+    aFilterWidget->changeMargins().left  = -(myMarginX + myIconSizeX + myMarginX); // TODO weird logic
+    aFilterWidget->setupStyle(StFTFont::Style_Italic);
+    aFilterWidget->setText(theName);
+    aFilterWidget->setupAlignment(StGLTextFormatter::ST_ALIGN_X_RIGHT, StGLTextFormatter::ST_ALIGN_Y_CENTER);
+    aFilterWidget->setTextColor(myHotColor);
+    aFilterWidget->setHilightColor(myHighlightColor);
+    return aFilterWidget;
 }
 
 void StGLOpenFile::initExtensions() {

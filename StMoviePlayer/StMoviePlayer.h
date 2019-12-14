@@ -211,6 +211,7 @@ class StMoviePlayer : public StApplication {
         StHandle<StBoolParamNamed>    ToShowFps;         //!< display FPS meter
         StHandle<StBoolParamNamed>    ToShowMenu;        //!< show main menu
         StHandle<StBoolParamNamed>    ToShowTopbar;      //!< show topbar
+        StHandle<StBoolParamNamed>    ToMixImagesVideos; //!< mix videos and images
         StHandle<StFloat32Param>      SlideShowDelay;    //!< slideshow delay
         StHandle<StBoolParamNamed>    IsMobileUI;        //!< display mobile interface (user option)
         StHandle<StBoolParam>         IsMobileUISwitch;  //!< display mobile interface (actual value)
@@ -290,6 +291,7 @@ class StMoviePlayer : public StApplication {
     ST_LOCAL void doScaleGui(const int32_t );
     ST_LOCAL void doChangeMobileUI(const bool );
     ST_LOCAL void doScaleHiDPI(const bool );
+    ST_LOCAL void doChangeMixImagesVideos(const bool );
     ST_LOCAL void doSwitchVSync(const bool theValue);
     ST_LOCAL void doSwitchAudioDevice(const int32_t theDevId);
     ST_LOCAL void doSwitchAudioAlHrtf(const int32_t theValue);
