@@ -152,6 +152,7 @@ void StMoviePlayer::updateStrings() {
     params.ToShowFps->setName(tr(MENU_FPS_METER));
     params.ToShowMenu->setName(stCString("Show main menu"));
     params.ToShowTopbar->setName(stCString("Show top toolbar"));
+    params.SlideShowDelay->setName(stCString("Slideshow delay"));
     params.IsMobileUI->setName(stCString("Mobile UI"));
     params.IsExclusiveFullScreen->setName(tr(MENU_EXCLUSIVE_FULLSCREEN));
     params.IsVSyncOn->setName(tr(MENU_FPS_VSYNC));
@@ -280,6 +281,12 @@ StMoviePlayer::StMoviePlayer(const StHandle<StResourceManager>& theResMgr,
     params.ToShowFps   = new StBoolParamNamed(false, stCString("toShowFps"));
     params.ToShowMenu  = new StBoolParamNamed(true,  stCString("toShowMenu"));
     params.ToShowTopbar= new StBoolParamNamed(true,  stCString("toShowTopbar"));
+    params.SlideShowDelay = new StFloat32Param(4.0f, stCString("slideShowDelay2"));
+    params.SlideShowDelay->setMinMaxValues(1.0f, 10.0f);
+    params.SlideShowDelay->setDefValue(4.0f);
+    params.SlideShowDelay->setStep(1.0f);
+    params.SlideShowDelay->setTolerance(0.1f);
+    params.SlideShowDelay->setFormat(stCString("%01.1f s"));
     params.IsMobileUI  = new StBoolParamNamed(StWindow::isMobile(), stCString("isMobileUI"));
     params.IsMobileUI->signals.onChanged = stSlot(this, &StMoviePlayer::doChangeMobileUI);
     params.IsMobileUISwitch = new StBoolParam(params.IsMobileUI->getValue());
@@ -346,6 +353,7 @@ StMoviePlayer::StMoviePlayer(const StHandle<StResourceManager>& theResMgr,
     mySettings->loadParam (params.ToForceBFormat);
     mySettings->loadParam (params.AudioAlHrtf);
     mySettings->loadParam (params.ToShowFps);
+    mySettings->loadParam (params.SlideShowDelay);
     mySettings->loadParam (params.IsMobileUI);
     mySettings->loadParam (params.IsExclusiveFullScreen);
     mySettings->loadParam (params.IsVSyncOn);
@@ -597,6 +605,7 @@ void StMoviePlayer::saveAllParams() {
         mySettings->saveParam (params.ToTrackHeadAudio);
         mySettings->saveParam (params.ToForceBFormat);
         mySettings->saveParam (params.ToShowFps);
+        mySettings->saveParam (params.SlideShowDelay);
         mySettings->saveParam (params.IsMobileUI);
         mySettings->saveParam (params.IsExclusiveFullScreen);
         mySettings->saveParam (params.IsVSyncOn);
@@ -864,6 +873,7 @@ bool StMoviePlayer::init() {
         myVideo->params.UseOpenJpeg  = params.UseOpenJpeg;
         myVideo->params.ToSearchSubs = params.ToSearchSubs;
         myVideo->params.ToTrackHeadAudio = params.ToTrackHeadAudio;
+        myVideo->params.SlideShowDelay = params.SlideShowDelay;
         myVideo->setStickPano360(params.ToStickPanorama->getValue());
         myVideo->setForceBFormat(params.ToForceBFormat->getValue());
 

@@ -2351,6 +2351,7 @@ void StMoviePlayerGUI::doMobileSettings(const size_t ) {
     }
 
     aParams.add(myLangMap->params.language);
+    aParams.add(myPlugin->params.SlideShowDelay);
     aParams.add(myPlugin->params.IsMobileUI);
 #if defined(_WIN32) || defined(__APPLE__) // implemented only on Windows and macOS
     aParams.add(myPlugin->params.IsExclusiveFullScreen);

@@ -49,10 +49,11 @@ class StTimer {
      * Just start the timer again.
      */
     void resume() {
-        stMemSet(&myCounterStart, 0, sizeof(myCounterStart));
-        myIsPaused = false;
-
-        fillCounter(myCounterStart);
+        if(myIsPaused) {
+            stMemSet(&myCounterStart, 0, sizeof(myCounterStart));
+            myIsPaused = false;
+            fillCounter(myCounterStart);
+        }
     }
 
     /**
@@ -75,10 +76,12 @@ class StTimer {
      * Pause the timer (freeze current timestamp).
      */
     void pause() {
-        // increment our timer value
-        myTimeInMicroSec += getElapsedTimeFromLastStartInMicroSec();
-        // set timer paused flag
-        myIsPaused = true;
+        if(!myIsPaused) {
+            // increment our timer value
+            myTimeInMicroSec += getElapsedTimeFromLastStartInMicroSec();
+            // set timer paused flag
+            myIsPaused = true;
+        }
     }
 
     /**

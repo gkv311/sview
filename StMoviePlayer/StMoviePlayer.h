@@ -211,6 +211,7 @@ class StMoviePlayer : public StApplication {
         StHandle<StBoolParamNamed>    ToShowFps;         //!< display FPS meter
         StHandle<StBoolParamNamed>    ToShowMenu;        //!< show main menu
         StHandle<StBoolParamNamed>    ToShowTopbar;      //!< show topbar
+        StHandle<StFloat32Param>      SlideShowDelay;    //!< slideshow delay
         StHandle<StBoolParamNamed>    IsMobileUI;        //!< display mobile interface (user option)
         StHandle<StBoolParam>         IsMobileUISwitch;  //!< display mobile interface (actual value)
         StHandle<StBoolParamNamed>    IsExclusiveFullScreen; //!< exclusive fullscreen mode

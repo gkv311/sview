@@ -1182,6 +1182,7 @@ void StVideo::packetsLoop() {
     #endif
 
         // All packets sent
+        bool isPendingPlayNext = false;
         if(anEmptyQueues == myPlayCtxList.size()) {
             bool areFlushed = false;
             // It seems FFmpeg fail to seek the stream after all packets were read...
@@ -1192,26 +1193,55 @@ void StVideo::packetsLoop() {
                || !mySubtitles->isEmpty()   || !mySubtitles->isInDowntime()) {
                 StThread::sleep(10);
                 if(!areFlushed && (popPlayEvent(aSeekPts, toSeekBack) == ST_PLAYEVENT_NEXT)) {
+                    isPendingPlayNext = true;
                     doFlush();
                     if(myAudio->isInitialized()) {
                         myAudio->pushPlayEvent(ST_PLAYEVENT_SEEK, 0.0);
                     }
                     areFlushed = true;
+                    isPendingPlayNext = true;
                 }
             }
             // If video is played - always wait until audio played
-            if(myVideoMaster->isInitialized() && myAudio->isInitialized()) {
-                while(myAudio->stalIsAudioPlaying()) {
-                    StThread::sleep(10);
-                    if(!areFlushed && (popPlayEvent(aSeekPts, toSeekBack) == ST_PLAYEVENT_NEXT)) {
-                        doFlush();
-                        if(myAudio->isInitialized()) {
-                            myAudio->pushPlayEvent(ST_PLAYEVENT_SEEK, 0.0);
+            if(myVideoMaster->isInitialized()) {
+                if(myAudio->isInitialized()) {
+                    while(myAudio->stalIsAudioPlaying()) {
+                        StThread::sleep(10);
+                        if(!areFlushed && (popPlayEvent(aSeekPts, toSeekBack) == ST_PLAYEVENT_NEXT)) {
+                            isPendingPlayNext = true;
+                            doFlush();
+                            if(myAudio->isInitialized()) {
+                                myAudio->pushPlayEvent(ST_PLAYEVENT_SEEK, 0.0);
+                            }
+                            areFlushed = true;
+                            isPendingPlayNext = true;
+                            break;
                         }
-                        areFlushed = true;
+                    }
+                } else if(myDuration < (double )params.SlideShowDelay->getValue()) {
+                    StTimer aDelayTimer;
+                    aDelayTimer.restart(myDuration * 1000.0);
+                    while(aDelayTimer.getElapsedTimeInSec() < (double )params.SlideShowDelay->getValue()) {
+                        StThread::sleep(10);
+                        if((popPlayEvent(aSeekPts, toSeekBack) == ST_PLAYEVENT_NEXT)) {
+                            isPendingPlayNext = true;
+                            break;
+                        }
+                        const bool isPaused = !isPlaying();
+                        if(isPaused) {
+                            aDelayTimer.pause();
+                        } else {
+                            aDelayTimer.resume();
+                        }
                     }
                 }
             }
+            if(isPendingPlayNext) {
+                // resend event after it was pop out
+                pushPlayEvent(ST_PLAYEVENT_NEXT);
+                break;
+            }
+
             // end when any one in format context finished
             myCurrParams->Timestamp = 0.0f;
             break;
@@ -1224,7 +1254,7 @@ void StVideo::packetsLoop() {
     if(myAudio->isInitialized())       myAudio->pushEnd();
     if(mySubtitles->isInitialized())   mySubtitles->pushEnd();
 
-    // what for queues receive 'end-packet'
+    // wait for queues receive 'end-packet'
     while(!myVideoMaster->isEmpty() || !myVideoMaster->isInDowntime()
        || !myAudio->isEmpty()       || !myAudio->isInDowntime()
        || !myVideoSlave->isEmpty()  || !myVideoSlave->isInDowntime()

@@ -261,6 +261,7 @@ class StVideo {
         StHandle<StBoolParam>         UseOpenJpeg;     //!< use OpenJPEG (libopenjpeg) instead of built-in jpeg2000 decoder
         StHandle<StBoolParam>         ToSearchSubs;    //!< automatically search for additional subtitles/audio track files nearby video file
         StHandle<StBoolParamNamed>    ToTrackHeadAudio;//!< enable/disable head-tracking for audio listener
+        StHandle<StFloat32Param>      SlideShowDelay;  //!< slideshow delay
         StHandle<StParamActiveStream> activeAudio;     //!< active Audio stream
         StHandle<StParamActiveStream> activeSubtitles; //!< active Subtitles stream
 
@@ -365,6 +366,9 @@ class StVideo {
      */
     ST_LOCAL void close();
 
+    /**
+     * Dispatch packets from format contexts to decoding queues.
+     */
     ST_LOCAL void packetsLoop();
 
     /**
