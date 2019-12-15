@@ -25,6 +25,7 @@ class StAVPacket {
         DATA_PACKET,
         FLUSH_PACKET,
         START_PACKET,
+        LAST_PACKET,
         END_PACKET,
         QUIT_PACKET,
     };

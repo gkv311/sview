@@ -1116,7 +1116,7 @@ void StAudioQueue::decodePacket(const StHandle<StAVPacket>& thePacket,
         #if(LIBAVCODEC_VERSION_INT >= AV_VERSION_INT(57, 106, 102))
             (void )aDataSize;
             if(toSendPacket) {
-                const int aRes = avcodec_send_packet(myCodecCtx, thePacket->getAVpkt());
+                const int aRes = avcodec_send_packet(myCodecCtx, thePacket->getType() == StAVPacket::DATA_PACKET ? thePacket->getAVpkt() : NULL);
                 if(aRes < 0 && aRes != AVERROR_EOF) {
                     anAudioPktSize = 0;
                     break;
@@ -1284,6 +1284,16 @@ void StAudioQueue::decodeLoop() {
                 playTimerStart(myPtsStartStream - myPtsStartBase);
                 aPts = 0.0;
                 continue;
+            }
+            case StAVPacket::DATA_PACKET: {
+                break;
+            }
+            case StAVPacket::LAST_PACKET: {
+            #if(LIBAVCODEC_VERSION_INT >= AV_VERSION_INT(57, 106, 102))
+                break; // redirect NULL packet to avcodec_send_packet()
+            #else
+                continue;
+            #endif
             }
             case StAVPacket::END_PACKET: {
                 pushPlayEvent(ST_PLAYEVENT_NONE);

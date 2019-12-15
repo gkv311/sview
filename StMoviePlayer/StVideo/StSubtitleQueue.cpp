@@ -125,6 +125,12 @@ void StSubtitleQueue::decodeLoop() {
                 myOutQueue->clear();
                 continue;
             }
+            case StAVPacket::DATA_PACKET: {
+                break;
+            }
+            case StAVPacket::LAST_PACKET: {
+                continue; // ignore as avcodec_send_packet() is not used
+            }
             case StAVPacket::END_PACKET: {
                 if(toQuit) {
                     return;

@@ -786,7 +786,18 @@ void StVideoQueue::decodeLoop() {
                 myHasDataState.reset();
                 isStarted = true;
                 aPrevPts = 0.0;
+                myWasFlushed = true; // force displaying the first frame
                 continue;
+            }
+            case StAVPacket::DATA_PACKET: {
+                break;
+            }
+            case StAVPacket::LAST_PACKET: {
+            #if(LIBAVCODEC_VERSION_INT >= AV_VERSION_INT(57, 106, 102))
+                break; // redirect NULL packet to avcodec_send_packet()break;
+            #else
+                continue;
+            #endif
             }
             case StAVPacket::END_PACKET: {
                 // TODO at the end of the stream it might be needed calling
@@ -847,7 +858,7 @@ bool StVideoQueue::decodeFrame(const StHandle<StAVPacket>& thePacket,
 #if(LIBAVCODEC_VERSION_INT >= AV_VERSION_INT(57, 106, 102))
     if(theToSendPacket) {
         theToSendPacket = false;
-        const int aRes = avcodec_send_packet(myCodecCtx, thePacket->getAVpkt());
+        const int aRes = avcodec_send_packet(myCodecCtx, thePacket->getType() == StAVPacket::DATA_PACKET ? thePacket->getAVpkt() : NULL);
         if(aRes == AVERROR(EAGAIN)) {
             // special case used by some hardware decoders - new packet cannot be sent until decoded frame is retrieved
             theToSendPacket = true;

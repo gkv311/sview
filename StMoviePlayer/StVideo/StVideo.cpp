@@ -925,6 +925,7 @@ void StVideo::packetsLoop() {
 
     StArrayList<StAVPacket> anAVPackets(myCtxList.size());
     StArrayList<bool> aQueueIsFull(myCtxList.size());
+    StArrayList<bool> aQueueIsEmpty(myCtxList.size());
     myPlayCtxList.clear();
     size_t anEmptyQueues = 0;
     size_t aCtxId = 0;
@@ -940,6 +941,7 @@ void StVideo::packetsLoop() {
         myPlayCtxList.add(aFormatCtx);
         anAVPackets.add(StAVPacket(myCurrParams));
         aQueueIsFull.add(false);
+        aQueueIsEmpty.add(false);
     }
 
     // reset target FPS
@@ -956,6 +958,23 @@ void StVideo::packetsLoop() {
                 // read next packet
                 if(av_read_frame(aFormatCtx, aPacket.getAVpkt()) < 0) {
                     ++anEmptyQueues;
+                    if(!aQueueIsEmpty[aCtxId]) {
+                        aQueueIsEmpty[aCtxId] = true;
+                        // force decoding of last frame
+                        const StAVPacket aDummyLastPacket(myCurrParams, StAVPacket::LAST_PACKET);
+                        if(myVideoMaster->isInContext(aFormatCtx)) {
+                            myVideoMaster->push(aDummyLastPacket);
+                        }
+                        if(myVideoSlave->isInContext(aFormatCtx)) {
+                            myVideoSlave->push(aDummyLastPacket);
+                        }
+                        if(myAudio->isInContext(aFormatCtx)) {
+                            myAudio->push(aDummyLastPacket);
+                        }
+                        if(mySubtitles->isInContext(aFormatCtx)) {
+                            mySubtitles->push(aDummyLastPacket);
+                        }
+                    }
                     continue;
                 }
             }
