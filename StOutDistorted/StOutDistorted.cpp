@@ -217,7 +217,7 @@ void StOutDistorted::updateStrings() {
 void StOutDistorted::updateAbout() {
     myAbout = myAboutTitle + '\n' + myAboutVerString + " " + StVersionInfo::getSDKVersionString() + "\n \n"
             + (!myAboutVrDevice.isEmpty() ? ("Connected hardware: " + myAboutVrDevice + "\n \n") : "")
-            + myAboutDescr.format("2013-2019", "kirill@sview.ru", "www.sview.ru");
+            + myAboutDescr.format("2013-2020", "kirill@sview.ru", "www.sview.ru");
 #ifdef ST_HAVE_OPENVR
     myAbout = myAbout + "\n \n"
             + "This software uses OpenVR library:\n"

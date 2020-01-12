@@ -426,7 +426,7 @@ void StCADViewerGUI::doAboutProgram(const size_t ) {
     const StGLVec3 THE_WHITE(1.0f, 1.0f, 1.0f);
     const StString anAbout = tr(ABOUT_DPLUGIN_NAME) + '\n'
                            + tr(ABOUT_VERSION) + " " + StVersionInfo::getSDKVersionString()
-                           + "\n \n" + tr(ABOUT_DESCRIPTION).format("2011-2019", "kirill@sview.ru", "www.sview.ru");
+                           + "\n \n" + tr(ABOUT_DESCRIPTION).format("2011-2020", "kirill@sview.ru", "www.sview.ru");
 
     StArgumentsMap anInfo;
     anInfo.add(StDictEntry("CPU cores", StString(StThread::countLogicalProcessors()) + StString(" logical processor(s)")));

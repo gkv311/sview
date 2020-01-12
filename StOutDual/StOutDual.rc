@@ -15,7 +15,7 @@ BEGIN
     BEGIN
       VALUE "FileDescription", "Stereo Dual Renderer library\000"
       VALUE "FileVersion",     SVIEW_SDK_VER_STRING "\000"
-      VALUE "LegalCopyright",  "\251 2007-2019 Kirill Gavrilov\000"
+      VALUE "LegalCopyright",  "\251 2007-2020 Kirill Gavrilov and sView developers\000"
       VALUE "ProductName",     "StOutDual\000"
       VALUE "ProductVersion",  SVIEW_SDK_VER_STRING "\000"
       VALUE "OfficialSite",    "www.sview.ru\000"

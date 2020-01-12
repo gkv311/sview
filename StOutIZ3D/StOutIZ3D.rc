@@ -15,7 +15,7 @@ BEGIN
     BEGIN
       VALUE "FileDescription", "IZ3D Renderer library\000"
       VALUE "FileVersion",     SVIEW_SDK_VER_STRING "\000"
-      VALUE "LegalCopyright",  "\251 2009-2019 Kirill Gavrilov. Copyright \251 iZ3D LLC. All rights for codes for iZ3D conversion reserved for iZ3D LLC 2007-2009\000"
+      VALUE "LegalCopyright",  "\251 2009-2020 Kirill Gavrilov. Copyright \251 iZ3D LLC. All rights for codes for iZ3D conversion reserved for iZ3D LLC 2007-2009\000"
       VALUE "ProductName",     "StOutIZ3D\000"
       VALUE "ProductVersion",  SVIEW_SDK_VER_STRING "\000"
       VALUE "OfficialSite",    "www.sview.ru\000"
