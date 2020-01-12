@@ -188,6 +188,7 @@ class StMoviePlayer : public StApplication {
         StHandle<StFloat32Param>      SubtitlesParallax; //!< subtitles parallax
         StHandle<StBoolParamNamed>    ToSearchSubs;      //!< automatically search for additional subtitles/audio track files nearby video file
         StHandle<StEnumParam>         SubtitlesParser;   //!< subtitles parser
+        StHandle<StBoolParamNamed>    SubtitlesApplyStereo; //!<  apply stereoscopic format of video to image subtitles
         StHandle<StALDeviceParam>     AudioAlDevice;     //!< active OpenAL device
         StHandle<StEnumParam>         AudioAlHrtf;       //!< OpenAL HRTF flag
         StHandle<StFloat32Param>      AudioGain;         //!< volume factor

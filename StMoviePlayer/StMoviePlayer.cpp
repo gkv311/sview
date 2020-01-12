@@ -119,6 +119,7 @@ void StMoviePlayer::updateStrings() {
     params.SubtitlesParser->setName(tr(MENU_SUBTITLES_PARSER));
     params.SubtitlesParser->defineOption(0, tr(MENU_SUBTITLES_PLAIN_TEXT));
     params.SubtitlesParser->defineOption(1, tr(MENU_SUBTITLES_LITE_HTML));
+    params.SubtitlesApplyStereo->setName(tr(MENU_SUBTITLES_STEREO));
     params.AudioAlHrtf->setName(stCString("Audio HRTF mixing"));
     params.AudioAlHrtf->defineOption(0, stCString("Auto"));
     params.AudioAlHrtf->defineOption(1, stCString("Forced ON"));
@@ -245,6 +246,7 @@ StMoviePlayer::StMoviePlayer(const StHandle<StResourceManager>& theResMgr,
     params.SubtitlesParallax->setTolerance(0.1f);
     params.ToSearchSubs = new StBoolParamNamed(true, stCString("toSearchSubs"));
     params.SubtitlesParser = new StEnumParam(1, stCString("subsParser"));
+    params.SubtitlesApplyStereo = new StBoolParamNamed(true, stCString("subsApplyStereo"));
     params.AudioAlDevice = new StALDeviceParam();
     params.AudioAlHrtf   = new StEnumParam(0, stCString("alHrtfRequest"));
     params.AudioGain = new StFloat32Param( 0.0f, // sound is unattenuated
@@ -348,6 +350,7 @@ StMoviePlayer::StMoviePlayer(const StHandle<StResourceManager>& theResMgr,
     mySettings->loadParam (params.SubtitlesSize);
     mySettings->loadParam (params.SubtitlesParallax);
     mySettings->loadParam (params.SubtitlesParser);
+    mySettings->loadParam (params.SubtitlesApplyStereo);
     mySettings->loadParam (params.ToSearchSubs);
 
     myToCheckPoorOrient = !mySettings->loadParam(params.ToTrackHead);
@@ -591,6 +594,7 @@ void StMoviePlayer::saveAllParams() {
         mySettings->saveParam (params.SubtitlesSize);
         mySettings->saveParam (params.SubtitlesParallax);
         mySettings->saveParam (params.SubtitlesParser);
+        mySettings->saveParam (params.SubtitlesApplyStereo);
         mySettings->saveParam (params.ToSearchSubs);
         mySettings->saveParam (params.TargetFps);
         mySettings->saveString(params.AudioAlDevice->getKey(), params.AudioAlDevice->getUtfTitle());

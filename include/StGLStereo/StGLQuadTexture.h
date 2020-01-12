@@ -52,10 +52,21 @@ class StGLFrameTexture : public StGLTexture {
         myDisplayRatio = theValue;
     }
 
+    /**
+     * Returns Pixel Aspect Ratio.
+     */
+    ST_LOCAL GLfloat getPixelRatio() const { return myPAR; }
+
+    /**
+     * Sets Pixel Aspect Ratio.
+     */
+    ST_LOCAL void setPixelRatio(const GLfloat thePAR) { myPAR = thePAR; }
+
         private:
 
     StGLVec2 myDataSize;     //!< data size in the texture (x()=right and y()=bottom)
-    GLfloat  myDisplayRatio; //!< display aspect ratio
+    float    myDisplayRatio; //!< display aspect ratio
+    float    myPAR;          //!< pixel aspect ratio
 
 };
 

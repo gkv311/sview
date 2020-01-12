@@ -706,6 +706,7 @@ static void setupDataRectangle(const StImagePlane& theImagePlane,
     }
     theTextureFrame.setDataSize(aDataSize);
     theTextureFrame.setDisplayRatio((thePixelRatio * aSizeXFloat) / aSizeYFloat);
+    theTextureFrame.setPixelRatio(thePixelRatio);
 }
 
 void StGLTextureData::setupAttributes(StGLFrameTextures& stFrameTextures, const StImage& theImage) {

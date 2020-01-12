@@ -1,6 +1,6 @@
 /**
  * StGLWidgets, small C++ toolkit for writing GUI using OpenGL.
- * Copyright © 2010-2015 Kirill Gavrilov <kirill@sview.ru>
+ * Copyright © 2010-2020 Kirill Gavrilov <kirill@sview.ru>
  *
  * Distributed under the Boost Software License, Version 1.0.
  * See accompanying file license-boost.txt or copy at
@@ -19,6 +19,8 @@
 // dummy
 template<>
 inline void StArray<StHandle <StSubItem> >::sort() {}
+
+class StGLImageRegion;
 
 /**
  * Subtitles widget.
@@ -61,14 +63,17 @@ class StGLSubtitles : public StGLTextArea {
 
         public:
 
-    ST_CPPEXPORT StGLSubtitles(StGLWidget*                     theParent,
+    /**
+     * Main constructor.
+     */
+    ST_CPPEXPORT StGLSubtitles(StGLImageRegion* theParent,
                                const StHandle<StSubQueue>&     theSubQueue,
                                const StHandle<StInt32Param>&   thePlace,
-                               const StHandle<StFloat32Param>& theTopDY,
-                               const StHandle<StFloat32Param>& theBottomDY,
-                               const StHandle<StFloat32Param>& theFontSize,
-                               const StHandle<StFloat32Param>& theParallax,
-                               const StHandle<StEnumParam>&    theParser);
+                               const StHandle<StFloat32Param>& theFontSize);
+
+    /**
+     * Destructor.
+     */
     ST_CPPEXPORT virtual ~StGLSubtitles();
     ST_CPPEXPORT virtual bool stglInit() ST_ATTR_OVERRIDE;
     ST_CPPEXPORT virtual void stglUpdate(const StPointD_t& thePointZo,
@@ -86,14 +91,22 @@ class StGLSubtitles : public StGLTextArea {
      */
     ST_CPPEXPORT void setPTS(const double thePTS);
 
+        public: //! @name Properties
+
+    struct {
+
+        StHandle<StInt32Param>     Place;         //!< placement
+        StHandle<StFloat32Param>   TopDY;         //!< displacement
+        StHandle<StFloat32Param>   BottomDY;      //!< displacement
+        StHandle<StFloat32Param>   FontSize;      //!< font size parameter
+        StHandle<StFloat32Param>   Parallax;      //!< text parallax
+        StHandle<StEnumParam>      Parser;        //!< text parser option
+        StHandle<StBoolParamNamed> ToApplyStereo; //!< apply stereoscopic format of video to image subtitles
+
+    } params;
+
         private:
 
-    StHandle<StInt32Param>   myPlace;     //!< placement
-    StHandle<StFloat32Param> myTopDY;     //!< displacement
-    StHandle<StFloat32Param> myBottomDY;  //!< displacement
-    StHandle<StFloat32Param> myFontSize;  //!< font size parameter
-    StHandle<StFloat32Param> myParallax;  //!< text parallax
-    StHandle<StEnumParam>    myParser;    //!< text parser option
     StGLTexture              myTexture;   //!< texture for image-based subtitles
     StGLVertexBuffer         myVertBuf;   //!< vertex buffer for image-based subtitles
     StGLVertexBuffer         myTCrdBuf;   //!< texture coordinates buffer for image-based subtitles

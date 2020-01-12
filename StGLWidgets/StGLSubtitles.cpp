@@ -1,6 +1,6 @@
 /**
  * StGLWidgets, small C++ toolkit for writing GUI using OpenGL.
- * Copyright © 2010-2015 Kirill Gavrilov <kirill@sview.ru>
+ * Copyright © 2010-2020 Kirill Gavrilov <kirill@sview.ru>
  *
  * Distributed under the Boost Software License, Version 1.0.
  * See accompanying file license-boost.txt or copy at
@@ -11,10 +11,12 @@
 
 #include <StGLCore/StGLCore20.h>
 #include <StGL/StGLProgram.h>
+#include <StGLWidgets/StGLImageRegion.h>
 #include <StGLWidgets/StGLRootWidget.h>
 
 namespace {
     static const size_t SHARE_IMAGE_PROGRAM_ID = StGLRootWidget::generateShareId();
+    static StGLVCorner parseCorner(int theVal) { return (StGLVCorner )theVal; }
 }
 
 class StGLSubtitles::StImgProgram : public StGLProgram {
@@ -142,31 +144,25 @@ void StGLSubtitles::StSubShowItems::add(const StHandle<StSubItem>& theItem) {
     StArrayList<StHandle <StSubItem> >::add(theItem);
 }
 
-inline StGLVCorner parseCorner(int theVal) {
-    return (StGLVCorner )theVal;
-}
-
-StGLSubtitles::StGLSubtitles(StGLWidget*                     theParent,
+StGLSubtitles::StGLSubtitles(StGLImageRegion* theParent,
                              const StHandle<StSubQueue>&     theSubQueue,
                              const StHandle<StInt32Param>&   thePlace,
-                             const StHandle<StFloat32Param>& theTopDY,
-                             const StHandle<StFloat32Param>& theBottomDY,
-                             const StHandle<StFloat32Param>& theFontSize,
-                             const StHandle<StFloat32Param>& theParallax,
-                             const StHandle<StEnumParam>&    theParser)
+                             const StHandle<StFloat32Param>& theFontSize)
 : StGLTextArea(theParent,
                0, 0,
                StGLCorner(parseCorner(thePlace->getValue()), ST_HCORNER_CENTER),
                theParent->getRoot()->scale(800), theParent->getRoot()->scale(160)),
-  myPlace(thePlace),
-  myTopDY(theTopDY),
-  myBottomDY(theBottomDY),
-  myFontSize(theFontSize),
-  myParallax(theParallax),
-  myParser(theParser),
   myQueue(theSubQueue),
   myPTS(0.0),
   myImgProgram(getRoot()->getShare(SHARE_IMAGE_PROGRAM_ID)) {
+    params.Place    = thePlace;
+    params.FontSize = theFontSize;
+    params.TopDY    = new StFloat32Param(100.0f);
+    params.BottomDY = new StFloat32Param(100.0f);
+    params.Parallax = new StFloat32Param(0.0f);
+    params.Parser   = new StEnumParam(1, stCString("subsParser"));
+    params.ToApplyStereo = new StBoolParamNamed(true, stCString("subsApplyStereo"));
+
     if(myQueue.isNull()) {
         myQueue = new StSubQueue();
     }
@@ -180,7 +176,7 @@ StGLSubtitles::StGLSubtitles(StGLWidget*                     theParent,
 
     StHandle<StGLFont> aFontNew = new StGLFont();
     StHandle<StFTLibrary> aLib = getRoot()->getFontManager()->getLibraty();
-    const FontSize     aSize       = (FontSize )(int )myFontSize->getValue();
+    const FontSize     aSize       = (FontSize )(int )params.FontSize->getValue();
     const unsigned int aResolution = getRoot()->getFontManager()->getResolution();
     for(size_t anIter = 0; anIter < StFTFont::SubsetsNB; ++anIter) {
         StHandle<StGLFontEntry>& aFontGlSrc = myFont->changeFont((StFTFont::Subset )anIter);
@@ -211,15 +207,10 @@ StGLSubtitles::~StGLSubtitles() {
 bool StGLSubtitles::stglInit() {
     if(!myVertBuf.isValid()) {
         StArray<StGLVec2> aDummyVert(4);
-        StArray<StGLVec2> aTexCoords(4);
-        aTexCoords[0] = StGLVec2(1.0f, 0.0f);
-        aTexCoords[1] = StGLVec2(1.0f, 1.0f);
-        aTexCoords[2] = StGLVec2(0.0f, 0.0f);
-        aTexCoords[3] = StGLVec2(0.0f, 1.0f);
 
         StGLContext& aCtx = getContext();
         myVertBuf.init(aCtx, aDummyVert);
-        myTCrdBuf.init(aCtx, aTexCoords);
+        myTCrdBuf.init(aCtx, aDummyVert);
 
         if(myImgProgram.isNull()) {
             myImgProgram.create(getRoot()->getContextHandle(), new StImgProgram());
@@ -237,12 +228,12 @@ void StGLSubtitles::stglUpdate(const StPointD_t& ,
         myShowItems.add(aNewSubItem);
     }
 
-    const StGLVCorner aCorner = parseCorner(myPlace->getValue());
+    const StGLVCorner aCorner = parseCorner(params.Place->getValue());
     bool toResize = myCorner.v != aCorner;
     myCorner.v = aCorner;
     switch(myCorner.v) {
         case ST_VCORNER_TOP: {
-            const int aDisp = myRoot->scale((int )myTopDY->getValue()) + myRoot->getRootMargins().top;
+            const int aDisp = myRoot->scale((int )params.TopDY->getValue()) + myRoot->getRootMargins().top;
             if(getRectPx().top() != aDisp) {
                 toResize = true;
                 changeRectPx().moveTopTo(aDisp);
@@ -261,7 +252,7 @@ void StGLSubtitles::stglUpdate(const StPointD_t& ,
             break;
         }
         case ST_VCORNER_BOTTOM: {
-            const int aDisp = -myRoot->scale((int )myBottomDY->getValue()) - myRoot->getRootMargins().bottom;
+            const int aDisp = -myRoot->scale((int )params.BottomDY->getValue()) - myRoot->getRootMargins().bottom;
             if(getRectPx().top() != aDisp) {
                 toResize = true;
                 changeRectPx().moveTopTo(aDisp);
@@ -292,7 +283,7 @@ void StGLSubtitles::stglUpdate(const StPointD_t& ,
         ST_DEBUG_LOG("(" + myPTS + ") myShowItems.myText= '" + myShowItems.myText + "'\n" + aLog);*/
     }
 
-    const FontSize aNewSize = (FontSize )(int )myFontSize->getValue();
+    const FontSize aNewSize = (FontSize )(int )params.FontSize->getValue();
     if(!myText.isEmpty()
     && aNewSize != mySize) {
         mySize = aNewSize;
@@ -308,8 +299,8 @@ void StGLSubtitles::stglDraw(unsigned int theView) {
     }
 
     StGLContext& aCtx = getContext();
-    if(myFormatter.getParser() != (StGLTextFormatter::Parser )myParser->getValue()) {
-        myFormatter.setupParser((StGLTextFormatter::Parser )myParser->getValue());
+    if(myFormatter.getParser() != (StGLTextFormatter::Parser )params.Parser->getValue()) {
+        myFormatter.setupParser((StGLTextFormatter::Parser )params.Parser->getValue());
         myToRecompute = true;
     }
     if(!myText.isEmpty()) {
@@ -317,10 +308,10 @@ void StGLSubtitles::stglDraw(unsigned int theView) {
 
         switch(theView) {
             case ST_DRAW_LEFT:
-                myTextDX = -myParallax->getValue() * GLfloat(0.5 * 0.001 * myRoot->getRootRectGl().width());
+                myTextDX = -params.Parallax->getValue() * GLfloat(0.5 * 0.001 * myRoot->getRootRectGl().width());
                 break;
             case ST_DRAW_RIGHT:
-                myTextDX =  myParallax->getValue() * GLfloat(0.5 * 0.001 * myRoot->getRootRectGl().width());
+                myTextDX =  params.Parallax->getValue() * GLfloat(0.5 * 0.001 * myRoot->getRootRectGl().width());
                 break;
             case ST_DRAW_MONO:
             default:
@@ -335,20 +326,103 @@ void StGLSubtitles::stglDraw(unsigned int theView) {
         return;
     }
 
+    StHandle<StStereoParams> aParams;
+    StFormat aStFormat = StFormat_Mono;
+    unsigned int aView = theView;
+    float aSampleRatio = 1.0f;
+    if(StGLImageRegion* anImgRegion = !params.ToApplyStereo.isNull() && params.ToApplyStereo->getValue()
+                                    ? dynamic_cast<StGLImageRegion*>(myParent)
+                                    : NULL) {
+        aParams = anImgRegion->getSource();
+        if(!aParams.isNull()) {
+            aStFormat = aParams->StereoFormat;
+            aSampleRatio = anImgRegion->getSampleRatio();
+///ST_DEBUG_LOG( "@@ SampleRatio= " + aSampleRatio + "; size: " + myTexture.getSizeX() + "x" + myTexture.getSizeY()); ///
+            if(aParams->ToSwapLR) {
+                // apply swap flag
+                switch(aStFormat) {
+                    case StFormat_SideBySide_LR: aStFormat = StFormat_SideBySide_RL; break;
+                    case StFormat_SideBySide_RL: aStFormat = StFormat_SideBySide_LR; break;
+                    case StFormat_TopBottom_LR:  aStFormat = StFormat_TopBottom_RL;  break;
+                    case StFormat_TopBottom_RL:  aStFormat = StFormat_TopBottom_LR;  break;
+                    default: break;
+                }
+            }
+            // swap views
+            if(aStFormat == StFormat_SideBySide_RL) {
+                aStFormat = StFormat_SideBySide_LR;
+                if(theView == ST_DRAW_RIGHT) {
+                    aView = ST_DRAW_LEFT;
+                } else if(theView == ST_DRAW_LEFT) {
+                    aView = ST_DRAW_RIGHT;
+                }
+            } else if(aStFormat == StFormat_TopBottom_RL) {
+                aStFormat = StFormat_TopBottom_LR;
+                if(theView == ST_DRAW_RIGHT) {
+                    aView = ST_DRAW_LEFT;
+                } else if(theView == ST_DRAW_LEFT) {
+                    aView = ST_DRAW_RIGHT;
+                }
+            }
+            // reset
+            if(aStFormat != StFormat_SideBySide_LR
+            && aStFormat != StFormat_TopBottom_LR) {
+                aSampleRatio = 1.0f;
+            }
+        }
+    }
+
+    // update vertices
+    StVec2<int> anImgSize (myTexture.getSizeX(), myTexture.getSizeY());
+    StArray<StGLVec2> aVertices(4), aTexCoords(4);
+    aTexCoords[0] = StGLVec2(1.0f, 0.0f);
+    aTexCoords[1] = StGLVec2(1.0f, 1.0f);
+    aTexCoords[2] = StGLVec2(0.0f, 0.0f);
+    aTexCoords[3] = StGLVec2(0.0f, 1.0f);
+    if(aSampleRatio >= 1.0f) {
+        anImgSize.x() = int(float(anImgSize.x()) * aSampleRatio);
+    } else {
+        anImgSize.y() = int(float(anImgSize.y()) / aSampleRatio);
+    }
+    switch(aStFormat) {
+        case StFormat_SideBySide_LR: {
+            anImgSize.x() /= 2;
+            if(aView == ST_DRAW_LEFT) {
+                aTexCoords[0].x() = aTexCoords[1].x() = 0.5f;
+                aTexCoords[2].x() = aTexCoords[3].x() = 0.0f;
+            } else if(aView == ST_DRAW_RIGHT) {
+                aTexCoords[0].x() = aTexCoords[1].x() = 1.0f;
+                aTexCoords[2].x() = aTexCoords[3].x() = 0.5f;
+            }
+            break;
+        }
+        case StFormat_TopBottom_LR: {
+            anImgSize.y() /= 2;
+            if(aView == ST_DRAW_LEFT) {
+                aTexCoords[0].y() = aTexCoords[2].y() = 0.0f;
+                aTexCoords[1].y() = aTexCoords[3].y() = 0.5f;
+            } else if(aView == ST_DRAW_RIGHT) {
+                aTexCoords[0].y() = aTexCoords[2].y() = 0.5f;
+                aTexCoords[1].y() = aTexCoords[3].y() = 1.0f;
+            }
+            break;
+        }
+        default: {
+            break;
+        }
+    }
+
+    StRectI_t aRect = getRectPxAbsolute();
+    aRect.top()   = aRect.bottom() - anImgSize.y();
+    aRect.left()  = aRect.left() + aRect.width() / 2 - anImgSize.x() / 2;
+    aRect.right() = aRect.left() + anImgSize.x();
+    myRoot->getRectGl(aRect, aVertices);
+    myVertBuf.init(aCtx, aVertices);
+    myTCrdBuf.init(aCtx, aTexCoords);
+
     aCtx.core20fwd->glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
     aCtx.core20fwd->glEnable(GL_BLEND);
     myTexture.bind(aCtx);
-
-    // update vertices
-    StRectI_t aRect = getRectPxAbsolute();
-    aRect.top()   = aRect.bottom() - myTexture.getSizeY();
-    aRect.left()  = aRect.left() + aRect.width() / 2 - myTexture.getSizeX() / 2;
-    aRect.right() = aRect.left() + myTexture.getSizeX();
-
-    StArray<StGLVec2> aVertices(4);
-    myRoot->getRectGl(aRect, aVertices);
-    myVertBuf.init(aCtx, aVertices);
-
     myImgProgram->use(aCtx);
 
     myVertBuf.bindVertexAttrib(aCtx, myImgProgram->getVVertexLoc());

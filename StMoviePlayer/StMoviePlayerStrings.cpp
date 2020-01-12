@@ -89,6 +89,8 @@ void loadDefaults(StLangMap& theStrings) {
                "Top");
     theStrings(MENU_SUBTITLES_BOTTOM,
                "Bottom");
+    theStrings(MENU_SUBTITLES_STEREO,
+               "Apply stereo format");
     theStrings(MENU_SUBTITLES_PLAIN_TEXT,
                "Plain text");
     theStrings(MENU_SUBTITLES_LITE_HTML,

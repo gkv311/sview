@@ -221,6 +221,7 @@ StGLImageRegion::StGLImageRegion(StGLWidget* theParent,
   myKeyFlags(ST_VF_NONE),
   myDragDelayMs(0.0),
   myDragDelayTmpMs(0.0),
+  mySampleRatio(1.0f),
   myRotAngle(0.0f),
   myIsClickAborted(false),
 #ifdef ST_EXTRA_CONTROLS
@@ -571,6 +572,7 @@ void StGLImageRegion::stglDraw(unsigned int theView) {
 void StGLImageRegion::stglDrawView(unsigned int theView) {
     StGLQuadTexture::LeftOrRight aLeftOrRight = StGLQuadTexture::LEFT_TEXTURE;
     StHandle<StStereoParams> aParams = getSource();
+    mySampleRatio = 1.0f;
     if(!myIsInitialized || aParams.isNull()) {
         return;
     }
@@ -829,6 +831,7 @@ void StGLImageRegion::stglDrawView(unsigned int theView) {
 
             // check window ratio to fill whole image in normal zoom
             GLfloat aDispRatio = 1.0f;
+            mySampleRatio = aTextures.getPlane().getPixelRatio();
             switch(params.DisplayRatio->getValue()) {
                 case RATIO_1_1:   aDispRatio = 1.0f;  break;
                 case RATIO_4_3:   aDispRatio = 1.3333333333f; break;
@@ -848,6 +851,7 @@ void StGLImageRegion::stglDrawView(unsigned int theView) {
                              case StFormat_SideBySide_RL: {
                                 if(aDispRatio >= 0.85 && aDispRatio <= 1.18) {
                                     aDispRatio *= 2.0;
+                                    mySampleRatio *= 2.0f;
                                 }
                                 break;
                              }
@@ -855,6 +859,7 @@ void StGLImageRegion::stglDrawView(unsigned int theView) {
                              case StFormat_TopBottom_RL: {
                                 if(aDispRatio >= 3.5 && aDispRatio <= 4.8) {
                                     aDispRatio *= 0.5;
+                                    mySampleRatio *= 0.5f;
                                 }
                                 break;
                              }

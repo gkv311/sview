@@ -1666,11 +1666,12 @@ StMoviePlayerGUI::StMoviePlayerGUI(StMoviePlayer*  thePlugin,
 
     mySubtitles = new StGLSubtitles  (myImage, theSubQueue,
                                       myPlugin->params.SubtitlesPlace,
-                                      myPlugin->params.SubtitlesTopDY,
-                                      myPlugin->params.SubtitlesBottomDY,
-                                      myPlugin->params.SubtitlesSize,
-                                      myPlugin->params.SubtitlesParallax,
-                                      myPlugin->params.SubtitlesParser);
+                                      myPlugin->params.SubtitlesSize);
+    mySubtitles->params.TopDY    = myPlugin->params.SubtitlesTopDY;
+    mySubtitles->params.BottomDY = myPlugin->params.SubtitlesBottomDY;
+    mySubtitles->params.Parallax = myPlugin->params.SubtitlesParallax;
+    mySubtitles->params.Parser   = myPlugin->params.SubtitlesParser;
+    mySubtitles->params.ToApplyStereo = myPlugin->params.SubtitlesApplyStereo;
 
     if(myPlugin->params.ToShowFps->getValue()) {
         myFpsWidget = new StGLFpsLabel(this);
@@ -2102,6 +2103,8 @@ void StMoviePlayerGUI::doAudioStreamsCombo(const size_t ) {
 
 void StMoviePlayerGUI::doSubtitlesStreamsCombo(const size_t ) {
     const StHandle< StArrayList<StString> >& aStreams = myPlugin->myVideo->params.activeSubtitles->getList();
+    const bool hasAudioStream = myPlugin->myVideo->hasAudioStream();
+    const bool hasVideoStream = myPlugin->myVideo->hasVideoStream();
 
     StGLCombobox::ListBuilder aBuilder(this);
 
@@ -2171,12 +2174,26 @@ void StMoviePlayerGUI::doSubtitlesStreamsCombo(const size_t ) {
         anItem = aBuilder.getMenu()->addItem(tr(MENU_SUBTITLES_PLACEMENT), aPlaceMenu);
     }
 
+    if(!aStreams.isNull()
+    && !aStreams->isEmpty()
+    && hasVideoStream) {
+        StHandle<StStereoParams> aParams = myImage->getSource();
+        StFormat aSrcFormat = (StFormat )myPlugin->params.SrcStereoFormat->getValue();
+        if(aSrcFormat == StFormat_AUTO && !aParams.isNull()) {
+            aSrcFormat = aParams->StereoFormat;
+        }
+        if(aSrcFormat == StFormat_SideBySide_LR
+        || aSrcFormat == StFormat_SideBySide_RL
+        || aSrcFormat == StFormat_TopBottom_LR
+        || aSrcFormat == StFormat_TopBottom_RL) {
+            aBuilder.getMenu()->addItem(tr(MENU_SUBTITLES_STEREO), myPlugin->params.SubtitlesApplyStereo);
+        }
+    }
     if(!myWindow->isMobile()) {
         aBuilder.getMenu()->addItem(tr(MENU_SUBTITLES_PARSER), aParserMenu)
                           ->setIcon(stCMenuIcon("actionTextFormat"), false);
     }
-    if(myPlugin->myVideo->hasAudioStream()
-    || myPlugin->myVideo->hasVideoStream()) {
+    if(hasAudioStream || hasVideoStream) {
         //aBuilder.getMenu()->addSplitter();
         aBuilder.getMenu()->addItem(tr(MENU_SUBTITLES_ATTACH))
                           ->setIcon(stCMenuIcon("actionOpen"), false)

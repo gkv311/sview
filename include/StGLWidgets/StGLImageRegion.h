@@ -21,9 +21,9 @@
 #include <StGL/StParams.h>
 #include <StGL/StPlayList.h>
 
+#include <StSlots/StAction.h>
 #include <StSettings/StEnumParam.h>
 
-class StAction;
 class StGLIcon;
 
 class StGLImageRegion : public StGLWidget {
@@ -189,6 +189,11 @@ class StGLImageRegion : public StGLWidget {
      * Auxiliary method to discard frames in the textures queue without bound OpenGL context.
      */
     ST_CPPEXPORT void stglSkipFrames();
+
+    /**
+     * Return sample aspect ratio.
+     */
+    ST_LOCAL float getSampleRatio() const { return mySampleRatio; }
 
         public: //! @name Properties
 
@@ -363,6 +368,7 @@ class StGLImageRegion : public StGLWidget {
     StVirtFlags                myKeyFlags;       //!< active key flags
     double                     myDragDelayMs;    //!< dragging delay in milliseconds
     double                     myDragDelayTmpMs; //!< temporary dragging delay
+    float                      mySampleRatio;    //!< sample aspect ratio
     float                      myRotAngle;       //!< rotation angle gesture progress
     bool                       myIsClickAborted;
     bool                       myToRightRotate;

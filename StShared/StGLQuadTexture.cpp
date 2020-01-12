@@ -19,7 +19,8 @@ StGLFrameTexture::StGLFrameTexture()
 : StGLTexture(GL_RGB8),
 #endif
   myDataSize(1.0f, 1.0f),
-  myDisplayRatio(1.0f) {
+  myDisplayRatio(1.0f),
+  myPAR(1.0f) {
     //
 }
 
