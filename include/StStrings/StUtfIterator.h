@@ -149,7 +149,7 @@ class StUtfIterator {
     inline const Type* getBufferNext() const { return myPosNext; }
 
     /**
-     * Return the index displacement from iterator intialization.
+     * Return the index displacement from iterator initialization.
      */
     inline size_t getIndex() const {
         return myCharIndex;

@@ -1,5 +1,5 @@
 /**
- * Copyright © 2011-2014 Kirill Gavrilov <kirill@sview.ru>
+ * Copyright © 2011-2020 Kirill Gavrilov <kirill@sview.ru>
  *
  * StMoviePlayer program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -191,18 +191,39 @@ void StSubtitlesASS::parseStyle(StString& theText) {
             if(*anIter.getBufferHere() == stUtf8_t('i')) {
                 // italic
                 if(       *anIter.getBufferNext() == stUtf8_t('1')) {
-                    ///aText += "<i>";  // on
+                    aText += "<i>";
                 } else if(*anIter.getBufferNext() == stUtf8_t('0')) {
-                    ///aText += "</i>"; // off
+                    aText += "</i>";
                 }
             } else if(*anIter.getBufferHere() == stUtf8_t('b')) {
                 // bold
                 if(       *anIter.getBufferNext() == stUtf8_t('1')) {
-                    ///aText += "<b>";  // on
+                    aText += "<b>";
                 } else if(*anIter.getBufferNext() == stUtf8_t('0')) {
-                    ///aText += "</b>"; // off
+                    aText += "</b>";
                 }
-            }// else
+            } else if(*anIter.getBufferHere() == stUtf8_t('u')) {
+                // underline
+                if(       *anIter.getBufferNext() == stUtf8_t('1')) {
+                    //aText += "<u>";
+                } else if(*anIter.getBufferNext() == stUtf8_t('0')) {
+                    //aText += "</u>";
+                }
+            } else if(*anIter.getBufferHere() == stUtf8_t('s')) {
+                // strikeout
+                if(       *anIter.getBufferNext() == stUtf8_t('1')) {
+                    //aText += "<s>";
+                } else if(*anIter.getBufferNext() == stUtf8_t('0')) {
+                    //aText += "</s>";
+                }
+            } else if(*anIter.getBufferHere() == stUtf8_t('f')) {
+                if(*anIter.getBufferNext() == stUtf8_t('s')) {
+                    // font size
+                } else if(*anIter.getBufferNext() == stUtf8_t('n')) {
+                    // font name
+                }
+            }
+            // else
 
             // search for trailing bracket
             while(*anIter != stUtf32_t('}') && *anIter != 0) {
@@ -215,6 +236,9 @@ void StSubtitlesASS::parseStyle(StString& theText) {
             }
             aStart = anIter.getIndex() + 1;
         }
+    }
+    if(aStart != 0) {
+        aText += theText.subString(aStart, theText.Length);
     }
     if(!aText.isEmpty()) {
         // replace only if text contains style codes
