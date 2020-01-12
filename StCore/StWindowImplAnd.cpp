@@ -553,7 +553,8 @@ void StWindowImpl::processEvents() {
     }
 
     myIsMouseMoved = false;
-    if(myMousePt.x() >= 0.0 && myMousePt.x() <= 1.0 && myMousePt.y() >= 0.0 && myMousePt.y() <= 1.0) {
+    if(myIsPreciseCursor
+    && myMousePt.x() >= 0.0 && myMousePt.x() <= 1.0 && myMousePt.y() >= 0.0 && myMousePt.y() <= 1.0) {
         StPointD_t aDspl = myMousePt - anOldMousePt;
         if(std::abs(aDspl.x()) >= 0.0008 || std::abs(aDspl.y()) >= 0.0008) {
             myIsMouseMoved = true;

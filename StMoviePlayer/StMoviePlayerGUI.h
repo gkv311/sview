@@ -115,6 +115,10 @@ class StMoviePlayerGUI : public StGLRootWidget {
     ST_LOCAL virtual void stglUpdate(const StPointD_t& thePointZo,
                                      bool theIsPreciseInput) ST_ATTR_OVERRIDE;
 
+    /**
+     * Handle gesture.
+     */
+    ST_LOCAL void doGesture(const StGestureEvent& theEvent);
     ST_LOCAL void setVisibility(const StPointD_t& theCursor);
 
         public:
@@ -211,6 +215,8 @@ class StMoviePlayerGUI : public StGLRootWidget {
     StWindow*           myWindow;           //!< link to the window instance
     StTranslations*     myLangMap;          //!< translated strings map
     StTimer             myVisibilityTimer;  //!< minimum visible delay
+    StTimer             myEmptyTimer;       //!< empty list delay
+    StTimer             myTapTimer;         //!< single tap delay
     StGLAnimationLerp   myVisLerp;
 
     StGLImageRegion*    myImage;            //!< the main video frame

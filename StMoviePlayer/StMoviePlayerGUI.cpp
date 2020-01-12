@@ -62,6 +62,8 @@ using namespace StMoviePlayerStrings;
 
 namespace {
 
+    static const float THE_VISIBILITY_IDLE_TIME = 2.0f;
+
     static const int DISPL_Y_REGION_UPPER  = 32;
     static const int DISPL_X_REGION_UPPER  = 32;
     static const int DISPL_X_REGION_BOTTOM = 52;
@@ -1857,6 +1859,29 @@ namespace {
 
 }
 
+void StMoviePlayerGUI::doGesture(const StGestureEvent& theEvent) {
+    if(myImage == NULL) {
+        return;
+    }
+
+    if(theEvent.Type == stEvent_Gesture1Tap) {
+        myTapTimer.restart();
+    } else if(theEvent.Type == stEvent_Gesture1DoubleTap) {
+        myTapTimer.stop();
+    }
+
+    for(StGLWidget *aChildIter(getChildren()->getLast()), *aChildActive(NULL); aChildIter != NULL;) {
+        aChildActive = aChildIter;
+        aChildIter   = aChildIter->getPrev();
+        if(aChildActive->isVisibleAndPointIn(getCursorZo())) {
+            if(aChildActive == myImage) {
+                myImage->doGesture(theEvent);
+            }
+            return;
+        }
+    }
+}
+
 void StMoviePlayerGUI::setVisibility(const StPointD_t& theCursor) {
     const bool toShowAdjust   = myPlugin->params.ToShowAdjustImage->getValue();
     const bool toShowPlayList = myPlugin->params.ToShowPlayList->getValue();
@@ -1867,6 +1892,20 @@ void StMoviePlayerGUI::setVisibility(const StPointD_t& theCursor) {
 
     const int  aRootSizeY     = getRectPx().height();
     const bool hasVideo       = myPlugin->myVideo->hasVideoStream();
+    if(!hasVideo && !myTapTimer.isOn()
+    && !myPlugin->myPlayList->isEmpty()) {
+        myEmptyTimer.restart();
+    } else {
+        myEmptyTimer.stop();
+    }
+    if(myEmptyTimer.getElapsedTime() >= 2.5) {
+        myVisibilityTimer.restart();
+        myEmptyTimer.stop();
+    }
+    if(myTapTimer.getElapsedTime() >= 0.5) {
+        myVisibilityTimer.restart();
+        myTapTimer.stop();
+    }
     const bool isMouseActive  = myWindow->isMouseMoved();
     const double aStillTime   = myVisibilityTimer.getElapsedTime();
 
@@ -1886,10 +1925,9 @@ void StMoviePlayerGUI::setVisibility(const StPointD_t& theCursor) {
                          && aSrcFormat != StFormat_Mono
                          && aSrcFormat != StFormat_AUTO;
 
-    myIsVisibleGUI = !hasVideo
-        || isMouseActive
+    myIsVisibleGUI = isMouseActive
         || aParams.isNull()
-        || aStillTime < 2.0
+        || aStillTime < THE_VISIBILITY_IDLE_TIME
         || (hasUpperPanel && myPanelUpper->isPointIn(theCursor))
         || (myPanelBottom != NULL && int(aRootSizeY * theCursor.y()) > (aRootSizeY - 2 * myPanelBottom->getRectPx().height())
                                   && theCursor.y() < 1.0)

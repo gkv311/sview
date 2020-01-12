@@ -286,6 +286,7 @@ class StWindowImpl {
     bool               myIsPreciseCursor; //!< flag indicating that last mouse cursor position was updated by precise input device
     StTouchEvent       myTouches;         //!< current state of touch screen
     StTouchEvent       myTap1Touch;       //!< previous tap touch
+    StTouch            myTap0Touch;       //!< started tap
     int                myNbTouchesMax;    //!< maximum touches within current sequence
     StRectI_t          myRectNorm;        //!< master window coordinates in normal     state
     StRectI_t          myRectFull;        //!< master window coordinates in fullscreen state

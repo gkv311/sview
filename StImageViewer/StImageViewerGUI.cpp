@@ -56,6 +56,8 @@ using namespace StImageViewerStrings;
 
 namespace {
 
+    static const float THE_VISIBILITY_IDLE_TIME = 2.0f;
+
     static const int DISPL_Y_REGION_UPPER = 32;
     static const int DISPL_X_REGION_UPPER = 32;
 
@@ -1338,6 +1340,29 @@ size_t StImageViewerGUI::trSrcFormatId(const StFormat theSrcFormat) {
     }
 }
 
+void StImageViewerGUI::doGesture(const StGestureEvent& theEvent) {
+    if(myImage == NULL) {
+        return;
+    }
+
+    if(theEvent.Type == stEvent_Gesture1Tap) {
+        myTapTimer.restart();
+    } else if(theEvent.Type == stEvent_Gesture1DoubleTap) {
+        myTapTimer.stop();
+    }
+
+    for(StGLWidget *aChildIter(getChildren()->getLast()), *aChildActive(NULL); aChildIter != NULL;) {
+        aChildActive = aChildIter;
+        aChildIter   = aChildIter->getPrev();
+        if(aChildActive->isVisibleAndPointIn(getCursorZo())) {
+            if(aChildActive == myImage) {
+                myImage->doGesture(theEvent);
+            }
+            return;
+        }
+    }
+}
+
 void StImageViewerGUI::setVisibility(const StPointD_t& theCursor,
                                      bool              toForceHide) {
     const bool toShowAdjust   = myPlugin->params.ToShowAdjustImage->getValue();
@@ -1349,9 +1374,24 @@ void StImageViewerGUI::setVisibility(const StPointD_t& theCursor,
                              &&  myPanelUpper  != NULL;
     const bool hasBottomPanel = !myIsMinimalGUI
                              &&  myPanelBottom != NULL;
-    const bool isMouseActive  = myWindow->isMouseMoved();
 
     StHandle<StStereoParams> aParams = myImage->getSource();
+    if(aParams.isNull() && !myEmptyTimer.isOn()
+    && !myPlugin->myPlayList->isEmpty()) {
+        myEmptyTimer.restart();
+    } else {
+        myEmptyTimer.stop();
+    }
+    if(myEmptyTimer.getElapsedTime() >= 2.5) {
+        myVisibilityTimer.restart();
+        myEmptyTimer.stop();
+    }
+    if(myTapTimer.getElapsedTime() >= 0.5) {
+        myVisibilityTimer.restart();
+        myTapTimer.stop();
+    }
+    const bool isMouseActive  = myWindow->isMouseMoved();
+
     StFormat aSrcFormat = (StFormat )myPlugin->params.SrcStereoFormat->getValue();
     if(aSrcFormat == StFormat_AUTO
     && !aParams.isNull()) {
@@ -1364,8 +1404,7 @@ void StImageViewerGUI::setVisibility(const StPointD_t& theCursor,
 
     const double aStillTime = myVisibilityTimer.getElapsedTime();
     myIsVisibleGUI = isMouseActive
-        || aParams.isNull()
-        || aStillTime < 2.0
+        || aStillTime < THE_VISIBILITY_IDLE_TIME
         || (hasUpperPanel  && myPanelUpper ->isPointIn(theCursor))
         || (hasBottomPanel && myPanelBottom->isPointIn(theCursor))
         || (myPlayList != NULL && toShowPlayList && myPlayList->isPointIn(theCursor))

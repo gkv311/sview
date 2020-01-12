@@ -127,6 +127,7 @@ StWindowImpl::StWindowImpl(const StHandle<StResourceManager>& theResMgr,
     myTouches.Time = 0.0;
     myTouches.clearTouches();
 
+    myTap0Touch = StTouch::Empty();
     myTap1Touch.Type = stEvent_TouchCancel;
     myTap1Touch.Time = 0.0;
     myTap1Touch.clearTouches();
@@ -1158,6 +1159,7 @@ void StWindowImpl::doTouch(const StTouchEvent& theTouches) {
             }
             if(myNbTouchesMax == 0) {
                 myTouches.Time = aTime;
+                myTap0Touch = theTouches.Touches[0];
             }
             myNbTouchesMax = stMax(myNbTouchesMax, theTouches.NbTouches);
 
@@ -1202,6 +1204,19 @@ void StWindowImpl::doTouch(const StTouchEvent& theTouches) {
                         myTap1Touch = aCopy;
                         myTap1Touch.Type = stEvent_TouchUp;
                         myTap1Touch.Time = aTime;
+                        StGLVec2 aDelta(myTap0Touch.PointX - aCopy.Touches[0].PointX,
+                                        myTap0Touch.PointY - aCopy.Touches[0].PointY);
+                        aDelta *= aScale;
+                        if(aDelta.modulus() <= THE_THRESHOLD_TAP.FromIdle) {
+                            myStEvent2.Type = stEvent_Gesture1Tap;
+                            myStEvent2.Gesture.clearGesture();
+                            myStEvent2.Gesture.Time = aTime;
+                            myStEvent2.Gesture.Point1X = aCopy.Touches[0].PointX;
+                            myStEvent2.Gesture.Point1Y = aCopy.Touches[0].PointY;
+                            signals.onGesture->emit(myStEvent2.Gesture);
+                        }
+                    }  else {
+                        myTap1Touch.Type = stEvent_TouchCancel;
                     }
                 } else {
                     myTap1Touch.Type = stEvent_TouchCancel;
@@ -1233,8 +1248,16 @@ void StWindowImpl::doTouch(const StTouchEvent& theTouches) {
     }
 
     bool toUpdate = false;
-    if(myTouches .NbTouches == 2
-    && theTouches.NbTouches == 2) {
+    if(myTouches .NbTouches == 1
+    && theTouches.NbTouches == 1) {
+        StTouch aTFrom = myTouches.Touches[0];
+        StTouch aTTo = theTouches.findTouchById(aTFrom.Id);
+        if(!aTTo.isDefined()) {
+            return;
+        }
+        myTouches.Touches[0] = aTTo;
+    } else if(myTouches .NbTouches == 2
+           && theTouches.NbTouches == 2) {
         StTouch aTFrom[2] = {
             myTouches.Touches[0],
             myTouches.Touches[1]
