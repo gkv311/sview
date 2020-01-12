@@ -247,6 +247,7 @@ void StFTFontRegistry::init(const bool theToSearchAll) {
     aSerif.Western = findFont(stCString("Times New Roman"));
     aSans .Western = findFont(stCString("Trebuchet MS"));
     aMono .Western = findFont(stCString("Tahoma"));
+    aSans.MiscSymbols = aSerif.Western; // Trebuchet font does not include this sub-set
     const StFTFontFamily& aMalgun = findFont(stCString("Malgun Gothic"));
     const StFTFontFamily& aGulim  = findFont(stCString("Gulim"));
     const StFTFontFamily& aKor = aMalgun.FamilyName.isEmpty() && !aGulim.FamilyName.isEmpty()

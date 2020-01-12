@@ -188,14 +188,11 @@ bool StFTFont::loadCharmap(const StString& theFontName,
 
     // test Unicode subsets
     mySubsets[Subset_General] = true;
-    mySubsets[Subset_Korean]  = FT_Get_Char_Index(theFace, 0x0B371) != 0
-                             && FT_Get_Char_Index(theFace, 0x0D130) != 0;
-    mySubsets[Subset_CJK]     = FT_Get_Char_Index(theFace, 0x06F22) != 0;
-    mySubsets[Subset_Arabic]  = FT_Get_Char_Index(theFace, 0x00600) != 0;
-
-//if(mySubsets[Subset_Korean]) { std::cerr << "  found Korean in " << myFontPath << "\n"; }
-//if(mySubsets[Subset_CJK])    { std::cerr << "  found CJK    in " << myFontPath << "\n"; }
-
+    mySubsets[Subset_Korean]  =     FT_Get_Char_Index(theFace, 0x0B371) != 0
+                                 && FT_Get_Char_Index(theFace, 0x0D130) != 0;
+    mySubsets[Subset_CJK]         = FT_Get_Char_Index(theFace, 0x06F22) != 0;
+    mySubsets[Subset_Arabic]      = FT_Get_Char_Index(theFace, 0x00600) != 0;
+    mySubsets[Subset_MiscSymbols] = FT_Get_Char_Index(theFace, 0x0266A) != 0;
     return true;
 }
 

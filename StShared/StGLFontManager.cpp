@@ -114,6 +114,9 @@ const StHandle<StGLFont>& StGLFontManager::findCreate(const StFTFont::Typeface t
     if(aGenFont.isNull() || !aGenFont->hasSubset(StFTFont::Subset_Arabic)) {
         aFont->changeFont(StFTFont::Subset_Arabic) = findCreate(aPack.Arabic.FamilyName, theSize);
     }
+    if(aGenFont.isNull() || !aGenFont->hasSubset(StFTFont::Subset_MiscSymbols)) {
+        aFont->changeFont(StFTFont::Subset_MiscSymbols) = findCreate(aPack.MiscSymbols.FamilyName, theSize);
+    }
 
     if(aGenFont.isNull()) {
         aGenFont = findCreateFallback(theSize);

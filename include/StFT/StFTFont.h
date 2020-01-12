@@ -33,7 +33,8 @@ struct StFTFontPack {
     StFTFontFamily Western;
     StFTFontFamily CJK;
     StFTFontFamily Korean;
-    StFTFontFamily Arabic; //!< fallback font for Arabic letters
+    StFTFontFamily Arabic;      //!< fallback font for Arabic letters
+    StFTFontFamily MiscSymbols; //!< fallback font for Miscellaneous Symbols
 };
 
 /**
@@ -71,9 +72,10 @@ class StFTFont {
      */
     enum Subset {
         Subset_General,
-        Subset_Korean,  //!< modern Korean letters
-        Subset_CJK,     //!< Chinese characters (Chinese, Japanese, Korean and Vietnam)
-        Subset_Arabic,  //!< Arabic  characters
+        Subset_Korean,      //!< modern Korean letters
+        Subset_CJK,         //!< Chinese characters (Chinese, Japanese, Korean and Vietnam)
+        Subset_Arabic,      //!< Arabic  characters
+        Subset_MiscSymbols, //!< Miscellaneous Symbols 0x2600 - 0x26FF
         SubsetsNB
     };
 
@@ -100,10 +102,17 @@ class StFTFont {
     }
 
     /**
-     * @return true if specified character is within subset of Arabic characters
+     * @return true if specified character is within subset of Miscellaneous Symbols
      */
+    ST_LOCAL static bool isMiscSymbol(stUtf32_t theUChar) {
+        return (theUChar >= 0x02600 && theUChar <= 0x026FF);
+    }
+
+    /**
+    * @return true if specified character is within subset of Arabic characters
+    */
     ST_LOCAL static bool isArabic(stUtf32_t theUChar) {
-        return (theUChar >= 0x00600 && theUChar <= 0x006FF);
+      return (theUChar >= 0x00600 && theUChar <= 0x006FF);
     }
 
     /**
@@ -123,6 +132,8 @@ class StFTFont {
             return Subset_Korean;
         } else if(isArabic(theUChar)) {
             return Subset_Arabic;
+        } else if(isMiscSymbol(theUChar)) {
+          return Subset_MiscSymbols;
         }
         return Subset_General;
     }
