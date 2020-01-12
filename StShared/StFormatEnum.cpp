@@ -70,6 +70,7 @@ StFormat st::formatReversed(const StFormat theFormatEnum) {
 }
 
 StFormat st::formatFromName(const StString& theFileName,
+                            const bool      theToSwapJps,
                             bool&           theIsAnamorph) {
     StString aName, anExt;
     StFileNode::getNameAndExtension(theFileName, aName, anExt);
@@ -78,7 +79,7 @@ StFormat st::formatFromName(const StString& theFileName,
     if(anExt == stCString("pns")
     || anExt == stCString("jps")) {
         theIsAnamorph = false;
-        return StFormat_SideBySide_RL;
+        return theToSwapJps ? StFormat_SideBySide_LR : StFormat_SideBySide_RL;
     }
 
     // this is not optimized search, but should be OK for most use cases

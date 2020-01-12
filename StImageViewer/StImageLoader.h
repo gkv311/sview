@@ -156,6 +156,11 @@ class StImageLoader {
         myToFlipCubeZ3x2 = theToFlip;
     }
 
+    /**
+     * Set if JPS file should be read as Left/Right (TRUE) of as Right/Left (FALSE).
+     */
+    ST_LOCAL void setSwapJPS(bool theToSwap) { myToSwapJps = theToSwap; }
+
         public:  //! @name Signals
 
     struct {
@@ -217,6 +222,7 @@ class StImageLoader {
     volatile bool              myToStickPano360; //!< stick to panorama 360 mode
     volatile bool              myToFlipCubeZ6x1; //!< flip Z within 6x1 cubemap input
     volatile bool              myToFlipCubeZ3x2; //!< flip Z within 3x2 cubemap input
+    volatile bool              myToSwapJps;      //!< read JPS as Left/Right instead of Right/Left
 
         private: //! @name no copies, please
 

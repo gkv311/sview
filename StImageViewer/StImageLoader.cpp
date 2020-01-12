@@ -70,7 +70,8 @@ StImageLoader::StImageLoader(const StImageFile::ImageClass      theImageLib,
   myAction(Action_NONE),
   myToStickPano360(false),
   myToFlipCubeZ6x1(false),
-  myToFlipCubeZ3x2(false) {
+  myToFlipCubeZ3x2(false),
+  myToSwapJps(false) {
       myPlayList->setExtensions(myMimeList.getExtensionsList());
       myThread = new StThread(threadFunction, (void* )this, "StImageLoader");
 }
@@ -449,7 +450,7 @@ bool StImageLoader::loadImage(const StHandle<StFileNode>& theSource,
 
     // detect information from file name
     bool isAnamorphByName = false;
-    anImgInfo->StInfoFileName = st::formatFromName(aTitleString, isAnamorphByName);
+    anImgInfo->StInfoFileName = st::formatFromName(aTitleString, myToSwapJps, isAnamorphByName);
     if(aSrcFormatCurr == StFormat_AUTO
     && anImgInfo->StInfoFileName != StFormat_AUTO) {
         aSrcFormatCurr = anImgInfo->StInfoFileName;

@@ -98,8 +98,12 @@ namespace st {
      * - half,q    Anamorph suffix
      * or file extension:
      * - jps,pns   SideBySide (Right/Left order)
+     * @param theFileName  [in] file name to parse
+     * @param theToSwapJps [in] if TRUE, then JPS/PNS file extension will be treated as Left/Right instead of Right/Left
+     * @param theIsAnamorph [out] flag indicating anamorphic aspect ratio
      */
     ST_CPPEXPORT StFormat formatFromName(const StString& theFileName,
+                                         const bool      theToSwapJps,
                                          bool&           theIsAnamorph);
 
     /**

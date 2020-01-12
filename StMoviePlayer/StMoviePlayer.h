@@ -203,6 +203,7 @@ class StMoviePlayer : public StApplication {
         StHandle<StEnumParam>         CheckUpdatesDays;  //!< days count between updates checks
         StHandle<StInt32ParamNamed>   LastUpdateDay;     //!< the last time update has been checked
         StHandle<StInt32ParamNamed>   SrcStereoFormat;   //!< source format
+        StHandle<StBoolParamNamed>    ToSwapJPS;         //!< swap JPS views order
         StHandle<StBoolParamNamed>    ToStickPanorama;   //!< force panorama input for all files
         StHandle<StBoolParamNamed>    ToTrackHead;       //!< enable/disable head-tracking
         StHandle<StBoolParamNamed>    ToTrackHeadAudio;  //!< enable/disable head-tracking for audio listener
@@ -307,6 +308,7 @@ class StMoviePlayer : public StApplication {
     ST_LOCAL void doSetStereoOutput(const size_t theMode);
     ST_LOCAL void doPanoramaOnOff(const size_t );
     ST_LOCAL void doChangeStickPano360(const bool );
+    ST_LOCAL void doChangeSwapJPS(const bool );
     ST_LOCAL void doSwitchAudioStream(const int32_t theStreamId);
     ST_LOCAL void doSwitchSubtitlesStream(const int32_t theStreamId);
     ST_LOCAL void doShowPlayList(const bool theToShow);

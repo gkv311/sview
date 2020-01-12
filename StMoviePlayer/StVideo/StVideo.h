@@ -169,6 +169,11 @@ class StVideo {
     }
 
     /**
+     * Set if JPS file should be read as Left/Right (TRUE) of as Right/Left (FALSE).
+     */
+    ST_LOCAL void setSwapJPS(bool theToSwap) { myVideoMaster->setSwapJPS(theToSwap); }
+
+    /**
      * Retrieve information about currently played file.
      */
     ST_LOCAL StHandle<StMovieInfo> getFileInfo(const StHandle<StStereoParams>& theParams) const;

@@ -2358,6 +2358,7 @@ void StMoviePlayerGUI::doMobileSettings(const size_t ) {
     aParams.add(myPlugin->StApplication::params.ActiveDevice);
     aParams.add(myImage->params.DisplayMode);
     aParams.add(myPlugin->params.ToStickPanorama);
+    aParams.add(myPlugin->params.ToSwapJPS);
     aRend->getOptions(aParams);
     aParams.add(myPlugin->params.ToShowFps);
     aParams.add(myPlugin->params.UseGpu);

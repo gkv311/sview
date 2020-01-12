@@ -198,6 +198,7 @@ namespace StMoviePlayerStrings {
         OPTION_EXIT_ON_ESCAPE_WINDOWED     = 1705,
         OPTION_HIDE_NAVIGATION_BAR         = 1710,
         OPTION_OPEN_LAST_ON_STARTUP        = 1711,
+        OPTION_SWAP_JPS                    = 1712,
 
         // Open/Save dialogs
         DIALOG_OPEN_FILE       = 2000,

@@ -315,6 +315,8 @@ void loadDefaults(StLangMap& theStrings) {
                "Hide system navigation bar");
     theStrings(OPTION_OPEN_LAST_ON_STARTUP,
                "Open last played file on startup");
+    theStrings(OPTION_SWAP_JPS,
+               "Swap JPS/PNS views order");
 
     theStrings(FILE_VIDEO_OPEN,
                "Open another movie");

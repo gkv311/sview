@@ -186,7 +186,8 @@ StVideoQueue::StVideoQueue(const StHandle<StGLTextureQueue>& theTextureQueue,
   myStFormatByUser(StFormat_AUTO),
   myStFormatByName(StFormat_AUTO),
   myStFormatInStream(StFormat_AUTO),
-  myToStickPano360(false) {
+  myToStickPano360(false),
+  myToSwapJps(false) {
 #ifdef ST_USE64PTR
     myFrame.Frame->opaque = (void* )stAV::NOPTS_VALUE;
 #else
@@ -474,7 +475,7 @@ bool StVideoQueue::init(AVFormatContext*   theFormatCtx,
 
     // detect information from file name
     bool isAnamorphByName = false;
-    myStFormatByName = st::formatFromName(myFileName, isAnamorphByName);
+    myStFormatByName = st::formatFromName(myFileName, myToSwapJps, isAnamorphByName);
     if(myStFormatInStream == StFormat_AUTO
     && isAnamorphByName) {
         if(myStFormatByName == StFormat_SideBySide_LR

@@ -791,6 +791,7 @@ void StImageViewerGUI::doMobileSettings(const size_t ) {
     aParams.add(myPlugin->params.ToStickPanorama);
     aParams.add(myPlugin->params.ToFlipCubeZ6x1);
     aParams.add(myPlugin->params.ToFlipCubeZ3x2);
+    aParams.add(myPlugin->params.ToSwapJPS);
     aParams.add(myPlugin->params.ToShowFps);
     aParams.add(myPlugin->params.SlideShowDelay);
     aParams.add(myLangMap->params.language);

@@ -204,6 +204,11 @@ class StVideoQueue : public StAVPacketQueue {
         myToStickPano360 = theToStick;
     }
 
+    /**
+     * Set if JPS file should be read as Left/Right (TRUE) of as Right/Left (FALSE).
+     */
+    ST_LOCAL void setSwapJPS(bool theToSwap) { myToSwapJps = theToSwap; }
+
     ST_LOCAL StVideoQueue(const StHandle<StGLTextureQueue>& theTextureQueue,
                           const StHandle<StVideoQueue>&     theMaster = StHandle<StVideoQueue>());
     ST_LOCAL virtual ~StVideoQueue();
@@ -426,6 +431,7 @@ private:
     volatile StFormat          myStFormatByName;  //!< source format detected from file name
     volatile StFormat          myStFormatInStream;//!< source format information retrieved from stream
     volatile bool              myToStickPano360;  //!< stick to panorama 360 mode
+    volatile bool              myToSwapJps;       //!< read JPS as Left/Right instead of Right/Left
 
 };
 
