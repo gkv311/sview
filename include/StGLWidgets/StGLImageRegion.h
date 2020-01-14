@@ -195,6 +195,11 @@ class StGLImageRegion : public StGLWidget {
      */
     ST_LOCAL float getSampleRatio() const { return mySampleRatio; }
 
+    /**
+    * Return frame dimensions.
+    */
+    ST_LOCAL const StVec2<int>& getFrameSize() const { return myFrameSize; }
+
         public: //! @name Properties
 
     struct {
@@ -368,6 +373,7 @@ class StGLImageRegion : public StGLWidget {
     StVirtFlags                myKeyFlags;       //!< active key flags
     double                     myDragDelayMs;    //!< dragging delay in milliseconds
     double                     myDragDelayTmpMs; //!< temporary dragging delay
+    StVec2<int>                myFrameSize;      //!< frame dimensions
     float                      mySampleRatio;    //!< sample aspect ratio
     float                      myRotAngle;       //!< rotation angle gesture progress
     bool                       myIsClickAborted;

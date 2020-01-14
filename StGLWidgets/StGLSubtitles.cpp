@@ -330,6 +330,7 @@ void StGLSubtitles::stglDraw(unsigned int theView) {
     StFormat aStFormat = StFormat_Mono;
     unsigned int aView = theView;
     float aSampleRatio = 1.0f;
+    StVec2<int> aFrameDims(0, 0);
     if(StGLImageRegion* anImgRegion = !params.ToApplyStereo.isNull() && params.ToApplyStereo->getValue()
                                     ? dynamic_cast<StGLImageRegion*>(myParent)
                                     : NULL) {
@@ -337,7 +338,7 @@ void StGLSubtitles::stglDraw(unsigned int theView) {
         if(!aParams.isNull()) {
             aStFormat = aParams->StereoFormat;
             aSampleRatio = anImgRegion->getSampleRatio();
-///ST_DEBUG_LOG( "@@ SampleRatio= " + aSampleRatio + "; size: " + myTexture.getSizeX() + "x" + myTexture.getSizeY()); ///
+            aFrameDims   = anImgRegion->getFrameSize();
             if(aParams->ToSwapLR) {
                 // apply swap flag
                 switch(aStFormat) {
@@ -373,7 +374,7 @@ void StGLSubtitles::stglDraw(unsigned int theView) {
     }
 
     // update vertices
-    StVec2<int> anImgSize (myTexture.getSizeX(), myTexture.getSizeY());
+    StVec2<int> anImgSize (myTexture.getSizeX(), myTexture.getSizeY()), anOffset (0, 0);
     StArray<StGLVec2> aVertices(4), aTexCoords(4);
     aTexCoords[0] = StGLVec2(1.0f, 0.0f);
     aTexCoords[1] = StGLVec2(1.0f, 1.0f);
@@ -390,9 +391,11 @@ void StGLSubtitles::stglDraw(unsigned int theView) {
             if(aView == ST_DRAW_LEFT) {
                 aTexCoords[0].x() = aTexCoords[1].x() = 0.5f;
                 aTexCoords[2].x() = aTexCoords[3].x() = 0.0f;
+                anOffset.x() = (aFrameDims.x() * 2 - myTexture.getSizeX()) / 2;
             } else if(aView == ST_DRAW_RIGHT) {
                 aTexCoords[0].x() = aTexCoords[1].x() = 1.0f;
                 aTexCoords[2].x() = aTexCoords[3].x() = 0.5f;
+                anOffset.x() = -(aFrameDims.x() * 2 - myTexture.getSizeX()) / 2;
             }
             break;
         }
@@ -401,9 +404,11 @@ void StGLSubtitles::stglDraw(unsigned int theView) {
             if(aView == ST_DRAW_LEFT) {
                 aTexCoords[0].y() = aTexCoords[2].y() = 0.0f;
                 aTexCoords[1].y() = aTexCoords[3].y() = 0.5f;
+                anOffset.y() = -(aFrameDims.y() * 2 - myTexture.getSizeY()) / 2;
             } else if(aView == ST_DRAW_RIGHT) {
                 aTexCoords[0].y() = aTexCoords[2].y() = 0.5f;
                 aTexCoords[1].y() = aTexCoords[3].y() = 1.0f;
+                anOffset.y() = (aFrameDims.y() * 2 - myTexture.getSizeY()) / 2;
             }
             break;
         }
@@ -411,10 +416,16 @@ void StGLSubtitles::stglDraw(unsigned int theView) {
             break;
         }
     }
+    if(aView == ST_DRAW_LEFT) {
+        anOffset.x() -= (int )params.Parallax->getValue();
+    } else if(aView == ST_DRAW_RIGHT) {
+        anOffset.x() += (int )params.Parallax->getValue();
+    }
 
     StRectI_t aRect = getRectPxAbsolute();
+    aRect.bottom() += anOffset.y();
     aRect.top()   = aRect.bottom() - anImgSize.y();
-    aRect.left()  = aRect.left() + aRect.width() / 2 - anImgSize.x() / 2;
+    aRect.left()  = aRect.left() + aRect.width() / 2 - anImgSize.x() / 2 + anOffset.x();
     aRect.right() = aRect.left() + anImgSize.x();
     myRoot->getRectGl(aRect, aVertices);
     myVertBuf.init(aCtx, aVertices);

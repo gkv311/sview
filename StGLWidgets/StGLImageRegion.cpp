@@ -573,6 +573,7 @@ void StGLImageRegion::stglDrawView(unsigned int theView) {
     StGLQuadTexture::LeftOrRight aLeftOrRight = StGLQuadTexture::LEFT_TEXTURE;
     StHandle<StStereoParams> aParams = getSource();
     mySampleRatio = 1.0f;
+    myFrameSize = StVec2<int>(0, 0);
     if(!myIsInitialized || aParams.isNull()) {
         return;
     }
@@ -715,6 +716,10 @@ void StGLImageRegion::stglDrawView(unsigned int theView) {
         aViewMode = StViewSurface_Plain;
     }
 
+    myFrameSize.x() = int(double(aTextures.getPlane().getDataSize().x()) * double(aTextures.getPlane().getSizeX()));
+    myFrameSize.y() = int(double(aTextures.getPlane().getDataSize().y()) * double(aTextures.getPlane().getSizeY()));
+    mySampleRatio = aTextures.getPlane().getPixelRatio();
+
     myProgram.setColorScale(aColorScale); // apply de-anaglyph color filter
     StGLImageProgram::FragGetColor aColorGetter = params.TextureFilter->getValue() == StGLImageProgram::FILTER_BLEND
                                                 ? StGLImageProgram::FragGetColor_Blend
@@ -831,7 +836,6 @@ void StGLImageRegion::stglDrawView(unsigned int theView) {
 
             // check window ratio to fill whole image in normal zoom
             GLfloat aDispRatio = 1.0f;
-            mySampleRatio = aTextures.getPlane().getPixelRatio();
             switch(params.DisplayRatio->getValue()) {
                 case RATIO_1_1:   aDispRatio = 1.0f;  break;
                 case RATIO_4_3:   aDispRatio = 1.3333333333f; break;
