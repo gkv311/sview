@@ -42,6 +42,7 @@ StSubtitleQueue::StSubtitleQueue(const StHandle<StSubQueue>& theSubtitlesQueue)
   myOutQueue(theSubtitlesQueue),
   myThread(NULL),
   evDowntime(true),
+  myImageScale(1.0f),
   toQuit(false) {
     myThread = new StThread(threadFunction, (void* )this, "StSubtitleQueue");
 }
@@ -59,6 +60,7 @@ StSubtitleQueue::~StSubtitleQueue() {
 bool StSubtitleQueue::init(AVFormatContext*   theFormatCtx,
                            const unsigned int theStreamId,
                            const StString&    theFileName) {
+    myImageScale = 1.0f;
     if(!StAVPacketQueue::init(theFormatCtx, theStreamId, theFileName)) {
         signals.onError(stCString("FFmpeg: invalid stream"));
         deinit();
@@ -84,6 +86,9 @@ bool StSubtitleQueue::init(AVFormatContext*   theFormatCtx,
         myASS.init((char* )myCodecCtx->subtitle_header,
                    myCodecCtx->subtitle_header_size);
     #endif
+    }
+    if(myCodecAuto != NULL && StString(myCodecAuto->name).isEquals(stCString("pgssub"))) {
+        myImageScale = 0.5f;
     }
     fillCodecInfo(myCodec);
     return true;
@@ -171,6 +176,8 @@ void StSubtitleQueue::decodeLoop() {
 
                             StHandle<StSubItem> aNewSubItem = new StSubItem(aPts, aPts + aDuration);
                             aNewSubItem->Image.initTrash(StImagePlane::ImgRGBA, aRect->w, aRect->h);
+                            aNewSubItem->Scale = myImageScale;
+
                         #if(LIBAVCODEC_VERSION_INT >= AV_VERSION_INT(57, 9, 100))
                             uint8_t** anImgData = aRect->data;
                             int* anImgLineSizes = aRect->linesize;

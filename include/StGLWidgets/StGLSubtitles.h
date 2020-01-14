@@ -39,6 +39,7 @@ class StGLSubtitles : public StGLTextArea {
 
         StString     Text;  //!< active string representation
         StImagePlane Image; //!< active image  representation
+        float        Scale; //!< image scale factor
 
             public:
 

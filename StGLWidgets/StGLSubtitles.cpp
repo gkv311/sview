@@ -89,7 +89,7 @@ class StGLSubtitles::StImgProgram : public StGLProgram {
 };
 
 StGLSubtitles::StSubShowItems::StSubShowItems()
-: StArrayList<StHandle <StSubItem> >(8) {
+: StArrayList<StHandle <StSubItem> >(8), Scale (1.0f) {
     //
 }
 
@@ -123,8 +123,10 @@ bool StGLSubtitles::StSubShowItems::pop(const double thePTS) {
     const StImagePlane& anImage = getFirst()->Image;
     if(!anImage.isNull()) {
         Image.initCopy(anImage, false);
+        Scale = getFirst()->Scale;
     } else {
         Image.nullify();
+        Scale = 1.0f;
     }
 
     return isChanged;
@@ -139,6 +141,7 @@ void StGLSubtitles::StSubShowItems::add(const StHandle<StSubItem>& theItem) {
     const StImagePlane& anImage = theItem->Image;
     if(!anImage.isNull()) {
         Image.initCopy(anImage, false);
+        Scale = theItem->Scale;
     }
 
     StArrayList<StHandle <StSubItem> >::add(theItem);
@@ -381,34 +384,40 @@ void StGLSubtitles::stglDraw(unsigned int theView) {
     aTexCoords[2] = StGLVec2(0.0f, 0.0f);
     aTexCoords[3] = StGLVec2(0.0f, 1.0f);
     if(aSampleRatio >= 1.0f) {
-        anImgSize.x() = int(float(anImgSize.x()) * aSampleRatio);
+        anImgSize.x() = int(double(anImgSize.x()) * aSampleRatio);
     } else {
-        anImgSize.y() = int(float(anImgSize.y()) / aSampleRatio);
+        anImgSize.y() = int(double(anImgSize.y()) / aSampleRatio);
     }
+    const double aFontScale = double(getRoot()->getScale()) * myShowItems.Scale * params.FontSize->getValue() / params.FontSize->getDefValue();
+    anImgSize.x() = int(double(anImgSize.x()) * aFontScale);
+    anImgSize.y() = int(double(anImgSize.y()) * aFontScale);
+
     switch(aStFormat) {
         case StFormat_SideBySide_LR: {
             anImgSize.x() /= 2;
+            const int anOffsetX = int(aFontScale * ((aFrameDims.x() * 2 - myTexture.getSizeX()) / 2));
             if(aView == ST_DRAW_LEFT) {
                 aTexCoords[0].x() = aTexCoords[1].x() = 0.5f;
                 aTexCoords[2].x() = aTexCoords[3].x() = 0.0f;
-                anOffset.x() = (aFrameDims.x() * 2 - myTexture.getSizeX()) / 2;
+                anOffset.x() = anOffsetX;
             } else if(aView == ST_DRAW_RIGHT) {
                 aTexCoords[0].x() = aTexCoords[1].x() = 1.0f;
                 aTexCoords[2].x() = aTexCoords[3].x() = 0.5f;
-                anOffset.x() = -(aFrameDims.x() * 2 - myTexture.getSizeX()) / 2;
+                anOffset.x() = -anOffsetX;
             }
             break;
         }
         case StFormat_TopBottom_LR: {
             anImgSize.y() /= 2;
+            const int anOffsetY = int(aFontScale * ((aFrameDims.y() * 2 - myTexture.getSizeY()) / 2));
             if(aView == ST_DRAW_LEFT) {
                 aTexCoords[0].y() = aTexCoords[2].y() = 0.0f;
                 aTexCoords[1].y() = aTexCoords[3].y() = 0.5f;
-                anOffset.y() = -(aFrameDims.y() * 2 - myTexture.getSizeY()) / 2;
+                anOffset.y() = -anOffsetY;
             } else if(aView == ST_DRAW_RIGHT) {
                 aTexCoords[0].y() = aTexCoords[2].y() = 0.5f;
                 aTexCoords[1].y() = aTexCoords[3].y() = 1.0f;
-                anOffset.y() = (aFrameDims.y() * 2 - myTexture.getSizeY()) / 2;
+                anOffset.y() = anOffsetY;
             }
             break;
         }

@@ -81,6 +81,7 @@ class StSubtitleQueue : public StAVPacketQueue {
     StThread*            myThread;   //!< decoding loop thread
     StSubtitlesASS       myASS;      //!< ASS subtitles parser
     StCondition          evDowntime;
+    float                myImageScale;
     volatile bool        toQuit;
 
 };

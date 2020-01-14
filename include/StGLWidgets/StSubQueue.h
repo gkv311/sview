@@ -26,13 +26,15 @@ class StSubItem {
     StImagePlane Image;     //!< subtitle image   representation
     double       TimeStart; //!< PTS to show subtitle item
     double       TimeEnd;   //!< PTS to hide subtitle item
+    float        Scale;     //!< image scale factor
 
         public:
 
-    ST_LOCAL StSubItem(const double    theTimeStart,
-                       const double    theTimeEnd)
+    ST_LOCAL StSubItem(double theTimeStart,
+                       double theTimeEnd)
     : TimeStart(theTimeStart),
-      TimeEnd(theTimeEnd) {
+      TimeEnd(theTimeEnd),
+      Scale(1.0f) {
         //
     }
 
