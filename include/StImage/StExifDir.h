@@ -54,10 +54,11 @@ class StExifDir {
             Entry.Components = 0;
         }
 
-        Query(DirType theType, uint16_t theTag) : Type(theType), Folder(NULL) {
+        Query(DirType theType, uint16_t theTag, uint16_t theFormat = 0)
+        : Type(theType), Folder(NULL) {
             Entry.ValuePtr   = NULL;
             Entry.Tag        = theTag;
-            Entry.Format     = 0;
+            Entry.Format     = theFormat;
             Entry.Components = 0;
         }
     };

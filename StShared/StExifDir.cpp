@@ -249,7 +249,12 @@ bool StExifDir::readDirectory(StExifDir::List& theParentList,
                         }
                     }
                 } else {
-                    ST_DEBUG_LOG("StExifDir, found unsupported (" + CameraMaker + ") maker notes");
+                    if(anEntry.Format == StExifEntry::FMT_STRING) {
+                        StString aMakerNoteName((char *)anEntry.ValuePtr);
+                        ST_DEBUG_LOG("StExifDir, found unsupported (" + aMakerNoteName + ") maker notes");
+                    } else {
+                        ST_DEBUG_LOG("StExifDir, found unsupported (" + CameraMaker + ": " + CameraModel + ") maker notes");
+                    }
                 }
                 break;
             }
@@ -474,7 +479,8 @@ bool StExifDir::findEntry(const StExifDir::List& theList,
         if(aDir->Type == theQuery.Type) {
             for(size_t anEntryId = 0; anEntryId < aDir->Entries.size(); ++anEntryId) {
                 const StExifEntry& anEntry = aDir->Entries[anEntryId];
-                if(anEntry.Tag == theQuery.Entry.Tag) {
+                if(anEntry.Tag == theQuery.Entry.Tag
+                && (anEntry.Format == theQuery.Entry.Format || theQuery.Entry.Format == 0)) {
                     theQuery.Entry  = anEntry;
                     theQuery.Folder = aDir.access();
                     return true;

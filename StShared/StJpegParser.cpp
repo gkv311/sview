@@ -256,6 +256,7 @@ StHandle<StJpegParser::Image> StJpegParser::parseImage(const int      theImgCoun
         if(aMarker == M_EOI) {
             //ST_DEBUG_LOG("Jpeg, EOI at position " + size_t(aData - myBuffer) + " / " + myLength);
 
+            bool isPanoStereo = false;
             if(toDetectCubemap && myPanorama == StPanorama_OFF) {
                 size_t aViewX = anImg->SizeX, aViewY = anImg->SizeY;
                 if(myStFormat == StFormat_SideBySide_LR || myStFormat == StFormat_SideBySide_RL) {
@@ -269,6 +270,14 @@ StHandle<StJpegParser::Image> StJpegParser::parseImage(const int      theImgCoun
                     myPanorama = StPanorama_Cubemap1_6;
                 } else if(aViewX * 2 == aViewY * 3) {
                     myPanorama = StPanorama_Cubemap3_2;
+                }
+            } else if(anImg->get360PanoMakerNote(isPanoStereo)) {
+                if(myPanorama == StPanorama_OFF) {
+                    myPanorama = StPanorama_Sphere;
+                }
+                if(myStFormat == StFormat_AUTO
+                && isPanoStereo) {
+                    myStFormat = StFormat_TopBottom_LR;
                 }
             }
 
@@ -646,6 +655,20 @@ StString StJpegParser::Image::getDateTime() const {
         aQuery.Folder->format(aQuery.Entry, aString);
     }
     return aString;
+}
+
+bool StJpegParser::Image::get360PanoMakerNote(bool& theIsStereo) const {
+    StExifDir::Query aQuery(StExifDir::DType_General, StExifTags::Image_MakerNote, StExifEntry::FMT_STRING);
+    if(!StExifDir::findEntry(Exif, aQuery)) {
+        return false;
+    } else if(::strncmp((char* )aQuery.Entry.ValuePtr, "360Stereo", 9) == 0) {
+        theIsStereo = true;
+        return true;
+    } else if(::strncmp((char* )aQuery.Entry.ValuePtr, "360Mono", 7) == 0) {
+        theIsStereo = false;
+        return true;
+    }
+    return false;
 }
 
 bool StJpegParser::Image::getParallax(double& theParallax) const {

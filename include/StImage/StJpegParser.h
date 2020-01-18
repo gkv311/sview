@@ -75,6 +75,11 @@ class StJpegParser : public StRawFile {
         ST_CPPEXPORT StString getDateTime() const;
 
         /**
+         * Read 360Mono and 360Stereo EXIF property.
+         */
+        ST_CPPEXPORT bool get360PanoMakerNote(bool& theIsStereo) const;
+
+        /**
          * Reads the parallax information from EXIF (currently - only for Fujifilm MPO).
          * @param theParallax the parallax in per cents
          * @return true if tag found
