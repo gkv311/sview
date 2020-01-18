@@ -171,11 +171,21 @@ class StJpegParser : public StRawFile {
     }
 
     /**
+     * @return XMP
+     */
+    ST_LOCAL const StString& getXMP() const { return myXMP; }
+
+    /**
      * @return stereo format stored in file
      */
     ST_LOCAL StFormat getSrcFormat() const {
         return myStFormat;
     }
+
+    /**
+     * Return panorama format.
+     */
+    ST_LOCAL StPanorama getPanorama() const { return myPanorama; }
 
     /**
      * Parse the structure.
@@ -228,7 +238,9 @@ class StJpegParser : public StRawFile {
                                   //!< array of offsets in image data, starting from session lenght (zero offset is invalid)
     StString        myComment;    //!< string stored in COM segment (directly in JPEG, NOT inside EXIF)
     StString        myJpsComment; //!< string stored in JPS segment
+    StString        myXMP;        //!< string stored in XMP segment
     StFormat        myStFormat;   //!< stereo format
+    StPanorama      myPanorama;   //!< panorama format
 
 };
 

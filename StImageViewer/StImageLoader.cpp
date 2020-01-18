@@ -292,6 +292,7 @@ bool StImageLoader::loadImage(const StHandle<StFileNode>& theSource,
 
     StTimer aLoadTimer(true);
     StFormat  aSrcFormatCurr = myStFormatByUser;
+    StPanorama aSrcPanorama = StPanorama_OFF;
     if(anImgType == StImageFile::ST_TYPE_MPO
     || anImgType == StImageFile::ST_TYPE_JPEG
     || anImgType == StImageFile::ST_TYPE_JPS) {
@@ -340,6 +341,10 @@ bool StImageLoader::loadImage(const StHandle<StFileNode>& theSource,
             StDictEntry& anEntry  = anImgInfo->Info.addChange("Jpeg.JpsComment");
             anEntry.changeValue() = aParser.getJpsComment();
         }
+        if(!aParser.getXMP().isEmpty()) {
+            StDictEntry& anEntry  = anImgInfo->Info.addChange("Jpeg.XMP");
+            anEntry.changeValue() = aParser.getXMP();
+        }
         if(!anImg1.isNull()) {
             for(size_t anExifId = 0; anExifId < anImg1->Exif.size(); ++anExifId) {
                 metadataFromExif(anImg1->Exif[anExifId], anImgInfo);
@@ -354,6 +359,7 @@ bool StImageLoader::loadImage(const StHandle<StFileNode>& theSource,
         && aParser.getSrcFormat() != StFormat_AUTO) {
             aSrcFormatCurr = aParser.getSrcFormat();
         }
+        aSrcPanorama = aParser.getPanorama();
 
         //aParser.fillDictionary(anImgInfo->Info, true);
         if(!isParsed) {
@@ -483,6 +489,9 @@ bool StImageLoader::loadImage(const StHandle<StFileNode>& theSource,
         aSrcFormatCurr = StFormat_SeparateFrames;
     }
 
+    if(aSrcPanorama != StPanorama_OFF) {
+        theParams->ViewingMode = StStereoParams::getViewSurfaceForPanoramaSource(aSrcPanorama, true);
+    }
     if(myToStickPano360
     && theParams->ViewingMode == StViewSurface_Plain) {
         StPanorama aPano = st::probePanorama(aSrcFormatCurr,

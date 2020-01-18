@@ -142,7 +142,8 @@ namespace {
 StJpegParser::StJpegParser(const StCString& theFilePath)
 : StRawFile(theFilePath),
   myImages(NULL),
-  myStFormat(StFormat_AUTO) {
+  myStFormat(StFormat_AUTO),
+  myPanorama(StPanorama_OFF) {
     stMemZero(myOffsets, sizeof(myOffsets));
 #if !defined(_MSC_VER)
     (void )markerString;
@@ -157,7 +158,9 @@ void StJpegParser::reset() {
     // destroy all images
     myImages.nullify();
     myComment.clear();
+    myXMP.clear();
     myStFormat = StFormat_AUTO;
+    myPanorama = StPanorama_OFF;
     myLength = 0;
     stMemZero(myOffsets, sizeof(myOffsets));
 }
@@ -232,6 +235,7 @@ StHandle<StJpegParser::Image> StJpegParser::parseImage(const int      theImgCoun
     // parse the data
     StHandle<StJpegParser::Image> anImg = new StJpegParser::Image();
     anImg->Data = aData - 2;
+    bool toDetectCubemap = false;
 
     for(;;) {
         // search for the next marker in the file
@@ -251,6 +255,23 @@ StHandle<StJpegParser::Image> StJpegParser::parseImage(const int      theImgCoun
         //ST_DEBUG_LOG(" #" + theImgCount + "." + theDepth + " [" + markerString(aMarker) + "] at position " + size_t(aData - myBuffer) + " / " + myLength); ///
         if(aMarker == M_EOI) {
             //ST_DEBUG_LOG("Jpeg, EOI at position " + size_t(aData - myBuffer) + " / " + myLength);
+
+            if(toDetectCubemap && myPanorama == StPanorama_OFF) {
+                size_t aViewX = anImg->SizeX, aViewY = anImg->SizeY;
+                if(myStFormat == StFormat_SideBySide_LR || myStFormat == StFormat_SideBySide_RL) {
+                    aViewX /= 2;
+                } else if(myStFormat == StFormat_TopBottom_LR || myStFormat == StFormat_TopBottom_RL) {
+                    aViewY /= 2;
+                }
+                if(aViewX == aViewY * 6) {
+                    myPanorama = StPanorama_Cubemap6_1;
+                } else if(aViewX * 6 == aViewY) {
+                    myPanorama = StPanorama_Cubemap1_6;
+                } else if(aViewX * 2 == aViewY * 3) {
+                    myPanorama = StPanorama_Cubemap3_2;
+                }
+            }
+
             anImg->Length = size_t(aData - anImg->Data);
             return anImg;
         } else if(aMarker == M_SOI) {
@@ -369,6 +390,23 @@ StHandle<StJpegParser::Image> StJpegParser::parseImage(const int      theImgCoun
                     }
                 } else if(stAreEqual(aData + 2, "http:", 5)) {
                     //ST_DEBUG_LOG("Image cotains XMP section");
+                    if(stAreEqual(aData + 2, "http://ns.adobe.com/xap/1.0/", 28)) { // XMP basic namespace
+                        myXMP = StString((char* )aData + 31, anItemLen - 31);
+                        {
+                          // GPano http://ns.google.com/photos/1.0/panorama/ namespace metadata.
+                          // Note possible cropped panorama parameters are ignored by sView.
+                          if(myXMP.isContains(stCString("<GPano:ProjectionType>equirectangular</GPano:ProjectionType>"))
+                          || myXMP.isContains(stCString("GPano:ProjectionType=\"equirectangular\""))) {
+                              // Google currently supports only equirectangular format
+                              myPanorama = StPanorama_Sphere;
+                          } else if(myXMP.isContains(stCString("<GPano:ProjectionType>cubemap</GPano:ProjectionType>"))
+                                 || myXMP.isContains(stCString("GPano:ProjectionType=\"cubemap\""))) {
+                              // this one doesn't yet exist, but try to support it
+                              toDetectCubemap = true;
+                          }
+                        }
+                        myXMP.clear();
+                    }
                 } else {
                     //ST_DEBUG_LOG("  @@@ APP2 " + StString((char* )aData + 2));
                 }
