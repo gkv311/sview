@@ -152,7 +152,13 @@ public class StMovieService extends android.app.Service  {
                                                                 aPendingPlayIntent));
         }
         final int aNotifId = 1; // unique ID, should not be 0
-        startForeground(aNotifId, aNoti.build());
+        try {
+            startForeground(aNotifId, aNoti.build());
+        } catch(SecurityException theError) {
+            android.widget.Toast.makeText(this,
+                                          "Internal error: unable to start StMovieService.startForeground() due to security reasons:\n  " + theError.getMessage(),
+                                          android.widget.Toast.LENGTH_LONG).show();
+        }
     }
 
     /**
