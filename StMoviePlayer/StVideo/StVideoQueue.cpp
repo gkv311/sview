@@ -564,6 +564,15 @@ void StVideoQueue::prepareFrame(const StFormat theSrcFormat) {
                                              size_t(aFrameSizeX), size_t(aFrameSizeY),
                                              myFrame.getLineSize(0));
         return;
+    } else if(aPixFmt == stAV::PIX_FMT::RGBA32
+           && myTextureQueue->getDeviceCaps().isSupportedFormat(StImagePlane::ImgRGBA)) {
+        myDataAdp.setColorModel(StImage::ImgColor_RGBA);
+        myDataAdp.setColorScale(StImage::ImgScale_Full);
+        myDataAdp.setPixelRatio(getPixelRatio());
+        myDataAdp.changePlane(0).initWrapper(StImagePlane::ImgRGBA, myFrame.getPlane(0),
+                                             size_t(aFrameSizeX), size_t(aFrameSizeY),
+                                             myFrame.getLineSize(0));
+        return;
 #if(LIBAVCODEC_VERSION_INT >= AV_VERSION_INT(53, 5, 0))
     } else if(stAV::isFormatYUVPlanar(myFrame.Frame,
 #else
@@ -604,7 +613,7 @@ void StVideoQueue::prepareFrame(const StFormat theSrcFormat) {
         }
 
         if(myTextureQueue->getDeviceCaps().isSupportedFormat(aPlaneFrmt)) {
-            myDataAdp.setColorModel(StImage::ImgColor_YUV);
+            myDataAdp.setColorModel(aDimsYUV.hasAlpha ? StImage::ImgColor_YUVA : StImage::ImgColor_YUV);
             myDataAdp.setPixelRatio(getPixelRatio());
             myDataAdp.changePlane(0).initWrapper(aPlaneFrmt, myFrame.getPlane(0),
                                                  size_t(aDimsYUV.widthY), size_t(aDimsYUV.heightY), myFrame.getLineSize(0));
@@ -612,6 +621,10 @@ void StVideoQueue::prepareFrame(const StFormat theSrcFormat) {
                                                  size_t(aDimsYUV.widthU), size_t(aDimsYUV.heightU), myFrame.getLineSize(1));
             myDataAdp.changePlane(2).initWrapper(aPlaneFrmt, myFrame.getPlane(2),
                                                  size_t(aDimsYUV.widthV), size_t(aDimsYUV.heightV), myFrame.getLineSize(2));
+            if(aDimsYUV.hasAlpha) {
+                myDataAdp.changePlane(3).initWrapper(aPlaneFrmt, myFrame.getPlane(3),
+                                                     size_t(aDimsYUV.widthY), size_t(aDimsYUV.heightY), myFrame.getLineSize(3));
+            }
 
             myFrameBufRef->moveReferenceFrom(myFrame.Frame);
             myDataAdp.setBufferCounter(myFrameBufRef);

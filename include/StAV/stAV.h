@@ -1,5 +1,5 @@
 /**
- * Copyright © 2011-2016 Kirill Gavrilov <kirill@sview.ru>
+ * Copyright © 2011-2020 Kirill Gavrilov <kirill@sview.ru>
  *
  * Distributed under the Boost Software License, Version 1.0.
  * See accompanying file license-boost.txt or copy at
@@ -229,8 +229,11 @@ namespace stAV {
         ST_SHARED_CPPEXPORT AVPixelFormat GRAY16;    //!< Y, 16bpp
         // planar YUV formats
         ST_SHARED_CPPEXPORT AVPixelFormat YUV420P;   //!< planar YUV 4:2:0, 12bpp, (1 Cr & Cb sample per 2x2 Y samples)
+        ST_SHARED_CPPEXPORT AVPixelFormat YUVA420P;  //!< planar YUV 4:2:0, 20bpp, (1 Cr & Cb sample per 2x2 Y & A samples)
         ST_SHARED_CPPEXPORT AVPixelFormat YUV422P;   //!< planar YUV 4:2:2, 16bpp, (1 Cr & Cb sample per 2x1 Y samples)
+        ST_SHARED_CPPEXPORT AVPixelFormat YUVA422P;  //!< planar YUV 4:2:2  24bpp, (1 Cr & Cb sample per 2x1 Y & A samples)
         ST_SHARED_CPPEXPORT AVPixelFormat YUV444P;   //!< planar YUV 4:4:4, 24bpp, (1 Cr & Cb sample per 1x1 Y samples)
+        ST_SHARED_CPPEXPORT AVPixelFormat YUVA444P;  //!< planar YUV 4:4:4  32bpp, (1 Cr & Cb sample per 1x1 Y & A samples)
         ST_SHARED_CPPEXPORT AVPixelFormat YUV410P;   //!< planar YUV 4:1:0,  9bpp, (1 Cr & Cb sample per 4x4 Y samples)
         ST_SHARED_CPPEXPORT AVPixelFormat YUV411P;   //!< planar YUV 4:1:1, 12bpp, (1 Cr & Cb sample per 4x1 Y samples)
         ST_SHARED_CPPEXPORT AVPixelFormat YUV440P;   //!< planar YUV 4:4:0 (1 Cr & Cb sample per 1x2 Y samples)
@@ -283,6 +286,7 @@ namespace stAV {
         int  heightV;
         int  bitsPerComp;
         bool isFullScale;
+        bool hasAlpha;
     };
 
     /**

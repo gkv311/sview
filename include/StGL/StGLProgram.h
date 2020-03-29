@@ -25,6 +25,7 @@ class StGLProgram : public StGLResource {
         TEXTURE_SAMPLE_0 = 0, // GL_TEXTURE0
         TEXTURE_SAMPLE_1 = 1, // GL_TEXTURE1
         TEXTURE_SAMPLE_2 = 2, // GL_TEXTURE2
+        TEXTURE_SAMPLE_3 = 3, // GL_TEXTURE3
     };
 
         public:

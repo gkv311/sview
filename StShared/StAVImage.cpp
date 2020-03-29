@@ -46,7 +46,8 @@ int StAVImage::getAVPixelFormat(const StImage& theImage) {
         }
     }
     switch(theImage.getColorModel()) {
-        case StImage::ImgColor_YUV: {
+        case StImage::ImgColor_YUV:
+        case StImage::ImgColor_YUVA: {
             size_t aDelimX = (theImage.getPlane(1).getSizeX() > 0) ? (aPlane0.getSizeX() / theImage.getPlane(1).getSizeX()) : 1;
             size_t aDelimY = (theImage.getPlane(1).getSizeY() > 0) ? (aPlane0.getSizeY() / theImage.getPlane(1).getSizeY()) : 1;
             if(theImage.getPlane(1).getFormat() == StImagePlane::ImgUV) {
@@ -482,7 +483,7 @@ bool StAVImage::loadExtra(const StString& theFilePath,
             aDimsYUV.isFullScale = true;
         }
     #endif
-        setColorModel(StImage::ImgColor_YUV);
+        setColorModel(aDimsYUV.hasAlpha ? StImage::ImgColor_YUVA : StImage::ImgColor_YUV);
         setColorScale(aDimsYUV.isFullScale ? StImage::ImgScale_Full : StImage::ImgScale_Mpeg);
         StImagePlane::ImgFormat aPlaneFrmt = StImagePlane::ImgGray;
         if(aDimsYUV.bitsPerComp == 9) {
@@ -501,6 +502,10 @@ bool StAVImage::loadExtra(const StString& theFilePath,
                                    size_t(aDimsYUV.widthU), size_t(aDimsYUV.heightU), myFrame.getLineSize(1));
         changePlane(2).initWrapper(aPlaneFrmt, myFrame.getPlane(2),
                                    size_t(aDimsYUV.widthV), size_t(aDimsYUV.heightV), myFrame.getLineSize(2));
+        if(aDimsYUV.hasAlpha) {
+            changePlane(3).initWrapper(aPlaneFrmt, myFrame.getPlane(3),
+                                       size_t(aDimsYUV.widthY), size_t(aDimsYUV.heightY), myFrame.getLineSize(3));
+        }
     } else {
         ///ST_DEBUG_LOG("StAVImage, perform conversion from Pixel format '" + avcodec_get_pix_fmt_name(myCodecCtx->pix_fmt) + "' to RGB");
         // initialize software scaler/converter

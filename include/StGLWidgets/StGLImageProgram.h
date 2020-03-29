@@ -71,11 +71,17 @@ class StGLImageProgram : public StGLProgramMatrix<1, 5, StGLMeshProgram> {
         FragToRgb_FromGray,
         FragToRgb_FromXyz,
         FragToRgb_FromYuvFull,
+        FragToRgb_FromYuvaFull,
         FragToRgb_FromYuvMpeg,
+        FragToRgb_FromYuvaMpeg,
         FragToRgb_FromYuv9Full,
+        FragToRgb_FromYuva9Full,
         FragToRgb_FromYuv9Mpeg,
+        FragToRgb_FromYuva9Mpeg,
         FragToRgb_FromYuv10Full,
+        FragToRgb_FromYuva10Full,
         FragToRgb_FromYuv10Mpeg,
+        FragToRgb_FromYuva10Mpeg,
         FragToRgb_FromYuvNvFull,
         FragToRgb_FromYuvNvMpeg,
         FragToRgb_CUBEMAP,
@@ -114,6 +120,9 @@ class StGLImageProgram : public StGLProgramMatrix<1, 5, StGLMeshProgram> {
 
     ST_CPPEXPORT void setTextureUVDataSize(StGLContext&    theCtx,
                                            const StGLVec4& theTexDataVec4);
+
+    ST_CPPEXPORT void setTextureADataSize(StGLContext&    theCtx,
+                                          const StGLVec4& theTexDataVec4);
 
     ST_CPPEXPORT void setCubeTextureFlipZ(StGLContext&    theCtx,
                                           bool theToFlip);
@@ -164,6 +173,7 @@ class StGLImageProgram : public StGLProgramMatrix<1, 5, StGLMeshProgram> {
 
     StGLVarLocation uniTexMainDataLoc;
     StGLVarLocation uniTexUVDataLoc;
+    StGLVarLocation uniTexADataLoc;
     StGLVarLocation uniTexSizePxLoc;
     StGLVarLocation uniTexelSizePxLoc;
     StGLVarLocation uniTexCubeFlipZLoc;

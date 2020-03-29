@@ -633,9 +633,11 @@ void StGLImageRegion::stglDrawView(unsigned int theView) {
                             GLfloat(aTextures.getPlane(0).getSizeY()));
     StGLVec2 aTextureUVSize(GLfloat(aTextures.getPlane(1).getSizeX()),
                             GLfloat(aTextures.getPlane(1).getSizeY()));
+    StGLVec2 aTextureASize (GLfloat(aTextures.getPlane(3).getSizeX()),
+                            GLfloat(aTextures.getPlane(3).getSizeY()));
     StGLMatrix aModelMat;
     // data rectangle in the texture
-    StGLVec4 aClampVec, aClampUV;
+    StGLVec4 aClampVec, aClampUV, aClampA;
     if(params.TextureFilter->getValue() == StGLImageProgram::FILTER_NEAREST) {
         myTextureQueue->getQTexture().setMinMagFilter(aCtx, GL_NEAREST);
         //
@@ -648,6 +650,11 @@ void StGLImageRegion::stglDrawView(unsigned int theView) {
         aClampUV.y() = 0.0f;
         aClampUV.z() = aTextures.getPlane(1).getDataSize().x();
         aClampUV.w() = aTextures.getPlane(1).getDataSize().y();
+        // Alpha
+        aClampA.x() = 0.0f;
+        aClampA.y() = 0.0f;
+        aClampA.z() = aTextures.getPlane(3).getDataSize().x();
+        aClampA.w() = aTextures.getPlane(3).getDataSize().y();
     } else {
         if(params.TextureFilter->getValue() == StGLImageProgram::FILTER_TRILINEAR) {
             myTextureQueue->getQTexture().setMinMagFilter(aCtx, GL_LINEAR_MIPMAP_LINEAR, GL_LINEAR);
@@ -666,6 +673,14 @@ void StGLImageRegion::stglDrawView(unsigned int theView) {
             aClampUV.y() = 0.5f / aTextureUVSize.y(),
             aClampUV.z() = aTextures.getPlane(1).getDataSize().x() - 2.0f * aClampUV.x();
             aClampUV.w() = aTextures.getPlane(1).getDataSize().y() - 2.0f * aClampUV.y();
+        }
+        // Alpha
+        if(aTextureASize.x() > 0.0f
+        && aTextureASize.y() > 0.0f) {
+            aClampA.x() = 0.5f / aTextureASize.x();
+            aClampA.y() = 0.5f / aTextureASize.y(),
+            aClampA.z() = aTextures.getPlane(3).getDataSize().x() - 2.0f * aClampA.x();
+            aClampA.w() = aTextures.getPlane(3).getDataSize().y() - 2.0f * aClampA.y();
         }
     }
     aTextures.bind(aCtx);
@@ -894,6 +909,7 @@ void StGLImageRegion::stglDrawView(unsigned int theView) {
                 myProgram.setTextureSizePx      (aCtx, aTextureSize);
                 myProgram.setTextureMainDataSize(aCtx, aClampVec);
                 myProgram.setTextureUVDataSize  (aCtx, aClampUV);
+                myProgram.setTextureADataSize   (aCtx, aClampA);
 
                 StGLMatrix anOrthoMat;
                 anOrthoMat.initOrtho(StGLVolume(-aRectRatio * aFrustrumL, aRectRatio * aFrustrumR,
@@ -924,6 +940,7 @@ void StGLImageRegion::stglDrawView(unsigned int theView) {
             myProgram.setTextureSizePx      (aCtx, aTextureSize);
             myProgram.setTextureMainDataSize(aCtx, aClampVec);
             myProgram.setTextureUVDataSize  (aCtx, aClampUV);
+            myProgram.setTextureADataSize   (aCtx, aClampA);
             myProgram.setCubeTextureFlipZ   (aCtx, aParams->ToFlipCubeZ);
 
             const float aScale = THE_PANORAMA_DEF_ZOOM * aParams->ScaleFactor * aVrScale;
@@ -991,6 +1008,7 @@ void StGLImageRegion::stglDrawView(unsigned int theView) {
             myProgram.setTextureSizePx      (aCtx, aTextureSize);
             myProgram.setTextureMainDataSize(aCtx, aClampVec);
             myProgram.setTextureUVDataSize  (aCtx, aClampUV);
+            myProgram.setTextureADataSize   (aCtx, aClampA);
 
             myProgram.getActiveProgram()->setProjMat (aCtx, myProjCam.getProjMatrixMono());
             myProgram.getActiveProgram()->setModelMat(aCtx, aModelMat);

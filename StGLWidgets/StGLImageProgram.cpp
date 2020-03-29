@@ -120,23 +120,27 @@ void StGLImageProgram::registerFragments(const StGLContext& theCtx) {
         "}\n\n");
 
     registerFragmentShaderPart(FragSection_ToRgb, FragToRgb_FromRgb,
-        "void convertToRGB(inout vec4 color, in vec3 texCoord) {}\n\n");
+        "void convertToRGB(inout vec4 color, in vec3 texCoord, in vec3 texCoordA) {}\n\n");
 
-    registerFragmentShaderPart(FragSection_ToRgb, FragToRgb_FromRgba,
-        "void convertToRGB(inout vec4 color, in vec3 texCoord) {\n"
-        "    vec4 backColor;\n"
-        "    bool evenX = int(mod(floor(gl_FragCoord.x + 1.5), 16.0)) >= 8;\n" // just simple 8 pixels check-board
-        "    bool evenY = int(mod(floor(gl_FragCoord.y + 1.5), 16.0)) >= 8;\n"
-        "    if((evenX && evenY) || (!evenX && !evenY)) {\n"
-        "        backColor = vec4(0.4, 0.4, 0.4, 1.0);\n"
-        "    } else {\n"
-        "        backColor = vec4(0.6, 0.6, 0.6, 1.0);\n"
-        "    }\n"
-        "    color = mix(backColor, color, color.a);\n"
+    const char F_ALPHA_BACKGROUND[] =
+        "void drawAlphaBackground(inout vec4 theColor) {\n"
+        "    bool anEvenX = int(mod(floor(gl_FragCoord.x + 1.5), 16.0)) >= 8;\n" // just simple 8 pixels check-board
+        "    bool anEvenY = int(mod(floor(gl_FragCoord.y + 1.5), 16.0)) >= 8;\n"
+        "    vec4 aBackColor = vec4(0.6, 0.6, 0.6, 1.0);\n"
+        "    if((anEvenX && anEvenY) || (!anEvenX && !anEvenY)) {\n"
+        "        aBackColor = vec4(0.4, 0.4, 0.4, 1.0);\n"
+        "    };\n"
+        "    theColor = mix(aBackColor, theColor, theColor.a);\n"
+        "}\n\n";
+
+    registerFragmentShaderPart(FragSection_ToRgb, FragToRgb_FromRgba, StString()
+      + F_ALPHA_BACKGROUND
+      + "void convertToRGB(inout vec4 color, in vec3 texCoord, in vec3 texCoordA) {\n"
+        "    drawAlphaBackground(color);\n"
         "}\n\n");
 
     regToRgb(theCtx, FragToRgb_FromGray,
-        "void convertToRGB(inout vec4 color, in vec3 texCoord) {\n"
+        "void convertToRGB(inout vec4 color, in vec3 texCoord, in vec3 texCoordA) {\n"
         "    color.r = color.stAlpha;\n" // gray scale stored in alpha
         "    color.g = color.stAlpha;\n"
         "    color.b = color.stAlpha;\n"
@@ -151,7 +155,7 @@ void StGLImageProgram::registerFragments(const StGLContext& theCtx) {
        "                                        0.0,        0.0,        0.0, 1.0);"
        "const vec4 THE_GAMMA_XYZ =       vec4(2.6, 2.6, 2.6, 1.0);"
        "const vec4 THE_GAMMA_RGB = 1.0 / vec4(2.2, 2.2, 2.2, 1.0);"
-       "void convertToRGB(inout vec4 theColor, in vec3 texCoord) {\n"
+       "void convertToRGB(inout vec4 theColor, in vec3 texCoord, in vec3 texCoordA) {\n"
        "    vec4 aColor = pow(theColor, THE_GAMMA_XYZ);"
        "    aColor = THE_XYZ2RGB_MAT * aColor;\n"
        "    aColor = pow(aColor, THE_GAMMA_RGB);"
@@ -161,7 +165,7 @@ void StGLImageProgram::registerFragments(const StGLContext& theCtx) {
     const char F_SHADER_YUV2RGB_MPEG[] =
        "uniform stSampler uTextureU;\n"
        "uniform stSampler uTextureV;\n"
-       "void convertToRGB(inout vec4 color, in vec3 texCoordUV) {\n"
+       "void convertToRGB(inout vec4 color, in vec3 texCoordUV, in vec3 texCoordA) {\n"
        "    vec3 colorYUV = vec3(color.stAlpha, stTexture(uTextureU, texCoordUV).stAlpha, stTexture(uTextureV, texCoordUV).stAlpha);\n"
        "    colorYUV   *= TheRangeBits;\n"
        "    colorYUV.x  = 1.1643 * (colorYUV.x - 0.0625);\n"
@@ -172,10 +176,27 @@ void StGLImageProgram::registerFragments(const StGLContext& theCtx) {
        "    color.b = colorYUV.x +   2.017 * colorYUV.y;\n"
        "}\n\n";
 
+    const char F_SHADER_YUVA2RGB_MPEG[] =
+       "uniform stSampler uTextureU;\n"
+       "uniform stSampler uTextureV;\n"
+       "uniform stSampler uTextureA;\n"
+       "void convertToRGB(inout vec4 color, in vec3 texCoordUV, in vec3 texCoordA) {\n"
+       "    vec3 colorYUV = vec3(color.stAlpha, stTexture(uTextureU, texCoordUV).stAlpha, stTexture(uTextureV, texCoordUV).stAlpha);\n"
+       "    colorYUV   *= TheRangeBits;\n"
+       "    colorYUV.x  = 1.1643 * (colorYUV.x - 0.0625);\n"
+       "    colorYUV.y -= 0.5;\n"
+       "    colorYUV.z -= 0.5;\n"
+       "    color.r = colorYUV.x +  1.5958 * colorYUV.z;\n"
+       "    color.g = colorYUV.x - 0.39173 * colorYUV.y - 0.81290 * colorYUV.z;\n"
+       "    color.b = colorYUV.x +   2.017 * colorYUV.y;\n"
+       "    color.a = stTexture(uTextureA, texCoordA).stAlpha;\n" // TODO how to handle TheRangeBits?
+       "    drawAlphaBackground(color);\n"
+       "}\n\n";
+
     const char F_SHADER_YUV2RGB_FULL[] =
        "uniform stSampler uTextureU;\n"
        "uniform stSampler uTextureV;\n"
-       "void convertToRGB(inout vec4 color, in vec3 texCoordUV) {\n"
+       "void convertToRGB(inout vec4 color, in vec3 texCoordUV, in vec3 texCoordA) {\n"
        "    vec3 colorYUV = vec3(color.stAlpha, stTexture(uTextureU, texCoordUV).stAlpha, stTexture(uTextureV, texCoordUV).stAlpha);\n"
        "    colorYUV   *= TheRangeBits;\n"
        "    colorYUV.x  = colorYUV.x;\n"
@@ -186,9 +207,26 @@ void StGLImageProgram::registerFragments(const StGLContext& theCtx) {
        "    color.b = colorYUV.x + 1.772 * colorYUV.y;\n"
        "}\n\n";
 
+    const char F_SHADER_YUVA2RGB_FULL[] =
+       "uniform stSampler uTextureU;\n"
+       "uniform stSampler uTextureV;\n"
+       "uniform stSampler uTextureA;\n"
+       "void convertToRGB(inout vec4 color, in vec3 texCoordUV, in vec3 texCoordA) {\n"
+       "    vec3 colorYUV = vec3(color.stAlpha, stTexture(uTextureU, texCoordUV).stAlpha, stTexture(uTextureV, texCoordUV).stAlpha);\n"
+       "    colorYUV   *= TheRangeBits;\n"
+       "    colorYUV.x  = colorYUV.x;\n"
+       "    colorYUV.y -= 0.5;\n"
+       "    colorYUV.z -= 0.5;\n"
+       "    color.r = colorYUV.x + 1.402 * colorYUV.z;\n"
+       "    color.g = colorYUV.x - 0.344 * colorYUV.y - 0.714 * colorYUV.z;\n"
+       "    color.b = colorYUV.x + 1.772 * colorYUV.y;\n"
+       "    color.a = stTexture(uTextureA, texCoordA).stAlpha;\n" // TODO how to handle TheRangeBits?
+       "    drawAlphaBackground(color);\n"
+       "}\n\n";
+
     const char F_SHADER_YUVNV2RGB_MPEG[] =
        "uniform stSampler uTextureU;\n"
-       "void convertToRGB(inout vec4 color, in vec3 texCoordUV) {\n"
+       "void convertToRGB(inout vec4 color, in vec3 texCoordUV, in vec3 texCoordA) {\n"
        "    vec3 colorYUV = vec3(color.a, stTexture(uTextureU, texCoordUV).r, stTexture(uTextureU, texCoordUV).a);\n"
        "    colorYUV   *= TheRangeBits;\n"
        "    colorYUV.x  = 1.1643 * (colorYUV.x - 0.0625);\n"
@@ -201,7 +239,7 @@ void StGLImageProgram::registerFragments(const StGLContext& theCtx) {
 
     const char F_SHADER_YUVNV2RGB_FULL[] =
        "uniform stSampler uTextureU;\n"
-       "void convertToRGB(inout vec4 color, in vec3 texCoordUV) {\n"
+       "void convertToRGB(inout vec4 color, in vec3 texCoordUV, in vec3 texCoordA) {\n"
        "    vec3 colorYUV = vec3(color.a, stTexture(uTextureU, texCoordUV).r, stTexture(uTextureU, texCoordUV).a);\n"
        "    colorYUV   *= TheRangeBits;\n"
        "    colorYUV.x  = colorYUV.x;\n"
@@ -216,25 +254,55 @@ void StGLImageProgram::registerFragments(const StGLContext& theCtx) {
         + "const float TheRangeBits = 1.0;\n"
         + F_SHADER_YUV2RGB_FULL);
 
+    regToRgb(theCtx, FragToRgb_FromYuvaFull, StString()
+        + "const float TheRangeBits = 1.0;\n"
+        + F_ALPHA_BACKGROUND
+        + F_SHADER_YUVA2RGB_FULL);
+
     regToRgb(theCtx, FragToRgb_FromYuvMpeg, StString()
         + "const float TheRangeBits = 1.0;\n"
         + F_SHADER_YUV2RGB_MPEG);
+
+    regToRgb(theCtx, FragToRgb_FromYuvaMpeg, StString()
+        + "const float TheRangeBits = 1.0;\n"
+        + F_ALPHA_BACKGROUND
+        + F_SHADER_YUVA2RGB_MPEG);
 
     regToRgb(theCtx, FragToRgb_FromYuv9Full, StString()
         + "const float TheRangeBits = 65535.0 / 511.0;\n"
         + F_SHADER_YUV2RGB_FULL);
 
+    regToRgb(theCtx, FragToRgb_FromYuva9Full, StString()
+        + "const float TheRangeBits = 65535.0 / 511.0;\n"
+        + F_ALPHA_BACKGROUND
+        + F_SHADER_YUVA2RGB_FULL);
+
     regToRgb(theCtx, FragToRgb_FromYuv9Mpeg, StString()
         + "const float TheRangeBits = 65535.0 / 511.0;\n"
         + F_SHADER_YUV2RGB_MPEG);
+
+    regToRgb(theCtx, FragToRgb_FromYuva9Mpeg, StString()
+        + "const float TheRangeBits = 65535.0 / 511.0;\n"
+        + F_ALPHA_BACKGROUND
+        + F_SHADER_YUVA2RGB_MPEG);
 
     regToRgb(theCtx, FragToRgb_FromYuv10Full, StString()
         + "const float TheRangeBits = 65535.0 / 1023.0;\n"
         + F_SHADER_YUV2RGB_FULL);
 
+    regToRgb(theCtx, FragToRgb_FromYuva10Full, StString()
+        + "const float TheRangeBits = 65535.0 / 1023.0;\n"
+        + F_ALPHA_BACKGROUND
+        + F_SHADER_YUVA2RGB_FULL);
+
     regToRgb(theCtx, FragToRgb_FromYuv10Mpeg, StString()
         + "const float TheRangeBits = 65535.0 / 1023.0;\n"
         + F_SHADER_YUV2RGB_MPEG);
+
+    regToRgb(theCtx, FragToRgb_FromYuva10Mpeg, StString()
+        + "const float TheRangeBits = 65535.0 / 1023.0;\n"
+        + F_ALPHA_BACKGROUND
+        + F_SHADER_YUVA2RGB_MPEG);
 
     regToRgb(theCtx, FragToRgb_FromYuvNvFull, StString()
         + "const float TheRangeBits = 1.0;\n"
@@ -250,16 +318,19 @@ void StGLImageProgram::registerFragments(const StGLContext& theCtx) {
        "uniform mat4 uModelMat;\n"
        "uniform vec4 uTexData;\n"
        "uniform vec4 uTexUVData;\n"
+       "uniform vec4 uTexAData;\n"
 
        "attribute vec4 vVertex;\n"
        "attribute vec2 vTexCoord;\n"
 
        "varying vec3 fTexCoord;\n"
        "varying vec3 fTexUVCoord;\n"
+       "varying vec3 fTexACoord;\n"
 
        "void main(void) {\n"
        "    fTexCoord   = vec3(uTexData.xy   + vTexCoord * uTexData.zw,   0.0);\n"
        "    fTexUVCoord = vec3(uTexUVData.xy + vTexCoord * uTexUVData.zw, 0.0);\n"
+       "    fTexACoord  = vec3(uTexAData.xy  + vTexCoord * uTexAData.zw,  0.0);\n"
        "    gl_Position = uProjMat * uModelMat * vVertex;\n"
        "}\n";
 
@@ -268,6 +339,7 @@ void StGLImageProgram::registerFragments(const StGLContext& theCtx) {
        "uniform mat4 uModelMat;\n"
        "uniform vec4 uTexData;\n"
        "uniform vec4 uTexUVData;\n"
+       "uniform vec4 uTexAData;\n"
        "uniform float uTexCubeFlipZ;\n"
 
        "attribute vec4 vVertex;\n"
@@ -275,6 +347,7 @@ void StGLImageProgram::registerFragments(const StGLContext& theCtx) {
 
        "varying vec3 fTexCoord;\n"
        "varying vec3 fTexUVCoord;\n"
+       "varying vec3 fTexACoord;\n"
 
        "void main(void) {\n"
        "    gl_Position = vec4(vVertex.x, vVertex.y, 0.0, 1.0);\n"
@@ -282,16 +355,18 @@ void StGLImageProgram::registerFragments(const StGLContext& theCtx) {
        "    aTCoord.z  *= uTexCubeFlipZ;"
        "    fTexCoord   = aTCoord;"
        "    fTexUVCoord = aTCoord;"
+       "    fTexACoord  = aTCoord;"
        "}\n";
 
     const char F_SHADER_FLAT[] =
        "varying vec3 fTexCoord;\n"
        "varying vec3 fTexUVCoord;\n"
+       "varying vec3 fTexACoord;\n"
         // we split these functions for two reasons:
         // - to change function code (like color conversion);
         // - to optimize rendering on old hardware not supported conditions (GeForce FX for example).
        "vec4 getColor(in vec3 texCoord);\n"
-       "void convertToRGB(inout vec4 theColor, in vec3 theTexUVCoord);\n"
+       "void convertToRGB(inout vec4 theColor, in vec3 theTexUVCoord, in vec3 texCoordA);\n"
        "void applyCorrection(inout vec4 theColor);\n"
        "void applyGamma(inout vec4 theColor);\n"
 
@@ -299,7 +374,7 @@ void StGLImageProgram::registerFragments(const StGLContext& theCtx) {
             // extract color from main texture
        "    vec4 aColor = getColor(fTexCoord);\n"
             // convert from alien color model (like YUV) to RGB
-       "    convertToRGB(aColor, fTexUVCoord);\n"
+       "    convertToRGB(aColor, fTexUVCoord, fTexACoord);\n"
             // color processing (saturation, brightness, etc)
        "    applyCorrection(aColor);\n"
             // gamma correction
@@ -332,6 +407,11 @@ void StGLImageProgram::setTextureUVDataSize(StGLContext&    theCtx,
     theCtx.core20fwd->glUniform4fv(uniTexUVDataLoc, 1, theTexDataVec4);
 }
 
+void StGLImageProgram::setTextureADataSize(StGLContext&    theCtx,
+                                           const StGLVec4& theTexDataVec4) {
+  theCtx.core20fwd->glUniform4fv(uniTexADataLoc, 1, theTexDataVec4);
+}
+
 void StGLImageProgram::setCubeTextureFlipZ(StGLContext& theCtx,
                                            bool theToFlip) {
     theCtx.core20fwd->glUniform1f(uniTexCubeFlipZLoc, theToFlip ? 1.0f : -1.0f);
@@ -361,18 +441,20 @@ static inline StGLImageProgram::FragToRgb getColorShader(const StImage::ImgColor
         case StImage::ImgColor_RGBA: return StGLImageProgram::FragToRgb_FromRgba;
         case StImage::ImgColor_GRAY: return StGLImageProgram::FragToRgb_FromGray;
         case StImage::ImgColor_XYZ:  return StGLImageProgram::FragToRgb_FromXyz;
-        case StImage::ImgColor_YUV: {
+        case StImage::ImgColor_YUV:
+        case StImage::ImgColor_YUVA: {
+            const bool hasAlpha = theColorModel == StImage::ImgColor_YUVA;
             switch(theColorScale) {
-                case StImage::ImgScale_Mpeg9:  return StGLImageProgram::FragToRgb_FromYuv9Mpeg;
-                case StImage::ImgScale_Mpeg10: return StGLImageProgram::FragToRgb_FromYuv10Mpeg;
-                case StImage::ImgScale_Jpeg9:  return StGLImageProgram::FragToRgb_FromYuv9Full;
-                case StImage::ImgScale_Jpeg10: return StGLImageProgram::FragToRgb_FromYuv10Full;
-                case StImage::ImgScale_Mpeg:   return StGLImageProgram::FragToRgb_FromYuvMpeg;
-                case StImage::ImgScale_Full:   return StGLImageProgram::FragToRgb_FromYuvFull;
+                case StImage::ImgScale_Mpeg9:  return hasAlpha ? StGLImageProgram::FragToRgb_FromYuva9Mpeg  : StGLImageProgram::FragToRgb_FromYuv9Mpeg;
+                case StImage::ImgScale_Mpeg10: return hasAlpha ? StGLImageProgram::FragToRgb_FromYuva10Mpeg : StGLImageProgram::FragToRgb_FromYuv10Mpeg;
+                case StImage::ImgScale_Jpeg9:  return hasAlpha ? StGLImageProgram::FragToRgb_FromYuva9Full  : StGLImageProgram::FragToRgb_FromYuv9Full;
+                case StImage::ImgScale_Jpeg10: return hasAlpha ? StGLImageProgram::FragToRgb_FromYuva10Full : StGLImageProgram::FragToRgb_FromYuv10Full;
+                case StImage::ImgScale_Mpeg:   return hasAlpha ? StGLImageProgram::FragToRgb_FromYuvaMpeg   : StGLImageProgram::FragToRgb_FromYuvMpeg;
+                case StImage::ImgScale_Full:   return hasAlpha ? StGLImageProgram::FragToRgb_FromYuvaFull   : StGLImageProgram::FragToRgb_FromYuvFull;
                 case StImage::ImgScale_NvMpeg: return StGLImageProgram::FragToRgb_FromYuvNvMpeg;
                 case StImage::ImgScale_NvFull: return StGLImageProgram::FragToRgb_FromYuvNvFull;
             }
-            return StGLImageProgram::FragToRgb_FromYuvFull;
+            return hasAlpha ? StGLImageProgram::FragToRgb_FromYuvaFull : StGLImageProgram::FragToRgb_FromYuvFull;
         }
         default: {
             ST_DEBUG_LOG("No GLSL shader for this color model = " + theColorModel);
@@ -415,6 +497,7 @@ bool StGLImageProgram::init(StGLContext&                 theCtx,
         myActiveProgram->uniModelMatLoc = myActiveProgram->getUniformLocation(theCtx, "uModelMat");
         uniTexMainDataLoc     = myActiveProgram->getUniformLocation(theCtx, "uTexData");
         uniTexUVDataLoc       = myActiveProgram->getUniformLocation(theCtx, "uTexUVData");
+        uniTexADataLoc        = myActiveProgram->getUniformLocation(theCtx, "uTexAData");
         uniTexSizePxLoc       = myActiveProgram->getUniformLocation(theCtx, "uTexSizePx");
         uniTexelSizePxLoc     = myActiveProgram->getUniformLocation(theCtx, "uTexelSize");
         uniTexCubeFlipZLoc    = myActiveProgram->getUniformLocation(theCtx, "uTexCubeFlipZ");
@@ -426,10 +509,12 @@ bool StGLImageProgram::init(StGLContext&                 theCtx,
         StGLVarLocation uniTextureLoc  = myActiveProgram->getUniformLocation(theCtx, "uTexture");
         StGLVarLocation uniTextureULoc = myActiveProgram->getUniformLocation(theCtx, "uTextureU");
         StGLVarLocation uniTextureVLoc = myActiveProgram->getUniformLocation(theCtx, "uTextureV");
+        StGLVarLocation uniTextureALoc = myActiveProgram->getUniformLocation(theCtx, "uTextureA");
         myActiveProgram->use(theCtx);
         theCtx.core20fwd->glUniform1i(uniTextureLoc,  StGLProgram::TEXTURE_SAMPLE_0);
         theCtx.core20fwd->glUniform1i(uniTextureULoc, StGLProgram::TEXTURE_SAMPLE_1);
         theCtx.core20fwd->glUniform1i(uniTextureVLoc, StGLProgram::TEXTURE_SAMPLE_2);
+        theCtx.core20fwd->glUniform1i(uniTextureALoc, StGLProgram::TEXTURE_SAMPLE_3);
         myActiveProgram->unuse(theCtx);
 
         /*if (!uniModelMatLoc.isValid()

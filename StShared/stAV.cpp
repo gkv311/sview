@@ -1,5 +1,5 @@
 /**
- * Copyright © 2011-2016 Kirill Gavrilov <kirill@sview.ru>
+ * Copyright © 2011-2020 Kirill Gavrilov <kirill@sview.ru>
  *
  * Distributed under the Boost Software License, Version 1.0.
  * See accompanying file license-boost.txt or copy at
@@ -105,11 +105,14 @@ const int64_t stAV::NOPTS_VALUE = 0x8000000000000000LL;
 #endif
 const AVPixelFormat stAV::PIX_FMT::NONE       = AVPixelFormat(-1);
 const AVPixelFormat stAV::PIX_FMT::YUV420P    = AVPixelFormat( 0);
+const AVPixelFormat stAV::PIX_FMT::YUVA420P   = ST_AV_GETPIXFMT("yuva420p");
 const AVPixelFormat stAV::PIX_FMT::PAL8       = ST_AV_GETPIXFMT("pal8");
 const AVPixelFormat stAV::PIX_FMT::GRAY8      = ST_AV_GETPIXFMT("gray");
 const AVPixelFormat stAV::PIX_FMT::GRAY16     = ST_AV_GETPIXFMT("gray16");
 const AVPixelFormat stAV::PIX_FMT::YUV422P    = ST_AV_GETPIXFMT("yuv422p");
+const AVPixelFormat stAV::PIX_FMT::YUVA422P   = ST_AV_GETPIXFMT("yuva422p");
 const AVPixelFormat stAV::PIX_FMT::YUV444P    = ST_AV_GETPIXFMT("yuv444p");
+const AVPixelFormat stAV::PIX_FMT::YUVA444P   = ST_AV_GETPIXFMT("yuva444p");
 const AVPixelFormat stAV::PIX_FMT::YUV410P    = ST_AV_GETPIXFMT("yuv410p");
 const AVPixelFormat stAV::PIX_FMT::YUV411P    = ST_AV_GETPIXFMT("yuv411p");
 const AVPixelFormat stAV::PIX_FMT::YUV440P    = ST_AV_GETPIXFMT("yuv440p");
@@ -155,6 +158,8 @@ StCString stAV::PIX_FMT::getString(const AVPixelFormat theFrmt) {
         return stCString("none");
     } else if(theFrmt == stAV::PIX_FMT::YUV420P) {
         return stCString("yuv420p");
+    } else if(theFrmt == stAV::PIX_FMT::YUVA420P) {
+        return stCString("yuva420p");
     } else if(theFrmt == stAV::PIX_FMT::PAL8) {
         return stCString("pal8");
     } else if(theFrmt == stAV::PIX_FMT::GRAY8) {
@@ -163,8 +168,12 @@ StCString stAV::PIX_FMT::getString(const AVPixelFormat theFrmt) {
         return stCString("gray16");
     } else if(theFrmt == stAV::PIX_FMT::YUV422P) {
         return stCString("yuv422p");
+    } else if(theFrmt == stAV::PIX_FMT::YUVA422P) {
+        return stCString("yuva422p");
     } else if(theFrmt == stAV::PIX_FMT::YUV444P) {
         return stCString("yuv444p");
+    } else if(theFrmt == stAV::PIX_FMT::YUVA444P) {
+        return stCString("yuva444p");
     } else if(theFrmt == stAV::PIX_FMT::YUV410P) {
         return stCString("yuv410p");
     } else if(theFrmt == stAV::PIX_FMT::YUV411P) {
@@ -305,10 +314,13 @@ bool stAV::init() {
 
 bool stAV::isFormatYUVPlanar(const AVCodecContext* theCtx) {
     return theCtx->pix_fmt == stAV::PIX_FMT::YUV420P
+        || theCtx->pix_fmt == stAV::PIX_FMT::YUVA420P
         || theCtx->pix_fmt == stAV::PIX_FMT::YUVJ420P
         || theCtx->pix_fmt == stAV::PIX_FMT::YUV422P
+        || theCtx->pix_fmt == stAV::PIX_FMT::YUVA422P
         || theCtx->pix_fmt == stAV::PIX_FMT::YUVJ422P
         || theCtx->pix_fmt == stAV::PIX_FMT::YUV444P
+        || theCtx->pix_fmt == stAV::PIX_FMT::YUVA444P
         || theCtx->pix_fmt == stAV::PIX_FMT::YUVJ444P
         || theCtx->pix_fmt == stAV::PIX_FMT::YUV440P
         || theCtx->pix_fmt == stAV::PIX_FMT::YUVJ440P
@@ -332,6 +344,7 @@ bool stAV::isFormatYUVPlanar(const AVPixelFormat thePixFmt,
     if(thePixFmt == stAV::PIX_FMT::NONE) {
         return false;
     } else if(thePixFmt == stAV::PIX_FMT::YUV420P
+           || thePixFmt == stAV::PIX_FMT::YUVA420P
            || thePixFmt == stAV::PIX_FMT::YUVJ420P
            || thePixFmt == stAV::PIX_FMT::YUV420P9
            || thePixFmt == stAV::PIX_FMT::YUV420P10
@@ -341,7 +354,9 @@ bool stAV::isFormatYUVPlanar(const AVPixelFormat thePixFmt,
         theDims.widthU  = theDims.widthV  = theDims.widthY  / 2;
         theDims.heightU = theDims.heightV = theDims.heightY / 2;
         theDims.isFullScale = (thePixFmt == stAV::PIX_FMT::YUVJ420P);
+        theDims.hasAlpha = thePixFmt == stAV::PIX_FMT::YUVA420P;
     } else if(thePixFmt == stAV::PIX_FMT::YUV422P
+           || thePixFmt == stAV::PIX_FMT::YUVA422P
            || thePixFmt == stAV::PIX_FMT::YUVJ422P
            || thePixFmt == stAV::PIX_FMT::YUV422P9
            || thePixFmt == stAV::PIX_FMT::YUV422P10
@@ -350,7 +365,9 @@ bool stAV::isFormatYUVPlanar(const AVPixelFormat thePixFmt,
         theDims.heightY = theDims.heightU = theDims.heightV = theHeight;
         theDims.widthU  = theDims.widthV  = theDims.widthY  / 2;
         theDims.isFullScale = (thePixFmt == stAV::PIX_FMT::YUVJ422P);
+        theDims.hasAlpha = false;
     } else if(thePixFmt == stAV::PIX_FMT::YUV444P
+           || thePixFmt == stAV::PIX_FMT::YUVA444P
            || thePixFmt == stAV::PIX_FMT::YUVJ444P
            || thePixFmt == stAV::PIX_FMT::YUV444P9
            || thePixFmt == stAV::PIX_FMT::YUV444P10
@@ -358,23 +375,27 @@ bool stAV::isFormatYUVPlanar(const AVPixelFormat thePixFmt,
         theDims.widthY  = theDims.widthU  = theDims.widthV  = theWidth;
         theDims.heightY = theDims.heightU = theDims.heightV = theHeight;
         theDims.isFullScale = (thePixFmt == stAV::PIX_FMT::YUVJ444P);
+        theDims.hasAlpha = false;
     } else if(thePixFmt == stAV::PIX_FMT::YUV440P
            || thePixFmt == stAV::PIX_FMT::YUVJ440P) {
         theDims.widthY  = theDims.widthU  = theDims.widthV  = theWidth;
         theDims.heightY = theHeight;
         theDims.heightU = theDims.heightV = theDims.heightY / 2;
         theDims.isFullScale = (thePixFmt == stAV::PIX_FMT::YUVJ440P);
+        theDims.hasAlpha = false;
     } else if(thePixFmt == stAV::PIX_FMT::YUV411P) {
         theDims.widthY  = theDims.widthU  = theDims.widthV  = theWidth;
         theDims.heightY = theDims.heightU = theDims.heightV = theHeight;
         theDims.widthU  = theDims.widthV  = theDims.widthY  / 4;
         theDims.isFullScale = false;
+        theDims.hasAlpha = false;
     } else if(thePixFmt == stAV::PIX_FMT::YUV410P) {
         theDims.widthY  = theDims.widthU  = theDims.widthV  = theWidth;
         theDims.heightY = theHeight;
         theDims.widthU  = theDims.widthV  = theDims.widthY  / 4;
         theDims.heightU = theDims.heightV = theDims.heightY / 4;
         theDims.isFullScale = false;
+        theDims.hasAlpha = false;
     } else {
         return false;
     }
