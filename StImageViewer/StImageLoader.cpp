@@ -703,8 +703,9 @@ bool StImageLoader::saveImage(const StHandle<StFileNode>&     theSource,
         if(toSave) {
             ST_DEBUG_LOG("Save snapshot to the path '" + aFileToSave + '\'');
             StString strSaveState;
+            StPanorama aPano = StStereoParams::getPanoramaModeForViewSurface(theParams->ViewingMode);
             if(!aDataResult->save(aFileToSave, theImgType,
-                                  toSaveStereo ? StFormat_SideBySide_RL : StFormat_AUTO)) {
+                                  toSaveStereo ? StFormat_SideBySide_RL : StFormat_AUTO, aPano)) {
                 // TODO (Kirill Gavrilov#7)
                 myMsgQueue->pushError(aDataResult->getState());
                 return false;

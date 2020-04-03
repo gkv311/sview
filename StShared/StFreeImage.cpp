@@ -402,7 +402,8 @@ bool StFreeImage::loadExtra(const StString& theFilePath,
 
 bool StFreeImage::save(const StString& theFilePath,
                        ImageType       theImageType,
-                       StFormat ) {
+                       StFormat ,
+                       StPanorama ) {
     if(!StFreeImage::init()) {
         setState("FreeImage library is not initialized");
         return false;

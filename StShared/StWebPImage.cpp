@@ -214,6 +214,7 @@ bool StWebPImage::loadExtra(const StString& theFilePath,
 
 bool StWebPImage::save(const StString& /*theFilePath*/,
                        ImageType       /*theImageType*/,
-                       StFormat        /*theSrcFormat*/) {
+                       StFormat        /*theSrcFormat*/,
+                       StPanorama      /*thePanorama*/) {
     return false;
 }

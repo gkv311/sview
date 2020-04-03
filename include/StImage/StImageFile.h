@@ -160,7 +160,8 @@ class StImageFile : public StImage {
      */
     virtual bool save(const StString& theFilePath,
                       ImageType       theImageType,
-                      StFormat        theSrcFormat) = 0;
+                      StFormat        theSrcFormat,
+                      StPanorama      thePanorama) = 0;
 
         protected:
 

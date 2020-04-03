@@ -357,7 +357,7 @@ StHandle<StJpegParser::Image> StJpegParser::parseImage(const int      theImgCoun
             case M_JFIF: {
                 if(anItemLen >= 16
                 && stAreEqual(aData + 2, "JFIF\0", 5)) {
-                    myOffsets[Offset_Jfif] = aData - myBuffer - 2;
+                    myOffsets[Offset_APP0_Jfif] = aData - myBuffer - 2;
                     //const int8_t aVerMaj = (int8_t )aData[7];
                     //const int8_t aVerMin = (int8_t )aData[8];
                     const JfifUnitsXY aUnits = (JfifUnitsXY )aData[9];
@@ -380,10 +380,11 @@ StHandle<StJpegParser::Image> StJpegParser::parseImage(const int      theImgCoun
             }
             case M_EXIF:
             case M_APP2: {
-                myOffsets[aMarker == M_EXIF ? Offset_Exif : Offset_ExifExtra] = aData - myBuffer - 2;
+ST_DEBUG_LOG(" @@ Exif section " + aMarker); ///
                 // there can be different section using the same marker
                 if(stAreEqual(aData + 2, "Exif\0\0", 6)) {
                     //ST_DEBUG_LOG("Exif section...");
+                    myOffsets[Offset_APP1_Exif] = aData - myBuffer - 2;
                     StHandle<StExifDir> aSubDir = new StExifDir();
                     anImg->Exif.add(aSubDir);
                     if(!aSubDir->parseExif(anImg->Exif, aData + 8, anItemLen - 8)) {
@@ -391,6 +392,7 @@ StHandle<StJpegParser::Image> StJpegParser::parseImage(const int      theImgCoun
                     }
                 } else if(stAreEqual(aData + 2, "MPF\0", 4)) {
                     // MP Extensions (MPO)
+                    myOffsets[Offset_APP2_MPF] = aData - myBuffer - 2;
                     StHandle<StExifDir> aSubDir = new StExifDir();
                     aSubDir->Type = StExifDir::DType_MPO;
                     anImg->Exif.add(aSubDir);
@@ -399,9 +401,11 @@ StHandle<StJpegParser::Image> StJpegParser::parseImage(const int      theImgCoun
                     }
                 } else if(stAreEqual(aData + 2, "http:", 5)) {
                     //ST_DEBUG_LOG("Image cotains XMP section");
+                    myOffsets[Offset_APP1_XMP] = aData - myBuffer - 2;
                     if(stAreEqual(aData + 2, "http://ns.adobe.com/xap/1.0/", 28)) { // XMP basic namespace
                         myXMP = StString((char* )aData + 31, anItemLen - 31);
                         {
+ST_DEBUG_LOG("  XMP\n" + myXMP)
                           // GPano http://ns.google.com/photos/1.0/panorama/ namespace metadata.
                           // Note possible cropped panorama parameters are ignored by sView.
                           if(myXMP.isContains(stCString("<GPano:ProjectionType>equirectangular</GPano:ProjectionType>"))
@@ -427,7 +431,7 @@ StHandle<StJpegParser::Image> StJpegParser::parseImage(const int      theImgCoun
                 if(anItemLen >= 16
                 && stAreEqual(aData + 2, "_JPSJPS_", 8)) {
                     // outdated VRex section
-                    myOffsets[Offset_Jps] = aData - myBuffer - 2;
+                    myOffsets[Offset_APP3_Jps] = aData - myBuffer - 2;
                     //ST_DEBUG_LOG("Jpeg, _JPSJPS_ section (len= )" + anItemLen);
                     //const uint16_t aBlockLen   = StAlienData::Get16uBE(aData + 10);
                     const uint32_t aStereoDesc = StAlienData::Get32uBE(aData + 12);
@@ -511,6 +515,7 @@ bool StJpegParser::insertSection(const uint8_t   theMarker,
                                  const ptrdiff_t theOffset) {
     const size_t aDiff    = size_t(theSectLen) + 2; // 2 bytes for marker
     const size_t aNewSize = myLength + aDiff;
+    const size_t aTailSize = myLength - theOffset;
     if(aNewSize > myBuffSize) {
         myBuffSize = aNewSize + 256;
         stUByte_t* aNewData = stMemAllocAligned<stUByte_t*>(myBuffSize);
@@ -552,7 +557,6 @@ bool StJpegParser::insertSection(const uint8_t   theMarker,
     }
 
     // initialize new section
-    const size_t aTailSize = myLength - theOffset;
     std::memmove(myBuffer + theOffset + 2 + size_t(theSectLen),
                  myBuffer + theOffset,
                  aTailSize);
@@ -568,7 +572,7 @@ bool StJpegParser::setupJps(const StFormat theFormat) {
         return false;
     }
 
-    if(myOffsets[Offset_Jps] == 0) {
+    if(myOffsets[Offset_APP3_Jps] == 0) {
         if(myOffsets[Offset_Dqt] == 0) {
             return false;
         }
@@ -582,13 +586,16 @@ bool StJpegParser::setupJps(const StFormat theFormat) {
             return false;
         }
 
-        myOffsets[Offset_Jps] = anOffset;
+        myOffsets[Offset_APP3_Jps] = anOffset;
         stUByte_t* aData = myBuffer + anOffset + 2;
         stMemCpy(aData + 2, "_JPSJPS_", 8);
         StAlienData::Set16uBE(aData + 10, 4);
         StAlienData::Set32uBE(aData + 12, 0);
         StAlienData::Set16uBE(aData + 16, (uint16_t )THE_APP_DESC.Size);
         stMemCpy(aData + 18, THE_APP_DESC.String, THE_APP_DESC.Size + 1);
+
+        ///
+
     } else if(myStFormat == theFormat) {
         return false;
     }
@@ -620,7 +627,67 @@ bool StJpegParser::setupJps(const StFormat theFormat) {
             break;
     }
 
-    StAlienData::Set32uBE(myBuffer + myOffsets[Offset_Jps] + 2 + 8 + 2 + 2, aStereoDesc);
+    StAlienData::Set32uBE(myBuffer + myOffsets[Offset_APP3_Jps] + 2 + 8 + 2 + 2, aStereoDesc);
+    return true;
+}
+
+bool StJpegParser::setupGPano(const StPanorama theFormat) {
+    if(myBuffer == NULL
+    || myPanorama == theFormat) {
+        return false;
+    }
+
+    if(theFormat == StPanorama_OFF) {
+        if(myOffsets[Offset_APP1_XMP] == 0) {
+            return false;
+        }
+        // unsupported - need removing XMP
+        return false;
+    }
+
+    StString anXmpData =
+      "<?xpacket begin=\"\xEF\xBB\xBF\" id=\"W5M0MpCehiHzreSzNTczkc9d\"?>"
+      " <x:xmpmeta xmlns:x=\"adobe:ns:meta/\" x:xmptk=\"Ansel\">"
+      " <rdf:RDF xmlns:rdf=\"http://www.w3.org/1999/02/22-rdf-syntax-ns#\">"
+      " <rdf:Description xmlns:GPano=\"http://ns.google.com/photos/1.0/panorama/\" xmlns:xmp=\"http://ns.adobe.com/xap/1.0/\" rdf:about=\"\">"
+      " <GPano:UsePanoramaViewer>True</GPano:UsePanoramaViewer>"
+      " <GPano:ProjectionType>equirectangular</GPano:ProjectionType>"
+      " <GPano:CroppedAreaLeftPixels>0</GPano:CroppedAreaLeftPixels>"
+      " <GPano:CroppedAreaTopPixels>0</GPano:CroppedAreaTopPixels>"
+      " <GPano:CroppedAreaImageWidthPixels>8192</GPano:CroppedAreaImageWidthPixels>"
+      " <GPano:CroppedAreaImageHeightPixels>4096</GPano:CroppedAreaImageHeightPixels>"
+      " <GPano:FullPanoWidthPixels>8192</GPano:FullPanoWidthPixels>"
+      " <GPano:FullPanoHeightPixels>4096</GPano:FullPanoHeightPixels>"
+      " </rdf:Description>"
+      " </rdf:RDF>"
+      " </x:xmpmeta>\x20\x20\x20\x20"
+      "<?xpacket end=\"w\"?>";
+
+    if(myOffsets[Offset_APP1_XMP] == 0) {
+        if(myOffsets[Offset_Dqt] == 0) {
+            return false;
+        }
+
+        // insert section right after DQT
+        const uint16_t  aDqtLen  = StAlienData::Get16uBE(myBuffer + myOffsets[Offset_Dqt] + 2);
+        const ptrdiff_t anOffset = myOffsets[Offset_Dqt] + aDqtLen + 2;
+        const uint16_t  anXmpLen = ((uint16_t )anXmpData.Size + 1) + 29;
+        if(!insertSection(M_EXIF, anXmpLen, anOffset)) {
+            return false;
+        }
+
+        myOffsets[Offset_APP1_XMP] = anOffset;
+        stUByte_t* aData = myBuffer + anOffset + 2;
+        //stMemZero(aData, anXmpData.Size + 1);
+        stMemCpy(aData, "http://ns.adobe.com/xap/1.0/\0", 29);
+        stMemCpy(aData + 29, anXmpData.String, anXmpData.Size + 1);
+        //stMemCpy(aData, anXmpData.String, anXmpData.Size - 2);
+        myPanorama = theFormat;
+        return true;
+    } else {
+        return false;
+    }
+    
     return true;
 }
 

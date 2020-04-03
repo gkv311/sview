@@ -549,7 +549,8 @@ bool StAVImage::loadExtra(const StString& theFilePath,
 
 bool StAVImage::save(const StString& theFilePath,
                      ImageType       theImageType,
-                     StFormat        theSrcFormat) {
+                     StFormat        theSrcFormat,
+                     StPanorama      thePanorama) {
     close();
     setState();
     if(isNull()) {
@@ -738,6 +739,7 @@ bool StAVImage::save(const StString& theFilePath,
             if(theSrcFormat != StFormat_AUTO) {
                 aRawFile.setupJps(theSrcFormat);
             }
+            aRawFile.setupGPano(thePanorama);
         } else {
             ST_ERROR_LOG("AVCodec library, created JPEG can not be parsed!");
         }

@@ -141,7 +141,8 @@ bool StStbImage::loadExtra(const StString& theFilePath,
 
 bool StStbImage::save(const StString& ,
                       ImageType ,
-                      StFormat ) {
+                      StFormat ,
+                      StPanorama ) {
     setState("STB library, save operation is NOT implemented");
     return false;
 }

@@ -76,6 +76,24 @@ class StStereoParams {
         return theToFallbackSphere ? StViewSurface_Sphere : StViewSurface_Plain;
     }
 
+    /**
+     * Convert surface view into panorama mode.
+     */
+    static StPanorama getPanoramaModeForViewSurface(StViewSurface theSurf) {
+        switch(theSurf) {
+            case StViewSurface_Plain:
+                return StPanorama_OFF;
+            case StViewSurface_Cubemap:
+                //StPanorama_Cubemap6_1, StPanorama_Cubemap1_6, StPanorama_Cubemap3_2:
+                return StPanorama_Cubemap6_1;
+            case StViewSurface_Sphere:
+                return StPanorama_Sphere;
+            case StViewSurface_Hemisphere:
+                return StPanorama_Hemisphere;
+        }
+        return StPanorama_OFF;
+    }
+
         public:
 
     /**

@@ -45,11 +45,15 @@ class StJpegParser : public StRawFile {
 
     enum Offset {
         Offset_Dqt = 0,
-        Offset_Jfif,
-        Offset_Exif,      //!< APP1
-        Offset_ExifExtra, //!< APP2
-        Offset_Jps,       //!< APP3
-        Offset_Iptc,      //!< APP13
+        Offset_APP0_Jfif,
+        // APP1 - EXIF, XMP
+        Offset_APP1_Exif,
+        Offset_APP1_XMP,
+        // APP2 - ICC_Profile, FPXR, MPF (MPO)
+        Offset_APP2_MPF,
+        Offset_APP2_ICCProfile,
+        Offset_APP3_Jps,
+        Offset_APP13_Iptc,
         Offset_Comment,
         OffsetsNb,
     };
@@ -206,6 +210,11 @@ class StJpegParser : public StRawFile {
      * Create/modify JPS section.
      */
     ST_CPPEXPORT bool setupJps(const StFormat theFormat);
+
+    /**
+     * Create/modify XMP section holding GPano tags.
+     */
+    ST_CPPEXPORT bool setupGPano(const StPanorama theFormat);
 
     /**
      * Override data length.

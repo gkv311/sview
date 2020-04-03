@@ -77,7 +77,8 @@ class StAVImage : public StImageFile {
      */
     ST_CPPEXPORT virtual bool save(const StString& theFilePath,
                                    ImageType       theImageType,
-                                   StFormat        theSrcFormat = StFormat_AUTO) ST_ATTR_OVERRIDE;
+                                   StFormat        theSrcFormat = StFormat_AUTO,
+                                   StPanorama      thePanorama = StPanorama_OFF) ST_ATTR_OVERRIDE;
 
         private:
 

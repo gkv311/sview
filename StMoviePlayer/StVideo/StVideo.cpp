@@ -1342,8 +1342,9 @@ bool StVideo::saveSnapshotAs(StImageFile::ImageType theImgType) {
             fileToSave += StString('.') + saveExt;
         }
         ST_DEBUG_LOG("Save snapshot to the path '" + fileToSave + '\'');
+        StPanorama aPano = StStereoParams::getPanoramaModeForViewSurface(myCurrParams->ViewingMode);
         if(!dataResult->save(fileToSave, theImgType,
-                             toSaveStereo ? StFormat_SideBySide_RL : StFormat_AUTO)) {
+                             toSaveStereo ? StFormat_SideBySide_RL : StFormat_AUTO, aPano)) {
             // TODO (Kirill Gavrilov#7)
             signals.onError(dataResult->getState());
             return false;

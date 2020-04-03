@@ -54,7 +54,8 @@ class StDevILImage : public StImageFile {
                                         bool            theIsOnlyRGB) ST_ATTR_OVERRIDE;
     ST_CPPEXPORT virtual bool save(const StString& theFilePath,
                                    ImageType       theImageType,
-                                   StFormat        theSrcFormat) ST_ATTR_OVERRIDE;
+                                   StFormat        theSrcFormat,
+                                   StPanorama      thePanorama) ST_ATTR_OVERRIDE;
 
 };
 
