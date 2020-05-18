@@ -51,6 +51,7 @@ typedef unsigned int   ILuint;
 #define IL_PNG          0x042A
 #define IL_PSD          0x0439
 #define IL_HDR          0x043F
+#define IL_DDS          0x0437
 
 // Matches OpenGL's right now.
 #define IL_RGB              0x1907
@@ -235,6 +236,7 @@ namespace {
             case StImageFile::ST_TYPE_JPS:  return IL_JPG;
             case StImageFile::ST_TYPE_PSD:  return IL_PSD;
             case StImageFile::ST_TYPE_HDR:  return IL_HDR;
+            case StImageFile::ST_TYPE_DDS:  return IL_DDS;
             case StImageFile::ST_TYPE_NONE:
             default:
                 return IL_TYPE_UNKNOWN;

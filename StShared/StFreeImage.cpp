@@ -302,6 +302,7 @@ static FREE_IMAGE_FORMAT convertToFIF(StImageFile::ImageType theImageType) {
         case StImageFile::ST_TYPE_JPS: return FIF_JPEG;
         case StImageFile::ST_TYPE_EXR: return FIF_EXR;
         case StImageFile::ST_TYPE_HDR: return FIF_HDR;
+        case StImageFile::ST_TYPE_DDS: return FIF_DDS;
         default: return FIF_UNKNOWN;
     }
 }

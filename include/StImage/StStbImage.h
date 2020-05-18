@@ -32,6 +32,8 @@ class StStbImage : public StImageFile {
     ST_CPPEXPORT StStbImage();
     ST_CPPEXPORT virtual ~StStbImage();
 
+    ST_LOCAL virtual StHandle<StImageFile> createEmpty() const ST_ATTR_OVERRIDE { return new StStbImage(); }
+
     ST_CPPEXPORT virtual void close() ST_ATTR_OVERRIDE;
     ST_CPPEXPORT virtual bool loadExtra(const StString& theFilePath,
                                         ImageType       theImageType,

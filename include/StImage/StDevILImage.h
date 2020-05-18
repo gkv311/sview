@@ -46,6 +46,8 @@ class StDevILImage : public StImageFile {
     ST_CPPEXPORT StDevILImage();
     ST_CPPEXPORT virtual ~StDevILImage();
 
+    ST_LOCAL virtual StHandle<StImageFile> createEmpty() const ST_ATTR_OVERRIDE { return new StDevILImage(); }
+
     ST_CPPEXPORT virtual void close() ST_ATTR_OVERRIDE;
     ST_CPPEXPORT virtual bool loadExtra(const StString& theFilePath,
                                         ImageType       theImageType,

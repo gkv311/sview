@@ -420,6 +420,7 @@ bool StImageLoader::loadImage(const StHandle<StFileNode>& theSource,
             return false;
         }
         aRawFileL.freeBuffer();
+        aSrcPanorama = anImageFileL->getPanoramaFormat();
 
         StRawFile aRawFileR;
         if(StFileNode::isContentProtocolPath(aFilePathRight)) {
@@ -441,6 +442,7 @@ bool StImageLoader::loadImage(const StHandle<StFileNode>& theSource,
             return false;
         }
 
+        aSrcPanorama = anImageFileL->getPanoramaFormat();
         anImgInfo->StInfoStream = anImageFileL->getFormat();
         if(myStFormatByUser == StFormat_AUTO) {
             aSrcFormatCurr = anImgInfo->StInfoStream;

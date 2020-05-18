@@ -1,5 +1,5 @@
 /**
- * Copyright © 2011-2015 Kirill Gavrilov <kirill@sview.ru>
+ * Copyright © 2011-2020 Kirill Gavrilov <kirill@sview.ru>
  *
  * Distributed under the Boost Software License, Version 1.0.
  * See accompanying file license-boost.txt or copy at
@@ -57,6 +57,11 @@ class StAVImage : public StImageFile {
      * Destructor.
      */
     ST_CPPEXPORT virtual ~StAVImage();
+
+    /**
+     * Create new instance.
+     */
+    virtual StHandle<StImageFile> createEmpty() const ST_ATTR_OVERRIDE { return new StAVImage(); }
 
     /**
      * Close currently opened image context and release memory.

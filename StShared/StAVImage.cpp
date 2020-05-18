@@ -1,5 +1,5 @@
 /**
- * Copyright © 2011-2015 Kirill Gavrilov <kirill@sview.ru>
+ * Copyright © 2011-2020 Kirill Gavrilov <kirill@sview.ru>
  *
  * Distributed under the Boost Software License, Version 1.0.
  * See accompanying file license-boost.txt or copy at
@@ -239,6 +239,10 @@ bool StAVImage::loadExtra(const StString& theFilePath,
         case ST_TYPE_WEBP:
         case ST_TYPE_WEBPLL: {
             myCodec = avcodec_find_decoder_by_name("webp");
+            break;
+        }
+        case ST_TYPE_DDS: {
+            myCodec = avcodec_find_decoder_by_name("dds");
             break;
         }
         default: {

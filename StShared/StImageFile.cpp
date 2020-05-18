@@ -1,5 +1,5 @@
 /**
- * Copyright © 2010-2019 Kirill Gavrilov <kirill@sview.ru>
+ * Copyright © 2010-2020 Kirill Gavrilov <kirill@sview.ru>
  *
  * Distributed under the Boost Software License, Version 1.0.
  * See accompanying file license-boost.txt or copy at
@@ -15,11 +15,57 @@
 #include <StAV/StAVImage.h>
 #include <StFile/StFileNode.h>
 #include <StFile/StMIME.h>
+#include <StFile/StRawFile.h>
 
 #include <StStrings/StLogger.h>
 
+/**
+ * DDS Pixel Format structure.
+ */
+struct StDDSPixelFormat {
+    uint32_t Size;
+    uint32_t Flags;
+    uint32_t FourCC;
+    uint32_t RGBBitCount;
+    uint32_t RBitMask;
+    uint32_t GBitMask;
+    uint32_t BBitMask;
+    uint32_t ABitMask;
+};
+
+/**
+ * DDS File header structure.
+ */
+struct StDDSFileHeader {
+    /**
+     * Caps2 flag indicating complete (6 faces) cubemap.
+     */
+    enum { DDSCompleteCubemap = 0xFE00 };
+
+    /**
+     * Return TRUE if cubmap flag is set.
+     */
+    bool isCompleteCubemap() const { return (Caps2 & DDSCompleteCubemap) != 0; }
+
+    uint32_t Size;
+    uint32_t Flags;
+    uint32_t Height;
+    uint32_t Width;
+    uint32_t PitchOrLinearSize;
+    uint32_t Depth;
+    uint32_t MipMapCount;
+    uint32_t Reserved1[11];
+    StDDSPixelFormat PixelFormatDef;
+    uint32_t Caps;
+    uint32_t Caps2;
+    uint32_t Caps3;
+    uint32_t Caps4;
+    uint32_t Reserved2;
+};
+
 StImageFile::StImageFile()
-: mySrcFormat(StFormat_AUTO) {
+: mySrcFormat(StFormat_AUTO),
+  mySrcPanorama(StPanorama_OFF) {
     //
 }
 
@@ -97,6 +143,9 @@ StImageFile::ImageType StImageFile::guessImageType(const StString& theFileName,
     } else if(anExt.isEqualsIgnoreCase(stCString("webpll"))
            || theMIMEType.getMIMEType().isEquals(stCString("image/webpll"))) {
         return StImageFile::ST_TYPE_WEBPLL;
+    } else if(anExt.isEqualsIgnoreCase(stCString("dds"))
+           || theMIMEType.getMIMEType().isEquals(stCString("image/vnd-ms.dds"))) {
+       return StImageFile::ST_TYPE_DDS;
     }
     return StImageFile::ST_TYPE_NONE;
 }
@@ -188,6 +237,111 @@ StHandle<StImageFile> StImageFile::create(StImageFile::ImageClass thePreferred,
         return new StAVImage();
     }
     return StHandle<StImageFile>();
+}
+
+bool StImageFile::load(const StString& theFilePath,
+                       ImageType theImageType,
+                       uint8_t* theDataPtr, int theDataSize) {
+    if(theImageType == ST_TYPE_DDS) {
+        // Most image libraries ignore arrays/cubemaps in DDS file.
+        // As DDS format is pretty simple - parse it here and load cubemap as vertically stacked image.
+        StRawFile aRawFile(theFilePath);
+        if(theDataPtr == NULL) {
+            if(!aRawFile.readFile()) {
+                return loadExtra(theFilePath, theImageType, theDataPtr, theDataSize, false);
+            }
+            theDataPtr = (uint8_t* )aRawFile.getBuffer();
+            theDataSize = (int )aRawFile.getSize();
+        }
+
+        if (theDataSize < 128
+         || memcmp (&theDataPtr[0], "DDS ", 4) != 0) {
+            return loadExtra(theFilePath, theImageType, theDataPtr, theDataSize, false);
+        }
+
+        const StDDSFileHeader* aSrcHeader = (const StDDSFileHeader* )&theDataPtr[4];
+        if (aSrcHeader->Size != 124
+         || aSrcHeader->Width  == 0
+         || aSrcHeader->Height == 0
+         || aSrcHeader->Width != aSrcHeader->Height
+         || aSrcHeader->PixelFormatDef.Size != 32
+         || (aSrcHeader->Caps2 & StDDSFileHeader::DDSCompleteCubemap) != StDDSFileHeader::DDSCompleteCubemap) {
+            return loadExtra(theFilePath, theImageType, theDataPtr, theDataSize, false);
+        }
+
+        const int aHeaderSize  = aSrcHeader->Size + 4;
+        const int aPayLoadSize = theDataSize - aHeaderSize;
+        if (aPayLoadSize % 6 != 0
+         || aPayLoadSize <= 0) {
+            return loadExtra(theFilePath, theImageType, theDataPtr, theDataSize, false);
+        }
+
+        const int aTileDataSize = aPayLoadSize / 6;
+        StArray<uint8_t> aTileBuffer (aTileDataSize + aHeaderSize);
+        memcpy(&aTileBuffer.changeFirst(),  "DDS ", 4);
+        memcpy(&aTileBuffer.changeValue(4), aSrcHeader, aSrcHeader->Size);
+        StDDSFileHeader* aHeaderTile = (StDDSFileHeader* )&aTileBuffer.changeValue(4);
+        aHeaderTile->Caps2 &= ~(StDDSFileHeader::DDSCompleteCubemap);
+
+        StHandle<StImageFile> aTileImage = createEmpty();
+
+        memcpy(&aTileBuffer.changeValue(aHeaderSize), &theDataPtr[aHeaderSize], aTileDataSize);
+        if(!aTileImage->loadExtra(theFilePath, theImageType, &aTileBuffer.changeFirst(), (int )aTileBuffer.size(), false)
+         || aTileImage->isNull()
+         || aTileImage->getSizeX() < 1
+         || aTileImage->getSizeY() < 1
+         || aTileImage->getSizeX() != aTileImage->getSizeY()) {
+            return loadExtra(theFilePath, theImageType, theDataPtr, theDataSize, false);
+        }
+
+        close();
+        nullify();
+        myMetadata   = aTileImage->myMetadata;
+        myStateDescr = aTileImage->myStateDescr;
+        mySrcFormat  = aTileImage->mySrcFormat;
+        setColorModel(aTileImage->getColorModel());
+        setColorScale(aTileImage->getColorScale());
+        setPixelRatio(aTileImage->getPixelRatio());
+        const bool isTopDownLayout = aTileImage->isTopDown();
+        for(size_t aPlaneId = 0; aPlaneId < 4; ++aPlaneId) {
+            const StImagePlane& aFromPlane = aTileImage->getPlane(aPlaneId);
+            const size_t aTileIndex = isTopDownLayout ? 0 : 5;
+            if(!aFromPlane.isNull()) {
+                if(!changePlane(aPlaneId).initTrash(aFromPlane.getFormat(), aFromPlane.getSizeX(), aFromPlane.getSizeX() * 6)) {
+                    return false;
+                }
+                changePlane(aPlaneId).setTopDown(aFromPlane.isTopDown());
+                memcpy(changePlane(aPlaneId).changeData() + aFromPlane.getSizeBytes() * aTileIndex,
+                       aFromPlane.getData(), aFromPlane.getSizeBytes());
+            }
+        }
+
+        for(size_t aTileIter = 1; aTileIter < 6; ++aTileIter) {
+            memcpy(&aTileBuffer.changeValue(aHeaderSize), &theDataPtr[aTileIter * aTileDataSize + aHeaderSize], aTileDataSize);
+            aTileImage = createEmpty();
+            if(!aTileImage->loadExtra(theFilePath, theImageType, &aTileBuffer.changeFirst(), (int )aTileBuffer.size(), false)
+             || aTileImage->isNull()
+             || aTileImage->getSizeX() != getSizeX()
+             || aTileImage->getSizeY() != getSizeX() // square
+             || aTileImage->getColorModel() != getColorModel()
+             || aTileImage->getPlane().getFormat() != getPlane().getFormat()) {
+                ST_ERROR_LOG("Internal error: DDS file is decoded into inconsistent tiles");
+                return loadExtra(theFilePath, theImageType, theDataPtr, theDataSize, false);
+            }
+
+            const size_t aTileIndex = isTopDownLayout ? aTileIter : (5 - aTileIter);
+            for(size_t aPlaneId = 0; aPlaneId < 4; ++aPlaneId) {
+                const StImagePlane& aFromPlane = aTileImage->getPlane(aPlaneId);
+                if(!aFromPlane.isNull()) {
+                    memcpy(changePlane(aPlaneId).changeData() + aFromPlane.getSizeBytes() * aTileIndex,
+                           aFromPlane.getData(), aFromPlane.getSizeBytes());
+                }
+            }
+        }
+        mySrcPanorama = StPanorama_Cubemap1_6;
+        return true;
+    }
+    return loadExtra(theFilePath, theImageType, theDataPtr, theDataSize, false);
 }
 
 StImageFileCounter::~StImageFileCounter() {}

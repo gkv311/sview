@@ -1,5 +1,5 @@
 /**
- * Copyright © 2011-2019 Kirill Gavrilov <kirill@sview.ru>
+ * Copyright © 2011-2020 Kirill Gavrilov <kirill@sview.ru>
  *
  * Distributed under the Boost Software License, Version 1.0.
  * See accompanying file license-boost.txt or copy at
@@ -44,6 +44,7 @@ class StImageFile : public StImage {
         ST_TYPE_HDR, //!< Radiance High Dynamic Range - .hdr extension
         ST_TYPE_WEBP,
         ST_TYPE_WEBPLL,
+        ST_TYPE_DDS,
     } ImageType;
 
     typedef enum tagImageClass {
@@ -72,6 +73,8 @@ class StImageFile : public StImage {
                                                      ImageType       theImgType = ST_TYPE_NONE);
     ST_CPPEXPORT static StHandle<StImageFile> create(ImageClass      thePreferred = ST_LIBAV,
                                                      ImageType       theImgType = ST_TYPE_NONE);
+
+        public:
 
     /**
      * Empty constructor.
@@ -108,9 +111,17 @@ class StImageFile : public StImage {
         myMetadata = theDict;
     }
 
+    /**
+     * Return stereoscopic format stored in the file or StFormat_AUTO if undefined.
+     */
     ST_LOCAL StFormat getFormat() const {
         return mySrcFormat;
     }
+
+    /**
+     * Return panorama format stored in the file or StPanorama_OFF if undefined.
+     */
+    ST_LOCAL StPanorama getPanoramaFormat() const { return mySrcPanorama; }
 
     /**
      * Returns the number of frames in multi-page image.
@@ -125,9 +136,9 @@ class StImageFile : public StImage {
      * @param theDataSize  size of data in memory
      * @return true on success
      */
-    bool load(const StString& theFilePath,
-              ImageType theImageType = ST_TYPE_NONE,
-              uint8_t* theDataPtr = NULL, int theDataSize = 0) { return loadExtra(theFilePath, theImageType, theDataPtr, theDataSize, false); }
+    ST_CPPEXPORT bool load(const StString& theFilePath,
+                           ImageType theImageType = ST_TYPE_NONE,
+                           uint8_t* theDataPtr = NULL, int theDataSize = 0);
 
     /**
      * This virtual function should be implemented by inheritors.
@@ -162,11 +173,17 @@ class StImageFile : public StImage {
                       ImageType       theImageType,
                       StFormat        theSrcFormat) = 0;
 
+    /**
+     * Create new instance of this class.
+     */
+    virtual StHandle<StImageFile> createEmpty() const = 0;
+
         protected:
 
     StDictionary myMetadata;
     StString     myStateDescr;
     StFormat     mySrcFormat;
+    StPanorama   mySrcPanorama;
 
 };
 
