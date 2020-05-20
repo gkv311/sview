@@ -4,6 +4,24 @@ sview (unknown_version) unknown_distrib; urgency=low
 
  -- Kirill Gavrilov <kirill@sview.ru>  unknown_date
 
+sview (1:20.05-1~unknown_distrib) unknown_distrib; urgency=low
+
+  + Added Spanish translation files.
+  + Image Viewer - added trilinear texture filtering option generating mip-maps.
+  + Image Viewer - support 1x6 cubemap layout.
+  + Image Viewer - panorama is now automatically enabled for JPEG files with GPano:ProjectionType tag.
+  + Image Viewer - panorama is now automatically enabled for JPEG files with 360Stereo/360Mono tags (game screenshots).
+  + Image Viewer - support DDS-packed cubemaps.
+  + Movie Player - image-based subtitles size can be now adjusted.
+  * Movie Player - workaround subtitles seeking issues for attached SRT files.
+  * Movie Player - fixed ASS subtitles formatting issue on files without closure tags.
+  * Movie Player - added handling of image-based subtitles encoded as stereoscopic pair (side-by-side).
+  * Image Viewer - fixed poor quality on saving JPEG (yuv420p) image into PNG (rgb).
+  * Image Viewer - fixed displaying WebP images with alpha channel (yuva pixel formats).
+  * fontconfig library is now used to retrieve paths to system fonts on Linux.
+
+ -- Kirill Gavrilov <kirill@sview.ru>  Wed, 20 May 2020 15:25:33 +0300
+
 sview (1:19.08-2~unknown_distrib) unknown_distrib; urgency=low
 
   + Support VR180 hemisphere and cylindrical panorama inputs.
