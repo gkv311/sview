@@ -43,6 +43,96 @@ public:
     StDriveNameResolver() : NbProcessed(0), ToAbort(false) {}
 
     /**
+     * Init list.
+     */
+    void init() {
+        const DWORD aLogicalDrivesMask = ::GetLogicalDrives();
+        for(int aLetterIter = 'A'; aLetterIter <= 'Z'; ++aLetterIter) {
+            const int aBit = 1 << (aLetterIter - 'A');
+            if((aLogicalDrivesMask & aBit) != 0) {
+                Drives.push_back(StString()         + char(aLetterIter) + ":\\");
+                Labels.push_back(StString("Drive ") + char(aLetterIter) + ":\\");
+            }
+        }
+
+        // enumerate all physical drives seen by Windows
+        const GUID PARTITION_BASIC_DATA_GUID = { 0xEBD0A0A2L, 0xB9E5, 0x4433, {0x87, 0xC0, 0x68, 0xB6, 0xB7, 0x26, 0x99, 0xC7} };
+        static const DWORD aPartInfoSize = sizeof(DRIVE_LAYOUT_INFORMATION_EX) + 128 * sizeof(PARTITION_INFORMATION_EX); // up to 128 partitions
+        char aPartInfoBuffer[aPartInfoSize] = {};
+        DRIVE_LAYOUT_INFORMATION_EX* aPartitions = (DRIVE_LAYOUT_INFORMATION_EX* )aPartInfoBuffer;
+        for(int aDriveIter = 0; aDriveIter < 1000; ++aDriveIter) {
+            const StStringUtfWide aDriveId = StStringUtfWide(L"\\\\.\\PhysicalDrive") + aDriveIter;
+            HANDLE aDriveHandle = CreateFileW(aDriveId.toCString(), 0, FILE_SHARE_READ, NULL, OPEN_EXISTING, 0, 0);
+            if(aDriveHandle == INVALID_HANDLE_VALUE) {
+                break;
+            }
+
+            // list partitions
+            DWORD aDummyIor = 0;
+            if(!DeviceIoControl(aDriveHandle, IOCTL_DISK_GET_DRIVE_LAYOUT_EX, NULL, 0, aPartitions, aPartInfoSize, &aDummyIor, NULL)) {
+                CloseHandle(aDriveHandle);
+                continue;
+            }
+
+            for(DWORD aPartIter = 0; aPartIter < aPartitions->PartitionCount; ++aPartIter) {
+                const PARTITION_INFORMATION_EX& aPart = aPartitions->PartitionEntry[aPartIter];
+                switch(aPart.PartitionStyle) {
+                    case PARTITION_STYLE_MBR: {
+                        if(aPart.Mbr.PartitionType == PARTITION_ENTRY_UNUSED || !aPart.Mbr.RecognizedPartition) {
+                            continue; // ignore unused
+                        }
+                        break;
+                    }
+                    case PARTITION_STYLE_GPT: {
+                        if(aPart.Gpt.PartitionType != PARTITION_BASIC_DATA_GUID) {
+                            continue; // ignore unused
+                        }
+                        break;
+                    }
+                    default: {
+                        continue; // ignore unknown
+                    }
+                }
+
+                const StStringUtfWide aPartVolume = findPartitionVolume(aDriveIter, aPart);
+                if(aPartVolume.isEmpty()) {
+                    continue;
+                }
+
+                // find mount points
+                DWORD aMntPointLen = 0;
+                std::vector<wchar_t> aMntPoints(1);
+                GetVolumePathNamesForVolumeNameW(aPartVolume.toCString(), aMntPoints.data(), 0, &aMntPointLen);
+                if(aMntPointLen > 0) {
+                    aMntPoints.resize (aMntPointLen + 1, '\0');
+                    if(GetVolumePathNamesForVolumeNameW(aPartVolume.toCString(), aMntPoints.data(), aMntPointLen, &aMntPointLen) != FALSE) {
+                        StString aMntPointRes(aMntPoints.data());
+                        for(const wchar_t* aMntPointIter = aMntPoints.data(); aMntPointIter[0] != '\0'; aMntPointIter += wcslen(aMntPointIter)) {
+                            const StString aMntPoint(aMntPointIter);
+                            if(aMntPoint.getLength() == 3
+                            && aMntPoint.toCString()[1] == ':'
+                            && aMntPoint.toCString()[2] == '\\') {
+                                // filter common logical drive letter
+                                aMntPointRes.clear();
+                                break;
+                            }
+                        }
+                        if(!aMntPointRes.isEmpty()) {
+                            if(aMntPointRes.getLength() > 3
+                            && aMntPointRes.isEndsWith('\\')) {
+                                aMntPointRes = aMntPointRes.subString(0, aMntPointRes.getLength() - 1);
+                            }
+                            Drives.push_back(aMntPointRes);
+                            Labels.push_back(StString("Drive ") + aMntPointRes);
+                        }
+                    }
+                }
+            }
+            CloseHandle(aDriveHandle);
+        }
+    }
+
+    /**
      * Working thread callback.
      */
     void resolve() {
@@ -53,7 +143,10 @@ public:
         const StString aDriveB = "B:";
         for(; NbProcessed < (int )Drives.size(); StAtomicOp::Increment(NbProcessed)) {
             const StString& aDrivePath = Drives[NbProcessed];
-            const StStringUtfWide aDrivePathW = aDrivePath.toUtfWide();
+            StStringUtfWide aDrivePathW = aDrivePath.toUtfWide();
+            if(!aDrivePath.isEndsWith('\\')) {
+                aDrivePathW += '\\';
+            }
             DWORD aSerialNumber = 0, aMaxFileNameLength = 0, aFileSystemFlags = 0;
             if(!aDrivePath.isStartsWithIgnoreCase(aDriveA)
             && !aDrivePath.isStartsWithIgnoreCase(aDriveB)
@@ -82,6 +175,50 @@ public:
         aThis->resolve();
         return SV_THREAD_RETURN 0;
     }
+
+        private:
+
+    /**
+     * Find volume name for partition.
+     */
+    static StStringUtfWide findPartitionVolume(DWORD theDiskNumber, const PARTITION_INFORMATION_EX& thePart) {
+        // handle up-to 256 extents
+        static const DWORD THE_EXTENTS_SIZE = sizeof(VOLUME_DISK_EXTENTS) + 256 * sizeof(DISK_EXTENT);
+        char aBuffer[THE_EXTENTS_SIZE] = {};
+        VOLUME_DISK_EXTENTS* aVolDiskExtents = (VOLUME_DISK_EXTENTS* )aBuffer;
+
+        std::vector<wchar_t> aVolName(4096, '\0');
+        HANDLE aVolIter = FindFirstVolumeW(aVolName.data(), (DWORD )aVolName.size());
+        for(bool hasMoreVolumes = aVolIter != INVALID_HANDLE_VALUE; hasMoreVolumes; hasMoreVolumes = FindNextVolumeW (aVolIter, aVolName.data(), (DWORD )aVolName.size()) != FALSE) {
+            aVolName[wcslen(aVolName.data()) - 1] = '\0'; // volume must be without trailing backslash here
+            HANDLE aVolHandle = CreateFileW(aVolName.data(), 0, FILE_SHARE_READ, NULL, OPEN_EXISTING, 0, 0);
+            aVolName[wcslen(aVolName.data())] = '\\';
+            if(aVolHandle == INVALID_HANDLE_VALUE) {
+                continue;
+            }
+
+            DWORD anExtentsSize = 0;
+            if(DeviceIoControl(aVolHandle, IOCTL_VOLUME_GET_VOLUME_DISK_EXTENTS, NULL, 0, (void* )aVolDiskExtents, THE_EXTENTS_SIZE, &anExtentsSize, NULL) == FALSE) {
+                CloseHandle(aVolHandle);
+                continue;
+            }
+
+            for(DWORD anExtentIter = 0; anExtentIter < aVolDiskExtents->NumberOfDiskExtents; ++anExtentIter) {
+                const DISK_EXTENT& anExtent = aVolDiskExtents->Extents[anExtentIter];
+                if(anExtent.DiskNumber == theDiskNumber
+                && anExtent.StartingOffset.QuadPart == thePart.StartingOffset.QuadPart
+                && anExtent.ExtentLength.QuadPart == thePart.PartitionLength.QuadPart) {
+                    CloseHandle(aVolHandle);
+                    FindVolumeClose(aVolIter);
+                    return StStringUtfWide(aVolName.data());
+                }
+            }
+            CloseHandle(aVolHandle);
+        }
+        FindVolumeClose(aVolIter);
+        return StStringUtfWide();
+    }
+
 };
 #endif
 
@@ -163,15 +300,8 @@ StGLOpenFile::StGLOpenFile(StGLWidget*     theParent,
 
 void StGLOpenFile::addSystemDrives() {
 #ifdef _WIN32
-    const DWORD aMask = ::GetLogicalDrives();
     StHandle<StDriveNameResolver> aResolver = new StDriveNameResolver();
-    for(int aLetterIter = 'A'; aLetterIter <= 'Z'; ++aLetterIter) {
-        const int aBit = 1 << (aLetterIter - 'A');
-        if((aMask & aBit) != 0) {
-            aResolver->Drives.push_back(StString()         + char(aLetterIter) + ":\\");
-            aResolver->Labels.push_back(StString("Drive ") + char(aLetterIter) + ":\\");
-        }
-    }
+    aResolver->init();
     if(!aResolver->Drives.empty()) {
         // name resolver might hang on resource unavailability
         StThread aThread(StDriveNameResolver::resolveThread, &aResolver);
