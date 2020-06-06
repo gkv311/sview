@@ -1,5 +1,5 @@
 /**
- * Copyright © 2013-2019 Kirill Gavrilov <kirill@sview.ru>
+ * Copyright © 2013-2020 Kirill Gavrilov <kirill@sview.ru>
  *
  * StImageViewer program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -461,6 +461,9 @@ void loadDefaults(StLangMap& theStrings) {
     addAction(theStrings, StImageViewer::Action_PanoramaOnOff,
               "DoPanoramaOnOff",
               "Enable/disable panorama mode");
+    addAction(theStrings, StImageViewer::Action_ShowGUI,
+              "DoShowGUI",
+              "Show/hide GUI");
 
     theStrings.addAlias("DoOutStereoNormal",       MENU_VIEW_DISPLAY_MODE_STEREO);
     theStrings.addAlias("DoOutStereoLeftView",     MENU_VIEW_DISPLAY_MODE_LEFT);

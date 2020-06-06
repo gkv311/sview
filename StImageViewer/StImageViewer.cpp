@@ -1,5 +1,5 @@
 /**
- * Copyright © 2007-2019 Kirill Gavrilov <kirill@sview.ru>
+ * Copyright © 2007-2020 Kirill Gavrilov <kirill@sview.ru>
  *
  * StImageViewer program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -109,6 +109,7 @@ void StImageViewer::updateStrings() {
     params.ToShowFps->setName(tr(MENU_SHOW_FPS));
     params.ToShowMenu->setName(stCString("Show main menu"));
     params.ToShowTopbar->setName(stCString("Show top toolbar"));
+    params.ToShowBottom->setName(stCString("Show bottom toolbar"));
     params.SlideShowDelay->setName(stCString("Slideshow delay"));
     params.IsMobileUI->setName(stCString("Mobile UI"));
     params.ToHideStatusBar->setName("Hide system status bar");
@@ -179,6 +180,7 @@ StImageViewer::StImageViewer(const StHandle<StResourceManager>& theResMgr,
     params.ToShowFps     = new StBoolParamNamed(false, stCString("toShowFps"));
     params.ToShowMenu    = new StBoolParamNamed(true,  stCString("toShowMenu"));
     params.ToShowTopbar  = new StBoolParamNamed(true,  stCString("toShowTopbar"));
+    params.ToShowBottom  = new StBoolParamNamed(true,  stCString("toShowBottom"));
     params.SlideShowDelay = new StFloat32Param(4.0f, stCString("slideShowDelay2"));
     params.SlideShowDelay->setMinMaxValues(1.0f, 10.0f);
     params.SlideShowDelay->setDefValue(4.0f);
@@ -259,6 +261,9 @@ StImageViewer::StImageViewer(const StHandle<StResourceManager>& theResMgr,
 
     anAction = new StActionBool(stCString("DoShowFPS"), params.ToShowFps);
     addAction(Action_ShowFps, anAction, ST_VK_F12);
+
+    anAction = new StActionIntSlot(stCString("DoShowGUI"), stSlot(this, &StImageViewer::doShowHideGUI), 0);
+    addAction(Action_ShowGUI, anAction, ST_VK_TILDE);
 
     anAction = new StActionIntValue(stCString("DoSrcAuto"), params.SrcStereoFormat, StFormat_AUTO);
     addAction(Action_SrcAuto, anAction, ST_VK_A);
@@ -1361,6 +1366,16 @@ void StImageViewer::doListNext(const size_t ) {
     if(myPlayList->walkToNext()) {
         myLoader->doLoadNext();
         doUpdateStateLoading();
+    }
+}
+
+void StImageViewer::doShowHideGUI(const size_t ) {
+    const bool toShow = !params.ToShowMenu->getValue() || (!myGUI.isNull() && !myGUI->isVisibleGUI());
+    params.ToShowMenu->setValue(toShow);
+    params.ToShowTopbar->setValue(toShow);
+    params.ToShowBottom->setValue(toShow);
+    if(toShow && !myGUI.isNull()) {
+        myGUI->setVisibility(myWindow->getMousePos(), false, true);
     }
 }
 

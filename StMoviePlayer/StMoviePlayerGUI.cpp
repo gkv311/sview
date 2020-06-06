@@ -1,5 +1,5 @@
 /**
- * Copyright © 2009-2019 Kirill Gavrilov <kirill@sview.ru>
+ * Copyright © 2009-2020 Kirill Gavrilov <kirill@sview.ru>
  *
  * StMoviePlayer program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -1882,13 +1882,17 @@ void StMoviePlayerGUI::doGesture(const StGestureEvent& theEvent) {
     }
 }
 
-void StMoviePlayerGUI::setVisibility(const StPointD_t& theCursor) {
+void StMoviePlayerGUI::setVisibility(const StPointD_t& theCursor,
+                                     bool theToForceHide,
+                                     bool theToForceShow) {
     const bool toShowAdjust   = myPlugin->params.ToShowAdjustImage->getValue();
     const bool toShowPlayList = myPlugin->params.ToShowPlayList->getValue();
     const bool hasMainMenu    = myPlugin->params.ToShowMenu->getValue()
                              && myMenuRoot != NULL;
     const bool hasUpperPanel  = myPlugin->params.ToShowTopbar->getValue()
                              && myPanelUpper != NULL;
+    const bool hasBottomPanel = myPlugin->params.ToShowBottom->getValue()
+                             && (myPanelBottom != NULL || mySeekBar != NULL);
 
     const int  aRootSizeY     = getRectPx().height();
     const bool hasVideo       = myPlugin->myVideo->hasVideoStream();
@@ -1905,6 +1909,11 @@ void StMoviePlayerGUI::setVisibility(const StPointD_t& theCursor) {
     if(myTapTimer.getElapsedTime() >= 0.5) {
         myVisibilityTimer.restart();
         myTapTimer.stop();
+    }
+    if(theToForceShow) {
+        myVisibilityTimer.restart();
+    } else if(theToForceHide) {
+        myVisibilityTimer.restart(THE_VISIBILITY_IDLE_TIME + 0.001);
     }
     const bool isMouseActive  = myWindow->isMouseMoved();
     const double aStillTime   = myVisibilityTimer.getElapsedTime();
@@ -1929,10 +1938,11 @@ void StMoviePlayerGUI::setVisibility(const StPointD_t& theCursor) {
         || aParams.isNull()
         || aStillTime < THE_VISIBILITY_IDLE_TIME
         || (hasUpperPanel && myPanelUpper->isPointIn(theCursor))
-        || (myPanelBottom != NULL && int(aRootSizeY * theCursor.y()) > (aRootSizeY - 2 * myPanelBottom->getRectPx().height())
-                                  && theCursor.y() < 1.0)
-        || (mySeekBar     != NULL && mySeekBar    ->isPointIn(theCursor))
-        || (myPlayList    != NULL && toShowPlayList && myPlayList->isPointIn(theCursor))
+        || (hasBottomPanel && myPanelBottom != NULL
+         && int(aRootSizeY * theCursor.y()) > (aRootSizeY - 2 * myPanelBottom->getRectPx().height())
+         && theCursor.y() < 1.0)
+        || (hasBottomPanel && mySeekBar != NULL && mySeekBar->isPointIn(theCursor))
+        || (hasBottomPanel && myPlayList != NULL && toShowPlayList && myPlayList->isPointIn(theCursor))
         || (hasMainMenu           && myMenuRoot->isActive());
     if(!myIsVisibleGUI
      && myBtnPlay != NULL
@@ -1941,7 +1951,7 @@ void StMoviePlayerGUI::setVisibility(const StPointD_t& theCursor) {
       || theCursor.y() < 0.0 || theCursor.y() > 1.0)) {
         myIsVisibleGUI = true;
     }
-    const float anOpacity = (float )myVisLerp.perform(myIsVisibleGUI, false);
+    const float anOpacity = (float )myVisLerp.perform(myIsVisibleGUI, theToForceHide || theToForceShow);
     if(isMouseActive) {
         myVisibilityTimer.restart();
     }
@@ -1953,10 +1963,10 @@ void StMoviePlayerGUI::setVisibility(const StPointD_t& theCursor) {
         myPanelUpper->setOpacity(hasUpperPanel ? anOpacity : 0.0f, true);
     }
     if(mySeekBar != NULL) {
-        mySeekBar->setOpacity(anOpacity, false);
+        mySeekBar->setOpacity(hasBottomPanel ? anOpacity : 0.0f, false);
     }
     if(myPanelBottom != NULL) {
-        myPanelBottom->setOpacity(anOpacity, true);
+        myPanelBottom->setOpacity(hasBottomPanel ? anOpacity : 0.0f, true);
     }
 
     if(myAdjustOverlay != NULL
@@ -1974,7 +1984,7 @@ void StMoviePlayerGUI::setVisibility(const StPointD_t& theCursor) {
     }
     if(myPlayList != NULL
     && toShowPlayList) {
-        myPlayList->setOpacity(anOpacity, true);
+        myPlayList->setOpacity(hasBottomPanel ? anOpacity : 0.0f, true);
     }
 
     const StPlayList::CurrentPosition aCurrPos = myPlugin->myPlayList->getCurrentPosition();

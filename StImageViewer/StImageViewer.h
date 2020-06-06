@@ -1,5 +1,5 @@
 /**
- * Copyright © 2007-2019 Kirill Gavrilov <kirill@sview.ru>
+ * Copyright © 2007-2020 Kirill Gavrilov <kirill@sview.ru>
  *
  * StImageViewer program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -105,6 +105,7 @@ class StImageViewer : public StApplication {
     ST_LOCAL void doListLast(const size_t dummy = 0);
     ST_LOCAL void doDeleteFileBegin(const size_t dummy = 0);
     ST_LOCAL void doDeleteFileEnd(const size_t dummy = 0);
+    ST_LOCAL void doShowHideGUI(const size_t dummy = 0);
     ST_LOCAL void doSlideShow(const size_t dummy = 0);
     ST_LOCAL void doQuit(const size_t dummy = 0);
 
@@ -138,6 +139,7 @@ class StImageViewer : public StApplication {
         StHandle<StBoolParamNamed>    ToTrackHead;      //!< enable/disable head-tracking
         StHandle<StBoolParamNamed>    ToShowMenu;       //!< show main menu
         StHandle<StBoolParamNamed>    ToShowTopbar;     //!< show topbar
+        StHandle<StBoolParamNamed>    ToShowBottom;     //!< show bottom
         StHandle<StBoolParamNamed>    ToShowPlayList;   //!< display playlist
         StHandle<StBoolParamNamed>    ToShowAdjustImage;//!< display image adjustment overlay
         StHandle<StBoolParamNamed>    ToShowFps;        //!< display FPS meter
@@ -224,6 +226,7 @@ class StImageViewer : public StApplication {
         Action_StereoParamsBegin,
         Action_StereoParamsEnd = Action_StereoParamsBegin + StGLImageRegion::ActionsNb - 1,
         Action_PanoramaOnOff,
+        Action_ShowGUI,
         Action_OutStereoNormal,
         Action_OutStereoLeftView,
         Action_OutStereoRightView,

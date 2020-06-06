@@ -1,5 +1,5 @@
 /**
- * Copyright © 2009-2019 Kirill Gavrilov <kirill@sview.ru>
+ * Copyright © 2009-2020 Kirill Gavrilov <kirill@sview.ru>
  *
  * StImageViewer program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -1364,7 +1364,8 @@ void StImageViewerGUI::doGesture(const StGestureEvent& theEvent) {
 }
 
 void StImageViewerGUI::setVisibility(const StPointD_t& theCursor,
-                                     bool              toForceHide) {
+                                     bool theToForceHide,
+                                     bool theToForceShow) {
     const bool toShowAdjust   = myPlugin->params.ToShowAdjustImage->getValue();
     const bool toShowPlayList = myPlugin->params.ToShowPlayList->getValue();
     const bool hasMainMenu    =  myPlugin->params.ToShowMenu->getValue()
@@ -1373,6 +1374,7 @@ void StImageViewerGUI::setVisibility(const StPointD_t& theCursor,
                              &&  myPlugin->params.ToShowTopbar->getValue()
                              &&  myPanelUpper  != NULL;
     const bool hasBottomPanel = !myIsMinimalGUI
+                             &&  myPlugin->params.ToShowBottom->getValue()
                              &&  myPanelBottom != NULL;
 
     StHandle<StStereoParams> aParams = myImage->getSource();
@@ -1389,6 +1391,9 @@ void StImageViewerGUI::setVisibility(const StPointD_t& theCursor,
     if(myTapTimer.getElapsedTime() >= 0.5) {
         myVisibilityTimer.restart();
         myTapTimer.stop();
+    }
+    if(theToForceShow) {
+        myVisibilityTimer.restart();
     }
     const bool isMouseActive  = myWindow->isMouseMoved();
 
@@ -1413,8 +1418,8 @@ void StImageViewerGUI::setVisibility(const StPointD_t& theCursor,
     if(isMouseActive) {
         myVisibilityTimer.restart();
     }
-    const bool  toShowAll = !myIsMinimalGUI && myIsVisibleGUI && !toForceHide;
-    const float anOpacity = (float )myVisLerp.perform(toShowAll, toForceHide);
+    const bool  toShowAll = !myIsMinimalGUI && myIsVisibleGUI && !theToForceHide;
+    const float anOpacity = (float )myVisLerp.perform(toShowAll, theToForceHide || theToForceShow);
 
     if(myMenuRoot != NULL) {
         myMenuRoot->setOpacity(hasMainMenu ? anOpacity : 0.0f, true);
@@ -1440,7 +1445,7 @@ void StImageViewerGUI::setVisibility(const StPointD_t& theCursor,
     }
     if(myPlayList != NULL
     && toShowPlayList) {
-        myPlayList->setOpacity(anOpacity, true);
+        myPlayList->setOpacity(myPlugin->params.ToShowBottom->getValue() ? anOpacity : 0.0f, true);
     }
     if(myBtnFull != NULL) {
         if(myIsMinimalGUI

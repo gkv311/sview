@@ -1,5 +1,5 @@
 /**
- * Copyright © 2007-2019 Kirill Gavrilov <kirill@sview.ru>
+ * Copyright © 2007-2020 Kirill Gavrilov <kirill@sview.ru>
  *
  * StMoviePlayer program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -124,6 +124,7 @@ class StMoviePlayer : public StApplication {
     ST_LOCAL void doSubtitlesNext(size_t theDirection);
     ST_LOCAL void doSubtitlesCopy(size_t dummy = 0);
     ST_LOCAL void doFromClipboard(size_t dummy = 0);
+    ST_LOCAL void doShowHideGUI(const size_t dummy = 0);
 
     ST_LOCAL void doQuit(const size_t dummy = 0);
 
@@ -213,6 +214,7 @@ class StMoviePlayer : public StApplication {
         StHandle<StBoolParamNamed>    ToShowFps;         //!< display FPS meter
         StHandle<StBoolParamNamed>    ToShowMenu;        //!< show main menu
         StHandle<StBoolParamNamed>    ToShowTopbar;      //!< show topbar
+        StHandle<StBoolParamNamed>    ToShowBottom;      //!< show bottom (seekbar)
         StHandle<StBoolParamNamed>    ToMixImagesVideos; //!< mix videos and images
         StHandle<StFloat32Param>      SlideShowDelay;    //!< slideshow delay
         StHandle<StBoolParamNamed>    IsMobileUI;        //!< display mobile interface (user option)
@@ -360,6 +362,7 @@ class StMoviePlayer : public StApplication {
         Action_StereoParamsBegin,
         Action_StereoParamsEnd = Action_StereoParamsBegin + StGLImageRegion::ActionsNb - 1,
         Action_PanoramaOnOff,
+        Action_ShowGUI,
         Action_OutStereoNormal,
         Action_OutStereoLeftView,
         Action_OutStereoRightView,

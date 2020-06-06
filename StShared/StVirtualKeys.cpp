@@ -1,5 +1,5 @@
 /**
- * Copyright © 2013-2015 Kirill Gavrilov <kirill@sview.ru>
+ * Copyright © 2013-2020 Kirill Gavrilov <kirill@sview.ru>
  *
  * Distributed under the Boost Software License, Version 1.0.
  * See accompanying file license-boost.txt or copy at
@@ -202,8 +202,8 @@ namespace {
         stCString(","),     // ST_VK_COMMA
         stCString("-"),     // ST_VK_OEM_MINUS
         stCString("."),     // ST_VK_PERIOD
-        stCString(""),      // ST_VK_OEM_2
-        stCString(""),      // ST_VK_OEM_3
+        stCString("/"),     // ST_VK_SLASH
+        stCString("~"),     // ST_VK_TILDE
         stCString(""),      // 193
         stCString(""),      // 194
         stCString(""),      // 195

@@ -1,6 +1,6 @@
 /**
  * StCore, window system independent C++ toolkit for writing OpenGL applications.
- * Copyright © 2007-2015 Kirill Gavrilov <kirill@sview.ru>
+ * Copyright © 2007-2020 Kirill Gavrilov <kirill@sview.ru>
  *
  * Distributed under the Boost Software License, Version 1.0.
  * See accompanying file license-boost.txt or copy at
@@ -299,7 +299,7 @@ enum StVirtKey {
     ST_VK_OEM_MINUS  = 0xBD,   // 189 = VK_OEM_MINUS   | '-' any country
     ST_VK_PERIOD     = 0xBE,   // 190 = VK_OEM_PERIOD  | '.' any country
     ST_VK_SLASH      = 0xBF,   // 191 = VK_OEM_2       | '/?' for US
-    ///ST_VK_OEM_3       = 0xC0,  // 192 = VK_OEM_3       | '`~' for US*
+    ST_VK_TILDE      = 0xC0,   // 192 = VK_OEM_3       | '`~' for US*
 
     ST_VK_BRACKETLEFT  = 0xDB, // 219 = VK_OEM_4       | '[{' for US
     ST_VK_BACKSLASH    = 0xDC, // 220 = VK_OEM_5       | '\|' for US

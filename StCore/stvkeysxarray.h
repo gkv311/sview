@@ -37,7 +37,7 @@ static const unsigned int ST_XK2ST_VK[ST_XK2ST_VK_SIZE] = {
     ST_VK_COMMA,     // 0x2C = XK_comma
     ST_VK_OEM_MINUS, // 0x2D = XK_minus
     ST_VK_PERIOD,    // 0x2E = XK_period
-    0, // 0x2F
+    ST_VK_SLASH,  // 0x2F = XK_slash
     ST_VK_0,      // 0x30 = XK_0
     ST_VK_1,      // 0x31 = XK_1
     ST_VK_2,      // 0x32 = XK_2
@@ -86,7 +86,7 @@ static const unsigned int ST_XK2ST_VK[ST_XK2ST_VK_SIZE] = {
     ST_VK_BRACKETRIGHT, // 0x5D = XK_bracketright
     ST_VK_NULL,   // 0x5E
     ST_VK_NULL,   // 0x5F
-    ST_VK_NULL,   // 0x60
+    ST_VK_TILDE,  // 0x60 = XK_grave
     ST_VK_A,      // 0x61 = XK_a
     ST_VK_B,      // 0x62 = XK_b
     ST_VK_C,      // 0x63 = XK_c
