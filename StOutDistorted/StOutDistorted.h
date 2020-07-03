@@ -1,6 +1,6 @@
 /**
  * StOutDistorted, class providing stereoscopic output in anamorph side by side format using StCore toolkit.
- * Copyright © 2013-2017 Kirill Gavrilov <kirill@sview.ru>
+ * Copyright © 2013-2020 Kirill Gavrilov <kirill@sview.ru>
  *
  * Distributed under the Boost Software License, Version 1.0.
  * See accompanying file license-boost.txt or copy at
@@ -27,10 +27,6 @@ namespace vr {
     class IVRSystem;
     struct TrackedDevicePose_t;
 }
-
-typedef struct ovrHmdStruct* ovrSession;
-typedef union ovrGLTexture_s ovrGLTexture;
-typedef struct ovrSwapTextureSet_ ovrSwapTextureSet;
 
 /**
  * This class implements stereoscopic rendering on displays
@@ -302,12 +298,6 @@ class StOutDistorted : public StWindow {
 #ifdef ST_HAVE_OPENVR
     vr::IVRSystem*            myVrHmd;           //!< OpenVR session object
     vr::TrackedDevicePose_t*  myVrTrackedPoses;  //!< array of tracked devices poses
-#elif defined(ST_HAVE_LIBOVR)
-    ovrSession                myVrHmd;
-    ovrSwapTextureSet*        myOvrSwapTexture;
-    GLuint                    myOvrSwapFbo[2];
-    ovrGLTexture*             myOvrMirrorTexture;
-    GLuint                    myOvrMirrorFbo;
 #endif
 
     bool                      myToShowCursor;    //!< cursor visibility flag
