@@ -306,6 +306,47 @@ class StVec3 {
     }
 
     /**
+     * Return component-wise minimum of two vectors.
+     */
+    StVec3 cwiseMin(const StVec3& theVec) const {
+        return StVec3(v[0] < theVec.v[0] ? v[0] : theVec.v[0],
+                      v[1] < theVec.v[1] ? v[1] : theVec.v[1],
+                      v[2] < theVec.v[2] ? v[2] : theVec.v[2]);
+    }
+
+    /**
+     * Return component-wise maximum of two vectors.
+     */
+    StVec3 cwiseMax(const StVec3& theVec) const {
+        return StVec3(v[0] > theVec.v[0] ? v[0] : theVec.v[0],
+                      v[1] > theVec.v[1] ? v[1] : theVec.v[1],
+                      v[2] > theVec.v[2] ? v[2] : theVec.v[2]);
+    }
+
+    /**
+     * Return component-wise modulus of the vector.
+     */
+    StVec3 cwiseAbs() const {
+        return StVec3(std::abs (v[0]), std::abs (v[1]), std::abs (v[2]));
+    }
+
+    /**
+     * Return maximum component of the vector.
+     */
+    Element_t maxComp() const {
+        return v[0] > v[1] ? (v[0] > v[2] ? v[0] : v[2])
+                           : (v[1] > v[2] ? v[1] : v[2]);
+    }
+
+    /**
+     * Return minimum component of the vector.
+     */
+    Element_t minComp() const {
+        return v[0] < v[1] ? (v[0] < v[2] ? v[0] : v[2])
+                           : (v[1] < v[2] ? v[1] : v[2]);
+    }
+
+    /**
      * Compute linear interpolation between to vectors.
      * @param theT (const Element_t ) - interpolation coefficient 0..1;
      * @return interpolation result.

@@ -235,6 +235,22 @@ class StVec2 {
     }
 
     /**
+     * Return component-wise minimum of two vectors.
+     */
+    StVec2 cwiseMin(const StVec2& theVec) const {
+        return StVec2(v[0] < theVec.v[0] ? v[0] : theVec.v[0],
+                      v[1] < theVec.v[1] ? v[1] : theVec.v[1]);
+    }
+
+    /**
+     * Return component-wise maximum of two vectors.
+     */
+    StVec2 cwiseMax(const StVec2& theVec) const {
+        return StVec2(v[0] > theVec.v[0] ? v[0] : theVec.v[0],
+                      v[1] > theVec.v[1] ? v[1] : theVec.v[1]);
+    }
+
+    /**
      * Compute component-wise modulus of the vector.
      */
     StVec2 cwiseAbs() const {

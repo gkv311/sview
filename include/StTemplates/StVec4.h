@@ -290,6 +290,51 @@ class StVec4 {
         return StString('(') + x() + "; " + y() + "; " + z() + "; " + w() + ')';
     }
 
+    /**
+     * Return component-wise minimum of two vectors.
+     */
+    StVec4 cwiseMin(const StVec4& theVec) const {
+        return StVec4(v[0] < theVec.v[0] ? v[0] : theVec.v[0],
+                      v[1] < theVec.v[1] ? v[1] : theVec.v[1],
+                      v[2] < theVec.v[2] ? v[2] : theVec.v[2],
+                      v[3] < theVec.v[3] ? v[3] : theVec.v[3]);
+    }
+
+    /**
+     * Return component-wise maximum of two vectors.
+     */
+    StVec4 cwiseMax(const StVec4& theVec) const {
+        return StVec4(v[0] > theVec.v[0] ? v[0] : theVec.v[0],
+                      v[1] > theVec.v[1] ? v[1] : theVec.v[1],
+                      v[2] > theVec.v[2] ? v[2] : theVec.v[2],
+                      v[3] > theVec.v[3] ? v[3] : theVec.v[3]);
+    }
+
+    /**
+     * Return component-wise modulus of the vector.
+     */
+    StVec4 cwiseAbs() const {
+        return StVec4(std::abs (v[0]), std::abs (v[1]), std::abs (v[2]), std::abs (v[3]));
+    }
+
+    /**
+     * Return maximum component of the vector.
+     */
+    Element_t maxComp() const {
+        const Element_t aMax1 = v[0] > v[1] ? v[0] : v[1];
+        const Element_t aMax2 = v[2] > v[3] ? v[2] : v[3];
+        return aMax1 > aMax2 ? aMax1 : aMax2;
+    }
+
+    /**
+     * Return minimum component of the vector.
+     */
+    Element_t minComp() const {
+        const Element_t aMin1 = v[0] < v[1] ? v[0] : v[1];
+        const Element_t aMin2 = v[2] < v[3] ? v[2] : v[3];
+        return aMin1 < aMin2 ? aMin1 : aMin2;
+    }
+
 };
 
 /**
