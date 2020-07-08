@@ -19,6 +19,7 @@
 #include <StGL/StGLArbFbo.h>
 #include <StGLCore/StGLCore20.h>
 #include <StGLMesh/StGLTextureQuad.h>
+#include <StGLStereo/StGLProjCamera.h>
 #include <StSettings/StSettings.h>
 #include <StSettings/StTranslations.h>
 #include <StSettings/StEnumParam.h>
@@ -238,6 +239,9 @@ StOutDistorted::StOutDistorted(const StHandle<StResourceManager>& theResMgr,
   myVrMarginsLeft(0.33),
   myVrMarginsRight(0.33),
   myVrFrequency(0),
+  myVrAspectRatio(1.0f),
+  myVrFieldOfView(-1.0f),
+  myVrIOD(0.0f),
   myVrTrackOrient(false),
   myVrToDrawMsg(false),
 #ifdef ST_HAVE_OPENVR
@@ -413,6 +417,7 @@ bool StOutDistorted::create() {
     myContext->setMessagesQueue(myMsgQueue);
     myIsBroken = false;
     myVrFrequency = 0;
+    myVrFieldOfView = -1.0f;
     if(!myContext->isGlGreaterEqual(2, 0)) {
         myMsgQueue->pushError(stCString("OpenGL 2.0 is required by Distorted Output"));
         myIsBroken = true;
@@ -492,6 +497,7 @@ bool StOutDistorted::create() {
         const StString aVrDriver  = getVrTrackedDeviceString(myVrHmd, vr::k_unTrackedDeviceIndex_Hmd, vr::Prop_TrackingSystemName_String);
         const StString aVrDisplay = getVrTrackedDeviceString(myVrHmd, vr::k_unTrackedDeviceIndex_Hmd, vr::Prop_SerialNumber_String);
         myVrFrequency = myVrHmd->GetFloatTrackedDeviceProperty(vr::k_unTrackedDeviceIndex_Hmd, vr::Prop_DisplayFrequency_Float);
+        updateVRProjectionFrustums();
 
         uint32_t aRenderSizeX = 0, aRenderSizeY = 0;
         myVrHmd->GetRecommendedRenderTargetSize(&aRenderSizeX, &aRenderSizeY);
@@ -527,6 +533,29 @@ bool StOutDistorted::create() {
     }
 
     return true;
+}
+
+void StOutDistorted::updateVRProjectionFrustums() {
+#ifdef ST_HAVE_OPENVR
+    StRect<float> aFrustL, aFrustR;
+    myVrHmd->GetProjectionRaw(vr::Eye_Left,  &aFrustL.left(), &aFrustL.right(), &aFrustL.top(), &aFrustL.bottom());
+    myVrHmd->GetProjectionRaw(vr::Eye_Right, &aFrustR.left(), &aFrustR.right(), &aFrustR.top(), &aFrustR.bottom());
+    myVrFrustumL = aFrustL;
+    myVrFrustumR = aFrustR;
+    std::swap(myVrFrustumL.top(), myVrFrustumL.bottom());
+    std::swap(myVrFrustumR.top(), myVrFrustumR.bottom());
+
+    const StVec2<double> aTanHalfFov(StVec4<float>(-aFrustL.left(), aFrustL.right(),  -aFrustR.left(), aFrustR.right()).maxComp(),
+                                     StVec4<float>(-aFrustL.top(),  aFrustL.bottom(), -aFrustR.top(),  aFrustR.bottom()).maxComp());
+    myVrAspectRatio = float(aTanHalfFov.x() / aTanHalfFov.y());
+    myVrFieldOfView = float(2.0 * std::atan(aTanHalfFov.y()) * 180.0 / M_PI);
+
+    // Intra-ocular Distance can be changed in runtime
+    //const vr::HmdMatrix34_t aLeftToHead  = myContext->System->GetEyeToHeadTransform (vr::Eye_Left);
+    //const vr::HmdMatrix34_t aRightToHead = myContext->System->GetEyeToHeadTransform (vr::Eye_Right);
+    //myVrIOD = aRightToHead.m[0][3] - aLeftToHead.m[0][3];
+    myVrIOD = myVrHmd->GetFloatTrackedDeviceProperty(vr::k_unTrackedDeviceIndex_Hmd, vr::Prop_UserIpdMeters_Float);
+#endif
 }
 
 float StOutDistorted::getMaximumTargetFps() const {
@@ -591,20 +620,27 @@ void StOutDistorted::stglDrawCursor(const StPointD_t&  theCursorPos,
         return;
     }
 
-    const float aLensDisp = getLensDist() * 0.5f;
-    double aGlLeft  = -1.0;
-    double aGlTop   =  1.0;
-    double aGlSizeX =  2.0;
-    double aGlSizeY =  2.0;
+    double aGlLeft  = -1.0, aGlTop   = 1.0;
+    double aGlSizeX =  2.0, aGlSizeY = 2.0;
+    float aLensDisp = theView == ST_DRAW_LEFT ? getLensDist() : -getLensDist();
     if(isHmdOutput()) {
         aGlLeft  = -1.0 + myVrMarginsLeft * 2.0;
         aGlTop   =  1.0 - myVrMarginsTop  * 2.0;
         aGlSizeX =  2.0 - (myVrMarginsLeft + myVrMarginsRight) * 2.0;
         aGlSizeY =  2.0 - (myVrMarginsTop + myVrMarginsBottom) * 2.0;
+
+        StGLProjCamera aProjCam;
+        aProjCam.setPerspective(true);
+        //aProjCam.setFOVy(myVrFieldOfView);
+        aProjCam.resize(myVrAspectRatio);
+        aProjCam.setCustomProjection(myVrFrustumL, myVrFrustumR);
+        aProjCam.setView(theView);
+
+        const StGLVec4 aTestProj = aProjCam.getProjMatrix() * StGLVec4(0, 0, aProjCam.getZScreen(), 1.0f);
+        aLensDisp = aTestProj.x() / aTestProj.w();
     }
 
     // compute cursor position
-    StArray<StGLVec4> aVerts(4);
     const float aCurLeft = float(aGlLeft + theCursorPos.x() * aGlSizeX);
     const float aCurTop  = float(aGlTop  - theCursorPos.y() * aGlSizeY);
     if(isHmdOutput()) {
@@ -632,17 +668,12 @@ void StOutDistorted::stglDrawCursor(const StPointD_t&  theCursorPos,
                 break;
         }
     }
-    if(theView == ST_DRAW_LEFT) {
-        aVerts[0] = StGLVec4( 2.0f * aLensDisp + aCurLeft + aCurWidth, aCurTop - aCurHeight, 0.0f, 1.0f);
-        aVerts[1] = StGLVec4( 2.0f * aLensDisp + aCurLeft + aCurWidth, aCurTop,              0.0f, 1.0f);
-        aVerts[2] = StGLVec4( 2.0f * aLensDisp + aCurLeft,             aCurTop - aCurHeight, 0.0f, 1.0f);
-        aVerts[3] = StGLVec4( 2.0f * aLensDisp + aCurLeft,             aCurTop,              0.0f, 1.0f);
-    } else {
-        aVerts[0] = StGLVec4(-2.0f * aLensDisp + aCurLeft + aCurWidth, aCurTop - aCurHeight, 0.0f, 1.0f);
-        aVerts[1] = StGLVec4(-2.0f * aLensDisp + aCurLeft + aCurWidth, aCurTop,              0.0f, 1.0f);
-        aVerts[2] = StGLVec4(-2.0f * aLensDisp + aCurLeft,             aCurTop - aCurHeight, 0.0f, 1.0f);
-        aVerts[3] = StGLVec4(-2.0f * aLensDisp + aCurLeft,             aCurTop,              0.0f, 1.0f);
-    }
+
+    StArray<StGLVec4> aVerts(4);
+    aVerts[0] = StGLVec4(aLensDisp + aCurLeft + aCurWidth, aCurTop - aCurHeight, 0.0f, 1.0f);
+    aVerts[1] = StGLVec4(aLensDisp + aCurLeft + aCurWidth, aCurTop,              0.0f, 1.0f);
+    aVerts[2] = StGLVec4(aLensDisp + aCurLeft,             aCurTop - aCurHeight, 0.0f, 1.0f);
+    aVerts[3] = StGLVec4(aLensDisp + aCurLeft,             aCurTop,              0.0f, 1.0f);
     myCurVertsBuf.init(*myContext, aVerts);
 
     myContext->core20fwd->glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
@@ -705,16 +736,35 @@ StQuaternion<double> StOutDistorted::getDeviceOrientation() const {
     return StWindow::getDeviceOrientation();
 }
 
+bool StOutDistorted::getCustomProjection(StRectF_t& theLeft, StRectF_t& theRight) const {
+    if(!isHmdOutput()) {
+        return false;
+    }
+
+    theLeft  = myVrFrustumL;
+    theRight = myVrFrustumR;
+    return true;
+}
+
+StGLBoxPx StOutDistorted::stglViewport(const int theWinEnum) const {
+    if(!isHmdOutput()) {
+        return StWindow::stglViewport(theWinEnum);
+    }
+
+    StGLBoxPx aBox;
+    aBox.x() = aBox.y() = 0;
+    aBox.width()  = myVrRendSize.x();
+    aBox.height() = myVrRendSize.y();
+    return aBox;
+}
+
 StMarginsI StOutDistorted::getMargins() const {
     if(isHmdOutput()) {
-        const StGLBoxPx aViewPort = StWindow::stglViewport(ST_WIN_MASTER);
-        const int aSizeX = aViewPort.width();
-        const int aSizeY = aViewPort.height();
         StMarginsI aMargins;
-        aMargins.left   = int(double(aSizeX) * myVrMarginsLeft);
-        aMargins.right  = int(double(aSizeX) * myVrMarginsRight);
-        aMargins.top    = int(double(aSizeY) * myVrMarginsTop);
-        aMargins.bottom = int(double(aSizeY) * myVrMarginsBottom);
+        aMargins.left   = int(double(myVrRendSize.x()) * myVrMarginsLeft);
+        aMargins.right  = int(double(myVrRendSize.x()) * myVrMarginsRight);
+        aMargins.top    = int(double(myVrRendSize.y()) * myVrMarginsTop);
+        aMargins.bottom = int(double(myVrRendSize.y()) * myVrMarginsBottom);
         return aMargins;
     }
     return StMarginsI();
@@ -729,9 +779,8 @@ GLfloat StOutDistorted::getScaleFactor() const {
         return StWindow::getScaleFactor();
     }
 
-    // within direct rendering mode HMD is not visible to the system and thus is not registered as StMonitor,
-    // therefore we need to override scale factor here to avoid incorrect scaling
-    return 0.8f;
+    // TODO this is calibrated for HTC Vive; applying to HMDs with another FOV might give bad results
+    return float(myVrRendSize.x()) / 1280.0f;
 }
 
 void StOutDistorted::checkHdmiPack() {
@@ -839,8 +888,10 @@ void StOutDistorted::stglDrawVR() {
                     aRotMat[aCol][aRow] = aHeadPos.m[aCol][aRow];
                 }
             }
+
             myVrOrient.setMatrix(aRotMat);
-	      }
+            updateVRProjectionFrustums();
+        }
     }
 
     // real screen buffer
@@ -878,7 +929,8 @@ void StOutDistorted::stglDraw() {
 
     double aForcedAspect = -1.0;
     if(isHmdOutput()) {
-        if(myVrRendSize.x() != 0 && myVrRendSize.y() != 0) { aForcedAspect = double(myVrRendSize.x()) / double(myVrRendSize.y()); }
+        //if(myVrRendSize.x() != 0 && myVrRendSize.y() != 0) { aForcedAspect = double(myVrRendSize.x()) / double(myVrRendSize.y()); }
+        aForcedAspect = myVrAspectRatio;
     }
 
     StWinSplit aWinSplit = StWinSlave_splitOff;

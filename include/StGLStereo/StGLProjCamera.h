@@ -253,6 +253,21 @@ class StGLProjCamera {
     }
 
     /**
+     * Return TRUE if custom stereoscopic projection frustum has been set.
+     */
+    ST_LOCAL bool isCustomProjection() const { return myIsCustomFrust; }
+
+    /**
+     * Unset custom projection.
+     */
+    ST_CPPEXPORT void resetCustomProjection();
+
+    /**
+     * Setup custom projection.
+     */
+    ST_CPPEXPORT void setCustomProjection(const StRectF_t& theLeft, const StRectF_t& theRight);
+
+    /**
      * Returns the string description for the camera.
      * For debug purposes...
      */
@@ -262,6 +277,11 @@ class StGLProjCamera {
 
     StGLMatrix  myMatrix;     //!< current projection matrix
     StGLMatrix  myMatrixMono; //!< we store mono projection matrix to allow draw special object
+
+    StRectF_t   myVrFrustumL; //!< custom VR projection frustum, left eye
+    StRectF_t   myVrFrustumR; //!< custom VR projection frustum, right eye
+    bool        myIsCustomFrust;
+
     GLfloat     myFOVy;       //!< field of view in y-axis (degrees)
     GLfloat     myZoom;       //!< linear zoom factor (changes the effective FOVy value!)
     GLfloat     myAspect;     //!< screen aspect ratio, recomputed on window size change

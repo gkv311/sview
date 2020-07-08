@@ -479,6 +479,12 @@ bool StImageViewer::createGui() {
         return false;
     }
     myGUI->stglInit();
+    StRectF_t aFrustL, aFrustR;
+    if(myWindow->getCustomProjection(aFrustL, aFrustR)) {
+        myGUI->changeCamera()->setCustomProjection(aFrustL, aFrustR);
+    } else {
+        myGUI->changeCamera()->resetCustomProjection();
+    }
     myGUI->stglResize(myWindow->stglViewport(ST_WIN_MASTER), myWindow->getMargins(), (float )myWindow->stglAspectRatio());
 
     for(size_t anIter = 0; anIter < myGUI->myImage->getActions().size(); ++anIter) {
@@ -757,6 +763,12 @@ void StImageViewer::doResize(const StSizeEvent& ) {
     if(toMobileGui != wasMobileGui) {
         doChangeMobileUI(params.IsMobileUI->getValue());
     } else {
+        StRectF_t aFrustL, aFrustR;
+        if(myWindow->getCustomProjection(aFrustL, aFrustR)) {
+            myGUI->changeCamera()->setCustomProjection(aFrustL, aFrustR);
+        } else {
+            myGUI->changeCamera()->resetCustomProjection();
+        }
         myGUI->stglResize(myWindow->stglViewport(ST_WIN_MASTER), myWindow->getMargins(), (float )myWindow->stglAspectRatio());
     }
 }

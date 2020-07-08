@@ -1,6 +1,6 @@
 /**
  * StGLWidgets, small C++ toolkit for writing GUI using OpenGL.
- * Copyright © 2009-2015 Kirill Gavrilov <kirill@sview.ru>
+ * Copyright © 2009-2020 Kirill Gavrilov <kirill@sview.ru>
  *
  * Distributed under the Boost Software License, Version 1.0.
  * See accompanying file license-boost.txt or copy at
@@ -27,9 +27,10 @@ void StGLTextProgram::setProjMat(StGLContext&      theCtx,
     theCtx.core20fwd->glUniformMatrix4fv(myUniformProjMat, 1, GL_FALSE, theProjMat);
 }
 
-void StGLTextProgram::setModelMat(StGLContext&      theCtx,
-                                  const StGLMatrix& theModelMat) {
-    theCtx.core20fwd->glUniformMatrix4fv(myUniformModelMat, 1, GL_FALSE, theModelMat);
+void StGLTextProgram::setDisplacement(StGLContext& theCtx,
+                                      const StGLVec3& theDisp,
+                                      const float theScale) {
+    theCtx.core20fwd->glUniform4fv(myUniformDispl, 1, StGLVec4(theDisp, theScale));
 }
 
 void StGLTextProgram::setColor(StGLContext&    theCtx,
@@ -40,13 +41,13 @@ void StGLTextProgram::setColor(StGLContext&    theCtx,
 bool StGLTextProgram::init(StGLContext& theCtx) {
     const char VERTEX_SHADER[] =
        "uniform mat4 uProjMat; \
-        uniform mat4 uModelMat; \
+        uniform vec4 uDisp; \
         attribute vec4 vVertex; \
         attribute vec2 vTexCoord; \
         varying vec2 fTexCoord; \
         void main(void) { \
             fTexCoord = vTexCoord; \
-            gl_Position = uProjMat * uModelMat * vVertex; \
+            gl_Position = uProjMat * (vec4(vVertex.xy * uDisp.w, 0.0, 1.0) + vec4(uDisp.xyz, 0.0)); \
         }";
 
     const char FRAGMENT_GET_RED[] =
@@ -84,7 +85,7 @@ bool StGLTextProgram::init(StGLContext& theCtx) {
     }
 
     myUniformProjMat  = StGLProgram::getUniformLocation(theCtx, "uProjMat");
-    myUniformModelMat = StGLProgram::getUniformLocation(theCtx, "uModelMat");
+    myUniformDispl    = StGLProgram::getUniformLocation(theCtx, "uDisp");
     myUniformColor    = StGLProgram::getUniformLocation(theCtx, "uTextColor");
 
     StGLVarLocation aUniformTexture = StGLProgram::getUniformLocation(theCtx, "uTexture");
@@ -95,7 +96,7 @@ bool StGLTextProgram::init(StGLContext& theCtx) {
     }
 
     return myUniformProjMat.isValid()
-        && myUniformModelMat.isValid()
+        && myUniformDispl.isValid()
         && myUniformColor.isValid()
         && aUniformTexture.isValid();
 }

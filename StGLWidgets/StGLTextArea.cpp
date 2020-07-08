@@ -1,6 +1,6 @@
 /**
  * StGLWidgets, small C++ toolkit for writing GUI using OpenGL.
- * Copyright © 2009-2017 Kirill Gavrilov <kirill@sview.ru>
+ * Copyright © 2009-2020 Kirill Gavrilov <kirill@sview.ru>
  *
  * Distributed under the Boost Software License, Version 1.0.
  * See accompanying file license-boost.txt or copy at
@@ -273,15 +273,8 @@ void StGLTextArea::stglDraw(unsigned int theView) {
     StRectD_t aTextRectGl = getRoot()->getRectGl(getAbsolute(aTextRectPx));
 
     // size corrector for FTGL
-    StRectD_t zparams; getCamera()->getZParams(zparams);
-    GLfloat aSizeOut = 2.0f * GLfloat(zparams.top()) / GLfloat(getRoot()->getRootFullSizeY());
-
-    StGLMatrix aModelMat;
-    aModelMat.translate(StGLVec3(getRoot()->getScreenDispX() + myTextDX, 0.0f, -getCamera()->getZScreen()));
-    aModelMat.translate(StGLVec3(GLfloat(aTextRectGl.left()),
-                                 GLfloat(aTextRectGl.top()),
-                                 0.0f));
-    aModelMat.scale(aSizeOut, aSizeOut, 0.0f);
+    StRectD_t aZParams; getCamera()->getZParams(aZParams);
+    const GLfloat aSizeOut = 2.0f * GLfloat(aZParams.top()) / GLfloat(getRoot()->getRootFullSizeY());
 
     aCtx.core20fwd->glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
     aCtx.core20fwd->glEnable(GL_BLEND);
@@ -294,7 +287,10 @@ void StGLTextArea::stglDraw(unsigned int theView) {
 
         StGLTextBorderProgram& aBorderProgram = myRoot->getTextBorderProgram();
         aBorderProgram.use(aCtx);
-        aBorderProgram.setModelMat(aCtx, aModelMat);
+        aBorderProgram.setDisplacement(aCtx,
+                                       StGLVec3(GLfloat(aTextRectGl.left()) + getRoot()->getScreenDispX() + myTextDX,
+                                                GLfloat(aTextRectGl.top()), 0.0f),
+                                       aSizeOut);
 
         aBorderProgram.setColor(aCtx, myBorderColor);
         myBorderOVertBuf.bindVertexAttrib(aCtx, aBorderProgram.getVVertexLoc());
@@ -312,23 +308,22 @@ void StGLTextArea::stglDraw(unsigned int theView) {
     aCtx.core20fwd->glActiveTexture(GL_TEXTURE0); // our shader is bound to first texture unit
     StGLTextProgram& aTextProgram = myRoot->getTextProgram();
     aTextProgram.use(aCtx);
-        aTextProgram.setModelMat(aCtx, aModelMat);
+        aTextProgram.setDisplacement(aCtx,
+                                     StGLVec3(GLfloat(aTextRectGl.left()) + getRoot()->getScreenDispX() + myTextDX,
+                                              GLfloat(aTextRectGl.top()), 0.0f),
+                                     aSizeOut);
         aTextProgram.setColor(aCtx, myToDrawShadow ? myShadowColor : aTextColor);
-
         drawText(aCtx);
 
         if(myToDrawShadow) {
-            aModelMat.initIdentity();
             aTextRectPx.left() -= 1;
             aTextRectPx.top()  -= 1;
             aTextRectGl = getRoot()->getRectGl(getAbsolute(aTextRectPx));
-            aModelMat.translate(StGLVec3(getRoot()->getScreenDispX() + myTextDX, 0.0f, -getCamera()->getZScreen()));
-            aModelMat.translate(StGLVec3(GLfloat(aTextRectGl.left()),
-                                         GLfloat(aTextRectGl.top()),
-                                         0.0f));
-            aModelMat.scale(aSizeOut, aSizeOut, 0.0f);
 
-            aTextProgram.setModelMat(aCtx, aModelMat);
+            aTextProgram.setDisplacement(aCtx,
+                                         StGLVec3(GLfloat(aTextRectGl.left()) + getRoot()->getScreenDispX() + myTextDX,
+                                                  GLfloat(aTextRectGl.top()), 0.0f),
+                                         aSizeOut);
             aTextProgram.setColor(aCtx, aTextColor);
 
             drawText(aCtx);

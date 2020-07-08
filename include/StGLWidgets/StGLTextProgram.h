@@ -1,6 +1,6 @@
 /**
  * StGLWidgets, small C++ toolkit for writing GUI using OpenGL.
- * Copyright © 2009-2015 Kirill Gavrilov <kirill@sview.ru>
+ * Copyright © 2009-2020 Kirill Gavrilov <kirill@sview.ru>
  *
  * Distributed under the Boost Software License, Version 1.0.
  * See accompanying file license-boost.txt or copy at
@@ -53,12 +53,14 @@ class StGLTextProgram : public StGLProgram {
                                  const StGLMatrix& theProjMat);
 
     /**
-     * Setup model-view matrix.
-     * @param theCtx      active GL context
-     * @param theModelMat model-view matrix
+     * Setup components of model-view matrix.
+     * @param theCtx   active GL context
+     * @param theDisp  translation vector
+     * @param theScale scale factor
      */
-    ST_CPPEXPORT void setModelMat(StGLContext&      theCtx,
-                                  const StGLMatrix& theModelMat);
+    ST_CPPEXPORT void setDisplacement(StGLContext& theCtx,
+                                      const StGLVec3& theDisp,
+                                      const float theScale);
 
     /**
      * Setup text color.
@@ -78,7 +80,7 @@ class StGLTextProgram : public StGLProgram {
         private:
 
     StGLVarLocation myUniformProjMat;  //!< location of uniform variable of projection matrix
-    StGLVarLocation myUniformModelMat; //!< location of uniform variable of model view matrix
+    StGLVarLocation myUniformDispl;    //!< location of uniform variable of displacement vector
     StGLVarLocation myUniformColor;    //!< location of uniform variable of color value
 
 };

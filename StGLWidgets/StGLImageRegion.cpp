@@ -645,13 +645,6 @@ void StGLImageRegion::stglDrawView(unsigned int theView) {
         }
     }
 
-    // setup scissor box
-    StGLBoxPx aScissorBox;
-    const StRectI_t aFrameRectAbs = getAbsolute(aFrameRectPx);
-    getRoot()->stglScissorRect(aFrameRectAbs, aScissorBox);
-    aCtx.stglSetScissorRect(aScissorBox, true);
-    aCtx.stglResizeViewport(aScissorBox);
-
     // set 85 degrees FOV as 1.0x zoom for panorama rendering
     myProjCam = *getCamera();
     myProjCam.resize(aCameraAspect);
@@ -754,14 +747,23 @@ void StGLImageRegion::stglDrawView(unsigned int theView) {
     const GLfloat  aScaleBack = aParams->ScaleFactor;
     const StGLVec2 aPanBack   = aParams->PanCenter;
 
-    const float aVrScale = float(myRoot->getVrZoomOut());
-
     StViewSurface aViewMode = aParams->ViewingMode;
     if(aTextures.getPlane(0).getTarget() == GL_TEXTURE_CUBE_MAP) {
         aViewMode = StViewSurface_Cubemap;
     } else if(aViewMode == StViewSurface_Cubemap) {
         aViewMode = StViewSurface_Plain;
     }
+
+    // setup scissor box
+    StGLBoxPx aScissorBox;
+    const StRectI_t aFrameRectAbs = getAbsolute(aFrameRectPx);
+    if(aViewMode == StViewSurface_Plain) {
+        getRoot()->stglScissorRect2d(aFrameRectAbs, aScissorBox);
+    } else {
+        getRoot()->stglScissorRect3d(aFrameRectAbs, aScissorBox);
+    }
+    aCtx.stglSetScissorRect(aScissorBox, true);
+    aCtx.stglResizeViewport(aScissorBox);
 
     myFrameSize.x() = int(double(aTextures.getPlane().getDataSize().x()) * double(aTextures.getPlane().getSizeX()));
     myFrameSize.y() = int(double(aTextures.getPlane().getDataSize().y()) * double(aTextures.getPlane().getSizeY()));
@@ -865,6 +867,7 @@ void StGLImageRegion::stglDrawView(unsigned int theView) {
             }
 
             // apply scale
+            const float aVrScale = float(myRoot->getVrZoomOut());
             aModelMat.scale(aParams->ScaleFactor * aVrScale, aParams->ScaleFactor * aVrScale, 1.0f);
 
             // apply position
@@ -975,15 +978,19 @@ void StGLImageRegion::stglDrawView(unsigned int theView) {
             myProgram.setTextureADataSize   (aCtx, aClampA);
             myProgram.setCubeTextureFlipZ   (aCtx, aParams->ToFlipCubeZ);
 
-            const float aScale = aParams->ScaleFactor * aVrScale;
+            const float aScale = aParams->ScaleFactor;
             aModelMat.scale(aScale, aScale, 1.0f);
 
             // compute orientation
             const StGLQuaternion anOri = getHeadOrientation(theView, true);
             aModelMat = StGLMatrix::multiply(aModelMat, StGLMatrix(anOri));
-
-            myProgram.getActiveProgram()->setProjMat (aCtx, myProjCam.getProjMatrixMono());
             myProgram.getActiveProgram()->setModelMat(aCtx, aModelMat);
+
+            if(myProjCam.isCustomProjection()) {
+                myProgram.getActiveProgram()->setProjMat (aCtx, myProjCam.getProjMatrix());
+            } else {
+                myProgram.getActiveProgram()->setProjMat (aCtx, myProjCam.getProjMatrixMono());
+            }
 
             ///glEnable(GL_TEXTURE_CUBE_MAP_SEAMLESS);
 
@@ -1023,7 +1030,7 @@ void StGLImageRegion::stglDrawView(unsigned int theView) {
             }
 
             // perform scaling
-            const float aScale = THE_SPHERE_RADIUS * aParams->ScaleFactor * aVrScale;
+            const float aScale = THE_SPHERE_RADIUS * aParams->ScaleFactor;
             aModelMat.scale(aScale, aScale * aVertScale, THE_SPHERE_RADIUS);
 
             // compute orientation
@@ -1039,8 +1046,12 @@ void StGLImageRegion::stglDrawView(unsigned int theView) {
             myProgram.setTextureUVDataSize  (aCtx, aClampUV);
             myProgram.setTextureADataSize   (aCtx, aClampA);
 
-            myProgram.getActiveProgram()->setProjMat (aCtx, myProjCam.getProjMatrixMono());
             myProgram.getActiveProgram()->setModelMat(aCtx, aModelMat);
+            if(myProjCam.isCustomProjection()) {
+                myProgram.getActiveProgram()->setProjMat (aCtx, myProjCam.getProjMatrix());
+            } else {
+                myProgram.getActiveProgram()->setProjMat (aCtx, myProjCam.getProjMatrixMono());
+            }
 
             aMesh->draw(aCtx, *myProgram.getActiveProgram());
 

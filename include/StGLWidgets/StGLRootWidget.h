@@ -1,6 +1,6 @@
 /**
  * StGLWidgets, small C++ toolkit for writing GUI using OpenGL.
- * Copyright © 2009-2017 Kirill Gavrilov <kirill@sview.ru>
+ * Copyright © 2009-2020 Kirill Gavrilov <kirill@sview.ru>
  *
  * Distributed under the Boost Software License, Version 1.0.
  * See accompanying file license-boost.txt or copy at
@@ -410,10 +410,6 @@ class StGLRootWidget : public StGLWidget {
         return myScrDispX;
     }
 
-    inline GLfloat getLensDist() const {
-        return myLensDist;
-    }
-
     inline void setLensDist(const GLfloat theLensDist) {
         myLensDist = theLensDist;
     }
@@ -451,8 +447,20 @@ class StGLRootWidget : public StGLWidget {
      * @param theRect        Rectangle in window coordinates
      * @param theScissorRect Scissor rectangle for glScissor() call
      */
-    ST_CPPEXPORT void stglScissorRect(const StRectI_t& theRect,
-                                      StGLBoxPx&       theScissorRect) const;
+    ST_LOCAL void stglScissorRect2d(const StRectI_t& theRect,
+                                    StGLBoxPx& theScissorRect) const {
+        stglScissorRectInternal(theRect, true, theScissorRect);
+    }
+
+    /**
+     * Computes scissor rectangle in OpenGL viewport.
+     * @param theRect        Rectangle in window coordinates
+     * @param theScissorRect Scissor rectangle for glScissor() call
+     */
+    ST_LOCAL void stglScissorRect3d(const StRectI_t& theRect,
+                                    StGLBoxPx& theScissorRect) const {
+        stglScissorRectInternal(theRect, false, theScissorRect);
+    }
 
     /**
      * Append widget to destroy list.
@@ -484,6 +492,16 @@ class StGLRootWidget : public StGLWidget {
     ST_LOCAL void clearDestroyList();
 
     ST_LOCAL void setupTextures();
+
+    /**
+    * Computes scissor rectangle in OpenGL viewport.
+    * @param theRect [in] Rectangle in window coordinates
+    * @param theIs2d [in] 2d/3d flag
+    * @param theScissorRect [out] Scissor rectangle for glScissor() call
+    */
+    ST_CPPEXPORT void stglScissorRectInternal(const StRectI_t& theRect,
+                                              const bool theIs2d,
+                                              StGLBoxPx& theScissorRect) const;
 
         private:
 

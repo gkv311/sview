@@ -376,7 +376,7 @@ void StGLPlayList::stglDraw(unsigned int theView) {
 
     StGLContext& aCtx = getContext();
     StGLBoxPx aScissorRect;
-    stglScissorRect(aScissorRect);
+    stglScissorRect2d(aScissorRect);
     aCtx.stglSetScissorRect(aScissorRect, true);
 
     StGLWidget::stglDraw(theView);

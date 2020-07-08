@@ -1,6 +1,6 @@
 /**
  * StGLWidgets, small C++ toolkit for writing GUI using OpenGL.
- * Copyright © 2009-2017 Kirill Gavrilov <kirill@sview.ru>
+ * Copyright © 2009-2020 Kirill Gavrilov <kirill@sview.ru>
  *
  * Distributed under the Boost Software License, Version 1.0.
  * See accompanying file license-boost.txt or copy at
@@ -263,31 +263,27 @@ void StGLRootWidget::stglDraw(unsigned int theView) {
     myGlCtx->stglSyncState();
     myGlCtx->core20fwd->glGetIntegerv(GL_VIEWPORT, myViewport); // cache viewport
 
-    switch(theView) {
-        case ST_DRAW_LEFT:
-            myScrDispX   =             myLensDist * GLfloat(0.5 * myRectGl.width());
-            myScrDispXPx =  int(double(myLensDist) * 0.5 * double(myRectPxFull.width()));
-            break;
-        case ST_DRAW_RIGHT:
-            myScrDispX   =            -myLensDist * GLfloat(0.5 * myRectGl.width());
-            myScrDispXPx = -int(double(myLensDist) * 0.5 * double(myRectPxFull.width()));
-            break;
-        case ST_DRAW_MONO:
-        default:
-            myScrDispX   = 0.0f;
-            myScrDispXPx = 0;
-            break;
-    }
+    myScrDispX   = 0.0f;
+    myScrDispXPx = 0;
+    if(theView == ST_DRAW_LEFT || theView == ST_DRAW_RIGHT) {
+        if(myProjCamera.isCustomProjection()) {
+            StGLVec4 aTestProj = myProjCamera.getProjMatrix() * StGLVec4(0, 0, myProjCamera.getZScreen(), 1.0f);
+            aTestProj /= aTestProj.w();
+            aTestProj.x() = 0.5f + aTestProj.x() * 0.5f;
+            aTestProj.y() = 0.5f + aTestProj.y() * 0.5f;
 
-    if(myTextProgram->isValid()) {
-        myTextProgram->use(*myGlCtx);
-        myTextProgram->setProjMat(*myGlCtx,       myProjCamera.getProjMatrix());
-        myTextProgram->unuse(*myGlCtx);
-    }
-    if(myTextBorderProgram->isValid()) {
-        myTextBorderProgram->use(*myGlCtx);
-        myTextBorderProgram->setProjMat(*myGlCtx, myProjCamera.getProjMatrix());
-        myTextBorderProgram->unuse(*myGlCtx);
+            myScrDispX   = float((aTestProj.x() - 0.5f) * myRectGl.width());
+            myScrDispXPx = int(double(aTestProj.x()) * double(myViewport[2]) - double(myViewport[2])/2);
+            //myScrDispYPx = int(double(aTestProj.y()) * double(myViewport[3]) - double(myViewport[3])/2);
+        } else {
+            if(theView == ST_DRAW_LEFT) {
+                myScrDispX   =             myLensDist * float(0.5 * myRectGl.width());
+                myScrDispXPx =  int(double(myLensDist) * 0.5 * double(myViewport[2]));
+            } else {
+                myScrDispX   =            -myLensDist * float(0.5 * myRectGl.width());
+                myScrDispXPx = -int(double(myLensDist) * 0.5 * double(myViewport[2]));
+            }
+        }
     }
 
     StGLWidget::stglDraw(theView);
@@ -314,8 +310,9 @@ void StGLRootWidget::stglUpdate(const StPointD_t& theCursorZo,
     StGLWidget::stglUpdate(theCursorZo, theIsPreciseInput);
 }
 
-void StGLRootWidget::stglScissorRect(const StRectI_t& theRect,
-                                     StGLBoxPx&       theScissorRect) const {
+void StGLRootWidget::stglScissorRectInternal(const StRectI_t& theRect,
+                                             const bool theIs2d,
+                                             StGLBoxPx& theScissorRect) const {
     const GLint aVPortWidth  = myViewport[2];
     const GLint aVPortHeight = myViewport[3];
     const GLint aRootWidth   = myRectPxFull.width();
@@ -330,7 +327,8 @@ void StGLRootWidget::stglScissorRect(const StRectI_t& theRect,
     const GLdouble aWidthFactor  = GLdouble(aVPortWidth)  / GLdouble(aRootWidth);
     const GLdouble aHeightFactor = GLdouble(aVPortHeight) / GLdouble(aRootHeight);
 
-    theScissorRect.x() = myViewport[0] + GLint(aWidthFactor  * GLdouble(theRect.left() + myScrDispXPx));
+    const int anEyeShiftPx = theIs2d ? myScrDispXPx : 0;
+    theScissorRect.x() = myViewport[0] + GLint(aWidthFactor  * GLdouble(theRect.left() + anEyeShiftPx));
     theScissorRect.y() = myViewport[1] + GLint(aHeightFactor * GLdouble(aRootHeight - theRect.bottom()));
 
     theScissorRect.width()  = GLint(aWidthFactor  * GLdouble(theRect.width()));
@@ -369,6 +367,16 @@ void StGLRootWidget::stglResize(const StGLBoxPx& theViewPort,
         myMenuProgram->use(*myGlCtx);
         myMenuProgram->setProjMat(*myGlCtx, getScreenProjection());
         myMenuProgram->unuse(*myGlCtx);
+    }
+    if(myTextProgram->isValid()) {
+        myTextProgram->use(*myGlCtx);
+        myTextProgram->setProjMat(*myGlCtx, getScreenProjection());
+        myTextProgram->unuse(*myGlCtx);
+    }
+    if(myTextBorderProgram->isValid()) {
+        myTextBorderProgram->use(*myGlCtx);
+        myTextBorderProgram->setProjMat(*myGlCtx, getScreenProjection());
+        myTextBorderProgram->unuse(*myGlCtx);
     }
 
     // update all child widgets

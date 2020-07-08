@@ -289,6 +289,7 @@ class StRect {
 
 typedef StRect<int>    StRectI_t;
 typedef StRect<double> StRectD_t;
+typedef StRect<float>  StRectF_t;
 
 /**
  * Simple structure to define rectangular margins.

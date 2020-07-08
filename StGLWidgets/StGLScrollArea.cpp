@@ -168,7 +168,7 @@ void StGLScrollArea::stglDraw(unsigned int theView) {
     }
 
     StGLBoxPx aScissorRect;
-    stglScissorRect(aScissorRect);
+    stglScissorRect2d(aScissorRect);
     aCtx.stglSetScissorRect(aScissorRect, true);
 
     StGLWidget::stglDraw(theView); // draw children

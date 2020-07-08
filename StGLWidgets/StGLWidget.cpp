@@ -169,8 +169,12 @@ StRectI_t StGLWidget::getAbsolute(const StRectI_t& theRectPx) const {
     return computeAbsolutePos(myParent->getRectPxAbsolute(), theRectPx, myCorner);
 }
 
-void StGLWidget::stglScissorRect(StGLBoxPx& theScissorRect) const {
-    myRoot->stglScissorRect(getRectPxAbsolute(), theScissorRect);
+void StGLWidget::stglScissorRect2d(StGLBoxPx& theScissorRect) const {
+    myRoot->stglScissorRect2d(getRectPxAbsolute(), theScissorRect);
+}
+
+void StGLWidget::stglScissorRect3d(StGLBoxPx& theScissorRect) const {
+    myRoot->stglScissorRect3d(getRectPxAbsolute(), theScissorRect);
 }
 
 StPointD_t StGLWidget::getPointGl(const StPointD_t& thePointZo) const {

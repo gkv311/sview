@@ -442,6 +442,10 @@ StQuaternion<double> StWindow::getDeviceOrientation() const {
     return StQuaternion<double>();
 }
 
+bool StWindow::getCustomProjection(StRectF_t& , StRectF_t& ) const {
+    return false;
+}
+
 bool StWindow::toSwapEyesHW() const {
     return myWin->myToSwapEyesHW;
 }

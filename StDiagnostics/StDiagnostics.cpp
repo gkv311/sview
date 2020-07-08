@@ -97,6 +97,13 @@ bool StDiagnostics::open() {
         myGUI.nullify();
         return false;
     }
+
+    StRectF_t aFrustL, aFrustR;
+    if(myWindow->getCustomProjection(aFrustL, aFrustR)) {
+        myGUI->changeCamera()->setCustomProjection(aFrustL, aFrustR);
+    } else {
+        myGUI->changeCamera()->resetCustomProjection();
+    }
     myGUI->stglResize(myWindow->stglViewport(ST_WIN_MASTER), myWindow->getMargins(), (float )myWindow->stglAspectRatio());
 
     registerHotKeys();
@@ -108,6 +115,12 @@ void StDiagnostics::doResize(const StSizeEvent& ) {
         return;
     }
 
+    StRectF_t aFrustL, aFrustR;
+    if(myWindow->getCustomProjection(aFrustL, aFrustR)) {
+        myGUI->changeCamera()->setCustomProjection(aFrustL, aFrustR);
+    } else {
+        myGUI->changeCamera()->resetCustomProjection();
+    }
     myGUI->stglResize(myWindow->stglViewport(ST_WIN_MASTER), myWindow->getMargins(), (float )myWindow->stglAspectRatio());
 }
 

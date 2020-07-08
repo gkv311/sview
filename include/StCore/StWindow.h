@@ -352,7 +352,7 @@ class StWindow {
      * @param theWinEnum subwindow ID
      * @return rectangle within window from bottom-left corner (ready for OpenGL calls)
      */
-    ST_CPPEXPORT StGLBoxPx stglViewport(const int theWinEnum) const;
+    ST_CPPEXPORT virtual StGLBoxPx stglViewport(const int theWinEnum) const;
 
     /**
      * @return GUI scale factor for compatibility with low-resolution and high-resolution displays
@@ -482,6 +482,11 @@ class StWindow {
      * - Z is positive heading backwards (tangential to the ground).
      */
     ST_CPPEXPORT virtual StQuaternion<double> getDeviceOrientation() const;
+
+    /**
+     * Return custom stereo projection frustums.
+     */
+    ST_CPPEXPORT virtual bool getCustomProjection(StRectF_t& theLeft, StRectF_t& theRight) const;
 
     /**
      * Return TRUE if Left/Right eyes should be swapped by external event.

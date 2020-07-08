@@ -127,6 +127,11 @@ class StOutDistorted : public StWindow {
     ST_CPPEXPORT virtual void stglDraw() ST_ATTR_OVERRIDE;
 
     /**
+    * Get viewport for specified subwindow.
+    */
+    ST_CPPEXPORT virtual StGLBoxPx stglViewport(const int theWinEnum) const ST_ATTR_OVERRIDE;
+
+    /**
      * Show/Hide mouse cursor.
      * @param theToShow true to show cursor
      */
@@ -151,6 +156,11 @@ class StOutDistorted : public StWindow {
      * Get head orientation.
      */
     ST_CPPEXPORT virtual StQuaternion<double> getDeviceOrientation() const ST_ATTR_OVERRIDE;
+
+    /**
+     * Return custom stereo projection frustums.
+     */
+    ST_CPPEXPORT virtual bool getCustomProjection(StRectF_t& theLeft, StRectF_t& theRight) const ST_ATTR_OVERRIDE;
 
     /**
      * Return margins for working area.
@@ -214,6 +224,11 @@ class StOutDistorted : public StWindow {
         return myIsStereoOn
             && myDevice == DEVICE_HMD;
     }
+
+    /**
+     * Retrieve active head position.
+     */
+    ST_LOCAL void updateVRProjectionFrustums();
 
         private:
 
@@ -288,8 +303,13 @@ class StOutDistorted : public StWindow {
     double                    myVrMarginsBottom;
     double                    myVrMarginsLeft;
     double                    myVrMarginsRight;
+    StRectF_t                 myVrFrustumL;      //!< projection frustum for the left eye
+    StRectF_t                 myVrFrustumR;      //!< projection frustum for the right eye
     StVec2<int>               myVrRendSize;      //!< FBO width x height for rendering into VR (can be greater then actual HMD resolution to compensate distortion)
     float                     myVrFrequency;     //!< display frequency
+    float                     myVrAspectRatio;   //!< aspect ratio
+    float                     myVrFieldOfView;   //!< field of view
+    float                     myVrIOD;           //!< intra-ocular distance in meters
     bool                      myVrTrackOrient;   //!< track orientation flag
     bool                      myVrToDrawMsg;
     StHandle<StGLTextureQuad> myVrFullscreenMsg;

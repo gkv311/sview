@@ -225,7 +225,12 @@ class StGLWidget {
     /**
      * @param theScissorRect rectangle for OpenGL scissor test
      */
-    ST_CPPEXPORT void stglScissorRect(StGLBoxPx& theScissorRect) const;
+    ST_CPPEXPORT void stglScissorRect2d(StGLBoxPx& theScissorRect) const;
+
+    /**
+    * @param theScissorRect rectangle for OpenGL scissor test
+    */
+    ST_CPPEXPORT void stglScissorRect3d(StGLBoxPx& theScissorRect) const;
 
     /**
      * @param thePointZo point in Zero2One coordinates to convert
