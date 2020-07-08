@@ -288,9 +288,8 @@ class StOutDistorted : public StWindow {
     double                    myVrMarginsBottom;
     double                    myVrMarginsLeft;
     double                    myVrMarginsRight;
-    int                       myVrRendSizeX;     //!< FBO width  for rendering into VR (can be greater then actual HMD resolution to compensate distortion)
-    int                       myVrRendSizeY;     //!< FBO height for rendering into VR
-    float                     myVrFrequency;     //!< HMD frequency
+    StVec2<int>               myVrRendSize;      //!< FBO width x height for rendering into VR (can be greater then actual HMD resolution to compensate distortion)
+    float                     myVrFrequency;     //!< display frequency
     bool                      myVrTrackOrient;   //!< track orientation flag
     bool                      myVrToDrawMsg;
     StHandle<StGLTextureQuad> myVrFullscreenMsg;

@@ -237,8 +237,6 @@ StOutDistorted::StOutDistorted(const StHandle<StResourceManager>& theResMgr,
   myVrMarginsBottom(0.35),
   myVrMarginsLeft(0.33),
   myVrMarginsRight(0.33),
-  myVrRendSizeX(0),
-  myVrRendSizeY(0),
   myVrFrequency(0),
   myVrTrackOrient(false),
   myVrToDrawMsg(false),
@@ -495,13 +493,12 @@ bool StOutDistorted::create() {
         const StString aVrDisplay = getVrTrackedDeviceString(myVrHmd, vr::k_unTrackedDeviceIndex_Hmd, vr::Prop_SerialNumber_String);
         myVrFrequency = myVrHmd->GetFloatTrackedDeviceProperty(vr::k_unTrackedDeviceIndex_Hmd, vr::Prop_DisplayFrequency_Float);
 
-        uint32_t aRenderSizeX = 0;
-        uint32_t aRenderSizeY = 0;
+        uint32_t aRenderSizeX = 0, aRenderSizeY = 0;
         myVrHmd->GetRecommendedRenderTargetSize(&aRenderSizeX, &aRenderSizeY);
         myAboutVrDevice = aVrManuf + " " + aVrDriver + "\n"
                         + aVrDisplay + " [" + aRenderSizeX + "x" + aRenderSizeY + "@" + myVrFrequency + "]";
-        myVrRendSizeX = int(aRenderSizeX);
-        myVrRendSizeY = int(aRenderSizeY);
+        myVrRendSize.x() = int(aRenderSizeX);
+        myVrRendSize.y() = int(aRenderSizeY);
         updateAbout();
     }
 #endif
@@ -780,12 +777,18 @@ void StOutDistorted::stglDrawVR() {
         return;
     }
 
-    if(!myFrBuffer->initLazy(*myContext, GL_RGBA8, myVrRendSizeX, myVrRendSizeY, StWindow::hasDepthBuffer())) {
-        myIsBroken = true;
-        myMsgQueue->pushError(stCString("OpenVR output - critical error:\nFrame Buffer Object resize failed!"));
-        vr::VR_Shutdown();
-        myVrHmd = NULL;
-        return;
+    // force resizing instead of lazy resize as we do not pass texture bounds
+    const vr::VRTextureBounds_t* aTexBounds = NULL;
+    if(!myFrBuffer->isValid()
+     || myFrBuffer->getSizeX() != myVrRendSize.x()
+     || myFrBuffer->getSizeY() != myVrRendSize.y()) {
+        if(!myFrBuffer->init(*myContext, GL_RGBA8, myVrRendSize.x(), myVrRendSize.y(), StWindow::hasDepthBuffer())) {
+            myIsBroken = true;
+            myMsgQueue->pushError(stCString("OpenVR output - critical error:\nFrame Buffer Object resize failed!"));
+            vr::VR_Shutdown();
+            myVrHmd = NULL;
+            return;
+        }
     }
 
     // draw into virtual frame buffers (textures)
@@ -796,7 +799,7 @@ void StOutDistorted::stglDrawVR() {
         stglDrawCursor(aCursorPos, ST_DRAW_LEFT);
 
         vr::Texture_t aVRTexture = { (void* )(size_t )myFrBuffer->getTextureColor()->getTextureId(),  vr::TextureType_OpenGL, vr::ColorSpace_Gamma };
-        const vr::EVRCompositorError aVRError = vr::VRCompositor()->Submit(vr::Eye_Left, &aVRTexture);
+        const vr::EVRCompositorError aVRError = vr::VRCompositor()->Submit(vr::Eye_Left, &aVRTexture, aTexBounds);
         if(aVRError != vr::VRCompositorError_None) {
             //myMsgQueue->pushError(getVRCompositorError(aVRError));
             ST_ERROR_LOG(getVRCompositorError(aVRError));
@@ -875,9 +878,7 @@ void StOutDistorted::stglDraw() {
 
     double aForcedAspect = -1.0;
     if(isHmdOutput()) {
-        if(myVrRendSizeX != 0 && myVrRendSizeY != 0) {
-            aForcedAspect = double(myVrRendSizeX) / double(myVrRendSizeY);
-        }
+        if(myVrRendSize.x() != 0 && myVrRendSize.y() != 0) { aForcedAspect = double(myVrRendSize.x()) / double(myVrRendSize.y()); }
     }
 
     StWinSplit aWinSplit = StWinSlave_splitOff;
