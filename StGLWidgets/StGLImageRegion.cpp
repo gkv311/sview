@@ -538,6 +538,9 @@ bool StGLImageRegion::getHeadOrientation(StGLQuaternion& theOrient,
     float aYaw   = -stToRadians(aParams->getPanYaw() + aMouseMove.x()) + aYawShift;
     float aPitch =  stToRadians(StStereoParams::clipPitch(aParams->getPanPitch() + aMouseMove.y()));
     float aRoll  =  stToRadians(aParams->getZRotate());
+    if(myProjCam.isCustomProjection()) {
+        aPitch = 0.0f; // ignore pitch for HMD
+    }
 
     // apply separation
     const float aSepDeltaX = GLfloat(aParams->getSeparationDx()) * 0.05f;
