@@ -350,8 +350,9 @@ void StGLImageProgram::registerFragments(const StGLContext& theCtx) {
        "varying vec3 fTexACoord;\n"
 
        "void main(void) {\n"
-       "    gl_Position = vec4(vVertex.x, vVertex.y, 0.0, 1.0);\n"
-       "    vec3 aTCoord = (uProjMat * gl_Position).xyz;"
+       "    vec4 aPos = uProjMat * uModelMat * vec4(vVertex.xyz, 1.0);"
+       "    gl_Position = aPos.xyww;"
+       "    vec3 aTCoord = vVertex.xyz;"
        "    aTCoord.z  *= uTexCubeFlipZ;"
        "    fTexCoord   = aTCoord;"
        "    fTexUVCoord = aTCoord;"

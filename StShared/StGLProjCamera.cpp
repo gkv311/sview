@@ -58,6 +58,50 @@ StGLProjCamera::StGLProjCamera(const GLfloat theFOVy,
     updateFrustum();
 }
 
+StGLProjCamera::StGLProjCamera(const StGLProjCamera& theOther)
+: myMatrix(theOther.myMatrix),
+  myMatrixMono(theOther.myMatrixMono),
+  myFOVy(theOther.myFOVy),
+  myZoom(theOther.myZoom),
+  myAspect(theOther.myAspect),
+  myZScreen(theOther.myZScreen),
+  myIOD(theOther.myIOD),
+  myFrustL(theOther.myFrustL),
+  myFrustR(theOther.myFrustR),
+  myFrustM(theOther.myFrustM),
+  myFrust(NULL),
+  myIsPersp(theOther.myIsPersp) {
+    myFrust = &myFrustM;
+    if(theOther.myFrust == &theOther.myFrustL) {
+        myFrust = &myFrustL;
+    } else if(theOther.myFrust == &theOther.myFrustR) {
+        myFrust = &myFrustR;
+    }
+    updateFrustum();
+}
+
+void StGLProjCamera::copyFrom(const StGLProjCamera& theOther) {
+    myMatrix = theOther.myMatrix;
+    myMatrixMono = theOther.myMatrixMono;
+    myFOVy = theOther.myFOVy;
+    myZoom = theOther.myZoom;
+    myAspect = theOther.myAspect;
+    myZScreen = theOther.myZScreen;
+    myIOD = theOther.myIOD;
+    myFrustL = theOther.myFrustL;
+    myFrustR = theOther.myFrustR;
+    myFrustM = theOther.myFrustM;
+    myIsPersp = theOther.myIsPersp;
+
+    myFrust = &myFrustM;
+    if(theOther.myFrust == &theOther.myFrustL) {
+        myFrust = &myFrustL;
+    } else if(theOther.myFrust == &theOther.myFrustR) {
+        myFrust = &myFrustR;
+    }
+    updateFrustum();
+}
+
 void StGLProjCamera::getZParams(const GLdouble theZValue,
                                 StRectD_t&     theSectRect) const {
     if(myIsPersp) {

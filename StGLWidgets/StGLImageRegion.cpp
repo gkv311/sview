@@ -203,7 +203,7 @@ namespace {
 
     // we use negative scale factor to show sphere inside out!
     static const float THE_SPHERE_RADIUS     = -10.0f;
-    static const float THE_PANORAMA_DEF_ZOOM = 0.45f;
+    static const float THE_PANORAMA_DEF_ZOOM = 0.45f; // circa 85 degrees FOV
 
 }
 
@@ -213,6 +213,7 @@ StGLImageRegion::StGLImageRegion(StGLWidget* theParent,
 : StGLWidget(theParent, 0, 0, StGLCorner(ST_VCORNER_TOP, ST_HCORNER_LEFT)),
   myIconPrev(NULL),
   myIconNext(NULL),
+  myCube(GL_TRIANGLE_STRIP),
   myUVSphere  (StGLVec3(0.0f, 0.0f, 0.0f), 1.0f, 64, false),
   myHemisphere(StGLVec3(0.0f, 0.0f, 0.0f), 1.0f, 64, true),
   myCylinder  (StGLVec3(0.0f, 0.0f, 0.0f), 1.0f, 1.0f, 64),
@@ -405,6 +406,7 @@ StGLImageRegion::~StGLImageRegion() {
     StGLContext& aCtx = getContext();
     myTextureQueue->getQTexture().release(aCtx);
     myQuad.release(aCtx);
+    myCube.release(aCtx);
     myUVSphere.release(aCtx);
     myHemisphere.release(aCtx);
     myCylinder.release(aCtx);
@@ -458,6 +460,32 @@ bool StGLImageRegion::stglInit() {
     }/* else if(!myUVSphere.initVBOs(aCtx)) {
         ST_ERROR_LOG("Fail to init StGLUVSphere");
     }*/
+
+    // a unit cube for cubemap rendering
+    {
+        StArrayList<StGLVec3>& aCubeVerts = myCube.changeVertices();
+        aCubeVerts.initArray(8);
+        aCubeVerts[0] = StGLVec3 (-1.0f, -1.0f,  1.0f);
+        aCubeVerts[1] = StGLVec3 ( 1.0f, -1.0f,  1.0f);
+        aCubeVerts[2] = StGLVec3 (-1.0f,  1.0f,  1.0f);
+        aCubeVerts[3] = StGLVec3 ( 1.0f,  1.0f,  1.0f);
+        aCubeVerts[4] = StGLVec3 (-1.0f, -1.0f, -1.0f);
+        aCubeVerts[5] = StGLVec3 ( 1.0f, -1.0f, -1.0f);
+        aCubeVerts[6] = StGLVec3 (-1.0f,  1.0f, -1.0f);
+        aCubeVerts[7] = StGLVec3 ( 1.0f,  1.0f, -1.0f);
+
+        const GLuint THE_BOX_TRISTRIP[14] = { 0, 1, 2, 3, 7, 1, 5, 4, 7, 6, 2, 4, 0, 1 };
+        StArrayList<GLuint>& aCubeInd = myCube.changeIndices();
+        aCubeInd.initArray(14);
+        for(unsigned int aVertIter = 0; aVertIter < 14; ++aVertIter) {
+            aCubeInd[aVertIter] = THE_BOX_TRISTRIP[aVertIter];
+        }
+        if(!myCube.initVBOs(aCtx)) {
+            aCtx.pushError(StString("Fail to init Cube Mesh"));
+            ST_ERROR_LOG("Fail to init Cube Mesh");
+            return false;
+        }
+    }
 
     // setup texture filter
     myTextureQueue->getQTexture().setMinMagFilter(aCtx,
@@ -623,7 +651,11 @@ void StGLImageRegion::stglDrawView(unsigned int theView) {
     getRoot()->stglScissorRect(aFrameRectAbs, aScissorBox);
     aCtx.stglSetScissorRect(aScissorBox, true);
     aCtx.stglResizeViewport(aScissorBox);
+
+    // set 85 degrees FOV as 1.0x zoom for panorama rendering
+    myProjCam = *getCamera();
     myProjCam.resize(aCameraAspect);
+    myProjCam.setFOVy(85.0f);
 
     aCtx.core20fwd->glDisable(GL_BLEND);
 
@@ -943,22 +975,19 @@ void StGLImageRegion::stglDrawView(unsigned int theView) {
             myProgram.setTextureADataSize   (aCtx, aClampA);
             myProgram.setCubeTextureFlipZ   (aCtx, aParams->ToFlipCubeZ);
 
-            const float aScale = THE_PANORAMA_DEF_ZOOM * aParams->ScaleFactor * aVrScale;
+            const float aScale = aParams->ScaleFactor * aVrScale;
             aModelMat.scale(aScale, aScale, 1.0f);
 
             // compute orientation
             const StGLQuaternion anOri = getHeadOrientation(theView, true);
             aModelMat = StGLMatrix::multiply(aModelMat, StGLMatrix(anOri));
 
-            StGLMatrix aMatModelInv, aMatProjInv;
-            aModelMat.inverted(aMatModelInv);
-            myProjCam.getProjMatrixMono().inverted(aMatProjInv);
-            myProgram.getActiveProgram()->setProjMat (aCtx, StGLMatrix::multiply(aMatModelInv, aMatProjInv));
+            myProgram.getActiveProgram()->setProjMat (aCtx, myProjCam.getProjMatrixMono());
             myProgram.getActiveProgram()->setModelMat(aCtx, aModelMat);
 
             ///glEnable(GL_TEXTURE_CUBE_MAP_SEAMLESS);
 
-            myQuad.draw(aCtx, *myProgram.getActiveProgram());
+            myCube.draw(aCtx, *myProgram.getActiveProgram());
 
             myProgram.getActiveProgram()->unuse(aCtx);
 
@@ -994,7 +1023,7 @@ void StGLImageRegion::stglDrawView(unsigned int theView) {
             }
 
             // perform scaling
-            const float aScale = THE_SPHERE_RADIUS * THE_PANORAMA_DEF_ZOOM * aParams->ScaleFactor * aVrScale;
+            const float aScale = THE_SPHERE_RADIUS * aParams->ScaleFactor * aVrScale;
             aModelMat.scale(aScale, aScale * aVertScale, THE_SPHERE_RADIUS);
 
             // compute orientation

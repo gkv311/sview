@@ -38,12 +38,30 @@ class StGLProjCamera {
     ST_CPPEXPORT StGLProjCamera();
 
     /**
+     * Copy constructor.
+     */
+    ST_CPPEXPORT StGLProjCamera(const StGLProjCamera& theOther);
+
+    /**
      * Custom projection camera.
      */
     ST_CPPEXPORT StGLProjCamera(const GLfloat theFOVy,
                                 const GLfloat theZNear,
                                 const GLfloat theZFar,
                                 const GLfloat theZScreen);
+
+    /**
+     * Copy camera settings.
+     */
+    ST_CPPEXPORT void copyFrom(const StGLProjCamera& theOther);
+
+    /**
+     * Copy camera settings.
+     */
+    ST_LOCAL StGLProjCamera& operator=(const StGLProjCamera& theOther) {
+        copyFrom(theOther);
+        return *this;
+    }
 
     /**
      * Get projection type.
@@ -103,6 +121,7 @@ class StGLProjCamera {
      */
     inline void setFOVy(const GLfloat theFOVy) {
         myFOVy = theFOVy;
+        updateFrustum();
     }
 
     /**

@@ -359,6 +359,7 @@ class StGLImageRegion : public StGLWidget {
     StGLIcon*                  myIconNext;       //!< icon displayed on swipe gesture
 
     StGLQuads                  myQuad;           //!< flat quad
+    StGLMesh                   myCube;           //!< cube for drawing cubemap
     StGLUVSphere               myUVSphere;       //!< sphere output helper class
     StGLUVSphere               myHemisphere;     //!< hemisphere output helper class
     StGLUVCylinder             myCylinder;       //!< cylinder output helper class
