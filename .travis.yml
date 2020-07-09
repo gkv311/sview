@@ -44,10 +44,14 @@ addons:
       - libavformat-dev
       - libavutil-dev
       - libswscale-dev
+  homebrew:
+    packages:
+      - freetype
+      - ffmpeg
+    update: true
 
-before_install:
-  - if [[ "$MY_TARGET" == "osx" ]]; then brew update; fi
-  - if [[ "$MY_TARGET" == "osx" ]]; then brew install freetype ffmpeg; fi
+#before_install:
+#  - if [[ "$MY_TARGET" == "osx" ]]; then brew update; fi
 
 install: true
 

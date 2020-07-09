@@ -555,6 +555,8 @@ void StOutDistorted::updateVRProjectionFrustums() {
     //const vr::HmdMatrix34_t aRightToHead = myContext->System->GetEyeToHeadTransform (vr::Eye_Right);
     //myVrIOD = aRightToHead.m[0][3] - aLeftToHead.m[0][3];
     myVrIOD = myVrHmd->GetFloatTrackedDeviceProperty(vr::k_unTrackedDeviceIndex_Hmd, vr::Prop_UserIpdMeters_Float);
+#else
+  (void )myVrIOD;
 #endif
 }
 
