@@ -20,7 +20,7 @@
 /**
  * GLSL program for Image Region widget.
  */
-class StGLImageProgram : public StGLProgramMatrix<1, 5, StGLMeshProgram> {
+class StGLImageProgram : public StGLProgramMatrix<1, 6, StGLMeshProgram> {
 
         public:
 
@@ -44,11 +44,12 @@ class StGLImageProgram : public StGLProgramMatrix<1, 5, StGLMeshProgram> {
      * Color conversion options in GLSL Fragment Shader.
      */
     enum FragSection {
-        FragSection_Main = 0, //!< section with main() function
-        FragSection_GetColor, //!< read color values from textures
-        FragSection_ToRgb,    //!< color conversion
-        FragSection_Correct,  //!< color correction
-        FragSection_Gamma,    //!< gamma correction
+        FragSection_Main = 0,     //!< section with main() function
+        FragSection_GetColor,     //!< read color values from textures
+        FragSection_GetTexCoords, //!< EAC texture coordinates correction
+        FragSection_ToRgb,        //!< color conversion
+        FragSection_Correct,      //!< color correction
+        FragSection_Gamma,        //!< gamma correction
         FragSection_NB
     };
 
@@ -106,6 +107,15 @@ class StGLImageProgram : public StGLProgramMatrix<1, 5, StGLMeshProgram> {
         FragGamma_NB
     };
 
+    /**
+     * Texture coordinates EAC correction options in GLSL Fragment Shader.
+     */
+    enum FragTexEAC {
+        FragTexEAC_Off = 0,
+        FragTexEAC_On,
+        FragTexEAC_NB
+    };
+
         public:
 
     ST_CPPEXPORT StGLImageProgram();
@@ -138,10 +148,11 @@ class StGLImageProgram : public StGLProgramMatrix<1, 5, StGLMeshProgram> {
     /**
      * Initialize default shaders, nothing more.
      */
-    ST_CPPEXPORT virtual bool init(StGLContext&                 theCtx,
-                                   const StImage::ImgColorModel theColorModel,
-                                   const StImage::ImgColorScale theColorScale,
-                                   const FragGetColor           theFilter);
+    ST_CPPEXPORT bool init(StGLContext&                 theCtx,
+                           const StImage::ImgColorModel theColorModel,
+                           const StImage::ImgColorScale theColorScale,
+                           const FragGetColor           theFilter,
+                           const FragTexEAC theTexCoord = FragTexEAC_Off);
 
         public: //!< Properties
 

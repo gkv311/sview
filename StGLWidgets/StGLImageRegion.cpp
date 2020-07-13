@@ -971,7 +971,9 @@ void StGLImageRegion::stglDrawView(unsigned int theView) {
         }
         case StViewSurface_Cubemap:
         case StViewSurface_CubemapEAC: {
-            if(!myProgram.init(aCtx, aTextures.getColorModel(), aTextures.getColorScale(), StGLImageProgram::FragGetColor_Cubemap)) {
+            if(!myProgram.init(aCtx, aTextures.getColorModel(), aTextures.getColorScale(),
+                               StGLImageProgram::FragGetColor_Cubemap,
+                               aViewMode == StViewSurface_CubemapEAC ? StGLImageProgram::FragTexEAC_On : StGLImageProgram::FragTexEAC_Off)) {
                 break;
             }
 

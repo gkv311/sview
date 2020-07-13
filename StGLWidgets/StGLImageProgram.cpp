@@ -119,6 +119,19 @@ void StGLImageProgram::registerFragments(const StGLContext& theCtx) {
         "    color = pow(color, uGamma);\n"
         "}\n\n");
 
+    // equiangular cubemap texture coordinates correction
+    registerFragmentShaderPart(FragSection_GetTexCoords, FragTexEAC_Off,
+                               "vec3 getTexCoords(in vec3 theCoords) { return theCoords; }\n\n");
+    registerFragmentShaderPart(FragSection_GetTexCoords, FragTexEAC_On,
+                               "#define ST_PI 3.1415926535897932384626433832795\n"
+                               "vec3 getTexCoords(in vec3 theCoords) {\n"
+                               "    vec3 aCoords = theCoords;\n"
+                               "    aCoords.x = 4.0 / ST_PI * atan(theCoords.x);\n"
+                               "    aCoords.y = 4.0 / ST_PI * atan(theCoords.y);\n"
+                               "    aCoords.z = 4.0 / ST_PI * atan(theCoords.z);\n"
+                               "    return aCoords;\n"
+                               "}\n\n");
+
     registerFragmentShaderPart(FragSection_ToRgb, FragToRgb_FromRgb,
         "void convertToRGB(inout vec4 color, in vec3 texCoord, in vec3 texCoordA) {}\n\n");
 
@@ -366,16 +379,20 @@ void StGLImageProgram::registerFragments(const StGLContext& theCtx) {
         // we split these functions for two reasons:
         // - to change function code (like color conversion);
         // - to optimize rendering on old hardware not supported conditions (GeForce FX for example).
+       "vec3 getTexCoords(in vec3 theCoords);\n"
        "vec4 getColor(in vec3 texCoord);\n"
        "void convertToRGB(inout vec4 theColor, in vec3 theTexUVCoord, in vec3 texCoordA);\n"
        "void applyCorrection(inout vec4 theColor);\n"
        "void applyGamma(inout vec4 theColor);\n"
 
        "void main(void) {\n"
+       "    vec3 aTexCoord   = getTexCoords(fTexCoord);\n"
+       "    vec3 aTexCoordUV = getTexCoords(fTexUVCoord);\n"
+       "    vec3 aTexCoordA  = getTexCoords(fTexACoord);\n"
             // extract color from main texture
-       "    vec4 aColor = getColor(fTexCoord);\n"
+       "    vec4 aColor = getColor(aTexCoord);\n"
             // convert from alien color model (like YUV) to RGB
-       "    convertToRGB(aColor, fTexUVCoord, fTexACoord);\n"
+       "    convertToRGB(aColor, aTexCoordUV, aTexCoordA);\n"
             // color processing (saturation, brightness, etc)
        "    applyCorrection(aColor);\n"
             // gamma correction
@@ -468,7 +485,8 @@ static inline StGLImageProgram::FragToRgb getColorShader(const StImage::ImgColor
 bool StGLImageProgram::init(StGLContext&                 theCtx,
                             const StImage::ImgColorModel theColorModel,
                             const StImage::ImgColorScale theColorScale,
-                            const FragGetColor           theFilter) {
+                            const FragGetColor           theFilter,
+                            const FragTexEAC theTexCoord) {
     registerFragments(theCtx);
 
     // re-configure shader parts when required
@@ -487,6 +505,7 @@ bool StGLImageProgram::init(StGLContext&                 theCtx,
     }
 
     isChanged = setFragmentShaderPart(theCtx, FragSection_ToRgb,    aToRgb) || isChanged;
+    isChanged = setFragmentShaderPart(theCtx, FragSection_GetTexCoords, theTexCoord) || isChanged;
     isChanged = setFragmentShaderPart(theCtx, FragSection_GetColor, theFilter) || isChanged;
     isChanged = setVertexShaderPart  (theCtx, 0, theFilter == FragGetColor_Cubemap ? VertMain_Cubemap : VertMain_Normal) || isChanged;
     if(isChanged) {
