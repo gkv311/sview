@@ -752,8 +752,10 @@ void StGLImageRegion::stglDrawView(unsigned int theView) {
 
     StViewSurface aViewMode = aParams->ViewingMode;
     if(aTextures.getPlane(0).getTarget() == GL_TEXTURE_CUBE_MAP) {
-        aViewMode = StViewSurface_Cubemap;
-    } else if(aViewMode == StViewSurface_Cubemap) {
+        if(aViewMode != StViewSurface_Cubemap && aViewMode != StViewSurface_CubemapEAC) {
+            aViewMode = StViewSurface_Cubemap;
+        }
+    } else if(aViewMode == StViewSurface_Cubemap || aViewMode == StViewSurface_CubemapEAC) {
         aViewMode = StViewSurface_Plain;
     }
 
@@ -967,7 +969,8 @@ void StGLImageRegion::stglDrawView(unsigned int theView) {
             params.Brightness->setValue(aBrightnessBack);
             break;
         }
-        case StViewSurface_Cubemap: {
+        case StViewSurface_Cubemap:
+        case StViewSurface_CubemapEAC: {
             if(!myProgram.init(aCtx, aTextures.getColorModel(), aTextures.getColorScale(), StGLImageProgram::FragGetColor_Cubemap)) {
                 break;
             }
@@ -1183,6 +1186,7 @@ bool StGLImageRegion::tryUnClick(const StClickEvent& theEvent,
                 break;
             }
             case StViewSurface_Cubemap:
+            case StViewSurface_CubemapEAC:
             case StViewSurface_Cylinder:
             case StViewSurface_Hemisphere:
             case StViewSurface_Sphere: {
@@ -1263,6 +1267,7 @@ void StGLImageRegion::scaleAt(const StPointD_t& thePoint,
             break;
         }
         case StViewSurface_Cubemap:
+        case StViewSurface_CubemapEAC:
         case StViewSurface_Cylinder:
         case StViewSurface_Hemisphere:
         case StViewSurface_Sphere: {

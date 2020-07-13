@@ -425,6 +425,7 @@ bool StVideoQueue::init(AVFormatContext*   theFormatCtx,
                 //spherical->padding
                 break;
             }
+            //case AV_SPHERICAL_MESH: { theNewParams->ViewingMode = StViewSurface_CubemapEAC; break; }
             case AV_SPHERICAL_EQUIRECTANGULAR_TILE: {
                 // unsupported
                 //av_spherical_tile_bounds(aSpherical, par->width, par->height, &l, &t, &r, &b);
@@ -1046,7 +1047,13 @@ bool StVideoQueue::decodeFrame(const StHandle<StAVPacket>& thePacket,
     }
     // override source format stored in metadata
     StFormat  aSrcFormat     = myStFormatByUser;
-    StCubemap aCubemapFormat = thePacket->getSource()->ViewingMode == StViewSurface_Cubemap ? StCubemap_Packed : StCubemap_OFF;
+    StCubemap aCubemapFormat = StCubemap_OFF;
+    if(thePacket->getSource()->ViewingMode == StViewSurface_Cubemap) {
+        aCubemapFormat = StCubemap_Packed;
+    } else if(thePacket->getSource()->ViewingMode == StViewSurface_CubemapEAC) {
+        aCubemapFormat = StCubemap_PackedEAC;
+    }
+
     if(aSrcFormat == StFormat_AUTO) {
         // prefer info stored in the stream itself
         aSrcFormat = myStFormatInStream;

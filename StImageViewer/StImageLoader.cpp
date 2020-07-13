@@ -147,7 +147,8 @@ inline StHandle<StImage> scaledImage(StHandle<StImageFile>& theRef,
         }
     }
 
-    if(theCubemap == StCubemap_Packed) {
+    if(theCubemap == StCubemap_Packed
+    || theCubemap == StCubemap_PackedEAC) {
         size_t aSizesY[4] = {};
         bool toResize = false;
         size_t aMulX = (thePairRatio == StPairRatio_HalfWidth)  ? 2 : 1;
@@ -501,10 +502,16 @@ bool StImageLoader::loadImage(const StHandle<StFileNode>& theSource,
                                              theParams->Src2SizeX, theParams->Src2SizeY);
         theParams->ViewingMode = StStereoParams::getViewSurfaceForPanoramaSource(aPano, true);
     }
-    StCubemap aSrcCubemap = theParams->ViewingMode == StViewSurface_Cubemap ? StCubemap_Packed : StCubemap_OFF;
+    StCubemap aSrcCubemap = StCubemap_OFF;
+    if(theParams->ViewingMode == StViewSurface_Cubemap) {
+        aSrcCubemap = StCubemap_Packed;
+    } else if(theParams->ViewingMode == StViewSurface_CubemapEAC) {
+        aSrcCubemap = StCubemap_PackedEAC;
+    }
 
     size_t aCubeCoeffs[2] = {0, 0};
-    if(aSrcCubemap == StCubemap_Packed) {
+    if(aSrcCubemap == StCubemap_Packed
+    || aSrcCubemap == StCubemap_PackedEAC) {
         if(aSizeX1 / 6 == aSizeY1) {
             aCubeCoeffs[0] = 6;
             aCubeCoeffs[1] = 1;
@@ -516,6 +523,10 @@ bool StImageLoader::loadImage(const StHandle<StFileNode>& theSource,
         } else if(aSizeX1 / 3 == aSizeY1 / 2) {
             aCubeCoeffs[0] = 3;
             aCubeCoeffs[1] = 2;
+            theParams->ToFlipCubeZ = myToFlipCubeZ3x2;
+        } else if(aSizeX1 / 2 == aSizeY1 / 3) {
+            aCubeCoeffs[0] = 2;
+            aCubeCoeffs[1] = 3;
             theParams->ToFlipCubeZ = myToFlipCubeZ3x2;
         }
         if(!anImageFileR->isNull()

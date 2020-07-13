@@ -1,5 +1,5 @@
 /**
- * Copyright © 2009-2012 Kirill Gavrilov <kirill@sview.ru>
+ * Copyright © 2009-2020 Kirill Gavrilov <kirill@sview.ru>
  *
  * Distributed under the Boost Software License, Version 1.0.
  * See accompanying file license-boost.txt or copy at
@@ -51,34 +51,43 @@ void StGLFrameTextures::increaseSize(StGLContext&      theCtx,
                                      const GLsizei     theTextureSizeY) {
     // test existing size / new size
     /// TODO (Kirill Gavrilov#8) we can automatically reduce texture size here
-    if((theTexture.getSizeX() < theTextureSizeX) ||
-       (theTexture.getSizeY() < theTextureSizeY) ||
-       !theTexture.isValid()) {
-        ST_DEBUG_LOG("Requested texture size (" + theTextureSizeX + 'x' + theTextureSizeY
-                   + ") larger than current texture size(" + theTexture.getSizeX() + 'x' + theTexture.getSizeY() + ')');
-        const GLsizei anOriginalSizeX = theTexture.getSizeX();
-        const GLsizei anOriginalSizeY = theTexture.getSizeY();
+    if(theTexture.isValid()) {
+        if(theTexture.getSizeX() == theTextureSizeX
+        && theTexture.getSizeY() == theTextureSizeY) {
+            return;
+        }
 
-        const GLint aMaxTexDim = theCtx.getMaxTextureSize();
-        GLsizei aNewSizeX = stMin(theTextureSizeX, GLsizei(aMaxTexDim));
-        GLsizei aNewSizeY = stMin(theTextureSizeY, GLsizei(aMaxTexDim));
-        if(!theCtx.arbNPTW) {
-            aNewSizeX = getPowerOfTwo(theTextureSizeX, GLsizei(aMaxTexDim));
-            aNewSizeY = getPowerOfTwo(theTextureSizeY, GLsizei(aMaxTexDim));
+        if(theTexture.getTarget() != GL_TEXTURE_CUBE_MAP
+        && theTexture.getSizeX() >= theTextureSizeX
+        && theTexture.getSizeY() >= theTextureSizeY) {
+            return;
         }
-        if((aNewSizeY != anOriginalSizeY)
-        || (aNewSizeX != anOriginalSizeX)) {
-            if(!theTexture.initTrash(theCtx, aNewSizeX, aNewSizeY)) {
-                theTexture.initTrash(theCtx,
-                                     (anOriginalSizeX > 0) ? anOriginalSizeX : 512,
-                                     (anOriginalSizeY > 0) ? anOriginalSizeY : 512);
-                ST_DEBUG_LOG("FAILED to Increase the texture size to (" + aNewSizeX + 'x' +  aNewSizeY + ")!");
-            } else {
-                ST_DEBUG_LOG("Increase the texture size to (" + aNewSizeX + 'x' +  aNewSizeY + ") success!");
-            }
+    }
+
+    ST_DEBUG_LOG("Requested texture size (" + theTextureSizeX + 'x' + theTextureSizeY
+                + ") larger than current texture size(" + theTexture.getSizeX() + 'x' + theTexture.getSizeY() + ')');
+    const GLsizei anOriginalSizeX = theTexture.getSizeX();
+    const GLsizei anOriginalSizeY = theTexture.getSizeY();
+
+    const GLint aMaxTexDim = theCtx.getMaxTextureSize();
+    GLsizei aNewSizeX = stMin(theTextureSizeX, GLsizei(aMaxTexDim));
+    GLsizei aNewSizeY = stMin(theTextureSizeY, GLsizei(aMaxTexDim));
+    if(!theCtx.arbNPTW) {
+        aNewSizeX = getPowerOfTwo(theTextureSizeX, GLsizei(aMaxTexDim));
+        aNewSizeY = getPowerOfTwo(theTextureSizeY, GLsizei(aMaxTexDim));
+    }
+    if((aNewSizeY != anOriginalSizeY)
+    || (aNewSizeX != anOriginalSizeX)) {
+        if(!theTexture.initTrash(theCtx, aNewSizeX, aNewSizeY)) {
+            theTexture.initTrash(theCtx,
+                                  (anOriginalSizeX > 0) ? anOriginalSizeX : 512,
+                                  (anOriginalSizeY > 0) ? anOriginalSizeY : 512);
+            ST_DEBUG_LOG("FAILED to Increase the texture size to (" + aNewSizeX + 'x' +  aNewSizeY + ")!");
         } else {
-            ST_DEBUG_LOG("Not possible to Increase the texture size!");
+            ST_DEBUG_LOG("Increase the texture size to (" + aNewSizeX + 'x' +  aNewSizeY + ") success!");
         }
+    } else {
+        ST_DEBUG_LOG("Not possible to Increase the texture size!");
     }
 }
 

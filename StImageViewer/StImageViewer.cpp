@@ -1209,9 +1209,9 @@ void StImageViewer::doSwitchViewMode(const int32_t theMode) {
     bool isChanged = false;
     StGLFrameTextures& aTexture = myGUI->myImage->getTextureQueue()->getQTexture().getFront(StGLQuadTexture::LEFT_TEXTURE);
     if(aTexture.getPlane(0).getTarget() == GL_TEXTURE_CUBE_MAP) {
-        isChanged = (theMode != StViewSurface_Cubemap);
+        isChanged = (theMode != StViewSurface_Cubemap && theMode != StViewSurface_CubemapEAC);
     } else {
-        isChanged = (theMode == StViewSurface_Cubemap);
+        isChanged = (theMode == StViewSurface_Cubemap || theMode == StViewSurface_CubemapEAC);
     }
 
     if(isChanged

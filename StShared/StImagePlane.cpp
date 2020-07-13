@@ -1,5 +1,5 @@
 /**
- * Copyright © 2010-2015 Kirill Gavrilov <kirill@sview.ru>
+ * Copyright © 2010-2020 Kirill Gavrilov <kirill@sview.ru>
  *
  * Distributed under the Boost Software License, Version 1.0.
  * See accompanying file license-boost.txt or copy at
@@ -155,6 +155,25 @@ bool StImagePlane::initCopy(const StImagePlane& theCopy,
     const size_t aCopyRowBytes = stMin(mySizeRowBytes, theCopy.mySizeRowBytes);
     for(size_t aRow = 0; aRow < mySizeY; ++aRow) {
         stMemCpy(changeData(aRow, 0), theCopy.getData(aRow, 0), aCopyRowBytes);
+    }
+    return true;
+}
+
+bool StImagePlane::initTransposedCopy(const StImagePlane& theCopy,
+                                      const bool theIsClockwise) {
+    if(!initTrash(theCopy.myImgFormat, theCopy.mySizeY, theCopy.mySizeX)) {
+        return false;
+    }
+
+    const size_t aPixelSize = getSizePixelBytes();
+    const size_t aSrcColFrom =  theIsClockwise ? theCopy.mySizeX - 1 : 0;
+    const size_t aSrcRowFrom = !theIsClockwise ? theCopy.mySizeY - 1 : 0;
+    const size_t aSrcColIncr = aSrcColFrom == 0 ? 1 : size_t(-1);
+    const size_t aSrcRowIncr = aSrcRowFrom == 0 ? 1 : size_t(-1);
+    for(size_t aDstRow = 0, aSrcCol = aSrcColFrom; aDstRow < mySizeY; ++aDstRow, aSrcCol += aSrcColIncr) {
+        for(size_t aDstCol = 0, aSrcRow = aSrcRowFrom; aDstCol < mySizeX; ++aDstCol, aSrcRow += aSrcRowIncr) {
+            stMemCpy(changeData(aDstRow, aDstCol), theCopy.getData(aSrcRow, aSrcCol), aPixelSize);
+        }
     }
     return true;
 }

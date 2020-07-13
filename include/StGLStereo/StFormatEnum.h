@@ -41,16 +41,20 @@ enum StPairRatio {
 enum StCubemap {
     StCubemap_AUTO = -1, //!< try to detect from metadata
     StCubemap_OFF  =  0, //!< no cubemap data
-    StCubemap_Packed     //!< cubemap data packed into single image frame - 6 horizontally stacked planes
+    StCubemap_Packed,    //!< cubemap data packed into single image frame - 6 horizontally stacked planes
+    StCubemap_PackedEAC  //!< cubemap data packed into single image frame (EAC layout)
 };
 
 enum StPanorama {
-    StPanorama_OFF  =  0,  //!< no cubemap data
-    StPanorama_Sphere,     //!< spherical panorama 360 degrees - 2:1
-    StPanorama_Hemisphere, //!< spherical panorama 180 degrees - 1:1
-    StPanorama_Cubemap6_1, //!< cubemap data packed into single image frame - 6:1
-    StPanorama_Cubemap1_6, //!< cubemap data packed into single image frame - 1:6
-    StPanorama_Cubemap3_2  //!< cubemap data packed into single image frame - 3:2
+    StPanorama_OFF  =  0,     //!< no cubemap data
+    StPanorama_Sphere,        //!< spherical panorama 360 degrees - 2:1
+    StPanorama_Hemisphere,    //!< spherical panorama 180 degrees - 1:1
+    StPanorama_Cubemap6_1,    //!< cubemap data packed into single image frame - 6:1 in OpenGL enum order (px nx py ny pz nz)
+    StPanorama_Cubemap1_6,    //!< cubemap data packed into single image frame - 1:6 in OpenGL enum order
+    StPanorama_Cubemap3_2,    //!< cubemap data packed into single image frame - 3:2 in OpenGL enum order
+    StPanorama_Cubemap3_2ytb, //!< cubemap data packed into single image frame - 3:2 in custom order (px nz nx, ny pz py)
+                              //!  one row defines 3 horizontally stacked sides of the cube, and other 3 vertically stacked sides
+    StPanorama_Cubemap2_3ytb  //!< cubemap data packed into single image frame - 2:3 in custom order (90 counterclockwise transposed 3x2 layout)
 };
 
 namespace st {

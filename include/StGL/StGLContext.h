@@ -407,6 +407,13 @@ class StGLContext {
                                                 int          theLength,
                                                 const char*  theMessage);
 
+        public:
+
+    /**
+     * Return auxiliary temporary image buffer.
+     */
+    ST_LOCAL StImagePlane& getTmpImagePlane() { return myTmpPlane; }
+
         public: //! @name auxiliary methods
 
     /**
@@ -448,6 +455,8 @@ class StGLContext {
     BufferBits              myWindowBits;         //!< default buffer (window) bits
     BufferBits              myFBOBits;            //!< FBO bits
     bool                    myWasInit;            //!< initialization state
+
+    StImagePlane            myTmpPlane;           //!< auxiliary temporary image buffer
 
         protected: //! @name current state
 

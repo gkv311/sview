@@ -1,5 +1,5 @@
 /**
- * Copyright © 2009-2019 Kirill Gavrilov <kirill@sview.ru>
+ * Copyright © 2009-2020 Kirill Gavrilov <kirill@sview.ru>
  *
  * Distributed under the Boost Software License, Version 1.0.
  * See accompanying file license-boost.txt or copy at
@@ -10,6 +10,7 @@
 #include <StStrings/StLogger.h>
 
 #include <StGLCore/StGLCore11.h>
+#include <StGL/StGLContext.h>
 
 StGLTextureData::StGLTextureData(const StHandle<StGLTextureUploadParams>& theUploadParams)
 : myPrev(NULL),
@@ -325,6 +326,10 @@ inline bool checkCubeMap(const StImagePlane& thePlane,
             theCoeffX = 3;
             theCoeffY = 2;
             return true;
+        } else if(thePlane.getSizeX() / 2 == thePlane.getSizeY() / 3) {
+            theCoeffX = 2;
+            theCoeffY = 3;
+            return true;
         }
         return false;
     }
@@ -594,7 +599,8 @@ void StGLTextureData::updateData(const StGLDeviceCaps&           theDeviceCaps,
 }
 
 void StGLTextureData::validateCubemap(const StCubemap theCubemap) {
-    if(theCubemap != StCubemap_Packed) {
+    if(theCubemap != StCubemap_Packed
+    && theCubemap != StCubemap_PackedEAC) {
         myCubemapFormat = StCubemap_OFF;
         return;
     }
@@ -628,7 +634,8 @@ void StGLTextureData::fillTexture(StGLContext&        theCtx,
         return;
     }
 
-    if(myCubemapFormat != StCubemap_Packed) {
+    if(myCubemapFormat != StCubemap_Packed
+    && myCubemapFormat != StCubemap_PackedEAC) {
         theFrameTexture.fillPatch(theCtx, theData, GL_TEXTURE_2D, myFillFromRow, myFillFromRow + myFillRows);
         return;
     }
@@ -643,18 +650,24 @@ void StGLTextureData::fillTexture(StGLContext&        theCtx,
         return;
     }
 
-    const GLenum aTargets[6] = { GL_TEXTURE_CUBE_MAP_POSITIVE_X,
-                                 GL_TEXTURE_CUBE_MAP_NEGATIVE_X,
-                                 GL_TEXTURE_CUBE_MAP_POSITIVE_Y,
-                                 GL_TEXTURE_CUBE_MAP_NEGATIVE_Y,
-                                 GL_TEXTURE_CUBE_MAP_POSITIVE_Z,
-                                 GL_TEXTURE_CUBE_MAP_NEGATIVE_Z };
+    static const GLenum THE_SIDES_GL[6] = { GL_TEXTURE_CUBE_MAP_POSITIVE_X, GL_TEXTURE_CUBE_MAP_NEGATIVE_X,
+                                            GL_TEXTURE_CUBE_MAP_POSITIVE_Y, GL_TEXTURE_CUBE_MAP_NEGATIVE_Y,
+                                            GL_TEXTURE_CUBE_MAP_POSITIVE_Z, GL_TEXTURE_CUBE_MAP_NEGATIVE_Z };
+    static const GLenum THE_SIDES_EAC32[6] = { GL_TEXTURE_CUBE_MAP_POSITIVE_X, GL_TEXTURE_CUBE_MAP_NEGATIVE_Z, GL_TEXTURE_CUBE_MAP_NEGATIVE_X,
+                                               GL_TEXTURE_CUBE_MAP_NEGATIVE_Y, GL_TEXTURE_CUBE_MAP_POSITIVE_Z, GL_TEXTURE_CUBE_MAP_POSITIVE_Y };
+    static const GLenum THE_SIDES_EAC23[6] = { GL_TEXTURE_CUBE_MAP_NEGATIVE_X, GL_TEXTURE_CUBE_MAP_POSITIVE_Y,
+                                               GL_TEXTURE_CUBE_MAP_NEGATIVE_Z, GL_TEXTURE_CUBE_MAP_POSITIVE_Z,
+                                               GL_TEXTURE_CUBE_MAP_POSITIVE_X, GL_TEXTURE_CUBE_MAP_NEGATIVE_Y };
+
+    const GLenum* aTargets = myCubemapFormat == StCubemap_PackedEAC
+                           ? (aCoeffs[1] == 3 ? THE_SIDES_EAC23 : THE_SIDES_EAC32)
+                           : THE_SIDES_GL;
     for(size_t aTargetIter = 0; aTargetIter < 6; ++aTargetIter) {
         StImagePlane aPlane;
         size_t aTop = 0, aLeft = 0;
+        bool toTranspose = false;
         switch(aCoeffs[1]) {
-            case 1: {
-                // 6x1
+            case 1: { // 6x1
                 aLeft = aPatch * aTargetIter;
                 aTop  = 0;
                 break;
@@ -664,6 +677,9 @@ void StGLTextureData::fillTexture(StGLContext&        theCtx,
                     // second row
                     aLeft = aPatch * (aTargetIter - 3);
                     aTop  = aPatch;
+                    if(myCubemapFormat == StCubemap_PackedEAC) {
+                        toTranspose = true;
+                    }
                 } else {
                     // first row
                     aLeft = aPatch * aTargetIter;
@@ -671,8 +687,28 @@ void StGLTextureData::fillTexture(StGLContext&        theCtx,
                 }
                 break;
             }
-            case 6: {
-                // 1x6
+            case 3: { // 2x3
+                if(aTargetIter >= 4) {
+                    // third row
+                    aLeft = aPatch * (aTargetIter - 4);
+                    aTop  = aPatch * 2;
+                } else if(aTargetIter >= 2) {
+                    // second row
+                    aLeft = aPatch * (aTargetIter - 2);
+                    aTop  = aPatch;
+                } else {
+                    // first row
+                    aLeft = aPatch * aTargetIter;
+                    aTop  = 0;
+                }
+
+                if(myCubemapFormat == StCubemap_PackedEAC
+                && (aTargetIter % 2) == 0) {
+                    toTranspose = true;
+                }
+                break;
+            }
+            case 6: { // 1x6
                 aLeft = 0;
                 aTop  = aPatch * aTargetIter;
                 break;
@@ -683,7 +719,13 @@ void StGLTextureData::fillTexture(StGLContext&        theCtx,
             ST_DEBUG_LOG("StGLTextureData::fillTexture(). wrapping failure");
             continue;
         }
-        theFrameTexture.fillPatch(theCtx, aPlane, aTargets[aTargetIter], myFillFromRow, myFillFromRow + myFillRows);
+        if(toTranspose) {
+            StImagePlane& aTmpPlane = theCtx.getTmpImagePlane();
+            aTmpPlane.initTransposedCopy(aPlane, aCoeffs[1] != 3);
+            theFrameTexture.fillPatch(theCtx, aTmpPlane, aTargets[aTargetIter], myFillFromRow, myFillFromRow + myFillRows);
+        } else {
+            theFrameTexture.fillPatch(theCtx, aPlane, aTargets[aTargetIter], myFillFromRow, myFillFromRow + myFillRows);
+        }
     }
 }
 
@@ -738,7 +780,8 @@ static void prepareTextures(StGLContext&       theCtx,
         GLenum  aTarget = GL_TEXTURE_2D;
         GLsizei aSizeX  = (GLsizei )anImgPlane.getSizeX();
         GLsizei aSizeY  = (GLsizei )anImgPlane.getSizeY();
-        if(theCubemap == StCubemap_Packed) {
+        if(theCubemap == StCubemap_Packed
+        || theCubemap == StCubemap_PackedEAC) {
             size_t aCoeffs[2] = {0, 0};
             if(!checkCubeMap(anImgPlane, aCoeffs[0], aCoeffs[1])) {
                 aTexture.release(theCtx);
@@ -747,6 +790,12 @@ static void prepareTextures(StGLContext&       theCtx,
             aTarget = GL_TEXTURE_CUBE_MAP;
             aSizeX  = aSizeX / GLsizei(aCoeffs[0]);
             aSizeY  = aSizeY / GLsizei(aCoeffs[1]);
+            if(aSizeX < 1) {
+                aTexture.release(theCtx);
+                continue;
+            }
+            aSizeX  = stMax(aSizeX, aSizeY); // cubemap requires squared images
+            aSizeY  = stMax(aSizeX, aSizeY);
         }
         if(aSizeX < 1) {
             aTexture.release(theCtx);

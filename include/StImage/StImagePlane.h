@@ -1,5 +1,5 @@
 /**
- * Copyright © 2010-2016 Kirill Gavrilov <kirill@sview.ru>
+ * Copyright © 2010-2020 Kirill Gavrilov <kirill@sview.ru>
  *
  * Distributed under the Boost Software License, Version 1.0.
  * See accompanying file license-boost.txt or copy at
@@ -258,6 +258,12 @@ class StImagePlane {
      */
     ST_CPPEXPORT bool initCopy(const StImagePlane& theCopy,
                                const bool          theIsCompact);
+
+    /**
+     * Initialize as transposed copy.
+     */
+    ST_CPPEXPORT bool initTransposedCopy(const StImagePlane& theCopy,
+                                         const bool theIsClockwise);
 
     /**
      * Initialize as wrapper (data will not be copied).
