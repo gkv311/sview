@@ -46,6 +46,9 @@ class StAVImage : public StImageFile {
     ST_CPPEXPORT static bool resize(const StImage& theImageFrom,
                                     StImage&       theImageTo);
 
+    ST_CPPEXPORT static bool resizePlane(const StImagePlane& theImageFrom,
+                                         StImagePlane&       theImageTo);
+
         public:
 
     /**

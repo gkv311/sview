@@ -161,6 +161,59 @@ static bool convert(const StImage& theImageFrom, AVPixelFormat theFormatFrom,
     return true;
 }
 
+/**
+ * Return AV pixel format for an image plane.
+ */
+static int getAVPixelFormatForPlane(const StImagePlane& theImage) {
+    switch(theImage.getFormat()) {
+        case StImagePlane::ImgRGB:    return stAV::PIX_FMT::RGB24;
+        case StImagePlane::ImgBGR:    return stAV::PIX_FMT::BGR24;
+        case StImagePlane::ImgRGBA:   return stAV::PIX_FMT::RGBA32;
+        case StImagePlane::ImgBGRA:   return stAV::PIX_FMT::BGRA32;
+        case StImagePlane::ImgGray:   return stAV::PIX_FMT::GRAY8;
+        case StImagePlane::ImgGray16: return stAV::PIX_FMT::GRAY16;
+        default:                      return stAV::PIX_FMT::NONE;
+    }
+}
+
+bool StAVImage::resizePlane(const StImagePlane& theImageFrom,
+                            StImagePlane&       theImageTo) {
+    if(theImageFrom.isNull()
+    || theImageFrom.getSizeX() < 1
+    || theImageFrom.getSizeY() < 1
+    || theImageTo.isNull()
+    || theImageTo.getSizeX() < 1
+    || theImageTo.getSizeY() < 1) {
+        return false;
+    }
+
+    StAVImage::init();
+    const AVPixelFormat aFormatFrom = (AVPixelFormat )getAVPixelFormatForPlane(theImageFrom);
+    const AVPixelFormat aFormatTo   = (AVPixelFormat )getAVPixelFormatForPlane(theImageTo);
+    if(aFormatFrom == stAV::PIX_FMT::NONE
+    || aFormatTo   == stAV::PIX_FMT::NONE) {
+        return false;
+    }
+
+    SwsContext* aCtxToRgb = sws_getContext((int )theImageFrom.getSizeX(), (int )theImageFrom.getSizeY(), aFormatFrom,
+                                           (int )theImageTo.getSizeX(),   (int )theImageTo.getSizeY(),   aFormatTo,
+                                           THE_SWSCALE_FLAGS_FAST, NULL, NULL, NULL);
+    if(aCtxToRgb == NULL) {
+        return false;
+    }
+
+    uint8_t* aSrcData[4] = { (uint8_t* )theImageFrom.getData(), NULL, NULL, NULL };
+    int  aSrcLinesize[4] = { (int )theImageFrom.getSizeRowBytes(), 0, 0, 0 };
+    uint8_t* aDstData[4] = { (uint8_t* )theImageTo.getData(), NULL, NULL, NULL };
+    int  aDstLinesize[4] = { (int )theImageTo.getSizeRowBytes(), 0, 0, 0 };
+    sws_scale(aCtxToRgb,
+              aSrcData, aSrcLinesize,
+              0, (int )theImageFrom.getSizeY(),
+              aDstData, aDstLinesize);
+    sws_freeContext(aCtxToRgb);
+    return true;
+}
+
 bool StAVImage::resize(const StImage& theImageFrom,
                        StImage&       theImageTo) {
     if(theImageFrom.isNull()

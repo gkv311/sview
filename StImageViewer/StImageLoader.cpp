@@ -147,8 +147,7 @@ inline StHandle<StImage> scaledImage(StHandle<StImageFile>& theRef,
         }
     }
 
-    if(theCubemap == StCubemap_Packed
-    || theCubemap == StCubemap_PackedEAC) {
+    if(theCubemap == StCubemap_Packed) { // skip scaling for StCubemap_PackedEAC
         size_t aSizesY[4] = {};
         bool toResize = false;
         size_t aMulX = (thePairRatio == StPairRatio_HalfWidth)  ? 2 : 1;
@@ -197,9 +196,13 @@ inline StHandle<StImage> scaledImage(StHandle<StImageFile>& theRef,
                 continue;
             }
 
+            size_t aPlanesSizeX = aSizesY[aPlaneId] * theCubeCoeffs[0] * aMulX;
+            size_t aSizeRowBytes = aPlanesSizeX * aFromPlane.getSizePixelBytes();
+            aSizeRowBytes = aSizeRowBytes + (32 - aSizeRowBytes % 32);
             if(!anImage->changePlane(aPlaneId).initTrash(aFromPlane.getFormat(),
                                                          aSizesY[aPlaneId] * theCubeCoeffs[0] * aMulX,
-                                                         aSizesY[aPlaneId] * theCubeCoeffs[1] * aMulY)) {
+                                                         aSizesY[aPlaneId] * theCubeCoeffs[1] * aMulY,
+                                                         aSizeRowBytes)) {
                 ST_ERROR_LOG("Scale failed!");
                 return theRef;
             }
@@ -528,6 +531,17 @@ bool StImageLoader::loadImage(const StHandle<StFileNode>& theSource,
             aCubeCoeffs[0] = 2;
             aCubeCoeffs[1] = 3;
             theParams->ToFlipCubeZ = myToFlipCubeZ3x2;
+        } else if(aSrcCubemap == StCubemap_PackedEAC) {
+            // EAC on ytb is so cruel, that they don't use squared cube sides!
+            if(aSizeX1 > aSizeY1) {
+                aCubeCoeffs[0] = 3;
+                aCubeCoeffs[1] = 2;
+                theParams->ToFlipCubeZ = myToFlipCubeZ3x2;
+            } else {
+                aCubeCoeffs[0] = 2;
+                aCubeCoeffs[1] = 3;
+                theParams->ToFlipCubeZ = myToFlipCubeZ3x2;
+            }
         }
         if(!anImageFileR->isNull()
         && (aSizeX1 != aSizeX2 || aSizeY1 != aSizeY2)) {

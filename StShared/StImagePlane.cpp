@@ -161,8 +161,12 @@ bool StImagePlane::initCopy(const StImagePlane& theCopy,
 
 bool StImagePlane::initTransposedCopy(const StImagePlane& theCopy,
                                       const bool theIsClockwise) {
-    if(!initTrash(theCopy.myImgFormat, theCopy.mySizeY, theCopy.mySizeX)) {
-        return false;
+    if(myImgFormat != theCopy.myImgFormat
+    || mySizeX != theCopy.mySizeX
+    || mySizeY != theCopy.mySizeY) {
+        if(!initTrash(theCopy.myImgFormat, theCopy.mySizeY, theCopy.mySizeX)) {
+            return false;
+        }
     }
 
     const size_t aPixelSize = getSizePixelBytes();
