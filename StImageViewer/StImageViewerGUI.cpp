@@ -394,6 +394,8 @@ StGLMenu* StImageViewerGUI::createDisplayRatioMenu() {
 void StImageViewerGUI::fillPanoramaMenu(StGLMenu* theMenu) {
     theMenu->addItem(tr(MENU_VIEW_SURFACE_PLANE),
                      myImage->params.ViewMode, StViewSurface_Plain);
+    theMenu->addItem(tr(MENU_VIEW_SURFACE_THEATER),
+                     myImage->params.ViewMode, StViewSurface_Theater);
     theMenu->addItem(tr(MENU_VIEW_SURFACE_CYLINDER),
                      myImage->params.ViewMode, StViewSurface_Cylinder);
     theMenu->addItem(tr(MENU_VIEW_SURFACE_HEMISPHERE),
@@ -1525,6 +1527,7 @@ void StImageViewerGUI::setVisibility(const StPointD_t& theCursor,
             size_t aTrPano = MENU_VIEW_SURFACE_PLANE;
             switch(aViewMode) {
                 case StViewSurface_Plain:      aTrPano = MENU_VIEW_SURFACE_PLANE;   break;
+                case StViewSurface_Theater:    aTrPano = MENU_VIEW_SURFACE_THEATER; break;
                 case StViewSurface_Sphere:     aTrPano = MENU_VIEW_SURFACE_SPHERE;  break;
                 case StViewSurface_Hemisphere: aTrPano = MENU_VIEW_SURFACE_HEMISPHERE; break;
                 case StViewSurface_Cubemap:    aTrPano = MENU_VIEW_SURFACE_CUBEMAP;  break;

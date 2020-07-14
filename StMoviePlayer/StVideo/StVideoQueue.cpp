@@ -186,6 +186,7 @@ StVideoQueue::StVideoQueue(const StHandle<StGLTextureQueue>& theTextureQueue,
   myStFormatByUser(StFormat_AUTO),
   myStFormatByName(StFormat_AUTO),
   myStFormatInStream(StFormat_AUTO),
+  myIsTheaterMode(false),
   myToStickPano360(false),
   myToSwapJps(false) {
 #ifdef ST_USE64PTR
@@ -749,6 +750,11 @@ void StVideoQueue::pushFrame(const StImage&     theSrcDataLeft,
                                              theStParams->Src1SizeX, theStParams->Src1SizeY,
                                              theStParams->Src2SizeX, theStParams->Src2SizeY);
         theStParams->ViewingMode = StStereoParams::getViewSurfaceForPanoramaSource(aPano, true);
+    }
+    if(myIsTheaterMode && theStParams->ViewingMode == StViewSurface_Plain) {
+        theStParams->ViewingMode = StViewSurface_Theater;
+    } else if(!myIsTheaterMode && theStParams->ViewingMode == StViewSurface_Theater) {
+        theStParams->ViewingMode = StViewSurface_Plain;
     }
 
     myTextureQueue->push(theSrcDataLeft, theSrcDataRight, theStParams, theSrcFormat, theCubemapFormat, theSrcPTS);

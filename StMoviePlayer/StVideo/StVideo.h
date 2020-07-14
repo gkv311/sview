@@ -162,6 +162,13 @@ class StVideo {
     }
 
     /**
+     * Set theater mode.
+     */
+    ST_LOCAL void setTheaterMode(bool theIsTheater) {
+        myVideoMaster->setTheaterMode(theIsTheater);
+    }
+
+    /**
      * Stick to panorama 360 mode.
      */
     ST_LOCAL void setStickPano360(bool theToStick) {

@@ -125,6 +125,8 @@ void loadDefaults(StLangMap& theStrings) {
                "Cylinder");
     theStrings(MENU_VIEW_SURFACE_CUBEMAP,
                "Cubemap");
+    theStrings(MENU_VIEW_SURFACE_THEATER,
+               "Theater");
     theStrings(MENU_VIEW_SURFACE_CUBEMAP_EAC,
                "Equiangular cubemap");
     theStrings(MENU_VIEW_TRACK_HEAD,

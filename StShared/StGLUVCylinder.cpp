@@ -1,5 +1,5 @@
 /**
- * Copyright © 2019 Kirill Gavrilov <kirill@sview.ru>
+ * Copyright © 2019-2020 Kirill Gavrilov <kirill@sview.ru>
  *
  * Distributed under the Boost Software License, Version 1.0.
  * See accompanying file license-boost.txt or copy at
@@ -12,16 +12,35 @@
 #include <StGL/StGLContext.h>
 
 StGLUVCylinder::StGLUVCylinder(const StGLVec3& theCenter,
-                               const GLfloat theHeight,
-                               const GLfloat theRadius,
+                               const float theHeight,
+                               const float theRadius,
                                const int theRings)
 : StGLMesh(GL_TRIANGLE_STRIP),
   myCenter(theCenter),
   myRadius(theRadius),
   myHeight(theHeight),
+  myAngleFrom(0.0f),
+  myAngleTo(float(M_PI * 2.0)),
   myNbRings(theRings) {
     //
 }
+
+StGLUVCylinder::StGLUVCylinder(const StGLVec3& theCenter,
+                               const float theHeight,
+                               const float theRadius,
+                               const float theAngleFrom,
+                               const float theAngleTo,
+                               const int theRings)
+: StGLMesh(GL_TRIANGLE_STRIP),
+  myCenter(theCenter),
+  myRadius(theRadius),
+  myHeight(theHeight),
+  myAngleFrom(theAngleFrom),
+  myAngleTo(theAngleTo),
+  myNbRings(theRings) {
+    //
+}
+
 
 StGLUVCylinder::~StGLUVCylinder() {
     //
@@ -38,9 +57,10 @@ bool StGLUVCylinder::computeMesh() {
     myNormals .initArray(aNbVerts);
     myTCoords .initArray(aNbVerts);
 
+    const float anAngle = myAngleTo - myAngleFrom;
     for(int aRingIter = 0; aRingIter <= myNbRings; ++aRingIter) {
-        const GLfloat aPhi    = float(aRingIter) * float(M_PI * 2.0) / float(myNbRings);
-        const GLfloat aTexCrd = float(aRingIter) / float(myNbRings);
+        const float aPhi    = myAngleFrom + float(aRingIter) * anAngle / float(myNbRings);
+        const float aTexCrd = float(aRingIter) / float(myNbRings);
         myTCoords.changeValue(aRingIter * 2 + 0) = StGLVec2(aTexCrd, 0.0f);
         myTCoords.changeValue(aRingIter * 2 + 1) = StGLVec2(aTexCrd, 1.0f);
 

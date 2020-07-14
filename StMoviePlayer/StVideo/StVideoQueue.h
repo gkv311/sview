@@ -198,6 +198,13 @@ class StVideoQueue : public StAVPacketQueue {
     }
 
     /**
+     * Set theater mode.
+     */
+    ST_LOCAL void setTheaterMode(bool theIsTheater) {
+        myIsTheaterMode = theIsTheater;
+    }
+
+    /**
      * Stick to panorama 360 mode.
      */
     ST_LOCAL void setStickPano360(bool theToStick) {
@@ -430,6 +437,7 @@ private:
     volatile StFormat          myStFormatByUser;  //!< source format specified by user
     volatile StFormat          myStFormatByName;  //!< source format detected from file name
     volatile StFormat          myStFormatInStream;//!< source format information retrieved from stream
+    volatile bool              myIsTheaterMode;   //!< flag indicating theater mode
     volatile bool              myToStickPano360;  //!< stick to panorama 360 mode
     volatile bool              myToSwapJps;       //!< read JPS as Left/Right instead of Right/Left
 

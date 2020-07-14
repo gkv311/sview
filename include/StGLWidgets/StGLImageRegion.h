@@ -364,9 +364,10 @@ class StGLImageRegion : public StGLWidget {
     StGLMesh                   myCube;           //!< cube for drawing cubemap
     StGLVec4                   myCubeClamp;      //!< cubemap clamping vector
     StPanorama                 myCubePano;       //!< cubemap panorama format
-    StGLUVSphere               myUVSphere;       //!< sphere output helper class
-    StGLUVSphere               myHemisphere;     //!< hemisphere output helper class
-    StGLUVCylinder             myCylinder;       //!< cylinder output helper class
+    StGLUVSphere               myUVSphere;       //!< sphere mesh object
+    StGLUVSphere               myHemisphere;     //!< hemisphere mesh object
+    StGLUVCylinder             myCylinder;       //!< cylinder mesh object
+    StGLUVCylinder             myTheater;        //!< theater cylinder mesh object
     StGLProjCamera             myProjCam;        //!< copy of projection camera
     StGLImageProgram           myProgram;        //!< GL program to draw flat image
     StHandle<StGLTextureQueue> myTextureQueue;   //!< shared texture queue

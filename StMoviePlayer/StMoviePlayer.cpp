@@ -1828,6 +1828,14 @@ void StMoviePlayer::doAboutFile(const size_t ) {
     }
 }
 
+void StMoviePlayer::doSwitchViewMode(const int32_t theMode) {
+    if(myVideo.isNull()) {
+        return;
+    }
+
+    myVideo->setTheaterMode(theMode == StViewSurface_Theater);
+}
+
 void StMoviePlayer::doPanoramaOnOff(const size_t ) {
     if(myVideo.isNull()) {
         return;

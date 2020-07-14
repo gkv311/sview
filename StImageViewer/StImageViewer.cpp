@@ -1206,6 +1206,8 @@ void StImageViewer::doSwitchViewMode(const int32_t theMode) {
         return;
     }
 
+    myLoader->setTheaterMode(theMode == StViewSurface_Theater);
+
     bool isChanged = false;
     StGLFrameTextures& aTexture = myGUI->myImage->getTextureQueue()->getQTexture().getFront(StGLQuadTexture::LEFT_TEXTURE);
     if(aTexture.getPlane(0).getTarget() == GL_TEXTURE_CUBE_MAP) {

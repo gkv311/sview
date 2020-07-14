@@ -19,6 +19,7 @@
  */
 enum StViewSurface {
     StViewSurface_Plain,      //!< normal 2D image
+    StViewSurface_Theater,    //!< theater panorama
     StViewSurface_Cubemap,    //!< cubemap texture
     StViewSurface_Sphere,     //!< spherical panorama, 360 degrees
     StViewSurface_Hemisphere, //!< spherical panorama, 180 degrees
@@ -40,6 +41,7 @@ class StStereoParams {
             case StViewSurface_Sphere:     return "sphere";
             case StViewSurface_Hemisphere: return "hemisphere";
             case StViewSurface_Cylinder:   return "cylinder";
+            case StViewSurface_Theater:    return "theater";
             case StViewSurface_Plain:      return "flat";
         }
         return "flat";
@@ -56,6 +58,8 @@ class StStereoParams {
             return StViewSurface_Hemisphere;
         } else if(theViewModeStr.isStartsWithIgnoreCase(stCString("cylinder"))) {
             return StViewSurface_Cylinder;
+        } else if(theViewModeStr.isStartsWithIgnoreCase(stCString("theater"))) {
+            return StViewSurface_Theater;
         } else {
             return StViewSurface_Plain;
         }
@@ -307,6 +311,7 @@ class StStereoParams {
             case StViewSurface_Sphere:
             case StViewSurface_Hemisphere:
             case StViewSurface_Cylinder:
+            case StViewSurface_Theater:
             case StViewSurface_Cubemap:
             case StViewSurface_CubemapEAC:
                 myPanYaw += 100.0f * theDuration;
@@ -322,6 +327,7 @@ class StStereoParams {
             case StViewSurface_Sphere:
             case StViewSurface_Hemisphere:
             case StViewSurface_Cylinder:
+            case StViewSurface_Theater:
             case StViewSurface_Cubemap:
             case StViewSurface_CubemapEAC:
                 myPanYaw -= 100.0f * theDuration;
@@ -349,6 +355,7 @@ class StStereoParams {
             case StViewSurface_Sphere:
             case StViewSurface_Hemisphere:
             case StViewSurface_Cylinder:
+            case StViewSurface_Theater:
             case StViewSurface_Cubemap:
             case StViewSurface_CubemapEAC:
                 myPanPitch = clipPitch(myPanPitch - 100.0f * theDuration);
@@ -364,6 +371,7 @@ class StStereoParams {
             case StViewSurface_Sphere:
             case StViewSurface_Hemisphere:
             case StViewSurface_Cylinder:
+            case StViewSurface_Theater:
             case StViewSurface_Cubemap:
             case StViewSurface_CubemapEAC:
                 myPanPitch = clipPitch(myPanPitch + 100.0f * theDuration);

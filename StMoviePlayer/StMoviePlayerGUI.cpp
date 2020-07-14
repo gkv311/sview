@@ -623,6 +623,8 @@ void StMoviePlayerGUI::doDisplayRatioCombo(const size_t ) {
 void StMoviePlayerGUI::fillPanoramaMenu(StGLMenu* theMenu) {
     theMenu->addItem(tr(MENU_VIEW_SURFACE_PLANE),
                      myImage->params.ViewMode, StViewSurface_Plain);
+    theMenu->addItem(tr(MENU_VIEW_SURFACE_THEATER),
+                     myImage->params.ViewMode, StViewSurface_Theater);
     theMenu->addItem(tr(MENU_VIEW_SURFACE_CYLINDER),
                      myImage->params.ViewMode, StViewSurface_Cylinder);
     theMenu->addItem(tr(MENU_VIEW_SURFACE_HEMISPHERE),
@@ -1667,6 +1669,7 @@ StMoviePlayerGUI::StMoviePlayerGUI(StMoviePlayer*  thePlugin,
     myImage->params.DisplayMode->changeValues()[StGLImageRegion::MODE_PARALLEL]   = tr(MENU_VIEW_DISPLAY_MODE_PARALLEL);
     myImage->params.DisplayMode->changeValues()[StGLImageRegion::MODE_CROSSYED]   = tr(MENU_VIEW_DISPLAY_MODE_CROSSYED);
     myImage->params.ToHealAnamorphicRatio->setValue(true);
+    myImage->params.ViewMode->signals.onChanged += stSlot(myPlugin, &StMoviePlayer::doSwitchViewMode);
 
     mySubtitles = new StGLSubtitles  (myImage, theSubQueue,
                                       myPlugin->params.SubtitlesPlace,
@@ -2059,6 +2062,7 @@ void StMoviePlayerGUI::setVisibility(const StPointD_t& theCursor,
             size_t aTrPano = MENU_VIEW_SURFACE_PLANE;
             switch(aViewMode) {
                 case StViewSurface_Plain:      aTrPano = MENU_VIEW_SURFACE_PLANE;   break;
+                case StViewSurface_Theater:    aTrPano = MENU_VIEW_SURFACE_THEATER; break;
                 case StViewSurface_Sphere:     aTrPano = MENU_VIEW_SURFACE_SPHERE;  break;
                 case StViewSurface_Hemisphere: aTrPano = MENU_VIEW_SURFACE_HEMISPHERE;  break;
                 case StViewSurface_Cubemap:    aTrPano = MENU_VIEW_SURFACE_CUBEMAP;  break;

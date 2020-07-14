@@ -68,6 +68,7 @@ StImageLoader::StImageLoader(const StImageFile::ImageClass      theImageLib,
   myMsgQueue(theMsgQueue),
   myImageLib(theImageLib),
   myAction(Action_NONE),
+  myIsTheaterMode(false),
   myToStickPano360(false),
   myToFlipCubeZ6x1(false),
   myToFlipCubeZ3x2(false),
@@ -498,6 +499,12 @@ bool StImageLoader::loadImage(const StHandle<StFileNode>& theSource,
     if(aSrcPanorama != StPanorama_OFF) {
         theParams->ViewingMode = StStereoParams::getViewSurfaceForPanoramaSource(aSrcPanorama, true);
     }
+    if(myIsTheaterMode && theParams->ViewingMode == StViewSurface_Plain) {
+        theParams->ViewingMode = StViewSurface_Theater;
+    } else if(!myIsTheaterMode && theParams->ViewingMode == StViewSurface_Theater) {
+        theParams->ViewingMode = StViewSurface_Plain;
+    }
+
     if(myToStickPano360
     && theParams->ViewingMode == StViewSurface_Plain) {
         StPanorama aPano = st::probePanorama(aSrcFormatCurr,

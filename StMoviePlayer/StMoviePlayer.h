@@ -308,6 +308,7 @@ class StMoviePlayer : public StApplication {
     ST_LOCAL void doFullscreen(const bool theIsFullscreen);
     ST_LOCAL void doSwitchSrcFormat(const int32_t theSrcFormat);
     ST_LOCAL void doSetStereoOutput(const size_t theMode);
+    ST_LOCAL void doSwitchViewMode(const int32_t theMode);
     ST_LOCAL void doPanoramaOnOff(const size_t );
     ST_LOCAL void doChangeStickPano360(const bool );
     ST_LOCAL void doChangeSwapJPS(const bool );
