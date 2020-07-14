@@ -2030,9 +2030,9 @@ void StMoviePlayerGUI::setVisibility(const StPointD_t& theCursor,
     if(!toShowPano
     &&  hasVideo
     && !aParams.isNull()
-    &&  st::probePanorama(aParams->StereoFormat,
+    /*&&  st::probePanorama(aParams->StereoFormat,
                           aParams->Src1SizeX, aParams->Src1SizeY,
-                          aParams->Src2SizeX, aParams->Src2SizeY) != StPanorama_OFF) {
+                          aParams->Src2SizeX, aParams->Src2SizeY) != StPanorama_OFF*/) {
         toShowPano = true;
     }
     if(myBtnPanorama != NULL) {

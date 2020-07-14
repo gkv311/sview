@@ -1486,9 +1486,9 @@ void StImageViewerGUI::setVisibility(const StPointD_t& theCursor,
     bool toShowPano = aViewMode != StViewSurface_Plain;
     if(!toShowPano
     && !aParams.isNull()
-    &&  st::probePanorama(aParams->StereoFormat,
+    /*&&  st::probePanorama(aParams->StereoFormat,
                           aParams->Src1SizeX, aParams->Src1SizeY,
-                          aParams->Src2SizeX, aParams->Src2SizeY) != StPanorama_OFF) {
+                          aParams->Src2SizeX, aParams->Src2SizeY) != StPanorama_OFF*/) {
         toShowPano = true;
     }
     if(myBtnPanorama != NULL) {
