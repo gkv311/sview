@@ -1,6 +1,6 @@
 /**
  * StGLWidgets, small C++ toolkit for writing GUI using OpenGL.
- * Copyright © 2010-2019 Kirill Gavrilov <kirill@sview.ru>
+ * Copyright © 2010-2020 Kirill Gavrilov <kirill@sview.ru>
  *
  * Distributed under the Boost Software License, Version 1.0.
  * See accompanying file license-boost.txt or copy at
@@ -347,6 +347,8 @@ class StGLImageRegion : public StGLWidget {
 
     ST_LOCAL void doRightUnclick(const StPointD_t& theCursorZo);
 
+    ST_LOCAL bool stglInitCube(const StGLVec4& theClampUV = StGLVec4(0.0f, 0.0f, 1.0f, 1.0f),
+                               const StPanorama thePano = StPanorama_OFF);
     ST_LOCAL void stglDrawView(unsigned int theView);
 
         private: //! @name private fields
@@ -360,6 +362,8 @@ class StGLImageRegion : public StGLWidget {
 
     StGLQuads                  myQuad;           //!< flat quad
     StGLMesh                   myCube;           //!< cube for drawing cubemap
+    StGLVec4                   myCubeClamp;      //!< cubemap clamping vector
+    StPanorama                 myCubePano;       //!< cubemap panorama format
     StGLUVSphere               myUVSphere;       //!< sphere output helper class
     StGLUVSphere               myHemisphere;     //!< hemisphere output helper class
     StGLUVCylinder             myCylinder;       //!< cylinder output helper class

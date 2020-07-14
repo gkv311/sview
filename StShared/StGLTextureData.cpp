@@ -740,7 +740,8 @@ void StGLTextureData::fillTexture(StGLContext&        theCtx,
         StImagePlane* aResPlane = &aPlane;
 
         // this is too slow without multi-threading
-        if(toTranspose) {
+        (void )toTranspose;
+        /*if(toTranspose) {
             StImagePlane& aTmpPlane = theCtx.getTmpImagePlane1();
             aTmpPlane.initTransposedCopy(aPlane, aCoeffs[1] != 3);
             aResPlane = &aTmpPlane;
@@ -758,21 +759,49 @@ void StGLTextureData::fillTexture(StGLContext&        theCtx,
                 StAVImage::resizePlane(*aResPlane, aTmpPlane2);
                 aResPlane = &aTmpPlane2;
             }
-        }
+        }*/
 
         theFrameTexture.fillPatch(theCtx, *aResPlane, aTargets[aTargetIter], myFillFromRow, myFillFromRow + myFillRows);
     }
 }
 
-static void setupDataRectangle(const StImagePlane& theImagePlane,
-                               const GLfloat       thePixelRatio,
-                               StGLFrameTexture&   theTextureFrame) {
+void StGLTextureData::setupDataRectangle(const StImagePlane& theImagePlane,
+                                         const GLfloat       thePixelRatio,
+                                         StGLFrameTexture&   theTextureFrame) {
     if(theImagePlane.isNull() || !theTextureFrame.isValid()) {
         return;
     }
 
-    const GLfloat aSizeXFloat = stMin(GLfloat(theImagePlane.getSizeX()), GLfloat(theTextureFrame.getSizeX()));
-    const GLfloat aSizeYFloat = stMin(GLfloat(theImagePlane.getSizeY()), GLfloat(theTextureFrame.getSizeY()));
+    size_t anImgSizeX = theImagePlane.getSizeX();
+    size_t anImgSizeY = theImagePlane.getSizeY();
+
+    StPanorama aPano = StPanorama_OFF;
+    size_t aCoeffs[2] = {0, 0};
+    if(myCubemapFormat == StCubemap_Packed
+    && checkCubeMap(theImagePlane, aCoeffs[0], aCoeffs[1])) {
+        anImgSizeX = anImgSizeX / aCoeffs[0];
+        anImgSizeY = anImgSizeY / aCoeffs[1];
+        switch(aCoeffs[0]) {
+            case 1: aPano = StPanorama_Cubemap1_6; break;
+            case 3: aPano = StPanorama_Cubemap3_2; break;
+            case 6: aPano = StPanorama_Cubemap6_1; break;
+        }
+    } else if(myCubemapFormat == StCubemap_PackedEAC) {
+        if(theImagePlane.getSizeX() > theImagePlane.getSizeY()) {
+            aCoeffs[0] = 3;
+            aCoeffs[1] = 2;
+            aPano = StPanorama_Cubemap3_2ytb;
+        } else {
+            aCoeffs[0] = 2;
+            aCoeffs[1] = 3;
+            aPano = StPanorama_Cubemap2_3ytb;
+        }
+        anImgSizeX = anImgSizeX / aCoeffs[0];
+        anImgSizeY = anImgSizeY / aCoeffs[1];
+    }
+
+    const GLfloat aSizeXFloat = stMin(GLfloat(anImgSizeX), GLfloat(theTextureFrame.getSizeX()));
+    const GLfloat aSizeYFloat = stMin(GLfloat(anImgSizeY), GLfloat(theTextureFrame.getSizeY()));
     StGLVec2 aDataSize (aSizeXFloat / GLfloat(theTextureFrame.getSizeX()),
                         aSizeYFloat / GLfloat(theTextureFrame.getSizeY()));
     if(aDataSize.x() > 1.0f) {
@@ -784,6 +813,7 @@ static void setupDataRectangle(const StImagePlane& theImagePlane,
     theTextureFrame.setDataSize(aDataSize);
     theTextureFrame.setDisplayRatio((thePixelRatio * aSizeXFloat) / aSizeYFloat);
     theTextureFrame.setPixelRatio(thePixelRatio);
+    theTextureFrame.setPackedPanorama(aPano);
 }
 
 void StGLTextureData::setupAttributes(StGLFrameTextures& stFrameTextures, const StImage& theImage) {

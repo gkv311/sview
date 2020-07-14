@@ -197,6 +197,8 @@ class StGLMesh : public StGLResource {
         return myNormals;
     }
 
+    ST_LOCAL StArrayList<StGLVec4>& changeColors() { return myColors; }
+
     inline StArrayList<GLuint>& changeIndices() {
         return myIndices;
     }

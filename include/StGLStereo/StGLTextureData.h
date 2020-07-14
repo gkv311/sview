@@ -176,6 +176,10 @@ class StGLTextureData {
 
     ST_LOCAL void setupAttributes(StGLFrameTextures& stFrameTextures, const StImage& theImage);
 
+    ST_LOCAL void setupDataRectangle(const StImagePlane& theImagePlane,
+                                     const GLfloat       thePixelRatio,
+                                     StGLFrameTexture&   theTextureFrame);
+
         private:
 
     StGLTextureData*         myPrev;          //!< pointer to previous item in the list

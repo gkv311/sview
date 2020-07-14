@@ -20,7 +20,8 @@ StGLFrameTexture::StGLFrameTexture()
 #endif
   myDataSize(1.0f, 1.0f),
   myDisplayRatio(1.0f),
-  myPAR(1.0f) {
+  myPAR(1.0f),
+  myPanorama(StPanorama_OFF) {
     //
 }
 

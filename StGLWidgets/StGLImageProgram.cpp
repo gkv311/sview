@@ -121,14 +121,29 @@ void StGLImageProgram::registerFragments(const StGLContext& theCtx) {
 
     // equiangular cubemap texture coordinates correction
     registerFragmentShaderPart(FragSection_GetTexCoords, FragTexEAC_Off,
-                               "vec3 getTexCoords(in vec3 theCoords) { return theCoords; }\n\n");
+                               "vec3 getTexCoords(in vec3 theCoords, in vec3 theClamp) { return theCoords; }\n\n");
     registerFragmentShaderPart(FragSection_GetTexCoords, FragTexEAC_On,
                                "#define ST_PI 3.1415926535897932384626433832795\n"
-                               "vec3 getTexCoords(in vec3 theCoords) {\n"
+                               "vec3 getTexCoords(in vec3 theCoords, in vec3 theClamp) {\n"
                                "    vec3 aCoords = theCoords;\n"
                                "    aCoords.x = 4.0 / ST_PI * atan(theCoords.x);\n"
                                "    aCoords.y = 4.0 / ST_PI * atan(theCoords.y);\n"
                                "    aCoords.z = 4.0 / ST_PI * atan(theCoords.z);\n"
+                               "    if(theClamp.x >= 0.0) {\n"
+                               "        aCoords.x = -1.0 + theClamp.x * (aCoords.x + 1.0);\n"
+                               "    } else {\n"
+                               "        aCoords.x =  1.0 + theClamp.x * (1.0 - aCoords.x);\n"
+                               "    }\n"
+                               "    if(theClamp.y >= 0.0) {\n"
+                               "        aCoords.y = -1.0 + theClamp.y * (aCoords.y + 1.0);\n"
+                               "    } else {\n"
+                               "        aCoords.y =  1.0 + theClamp.y * (1.0 - aCoords.y);\n"
+                               "    }\n"
+                               "    if(theClamp.z >= 0.0) {\n"
+                               "        aCoords.z = -1.0 + theClamp.z * (aCoords.z + 1.0);\n"
+                               "    } else {\n"
+                               "        aCoords.z =  1.0 + theClamp.z * (1.0 - aCoords.z);\n"
+                               "    }\n"
                                "    return aCoords;\n"
                                "}\n\n");
 
@@ -339,11 +354,13 @@ void StGLImageProgram::registerFragments(const StGLContext& theCtx) {
        "varying vec3 fTexCoord;\n"
        "varying vec3 fTexUVCoord;\n"
        "varying vec3 fTexACoord;\n"
+       "varying vec4 fTexClamp;\n"
 
        "void main(void) {\n"
        "    fTexCoord   = vec3(uTexData.xy   + vTexCoord * uTexData.zw,   0.0);\n"
        "    fTexUVCoord = vec3(uTexUVData.xy + vTexCoord * uTexUVData.zw, 0.0);\n"
        "    fTexACoord  = vec3(uTexAData.xy  + vTexCoord * uTexAData.zw,  0.0);\n"
+       "    fTexClamp   = vec4(0.0, 0.0, 0.0, 0.0);\n"
        "    gl_Position = uProjMat * uModelMat * vVertex;\n"
        "}\n";
 
@@ -356,39 +373,43 @@ void StGLImageProgram::registerFragments(const StGLContext& theCtx) {
        "uniform float uTexCubeFlipZ;\n"
 
        "attribute vec4 vVertex;\n"
-       "attribute vec2 vTexCoord;\n"
+       "attribute vec3 vNormal;\n"
+       "attribute vec4 vColor;\n"
 
        "varying vec3 fTexCoord;\n"
        "varying vec3 fTexUVCoord;\n"
        "varying vec3 fTexACoord;\n"
+       "varying vec4 fTexClamp;\n"
 
        "void main(void) {\n"
-       "    vec4 aPos = uProjMat * uModelMat * vec4(vVertex.xyz, 1.0);"
-       "    gl_Position = aPos.xyww;"
-       "    vec3 aTCoord = vVertex.xyz;"
-       "    aTCoord.z  *= uTexCubeFlipZ;"
-       "    fTexCoord   = aTCoord;"
-       "    fTexUVCoord = aTCoord;"
-       "    fTexACoord  = aTCoord;"
+       "    vec4 aPos = uProjMat * uModelMat * vec4(vVertex.xyz, 1.0);\n"
+       "    gl_Position = aPos.xyww;\n"
+       "    vec3 aTCoord = vNormal;\n" // fake normal attribute
+       "    aTCoord.z  *= uTexCubeFlipZ;\n"
+       "    fTexCoord   = aTCoord;\n"
+       "    fTexUVCoord = aTCoord;\n"
+       "    fTexACoord  = aTCoord;\n"
+       "    fTexClamp   = vColor;\n" // fake color attribute
        "}\n";
 
     const char F_SHADER_FLAT[] =
        "varying vec3 fTexCoord;\n"
        "varying vec3 fTexUVCoord;\n"
        "varying vec3 fTexACoord;\n"
+       "varying vec4 fTexClamp;\n"
         // we split these functions for two reasons:
         // - to change function code (like color conversion);
         // - to optimize rendering on old hardware not supported conditions (GeForce FX for example).
-       "vec3 getTexCoords(in vec3 theCoords);\n"
+       "vec3 getTexCoords(in vec3 theCoords, in vec3 theClamp);\n"
        "vec4 getColor(in vec3 texCoord);\n"
        "void convertToRGB(inout vec4 theColor, in vec3 theTexUVCoord, in vec3 texCoordA);\n"
        "void applyCorrection(inout vec4 theColor);\n"
        "void applyGamma(inout vec4 theColor);\n"
 
        "void main(void) {\n"
-       "    vec3 aTexCoord   = getTexCoords(fTexCoord);\n"
-       "    vec3 aTexCoordUV = getTexCoords(fTexUVCoord);\n"
-       "    vec3 aTexCoordA  = getTexCoords(fTexACoord);\n"
+       "    vec3 aTexCoord   = getTexCoords(fTexCoord,   fTexClamp.xyz);\n"
+       "    vec3 aTexCoordUV = getTexCoords(fTexUVCoord, fTexClamp.xyz);\n"
+       "    vec3 aTexCoordA  = getTexCoords(fTexACoord,  fTexClamp.xyz);\n"
             // extract color from main texture
        "    vec4 aColor = getColor(aTexCoord);\n"
             // convert from alien color model (like YUV) to RGB
@@ -525,6 +546,8 @@ bool StGLImageProgram::init(StGLContext&                 theCtx,
         uniGammaLoc           = myActiveProgram->getUniformLocation(theCtx, "uGamma");
         myActiveProgram->atrVVertexLoc  = myActiveProgram->getAttribLocation(theCtx, "vVertex");
         myActiveProgram->atrVTCoordLoc  = myActiveProgram->getAttribLocation(theCtx, "vTexCoord");
+        myActiveProgram->atrVNormalLoc  = myActiveProgram->getAttribLocation(theCtx, "vNormal");
+        myActiveProgram->atrVColorsLoc  = myActiveProgram->getAttribLocation(theCtx, "vColor");
 
         StGLVarLocation uniTextureLoc  = myActiveProgram->getUniformLocation(theCtx, "uTexture");
         StGLVarLocation uniTextureULoc = myActiveProgram->getUniformLocation(theCtx, "uTextureU");

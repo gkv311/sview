@@ -1,6 +1,6 @@
 /**
  * StGLWidgets, small C++ toolkit for writing GUI using OpenGL.
- * Copyright © 2010-2019 Kirill Gavrilov <kirill@sview.ru>
+ * Copyright © 2010-2020 Kirill Gavrilov <kirill@sview.ru>
  *
  * Distributed under the Boost Software License, Version 1.0.
  * See accompanying file license-boost.txt or copy at
@@ -213,7 +213,8 @@ StGLImageRegion::StGLImageRegion(StGLWidget* theParent,
 : StGLWidget(theParent, 0, 0, StGLCorner(ST_VCORNER_TOP, ST_HCORNER_LEFT)),
   myIconPrev(NULL),
   myIconNext(NULL),
-  myCube(GL_TRIANGLE_STRIP),
+  myCube(GL_TRIANGLES),
+  myCubePano(StPanorama_OFF),
   myUVSphere  (StGLVec3(0.0f, 0.0f, 0.0f), 1.0f, 64, false),
   myHemisphere(StGLVec3(0.0f, 0.0f, 0.0f), 1.0f, 64, true),
   myCylinder  (StGLVec3(0.0f, 0.0f, 0.0f), 1.0f, 1.0f, 64),
@@ -462,29 +463,8 @@ bool StGLImageRegion::stglInit() {
     }*/
 
     // a unit cube for cubemap rendering
-    {
-        StArrayList<StGLVec3>& aCubeVerts = myCube.changeVertices();
-        aCubeVerts.initArray(8);
-        aCubeVerts[0] = StGLVec3 (-1.0f, -1.0f,  1.0f);
-        aCubeVerts[1] = StGLVec3 ( 1.0f, -1.0f,  1.0f);
-        aCubeVerts[2] = StGLVec3 (-1.0f,  1.0f,  1.0f);
-        aCubeVerts[3] = StGLVec3 ( 1.0f,  1.0f,  1.0f);
-        aCubeVerts[4] = StGLVec3 (-1.0f, -1.0f, -1.0f);
-        aCubeVerts[5] = StGLVec3 ( 1.0f, -1.0f, -1.0f);
-        aCubeVerts[6] = StGLVec3 (-1.0f,  1.0f, -1.0f);
-        aCubeVerts[7] = StGLVec3 ( 1.0f,  1.0f, -1.0f);
-
-        const GLuint THE_BOX_TRISTRIP[14] = { 0, 1, 2, 3, 7, 1, 5, 4, 7, 6, 2, 4, 0, 1 };
-        StArrayList<GLuint>& aCubeInd = myCube.changeIndices();
-        aCubeInd.initArray(14);
-        for(unsigned int aVertIter = 0; aVertIter < 14; ++aVertIter) {
-            aCubeInd[aVertIter] = THE_BOX_TRISTRIP[aVertIter];
-        }
-        if(!myCube.initVBOs(aCtx)) {
-            aCtx.pushError(StString("Fail to init Cube Mesh"));
-            ST_ERROR_LOG("Fail to init Cube Mesh");
-            return false;
-        }
+    if(!stglInitCube()) {
+        return false;
     }
 
     // setup texture filter
@@ -494,6 +474,164 @@ bool StGLImageRegion::stglInit() {
 
     myIsInitialized = true;
     return myIsInitialized && isInit;
+}
+
+/**
+ * Cubemap sides.
+ */
+enum StCubeSide {
+    StCubeSide_PX = 0,
+    StCubeSide_NX,
+    StCubeSide_PY,
+    StCubeSide_NY,
+    StCubeSide_PZ,
+    StCubeSide_NZ,
+};
+typedef StVec4<int> StIVec4;
+
+bool StGLImageRegion::stglInitCube(const StGLVec4& theClamp,
+                                   const StPanorama thePano) {
+    myCubeClamp = theClamp;
+    myCubePano = thePano;
+
+    // a unit cube for cubemap rendering
+    const StGLVec3 THE_VERTS[8] = {
+        StGLVec3(-1.0f,-1.0f, 1.0f),
+        StGLVec3( 1.0f,-1.0f, 1.0f),
+        StGLVec3(-1.0f, 1.0f, 1.0f),
+        StGLVec3( 1.0f, 1.0f, 1.0f),
+        StGLVec3(-1.0f,-1.0f,-1.0f),
+        StGLVec3( 1.0f,-1.0f,-1.0f),
+        StGLVec3(-1.0f, 1.0f,-1.0f),
+        StGLVec3( 1.0f, 1.0f,-1.0f)
+    };
+
+    const StIVec4 THE_SIDES[6] = {
+        StIVec4(3, 7, 5, 1), // px
+        StIVec4(6, 2, 0, 4), // nx
+        StIVec4(2, 3, 7, 6), // py
+        StIVec4(0, 1, 5, 4), // ny
+        StIVec4(0, 1, 3, 2), // pz
+        StIVec4(5, 4, 6, 7), // nz
+    };
+
+    StArrayList<StGLVec3>& aVertArr  = myCube.changeVertices();
+    StArrayList<StGLVec3>& aCoordArr = myCube.changeNormals();
+    StArrayList<StGLVec4>& aClampArr = myCube.changeColors();
+    aVertArr.initArray(6 * 6);
+    aCoordArr.initArray(aVertArr.size());
+    aClampArr.initArray(aVertArr.size());
+    int aVert = 0;
+    for(int aSideIter = 0; aSideIter < 6; ++aSideIter, aVert += 6) {
+        StIVec4 aSide = THE_SIDES[aSideIter];
+        aVertArr[aVert + 0] = THE_VERTS[aSide[0]];
+        aVertArr[aVert + 1] = THE_VERTS[aSide[1]];
+        aVertArr[aVert + 2] = THE_VERTS[aSide[2]];
+
+        aVertArr[aVert + 3] = THE_VERTS[aSide[0]];
+        aVertArr[aVert + 4] = THE_VERTS[aSide[2]];
+        aVertArr[aVert + 5] = THE_VERTS[aSide[3]];
+
+        // rotate EAC cube sides
+        if(thePano == StPanorama_Cubemap3_2ytb) {
+            if(aSideIter == StCubeSide_NY) {
+                const StIVec4 aCopy = aSide;
+                for(int aSubIter = 0; aSubIter < 4; ++aSubIter) {
+                    aSide[aSubIter] = aCopy[aSubIter > 0 ? aSubIter - 1 : 3];
+                }
+            }
+            if(aSideIter == StCubeSide_NZ || aSideIter == StCubeSide_PY) {
+                const StIVec4 aCopy = aSide;
+                for(int aSubIter = 0; aSubIter < 4; ++aSubIter) {
+                    aSide[aSubIter] = aCopy[aSubIter < 3 ? aSubIter + 1 : 0];
+                }
+            }
+        } else if(thePano == StPanorama_Cubemap2_3ytb) {
+            if(aSideIter == StCubeSide_PX
+            || aSideIter == StCubeSide_NX) {
+                const StIVec4 aCopy = aSide;
+                for(int aSubIter = 0; aSubIter < 4; ++aSubIter) {
+                    aSide[aSubIter] = aCopy[aSubIter < 3 ? aSubIter + 1 : 0];
+                }
+            }
+            if(aSideIter == StCubeSide_PZ) {
+                const StIVec4 aCopy = aSide;
+                for(int aSubIter = 0; aSubIter < 4; ++aSubIter) {
+                    aSide[aSubIter] = aCopy[aSubIter > 0 ? aSubIter - 1 : 3];
+                }
+            }
+        }
+
+        aCoordArr[aVert + 0] = THE_VERTS[aSide[0]];
+        aCoordArr[aVert + 1] = THE_VERTS[aSide[1]];
+        aCoordArr[aVert + 2] = THE_VERTS[aSide[2]];
+
+        aCoordArr[aVert + 3] = THE_VERTS[aSide[0]];
+        aCoordArr[aVert + 4] = THE_VERTS[aSide[2]];
+        aCoordArr[aVert + 5] = THE_VERTS[aSide[3]];
+        for(int aSubIter = 0; aSubIter < 6; ++aSubIter) {
+            StGLVec4& aClamp = aClampArr[aVert + aSubIter];
+            aClamp = StGLVec4(0.0f, 0.0f, 0.0f, 0.0f);
+            switch(aSideIter) {
+                case StCubeSide_PX: {
+                    aClamp.x() = 1.0f;
+                    aClamp.y() = -theClamp.w();
+                    aClamp.z() = -theClamp.z();
+                    break;
+                }
+                case StCubeSide_NX: {
+                    aClamp.x() = -1.0f;
+                    aClamp.y() = -theClamp.w();
+                    aClamp.z() = theClamp.z();
+                    break;
+                }
+                case StCubeSide_PZ: {
+                    aClamp.x() = -theClamp.z();
+                    aClamp.y() = -theClamp.w();
+                    aClamp.z() = 1.0f;
+                    break;
+                }
+                case StCubeSide_NZ: {
+                    aClamp.x() = theClamp.z();
+                    aClamp.y() = -theClamp.w();
+                    aClamp.z() = -1.0f;
+                    break;
+                }
+                case StCubeSide_PY: {
+                    aClamp.x() = theClamp.z();
+                    aClamp.y() = 1.0f;
+                    aClamp.z() = theClamp.w();
+                    break;
+                }
+                case StCubeSide_NY: {
+                    aClamp.x() = theClamp.z();
+                    aClamp.y() = -1.0f;
+                    aClamp.z() = -theClamp.w();
+                    break;
+                }
+            }
+        }
+    }
+
+    // triangle strip initialization
+    /*aCubeVerts.initArray(8);
+    for(int aVertIter = 0; aVertIter < 8; ++aVertIter) {
+      aCubeVerts[aVertIter] = THE_VERTS[aVertIter];
+    }
+    const GLuint THE_BOX_TRISTRIP[14] = { 0, 1, 2, 3, 7, 1, 5, 4, 7, 6, 2, 4, 0, 1 };
+    StArrayList<GLuint>& aCubeInd = myCube.changeIndices();
+    aCubeInd.initArray(14);
+    for(unsigned int aVertIter = 0; aVertIter < 14; ++aVertIter) {
+        aCubeInd[aVertIter] = THE_BOX_TRISTRIP[aVertIter];
+    }*/
+
+    StGLContext& aCtx = getContext();
+    if(!myCube.initVBOs(aCtx)) {
+        aCtx.pushError(StString("Fail to init Cube Mesh"));
+        ST_ERROR_LOG("Fail to init Cube Mesh");
+        return false;
+    }
+    return true;
 }
 
 StGLVec2 StGLImageRegion::getMouseMoveFlat(const StPointD_t& theCursorZoFrom,
@@ -753,7 +891,10 @@ void StGLImageRegion::stglDrawView(unsigned int theView) {
     StViewSurface aViewMode = aParams->ViewingMode;
     if(aTextures.getPlane(0).getTarget() == GL_TEXTURE_CUBE_MAP) {
         if(aViewMode != StViewSurface_Cubemap && aViewMode != StViewSurface_CubemapEAC) {
-            aViewMode = StViewSurface_Cubemap;
+            aViewMode = aTextures.getPlane().getPackedPanorama() == StPanorama_Cubemap3_2ytb
+                     || aTextures.getPlane().getPackedPanorama() == StPanorama_Cubemap2_3ytb
+                      ? StViewSurface_CubemapEAC
+                      : StViewSurface_Cubemap;
         }
     } else if(aViewMode == StViewSurface_Cubemap || aViewMode == StViewSurface_CubemapEAC) {
         aViewMode = StViewSurface_Plain;
@@ -971,6 +1112,11 @@ void StGLImageRegion::stglDrawView(unsigned int theView) {
         }
         case StViewSurface_Cubemap:
         case StViewSurface_CubemapEAC: {
+            if(myCubeClamp != aClampUV
+            || myCubePano != aTextures.getPlane().getPackedPanorama()) {
+                stglInitCube(aClampUV, aTextures.getPlane().getPackedPanorama());
+            }
+
             if(!myProgram.init(aCtx, aTextures.getColorModel(), aTextures.getColorScale(),
                                StGLImageProgram::FragGetColor_Cubemap,
                                aViewMode == StViewSurface_CubemapEAC ? StGLImageProgram::FragTexEAC_On : StGLImageProgram::FragTexEAC_Off)) {
