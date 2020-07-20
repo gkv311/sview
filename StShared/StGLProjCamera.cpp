@@ -163,17 +163,18 @@ void StGLProjCamera::setCustomProjection(const StRectF_t& theLeft, const StRectF
 void StGLProjCamera::updateFrustum() {
     // sets top of frustum based on FOVy and near clipping plane
     const GLfloat aZNear = myFrustM.zNear;
+    GLfloat aDXStereoShift = (0.5f * myIOD) * aZNear / myZScreen;
+
     GLfloat aDYHalf = myIsPersp
                     ? (myZoom * aZNear * std::tan(ST_DTR_HALF * myFOVy))
                     : (myZoom * aZNear);
-    // sets right of frustum based on aspect ratio
-    GLfloat aDXHalf = aDYHalf;
-    GLfloat aDXStereoShift = (0.5f * myIOD) * aZNear / myZScreen;
+    GLfloat aDXHalf = myAspect * aDYHalf;
+    /*GLfloat aDXHalf = aDYHalf;
     if(myAspect > 1.0f) {
         aDXHalf *= myAspect;
     } else {
         aDYHalf /= myAspect;
-    }
+    }*/
 
     // frustum for left view
     myFrustL.yTop    =  aDYHalf;
