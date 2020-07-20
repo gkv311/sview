@@ -1116,9 +1116,25 @@ void StGLImageRegion::stglDrawView(unsigned int theView) {
         }
         case StViewSurface_Cubemap:
         case StViewSurface_CubemapEAC: {
-            if(myCubeClamp != aClampUV
+            StGLVec4 aClamVecMin = aClampVec;
+            if(aTextureUVSize.x() > 0.0f
+            && aTextureUVSize.y() > 0.0f) {
+                aClamVecMin.x() = stMax(aClamVecMin.x(), aClampUV.x());
+                aClamVecMin.y() = stMax(aClamVecMin.y(), aClampUV.y());
+                aClamVecMin.z() = stMin(aClamVecMin.z(), aClampUV.z());
+                aClamVecMin.w() = stMin(aClamVecMin.w(), aClampUV.w());
+            }
+            if(aTextureASize.x() > 0.0f
+            && aTextureASize.y() > 0.0f) {
+                aClamVecMin.x() = stMax(aClamVecMin.x(), aClampA.x());
+                aClamVecMin.y() = stMax(aClamVecMin.y(), aClampA.y());
+                aClamVecMin.z() = stMin(aClamVecMin.z(), aClampA.z());
+                aClamVecMin.w() = stMin(aClamVecMin.w(), aClampA.w());
+            }
+
+            if(myCubeClamp != aClamVecMin
             || myCubePano != aTextures.getPlane().getPackedPanorama()) {
-                stglInitCube(aClampUV, aTextures.getPlane().getPackedPanorama());
+                stglInitCube(aClamVecMin, aTextures.getPlane().getPackedPanorama());
             }
 
             if(!myProgram.init(aCtx, aTextures.getColorModel(), aTextures.getColorScale(),
