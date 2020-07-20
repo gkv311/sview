@@ -575,7 +575,7 @@ bool StGLImageRegion::stglInitCube(const StGLVec4& theClamp,
         aCoordArr[aVert + 5] = THE_VERTS[aSide[3]];
         for(int aSubIter = 0; aSubIter < 6; ++aSubIter) {
             StGLVec4& aClamp = aClampArr[aVert + aSubIter];
-            aClamp = StGLVec4(0.0f, 0.0f, 0.0f, 0.0f);
+            aClamp = StGLVec4(0.0f, 0.0f, 0.0f, theClamp.x());
             switch(aSideIter) {
                 case StCubeSide_PX: {
                     aClamp.x() = 1.0f;
@@ -807,7 +807,7 @@ void StGLImageRegion::stglDrawView(unsigned int theView) {
                             GLfloat(aTextures.getPlane(3).getSizeY()));
     StGLMatrix aModelMat;
     // data rectangle in the texture
-    StGLVec4 aClampVec, aClampUV, aClampA;
+    StGLVec4 aClampVec(0.0f, 0.0f, 1.0f, 1.0f), aClampUV(0.0f, 0.0f, 1.0f, 1.0f), aClampA(0.0f, 0.0f, 1.0f, 1.0f);
     if(params.TextureFilter->getValue() == StGLImageProgram::FILTER_NEAREST) {
         myTextureQueue->getQTexture().setMinMagFilter(aCtx, GL_NEAREST);
         //
@@ -831,26 +831,43 @@ void StGLImageRegion::stglDrawView(unsigned int theView) {
         } else {
             myTextureQueue->getQTexture().setMinMagFilter(aCtx, GL_LINEAR);
         }
-        //
-        aClampVec.x() = 0.5f / aTextureSize.x();
-        aClampVec.y() = 0.5f / aTextureSize.y();
-        aClampVec.z() = aTextures.getPlane(0).getDataSize().x() - 2.0f * aClampVec.x();
-        aClampVec.w() = aTextures.getPlane(0).getDataSize().y() - 2.0f * aClampVec.y();
+
+        // clamping is undesired for full-range cubemap to allow smooth seamless cube boundaries,
+        // but EAC video normally defines non-square cube sides requiring clamping
+        const bool isCubemapFull = aTextures.getPlane().getTarget() == GL_TEXTURE_CUBE_MAP
+                                && aTextures.getPlane().getPackedPanorama() != StPanorama_Cubemap3_2ytb
+                                && aTextures.getPlane().getPackedPanorama() != StPanorama_Cubemap2_3ytb;
+        if(!isCubemapFull
+         || aTextures.getPlane(0).getDataSize().x() != aTextures.getPlane(0).getDataSize().y()
+         || aTextures.getPlane(0).getDataSize().x() != 1.0f) {
+            aClampVec.x() = 0.5f / aTextureSize.x();
+            aClampVec.y() = 0.5f / aTextureSize.y();
+            aClampVec.z() = aTextures.getPlane(0).getDataSize().x() - 2.0f * aClampVec.x();
+            aClampVec.w() = aTextures.getPlane(0).getDataSize().y() - 2.0f * aClampVec.y();
+        }
         // UV
         if(aTextureUVSize.x() > 0.0f
         && aTextureUVSize.y() > 0.0f) {
-            aClampUV.x() = 0.5f / aTextureUVSize.x();
-            aClampUV.y() = 0.5f / aTextureUVSize.y(),
-            aClampUV.z() = aTextures.getPlane(1).getDataSize().x() - 2.0f * aClampUV.x();
-            aClampUV.w() = aTextures.getPlane(1).getDataSize().y() - 2.0f * aClampUV.y();
+            if(!isCubemapFull
+             || aTextures.getPlane(1).getDataSize().x() != aTextures.getPlane(1).getDataSize().y()
+             || aTextures.getPlane(1).getDataSize().x() != 1.0f) {
+                aClampUV.x() = 0.5f / aTextureUVSize.x();
+                aClampUV.y() = 0.5f / aTextureUVSize.y(),
+                aClampUV.z() = aTextures.getPlane(1).getDataSize().x() - 2.0f * aClampUV.x();
+                aClampUV.w() = aTextures.getPlane(1).getDataSize().y() - 2.0f * aClampUV.y();
+            }
         }
         // Alpha
         if(aTextureASize.x() > 0.0f
         && aTextureASize.y() > 0.0f) {
-            aClampA.x() = 0.5f / aTextureASize.x();
-            aClampA.y() = 0.5f / aTextureASize.y(),
-            aClampA.z() = aTextures.getPlane(3).getDataSize().x() - 2.0f * aClampA.x();
-            aClampA.w() = aTextures.getPlane(3).getDataSize().y() - 2.0f * aClampA.y();
+            if(!isCubemapFull
+             || aTextures.getPlane(3).getDataSize().x() != aTextures.getPlane(3).getDataSize().y()
+             || aTextures.getPlane(3).getDataSize().x() != 1.0f) {
+                aClampA.x() = 0.5f / aTextureASize.x();
+                aClampA.y() = 0.5f / aTextureASize.y(),
+                aClampA.z() = aTextures.getPlane(3).getDataSize().x() - 2.0f * aClampA.x();
+                aClampA.w() = aTextures.getPlane(3).getDataSize().y() - 2.0f * aClampA.y();
+            }
         }
     }
     aTextures.bind(aCtx);
@@ -1116,6 +1133,11 @@ void StGLImageRegion::stglDrawView(unsigned int theView) {
         }
         case StViewSurface_Cubemap:
         case StViewSurface_CubemapEAC: {
+            // Clamping range is passed through vertex attributes.
+            // To avoid extra vertex attributes, the smallest clamping range is used across planes.
+            // This trick is possible, because cubemap texture lazy resizing is not used,
+            // hence all planes should have same proportions.
+            // The result will be broken for rare formats like YUV422P/YUV411P/YUV440P.
             StGLVec4 aClamVecMin = aClampVec;
             if(aTextureUVSize.x() > 0.0f
             && aTextureUVSize.y() > 0.0f) {
@@ -1166,8 +1188,19 @@ void StGLImageRegion::stglDrawView(unsigned int theView) {
                 myProgram.getActiveProgram()->setProjMat (aCtx, myProjCam.getProjMatrixMono());
             }
 
-            ///glEnable(GL_TEXTURE_CUBE_MAP_SEAMLESS);
-
+        #if !defined(GL_ES_VERSION_2_0)
+            // Issues with seamless cubemap filtering:
+            // - Desktop, available since OpenGL 3.2+ (or ARB_seamless_cube_map) and DISABLED by default;
+            //   some old implementations might be buggy;
+            //   some very old implementation might even switch to software fallback.
+            // - Mobile, OpenGL ES 3.0 requires cubemap filtering to be always ENABLED - no API for disabling;
+            //   OpenGL ES 3.0 implementations might not support seamless filtering without a way to detect it.
+            // - Seamless filtering works is desired for a proper cubemap definition,
+            //   but undesired for EAC video frames with non-square cube sides and has rotated sides.
+            if(aCtx.isGlGreaterEqual(3, 2)) {
+                ///glEnable(GL_TEXTURE_CUBE_MAP_SEAMLESS);
+            }
+        #endif
             myCube.draw(aCtx, *myProgram.getActiveProgram());
 
             myProgram.getActiveProgram()->unuse(aCtx);
