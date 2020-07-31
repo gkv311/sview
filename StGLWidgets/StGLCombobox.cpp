@@ -1,6 +1,6 @@
 /**
  * StGLWidgets, small C++ toolkit for writing GUI using OpenGL.
- * Copyright © 2015 Kirill Gavrilov <kirill@sview.ru
+ * Copyright © 2015-2020 Kirill Gavrilov <kirill@sview.ru
  *
  * Distributed under the Boost Software License, Version 1.0.
  * See accompanying file license-boost.txt or copy at
@@ -11,6 +11,7 @@
 
 #include <StGLWidgets/StGLMenuItem.h>
 #include <StGLWidgets/StGLMessageBox.h>
+#include <StGLWidgets/StGLScrollArea.h>
 #include <StGLWidgets/StGLRootWidget.h>
 
 /**
@@ -27,7 +28,7 @@ class StGLContextBackground : public StGLMessageBox {
         const int aHeight = myRoot->getRootFullSizeY();
         changeRectPx().right()  = aWidth;
         changeRectPx().bottom() = aHeight;
-        create(StString(), StString(), aWidth, aHeight);
+        create(StString(), StString(), aWidth, aHeight, false);
     }
 
 };
@@ -59,7 +60,7 @@ StGLCombobox::ListBuilder::ListBuilder(StGLWidget* theParent)
     StGLWidget*     aMenuParent = aRoot;
     if(aRoot->isMobile()) {
         myBack = new StGLContextBackground(aRoot);
-        aMenuParent = myBack;
+        aMenuParent = myBack->getContent();
     }
 
     int aLeft = 0;
@@ -78,14 +79,18 @@ StGLCombobox::ListBuilder::ListBuilder(StGLWidget* theParent)
 }
 
 void StGLCombobox::ListBuilder::display() {
+    StGLRootWidget* aRoot = myMenu->getRoot();
+    const int aRootX = aRoot->getRectPx().width();
+    const int aRootY = aRoot->getRectPx().height();
     if(myBack != NULL) {
         myBack->stglInit();
+        if(myBack->getContent()->isScrollable()) {
+            myMenu->setCorner(StGLCorner(ST_VCORNER_TOP, ST_HCORNER_CENTER));
+            myMenu->stglResize();
+        }
     } else {
-        StGLRootWidget* aRoot = myMenu->getRoot();
         myMenu->stglUpdateSubmenuLayout();
-        StRectI_t aRect  = myMenu->getRectPxAbsolute();
-        const int aRootX = aRoot->getRectPx().width();
-        const int aRootY = aRoot->getRectPx().height();
+        StRectI_t aRect = myMenu->getRectPxAbsolute();
         if(aRect.width()  >= aRootX) {
             myMenu->changeRectPx().moveLeftTo(0);
         } else if(aRect.right() > aRoot->getRectPx().right()) {

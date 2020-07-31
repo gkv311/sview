@@ -50,6 +50,11 @@ class StGLScrollArea : public StGLWidget {
     }
 
     /**
+     * Returns TRUE if dragging has been confirmed.
+     */
+    ST_LOCAL bool hasDragged() const { return myHasDragged; }
+
+    /**
      * Scroll (vertically) content.
      * @param theDelta scroll delta
      * @return true if scrolling has been done

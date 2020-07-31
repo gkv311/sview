@@ -109,8 +109,9 @@ class StGLMessageBox : public StGLWidget {
      */
     ST_CPPEXPORT void create(const StString& theTitle,
                              const StString& theText,
-                             const int       theWidth,
-                             const int       theHeight);
+                             const int  theWidth,
+                             const int  theHeight,
+                             const bool theHasButtons = true);
 
         private:   //! @name callback Slots (private overriders)
 

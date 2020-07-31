@@ -762,11 +762,26 @@ class ST_LOCAL StDelayControl : public StGLMessageBox {
 
     StDelayControl(StMoviePlayerGUI*               theParent,
                    const StHandle<StFloat32Param>& theTrackedValue)
-    : StGLMessageBox(theParent, theParent->tr(DIALOG_AUDIO_DELAY_TITLE), "", theParent->scale(400), theParent->scale(260)),
+    : StGLMessageBox(theParent),
       myRange(NULL) {
-        changeRectPx().moveX( myRoot->scale( 64));
-        changeRectPx().moveY(-myRoot->scale(128));
+        int aWidth  = stMin(theParent->scale(400), myRoot->getRectPx().width());
+        int aHeight = stMin(theParent->scale(220), myRoot->getRectPx().height());
+        const bool isCompact = myRoot->getRectPx().width()  <= myRoot->scale(450)
+                            || myRoot->getRectPx().height() <= myRoot->scale(450);
+        if(isCompact) {
+            aHeight = stMin(theParent->scale(150), aHeight);
+        } else {
+            changeRectPx().left() = myRoot->scale(64);
+            changeRectPx().top() = -myRoot->scale(128);
+        }
         setCorner(StGLCorner(ST_VCORNER_BOTTOM, ST_HCORNER_LEFT));
+        changeRectPx().right()  = getRectPx().left() + aWidth;
+        changeRectPx().bottom() = getRectPx().top()  + aHeight;
+        create(theParent->tr(DIALOG_AUDIO_DELAY_TITLE), "", aWidth, aHeight);
+        if(isCompact) {
+            myMinSizeY = theParent->scale(150);
+        }
+
         StGLButton* aResetBtn = addButton(theParent->tr(BUTTON_RESET));
         addButton(theParent->tr(BUTTON_CLOSE));
 
@@ -2156,6 +2171,61 @@ void StMoviePlayerGUI::doAudioStreamsCombo(const size_t ) {
     aBuilder.display();
 }
 
+void StMoviePlayerGUI::doSubtitlesPlacement(const size_t ) {
+    StGLMenu* aMenu  = new StGLMenu(this, 0, 0, StGLMenu::MENU_VERTICAL, true);
+    aMenu->setCorner(StGLCorner(ST_VCORNER_BOTTOM, ST_HCORNER_RIGHT));
+    aMenu->setContextual(true);
+    fillSubtitlesFontSize(aMenu);
+    fillSubtitlesPlacement(aMenu);
+    aMenu->stglInit();
+    setFocus(aMenu);
+}
+
+void StMoviePlayerGUI::fillSubtitlesFontSize(StGLMenu* theMenu) {
+    StGLMenuItem* anItem = theMenu->addItem(tr(MENU_SUBTITLES_SIZE));
+    anItem->setIcon(stCMenuIcon("actionFontSize"), false);
+    anItem->changeMargins().right = scale(100 + 16);
+    StGLRangeFieldFloat32* aRange = new StGLRangeFieldFloat32(anItem, myPlugin->params.SubtitlesSize,
+                                                              -scale(16), 0, StGLCorner(ST_VCORNER_CENTER, ST_HCORNER_RIGHT));
+    aRange->changeRectPx().bottom() = aRange->getRectPx().top() + theMenu->getItemHeight();
+    aRange->setFormat(stCString("%02.0f"));
+    aRange->setColor(StGLRangeFieldFloat32::FieldColor_Default,  aBlack);
+    aRange->setColor(StGLRangeFieldFloat32::FieldColor_Positive, aBlack);
+    aRange->setColor(StGLRangeFieldFloat32::FieldColor_Negative, aBlack);
+}
+
+void StMoviePlayerGUI::fillSubtitlesPlacement(StGLMenu* theMenu) {
+    StGLMenuItem* anItem = theMenu->addItem(tr(MENU_SUBTITLES_TOP), myPlugin->params.SubtitlesPlace, ST_VCORNER_TOP);
+    anItem->changeMargins().right  = scale(100 + 16);
+    StGLRangeFieldFloat32* aRange = new StGLRangeFieldFloat32(anItem, myPlugin->params.SubtitlesTopDY,
+                                                              -scale(16), 0, StGLCorner(ST_VCORNER_CENTER, ST_HCORNER_RIGHT));
+    aRange->changeRectPx().bottom() = aRange->getRectPx().top() + theMenu->getItemHeight();
+    aRange->setFormat(stCString("%+03.0f"));
+    aRange->setColor(StGLRangeFieldFloat32::FieldColor_Default,  aBlack);
+    aRange->setColor(StGLRangeFieldFloat32::FieldColor_Positive, aGreen);
+    aRange->setColor(StGLRangeFieldFloat32::FieldColor_Negative, aRed);
+
+    anItem = theMenu->addItem(tr(MENU_SUBTITLES_BOTTOM), myPlugin->params.SubtitlesPlace, ST_VCORNER_BOTTOM);
+    anItem->changeMargins().right  = scale(100 + 16);
+    aRange = new StGLRangeFieldFloat32(anItem, myPlugin->params.SubtitlesBottomDY,
+                                       -scale(16), 0, StGLCorner(ST_VCORNER_CENTER, ST_HCORNER_RIGHT));
+    aRange->changeRectPx().bottom() = aRange->getRectPx().top() + theMenu->getItemHeight();
+    aRange->setFormat(stCString("%+03.0f"));
+    aRange->setColor(StGLRangeFieldFloat32::FieldColor_Default,  aBlack);
+    aRange->setColor(StGLRangeFieldFloat32::FieldColor_Positive, aGreen);
+    aRange->setColor(StGLRangeFieldFloat32::FieldColor_Negative, aRed);
+
+    anItem = theMenu->addItem(tr(MENU_SUBTITLES_PARALLAX));
+    anItem->changeMargins().right  = scale(100 + 16);
+    aRange = new StGLRangeFieldFloat32(anItem, myPlugin->params.SubtitlesParallax,
+                                       -scale(16), 0, StGLCorner(ST_VCORNER_CENTER, ST_HCORNER_RIGHT));
+    aRange->changeRectPx().bottom() = aRange->getRectPx().top() + theMenu->getItemHeight();
+    aRange->setFormat(stCString("%+03.0f"));
+    aRange->setColor(StGLRangeFieldFloat32::FieldColor_Default,  aBlack);
+    aRange->setColor(StGLRangeFieldFloat32::FieldColor_Positive, aBlack);
+    aRange->setColor(StGLRangeFieldFloat32::FieldColor_Negative, aBlack);
+}
+
 void StMoviePlayerGUI::doSubtitlesStreamsCombo(const size_t ) {
     const StHandle< StArrayList<StString> >& aStreams = myPlugin->myVideo->params.activeSubtitles->getList();
     const bool hasAudioStream = myPlugin->myVideo->hasAudioStream();
@@ -2180,53 +2250,16 @@ void StMoviePlayerGUI::doSubtitlesStreamsCombo(const size_t ) {
     }
 
     if(!aStreams.isNull()
-    && !aStreams->isEmpty()
-    && !myWindow->isMobile()) {
+    && !aStreams->isEmpty()) {
         //myMenuSubtitles->addSplitter();
-        StGLMenuItem* anItem = aBuilder.getMenu()->addItem(tr(MENU_SUBTITLES_SIZE));
-        anItem->setIcon(stCMenuIcon("actionFontSize"), false);
-        anItem->changeMargins().right = scale(100 + 16);
-        StGLRangeFieldFloat32* aRange = new StGLRangeFieldFloat32(anItem, myPlugin->params.SubtitlesSize,
-                                                                 -scale(16), 0, StGLCorner(ST_VCORNER_CENTER, ST_HCORNER_RIGHT));
-        aRange->changeRectPx().bottom() = aRange->getRectPx().top() + aBuilder.getMenu()->getItemHeight();
-        aRange->setFormat(stCString("%02.0f"));
-        aRange->setColor(StGLRangeFieldFloat32::FieldColor_Default,  aBlack);
-        aRange->setColor(StGLRangeFieldFloat32::FieldColor_Positive, aBlack);
-        aRange->setColor(StGLRangeFieldFloat32::FieldColor_Negative, aBlack);
+        if(!myWindow->isMobile()) {
+            fillSubtitlesFontSize(aBuilder.getMenu());
+        }
 
         StGLMenu* aPlaceMenu = new StGLMenu(this, 0, 0, StGLMenu::MENU_VERTICAL);
-
-        anItem = aPlaceMenu->addItem(tr(MENU_SUBTITLES_TOP), myPlugin->params.SubtitlesPlace, ST_VCORNER_TOP);
-        anItem->changeMargins().right  = scale(100 + 16);
-        aRange = new StGLRangeFieldFloat32(anItem, myPlugin->params.SubtitlesTopDY,
-                                          -scale(16), 0, StGLCorner(ST_VCORNER_CENTER, ST_HCORNER_RIGHT));
-        aRange->changeRectPx().bottom() = aRange->getRectPx().top() + aBuilder.getMenu()->getItemHeight();
-        aRange->setFormat(stCString("%+03.0f"));
-        aRange->setColor(StGLRangeFieldFloat32::FieldColor_Default,  aBlack);
-        aRange->setColor(StGLRangeFieldFloat32::FieldColor_Positive, aGreen);
-        aRange->setColor(StGLRangeFieldFloat32::FieldColor_Negative, aRed);
-
-        anItem = aPlaceMenu->addItem(tr(MENU_SUBTITLES_BOTTOM), myPlugin->params.SubtitlesPlace, ST_VCORNER_BOTTOM);
-        anItem->changeMargins().right  = scale(100 + 16);
-        aRange = new StGLRangeFieldFloat32(anItem, myPlugin->params.SubtitlesBottomDY,
-                                          -scale(16), 0, StGLCorner(ST_VCORNER_CENTER, ST_HCORNER_RIGHT));
-        aRange->changeRectPx().bottom() = aRange->getRectPx().top() + aBuilder.getMenu()->getItemHeight();
-        aRange->setFormat(stCString("%+03.0f"));
-        aRange->setColor(StGLRangeFieldFloat32::FieldColor_Default,  aBlack);
-        aRange->setColor(StGLRangeFieldFloat32::FieldColor_Positive, aGreen);
-        aRange->setColor(StGLRangeFieldFloat32::FieldColor_Negative, aRed);
-
-        anItem = aPlaceMenu->addItem(tr(MENU_SUBTITLES_PARALLAX));
-        anItem->changeMargins().right  = scale(100 + 16);
-        aRange = new StGLRangeFieldFloat32(anItem, myPlugin->params.SubtitlesParallax,
-                                          -scale(16), 0, StGLCorner(ST_VCORNER_CENTER, ST_HCORNER_RIGHT));
-        aRange->changeRectPx().bottom() = aRange->getRectPx().top() + aBuilder.getMenu()->getItemHeight();
-        aRange->setFormat(stCString("%+03.0f"));
-        aRange->setColor(StGLRangeFieldFloat32::FieldColor_Default,  aBlack);
-        aRange->setColor(StGLRangeFieldFloat32::FieldColor_Positive, aBlack);
-        aRange->setColor(StGLRangeFieldFloat32::FieldColor_Negative, aBlack);
-
-        anItem = aBuilder.getMenu()->addItem(tr(MENU_SUBTITLES_PLACEMENT), aPlaceMenu);
+        fillSubtitlesPlacement(aPlaceMenu);
+        aBuilder.getMenu()->addItem(tr(MENU_SUBTITLES_PLACEMENT), aPlaceMenu)
+                          ->signals.onItemClick.connect(this, &StMoviePlayerGUI::doSubtitlesPlacement);
     }
 
     if(!aStreams.isNull()

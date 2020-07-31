@@ -92,14 +92,15 @@ StGLMessageBox::StGLMessageBox(StGLWidget*     theParent,
 
 void StGLMessageBox::create(const StString& theTitle,
                             const StString& theText,
-                            const int       theWidth,
-                            const int       theHeight) {
+                            const int  theWidth,
+                            const int  theHeight,
+                            const bool theHasButtons) {
     StGLWidget::signals.onMouseUnclick.connect(this, &StGLMessageBox::doMouseUnclick);
 
     myMarginLeft   = myRoot->scale(OFFSET_PIXELS);
     myMarginRight  = myRoot->scale(OFFSET_PIXELS);
     myMarginTop    = myRoot->scale(OFFSET_PIXELS);
-    myMarginBottom = myRoot->scale(24 * 3);
+    myMarginBottom = myRoot->scale(theHasButtons ? (24 * 3) : OFFSET_PIXELS);
     myMinSizeY     = myRoot->scale(200);
 
     int aTitleOffset =  myRoot->scale(24);
@@ -110,7 +111,7 @@ void StGLMessageBox::create(const StString& theTitle,
         myMarginLeft   =  myRoot->scale(4);
         myMarginRight  =  myRoot->scale(4);
         myMarginTop    =  myRoot->scale(4);
-        myMarginBottom =  myRoot->scale(32);
+        myMarginBottom =  myRoot->scale(theHasButtons ? 32 : 4);
         aTitleOffset   =  myRoot->scale(4);
         aBtnBot        = -myRoot->scale(4);
     }
@@ -329,7 +330,7 @@ void StGLMessageBox::stglResize() {
             if(double(aSizeYToFit) / double(aMaxSizeY) > 0.7) {
                 aNewSizeY = stMax(myMinSizeY, aMaxSizeY);
             }
-            changeRectPx().bottom() = aNewSizeY;
+            changeRectPx().bottom() = getRectPx().top() + aNewSizeY;
             myContent->changeRectPx().bottom() = myContent->getRectPx().top() + aNewSizeY - myMarginTop - myMarginBottom;
         }
     }
@@ -389,17 +390,18 @@ bool StGLMessageBox::tryClick(const StClickEvent& theEvent,
 
 bool StGLMessageBox::tryUnClick(const StClickEvent& theEvent,
                                 bool&               theIsItemUnclicked) {
+    const bool wasDragged = myContent->hasDragged();
     if(//isPointIn(StPointD_t(theEvent.PointX, theEvent.PointY)) &&
        StGLWidget::tryUnClick(theEvent, theIsItemUnclicked)) {
         theIsItemUnclicked = true;
 
-        if(myIsContextual) {
+        if(myIsContextual && !wasDragged) {
             myRoot->destroyWithDelay(this);
         }
         return true;
     }
 
-    if(myIsContextual) {
+    if(myIsContextual && !wasDragged) {
         myRoot->destroyWithDelay(this);
     }
     return false;

@@ -275,8 +275,12 @@ bool StGLScrollArea::tryClick(const StClickEvent& theEvent,
 
 bool StGLScrollArea::tryUnClick(const StClickEvent& theEvent,
                                 bool&               theIsItemUnclicked) {
+    bool toCancel = false;
     if(myIsLeftClick
     && theEvent.Button == ST_MOUSE_LEFT) {
+        if(myHasDragged) {
+            toCancel = true;
+        }
         myIsLeftClick = false;
         myHasDragged  = false;
         if(myDragTimer.isOn()) {
@@ -290,6 +294,11 @@ bool StGLScrollArea::tryUnClick(const StClickEvent& theEvent,
                 myFlingTimer.stop();
             }
         }
+    }
+    if(toCancel) {
+        StClickEvent anEvent = theEvent;
+        anEvent.Type = stEvent_MouseCancel;
+        return StGLWidget::tryUnClick(anEvent, theIsItemUnclicked);
     }
     return StGLWidget::tryUnClick(theEvent, theIsItemUnclicked);
 }
