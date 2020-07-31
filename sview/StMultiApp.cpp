@@ -17,7 +17,7 @@
 static StString getAbout() {
     StString anAboutString =
         StString("sView ") + StVersionInfo::getSDKVersionString() + '\n'
-        + "Copyright (C) 2007-2016 Kirill Gavrilov (kirill@sview.ru).\n"
+        + "Copyright (C) 2007-2020 Kirill Gavrilov (kirill@sview.ru).\n"
         + "Usage: sView [options] - file\n"
         + "Available options:\n"
           "  --fullscreen         Open fullscreen\n"
@@ -31,6 +31,7 @@ static StString getAbout() {
           "  --slideshow          Start slideshow\n"
           "  --last               Open last file\n"
           "  --paused             Open file in paused state\n"
+          "  --seek=SECONDS       Seek to specified position\n"
           "  --in=image,video     Application to open (predefined values: image, video, diag)\n"
           "  --out=RENDERER       Stereoscopic output module (auto, StOutAnaglyph, StOutDual,...)\n"
           "  --imageLib=IMGLIB    Setup 3rd-party library for image processing (FFmpeg, FreeImage, DevIL)\n"
@@ -54,6 +55,7 @@ static StString getAbout() {
           "                       mute - mute/unmute audio\n"
           "                       vol?VOLUME - specify volume in percents\n"
           "                       prev,next - play previous/next item in playlist\n"
+          "                       seek?SECONDS - specify volume in percents\n"
           "                       fastbwd,fastfwd - seek backward/forward\n"
           "                       quit - close the program\n"
           "                       current?title - print title of currently played item\n"

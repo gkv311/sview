@@ -75,6 +75,7 @@ namespace {
     static const char ST_ARGUMENT_FILE_DEMO[]  = "demo";
     static const char ST_ARGUMENT_FILE_PAUSE[] = "pause";
     static const char ST_ARGUMENT_FILE_PAUSED[]= "paused";
+    static const char ST_ARGUMENT_FILE_SEEK[]  = "seek";
     static const char ST_ARGUMENT_MONITOR[]    = "monitorId";
     static const char ST_ARGUMENT_WINLEFT[]    = "windowLeft";
     static const char ST_ARGUMENT_WINTOP[]     = "windowTop";
@@ -1071,8 +1072,13 @@ bool StMoviePlayer::open() {
     myPlayList->clear();
 
     //StArgument argFile1     = myOpenFileInfo->getArgumentsMap()[ST_ARGUMENT_FILE + 1]; // playlist?
-    StArgument argFileLeft  = myOpenFileInfo->getArgumentsMap()[ST_ARGUMENT_FILE_LEFT];
-    StArgument argFileRight = myOpenFileInfo->getArgumentsMap()[ST_ARGUMENT_FILE_RIGHT];
+    const StArgument argFileLeft  = myOpenFileInfo->getArgumentsMap()[ST_ARGUMENT_FILE_LEFT];
+    const StArgument argFileRight = myOpenFileInfo->getArgumentsMap()[ST_ARGUMENT_FILE_RIGHT];
+    const StArgument anArgSeek    = myOpenFileInfo->getArgumentsMap()[ST_ARGUMENT_FILE_SEEK];
+    if(anArgSeek.isValid()) {
+        StCLocale aCLocale;
+        mySeekOnLoad = stStringToDouble(anArgSeek.getValue().toCString(), aCLocale);
+    }
     if(argFileLeft.isValid() && argFileRight.isValid()) {
         // meta-file
         const size_t aRecent = myPlayList->findRecent(argFileLeft.getValue(), argFileRight.getValue());
@@ -1085,19 +1091,50 @@ bool StMoviePlayer::open() {
         }
         myPlayList->addOneFile(argFileLeft.getValue(), argFileRight.getValue());
     } else if(!anOpenMIME.isEmpty()) {
+        // handle URI with #t=SECONDS tail
+        StString aFilePath = myOpenFileInfo->getPath();
+        StHandle< StArrayList<StString> > anUriParams = aFilePath.split('#', 2);
+        if(anUriParams->size() == 2) {
+            aFilePath = anUriParams->getFirst();
+            StString aParams = anUriParams->getLast();
+            if(aParams.isStartsWith(stCString("t="))) {
+                StCLocale aCLocale;
+                mySeekOnLoad = stStringToDouble(aParams.toCString() + 2, aCLocale);
+            }
+        }
+
         // create just one-file playlist
         myPlayList->addOneFile(myOpenFileInfo->getPath(), anOpenMIME);
     } else {
+        // handle URI with #t=SECONDS tail
+        StString aFilePath = myOpenFileInfo->getPath();
+        double aSeekPos = -1.0;
+        StHandle< StArrayList<StString> > anUriParams = aFilePath.split('#', 2);
+        if(anUriParams->size() == 2) {
+            aFilePath = anUriParams->getFirst();
+            StString aParams = anUriParams->getLast();
+            if(aParams.isStartsWith(stCString("t="))) {
+                StCLocale aCLocale;
+                aSeekPos = stStringToDouble(aParams.toCString() + 2, aCLocale);
+            }
+        }
+
         // create playlist from file's folder
-        const size_t aRecent = myPlayList->findRecent(myOpenFileInfo->getPath());
+        const size_t aRecent = myPlayList->findRecent(aFilePath);
         if(aRecent != size_t(-1)) {
             doOpenRecent(aRecent);
+            if(aSeekPos >= 0.0) {
+                mySeekOnLoad = aSeekPos;
+            }
             if(isPaused) {
                 myVideo->pushPlayEvent(ST_PLAYEVENT_PAUSE);
             }
             return true;
         }
-        myPlayList->open(myOpenFileInfo->getPath());
+        if(aSeekPos >= 0.0) {
+            mySeekOnLoad = aSeekPos;
+        }
+        myPlayList->open(aFilePath);
     }
 
     if(!myPlayList->isEmpty()) {
@@ -1314,10 +1351,29 @@ void StMoviePlayer::doFromClipboard(size_t ) {
         return;
     }
 
+    // handle URI with #t=SECONDS tail
+    double aSeekPos = -1.0;
+    StHandle< StArrayList<StString> > anUriParams = aText.split('#', 2);
+    if(anUriParams->size() == 2) {
+        aText = anUriParams->getFirst();
+        StString aParams = anUriParams->getLast();
+        if(aParams.isStartsWith(stCString("t="))) {
+            StCLocale aCLocale;
+            aSeekPos = stStringToDouble(aParams.toCString() + 2, aCLocale);
+        }
+    }
+
     const size_t aRecent = myPlayList->findRecent(aText);
     if(aRecent != size_t(-1)) {
         doOpenRecent(aRecent);
+        if(aSeekPos >= 0.0) {
+            mySeekOnLoad = aSeekPos;
+        }
         return;
+    }
+
+    if(aSeekPos >= 0.0) {
+        mySeekOnLoad = aSeekPos;
     }
     myPlayList->open(aText);
     if(!myPlayList->isEmpty()) {
@@ -1430,6 +1486,7 @@ void StMoviePlayer::doFileDrop(const StDNDropEvent& theEvent) {
             myPlayList->addOneFile(aPath, StMIME());
         }
     }
+
     doUpdateStateLoading();
     myVideo->pushPlayEvent(ST_PLAYEVENT_RESUME);
     myVideo->doLoadNext();
@@ -2190,6 +2247,11 @@ int StMoviePlayer::beginRequest(mg_connection*         theConnection,
         const long aVol = stStringToLong(aQuery.toCString(), 10, aCLocale);
         params.AudioGain->setValue(volumeToGain(params.AudioGain, GLfloat(aVol) * 0.01f));
         aContent = "audio set volume...";
+    } else if(anURI.isEquals(stCString("/seek"))) {
+        StCLocale aCLocale;
+        const double aPosSec = stStringToDouble(aQuery.toCString(), aCLocale);
+        myVideo->pushPlayEvent(ST_PLAYEVENT_SEEK, aPosSec);
+        aContent = "seek to position...";
     } else if(anURI.isEquals(stCString("/fullscr_win"))) {
         invokeAction(Action_Fullscreen);
         aContent = "switch fullscreen/windowed...";
