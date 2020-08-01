@@ -112,7 +112,7 @@ StHandle<StApplication> StMultiApp::getInstance(const StHandle<StResourceManager
         } else if(anActLow == "currenttitle") {
             anAction = "current?title";
         } else if(anAction.isContains('?')) {
-            anAction = anAction;
+            //anAction = anAction;
         } else if(anActLow == "fastbwd") {
             anAction = "action?DoSeekLeft";
         } else if(anActLow == "fastfwd") {

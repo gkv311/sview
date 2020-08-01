@@ -99,8 +99,10 @@ class StWindowImpl {
     ST_LOCAL bool wndCreateWindows(); // called from non-main thread
     ST_LOCAL LRESULT stWndProc(HWND , UINT , WPARAM , LPARAM );
 #elif defined(__APPLE__)
+    ST_DISABLE_DEPRECATION_WARNINGS
     ST_LOCAL void doCreateWindows(NSOpenGLContext* theGLContextMaster,
                                   NSOpenGLContext* theGLContextSlave);
+    ST_ENABLE_DEPRECATION_WARNINGS
 #endif
 
         public:

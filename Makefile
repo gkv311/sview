@@ -37,6 +37,7 @@ TARGET_OS = linux
 endif
 ifeq ($(UNAME_S),Darwin)
 TARGET_OS = osx
+TARGET_OS_VERSION = 10.10
 endif
 endif
 
@@ -99,7 +100,9 @@ LIBSUFFIX = dylib
 LIB_PTHREAD = -lobjc
 LIB_GLX = -framework OpenGL -framework Appkit
 LIB_IOKIT = -framework IOKit
-LIB_OPENAL = -framework OpenAL
+ifeq ($(OPENAL_ROOT),)
+  LIB_OPENAL = -framework OpenAL
+endif
 endif
 
 # Android libraries
@@ -183,6 +186,13 @@ endif
 ifeq ($(TARGET_OS),osx)
 # todo
 LDSTRIP =
+
+# minimal supported version of macOS:
+# - CMake: CMAKE_OSX_DEPLOYMENT
+# - qmake: QMAKE_MACOSX_DEPLOYMENT_TARGET = $(TARGET_OS_VERSION)
+# - environment variable: export MACOSX_DEPLOYMENT_TARGET=$(TARGET_OS_VERSION)
+EXTRA_CFLAGS   += -mmacosx-version-min=$(TARGET_OS_VERSION)
+EXTRA_CXXFLAGS += -mmacosx-version-min=$(TARGET_OS_VERSION)
 
 # workaround homebrew
 HAS_PKGCONF := $(shell command -v pkg-config 2> /dev/null)
@@ -703,7 +713,9 @@ ifneq ($(FFMPEG_ROOT),)
 	cp -R -f $(FFMPEG_ROOT)/$(LIBSUBFOLDER)/libswscale*.dylib    $(BUILD_ROOT_BUNDLE)/Contents/Frameworks
 endif
 ifneq ($(OPENAL_ROOT),)
+	mkdir -p $(BUILD_ROOT_BUNDLE)/Contents/MacOS/openal/hrtf/
 	cp -R -f $(OPENAL_ROOT)/$(LIBSUBFOLDER)/libopenal*.dylib     $(BUILD_ROOT_BUNDLE)/Contents/Frameworks
+	cp -f -r $(OPENAL_ROOT)/hrtf/*.mhr                           $(BUILD_ROOT_BUNDLE)/Contents/MacOS/openal/hrtf/
 endif
 endif
 	@echo sView building is DONE

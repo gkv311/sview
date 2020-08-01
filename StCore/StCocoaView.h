@@ -20,6 +20,7 @@
 
     class StWindowImpl;
 
+ST_DISABLE_DEPRECATION_WARNINGS
     @interface StCocoaView : NSOpenGLView
     {
         StWindowImpl* myStWin;        //!< pointer to StWindowImpl instance
@@ -33,6 +34,7 @@
         bool          myToHideCursor;
         bool          myIsLionOS;
     }
+ST_ENABLE_DEPRECATION_WARNINGS
 
         /**
          * Main constructor.

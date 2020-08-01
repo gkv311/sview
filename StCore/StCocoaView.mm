@@ -50,8 +50,10 @@ typedef NSUInteger NSEventPhase;
     - (id ) initWithStWin: (StWindowImpl* ) theStWin
                     nsWin: (NSWindow* )     theNsWin {
         NSRect aBounds = [[theNsWin contentView] bounds];
+    ST_DISABLE_DEPRECATION_WARNINGS
         self = [super initWithFrame: aBounds
                         pixelFormat: [[NSOpenGLView class] defaultPixelFormat]];
+    ST_ENABLE_DEPRECATION_WARNINGS
         if(self == NULL) {
             return NULL;
         }
@@ -62,7 +64,9 @@ typedef NSUInteger NSEventPhase;
 
         // enable HiDPI mode
         if(myIsLionOS) {
+        ST_DISABLE_DEPRECATION_WARNINGS
             [self setWantsBestResolutionOpenGLSurface: YES];
+        ST_ENABLE_DEPRECATION_WARNINGS
         }
 
         // create blank cursor

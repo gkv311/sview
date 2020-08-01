@@ -39,6 +39,7 @@
 
 // include main OpenGL header provided with system
 #if defined(__APPLE__)
+    #define GL_SILENCE_DEPRECATION
     #include <OpenGL/gl.h>
 #elif defined(ST_HAVE_GLES2) || defined(__ANDROID__)
     #include <GLES2/gl2.h>
