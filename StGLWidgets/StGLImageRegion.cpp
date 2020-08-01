@@ -940,6 +940,7 @@ void StGLImageRegion::stglDrawView(unsigned int theView) {
     StGLImageProgram::FragGetColor aColorGetter = params.TextureFilter->getValue() == StGLImageProgram::FILTER_BLEND
                                                 ? StGLImageProgram::FragGetColor_Blend
                                                 : StGLImageProgram::FragGetColor_Normal;
+    const bool toDragImageInSwipe = getRectPx().ratio() < 0.75; // drag image only in portrait mode while swiping
     switch(aViewMode) {
         case StViewSurface_Plain: {
             const float aBrightnessBack = params.Brightness->getValue();
@@ -977,27 +978,32 @@ void StGLImageRegion::stglDrawView(unsigned int theView) {
                     }
                 } else if(!myList.isNull()) {
                     // previous / next swipe gesture
-                    StPlayList::CurrentPosition aPos = myList->getCurrentPosition();
+                    const double anIntensMult = toDragImageInSwipe ? 1.0 : 3.0;
+                    const StPlayList::CurrentPosition aPos = myList->getCurrentPosition();
                     const double aMouseDX = myClickPntZo.x() - getRoot()->getCursorZo().x();
-                    const float aScaleSteps = (float )stMin(std::abs(aMouseDX), 1.0);
+                    const float aScaleSteps = (float )stMin(std::abs(aMouseDX) * anIntensMult, 1.0);
                     if(aMouseDX < 0.0) {
                         // previous
                         if(aPos == StPlayList::CurrentPosition_Middle
                         || aPos == StPlayList::CurrentPosition_Last) {
                             //params.Brightness->setValue(aBrightnessBack - aScaleSteps);
                             //aParams->scaleIn(-aScaleSteps);
-                            StGLVec2 aVec = getMouseMoveFlat(myClickPntZo, getRoot()->getCursorZo());
-                            aVec.y() = 0.0;
-                            aParams->moveFlat(aVec, float(getRectPx().ratio()));
+                            if(toDragImageInSwipe) {
+                                StGLVec2 aVec = getMouseMoveFlat(myClickPntZo, getRoot()->getCursorZo());
+                                aVec.y() = 0.0;
+                                aParams->moveFlat(aVec, float(getRectPx().ratio()));
+                            }
                             myIconPrev->setOpacity(aScaleSteps, false);
                         }
                     } else {
                         // next
                         if(aPos == StPlayList::CurrentPosition_Middle
                         || aPos == StPlayList::CurrentPosition_First) {
-                            StGLVec2 aVec = getMouseMoveFlat(myClickPntZo, getRoot()->getCursorZo());
-                            aVec.y() = 0.0;
-                            aParams->moveFlat(aVec, float(getRectPx().ratio()));
+                            if(toDragImageInSwipe) {
+                                StGLVec2 aVec = getMouseMoveFlat(myClickPntZo, getRoot()->getCursorZo());
+                                aVec.y() = 0.0;
+                                aParams->moveFlat(aVec, float(getRectPx().ratio()));
+                            }
                             myIconNext->setOpacity(aScaleSteps, false);
                         }
                     }
@@ -1007,16 +1013,19 @@ void StGLImageRegion::stglDrawView(unsigned int theView) {
                 const double aProgress  = myFadeTimer.getElapsedTimeInMilliSec() / THE_FADE_ANIM_MS;
                 const double aFadeClamp = stMin(1.0, aProgress);
                 const bool isNext = myFadeFrom.x() < myClickPntZo.x();
-                StPointD_t aFadeTo = myFadeFrom;
-                aFadeTo.x() += isNext ? -aFadeClamp : aFadeClamp;
+                if(toDragImageInSwipe) {
+                    StPointD_t aFadeTo = myFadeFrom;
+                    aFadeTo.x() += isNext ? -aFadeClamp : aFadeClamp;
 
-                StGLVec2 aVec = getMouseMoveFlat(myClickPntZo, aFadeTo);
-                aVec.y() = 0.0;
-                aParams->moveFlat(aVec, float(getRectPx().ratio()));
+                    StGLVec2 aVec = getMouseMoveFlat(myClickPntZo, aFadeTo);
+                    aVec.y() = 0.0;
+                    aParams->moveFlat(aVec, float(getRectPx().ratio()));
+                }
                 params.Brightness->setValue(aBrightnessBack - (float )aFadeClamp * 3.0f);
 
                 // animate icon opacity in loop
-                const double anOpacityFrom = stMin(std::abs(myClickPntZo.x() - myFadeFrom.x()), 1.0);
+                const double anIntensMult  = toDragImageInSwipe ? 1.0 : 3.0;
+                const double anOpacityFrom = stMin(std::abs(myClickPntZo.x() - myFadeFrom.x()) * anIntensMult, 1.0);
                 double anIconProgress = anOpacityFrom + aProgress;
                 const bool isEven = (int(anIconProgress) % 2) == 0;
                 anIconProgress -= int(anIconProgress);
