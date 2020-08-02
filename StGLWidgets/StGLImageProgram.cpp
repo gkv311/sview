@@ -267,7 +267,7 @@ void StGLImageProgram::registerFragments(const StGLContext& theCtx) {
     const char F_SHADER_YUVNV2RGB_MPEG[] =
        "uniform stSampler uTextureU;\n"
        "void convertToRGB(inout vec4 color, in vec3 texCoordUV, in vec3 texCoordA) {\n"
-       "    vec3 colorYUV = vec3(color.a, stTexture(uTextureU, texCoordUV).r, stTexture(uTextureU, texCoordUV).a);\n"
+       "    vec3 colorYUV = vec3(color.stAlpha, stTexture(uTextureU, texCoordUV).r, stTexture(uTextureU, texCoordUV).a);\n"
        "    colorYUV   *= TheRangeBits;\n"
        "    colorYUV.x  = 1.1643 * (colorYUV.x - 0.0625);\n"
        "    colorYUV.y -= 0.5;\n"
@@ -280,7 +280,7 @@ void StGLImageProgram::registerFragments(const StGLContext& theCtx) {
     const char F_SHADER_YUVNV2RGB_FULL[] =
        "uniform stSampler uTextureU;\n"
        "void convertToRGB(inout vec4 color, in vec3 texCoordUV, in vec3 texCoordA) {\n"
-       "    vec3 colorYUV = vec3(color.a, stTexture(uTextureU, texCoordUV).r, stTexture(uTextureU, texCoordUV).a);\n"
+       "    vec3 colorYUV = vec3(color.stAlpha, stTexture(uTextureU, texCoordUV).r, stTexture(uTextureU, texCoordUV).a);\n"
        "    colorYUV   *= TheRangeBits;\n"
        "    colorYUV.x  = colorYUV.x;\n"
        "    colorYUV.y -= 0.5;\n"
