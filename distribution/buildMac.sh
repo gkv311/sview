@@ -38,10 +38,7 @@ cp -f info/changelog.txt     $buildRoot/sView.app/Contents/MacOS/info/
 cp -f ../license-gpl-3.0.txt $buildRoot/sView.app/Contents/MacOS/info/license.txt
 
 # copy sView compiled files
-if [ -e ../bin/MAC_gcc/build.log ]; then
-  mv -f ../bin/MAC_gcc/build.log $buildRoot/
-fi
-cp -f -R ../bin/MAC_gcc/sView.app/* $buildRoot/sView.app/
+cp -f -R ../build/sView.app/* $buildRoot/sView.app/
 
 # create symlink to Applications
 ln -f -s /Applications "$buildRoot/"
