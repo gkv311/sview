@@ -184,7 +184,7 @@ void StMoviePlayer::updateStrings() {
 #if defined(_WIN32)
     const StCString aGpuAcc = stCString(" (DXVA2)");
 #elif defined(__APPLE__)
-    const StCString aGpuAcc = stCString(" (VDA)");
+    const StCString aGpuAcc = stCString(" (VideoToolbox)");
 #elif defined(__ANDROID__)
     const StCString aGpuAcc = stCString(""); //stCString(" (Android Media Codec)");
 #else

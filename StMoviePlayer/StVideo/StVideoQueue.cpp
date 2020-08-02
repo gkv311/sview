@@ -170,6 +170,8 @@ StVideoQueue::StVideoQueue(const StHandle<StGLTextureQueue>& theTextureQueue,
   myMaster(theMaster),
 #if defined(__ANDROID__)
   myCodecH264HW(avcodec_find_decoder_by_name("h264_mediacodec")),
+  myCodecHevcHW(avcodec_find_decoder_by_name("hevc_mediacodec")),
+  myCodecVp9HW (avcodec_find_decoder_by_name("vp9_mediacodec")),
 #endif
   myCodecOpenJpeg(avcodec_find_decoder_by_name("libopenjpeg")),
   myUseGpu(false),
@@ -358,9 +360,15 @@ bool StVideoQueue::init(AVFormatContext*   theFormatCtx,
 #if defined(__ANDROID__)
     AVCodec* aCodecGpu = NULL;
     if(myUseGpu
-    && StString(myCodecAuto->name).isEquals(stCString("h264"))
     && myCodecCtx->pix_fmt == stAV::PIX_FMT::YUV420P) {
-        aCodecGpu = myCodecH264HW;
+        const StString anAutoCodecName(myCodecAuto->name);
+        if(anAutoCodecName.isEquals(stCString("h264"))) {
+            aCodecGpu = myCodecH264HW;
+        } else if(anAutoCodecName.isEquals(stCString("hevc"))) {
+            aCodecGpu = myCodecHevcHW;
+        } else if(anAutoCodecName.isEquals(stCString("vp9"))) {
+            aCodecGpu = myCodecVp9HW;
+        }
     }
 
     if(aCodecGpu != NULL) {

@@ -398,7 +398,9 @@ private:
 
     StHandle<StHWAccelContext> myHWAccelCtx;
 #if defined(__ANDROID__)
-    AVCodec*                   myCodecH264HW;     //!< h264 decoder using dedicated hardware (VDA codec on OS X; Android Media Codec)
+    AVCodec*                   myCodecH264HW;     //!< h264 decoder using dedicated hardware (Android Media Codec)
+    AVCodec*                   myCodecHevcHW;     //!< hevc decoder using dedicated hardware
+    AVCodec*                   myCodecVp9HW;      //!< vp9  decoder using dedicated hardware
 #endif
     AVCodec*                   myCodecOpenJpeg;   //!< libopenjpeg decoder
     bool                       myUseGpu;          //!< activate decoding on GPU when possible
