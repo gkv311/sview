@@ -50,7 +50,11 @@ equals(ST_TOOLKIT_NAME, StShared) {
   # Define sView executable which Qt Creator will automatically use for "Run".
   # Touch dummy.cpp to force QMAKE_POST_LINK redirecting to main Makefile to be executed within each build.
   TEMPLATE = app
-  TARGET   = sView
+  mac {
+    TARGET = sView.app/Contents/MacOS/sView
+  } else {
+    TARGET = sView
+  }
   SOURCES += $$_PRO_FILE_PWD_/../dummy.cpp
   QMAKE_POST_LINK += rm $(TARGET); touch $$_PRO_FILE_PWD_/../dummy.cpp;
 
@@ -62,9 +66,12 @@ equals(ST_TOOLKIT_NAME, StShared) {
   # Prepare make arguments
   aNbJobs = $$system(getconf _NPROCESSORS_ONLN)
   ST_MAKE_ARGS = -j$$aNbJobs
+  ST_DEBUG = 0
+  CONFIG(debug, debug|release) { ST_DEBUG = 1 }
+
   #ST_MAKE_TARGET = android
   !isEmpty(ST_MAKE_TARGET) { ST_MAKE_ARGS += $$ST_MAKE_TARGET }
-  aMakeEnvList = ANDROID_NDK ANDROID_BUILD_TOOLS ANDROID_PLATFORM ANDROID_EABI FFMPEG_ROOT FREETYPE_ROOT OPENAL_ROOT LIBCONFIG_ROOT ANDROID_KEY_GUI ANDROID_KEYSTORE ANDROID_KEYSTORE_PASSWORD ANDROID_KEY ANDROID_KEY_PASSWORD
+  aMakeEnvList = ST_DEBUG ANDROID_NDK ANDROID_BUILD_TOOLS ANDROID_PLATFORM ANDROID_EABI FFMPEG_ROOT FREETYPE_ROOT OPENAL_ROOT LIBCONFIG_ROOT ANDROID_KEY_GUI ANDROID_KEYSTORE ANDROID_KEYSTORE_PASSWORD ANDROID_KEY ANDROID_KEY_PASSWORD
   for (aMakeEnvIter, aMakeEnvList) {
     !isEmpty($${aMakeEnvIter}) { ST_MAKE_ARGS += $${aMakeEnvIter}=$$val_escape($${aMakeEnvIter}) }
   }
