@@ -189,7 +189,9 @@ StGLSubtitles::StGLSubtitles(StGLImageRegion* theParent,
 
         StHandle<StFTFont> aFontFt = new StFTFont(aLib);
         for(int aStyleIt = 0; aStyleIt < StFTFont::StylesNB; ++aStyleIt) {
-            aFontFt->load(aFontGlSrc->getFont()->getFilePath((StFTFont::Style )aStyleIt), (StFTFont::Style )aStyleIt);
+            aFontFt->load(aFontGlSrc->getFont()->getFilePath((StFTFont::Style )aStyleIt),
+                          aFontGlSrc->getFont()->getFaceIndex((StFTFont::Style )aStyleIt),
+                          (StFTFont::Style )aStyleIt);
         }
         aFontFt->init(aSize, aResolution);
         aFontNew->changeFont((StFTFont::Subset )anIter) = new StGLFontEntry(aFontFt);

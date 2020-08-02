@@ -26,7 +26,13 @@ struct StFTFontFamily {
     StString Italic;
     StString BoldItalic;
 
-    ST_LOCAL StFTFontFamily() {}
+    // face index within font container
+    int RegularFace;
+    int BoldFace;
+    int ItalicFace;
+    int BoldItalicFace;
+
+    ST_LOCAL StFTFontFamily() : RegularFace (0), BoldFace (0), ItalicFace (0), BoldItalicFace (0) {}
 };
 
 struct StFTFontPack {
@@ -178,11 +184,13 @@ class StFTFont {
     /**
      * Load the font from specified path.
      * @param theFontPath path to the font
+     * @param theFaceId   face id within the file (0 by default)
      * @param theStyle    the font style
      * @param theToSyntItalic synthesize italic style
      * @return true on success
      */
     ST_CPPEXPORT bool load(const StString& theFontPath,
+                           const int theFaceId,
                            const StFTFont::Style theStyle,
                            const bool theToSyntItalic = false);
 
@@ -340,6 +348,13 @@ class StFTFont {
     }
 
     /**
+     * @return font face index
+     */
+    ST_LOCAL int getFaceIndex(const StFTFont::Style theStyle) const {
+        return myFontFaces[theStyle];
+    }
+
+    /**
      * @return active font style
      */
     ST_LOCAL StFTFont::Style getActiveStyle() const {
@@ -401,6 +416,7 @@ class StFTFont {
     StFTFont::Style       myStyle;               //!< active FT face style
     FT_Face               myFTFaces[StylesNB];   //!< FT face objects
     StString              myFontPaths[StylesNB]; //!< font paths
+    int                   myFontFaces[StylesNB]; //!< font face ids
     bool                  mySubsets[SubsetsNB];
     FT_Int32              myLoadFlags;           //!< default load flags
     unsigned int          myGlyphMaxWidth;       //!< maximum glyph width

@@ -69,11 +69,13 @@ StHandle<StGLFontEntry> StGLFontManager::findCreate(const StString& theName,
     StHandle<StFTFont> aFontFt = new StFTFont(myFTLib);
     const bool hasItalic     = !aFont.Italic.isEmpty();
     const bool hasBoldItalic = !aFont.BoldItalic.isEmpty();
-    aFontFt->load(aFont.Regular,    StFTFont::Style_Regular);
-    aFontFt->load(aFont.Bold,       StFTFont::Style_Bold);
+    aFontFt->load(aFont.Regular, aFont.RegularFace,    StFTFont::Style_Regular);
+    aFontFt->load(aFont.Bold,    aFont.BoldFace,       StFTFont::Style_Bold);
     aFontFt->load(hasItalic ? aFont.Italic : aFont.Regular,
+                  hasItalic ? aFont.ItalicFace : aFont.RegularFace,
                   StFTFont::Style_Italic, !hasItalic);
     aFontFt->load(hasBoldItalic ? aFont.BoldItalic : aFont.Bold,
+                  hasBoldItalic ? aFont.BoldItalicFace : aFont.BoldFace,
                   StFTFont::Style_BoldItalic, !hasBoldItalic);
     aFontFt->init(theSize, myResolution);
     aFontGl = new StGLFontEntry(aFontFt);

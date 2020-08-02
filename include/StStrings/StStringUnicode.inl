@@ -685,9 +685,13 @@ StStringUnicode<Type> StStringUnicode<Type>::unquoted() const {
 template<typename Type> inline
 StStringUnicode<Type> StStringUnicode<Type>::replace(const StStringUnicode<Type>& theSubString,
                                                      const StStringUnicode<Type>& theReplacer) const {
-    if(theSubString.isEmpty() || this->isEmpty() || theSubString.Size >= this->Size) {
+    if(theSubString.isEmpty() || this->isEmpty() || theSubString.Size > this->Size) {
         // just make a copy
         return *this;
+    } else if(theSubString.Size == this->Size) {
+        if(theSubString.isEquals(*this)) {
+            return theReplacer;
+        }
     }
     StUtfIterator<Type> anIter(this->String);
     StStringUnicode<Type> aResult;
@@ -729,6 +733,23 @@ void StStringUnicode<Type>::replaceFast(const StStringUnicode<Type>& theSubStrin
             continue;
         }
         ++anIter;
+    }
+}
+
+template<typename Type> inline
+void StStringUnicode<Type>::leftAdjust() {
+    if(this->Length == 0) {
+        return;
+    }
+    for(size_t anIter = 0; anIter < this->Size / sizeof(Type); ++anIter) {
+      if(this->String[anIter] != (Type )' '
+      && this->String[anIter] != (Type )'\t') {
+          if(anIter != 0) {
+              StStringUnicode<Type> aCopy(&this->String[anIter]);
+              *this = aCopy;
+          }
+          return;
+      }
     }
 }
 

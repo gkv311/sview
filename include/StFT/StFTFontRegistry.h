@@ -64,6 +64,11 @@ class StFTFontRegistry {
     void searchFiles(const StArrayList<StString>& theNames,
                      const bool                   theIsMajor);
 
+    /**
+     * Process font file.
+     */
+    bool registerFamily(const StString& theFontPath, int theFaceId);
+
         private:
 
     StArrayList<StString> myExtensions;  //!< list of supported font file extensions

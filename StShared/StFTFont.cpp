@@ -24,6 +24,7 @@ StFTFont::StFTFont(StHandle<StFTLibrary> theFTLib)
     }
     stMemZero(mySubsets, sizeof(mySubsets));
     stMemZero(myFTFaces, sizeof(myFTFaces));
+    stMemZero(myFontFaces, sizeof(myFontFaces));
 }
 
 StFTFont::~StFTFont() {
@@ -43,6 +44,7 @@ void StFTFont::release() {
             aFace = NULL;
         }
         myFontPaths[aStyleIt].clear();
+        myFontFaces[aStyleIt] = 0;
     }
 }
 
@@ -104,6 +106,7 @@ bool StFTFont::init(const unsigned int thePointSize,
 }
 
 bool StFTFont::load(const StString& theFontPath,
+                    const int theFaceId,
                     const StFTFont::Style theStyle,
                     const bool theToSyntItalic) {
     if(!myFTLib->isValid()
@@ -116,13 +119,14 @@ bool StFTFont::load(const StString& theFontPath,
     myFTFace = NULL;
     myGlyphImg.nullify();
     myFontPaths[theStyle] = theFontPath;
+    myFontFaces[theStyle] = theFaceId;
 
     FT_Face& aFace = myFTFaces[theStyle];
     if(aFace != NULL) {
         FT_Done_Face(aFace);
     }
     const StString aFontPath = StFileNode::getCompatibleName(theFontPath);
-    if(FT_New_Face(myFTLib->getInstance(), aFontPath.toCString(), 0, &aFace) != 0) {
+    if(FT_New_Face(myFTLib->getInstance(), aFontPath.toCString(), (FT_Long )theFaceId, &aFace) != 0) {
         ST_DEBUG_LOG("Font '" + aFontPath + "' fail to load!");
         FT_Done_Face(aFace);
         aFace = NULL;
@@ -161,6 +165,7 @@ bool StFTFont::loadInternal(const StString&       theFontName,
     myFTFace = NULL;
     myGlyphImg.nullify();
     myFontPaths[theStyle] = theFontName;
+    myFontFaces[theStyle] = 0;
 
     FT_Face& aFace = myFTFaces[theStyle];
     if(aFace != NULL) {

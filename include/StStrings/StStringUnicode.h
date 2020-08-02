@@ -353,6 +353,11 @@ class StStringUnicode : public StConstStringUnicode<Type> {
     StStringUnicode unquoted() const;
 
     /**
+     * Cut off all leading space characters.
+     */
+    void leftAdjust();
+
+    /**
      * Cut off all trailing space characters.
      */
     void rightAdjust();

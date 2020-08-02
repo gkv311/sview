@@ -56,7 +56,8 @@ StFTFontRegistry::StFTFontRegistry() {
     myFolders.add(stCString("/Library/Fonts"));
 
     // western
-    myFilesMajor.add(stCString("Times.dfont"));
+    myFilesMinor.add(stCString("Times.dfont")); // old macOS
+    myFilesMajor.add(stCString("Times.ttc"));
     myFilesMajor.add(stCString("Times New Roman.ttf"));
     myFilesMajor.add(stCString("Times New Roman Bold.ttf"));
     myFilesMajor.add(stCString("Times New Roman Italic.ttf"));
@@ -72,7 +73,8 @@ StFTFontRegistry::StFTFontRegistry() {
     //myFilesMajor.add(stCString("AppleMyungjo.ttf"));
     myFilesMajor.add(stCString("AppleGothic.ttf"));
     // chinese
-    myFilesMajor.add(stCString("华文仿宋.ttf"));
+    myFilesMinor.add(stCString("华文仿宋.ttf")); // old macOS
+    myFilesMajor.add(stCString("Songti.ttc"));
 #elif defined(__ANDROID__)
     myFolders.add(stCString("/system/fonts"));
 
@@ -175,6 +177,98 @@ void StFTFontRegistry::appendSearchPath(const StString& theFolder) {
     myFolders.add(theFolder);
 }
 
+bool StFTFontRegistry::registerFamily(const StString& theFontPath, int theFaceId) {
+    const FT_Long aFaceId = theFaceId != -1 ? theFaceId : 0;
+    FT_Face aFace = NULL;
+    if(FT_New_Face(myFTLib->getInstance(), theFontPath.toCString(), aFaceId, &aFace) != 0) {
+        if(aFace != NULL) {
+            FT_Done_Face(aFace);
+        }
+        return false;
+    }
+    if(aFace->family_name == NULL // skip broken fonts (error in FreeType?)
+    || FT_Select_Charmap(aFace, ft_encoding_unicode) != 0) { // handle only UNICODE fonts
+        FT_Done_Face(aFace);
+        return false;
+    }
+
+    // generate font family name
+    StString aStyle(aFace->style_name != NULL ? aFace->style_name : "");
+    {
+        // remove standard style combinations reflected by style_flags
+        // and keep only extra styles like Light, Condensed and similar
+        static const StString THE_EMPTY;
+        static const StString THE_SPACE1(" ");
+        static const StString THE_SPACE2("  ");
+        static const StString THE_ITALIC1("Italic");
+        static const StString THE_ITALIC2("Oblique");
+        static const StString THE_BOLD("Bold");
+        static const StString THE_REGULAR1("Regular");
+        static const StString THE_REGULAR2("Book");
+        if(aFace->style_flags == (FT_STYLE_FLAG_ITALIC | FT_STYLE_FLAG_BOLD)) {
+            aStyle = aStyle.replace(THE_BOLD, THE_EMPTY);
+            const size_t aLen = aStyle.Length;
+            aStyle = aStyle.replace(THE_ITALIC1, THE_EMPTY);
+            if(aLen == aStyle.Length) {
+                aStyle = aStyle.replace(THE_ITALIC2, THE_EMPTY);
+            }
+        } else if(aFace->style_flags == FT_STYLE_FLAG_BOLD) {
+            aStyle = aStyle.replace(THE_BOLD, THE_EMPTY);
+        } else if(aFace->style_flags == FT_STYLE_FLAG_ITALIC) {
+            const size_t aLen = aStyle.Length;
+            aStyle = aStyle.replace(THE_ITALIC1, THE_EMPTY);
+            if(aLen == aStyle.Length) {
+                aStyle = aStyle.replace(THE_ITALIC2, THE_EMPTY);
+            }
+        }
+        const size_t aLen2 = aStyle.Length;
+        aStyle = aStyle.replace(THE_REGULAR1, THE_EMPTY);
+        if(aLen2 == aStyle.Length) {
+            aStyle = aStyle.replace(THE_REGULAR2, THE_EMPTY);
+        }
+        aStyle.leftAdjust();
+        aStyle.rightAdjust();
+        aStyle.replace(THE_SPACE2, THE_SPACE1);
+    }
+
+    StString aFamilyName = aFace->family_name;
+    if(!aStyle.isEmpty()) {
+        aFamilyName = aFamilyName + " " + aStyle;
+    }
+
+    StFTFontFamily& aFamily = myFonts[aFamilyName];
+    aFamily.FamilyName = aFamilyName;
+    if(aFace->style_flags == (FT_STYLE_FLAG_ITALIC | FT_STYLE_FLAG_BOLD)) {
+        aFamily.BoldItalic = theFontPath;
+        aFamily.BoldItalicFace = (int )aFaceId;
+    } else if(aFace->style_flags == FT_STYLE_FLAG_BOLD) {
+        aFamily.Bold = theFontPath;
+        aFamily.BoldFace = (int )aFaceId;
+    } else if(aFace->style_flags == FT_STYLE_FLAG_ITALIC) {
+        aFamily.Italic = theFontPath;
+        aFamily.ItalicFace = (int )aFaceId;
+    } else {
+        aFamily.Regular = theFontPath;
+        aFamily.RegularFace = (int )aFaceId;
+    }
+    //ST_DEBUG_LOG("StFTFontRegistry, font file '" + theFontPath + " [" + aFaceId + "]" + "', family '" + aFamily.FamilyName + "', contains " + aFace->num_glyphs + " glyphs!");
+
+    if(theFaceId < aFace->num_faces) {
+        const FT_Long aNbInstances = aFace->style_flags >> 16;
+        for(FT_Long anInstIter = 1; anInstIter < aNbInstances; ++anInstIter) {
+            const FT_Long aSubFaceId = aFaceId + (anInstIter << 16);
+            registerFamily(theFontPath, aSubFaceId);
+        }
+    }
+    if(theFaceId == -1) {
+        for(FT_Long aFaceIter = 1; aFaceIter < aFace->num_faces; ++aFaceIter) {
+            registerFamily(theFontPath, aFaceIter);
+        }
+    }
+    FT_Done_Face(aFace);
+    return true;
+}
+
 void StFTFontRegistry::searchFiles(const StArrayList<StString>& theNames,
                                    const bool                   theIsMajor) {
     for(size_t aNameIter = 0; aNameIter < theNames.size(); ++aNameIter) {
@@ -195,32 +289,13 @@ void StFTFontRegistry::searchFiles(const StArrayList<StString>& theNames,
             continue;
         }
 
-        FT_Face aFace = NULL;
-        if(FT_New_Face(myFTLib->getInstance(), aPath.toCString(), 0, &aFace) != 0) {
+        if(!registerFamily(aPath, -1)) {
             if(theIsMajor) {
                 ST_ERROR_LOG("StFTFontRegistry, major font file '" + aName + "' fail to load"
                             + " from path '" + aPath + "'!");
             }
-            if(aFace != NULL) {
-                FT_Done_Face(aFace);
-            }
             continue;
         }
-
-        StFTFontFamily& aFamily = myFonts[aFace->family_name];
-        aFamily.FamilyName = aFace->family_name;
-        if(aFace->style_flags == (FT_STYLE_FLAG_ITALIC | FT_STYLE_FLAG_BOLD)) {
-            aFamily.BoldItalic = aPath;
-        } else if(aFace->style_flags == FT_STYLE_FLAG_BOLD) {
-            aFamily.Bold = aPath;
-        } else if(aFace->style_flags == FT_STYLE_FLAG_ITALIC) {
-            aFamily.Italic = aPath;
-        } else {
-            aFamily.Regular = aPath;
-        }
-        //ST_DEBUG_LOG("StFTFontRegistry, font file '" + aName + "', family '" + aFamily.FamilyName + "', contains " + aFace->num_glyphs + " glyphs!");
-
-        FT_Done_Face(aFace);
     }
 }
 
@@ -271,9 +346,14 @@ void StFTFontRegistry::init(const bool theToSearchAll) {
     aSerif.Korean  = findFont(stCString("AppleGothic")); // AppleMyungjo can not be loaded
     aSans .Korean  = findFont(stCString("AppleGothic"));
     aMono .Korean  = findFont(stCString("AppleGothic"));
-    aSerif.CJK     = findFont(stCString("STFangsong"));
-    aSans .CJK     = findFont(stCString("STFangsong"));
-    aMono .CJK     = findFont(stCString("STFangsong"));
+    const StFTFontFamily& aSongtiSC = findFont(stCString("Songti SC Light"));
+    const StFTFontFamily& aFang = findFont(stCString("STFangsong"));
+    const StFTFontFamily& aCjk = aSongtiSC.FamilyName.isEmpty() && !aFang.FamilyName.isEmpty()
+                               ? aFang
+                               : aSongtiSC;
+    aSerif.CJK     = aCjk;
+    aSans .CJK     = aCjk;
+    aMono .CJK     = aCjk;
     aSerif.Arabic  = findFont(stCString("DecoType Naskh"));
     aSans .Arabic  = findFont(stCString("DecoType Naskh"));
     aMono .Arabic  = findFont(stCString("DecoType Naskh"));
