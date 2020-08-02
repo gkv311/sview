@@ -56,10 +56,6 @@ namespace {
 }
 
 AVPixelFormat StVideoQueue::getFrameFormat(const AVPixelFormat* theFormats) {
-#if defined(__APPLE__)
-    // TODO - this decoder is no more available in FFmpeg
-    if(myCodecCtx->codec == myCodecH264HW) { return stAV::PIX_FMT::YUV420P; }
-#endif
     if(!myUseGpu || myIsGpuFailed) {
         return avcodec_default_get_format(myCodecCtx, theFormats);
     }
@@ -72,6 +68,14 @@ AVPixelFormat StVideoQueue::getFrameFormat(const AVPixelFormat* theFormats) {
 
     #if defined(_WIN32)
         if(*aFormatIter == stAV::PIX_FMT::DXVA2_VLD) {
+            if(!hwaccelInit()) {
+                myIsGpuFailed = true;
+                return avcodec_default_get_format(myCodecCtx, theFormats);
+            }
+            return *aFormatIter;
+        }
+    #elif defined(__APPLE__)
+        if(*aFormatIter == stAV::PIX_FMT::VIDEOTOOLBOX_VLD) {
             if(!hwaccelInit()) {
                 myIsGpuFailed = true;
                 return avcodec_default_get_format(myCodecCtx, theFormats);
@@ -103,6 +107,15 @@ int StVideoQueue::getFrameBuffer(AVFrame* theFrame,
             }
             isDone  = true;
         }
+    /*#elif defined(__APPLE__) // standard FFmpeg VideoToolbox wrapper is used - action is not needed
+        if(theFrame->format == stAV::PIX_FMT::VIDEOTOOLBOX_VLD) {
+            if(!myHWAccelCtx.isNull()) {
+                aResult = myHWAccelCtx->getFrameBuffer(*this, theFrame);
+            } else {
+                aResult = -1;
+            }
+            isDone  = true;
+        }*/
     #endif
         if(!isDone) {
             aResult = avcodec_default_get_buffer2(myCodecCtx, theFrame, theFlags);
@@ -133,7 +146,7 @@ int StVideoQueue::getFrameBuffer(AVFrame* theFrame,
     return aResult;
 }
 
-#if !defined(_WIN32)
+#if !defined(_WIN32) && !defined(__APPLE__)
 bool StVideoQueue::hwaccelInit() { return false; }
 #endif
 
@@ -155,9 +168,7 @@ StVideoQueue::StVideoQueue(const StHandle<StGLTextureQueue>& theTextureQueue,
   myTextureQueue(theTextureQueue),
   myHasDataState(false),
   myMaster(theMaster),
-#if defined(__APPLE__)
-  myCodecH264HW(avcodec_find_decoder_by_name("h264_vda")),
-#elif defined(__ANDROID__)
+#if defined(__ANDROID__)
   myCodecH264HW(avcodec_find_decoder_by_name("h264_mediacodec")),
 #endif
   myCodecOpenJpeg(avcodec_find_decoder_by_name("libopenjpeg")),
@@ -329,7 +340,10 @@ bool StVideoQueue::init(AVFormatContext*   theFormatCtx,
                  && myCodecAutoId != CodecIdH264
                  && myCodecAutoId != CodecIdVC1
                  && myCodecAutoId != CodecIdWMV3
-                 && myCodecAutoId != CodecIdVC1
+                 && myCodecAutoId != CodecIdHEVC;
+#elif defined(__APPLE__)
+    myIsGpuFailed = myCodecAutoId != CodecIdMPEG2
+                 && myCodecAutoId != CodecIdH264
                  && myCodecAutoId != CodecIdHEVC;
 #endif
 
@@ -341,7 +355,7 @@ bool StVideoQueue::init(AVFormatContext*   theFormatCtx,
     }
 
     // open VIDEO codec
-#if defined(__APPLE__) || defined(__ANDROID__)
+#if defined(__ANDROID__)
     AVCodec* aCodecGpu = NULL;
     if(myUseGpu
     && StString(myCodecAuto->name).isEquals(stCString("h264"))
@@ -514,11 +528,11 @@ void StVideoQueue::deinit() {
     if(myCodecCtx != NULL) { myCodecCtx->codec_id = myCodecAutoId; }
 #endif
     StAVPacketQueue::deinit();
+    if(!myHWAccelCtx.isNull()) {
+        myHWAccelCtx->decoderDestroy(myCodecCtx);
+    }
     if(myCodecCtx != NULL) {
         myCodecCtx->hwaccel_context = NULL;
-    }
-    if(!myHWAccelCtx.isNull()) {
-        myHWAccelCtx->decoderDestroy();
     }
 }
 

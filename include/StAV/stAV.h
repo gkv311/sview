@@ -266,7 +266,8 @@ namespace stAV {
         // XYZ formats
         ST_SHARED_CPPEXPORT AVPixelFormat XYZ12;
         // HWAccel formats
-        ST_SHARED_CPPEXPORT AVPixelFormat DXVA2_VLD;
+        ST_SHARED_CPPEXPORT AVPixelFormat DXVA2_VLD; // Windows
+        ST_SHARED_CPPEXPORT AVPixelFormat VIDEOTOOLBOX_VLD; // macOS
 
         /**
          * @sa StImage::formatImgPixelFormat()

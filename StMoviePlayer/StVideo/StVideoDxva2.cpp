@@ -131,7 +131,7 @@ class StDxva2Context : public StHWAccelContext {
     /**
      * Destroy decoder.
      */
-    virtual void decoderDestroy() ST_ATTR_OVERRIDE {
+    virtual void decoderDestroy(AVCodecContext* ) ST_ATTR_OVERRIDE {
         myPoolsTmp[0].release();
         myPoolsTmp[1].release();
         myPoolsTmp[2].release();
@@ -229,7 +229,7 @@ class StDxva2Context : public StHWAccelContext {
 };
 
 void StDxva2Context::release() {
-    decoderDestroy();
+    decoderDestroy(NULL);
     if(myDecoderService != NULL) {
         myDecoderService->Release();
         myDecoderService = NULL;
@@ -497,14 +497,14 @@ bool StDxva2Context::retrieveFrame(StVideoQueue& theVideo,
 bool StDxva2Context::decoderCreate(StVideoQueue&   theVideo,
                                    AVCodecContext* theCodecCtx) {
     const StSignal<void (const StCString& )>& onError = theVideo.signals.onError;
-    decoderDestroy();
+    decoderDestroy(theCodecCtx);
     theCodecCtx->hwaccel_context = NULL;
 
     uint32_t aNbGuids  = 0;
     GUID*    aGuidList = NULL;
     if(myDecoderService->GetDecoderDeviceGuids(&aNbGuids, &aGuidList) != S_OK) {
         onError(stCString("StVideoQueue: Failed to retrieve decoder DXVA2 device GUIDs"));
-        decoderDestroy();
+        decoderDestroy(theCodecCtx);
         return false;
     }
 
@@ -550,7 +550,7 @@ bool StDxva2Context::decoderCreate(StVideoQueue&   theVideo,
 
     if(::IsEqualGUID(aDeviceGuid, GUID_NULL)) {
         onError(stCString("StVideoQueue: No DXVA2 decoder device for codec found"));
-        decoderDestroy();
+        decoderDestroy(theCodecCtx);
         return false;
     }
 
@@ -565,7 +565,7 @@ bool StDxva2Context::decoderCreate(StVideoQueue&   theVideo,
     DXVA2_ConfigPictureDecode  aBestCfg = {{0}};
     if(myDecoderService->GetDecoderConfigurations(aDeviceGuid, &aDesc, NULL, &aNbConfigs, &aCfgList) != S_OK) {
         onError(stCString("StVideoQueue: Unable to retrieve DXVA2 decoder configurations"));
-        decoderDestroy();
+        decoderDestroy(theCodecCtx);
         return false;
     }
 
@@ -592,7 +592,7 @@ bool StDxva2Context::decoderCreate(StVideoQueue&   theVideo,
     ::CoTaskMemFree(aCfgList);
     if(aBestScore == 0) {
         onError(stCString("StVideoQueue: No valid DXVA2 decoder configuration available"));
-        decoderDestroy();
+        decoderDestroy(theCodecCtx);
         return false;
     }
 
@@ -628,7 +628,7 @@ bool StDxva2Context::decoderCreate(StVideoQueue&   theVideo,
     if(myD3dSurfaces == NULL
     || mySurfInfos   == NULL) {
         ST_ERROR_LOG(stCString("StVideoQueue: Unable to allocate surface arrays"));
-        decoderDestroy();
+        decoderDestroy(theCodecCtx);
         return false;
     }
 
@@ -640,7 +640,7 @@ bool StDxva2Context::decoderCreate(StVideoQueue&   theVideo,
                                                      myD3dSurfaces, NULL);
     if(anHRes != S_OK) {
         onError(StString("StVideoQueue: Failed to create ") + myNbSurfaces + " video surfaces");
-        decoderDestroy();
+        decoderDestroy(theCodecCtx);
         return false;
     }
 
@@ -649,7 +649,7 @@ bool StDxva2Context::decoderCreate(StVideoQueue&   theVideo,
                                                   myNbSurfaces, &myDxvaDecoder);
     if(anHRes != S_OK) {
         onError(stCString("StVideoQueue: Failed to create DXVA2 video decoder"));
-        decoderDestroy();
+        decoderDestroy(theCodecCtx);
         return false;
     }
 

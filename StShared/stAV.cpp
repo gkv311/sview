@@ -138,6 +138,7 @@ const AVPixelFormat stAV::PIX_FMT::RGBA64     = ST_AV_GETPIXFMT("rgba64");
 const AVPixelFormat stAV::PIX_FMT::BGRA64     = ST_AV_GETPIXFMT("bgra64");
 const AVPixelFormat stAV::PIX_FMT::XYZ12      = ST_AV_GETPIXFMT("xyz12");
 const AVPixelFormat stAV::PIX_FMT::DXVA2_VLD  = ST_AV_GETPIXFMT("dxva2_vld");
+const AVPixelFormat stAV::PIX_FMT::VIDEOTOOLBOX_VLD  = ST_AV_GETPIXFMT("videotoolbox_vld");
 
 // TODO (Kirill Gavrilov#9) remove this stuff
 namespace {

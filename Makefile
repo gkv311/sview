@@ -82,6 +82,7 @@ LIB_XLIB =
 LIB_CONFIG =
 LIB_ANDROID =
 LIB_IOKIT =
+LIB_COREVIDEO =
 LIB_OPENAL = -lopenal
 LIB_OUTPUTS = -lStOutAnaglyph -lStOutDual -lStOutInterlace -lStOutPageFlip -lStOutIZ3D -lStOutDistorted
 TOOLCHAIN =
@@ -101,6 +102,7 @@ LIBSUFFIX = dylib
 LIB_PTHREAD = -lobjc
 LIB_GLX = -framework OpenGL -framework Appkit
 LIB_IOKIT = -framework IOKit
+LIB_COREVIDEO = -framework CoreVideo
 ifeq ($(OPENAL_ROOT),)
   LIB_OPENAL = -framework OpenAL
 endif
@@ -598,7 +600,7 @@ aStMoviePlayer_SRCS2 := $(sort $(wildcard $(SRCDIR)/StMoviePlayer/StVideo/*.cpp)
 aStMoviePlayer_OBJS2 := ${aStMoviePlayer_SRCS2:.cpp=.o}
 aStMoviePlayer_SRCS3 := $(sort $(wildcard $(SRCDIR)/StMoviePlayer/*.c))
 aStMoviePlayer_OBJS3 := ${aStMoviePlayer_SRCS3:.c=.o}
-aStMoviePlayer_LIB   := $(LIB) -lStGLWidgets -lStShared -lStCore $(LIB_OUTPUTS) $(LIB_GLX) $(LIB_GTK) -lavutil -lavformat -lavcodec -lswscale $(LIB_OPENAL) $(LIB_PTHREAD)
+aStMoviePlayer_LIB   := $(LIB) -lStGLWidgets -lStShared -lStCore $(LIB_OUTPUTS) $(LIB_GLX) $(LIB_GTK) -lavutil -lavformat -lavcodec -lswscale $(LIB_OPENAL) $(LIB_COREVIDEO) $(LIB_PTHREAD)
 $(aStMoviePlayer) : pre_StMoviePlayer $(aStGLWidgets) outputs_all $(aStMoviePlayer_OBJS1) $(aStMoviePlayer_OBJS2) $(aStMoviePlayer_OBJS3)
 	$(LD) -shared $(call libinstname,$@) $(LDFLAGS) $(LIBDIR) $(aStMoviePlayer_OBJS1) $(aStMoviePlayer_OBJS2) $(aStMoviePlayer_OBJS3) $(aStMoviePlayer_LIB) -o $(BUILD_ROOT)/$@
 pre_StMoviePlayer:

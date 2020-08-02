@@ -59,7 +59,7 @@ class StHWAccelContext {
     /**
      * Release decoder.
      */
-    virtual void decoderDestroy() = 0;
+    virtual void decoderDestroy(AVCodecContext* theCodecCtx) = 0;
 
     /**
      * AVFrame initialization callback.
@@ -397,7 +397,7 @@ private:
     StHandle<StVideoQueue>     mySlave;           //!< handle to Slave  decoding thread
 
     StHandle<StHWAccelContext> myHWAccelCtx;
-#if defined(__APPLE__) || defined(__ANDROID__)
+#if defined(__ANDROID__)
     AVCodec*                   myCodecH264HW;     //!< h264 decoder using dedicated hardware (VDA codec on OS X; Android Media Codec)
 #endif
     AVCodec*                   myCodecOpenJpeg;   //!< libopenjpeg decoder
