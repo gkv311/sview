@@ -199,6 +199,7 @@ LDSTRIP =
 # - environment variable: export MACOSX_DEPLOYMENT_TARGET=$(TARGET_OS_VERSION)
 EXTRA_CFLAGS   += -mmacosx-version-min=$(TARGET_OS_VERSION)
 EXTRA_CXXFLAGS += -mmacosx-version-min=$(TARGET_OS_VERSION)
+EXTRA_LDFLAGS  += -mmacosx-version-min=$(TARGET_OS_VERSION)
 
 # workaround homebrew
 HAS_PKGCONF := $(shell command -v pkg-config 2> /dev/null)
