@@ -1,0 +1,25 @@
+# Traditional chinese(Taiwan) translation file for StOutPageFlip library
+# @author John Hsieh <johnmhsieh@gmail.com>
+--------
+1000=快門立體眼鏡
+1001=快門立體眼鏡
+1002=Vuzix 頭戴顯示器
+1003=Vuzix 頭戴顯示器
+1102=Quad Buffer 類型
+1103=眼鏡控制代碼
+1120=OpenGL 模擬
+1122=OpenGL 硬體
+1123=Direct3D (全螢幕)
+1124=Direct3D (無法使用)
+1125=Direct3D AMD (全螢幕)
+1126=Direct3D AMD (無法使用)
+1127=Direct3D NVIDIA (全螢幕)
+1128=Direct3D NVIDIA (已關閉)
+1130=沒有代碼
+1131=藍線同步
+1132=白線同步
+1134=eDimensional 自動 開啟 / 關閉
+2000=sView - PageFlip 輸出模組
+2001=版本
+2002=© {0} 基里爾·加夫里洛夫 Kirill Gavrilov <{1}>\n官方網站: {2}
+3001=OpenGL 硬體 QuadBuffer 無法使用!\n\n你可以嘗試其他的 Quad Buffer 類型\n(包含 OpenGL 在額外區段的模擬).

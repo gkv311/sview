@@ -1,0 +1,12 @@
+# Traditional chinese(Taiwan) translation file for StOutIZ3D library
+# @author John Hsieh <johnmhsieh@gmail.com>
+--------
+1000=IZ3D 顯示
+1001=IZ3D 顯示
+1102=iZ3D 眼鏡
+1120=傳統
+1121=現代
+1122=傳統 (快速)
+2000=sView - iZ3D 輸出模組
+2001=版本
+2002=© {0} 基里爾·加夫里洛夫 Kirill Gavrilov <{1}>\n© 2007-2009 iZ3D LLC\n官方網站: {2}\n網站 iZ3D LLC: www.iz3d.com

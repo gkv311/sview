@@ -1,0 +1,20 @@
+# Traditional chinese(Taiwan) translation file for StOutAnaglyph library
+# @author John Hsieh <johnmhsieh@gmail.com>
+--------
+1000=立體濾光眼鏡
+1001=簡易濾光眼鏡. 普遍使用
+1010=眼鏡種類
+1011=紅-青 (R+GB)
+1012=黃-藍 (RG+B)
+1013=綠-洋紅 (G+RB)
+1102=紅-青 過濾器
+1120=簡易
+1121=最佳化
+1122=灰階
+1123=黑暗
+1103=黃-藍 過濾器
+1130=簡易
+1131=Dubios
+2000=sView - 立體濾光輸出模組
+2001=版本
+2002=© {0} 基里爾·加夫里洛夫 Kirill Gavrilov <{1}>\n官方網站: {2}

@@ -1,0 +1,17 @@
+# Traditional chinese(Taiwan) translation file for StImageViewer program
+# @author John Hsieh <johnmhsieh@gmail.com>
+--------
+1000=橫列交錯
+1001=橫列交錯顯示: Zalman, Hyundai,...
+1002=直行交錯
+1003=直行交錯顯示
+1006=數位光處理電視 (棋盤)
+1007=數位光處理電視 (棋盤)
+1008=交錯式增強解析度
+1009=EDimensional 交錯模式
+?1102=Reverse Order
+1103=綁定支援的顯示器
+1104=使用紋理遮罩 (相容)
+2000=sView - 交錯輸出模組
+2001=版本
+2002=© {0} 基里爾·加夫里洛夫 Kirill Gavrilov <{1}>\n官方網站: {2}

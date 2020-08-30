@@ -82,6 +82,10 @@ void StTranslations::reload() {
             params.language->changeValues().add("简体中文");
             myLangFolderList.add("ChineseS");
         }
+        if(myResMgr->isResourceExist(StString("lang" ST_FILE_SPLITTER "ChineseT" ST_FILE_SPLITTER) + myModuleName + StTranslations::DEFAULT_SUFFIX)) {
+            params.language->changeValues().add("正體中文 (臺灣)");
+            myLangFolderList.add("ChineseT");
+        }
         if(myResMgr->isResourceExist(StString("lang" ST_FILE_SPLITTER "Czech"  ST_FILE_SPLITTER) + myModuleName + StTranslations::DEFAULT_SUFFIX)) {
             params.language->changeValues().add("Čeština");
             myLangFolderList.add("Czech");
@@ -133,6 +137,11 @@ void StTranslations::reload() {
             }
         } else if(aLang.isEqualsIgnoreCase(stCString("zh"))) {
             if(myLangFolderList.contains(stCString("ChineseS"), anIdInList)) {
+                params.language->setValue(int32_t(anIdInList));
+                isLangSet = true;
+            }
+        } else if(aLang.isEqualsIgnoreCase(stCString("zh-tw"))) {
+            if(myLangFolderList.contains(stCString("ChineseT"), anIdInList)) {
                 params.language->setValue(int32_t(anIdInList));
                 isLangSet = true;
             }

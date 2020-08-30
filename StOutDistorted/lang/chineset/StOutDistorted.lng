@@ -1,0 +1,18 @@
+# Traditional chinese(Taiwan) translation file for StOutDistorted library
+# @author John Hsieh <johnmhsieh@gmail.com>
+--------
+1000=電視 (裸視平行)
+1001=扭曲變形輸出
+1002=OpenVR 頭戴顯示器
+1003=桶狀扭曲
+1110=圖層
+1111=Side-by-Side
+1112=Top-and-Bottom
+1113=Side-by-Side (變形投影)
+1114=Top-and-Bottom (變形投影)
+1120=扭曲變形
+1121=無
+1123=在立體模式顯示單通道
+2000=sView - 扭曲變形輸出模組
+2001=版本
+2002=© {0} 基里爾·加夫里洛夫 Kirill Gavrilov <{1}>\n官方網站: {2}

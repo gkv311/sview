@@ -1,0 +1,12 @@
+# Traditional chinese(Taiwan) translation file for StOutDual library
+# @author John Hsieh <johnmhsieh@gmail.com>
+--------
+1000=雙輸出
+1001=以雙輸出方式的立體裝置: 頭戴顯示器, 鏡像立體顯示器, 雙投影機
+1002=鏡像輸出
+1003=手工製作的鏡像立體顯示器 (鏡子位在 X軸方向)
+1102=第二個顯示器
+1103=在立體模式顯示單通道
+2000=sView - 雙輸出模組
+2001=版本
+2002=© {0} 基里爾·加夫里洛夫 Kirill Gavrilov <{1}>\n官方網站: {2}
