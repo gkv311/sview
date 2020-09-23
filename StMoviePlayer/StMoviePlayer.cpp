@@ -1094,7 +1094,8 @@ bool StMoviePlayer::open() {
         // handle URI with #t=SECONDS tail
         StString aFilePath = myOpenFileInfo->getPath();
         StHandle< StArrayList<StString> > anUriParams = aFilePath.split('#', 2);
-        if(anUriParams->size() == 2) {
+        if(StFileNode::isRemoteProtocolPath(aFilePath)
+        && anUriParams->size() == 2) {
             aFilePath = anUriParams->getFirst();
             StString aParams = anUriParams->getLast();
             if(aParams.isStartsWith(stCString("t="))) {
@@ -1110,7 +1111,8 @@ bool StMoviePlayer::open() {
         StString aFilePath = myOpenFileInfo->getPath();
         double aSeekPos = -1.0;
         StHandle< StArrayList<StString> > anUriParams = aFilePath.split('#', 2);
-        if(anUriParams->size() == 2) {
+        if(StFileNode::isRemoteProtocolPath(aFilePath)
+        && anUriParams->size() == 2) {
             aFilePath = anUriParams->getFirst();
             StString aParams = anUriParams->getLast();
             if(aParams.isStartsWith(stCString("t="))) {
@@ -1354,7 +1356,8 @@ void StMoviePlayer::doFromClipboard(size_t ) {
     // handle URI with #t=SECONDS tail
     double aSeekPos = -1.0;
     StHandle< StArrayList<StString> > anUriParams = aText.split('#', 2);
-    if(anUriParams->size() == 2) {
+    if(StFileNode::isRemoteProtocolPath(aText)
+    && anUriParams->size() == 2) {
         aText = anUriParams->getFirst();
         StString aParams = anUriParams->getLast();
         if(aParams.isStartsWith(stCString("t="))) {
