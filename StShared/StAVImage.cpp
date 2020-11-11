@@ -311,6 +311,7 @@ bool StAVImage::loadExtra(const StString& theFilePath,
             aMemIoCtx->wrapBuffer(theDataPtr, theDataSize);
             myFormatCtx = avformat_alloc_context();
             myFormatCtx->pb = aMemIoCtx->getAvioContext();
+            myFormatCtx->iformat->flags |= AVFMT_NOFILE;
         }
 
         // open image file and detect its type, its could be non local file!
@@ -429,9 +430,13 @@ bool StAVImage::loadExtra(const StString& theFilePath,
 #endif
 
     if(isFrameFinished == 0) {
-        // thats not an image!!! try to decode more packets???
+        const bool toRetry = myFormatCtx == NULL && theImageType != ST_TYPE_NONE;
         setState("AVCodec library, input file is not an Image!");
         close();
+        if(toRetry) {
+            // try to detect codec from file content
+            return loadExtra(theFilePath, ST_TYPE_NONE, anAvPkt.getAVpkt()->data, anAvPkt.getAVpkt()->size, theIsOnlyRGB);
+        }
         return false;
     }
 
@@ -449,7 +454,7 @@ bool StAVImage::loadExtra(const StString& theFilePath,
     } else {
         const GLfloat aRatio = GLfloat(myCodecCtx->sample_aspect_ratio.num) / GLfloat(myCodecCtx->sample_aspect_ratio.den);
         if(aRatio > 70.0f) {
-            ST_DEBUG_LOG("AVCodec library, igning wrong PAR " + myCodecCtx->sample_aspect_ratio.num + ":" + myCodecCtx->sample_aspect_ratio.den);
+            ST_DEBUG_LOG("AVCodec library, ignoring wrong PAR " + myCodecCtx->sample_aspect_ratio.num + ":" + myCodecCtx->sample_aspect_ratio.den);
             setPixelRatio(1.0f);
         } else {
             setPixelRatio(aRatio);
@@ -457,7 +462,7 @@ bool StAVImage::loadExtra(const StString& theFilePath,
     }
 
 #ifdef ST_AV_NEWSTEREO
-    // currently it is unlikelly... but maybe in future?
+    // currently it is unlikely... but maybe in future?
     AVFrameSideData* aSideData = av_frame_get_side_data(myFrame.Frame, AV_FRAME_DATA_STEREO3D);
     if(aSideData != NULL) {
         AVStereo3D* aStereo = (AVStereo3D* )aSideData->data;
@@ -615,7 +620,7 @@ bool StAVImage::save(const StString& theFilePath,
 
     AVPixelFormat aPFormatAV = (AVPixelFormat )getAVPixelFormat(*this);
     if(aPFormatAV == stAV::PIX_FMT::NONE) {
-        setState("Specific pixel format convertion is not supported");
+        setState("Specific pixel format conversion is not supported");
         return false;
     }
 
