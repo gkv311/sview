@@ -171,7 +171,7 @@ EXTRA_CXXFLAGS = -DST_DEBUG
 LDSTRIP =
 STRIPFLAGS = --info
 endif
-#EXTRA_CXXFLAGS = -DST_DEBUG_LOG_TO_FILE=\"/sdcard/Android/data/com.sview/files/sview.log\" -DST_DEBUG
+#EXTRA_CXXFLAGS = -DST_DEBUG_LOG_TO_FILE=\"/storage/emulated/0/Android/data/com.sview/files/sview.log\" -DST_DEBUG
 #EXTRA_CXXFLAGS += -DST_DEBUG_GL
 #EXTRA_CXXFLAGS += -DST_DEBUG_FFMPEG_VERBOSE
 #EXTRA_CXXFLAGS += -DST_DEBUG_SYSLOG
