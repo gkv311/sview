@@ -67,11 +67,28 @@ equals(ST_TOOLKIT_NAME, StShared) {
   aNbJobs = $$system(getconf _NPROCESSORS_ONLN)
   ST_MAKE_ARGS = -j$$aNbJobs
   ST_DEBUG = 0
-  CONFIG(debug, debug|release) { ST_DEBUG = 1 }
+  SVIEW_VER_TYPE =
+  CONFIG(debug, debug|release) {
+    ST_DEBUG = 1
+    SVIEW_VER_TYPE = dev
+  }
+
+  # Calculate APK build code based on number of git commits for automatic increment.
+  # ST_APK_CODE = NbCommits * 10 + ArchShift
+  ST_APK_ARCH_SHIFT = 0
+  equals(ANDROID_EABI, armeabi-v7a) { ST_APK_ARCH_SHIFT = 0 }
+  equals(ANDROID_EABI, arm64-v8a)   { ST_APK_ARCH_SHIFT = 1 }
+  equals(ANDROID_EABI, x86)         { ST_APK_ARCH_SHIFT = 2 }
+  equals(ANDROID_EABI, x86_64)      { ST_APK_ARCH_SHIFT = 3 }
+  ST_REVISION = $$system(git rev-list --count HEAD)
+  SVIEW_APK_CODE = $$system(echo $((10 * $${ST_REVISION} + $${ST_APK_ARCH_SHIFT})))
+  SVIEW_SDK_VER_STRING = $$system(date +%y.%m)$${SVIEW_VER_TYPE}
+  #message("SVIEW_APK_CODE=$${SVIEW_APK_CODE}")
+  #message("SVIEW_SDK_VER_STRING=$${SVIEW_SDK_VER_STRING}")
 
   #ST_MAKE_TARGET = android
   !isEmpty(ST_MAKE_TARGET) { ST_MAKE_ARGS += $$ST_MAKE_TARGET }
-  aMakeEnvList = ST_DEBUG ANDROID_NDK ANDROID_BUILD_TOOLS ANDROID_PLATFORM ANDROID_EABI FFMPEG_ROOT FREETYPE_ROOT OPENAL_ROOT LIBCONFIG_ROOT ANDROID_KEY_GUI ANDROID_KEYSTORE ANDROID_KEYSTORE_PASSWORD ANDROID_KEY ANDROID_KEY_PASSWORD
+  aMakeEnvList = ST_DEBUG SVIEW_APK_CODE SVIEW_SDK_VER_STRING ANDROID_NDK ANDROID_BUILD_TOOLS ANDROID_PLATFORM ANDROID_EABI FFMPEG_ROOT FREETYPE_ROOT OPENAL_ROOT LIBCONFIG_ROOT ANDROID_KEY_GUI ANDROID_KEYSTORE ANDROID_KEYSTORE_PASSWORD ANDROID_KEY ANDROID_KEY_PASSWORD
   for (aMakeEnvIter, aMakeEnvList) {
     !isEmpty($${aMakeEnvIter}) { ST_MAKE_ARGS += $${aMakeEnvIter}=$$val_escape($${aMakeEnvIter}) }
   }

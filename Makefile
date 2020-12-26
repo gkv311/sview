@@ -66,6 +66,9 @@ ANDROID_KEYSTORE = $(BUILD_ROOT)/sview_debug.key
 ANDROID_KEYSTORE_PASSWORD = sview_store_pswd
 ANDROID_KEY = "sview android key"
 ANDROID_KEY_PASSWORD = sview_pswd
+#ST_REVISION = `git rev-list --count HEAD`
+SVIEW_APK_CODE = 1
+SVIEW_SDK_VER_STRING = 20.1
 
 # function defining library install_name to @executable_path on OS X
 libinstname =
@@ -271,6 +274,7 @@ sViewAndroid    := libsview.$(LIBSUFFIX)
 sViewApk        := $(SRCDIR)/build/sView.apk
 sViewApkSigned  := $(SRCDIR)/build/sView.signed.apk.tmp
 sViewApkUnsigned:= $(SRCDIR)/build/sView.unsigned.apk.tmp
+sViewApkManifest:= $(SRCDIR)/build/AndroidManifest.xml
 aDestAndroid    := build/apk-tmp
 sViewDex        := $(aDestAndroid)/classes.dex
 
@@ -310,7 +314,7 @@ install:
 	ln --force --symbolic ../../share/sView/demo/demo.jps $(DESTDIR)/$(APP_PREFIX)/$(USR_LIB)/sView/demo.jps
 	rm -f    $(DESTDIR)/$(APP_PREFIX)/$(USR_LIB)/sView/*.a
 
-install_android:
+install_android: $(sViewApkManifest)
 	mkdir -p $(aDestAndroid)/assets/info
 	mkdir -p $(aDestAndroid)/assets/lang/German
 	mkdir -p $(aDestAndroid)/assets/lang/French
@@ -335,7 +339,7 @@ install_android:
 	cp -f -r $(BUILD_ROOT)/shaders/*       $(aDestAndroid)/assets/shaders/
 	cp -f -r $(BUILD_ROOT)/textures/*      $(aDestAndroid)/assets/textures/
 	cp -f    license-gpl-3.0.txt           $(aDestAndroid)/assets/info/license.txt
-	$(ANDROID_BUILD_TOOLS)/aapt package -v -f -m -S $(SRCDIR)/sview/res -J $(BUILD_ROOT)/java/gen -M $(SRCDIR)/sview/AndroidManifest.xml -I $(ANDROID_PLATFORM)
+	$(ANDROID_BUILD_TOOLS)/aapt package -v -f -m -S $(SRCDIR)/sview/res -J $(BUILD_ROOT)/java/gen -M $(sViewApkManifest) -I $(ANDROID_PLATFORM)
 
 install_android_libs: $(aStShared) $(aStGLWidgets) $(aStCore) $(aStOutAnaglyph) $(aStOutInterlace) $(aStOutDistorted) $(aStImageViewer) $(aStMoviePlayer) $(sViewAndroid)
 	cp -f $(BUILD_ROOT)/$(aStShared)       $(aDestAndroid)/lib/$(ANDROID_EABI)/
@@ -698,6 +702,7 @@ clean_sViewAndroid:
 	rm -rf $(BUILD_ROOT)/java/classes/com/sview/*.class
 	rm -rf $(SRCDIR)/sview/src/com/sview/*class
 	rm -rf $(aDestAndroid)
+	rm -f $(sViewApkManifest)
 	rm -f $(sViewDex)
 	rm -f $(sViewApkUnsigned)
 	rm -f $(sViewApkSigned)
@@ -744,6 +749,12 @@ endif
 endif
 	@echo sView building is DONE
 
+
+$(sViewApkManifest):
+	cp -f -r $(SRCDIR)/sview/AndroidManifest.xml.in $(SRCDIR)/build/AndroidManifest.xml
+	sed -i "s/__SVIEW_APK_VER_CODE__/$(SVIEW_APK_CODE)/gi"          $(SRCDIR)/build/AndroidManifest.xml
+	sed -i "s/__SVIEW_SDK_VER_STRING__/$(SVIEW_SDK_VER_STRING)/gi"  $(SRCDIR)/build/AndroidManifest.xml
+
 $(sViewApk): $(sViewApkSigned)
 	$(ANDROID_BUILD_TOOLS)/zipalign -v -f 4 $< $(sViewApk)
 
@@ -767,17 +778,17 @@ $(sViewApkSigned): $(sViewApkUnsigned) sView_keystore_debug
 endif
 endif
 
-$(sViewApkUnsigned): $(sViewDex) install_android_libs
+$(sViewApkUnsigned): $(sViewDex) $(sViewApkManifest) install_android_libs
 	rm -f $(sViewApkUnsigned)
-	$(ANDROID_BUILD_TOOLS)/aapt package -v -f -M $(SRCDIR)/sview/AndroidManifest.xml -S $(SRCDIR)/sview/res -I $(ANDROID_PLATFORM) -F $(sViewApkUnsigned) $(aDestAndroid)
+	$(ANDROID_BUILD_TOOLS)/aapt package -v -f -M $(sViewApkManifest) -S $(SRCDIR)/sview/res -I $(ANDROID_PLATFORM) -F $(sViewApkUnsigned) $(aDestAndroid)
 
 sView_SRCS_JAVA1 := $(sort $(wildcard $(SRCDIR)/sview/src/com/sview/*.java))
 sView_OBJS_JAVA1 := ${sView_SRCS_JAVA1:.java=.class}
 $(sViewDex): $(BUILD_ROOT)/java/gen/com/sview/R.class $(sView_OBJS_JAVA1)
 	$(ANDROID_BUILD_TOOLS)/dx --dex --verbose --output=$(sViewDex) $(BUILD_ROOT)/java/classes
 
-$(BUILD_ROOT)/java/gen/com/sview/R.java: install_android $(shell find $(SRCDIR)/sview/res -type f)
-	$(ANDROID_BUILD_TOOLS)/aapt package -v -f -m -S $(SRCDIR)/sview/res -J $(BUILD_ROOT)/java/gen -M $(SRCDIR)/sview/AndroidManifest.xml -I $(ANDROID_PLATFORM)
+$(BUILD_ROOT)/java/gen/com/sview/R.java: install_android $(sViewApkManifest) $(shell find $(SRCDIR)/sview/res -type f)
+	$(ANDROID_BUILD_TOOLS)/aapt package -v -f -m -S $(SRCDIR)/sview/res -J $(BUILD_ROOT)/java/gen -M $(sViewApkManifest) -I $(ANDROID_PLATFORM)
 
 # This target generates a dummy signing key for debugging purposes.
 # Executed only when ANDROID_KEYSTORE points to non-existing file.
