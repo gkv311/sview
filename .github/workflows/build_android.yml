@@ -1,0 +1,24 @@
+name: Build (Android)
+on:
+  push:
+    branches: [ master ]
+  pull_request:
+    branches: [ master ]
+  workflow_dispatch:
+
+jobs:
+  Android:
+    runs-on: ubuntu-20.04
+    steps:
+    - name: Clone Tree
+      uses: actions/checkout@v1
+      with:
+        fetch-depth: 1
+    - name: Install Dependencies
+      run: |
+        sudo apt-get update
+        sudo apt-get install -y \
+          g++
+    - name: Compile
+      run: |
+        ./continuousIntegration/build_sview_android.sh

@@ -42,7 +42,13 @@ See the [docs/INSTALL](docs/INSTALL.md) file.
 
 Building state of master branch (of this git repository https://github.com/gkv311/sview.git).
 
-Linux/Android [![Build status from Travis CI](https://travis-ci.org/gkv311/sview.svg?branch=master)](https://travis-ci.org/gkv311/sview)
-Windows       [![Build status from AppVeyor](https://ci.appveyor.com/api/projects/status/github/gkv311/sview)](https://ci.appveyor.com/project/gkv311/sview/build/messages)
+| Platform           | Build Status |
+|--------------------|--------------|
+| Ubuntu 18.04       | [![status](https://github.com/gkv311/sview/workflows/Build%20(Ubuntu%2018.04)/badge.svg?branch=master)](https://github.com/gkv311/sview/actions?query=branch%3Amaster) |
+| Ubuntu 20.04       | [![status](https://github.com/gkv311/sview/workflows/Build%20(Ubuntu%2020.04)/badge.svg?branch=master)](https://github.com/gkv311/sview/actions?query=branch%3Amaster) |
+| macOS 10.15        | [![status](https://github.com/gkv311/sview/workflows/Build%20(macOS%2010.15)/badge.svg?branch=master)](https://github.com/gkv311/sview/actions?query=branch%3Amaster)  |
+| Android            | [![status](https://github.com/gkv311/sview/workflows/Build%20(Android)/badge.svg?branch=master)](https://github.com/gkv311/sview/actions?query=branch%3Amaster) |
+| Windows (AppVeyor) | [![status](https://ci.appveyor.com/api/projects/status/github/gkv311/sview)](https://ci.appveyor.com/project/gkv311/sview/build/messages) |
+| Linux (Travis CI)  | [![status](https://travis-ci.org/gkv311/sview.svg?branch=master)](https://travis-ci.org/gkv311/sview) |
 
 Note that macOS CI scripts rely on external repository *homebrew*, which may result in building failures even without sView source code modifications!

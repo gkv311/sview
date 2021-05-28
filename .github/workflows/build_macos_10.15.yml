@@ -1,0 +1,25 @@
+name: Build (macOS 10.15)
+on:
+  push:
+    branches: [ master ]
+  pull_request:
+    branches: [ master ]
+  workflow_dispatch:
+
+jobs:
+  macOS:
+    runs-on: macos-10.15
+    steps:
+    - name: Clone Tree
+      uses: actions/checkout@v1
+      with:
+        fetch-depth: 1
+    - name: Install Dependencies
+      run: |
+        brew update
+        brew install \
+          freetype \
+          ffmpeg
+    - name: Compile
+      run: |
+        ./continuousIntegration/build_sview_osx.sh
