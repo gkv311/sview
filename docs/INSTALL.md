@@ -2,37 +2,37 @@
 
 sView requires several 3rd-party components for building:
 * C/C++ compiler (g++, MSVC 2010+)
-* Code::Blocks (http://www.codeblocks.org)
-* FFmpeg (http://www.ffmpeg.org)
-* OpenAL soft (http://kcat.strangesoft.net/openal.html)
+* Code::Blocks (https://www.codeblocks.org/)
+* FFmpeg (https://www.ffmpeg.org)
+* OpenAL soft (https://openal-soft.org/)
 * libwebp, optional (https://developers.google.com/speed/webp/download)
-* GTK2+, Linux only (http://www.gtk.org)
-* libconfig++, Linux and Android (http://www.hyperrealm.com/libconfig)
+* GTK2+, Linux only (https://www.gtk.org)
+* libconfig++, Linux and Android (https://www.hyperrealm.com/libconfig/libconfig.html)
 * libxpm, Linux only
 
 On Debian/Ubuntu you might use the following command to install all dependencies at once:
 
 ~~~~~
 sudo apt-get install \
- g++ \
- libgtk2.0-dev \
- libopenal-dev \
- libgl1-mesa-dev \
- libavcodec-dev libavdevice-dev libavformat-dev libavutil-dev libswscale-dev \
- libwebp-dev \
- libconfig++-dev libconfig-dev \
- libxpm-dev \
- codeblocks
+  g++ \
+  libgtk2.0-dev \
+  libopenal-dev \
+  libgl1-mesa-dev \
+  libavcodec-dev libavdevice-dev libavformat-dev libavutil-dev libswscale-dev \
+  libwebp-dev \
+  libconfig++-dev libconfig-dev \
+  libxpm-dev \
+  codeblocks
 ~~~~~
  
 The similar command for RPM-based distributives:
 
 ~~~~~
 yum install gcc gcc-c++ \
- gtk+-devel gtk2-devel \
- mesa-libGLU-devel glew-devel \
- openal-devel \
- libconfig-devel
+  gtk+-devel gtk2-devel \
+  mesa-libGLU-devel glew-devel \
+  openal-devel \
+  libconfig-devel
 
 rpm -Uvh http://download1.rpmfusion.org/free/fedora/rpmfusion-free-release-stable.noarch.rpm
 yum install ffmpeg-devel
@@ -80,7 +80,9 @@ This instruction has been tested only on Linux host.
 
 ## III. Code::Blocks
 
-Code::Blocks is an official way for building and development of sView.
+Code::Blocks (https://www.codeblocks.org/) is the main way for building and development sView.
+It should be noted, however, that it is possible building sView using Visual Studio solution on Windows platform as alternative to Code::Blocks,
+and Makefile should be used for building for other target platforms.
 There are several building targets depending on platform
 (Mac OS X, Linux, Windows) and debugging possibilities:
 * `WIN_vc_x86`,        32-bit target using Visual Studio compiler

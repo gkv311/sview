@@ -37,15 +37,15 @@ This program is under the GNU General Public License version 3.0 or later.
 ## External libraries
 
 * FFmpeg libraries are distributed under GNU Lesser General Public License version 2.1 or later.<br/>
-  http://ffmpeg.org/
+  https://ffmpeg.org/
 * libconfig++ library distributed under GNU Lesser General Public License version 2.1 or later.<br/>
-  http://www.hyperrealm.com/libconfig/
+  https://www.hyperrealm.com/libconfig/libconfig.html
 * OpenAL library distributed under GNU Lesser General Public License version 2.1 or later.<br/>
-  http://kcat.strangesoft.net/openal.html
+  https://openal-soft.org/
 * FreeType library distributed under FreeType License (BSD-style license with a credit clause).<br/>
-  http://www.freetype.org/
+  https://www.freetype.org/
 * Open CASCADE Technology libraries distributed under GNU Lesser General Public License version 2.1.<br/>
-  http://dev.opencascade.org/
+  https://dev.opencascade.org/
 
 Some 3rd-parties may depend on other libraries and provide more license options.
 Please read license information for original projects.
