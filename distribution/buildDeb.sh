@@ -45,7 +45,7 @@ mkdir -p $aDebRoot/usr/lib/mozilla/plugins
 
 # copy common files
 cp -f -r ../share/*     $aDebRoot/usr/share/
-cp -f    ../license-gpl-3.0.txt $aDebRoot/usr/share/sView/info/license.txt
+cp -f    ../docs/license-gpl-3.0.txt $aDebRoot/usr/share/sView/info/license.txt
 
 # copy sView compiled files
 mv -f ../bin/LINUX_gcc/build.log $aDebRoot/

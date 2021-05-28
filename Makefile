@@ -307,7 +307,7 @@ install:
 	cp -f -r $(BUILD_ROOT)/shaders/*     $(DESTDIR)/$(APP_PREFIX)/share/sView/shaders/
 	cp -f -r $(BUILD_ROOT)/textures/*    $(DESTDIR)/$(APP_PREFIX)/share/sView/textures/
 	cp -f -r $(BUILD_ROOT)/web/*         $(DESTDIR)/$(APP_PREFIX)/share/sView/web/
-	cp -f    license-gpl-3.0.txt         $(DESTDIR)/$(APP_PREFIX)/share/sView/info/license.txt
+	cp -f    docs/license-gpl-3.0.txt    $(DESTDIR)/$(APP_PREFIX)/share/sView/info/license.txt
 	cp -f -r $(BUILD_ROOT)/*.$(LIBSUFFIX) $(DESTDIR)/$(APP_PREFIX)/$(USR_LIB)/
 	cp -f    $(BUILD_ROOT)/sView         $(DESTDIR)/$(APP_PREFIX)/$(USR_LIB)/sView/sView
 	ln --force --symbolic ../$(USR_LIB)/sView/sView       $(DESTDIR)/$(APP_PREFIX)/bin/sView
@@ -338,7 +338,7 @@ install_android: $(sViewApkManifest)
 	cp -f -r $(BUILD_ROOT)/lang/Korean/*   $(aDestAndroid)/assets/lang/Korean/
 	cp -f -r $(BUILD_ROOT)/shaders/*       $(aDestAndroid)/assets/shaders/
 	cp -f -r $(BUILD_ROOT)/textures/*      $(aDestAndroid)/assets/textures/
-	cp -f    license-gpl-3.0.txt           $(aDestAndroid)/assets/info/license.txt
+	cp -f    docs/license-gpl-3.0.txt      $(aDestAndroid)/assets/info/license.txt
 	$(ANDROID_BUILD_TOOLS)/aapt package -v -f -m -S $(SRCDIR)/sview/res -J $(BUILD_ROOT)/java/gen -M $(sViewApkManifest) -I $(ANDROID_PLATFORM)
 
 install_android_libs: $(aStShared) $(aStGLWidgets) $(aStCore) $(aStOutAnaglyph) $(aStOutInterlace) $(aStOutDistorted) $(aStImageViewer) $(aStMoviePlayer) $(sViewAndroid)

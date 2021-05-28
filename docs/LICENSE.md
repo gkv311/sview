@@ -52,7 +52,7 @@ Please read license information for original projects.
 
 ## Icons
 
-Images in folders [texturesSrc](texturesSrc) and [textures](textures)
+Images in folders [texturesSrc](../texturesSrc) and [textures](../textures)
 are available under the [license CC-BY 4.0](license-CC-BY-4.0.txt) (Creative Common Attribution 4.0 International License).
 Feel free to remix and re-share these icons in your products.
 

@@ -32,7 +32,7 @@ http://www.sview.ru/en/sview/usertips/
 
 ## Licensing
 
-See the [LICENSE](LICENSE.md) file.
+See the [docs/LICENSE](docs/LICENSE.md) file.
 
 ## Build and Install
 

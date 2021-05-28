@@ -143,7 +143,7 @@ xcopy /Y media\sView_JPS.ico                %SVIEW_DISTR_PATH_X86%\icons\
 xcopy /Y media\sView_PNS.ico                %SVIEW_DISTR_PATH_X86%\icons\
 xcopy /Y media\sView_Media.ico              %SVIEW_DISTR_PATH_X86%\icons\
 xcopy /S /Y info\*                          %SVIEW_DISTR_PATH_X86%\info\
-copy  /Y ..\license-gpl-3.0.txt             %SVIEW_DISTR_PATH_X86%\info\license.txt
+copy  /Y ..\docs\license-gpl-3.0.txt        %SVIEW_DISTR_PATH_X86%\info\license.txt
 
 echo Compile distribution package
 rem www.jrsoftware.org
