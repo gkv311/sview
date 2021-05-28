@@ -10,20 +10,6 @@ $(info SRCDIR=$(SRCDIR))
 LBITS := $(shell getconf LONG_BIT)
 HAVE_MONGOOSE := -DST_HAVE_MONGOOSE
 
-# The following lines are required because standard make does not recognize the Objective-C++ .mm suffix
-.SUFFIXES: .o .mm
-.mm.o:
-	$(CXX) -c $(CXXFLAGS) $< -o $@
-
-# Compile java files.
-# javac takes output folder, not file, and actually sometimes generates multiple files from single .java input.
-# To fool make (avoid recompiling on each build) - copy result .class file to source folder;
-# this, however, might lead to incomplete build on .java change without make clean.
-.SUFFIXES: .class .java
-.java.class:
-	$(JAVA_HOME)/bin/javac -source 1.7 -target 1.7 -d $(BUILD_ROOT)/java/classes -classpath $(ANDROID_PLATFORM) -sourcepath $(SRCDIR)/sview/src:$(BUILD_ROOT)/java/gen $<
-	cp -f $(BUILD_ROOT)/java/classes/com/sview/$(@F) $@
-
 TARGET_OS = linux
 TARGET_ARCH2 =
 
@@ -53,6 +39,20 @@ BUILD_ROOT_BUNDLE = build/sView.app
 BUILD_ROOT = $(BUILD_ROOT_BUNDLE)/Contents/MacOS
 endif
 
+# The following lines are required because standard make does not recognize the Objective-C++ .mm suffix
+.SUFFIXES: .o .mm
+.mm.o:
+	$(CXX) -c $(CXXFLAGS) $< -o $@
+
+# Compile java files.
+# javac takes output folder, not file, and actually sometimes generates multiple files from single .java input.
+# To fool make (avoid recompiling on each build) - copy result .class file to source folder;
+# this, however, might lead to incomplete build on .java change without make clean.
+.SUFFIXES: .class .java
+.java.class: %.java $(BUILD_ROOT)/java/gen/com/sview/R.java
+	$(JAVA_HOME)/bin/javac -source 1.7 -target 1.7 -d $(BUILD_ROOT)/java/classes -classpath $(ANDROID_PLATFORM) -sourcepath $(SRCDIR)/sview/src:$(BUILD_ROOT)/java/gen $<
+	cp -f $(BUILD_ROOT)/java/classes/com/sview/$(@F) $@
+
 ST_DEBUG = 0
 FFMPEG_ROOT =
 FREETYPE_ROOT =
@@ -63,7 +63,7 @@ LIBSUFFIX = so
 ANDROID_BUILD_TOOLS = $(ANDROID_HOME)/build-tools/26.0.3
 ANDROID_PLATFORM = $(ANDROID_HOME)/platforms/android-26/android.jar
 ANDROID_KEYSTORE = $(BUILD_ROOT)/sview_debug.key
-ANDROID_KEYSTORE_PASSWORD = sview_store_pswd
+ANDROID_KEYSTORE_PASSWORD = sview_pswd
 ANDROID_KEY = "sview android key"
 ANDROID_KEY_PASSWORD = sview_pswd
 #ST_REVISION = `git rev-list --count HEAD`
@@ -277,6 +277,7 @@ sViewApkUnsigned:= $(SRCDIR)/build/sView.unsigned.apk.tmp
 sViewApkManifest:= $(SRCDIR)/build/AndroidManifest.xml
 aDestAndroid    := build/apk-tmp
 sViewDex        := $(aDestAndroid)/classes.dex
+sViewRJava      := $(BUILD_ROOT)/java/gen/com/sview/R.java
 
 all:         shared $(aStDiagnostics) $(sView)
 android_cad: pre_all_android shared $(sViewAndroidCad) $(sViewApk) install_android install_android_cad_libs
@@ -339,7 +340,8 @@ install_android: $(sViewApkManifest)
 	cp -f -r $(BUILD_ROOT)/shaders/*       $(aDestAndroid)/assets/shaders/
 	cp -f -r $(BUILD_ROOT)/textures/*      $(aDestAndroid)/assets/textures/
 	cp -f    docs/license-gpl-3.0.txt      $(aDestAndroid)/assets/info/license.txt
-	$(ANDROID_BUILD_TOOLS)/aapt package -v -f -m -S $(SRCDIR)/sview/res -J $(BUILD_ROOT)/java/gen -M $(sViewApkManifest) -I $(ANDROID_PLATFORM)
+
+genjavares: pre_all_android $(sViewRJava)
 
 install_android_libs: $(aStShared) $(aStGLWidgets) $(aStCore) $(aStOutAnaglyph) $(aStOutInterlace) $(aStOutDistorted) $(aStImageViewer) $(aStMoviePlayer) $(sViewAndroid)
 	cp -f $(BUILD_ROOT)/$(aStShared)       $(aDestAndroid)/lib/$(ANDROID_EABI)/
@@ -707,7 +709,8 @@ clean_sViewAndroid:
 	rm -f $(sViewApkUnsigned)
 	rm -f $(sViewApkSigned)
 	rm -f $(sViewApk)
-	rm -rf $(BUILD_ROOT)/java/gen/com/sview/*.java
+	rm -f $(sViewRJava)
+	rm -rf $(BUILD_ROOT)/java/gen/com/sview/*.class
 
 # sView executable
 sView_SRCS1 := $(sort $(wildcard $(SRCDIR)/sview/*.cpp))
@@ -782,13 +785,13 @@ $(sViewApkUnsigned): $(sViewDex) $(sViewApkManifest) install_android_libs
 	rm -f $(sViewApkUnsigned)
 	$(ANDROID_BUILD_TOOLS)/aapt package -v -f -M $(sViewApkManifest) -S $(SRCDIR)/sview/res -I $(ANDROID_PLATFORM) -F $(sViewApkUnsigned) $(aDestAndroid)
 
+$(sViewRJava): $(sViewApkManifest)
+	$(ANDROID_BUILD_TOOLS)/aapt package -v -f -m -S $(SRCDIR)/sview/res -J $(BUILD_ROOT)/java/gen -M $(sViewApkManifest) -I $(ANDROID_PLATFORM)
+
 sView_SRCS_JAVA1 := $(sort $(wildcard $(SRCDIR)/sview/src/com/sview/*.java))
 sView_OBJS_JAVA1 := ${sView_SRCS_JAVA1:.java=.class}
-$(sViewDex): $(BUILD_ROOT)/java/gen/com/sview/R.class $(sView_OBJS_JAVA1)
+$(sViewDex): $(sViewRJava) $(sView_OBJS_JAVA1)
 	$(ANDROID_BUILD_TOOLS)/dx --dex --verbose --output=$(sViewDex) $(BUILD_ROOT)/java/classes
-
-$(BUILD_ROOT)/java/gen/com/sview/R.java: install_android $(sViewApkManifest) $(shell find $(SRCDIR)/sview/res -type f)
-	$(ANDROID_BUILD_TOOLS)/aapt package -v -f -m -S $(SRCDIR)/sview/res -J $(BUILD_ROOT)/java/gen -M $(sViewApkManifest) -I $(ANDROID_PLATFORM)
 
 # This target generates a dummy signing key for debugging purposes.
 # Executed only when ANDROID_KEYSTORE points to non-existing file.
