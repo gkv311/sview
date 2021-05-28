@@ -56,6 +56,6 @@ addons:
 install: true
 
 script:
-  - if [[ "$MY_TARGET" == "linux"   ]]; then ./contentiousIntegration/build_sview_linux.sh;   else echo "Skipping step for current target..."; fi
-  - if [[ "$MY_TARGET" == "android" ]]; then ./contentiousIntegration/build_sview_android.sh; else echo "Skipping step for current target..."; fi
-  - if [[ "$MY_TARGET" == "osx"     ]]; then ./contentiousIntegration/build_sview_osx.sh;     else echo "Skipping step for current target..."; fi
+  - if [[ "$MY_TARGET" == "linux"   ]]; then ./continuousIntegration/build_sview_linux.sh;   else echo "Skipping step for current target..."; fi
+  - if [[ "$MY_TARGET" == "android" ]]; then ./continuousIntegration/build_sview_android.sh; else echo "Skipping step for current target..."; fi
+  - if [[ "$MY_TARGET" == "osx"     ]]; then ./continuousIntegration/build_sview_osx.sh;     else echo "Skipping step for current target..."; fi
