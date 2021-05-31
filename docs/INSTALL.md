@@ -52,10 +52,10 @@ Notice that DevIL and FreeImage libraries are optional and are not required for 
 
 ## II. Makefile (Linux, macOS, Android)
 
-Current Makefile has been written only for DEB/RPM source packages
-and lacks configuration flexibility (means there NO any ./configure and so on).
+sView project defines a single `Makefile` for building an application and all libraries.
+There are no configuration scripts (like `./configure`), although building options can be adjusted by passing arguments to `make` or by modification of `Makefile` file.
 
-All you need is to install dependencies and to execute traditional commands:
+When building sView on Debian-based distributive - all you need is to install dependencies via package manager and to execute traditional commands:
 
 ~~~~~
   make && make install
@@ -63,26 +63,24 @@ All you need is to install dependencies and to execute traditional commands:
 
 ### Android
 
-sView for Android is build in two steps:
+sView for Android platform is built in the same way as for Linux platforms - via UNIX `Makefile`.
+sView does not provide `.mk` files - it uses UNIX Makefile for building native code.
 
-* Building native libraries using UNIX Makefile.
-  Paths to NDK and 3rd-party libraries can be specified through command-line options to **make** or by editing Makefile itself.
-  sView does not provide .mk files - it uses UNIX Makefile for building native code.
-~~~~~
-  make android ANDROID_NDK=$SVIEW_NDK FFMPEG_ROOT=$SVIEW_FFMPEG FREETYPE_ROOT=$SVIEW_FREETYPE OPENAL_ROOT=$SVIEW_OPENAL LIBCONFIG_ROOT=$SVIEW_LIBCONFIG
-~~~~~
-* Compiling Java classes and putting everything into APK file using Eclipse.
-  Eclipse performs building automatically (by default), but APK file is not created by this action.
-  APK export can be started from context menu on project sView (in the tree) -> Export -> Android -> Export Android Application.
-  Android Studio is currently can not be used for this purpose (not tested).
+`Makefile` coming with sView performs all building steps - from building native `.so` libraries, to compiling `.java` source code and generation of APK package.
+Paths to NDK and 3rd-party libraries can be specified through command-line options to **make** or by editing `Makefile` itself.
+The building can be run on a Linux host with compatible Java SDK, Android NDK and Android SDK versions.
 
-This instruction has been tested only on Linux host.
+### Qt Creator
+
+*distribution/qmake/sView.pro* defines a project file for Qt Creator.
+This is not a self-sustained solution, but rather a wrapper over existing UNIX `Makefile`, allowing to develop and build sView for macOS, Linux and Android targets within IDE.
+It has been introduced as an alternative to Code::Blocks having severe stability and usability problem on many platforms.
 
 ## III. Code::Blocks
 
-Code::Blocks (https://www.codeblocks.org/) is the main way for building and development sView.
-It should be noted, however, that it is possible building sView using Visual Studio solution on Windows platform as alternative to Code::Blocks,
-and Makefile should be used for building for other target platforms.
+For historical reasons, sView building environment was initially defined by a Code::Blocks (https://www.codeblocks.org/) workspace, allowing to develop and build application on multiple platforms.
+Code::Blocks remains the main way for building sView on Windows platform, although development can be done using Visual Studio (see below).
+
 There are several building targets depending on platform
 (Mac OS X, Linux, Windows) and debugging possibilities:
 * `WIN_vc_x86`,        32-bit target using Visual Studio compiler
@@ -98,10 +96,16 @@ Notice that the following compilers should be configured within Code::Blocks:
 * `msvc10`,            configured to Visual Studio 2010+ compiler, PSDK and DXSDK
 * `windows_sdk_x86_64` (copy of msvc10) configured to 64-bit libraries and compiler toolchain
 
-3rd-parties should be either configured as Code::Blocks global compiler options
-or placed into "3rdparty" folder.
+3rd-parties should be either configured as Code::Blocks global compiler options or placed into "3rdparty" folder.
 
-## IV. Building options
+## IV. Visual Studio
+
+sView comes within Visual Studio solution file, compatible with Visual Studio 2015 and higher.
+Visual Studio solution might require some extra steps for setting up paths to external libraries and for copying sView resources.
+
+Notice that for historical and compatibility reasons, sView install packages for Windows are build using Code::Blocks, configured to Visual Studio 2010 compiler.
+
+## V. Building options
 
 Several preprocessor directives control building options.
 Notice that by default "include/stconfig.conf" file is used to override these options
@@ -113,7 +117,7 @@ Notice that by default "include/stconfig.conf" file is used to override these op
 * `ST_DEBUG` - should be defined to activate debugging log output
 * `ST_DEBUG_LOG_TO_FILE` - specifies file name or full path to duplicate debug log output
 
-## V. Distribution scripts
+## VI. Distribution scripts
 
 Several script were written to automate distribution routines.
 All them were placed in "distribution" folder.
