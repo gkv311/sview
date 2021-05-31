@@ -1,11 +1,13 @@
 sView - stereoscopic media player
 =================================
 
-sView is an easy to use cross-platform solution to view 3D stereoscopic videos and images.
+sView is a cross-platform solution to view 3D stereoscopic videos and images.
 Please visit official site for more information:<br/>
 http://www.sview.ru
 
-## Libraries
+## sView SDK
+
+*sView SDK* - is a set of libraries for development of a stereoscopic application, which sView programs (media player and others) are based on.
 
 * `libStShared` threads, mutexes, template-based signals and slots, OpenGL tools, settings management, and other tools.
 * `libStGLWidgets` compact C++ toolkit for writing GUI using OpenGL 2.1+ or OpenGL ES 2.0+.
@@ -26,7 +28,7 @@ To get up-to-date sources please clone official git repository:
 
 ## Documentation
 
-Read the documentation in the **doc/** directory in git.
+Read the documentation in the **docs/** directory in git.
 Online help is available on official site:<br/>
 http://www.sview.ru/en/sview/usertips/
 

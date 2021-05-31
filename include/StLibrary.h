@@ -2,9 +2,7 @@
  * This is a header for dynamic library wrappers.
  * Copyright © 2008-2016 Kirill Gavrilov <kirill@sview.ru>
  *
- * Distributed under the Boost Software License, Version 1.0.
- * See accompanying file license-boost.txt or copy at
- * http://www.boost.org/LICENSE_1_0.txt
+ * This code is licensed under MIT license (see docs/license-mit.txt for details).
  */
 
 #ifndef __StLibrary_h_

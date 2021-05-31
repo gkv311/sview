@@ -1,38 +1,37 @@
-## Libraries
+## sView
 
-* StShared
-* StGLWidget
-* StCore
-* StOutAnaglyph
-* StOutDual
-* StOutInterlace
-* StOutIZ3D
-* StOutPageFlip
+*sView programs* are distributed under the terms of GNU General Public License version 3.0 or later.<br/>
+Read the file [license-gpl-3.0.txt](license-gpl-3.0.txt) for details.
 
-Sources of these libraries are under Boost license.
-Read the file [license-boost.txt](license-boost.txt) for details.
+Here is the list of sView programs:
+
+* `StImageViewer` (still image viewer)
+* `StMoviePlayer` (audio/video player)
+* `StDiagnostics` (mirror monitor calibrator)
+* `StMonitorsDump` (EDID dump)
+* `StBrowserPlugin` (NPAPI / ActiveX - obsolete Internet browser plugin)
+* `StTests` (performance measurements)
+* `StCADViewer` (CAD viewer)
+
+## sView SDK
+
+*sView SDK* is distributed under MIT license terms.<br/>
+Read the file [license-mit.txt](license-mit.txt) for details.
+
+Here is the list of sView SDK libraries:
+
+* `StShared` (common classes)
+* `StGLWidget` (GUI widgets base)
+* `StCore` (OpenGL window - platform abstraction layer)
+* `StOutAnaglyph` (anaglyph glasses support)
+* `StOutDistorted` (VR support)
+* `StOutDual` (mirror/dual output support)
+* `StOutInterlace` (interleaved monitors support)
+* `StOutIZ3D` (iZ3D monitors support)
+* `StOutPageFlip` (shutter-glasses support)
 
 Notice that some sources are wrappers over other 3rd-parties
 and their licenses should be taken into account when used.
-
-## sView
-
-* StImageViewer
-* StMoviePlayer
-* StDiagnostics
-* StMonitorsDump
-* StBrowserPlugin
-* StTests
-
-These libraries and programs are under the GNU General Public License version 3.0 or later.<br/>
-Read the file [license-gpl-3.0.txt](license-gpl-3.0.txt) for details.
-
-Note that sView executable project is a dummy entry point to real applications like StImageViewer.<br/>
-Formally it was licensed under Boost license terms.
-
-## StCADViewer
-
-This program is under the GNU General Public License version 3.0 or later.
 
 ## External libraries
 

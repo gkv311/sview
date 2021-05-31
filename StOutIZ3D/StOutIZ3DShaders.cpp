@@ -2,9 +2,7 @@
  * StOutInterlace, class providing stereoscopic output for iZ3D monitors using StCore toolkit.
  * Copyright © 2009-2012 Kirill Gavrilov <kirill@sview.ru>
  *
- * Distributed under the Boost Software License, Version 1.0.
- * See accompanying file license-boost.txt or copy at
- * http://www.boost.org/LICENSE_1_0.txt
+ * This code is licensed under MIT license (see docs/license-mit.txt for details).
  */
 
 #include "StOutIZ3DShaders.h"

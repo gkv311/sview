@@ -3,9 +3,7 @@
  * Copyright © 2005 Robin Whittle <rw@firstpr.com.au>
  * Copyright © 2011 Kirill Gavrilov <kirill@sview.ru>
  *
- * Distributed under the Boost Software License, Version 1.0.
- * See accompanying file license-boost.txt or copy at
- * http://www.boost.org/LICENSE_1_0.txt
+ * This code is licensed under MIT license (see docs/license-mit.txt for details).
  */
 
 #include <StThreads/StMinGen.h>
