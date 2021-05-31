@@ -5,12 +5,12 @@ compiler:
 
 os:
   - linux
-  - osx
+  #- osx
 
 env:
   - MY_TARGET=linux
-  - MY_TARGET=android
-  - MY_TARGET=osx
+  #- MY_TARGET=android
+  #- MY_TARGET=osx
 
 matrix:
   exclude:
