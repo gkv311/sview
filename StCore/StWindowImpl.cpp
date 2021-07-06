@@ -986,6 +986,15 @@ StGLBoxPx StWindowImpl::stglViewport(const int& theWinId) const {
 StPointD_t StWindowImpl::getMousePos() {
     StRectI_t aWinRect = (attribs.IsFullScreen) ? myRectFull : myRectNorm;
 #ifdef _WIN32
+    if(myTouches.NbTouches == 1) {
+        StTouch aTouch = myTouches.Touches[0];
+        if(aTouch.isDefined()) {
+            // simulate mouse move from single touch
+            myIsPreciseCursor = false;
+            return StPointD_t(aTouch.PointX, aTouch.PointY);
+        }
+    }
+
     if(myMaster.hWindowGl != NULL) {
         CURSORINFO aCursor;
         aCursor.cbSize = sizeof(aCursor);
@@ -998,6 +1007,7 @@ StPointD_t StWindowImpl::getMousePos() {
                 aCursor.ptScreenPos.y += 2;
             }
 
+            myIsPreciseCursor = true;
             return StPointD_t((double(aCursor.ptScreenPos.x) - double(aWinRect.left())) / double(aWinRect.width()),
                               (double(aCursor.ptScreenPos.y) - double(aWinRect.top()))  / double(aWinRect.height()));
         }
@@ -1143,7 +1153,7 @@ void StWindowImpl::doTouch(const StTouchEvent& theTouches) {
     const double aTime = theTouches.Time;
     signals.onTouch->emit(theTouches);
 
-    // scale factor for conversion into dp (dencity-independent pixels) units
+    // scale factor for conversion into dp (density-independent pixels) units
     const StRectI_t  aWinRect = attribs.IsFullScreen ? myRectFull : myRectNorm;
     const StMonitor& aMon     = myMonitors[aWinRect.center()];
     StGLVec2 aScale((float )aWinRect.width() / aMon.getScale(), (float )aWinRect.height() / aMon.getScale());
@@ -1466,9 +1476,11 @@ void StWindowImpl::swapEventsBuffers() {
             case stEvent_MouseDown:
                 signals.onMouseDown->emit(anEvent.Button);
                 break;
+            case stEvent_MouseCancel:
             case stEvent_MouseUp: {
                 signals.onMouseUp->emit(anEvent.Button);
-                if(anEvent.Button.Button != ST_MOUSE_LEFT) {
+                if(anEvent.Button.Button != ST_MOUSE_LEFT
+                || anEvent.Type == stEvent_MouseCancel) {
                     myDoubleClickTimer.stop();
                     break;
                 }

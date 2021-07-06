@@ -17,6 +17,10 @@
 #include <cmath>
 #include <vector>
 
+#ifndef MOUSEEVENTF_FROMTOUCH
+#define MOUSEEVENTF_FROMTOUCH 0xFF515700
+#endif
+
 static SV_THREAD_FUNCTION threadCreateWindows(void* inStWin);
 
 /**
@@ -242,9 +246,11 @@ bool StWindowImpl::wndCreateWindows() {
         aSessNotifSetProc(myMaster.hWindowGl, NOTIFY_FOR_THIS_SESSION);
     }
 
-    // recieve WM_TOUCH events
+    // receive WM_TOUCH events
     if(myRegisterTouchWindow != NULL) {
-        //myRegisterTouchWindow(myMaster.hWindowGl, TWF_FINETOUCH);
+        if(!myRegisterTouchWindow(myMaster.hWindowGl, TWF_FINETOUCH)) {
+            //ST_ERROR_LOG("RegisterTouchWindow() FAILED");
+        }
     }
 
     // always wait for message thread exit before quit
@@ -806,6 +812,12 @@ LRESULT StWindowImpl::stWndProc(HWND theWin, UINT uMsg, WPARAM wParam, LPARAM lP
         case WM_RBUTTONDOWN:
         case WM_MBUTTONDOWN:
         case WM_XBUTTONDOWN: {
+            const LPARAM anExtraInfo = GetMessageExtraInfo();
+            if((anExtraInfo & MOUSEEVENTF_FROMTOUCH) == MOUSEEVENTF_FROMTOUCH) {
+                //ST_DEBUG_LOG("Skip mouse message emulated from touches");
+                break;
+            }
+
             int mouseXPx = int(short(LOWORD(lParam)));
             int mouseYPx = int(short(HIWORD(lParam)));
             const StRectI_t aWinRect = getPlacement();
@@ -903,8 +915,7 @@ LRESULT StWindowImpl::stWndProc(HWND theWin, UINT uMsg, WPARAM wParam, LPARAM lP
             return 0;
         }
         case WM_TOUCH: {
-            int aNbTouches = LOWORD(wParam);
-            //ST_DEBUG_LOG(" @@ WM_TOUCH " + aNbTouches);
+            const int aNbTouches = LOWORD(wParam);
             if(aNbTouches < 1
             || myGetTouchInputInfo == NULL) {
                 break;
@@ -912,7 +923,7 @@ LRESULT StWindowImpl::stWndProc(HWND theWin, UINT uMsg, WPARAM wParam, LPARAM lP
 
             if(aNbTouches > myNbTmpTouches) {
                 stMemFree(myTmpTouches);
-                myNbTmpTouches = stMax(aNbTouches, 8);
+                myNbTmpTouches = stMax(aNbTouches, ST_MAX_TOUCHES);
                 myTmpTouches   = stMemAlloc<TOUCHINPUT*>(sizeof(TOUCHINPUT) * myNbTmpTouches);
             }
             if(myTmpTouches == NULL) {
@@ -926,8 +937,10 @@ LRESULT StWindowImpl::stWndProc(HWND theWin, UINT uMsg, WPARAM wParam, LPARAM lP
             const StRectI_t aWinRect  = getPlacement();
             const float     aWinSizeX = float(aWinRect.width());
             const float     aWinSizeY = float(aWinRect.height());
+            myStEvent.Type = stEvent_TouchCancel;
             myStEvent.Touch.NbTouches = 0;
-            myStEvent.Type = stEvent_TouchMove;
+            myStEvent.Touch.Time = getEventTime(myEvent.time);
+            StPointD_t aMouseEmPnt;
             for(size_t aTouchIter = 0; aTouchIter < ST_MAX_TOUCHES; ++aTouchIter) {
                 StTouch& aTouch = myStEvent.Touch.Touches[aTouchIter];
                 aTouch = StTouch::Empty();
@@ -936,26 +949,77 @@ LRESULT StWindowImpl::stWndProc(HWND theWin, UINT uMsg, WPARAM wParam, LPARAM lP
                 }
 
                 const TOUCHINPUT& aTouchSrc = myTmpTouches[aTouchIter];
+                const float aPosX = float(aTouchSrc.x) * 0.01f;
+                const float aPosY = float(aTouchSrc.y) * 0.01f;
+                aTouch.PointX = (aPosX - float(aWinRect.left())) / aWinSizeX;
+                aTouch.PointY = (aPosY - float(aWinRect.top()))  / aWinSizeY;
+                if(aTouchIter == 0) {
+                    aMouseEmPnt.x() = aTouch.PointX;
+                    aMouseEmPnt.y() = aTouch.PointY;
+                }
                 if((aTouchSrc.dwFlags & TOUCHEVENTF_UP) == TOUCHEVENTF_UP) {
                     myStEvent.Type = stEvent_TouchUp;
                     continue;
                 } else if((aTouchSrc.dwFlags & TOUCHEVENTF_DOWN) == TOUCHEVENTF_DOWN) {
                     myStEvent.Type = stEvent_TouchDown;
+                } else if((aTouchSrc.dwFlags & TOUCHEVENTF_MOVE) == TOUCHEVENTF_MOVE) {
+                    myStEvent.Type = stEvent_TouchMove;
+                }
+
+                if(aNbTouches == 2
+                && (aTouchSrc.dwFlags & TOUCHEVENTF_DOWN) != TOUCHEVENTF_DOWN) {
+                    // get position of first pressed touch
+                    aMouseEmPnt.x() = aTouch.PointX;
+                    aMouseEmPnt.y() = aTouch.PointY;
                 }
 
                 ++myStEvent.Touch.NbTouches;
                 aTouch.Id       = aTouchSrc.dwID;
                 aTouch.DeviceId = (size_t )aTouchSrc.hSource;
                 aTouch.OnScreen = true; // how to test?
-
-                const float aPosX = float(aTouchSrc.x) * 0.01f;
-                const float aPosY = float(aTouchSrc.y) * 0.01f;
-                aTouch.PointX = (aPosX - float(aWinRect.left())) / aWinSizeX;
-                aTouch.PointY = (aPosY - float(aWinRect.top()))  / aWinSizeY;
             }
 
             myCloseTouchInputHandle((HTOUCHINPUT )lParam);
             myEventsBuffer.append(myStEvent);
+
+            if(myStEvent.Type == stEvent_TouchUp) {
+                  if(aNbTouches == 1) {
+                      // simulate mouse unclick
+                      myStEvent.Type = stEvent_MouseUp;
+                      myStEvent.Button.Time    = getEventTime(myEvent.time);
+                      myStEvent.Button.Button  = ST_MOUSE_LEFT;
+                      myStEvent.Button.Buttons = 0;
+                      myStEvent.Button.PointX  = aMouseEmPnt.x();
+                      myStEvent.Button.PointY  = aMouseEmPnt.y();
+                      myEventsBuffer.append(myStEvent);
+                  }
+            } else if(myStEvent.Type == stEvent_TouchDown) {
+                  if(aNbTouches == 1) {
+                      // simulate mouse click
+                      myStEvent.Type = stEvent_MouseDown;
+                      myStEvent.Button.Time    = getEventTime(myEvent.time);
+                      myStEvent.Button.Button  = ST_MOUSE_LEFT;
+                      myStEvent.Button.Buttons = 0;
+                      myStEvent.Button.PointX  = aMouseEmPnt.x();
+                      myStEvent.Button.PointY  = aMouseEmPnt.y();
+                      myEventsBuffer.append(myStEvent);
+                  } else if(aNbTouches == 2) {
+                      // emit special event to cancel previously simulated click
+                      myStEvent.Type = stEvent_MouseCancel;
+                      myStEvent.Button.Time    = getEventTime(myEvent.time);
+                      myStEvent.Button.Button  = ST_MOUSE_LEFT;
+                      myStEvent.Button.Buttons = 0;
+                      myStEvent.Button.PointX  = aMouseEmPnt.x();
+                      myStEvent.Button.PointY  = aMouseEmPnt.y();
+                      myEventsBuffer.append(myStEvent);
+                  }
+            } else if(myStEvent.Type == stEvent_TouchMove) {
+                  if(aNbTouches == 1) {
+                      // mouse move will be simulated by StWindowImpl::getMousePos()
+                      //myMousePt = aMouseEmPnt;
+                      //myIsPreciseCursor = false;
+                  }
+            }
             return 0;
         }
         case WM_GESTURE: {

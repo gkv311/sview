@@ -1375,7 +1375,7 @@ bool StGLImageRegion::tryUnClick(const StClickEvent& theEvent,
         // ignore out of window
         switch(aParams->ViewingMode) {
             case StViewSurface_Plain: {
-                if(!myIsClickAborted) {
+                if(!myIsClickAborted) { // && theEvent.Type != stEvent_MouseCancel
                     aParams->moveFlat(getMouseMoveFlat(myClickPntZo, aCursor), GLfloat(getRectPx().ratio()));
                 } else if(!myList.isNull()) {
                     // previous / next swipe gesture
