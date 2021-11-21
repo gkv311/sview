@@ -40,12 +40,11 @@ cp -f -r ../StOutDistorted $aDebSrcRoot/
 cp -f -r ../StShared       $aDebSrcRoot/
 cp -f -r ../sview          $aDebSrcRoot/
 cp -f -r ../textures       $aDebSrcRoot/
+cp -f -r ../docs           $aDebSrcRoot/
 cp -f    ../Makefile       $aDebSrcRoot/
 cp -f    ../README.md      $aDebSrcRoot/
 cp -f    ../README.md      $aDebSrcRoot/README
-cp -f    ../LICENSE.md     $aDebSrcRoot/
-cp -f    ../LICENSE.md     $aDebSrcRoot/LICENSE
-cp -f    ../license*.txt   $aDebSrcRoot/
+cp -f    ../LICENSE_GPL_3-0.txt $aDebSrcRoot/LICENSE
 
 mkdir -p $aDebSrcRoot/3rdparty/include
 cp -f -r ../3rdparty/include/adlsdk     $aDebSrcRoot/3rdparty/include/
