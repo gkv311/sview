@@ -1,6 +1,6 @@
 /**
  * StOutInterlace, class providing stereoscopic output in row interlaced format using StCore toolkit.
- * Copyright © 2009-2017 Kirill Gavrilov <kirill@sview.ru>
+ * Copyright © 2009-2021 Kirill Gavrilov <kirill@sview.ru>
  *
  * This code is licensed under MIT license (see docs/license-mit.txt for details).
  */
@@ -26,6 +26,14 @@ class StProgramFB : public StGLProgram {
 
     ST_LOCAL StProgramFB(const StString& theTitle);
     ST_LOCAL virtual bool link(StGLContext& theCtx) ST_ATTR_OVERRIDE;
+
+    ST_LOCAL void setTexOffset(StGLContext& theCtx,
+                               const StGLVec2& theOffset);
+
+        private:
+
+    StGLVarLocation myTexOffsetLoc;
+    StGLVec2        myTexOffset;
 
 };
 
@@ -181,6 +189,7 @@ class StOutInterlace : public StWindow {
         StHandle<StBoolParamNamed> ToReverse; //!< configurable flag to reverse rows order
         StHandle<StBoolParamNamed> BindToMon; //!< flag to bind to monitor
         StHandle<StBoolParamNamed> ToUseMask; //!< use mask texture instead of straightforward discard shader
+        StHandle<StBoolParamNamed> ToSmooth;  //!< blend rows to smooth aliasing
 
     } params;
 
@@ -211,6 +220,7 @@ class StOutInterlace : public StWindow {
 
     StHandle<StProgramFB>     myGlProgramMask;            //!< universal GLSL program which uses mask texture
     StHandle<StGLTexture>     myTextureMask;              //!< texture holding mask for discarding pixels
+    StHandle<StGLTexture>     myTextureMaskEmpty;         //!< empty texture (no discard)
     int                       myTexMaskDevice;            //!< texture mask device
     bool                      myTexMaskReversed;          //!< texture mask is initialized in reversed state
 

@@ -1,6 +1,6 @@
 /**
  * StOutInterlace, class providing stereoscopic output in row interlaced format using StCore toolkit.
- * Copyright © 2009-2017 Kirill Gavrilov <kirill@sview.ru>
+ * Copyright © 2009-2021 Kirill Gavrilov <kirill@sview.ru>
  *
  * This code is licensed under MIT license (see docs/license-mit.txt for details).
  */
@@ -84,6 +84,7 @@ namespace {
         STTR_PARAMETER_REVERSE  = 1102,
         STTR_PARAMETER_BIND_MON = 1103,
         STTR_PARAMETER_USE_MASK = 1104,
+        STTR_PARAMETER_SMOOTHING= 1105,
 
         // about info
         STTR_PLUGIN_TITLE       = 2000,
@@ -93,10 +94,12 @@ namespace {
 
     static const char* ST_SHADER_TEMPLATE[3] = {
         "uniform sampler2D uTexture;\n"
+        "uniform vec2 uTexOffset;\n"
         "varying vec2 fTexCoord;\n"
-        "void main(void) {\n",
+        "void main(void) {\n"
+        "    vec2 aTexCoord = fTexCoord;\n",
         "\n",
-        "    gl_FragColor = texture2D(uTexture, fTexCoord);\n"
+        "    gl_FragColor = texture2D(uTexture, aTexCoord);\n"
         "}\n"
     };
 
@@ -128,6 +131,16 @@ StProgramFB::StProgramFB(const StString& theTitle)
     //
 }
 
+void StProgramFB::setTexOffset(StGLContext& theCtx,
+                               const StGLVec2& theOffset) {
+    if(myTexOffset == theOffset) {
+        return;
+    }
+
+    myTexOffset = theOffset;
+    theCtx.core20fwd->glUniform2fv(myTexOffsetLoc, 1, myTexOffset.getData());
+}
+
 bool StProgramFB::link(StGLContext& theCtx) {
     StGLProgram::bindAttribLocation(theCtx, "vVertex",   ST_VATTRIB_VERTEX);
     StGLProgram::bindAttribLocation(theCtx, "vTexCoord", ST_VATTRIB_TCOORD);
@@ -137,11 +150,15 @@ bool StProgramFB::link(StGLContext& theCtx) {
     }
     StGLVarLocation aTextureLoc  = StGLProgram::getUniformLocation(theCtx, "uTexture");
     StGLVarLocation aTexture2Loc = StGLProgram::getUniformLocation(theCtx, "uMaskTexture");
+    myTexOffsetLoc = StGLProgram::getUniformLocation(theCtx, "uTexOffset");
     if(aTextureLoc.isValid()) {
         use(theCtx);
         theCtx.core20fwd->glUniform1i(aTextureLoc, StGLProgram::TEXTURE_SAMPLE_0); // GL_TEXTURE0
         if(aTexture2Loc.isValid()) {
             theCtx.core20fwd->glUniform1i(aTexture2Loc, StGLProgram::TEXTURE_SAMPLE_1); // GL_TEXTURE1
+        }
+        if(myTexOffsetLoc.isValid()) {
+            theCtx.core20fwd->glUniform2fv(myTexOffsetLoc, 1, myTexOffset.getData());
         }
         unuse(theCtx);
     }
@@ -207,6 +224,7 @@ void StOutInterlace::getDevices(StOutDevicesList& theList) const {
 
 void StOutInterlace::getOptions(StParamsList& theList) const {
     theList.add(params.ToReverse);
+    theList.add(params.ToSmooth);
 #if !defined(__ANDROID__)
     theList.add(params.BindToMon);
 #endif
@@ -229,6 +247,7 @@ void StOutInterlace::updateStrings() {
     params.ToReverse->setName(aLangMap.changeValueId(STTR_PARAMETER_REVERSE,  "Reverse Order"));
     params.BindToMon->setName(aLangMap.changeValueId(STTR_PARAMETER_BIND_MON, "Bind To Supported Monitor"));
     params.ToUseMask->setName(aLangMap.changeValueId(STTR_PARAMETER_USE_MASK, "Use texture mask (compatibility)"));
+    params.ToSmooth ->setName(aLangMap.changeValueId(STTR_PARAMETER_SMOOTHING,"Smoothing"));
 
     // about string
     StString& aTitle     = aLangMap.changeValueId(STTR_PLUGIN_TITLE,   "sView - Interlaced Output library");
@@ -236,7 +255,7 @@ void StOutInterlace::updateStrings() {
     StString& aDescr     = aLangMap.changeValueId(STTR_PLUGIN_DESCRIPTION,
         "(C) {0} Kirill Gavrilov <{1}>\nOfficial site: {2}\n\nThis library is distributed under LGPL3.0");
     myAbout = aTitle + '\n' + aVerString + " " + StVersionInfo::getSDKVersionString() + "\n \n"
-            + aDescr.format("2009-2020", "kirill@sview.ru", "www.sview.ru");
+            + aDescr.format("2009-2021", "kirill@sview.ru", "www.sview.ru");
 }
 
 StOutInterlace::StOutInterlace(const StHandle<StResourceManager>& theResMgr,
@@ -245,6 +264,7 @@ StOutInterlace::StOutInterlace(const StHandle<StResourceManager>& theResMgr,
   mySettings(new StSettings(theResMgr, ST_OUT_PLUGIN_NAME)),
   myFrmBuffer(new StGLFrameBuffer()),
   myTextureMask(new StGLTexture(GL_ALPHA)),
+  myTextureMaskEmpty(new StGLTexture(GL_ALPHA)),
   myTexMaskDevice(DEVICE_AUTO),
   myTexMaskReversed(false),
   myDevice(DEVICE_AUTO),
@@ -357,10 +377,12 @@ StOutInterlace::StOutInterlace(const StHandle<StResourceManager>& theResMgr,
     params.ToReverse = new StBoolParamNamed(false, stCString("reverse"),     stCString("reverse"));
     params.BindToMon = new StBoolParamNamed(true,  stCString("bindMonitor"), stCString("bindMonitor"));
     params.ToUseMask = new StBoolParamNamed(false, stCString("useMask"),     stCString("useMask"));
+    params.ToSmooth  = new StBoolParamNamed(false, stCString("toSmooth"),    stCString("toSmooth"));
     updateStrings();
 
     mySettings->loadParam(params.ToReverse);
     mySettings->loadParam(params.BindToMon);
+    mySettings->loadParam(params.ToSmooth);
     myIsFirstDraw = !mySettings->loadParam(params.ToUseMask);
     params.BindToMon->signals.onChanged.connect(this, &StOutInterlace::doSetBindToMonitor);
 
@@ -431,6 +453,7 @@ void StOutInterlace::releaseResources() {
         myQuadTexCoordBuf.release(*myContext);
         myFrmBuffer->release(*myContext);
         myTextureMask->release(*myContext);
+        myTextureMaskEmpty->release(*myContext);
         myGlProgramMask->release(*myContext);
     }
     myContext.nullify();
@@ -490,6 +513,7 @@ void StOutInterlace::beforeClose() {
     mySettings->saveParam(params.BindToMon);
     mySettings->saveParam(params.ToReverse);
     mySettings->saveParam(params.ToUseMask);
+    mySettings->saveParam(params.ToSmooth);
     mySettings->saveInt32(ST_SETTING_DEVICE_ID,    myDevice);
     mySettings->flush();
 
@@ -553,7 +577,8 @@ bool StOutInterlace::create() {
     if(!aShaderRow.init(*myContext,
                         ST_SHADER_TEMPLATE[0],
                         // drop odd horizontal line (starts from bottom)
-                        "if(int(mod(gl_FragCoord.y - 1023.5, 2.0)) != 1) { discard; }\n",
+                        "if(int(mod(gl_FragCoord.y - 1023.5, 2.0)) != 1) { discard; }\n"
+                        "aTexCoord += uTexOffset;\n",
                         ST_SHADER_TEMPLATE[2])) {
         myMsgQueue->pushError(aShadersError);
         myIsBroken = true;
@@ -561,7 +586,8 @@ bool StOutInterlace::create() {
     } else if(!aShaderRowRev.init(*myContext,
                                   ST_SHADER_TEMPLATE[0],
               // drop even horizontal line (starts from bottom)
-              "if(int(mod(gl_FragCoord.y - 1023.5, 2.0)) == 1) { discard; }\n",
+              "if(int(mod(gl_FragCoord.y - 1023.5, 2.0)) == 1) { discard; }\n"
+              "aTexCoord += uTexOffset;\n",
               ST_SHADER_TEMPLATE[2])) {
         myMsgQueue->pushError(aShadersError);
         myIsBroken = true;
@@ -584,7 +610,8 @@ bool StOutInterlace::create() {
     if(!aShaderCol.init(*myContext,
                         ST_SHADER_TEMPLATE[0],
                         // drop odd column (starts from left)
-                        "if(int(mod(gl_FragCoord.x - 1023.5, 2.0)) == 1) { discard; }\n",
+                        "if(int(mod(gl_FragCoord.x - 1023.5, 2.0)) == 1) { discard; }\n"
+                        "aTexCoord += uTexOffset;\n",
                         ST_SHADER_TEMPLATE[2])) {
         myMsgQueue->pushError(aShadersError);
         myIsBroken = true;
@@ -592,7 +619,8 @@ bool StOutInterlace::create() {
     } else if(!aShaderColRev.init(*myContext,
                                   ST_SHADER_TEMPLATE[0],
               // drop even column (starts from left)
-              "if(int(mod(gl_FragCoord.x - 1023.5, 2.0)) != 1) { discard; }\n",
+              "if(int(mod(gl_FragCoord.x - 1023.5, 2.0)) != 1) { discard; }\n"
+              "aTexCoord += uTexOffset;\n",
               ST_SHADER_TEMPLATE[2])) {
         myMsgQueue->pushError(aShadersError);
         myIsBroken = true;
@@ -616,7 +644,8 @@ bool StOutInterlace::create() {
                           ST_SHADER_TEMPLATE[0],
                           "bool isEvenX = int(mod(floor(gl_FragCoord.x - 1023.5), 2.0)) != 1;\n"
                           "bool isEvenY = int(mod(floor(gl_FragCoord.y - 1023.5), 2.0)) == 1;\n"
-                          "if((isEvenX && isEvenY) || (!isEvenX && !isEvenY)) { discard; }\n",
+                          "if((isEvenX && isEvenY) || (!isEvenX && !isEvenY)) { discard; }\n"
+                          "aTexCoord += uTexOffset;\n",
                            ST_SHADER_TEMPLATE[2])) {
         myMsgQueue->pushError(aShadersError);
         myIsBroken = true;
@@ -625,7 +654,8 @@ bool StOutInterlace::create() {
                                     ST_SHADER_TEMPLATE[0],
               "bool isEvenX = int(mod(floor(gl_FragCoord.x - 1023.5), 2.0)) != 1;\n"
               "bool isEvenY = int(mod(floor(gl_FragCoord.y - 1023.5), 2.0)) == 1;\n"
-              "if(!((isEvenX && isEvenY) || (!isEvenX && !isEvenY))) { discard; }\n",
+              "if(!((isEvenX && isEvenY) || (!isEvenX && !isEvenY))) { discard; }\n"
+              "aTexCoord += uTexOffset;\n",
               ST_SHADER_TEMPLATE[2])) {
         myMsgQueue->pushError(aShadersError);
         myIsBroken = true;
@@ -650,11 +680,13 @@ bool StOutInterlace::create() {
     const StString aMaskProgram = StString() + FRAGMENT_GET_ALPHA
      + "uniform sampler2D uTexture;\n"
        "uniform sampler2D uMaskTexture;\n"
+       "uniform vec2 uTexOffset;\n"
        "varying vec2 fTexCoord;\n"
        "void main(void) {\n"
        "  float aMask = stTextureAlpha(uMaskTexture, fTexCoord);\n"
        "  if(aMask < 0.5) { discard; }\n"
-       "  gl_FragColor = texture2D(uTexture, fTexCoord);\n"
+       "  vec2 aTexCoord = fTexCoord + uTexOffset;\n"
+       "  gl_FragColor = texture2D(uTexture, aTexCoord);\n"
        "}\n";
 
     if(!aShaderMask.init(*myContext, aMaskProgram.toCString())) {
@@ -790,6 +822,22 @@ bool StOutInterlace::initTextureMask(int  theDevice,
         return true;
     }
 
+    const GLint aTexFormat = myContext->arbTexRG ? GL_R8 : GL_ALPHA;
+    {
+        StImagePlane anImage2;
+        if(anImage2.initZero(StImagePlane::ImgGray, 16, 16, 0, 255)) {
+            if(myTextureMaskEmpty->getTextureFormat() != aTexFormat) {
+                myTextureMaskEmpty->setTextureFormat(aTexFormat);
+            }
+
+            if(!myTextureMaskEmpty->init(*myContext, anImage2)) {
+                myMsgQueue->pushError(stCString("Interlace output - critical error:\nMask texture resize failed!"));
+                myIsBroken = true;
+                return false;
+            }
+        }
+    }
+
     StImagePlane anImage;
     if(!anImage.initTrash(StImagePlane::ImgGray, theSizeX, theSizeY)) {
         myMsgQueue->pushError(stCString("Interlace output - critical error:\nNot enough memory for mask image!"));
@@ -836,7 +884,6 @@ bool StOutInterlace::initTextureMask(int  theDevice,
         }
     }
 
-    const GLint aTexFormat = myContext->arbTexRG ? GL_R8 : GL_ALPHA;
     if(myTextureMask->getTextureFormat() != aTexFormat) {
         myTextureMask->setTextureFormat(aTexFormat);
     }
@@ -909,7 +956,10 @@ void StOutInterlace::stglDraw() {
     // always draw LEFT view into real screen buffer
     const StGLBoxPx aVPort = StWindow::stglViewport(ST_WIN_MASTER);
     myContext->stglResizeViewport(aVPort);
-    StWindow::signals.onRedraw(ST_DRAW_LEFT);
+    const bool toSmooth = params.ToSmooth->getValue();
+    if(!toSmooth || !StWindow::isStereoOutput() || myIsBroken) {
+        StWindow::signals.onRedraw(ST_DRAW_LEFT);
+    }
 
     if(myIsFirstDraw) {
         myIsFirstDraw = false;
@@ -1039,38 +1089,65 @@ void StOutInterlace::stglDraw() {
     aTCoords[3] = StGLVec2(0.0f, aDY);
     myQuadTexCoordBuf.init(*myContext, aTCoords);
 
-    // draw into virtual frame buffer
-    myFrmBuffer->setupViewPort(*myContext); // we set TEXTURE sizes here
-    myFrmBuffer->bindBuffer(*myContext);
-        StWindow::signals.onRedraw(ST_DRAW_RIGHT);
-    myFrmBuffer->unbindBuffer(*myContext);
+    for(int anEyeIter = toSmooth ? 0 : 1; anEyeIter < 2; ++anEyeIter) {
+        const int anEye = (anEyeIter == 0) ? ST_DRAW_LEFT : ST_DRAW_RIGHT;
+        const bool toReverseReverse = (anEyeIter == 0) ? !isPixelReverse : isPixelReverse;
 
-    myContext->core20fwd->glDisable(GL_DEPTH_TEST);
-    myContext->core20fwd->glDisable(GL_BLEND);
+        // draw into virtual frame buffer
+        myFrmBuffer->setupViewPort(*myContext); // we set TEXTURE sizes here
+        myFrmBuffer->bindBuffer(*myContext);
+            StWindow::signals.onRedraw(anEye);
+        myFrmBuffer->unbindBuffer(*myContext);
 
-    myContext->stglResizeViewport(aVPort);
-    myFrmBuffer->bindTexture(*myContext);
-    if(toUseTexMask) {
-        myTextureMask->bind(*myContext, GL_TEXTURE1);
+        myContext->core20fwd->glDisable(GL_DEPTH_TEST);
+        myContext->core20fwd->glDisable(GL_BLEND);
+
+        myContext->stglResizeViewport(aVPort);
+        myFrmBuffer->bindTexture(*myContext);
+        StHandle<StGLTexture>& aTexMask = (anEyeIter == 0) ? myTextureMaskEmpty : myTextureMask;
+        if(toUseTexMask) {
+            aTexMask->bind(*myContext, GL_TEXTURE1);
+        }
+        const StHandle<StProgramFB>& aProgram = toUseTexMask
+                                              ? myGlProgramMask
+                                              : (toReverseReverse
+                                                ? myGlProgramsRev[aDevice]
+                                                : myGlPrograms[aDevice]);
+        aProgram->use(*myContext);
+        StGLVec2 aTexOffset = StGLVec2(0.0f, 0.0f);
+        if(toSmooth) {
+            switch(aDevice) {
+                case DEVICE_ROW_INTERLACED:
+                case DEVICE_ROW_INTERLACED_ED: {
+                    aTexOffset = StGLVec2(0.0f, -0.5f / float(myFrmBuffer->getSizeY()));
+                    break;
+                }
+                case DEVICE_COL_INTERLACED: {
+                    aTexOffset = StGLVec2(0.5f / float(myFrmBuffer->getSizeX()), 0.0f);
+                    break;
+                }
+                case DEVICE_CHESSBOARD: {
+                    aTexOffset = StGLVec2(0.5f / float(myFrmBuffer->getSizeX()),
+                                         -0.5f / float(myFrmBuffer->getSizeY()));
+                    break;
+                }
+            }
+        }
+        if(toReverseReverse) { aTexOffset = -aTexOffset; }
+        aProgram->setTexOffset(*myContext, aTexOffset);
+        myQuadVertBuf.bindVertexAttrib(*myContext, ST_VATTRIB_VERTEX);
+        myQuadTexCoordBuf.bindVertexAttrib(*myContext, ST_VATTRIB_TCOORD);
+
+        myContext->core20fwd->glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
+
+        myQuadTexCoordBuf.unBindVertexAttrib(*myContext, ST_VATTRIB_TCOORD);
+        myQuadVertBuf.unBindVertexAttrib(*myContext, ST_VATTRIB_VERTEX);
+        aProgram->unuse(*myContext);
+        if(toUseTexMask) {
+            aTexMask->unbind(*myContext);
+        }
+        myFrmBuffer->unbindTexture(*myContext);
     }
-    const StHandle<StProgramFB>& aProgram = toUseTexMask
-                                          ? myGlProgramMask
-                                          : (isPixelReverse
-                                            ? myGlProgramsRev[aDevice]
-                                            : myGlPrograms[aDevice]);
-    aProgram->use(*myContext);
-    myQuadVertBuf.bindVertexAttrib(*myContext, ST_VATTRIB_VERTEX);
-    myQuadTexCoordBuf.bindVertexAttrib(*myContext, ST_VATTRIB_TCOORD);
-
-    myContext->core20fwd->glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
-
-    myQuadTexCoordBuf.unBindVertexAttrib(*myContext, ST_VATTRIB_TCOORD);
-    myQuadVertBuf.unBindVertexAttrib(*myContext, ST_VATTRIB_VERTEX);
-    aProgram->unuse(*myContext);
-    if(toUseTexMask) {
-        myTextureMask->unbind(*myContext);
-    }
-    myFrmBuffer->unbindTexture(*myContext);
 
     if(myDevice == DEVICE_ROW_INTERLACED_ED) {
         // EDimensional activation
