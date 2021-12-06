@@ -123,27 +123,52 @@ echo Copy files into intermidiate directory:
 rem x86 binaries
 echo "%SVIEW_DISTR_PATH_X86%"
 rmdir /S /Q "%SVIEW_DISTR_PATH_X86%
-xcopy /Y ..\bin\WIN_vc_x86\*.dll            %SVIEW_DISTR_PATH_X86%\
-xcopy /Y ..\bin\WIN_vc_x86\*.exe            %SVIEW_DISTR_PATH_X86%\
+xcopy /Y "..\bin\WIN_vc_x86\*.dll"            "%SVIEW_DISTR_PATH_X86%\"
+xcopy /Y "..\bin\WIN_vc_x86\*.exe"            "%SVIEW_DISTR_PATH_X86%\"
 
 rem x86_64 binaries
 echo "%SVIEW_DISTR_PATH_AMD64%"
 rmdir /S /Q "%SVIEW_DISTR_PATH_AMD64%
-xcopy /Y ..\bin\WIN_vc_AMD64\*.dll          %SVIEW_DISTR_PATH_AMD64%\
-xcopy /Y ..\bin\WIN_vc_AMD64\*.exe          %SVIEW_DISTR_PATH_AMD64%\
+xcopy /Y "..\bin\WIN_vc_AMD64\*.dll"          "%SVIEW_DISTR_PATH_AMD64%\"
+xcopy /Y "..\bin\WIN_vc_AMD64\*.exe"          "%SVIEW_DISTR_PATH_AMD64%\"
 
 rem shared resources
-xcopy /Y ..\share\sView\demo\demo.jps       %SVIEW_DISTR_PATH_X86%\
-xcopy /Y ..\share\sView\demo\demo_robot.jps %SVIEW_DISTR_PATH_X86%\
-xcopy /S /Y ..\bin\WIN_vc_x86\lang\*        %SVIEW_DISTR_PATH_X86%\lang\
-xcopy /S /Y ..\bin\WIN_vc_x86\shaders\*     %SVIEW_DISTR_PATH_X86%\shaders\
-xcopy /Y ..\bin\WIN_vc_x86\textures\*       %SVIEW_DISTR_PATH_X86%\textures\
-xcopy /Y ..\bin\WIN_vc_x86\web\*            %SVIEW_DISTR_PATH_X86%\web\
-xcopy /Y media\sView_JPS.ico                %SVIEW_DISTR_PATH_X86%\icons\
-xcopy /Y media\sView_PNS.ico                %SVIEW_DISTR_PATH_X86%\icons\
-xcopy /Y media\sView_Media.ico              %SVIEW_DISTR_PATH_X86%\icons\
-xcopy /S /Y info\*                          %SVIEW_DISTR_PATH_X86%\info\
-copy  /Y ..\docs\license-gpl-3.0.txt        %SVIEW_DISTR_PATH_X86%\info\license.txt
+xcopy /Y "..\share\sView\demo\demo.jps"       "%SVIEW_DISTR_PATH_X86%\"
+xcopy /Y "..\share\sView\demo\demo_robot.jps" "%SVIEW_DISTR_PATH_X86%\"
+xcopy /S /Y "..\bin\WIN_vc_x86\lang\*"        "%SVIEW_DISTR_PATH_X86%\lang\"
+xcopy /S /Y "..\bin\WIN_vc_x86\shaders\*"     "%SVIEW_DISTR_PATH_X86%\shaders\"
+xcopy /Y "..\bin\WIN_vc_x86\textures\*"       "%SVIEW_DISTR_PATH_X86%\textures\"
+xcopy /Y "..\bin\WIN_vc_x86\web\*"            "%SVIEW_DISTR_PATH_X86%\web\"
+xcopy /Y "media\sView_JPS.ico"                "%SVIEW_DISTR_PATH_X86%\icons\"
+xcopy /Y "media\sView_PNS.ico"                "%SVIEW_DISTR_PATH_X86%\icons\"
+xcopy /Y "media\sView_Media.ico"              "%SVIEW_DISTR_PATH_X86%\icons\"
+xcopy /S /Y "info\*"                          "%SVIEW_DISTR_PATH_X86%\info\"
+copy  /Y "..\docs\license-gpl-3.0.txt"        "%SVIEW_DISTR_PATH_X86%\info\license.txt"
+
+rem Archive tool
+set "THE_7Z_PARAMS=-t7z -m0=lzma -mx=9 -mfb=64 -md=32m -ms=on"
+set "THE_7Z_PATH=%ProgramW6432%\7-Zip\7z.exe"
+set "anArchName=sView_v.%YEAR%.%MONTH00%%SVIEW_VER_TYPE%%DAY%_amd64"
+set "SVIEW_DISTR_PATH_ARCH=%~dp0temp\arch\%anArchName%"
+echo Creating archive %anArchName%.7z
+rmdir /S /Q "%~dp0temp\arch"
+if exist "%~dp0repository\win\%anArchName%.7z" del "%~dp0repository\win\%anArchName%.7z"
+xcopy /Y "..\bin\WIN_vc_AMD64\*.dll"          "%SVIEW_DISTR_PATH_ARCH%\"
+xcopy /Y "..\bin\WIN_vc_AMD64\*.exe"          "%SVIEW_DISTR_PATH_ARCH%\"
+xcopy /Y "..\share\sView\demo\demo.jps"       "%SVIEW_DISTR_PATH_ARCH%\"
+xcopy /Y "..\share\sView\demo\demo_robot.jps" "%SVIEW_DISTR_PATH_ARCH%\"
+xcopy /S /Y "..\bin\WIN_vc_x86\lang\*"        "%SVIEW_DISTR_PATH_ARCH%\lang\"
+xcopy /S /Y "..\bin\WIN_vc_x86\shaders\*"     "%SVIEW_DISTR_PATH_ARCH%\shaders\"
+xcopy /Y "..\bin\WIN_vc_x86\textures\*"       "%SVIEW_DISTR_PATH_ARCH%\textures\"
+xcopy /Y "..\bin\WIN_vc_x86\web\*"            "%SVIEW_DISTR_PATH_ARCH%\web\"
+xcopy /Y "media\sView_JPS.ico"                "%SVIEW_DISTR_PATH_ARCH%\icons\"
+xcopy /Y "media\sView_PNS.ico"                "%SVIEW_DISTR_PATH_ARCH%\icons\"
+xcopy /Y "media\sView_Media.ico"              "%SVIEW_DISTR_PATH_ARCH%\icons\"
+xcopy /S /Y "info\*"                          "%SVIEW_DISTR_PATH_ARCH%\info\"
+copy  /Y "..\docs\license-gpl-3.0.txt"        "%SVIEW_DISTR_PATH_ARCH%\info\license.txt"
+pushd "%~dp0temp\arch"
+"%THE_7Z_PATH%" a -r %THE_7Z_PARAMS% "%~dp0repository/win/%anArchName%.7z" "%anArchName%"
+popd
 
 echo Compile distribution package
 rem www.jrsoftware.org
