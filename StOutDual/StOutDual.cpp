@@ -180,9 +180,9 @@ void StOutDual::updateStrings() {
     StString& aTitle     = aLangMap.changeValueId(STTR_PLUGIN_TITLE,   "sView - Dual Output module");
     StString& aVerString = aLangMap.changeValueId(STTR_VERSION_STRING, "version");
     StString& aDescr     = aLangMap.changeValueId(STTR_PLUGIN_DESCRIPTION,
-        "(C) {0} Kirill Gavrilov <{1}>\nOfficial site: {2}\n\nThis library is distributed under LGPL3.0");
+        "(C) {0} Kirill Gavrilov Tartynskih <{1}>\nOfficial site: {2}\n\nThis library is distributed under LGPL3.0");
     myAbout = aTitle + '\n' + aVerString + " " + StVersionInfo::getSDKVersionString() + "\n \n"
-            + aDescr.format("2007-2020", "kirill@sview.ru", "www.sview.ru");
+            + aDescr.format("2007-2022", "kirill@sview.ru", "www.sview.ru");
 }
 
 StOutDual::StOutDual(const StHandle<StResourceManager>& theResMgr,

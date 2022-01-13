@@ -17,7 +17,7 @@
 static StString getAbout() {
     StString anAboutString =
         StString("sView ") + StVersionInfo::getSDKVersionString() + '\n'
-        + "Copyright (C) 2007-2020 Kirill Gavrilov (kirill@sview.ru).\n"
+        + "Copyright (C) 2007-2022 Kirill Gavrilov Tartynskih <kirill@sview.ru>.\n"
         + "Usage: sView [options] - file\n"
         + "Available options:\n"
           "  --fullscreen         Open fullscreen\n"

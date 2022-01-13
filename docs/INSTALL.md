@@ -82,14 +82,14 @@ For historical reasons, sView building environment was initially defined by a Co
 Code::Blocks remains the main way for building sView on Windows platform, although development can be done using Visual Studio (see below).
 
 There are several building targets depending on platform
-(Mac OS X, Linux, Windows) and debugging possibilities:
+(macOS, Linux, Windows) and debugging possibilities:
 * `WIN_vc_x86`,        32-bit target using Visual Studio compiler
 * `WIN_vc_AMD64_DEBUG`,64-bit target with debugging options
 * `WIN_vc_AMD64`,      64-bit target using Visual Studio compiler
 * `LINUX_gcc`,         Linux target, g++ compiler
 * `LINUX_gcc_DEBUG`,   Linux target with debugging options
-* `MAC_gcc`,           Mac OS X target, g++ compatible compiler
-* `MAC_gcc_DEBUG`,     Mac OS X target with debugging options
+* `MAC_gcc`,           macOS target, g++ compatible compiler
+* `MAC_gcc_DEBUG`,     macOS target with debugging options
 
 Notice that the following compilers should be configured within Code::Blocks:
 * `gcc`,               configured to g++ or compatible compiler (on systems other than Windows)

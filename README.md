@@ -3,7 +3,7 @@ sView - stereoscopic media player
 
 sView is a cross-platform solution to view 3D stereoscopic videos and images.
 Please visit official site for more information:<br/>
-http://www.sview.ru
+https://www.sview.ru
 
 ## sView SDK
 
@@ -30,7 +30,7 @@ To get up-to-date sources please clone official git repository:
 
 Read the documentation in the **docs/** directory in git.
 Online help is available on official site:<br/>
-http://www.sview.ru/en/sview/usertips/
+https://www.sview.ru/en/sview/usertips/
 
 ## Licensing
 

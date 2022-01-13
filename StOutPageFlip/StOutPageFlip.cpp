@@ -480,9 +480,9 @@ void StOutPageFlip::updateStrings() {
     StString& aTitle     = myLangMap.changeValueId(STTR_PLUGIN_TITLE,   "sView - PageFlip Output module");
     StString& aVerString = myLangMap.changeValueId(STTR_VERSION_STRING, "version");
     StString& aDescr     = myLangMap.changeValueId(STTR_PLUGIN_DESCRIPTION,
-        "(C) {0} Kirill Gavrilov <{1}>\nOfficial site: {2}\n\nThis library is distributed under LGPL3.0");
+        "(C) {0} Kirill Gavrilov Tartynskih <{1}>\nOfficial site: {2}\n\nThis library is distributed under LGPL3.0");
     myAbout = aTitle + '\n' + aVerString + " " + StVersionInfo::getSDKVersionString() + "\n \n"
-            + aDescr.format("2007-2020", "kirill@sview.ru", "www.sview.ru");
+            + aDescr.format("2007-2022", "kirill@sview.ru", "www.sview.ru");
 }
 
 StOutPageFlip::StOutPageFlip(const StHandle<StResourceManager>& theResMgr,

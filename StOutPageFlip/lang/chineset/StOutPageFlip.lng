@@ -21,5 +21,5 @@
 1134=eDimensional 自動 開啟 / 關閉
 2000=sView - PageFlip 輸出模組
 2001=版本
-2002=© {0} 基里爾·加夫里洛夫 Kirill Gavrilov <{1}>\n官方網站: {2}
+2002=© {0} 基里爾·加夫里洛夫 Kirill Gavrilov Tartynskih <{1}>\n官方網站: {2}
 3001=OpenGL 硬體 QuadBuffer 無法使用!\n\n你可以嘗試其他的 Quad Buffer 類型\n(包含 OpenGL 在額外區段的模擬).

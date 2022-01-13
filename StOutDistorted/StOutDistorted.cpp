@@ -202,14 +202,14 @@ void StOutDistorted::updateStrings() {
     myAboutTitle     = aLangMap.changeValueId(STTR_PLUGIN_TITLE,   "sView - Distorted Output module");
     myAboutVerString = aLangMap.changeValueId(STTR_VERSION_STRING, "version");
     myAboutDescr     = aLangMap.changeValueId(STTR_PLUGIN_DESCRIPTION,
-                                              "(C) {0} Kirill Gavrilov <{1}>\nOfficial site: {2}\n\nThis library is distributed under LGPL3.0");
+                                              "(C) {0} Kirill Gavrilov Tartynskih <{1}>\nOfficial site: {2}\n\nThis library is distributed under LGPL3.0");
     updateAbout();
 }
 
 void StOutDistorted::updateAbout() {
     myAbout = myAboutTitle + '\n' + myAboutVerString + " " + StVersionInfo::getSDKVersionString() + "\n \n"
             + (!myAboutVrDevice.isEmpty() ? ("Connected hardware: " + myAboutVrDevice + "\n \n") : "")
-            + myAboutDescr.format("2013-2020", "kirill@sview.ru", "www.sview.ru");
+            + myAboutDescr.format("2013-2022", "kirill@sview.ru", "www.sview.ru");
 #ifdef ST_HAVE_OPENVR
     myAbout = myAbout + "\n \n"
             + "This software uses OpenVR library:\n"
