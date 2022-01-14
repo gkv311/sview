@@ -47,7 +47,7 @@ static LRESULT CALLBACK stWndProcWrapper(HWND   theWnd,
     if(theMsg == WM_CREATE) {
         // save pointer to our class instance (sent on window create) to window storage
         CREATESTRUCTW* aCreateInfo = (CREATESTRUCTW* )theParamL;
-        ::SetWindowLongPtr(theWnd, GWLP_USERDATA, (LONG_PTR )aCreateInfo->lpCreateParams);
+        ::SetWindowLongPtrW(theWnd, GWLP_USERDATA, (LONG_PTR )aCreateInfo->lpCreateParams);
     }
     // get pointer to our class instance
     StWindowImpl* aThis = (StWindowImpl* )::GetWindowLongPtr(theWnd, GWLP_USERDATA);
@@ -1060,10 +1060,20 @@ void StWindowImpl::setFullScreen(bool theFullscreen) {
         // generic
         const StMonitor& stMon = (myMonMasterFull == -1) ? myMonitors[myRectNorm.center()] : myMonitors[myMonMasterFull];
         myRectFull = stMon.getVRect();
-        SetWindowLongPtr(aWin, GWL_STYLE, WS_POPUP);
+        SetWindowLongPtrW(aWin, GWL_STYLE, WS_POPUP);
+
+        int aTop   = myRectFull.top();
+        int aSizeY = myRectFull.height();
+        if (!attribs.IsExclusiveFullScr)
+        {
+          // workaround slow switching into fullscreen mode and back on Windows 10
+          // due to OpenGL driver implicitly activating an exclusive GPU usage mode
+          aTop   -= 2;
+          aSizeY += 2;
+        }
         SetWindowPos(aWin, HWND_TOP,
-                     myRectFull.left(),  myRectFull.top(),
-                     myRectFull.width(), myRectFull.height(),
+                     myRectFull.left(),  aTop,
+                     myRectFull.width(), aSizeY,
                      !attribs.IsHidden ? SWP_SHOWWINDOW : SWP_NOACTIVATE); // show window
 
         // use tiled Master+Slave layout within single window if possible
@@ -1104,7 +1114,7 @@ void StWindowImpl::setFullScreen(bool theFullscreen) {
             // embedded
             SetParent(myMaster.hWindowGl, myParentWin);
         } else if(!attribs.IsNoDecor) {
-            SetWindowLongPtr(myMaster.hWindow, GWL_STYLE, WS_OVERLAPPEDWINDOW);
+            SetWindowLongPtrW(myMaster.hWindow, GWL_STYLE, WS_OVERLAPPEDWINDOW);
         }
 
         RECT aRect;
@@ -1216,7 +1226,7 @@ void StWindowImpl::updateWindowPos() {
             {
               // workaround slow switching into fullscreen mode and back on Windows 10
               // due to OpenGL driver implicitly activating an exclusive GPU usage mode
-              aTop   -= 2;
+              //aTop -= 2;
               aSizeY += 2;
             }
             SetWindowPos(myMaster.hWindowGl, HWND_TOP,

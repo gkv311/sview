@@ -1004,7 +1004,7 @@ StPointD_t StWindowImpl::getMousePos() {
             &&  myTiledCfg == TiledCfg_Separate
             &&  myParentWin == NULL) {
                 // workaround for non-exclusive fullscreen mode
-                aCursor.ptScreenPos.y += 2;
+                //aCursor.ptScreenPos.y += 2;
             }
 
             myIsPreciseCursor = true;
