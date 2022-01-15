@@ -38,6 +38,7 @@ bool StWinHandles::glMakeCurrent() {
 
 int StWinHandles::glCreateContext(StWinHandles*    theSlave,
                                   const StRectI_t& theRect,
+                                  const int        theColorSize,
                                   const int        theDepthSize,
                                   const int        theStencilSize,
                                   const bool       theIsQuadStereo,

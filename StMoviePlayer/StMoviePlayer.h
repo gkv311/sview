@@ -1,5 +1,5 @@
 /**
- * Copyright © 2007-2020 Kirill Gavrilov <kirill@sview.ru>
+ * Copyright © 2007-2022 Kirill Gavrilov <kirill@sview.ru>
  *
  * StMoviePlayer program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -223,6 +223,7 @@ class StMoviePlayer : public StApplication {
         StHandle<StBoolParamNamed>    ToLimitFps;        //!< limit CPU usage or not
         StHandle<StBoolParamNamed>    ToSmoothUploads;   //!< smooth texture uploads
         StHandle<StBoolParamNamed>    IsVSyncOn;         //!< flag to use VSync
+        StHandle<StBoolParamNamed>    ToUseDeepColor;    //!< flag to use Deep Color
         StHandle<StEnumParam>         StartWebUI;        //!< to start Web UI or not
         StHandle<StBoolParamNamed>    ToPrintWebErrors;  //!< print Web UI starting errors
         StHandle<StBoolParamNamed>    IsLocalWebUI;      //!< restrict remote access to 127.0.0.0

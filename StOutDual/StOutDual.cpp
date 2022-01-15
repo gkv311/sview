@@ -433,7 +433,9 @@ void StOutDual::stglDraw() {
         myContext->stglResetScissorRect();
     } else {
         // resize FBO
-        if(!myFrBuffer->initLazy(*myContext, GL_RGBA8, aVPMaster.width(), aVPMaster.height(), StWindow::hasDepthBuffer())) {
+        if(!myFrBuffer->initLazy(*myContext,
+                                 myContext->isDeepColorWindow() ? GL_RGB10_A2 : GL_RGBA8,
+                                 aVPMaster.width(), aVPMaster.height(), StWindow::hasDepthBuffer())) {
             myMsgQueue->pushError(stCString("Dual output - critical error:\nFrame Buffer Object resize failed!"));
             myIsBroken = true;
             return;

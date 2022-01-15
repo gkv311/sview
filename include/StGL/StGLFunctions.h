@@ -60,6 +60,8 @@
     #define GL_RGBA8 0x8058
     // GL_EXT_texture_format_BGRA8888
     #define GL_BGRA_EXT 0x80E1 // same as GL_BGRA on desktop
+    // in core since OpenGL ES 3.0, extension GL_OES_required_internalformat
+    #define GL_RGB10_A2 0x8059
 
     // debug ARB extension
     #define GL_DEBUG_OUTPUT                   0x92E0

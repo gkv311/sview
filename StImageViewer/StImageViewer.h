@@ -1,5 +1,5 @@
 /**
- * Copyright © 2007-2020 Kirill Gavrilov <kirill@sview.ru>
+ * Copyright © 2007-2022 Kirill Gavrilov <kirill@sview.ru>
  *
  * StImageViewer program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -150,6 +150,7 @@ class StImageViewer : public StApplication {
         StHandle<StBoolParamNamed>    ToHideNavBar;     //!< hide system-provided navigation bar
         StHandle<StBoolParamNamed>    IsExclusiveFullScreen; //!< exclusive fullscreen mode
         StHandle<StBoolParamNamed>    IsVSyncOn;        //!< flag to use VSync
+        StHandle<StBoolParamNamed>    ToUseDeepColor;   //!< flag to use Deep Color
         StHandle<StBoolParamNamed>    ToOpenLast;       //!< option to open last file from recent list by default
         StHandle<StBoolParamNamed>    ToSaveRecent;     //!< load/save recent file
         StString                      lastFolder;       //!< laster folder used to open / save file

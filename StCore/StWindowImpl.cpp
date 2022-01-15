@@ -103,6 +103,7 @@ StWindowImpl::StWindowImpl(const StHandle<StResourceManager>& theResMgr,
     attribs.IsStereoOutput = false;
     attribs.IsGlStereo     = false;
     attribs.IsGlDebug      = false;
+    attribs.GlColorSize    = 30;
     attribs.GlDepthSize    = 16;
     attribs.GlStencilSize  = 0;
 #if defined(__ANDROID__)
@@ -357,6 +358,9 @@ void StWindowImpl::getAttributes(StWinAttr* theAttributes) const {
             case StWinAttr_GlDebug:
                 anIter[1] = (StWinAttr )attribs.IsGlDebug;
                 break;
+            case StWinAttr_GlColorSize:
+                anIter[1] = (StWinAttr )attribs.GlColorSize;
+                break;
             case StWinAttr_GlDepthSize:
                 anIter[1] = (StWinAttr )attribs.GlDepthSize;
                 break;
@@ -407,6 +411,9 @@ void StWindowImpl::setAttributes(const StWinAttr* theAttributes) {
                 break;
             case StWinAttr_GlDebug:
                 attribs.IsGlDebug  = (anIter[1] == 1);
+                break;
+            case StWinAttr_GlColorSize:
+                attribs.GlColorSize = (int8_t )anIter[1];
                 break;
             case StWinAttr_GlDepthSize:
                 attribs.GlDepthSize = (int8_t )anIter[1];

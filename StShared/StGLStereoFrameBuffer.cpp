@@ -117,6 +117,7 @@ bool StGLStereoFrameBuffer::init(StGLContext&  theCtx,
     }
 
     // create the textures
+    StGLStereoTexture::setTextureFormat(theCtx.isDeepColorWindow() ? GL_RGB10_A2 : GL_RGBA8);
     if(!StGLStereoTexture::initTrash(theCtx, theTextureSizeX, theTextureSizeY)) {
         release(theCtx);
         return false;

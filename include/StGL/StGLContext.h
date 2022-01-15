@@ -1,5 +1,5 @@
 /**
- * Copyright © 2012-2019 Kirill Gavrilov <kirill@sview.ru>
+ * Copyright © 2012-2022 Kirill Gavrilov <kirill@sview.ru>
  *
  * This code is licensed under MIT license (see docs/license-mit.txt for details).
  */
@@ -262,6 +262,20 @@ class StGLContext {
      */
     ST_LOCAL GLint getMaxTextureSize() const {
         return myDevCaps.maxTexDim;
+    }
+
+    /**
+     * Return default buffer (window) bits.
+     */
+    ST_LOCAL const BufferBits& getWindowBits() const {
+        return myWindowBits;
+    }
+
+    /**
+     * Return TRUE if window buffer has deep color format (30-bit RGB).
+     */
+    ST_LOCAL bool isDeepColorWindow() const {
+        return myWindowBits.RGB >= 30;
     }
 
     /**

@@ -355,6 +355,7 @@ class StWindowImpl {
         bool       IsStereoOutput;     //!< indicate stereoscopic output on / off (used for interconnection between modules)
         bool       IsGlStereo;         //!< request OpenGL hardware accelerated QuadBuffer
         bool       IsGlDebug;          //!< request OpenGL debug context
+        int8_t     GlColorSize;        //!< OpenGL Color Buffer size
         int8_t     GlDepthSize;        //!< OpenGL Depth Buffer size
         int8_t     GlStencilSize;      //!< OpenGL Stencil Buffer size
         bool       IsFullScreen;       //!< to show in fullscreen mode

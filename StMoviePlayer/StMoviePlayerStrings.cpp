@@ -1,5 +1,5 @@
 /**
- * Copyright © 2013-2020 Kirill Gavrilov <kirill@sview.ru>
+ * Copyright © 2013-2022 Kirill Gavrilov <kirill@sview.ru>
  *
  * StMoviePlayer program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -321,6 +321,8 @@ void loadDefaults(StLangMap& theStrings) {
                "Open last played file on startup");
     theStrings(OPTION_SWAP_JPS,
                "Swap JPS/PNS views order");
+    theStrings(OPTION_USE_DEEP_COLOR,
+               "Prefer Deep Color (30-bit RGB)");
 
     theStrings(FILE_VIDEO_OPEN,
                "Open another movie");

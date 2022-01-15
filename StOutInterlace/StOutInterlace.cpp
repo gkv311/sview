@@ -1012,7 +1012,9 @@ void StOutInterlace::stglDraw() {
     convertRectToBacking(aBackStore, ST_WIN_MASTER);
 
     // resize FBO
-    if(!myFrmBuffer->initLazy(*myContext, GL_RGBA8, aVPort.width(), aVPort.height(), StWindow::hasDepthBuffer())) {
+    if(!myFrmBuffer->initLazy(*myContext,
+                              myContext->isDeepColorWindow() ? GL_RGB10_A2 : GL_RGBA8,
+                              aVPort.width(), aVPort.height(), StWindow::hasDepthBuffer())) {
         myMsgQueue->pushError(stCString("Interlace output - critical error:\nFrame Buffer Object resize failed!"));
         myIsBroken = true;
         return;

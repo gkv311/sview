@@ -1,6 +1,6 @@
 /**
  * StCore, window system independent C++ toolkit for writing OpenGL applications.
- * Copyright © 2007-2014 Kirill Gavrilov <kirill@sview.ru>
+ * Copyright © 2007-2022 Kirill Gavrilov <kirill@sview.ru>
  *
  * This code is licensed under MIT license (see docs/license-mit.txt for details).
  */
@@ -51,6 +51,7 @@ class StWinGlrc {
 #if defined(ST_HAVE_EGL) || defined(__ANDROID__)
     ST_LOCAL StWinGlrc(EGLDisplay theDisplay,
                        const bool theDebugCtx,
+                       int8_t     theGlColorSize,
                        int8_t     theGlDepthSize,
                        int8_t     theGlStencilSize);
 #elif defined(_WIN32)
@@ -166,6 +167,7 @@ class StWinHandles {
      */
     ST_LOCAL int glCreateContext(StWinHandles*    theSlave,
                                  const StRectI_t& theRect,
+                                 const int        theColorSize,
                                  const int        theDepthSize,
                                  const int        theStencilSize,
                                  const bool       theIsQuadStereo,

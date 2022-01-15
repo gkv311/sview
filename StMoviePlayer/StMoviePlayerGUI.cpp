@@ -2465,6 +2465,7 @@ void StMoviePlayerGUI::doMobileSettings(const size_t ) {
 #if defined(_WIN32) || defined(__APPLE__) // implemented only on Windows and macOS
     aParams.add(myPlugin->params.IsExclusiveFullScreen);
 #endif
+    aParams.add(myPlugin->params.ToUseDeepColor);
     aParams.add(myPlugin->params.ToSmoothUploads);
     if(isMobile()) {
         //aParams.add(myPlugin->params.ToHideStatusBar);

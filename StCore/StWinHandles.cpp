@@ -1,6 +1,6 @@
 /**
  * StCore, window system independent C++ toolkit for writing OpenGL applications.
- * Copyright © 2007-2014 Kirill Gavrilov <kirill@sview.ru>
+ * Copyright © 2007-2022 Kirill Gavrilov <kirill@sview.ru>
  *
  * This code is licensed under MIT license (see docs/license-mit.txt for details).
  */
@@ -17,8 +17,65 @@
 
 #if defined(ST_HAVE_EGL) || defined(__ANDROID__)
 
+/**
+ * Wrapper over eglChooseConfig() called with preferred defaults.
+ */
+static EGLConfig chooseEglSurfConfig(EGLDisplay theDisplay,
+                                     const bool theDebugCtx,
+                                     int8_t     theGlColorSize,
+                                     int8_t     theGlDepthSize,
+                                     int8_t     theGlStencilSize) {
+    EGLint aConfigAttribs[] = {
+        EGL_RED_SIZE,   theGlColorSize >= 30 ? 10 : 8,
+        EGL_GREEN_SIZE, theGlColorSize >= 30 ? 10 : 8,
+        EGL_BLUE_SIZE,  theGlColorSize >= 30 ? 10 : 8,
+        EGL_ALPHA_SIZE, 0,
+        EGL_DEPTH_SIZE,   theGlDepthSize,
+        EGL_STENCIL_SIZE, theGlStencilSize,
+    #if defined(GL_ES_VERSION_2_0)
+        EGL_CONFORMANT,      EGL_OPENGL_ES2_BIT,
+        EGL_RENDERABLE_TYPE, EGL_OPENGL_ES2_BIT,
+    #else
+        EGL_CONFORMANT,      EGL_OPENGL_BIT,
+        EGL_RENDERABLE_TYPE, EGL_OPENGL_BIT,
+    #endif
+        EGL_NONE
+    };
+
+    EGLint aNbConfigs = 0;
+    EGLConfig aCfg = NULL;
+    if(eglChooseConfig(theDisplay, aConfigAttribs, &aCfg, 1, &aNbConfigs) == EGL_TRUE && aCfg != NULL) {
+        return aCfg;
+    }
+    eglGetError();
+
+    if(theGlColorSize >= 30) {
+        // try config with smaller color buffer
+        aConfigAttribs[0 * 2 + 1] = 8;
+        aConfigAttribs[1 * 2 + 1] = 8;
+        aConfigAttribs[2 * 2 + 1] = 8;
+        if(eglChooseConfig(theDisplay, aConfigAttribs, &aCfg, 1, &aNbConfigs) == EGL_TRUE && aCfg != NULL) {
+            return aCfg;
+        }
+        eglGetError();
+    }
+
+    if(theGlDepthSize > 16) {
+        // try config with smaller depth buffer
+        aConfigAttribs[4 * 2 + 1] = 16;
+        aConfigAttribs[5 * 2 + 1] = 0;
+        if(eglChooseConfig(theDisplay, aConfigAttribs, &aCfg, 1, &aNbConfigs) == EGL_TRUE && aCfg != NULL) {
+            return aCfg;
+        }
+        eglGetError();
+    }
+
+    return NULL;
+}
+
 StWinGlrc::StWinGlrc(EGLDisplay theDisplay,
                      const bool theDebugCtx,
+                     int8_t     theGlColorSize,
                      int8_t     theGlDepthSize,
                      int8_t     theGlStencilSize)
 : myDisplay(theDisplay),
@@ -40,39 +97,10 @@ StWinGlrc::StWinGlrc(EGLDisplay theDisplay,
                + "  Client APIs: " + eglQueryString(myDisplay, EGL_CLIENT_APIS) + "\n"
                + "  Extensions:  " + eglQueryString(myDisplay, EGL_EXTENSIONS));
 
-    EGLint aConfigAttribs[] = {
-        EGL_RED_SIZE,   8,
-        EGL_GREEN_SIZE, 8,
-        EGL_BLUE_SIZE,  8,
-        EGL_ALPHA_SIZE, 0,
-        EGL_DEPTH_SIZE,   theGlDepthSize,
-        EGL_STENCIL_SIZE, theGlStencilSize,
-    #if defined(GL_ES_VERSION_2_0)
-        EGL_CONFORMANT,      EGL_OPENGL_ES2_BIT,
-        EGL_RENDERABLE_TYPE, EGL_OPENGL_ES2_BIT,
-    #else
-        EGL_CONFORMANT,      EGL_OPENGL_BIT,
-        EGL_RENDERABLE_TYPE, EGL_OPENGL_BIT,
-    #endif
-        EGL_NONE
-    };
-
-    EGLint aNbConfigs = 0;
-    if(eglChooseConfig(myDisplay, aConfigAttribs, &myConfig, 1, &aNbConfigs) != EGL_TRUE
-    || myConfig == NULL) {
-        if(theGlDepthSize <= 16) {
-            ST_ERROR_LOG("EGL, eglChooseConfig FAILED");
-            return;
-        }
-
-        eglGetError();
-        aConfigAttribs[4 * 2 + 1] = 16; // try config with smaller depth buffer
-        aConfigAttribs[5 * 2 + 1] = 0;
-        if(eglChooseConfig(myDisplay, aConfigAttribs, &myConfig, 1, &aNbConfigs) != EGL_TRUE
-        || myConfig == NULL) {
-            ST_ERROR_LOG("EGL, eglChooseConfig FAILED");
-            return;
-        }
+    myConfig = chooseEglSurfConfig(myDisplay, theDebugCtx, theGlColorSize, theGlDepthSize, theGlStencilSize);
+    if(myConfig == NULL) {
+        ST_ERROR_LOG("EGL, eglChooseConfig FAILED");
+        return;
     }
 
     /*EGLenum aEglApi = eglQueryAPI();
@@ -393,6 +421,7 @@ bool StWinHandles::glMakeCurrent() {
 
 int StWinHandles::glCreateContext(StWinHandles*    theSlave,
                                   const StRectI_t& theRect,
+                                  const int        theColorSize,
                                   const int        theDepthSize,
                                   const int        theStencilSize,
                                   const bool       theIsQuadStereo,
@@ -452,23 +481,34 @@ int StWinHandles::glCreateContext(StWinHandles*    theSlave,
       int aPixFrmtId = 0;
       if(aCtx.extAll->wglChoosePixelFormatARB != NULL) {
           for(bool toTryQuadBuffer = theIsQuadStereo;;) {
-              const int aPixAttribs[] = {
+              int aPixAttribs[] = {
                   WGL_DRAW_TO_WINDOW_ARB, GL_TRUE,
                   WGL_SUPPORT_OPENGL_ARB, GL_TRUE,
                   WGL_DOUBLE_BUFFER_ARB,  GL_TRUE,
                   WGL_STEREO_ARB,         toTryQuadBuffer ? GL_TRUE : GL_FALSE,
                   WGL_PIXEL_TYPE_ARB,     WGL_TYPE_RGBA_ARB,
-                  //WGL_SAMPLE_BUFFERS_ARB, 1,
-                  //WGL_SAMPLES_ARB,        8,
-                  // WGL_CONTEXT_ROBUST_ACCESS_BIT_ARB       0x00000004
-                  WGL_COLOR_BITS_ARB,     24,
+                  //WGL_COLOR_BITS_ARB,     24,
+                  WGL_RED_BITS_ARB,       theColorSize == 30 ? 10 : 8,
+                  WGL_GREEN_BITS_ARB,     theColorSize == 30 ? 10 : 8,
+                  WGL_BLUE_BITS_ARB,      theColorSize == 30 ? 10 : 8,
+                  //WGL_ALPHA_BITS_ARB,     theColorSize == 30 ? 2  : 8,
                   WGL_DEPTH_BITS_ARB,     theDepthSize,
                   WGL_STENCIL_BITS_ARB,   theStencilSize,
                   0, 0,
               };
               unsigned int aFrmtsNb = 0;
               aCtx.extAll->wglChoosePixelFormatARB(hDC, aPixAttribs, NULL, 1, &aPixFrmtId, &aFrmtsNb);
-              if(toTryQuadBuffer && aPixFrmtId == 0) {
+              if(aPixFrmtId == 0 && theColorSize == 30) {
+                  for(size_t anAttribIter = 0; anAttribIter < sizeof(aPixAttribs) / 2; anAttribIter += 2) {
+                      if(aPixAttribs[anAttribIter] == WGL_RED_BITS_ARB
+                      || aPixAttribs[anAttribIter] == WGL_GREEN_BITS_ARB
+                      || aPixAttribs[anAttribIter] == WGL_BLUE_BITS_ARB) {
+                          aPixAttribs[anAttribIter + 1] = 8;
+                      }
+                  }
+                  aCtx.extAll->wglChoosePixelFormatARB(hDC, aPixAttribs, NULL, 1, &aPixFrmtId, &aFrmtsNb);
+              }
+              if(aPixFrmtId == 0 && toTryQuadBuffer) {
                   toTryQuadBuffer = false;
                   continue;
               }
@@ -530,6 +570,7 @@ int StWinHandles::glCreateContext(StWinHandles*    theSlave,
                       STWIN_ERROR_WIN32_GLRC_ACTIVATE, "WinAPI, Can't activate Master GL Rendering Context");
     return STWIN_INIT_SUCCESS;
 #elif defined(__linux__)
+    (void )theColorSize;
     // create an OpenGL rendering context
 #if defined(ST_HAVE_EGL) || defined(__ANDROID__)
     // GL context is created beforehand for EGL

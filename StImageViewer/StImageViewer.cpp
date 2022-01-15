@@ -1,5 +1,5 @@
 /**
- * Copyright © 2007-2020 Kirill Gavrilov <kirill@sview.ru>
+ * Copyright © 2007-2022 Kirill Gavrilov <kirill@sview.ru>
  *
  * StImageViewer program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -116,6 +116,7 @@ void StImageViewer::updateStrings() {
     params.ToHideNavBar   ->setName(tr(OPTION_HIDE_NAVIGATION_BAR));
     params.IsExclusiveFullScreen->setName(tr(MENU_EXCLUSIVE_FULLSCREEN));
     params.IsVSyncOn->setName(tr(MENU_VSYNC));
+    params.ToUseDeepColor->setName(tr(OPTION_USE_DEEP_COLOR));
     params.ToOpenLast->setName(tr(OPTION_OPEN_LAST_ON_STARTUP));
     params.ToSaveRecent->setName(stCString("Remember recent file"));
     params.TargetFps->setName(stCString("FPS Target"));
@@ -199,6 +200,10 @@ StImageViewer::StImageViewer(const StHandle<StResourceManager>& theResMgr,
     params.IsVSyncOn     = new StBoolParamNamed(true,  stCString("vsync"));
     params.IsVSyncOn->signals.onChanged = stSlot(this, &StImageViewer::doSwitchVSync);
     StApplication::params.VSyncMode->setValue(StGLContext::VSync_ON);
+    params.ToUseDeepColor = new StBoolParamNamed(true, stCString("deepColor"));
+#if defined(__ANDROID__)
+    params.ToUseDeepColor->setValue(false);
+#endif
     params.ToOpenLast   = new StBoolParamNamed(false, stCString("toOpenLast"));
     params.ToSaveRecent = new StBoolParamNamed(false, stCString("toSaveRecent"));
     params.imageLib = StImageFile::ST_LIBAV,
@@ -227,6 +232,7 @@ StImageViewer::StImageViewer(const StHandle<StResourceManager>& theResMgr,
     mySettings->loadParam (params.ToOpenLast);
     mySettings->loadParam (params.IsExclusiveFullScreen);
     mySettings->loadParam (params.IsVSyncOn);
+    mySettings->loadParam (params.ToUseDeepColor);
     mySettings->loadParam (params.ToShowPlayList);
     mySettings->loadParam (params.ToShowAdjustImage);
 
@@ -245,6 +251,7 @@ StImageViewer::StImageViewer(const StHandle<StResourceManager>& theResMgr,
 
     // no need in Depth buffer
     const StWinAttr anAttribs[] = {
+        StWinAttr_GlColorSize,   (StWinAttr )(params.ToUseDeepColor->getValue() ? 30 : 24),
         StWinAttr_GlDepthSize,   (StWinAttr )0,
         StWinAttr_GlStencilSize, (StWinAttr )0,
         StWinAttr_NULL
@@ -388,6 +395,7 @@ void StImageViewer::saveAllParams() {
         mySettings->saveParam (params.ToOpenLast);
         mySettings->saveParam (params.IsExclusiveFullScreen);
         mySettings->saveParam (params.IsVSyncOn);
+        mySettings->saveParam (params.ToUseDeepColor);
         mySettings->saveParam (params.ToShowPlayList);
         mySettings->saveParam (params.ToShowAdjustImage);
         if(myToSaveSrcFormat) {

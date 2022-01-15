@@ -1,5 +1,5 @@
 /**
- * Copyright © 2009-2020 Kirill Gavrilov <kirill@sview.ru>
+ * Copyright © 2009-2022 Kirill Gavrilov <kirill@sview.ru>
  *
  * StMoviePlayer program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -201,6 +201,7 @@ namespace StMoviePlayerStrings {
         OPTION_HIDE_NAVIGATION_BAR         = 1710,
         OPTION_OPEN_LAST_ON_STARTUP        = 1711,
         OPTION_SWAP_JPS                    = 1712,
+        OPTION_USE_DEEP_COLOR              = 1713,
 
         // Open/Save dialogs
         DIALOG_OPEN_FILE       = 2000,

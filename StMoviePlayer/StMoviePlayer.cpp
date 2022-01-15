@@ -1,5 +1,5 @@
 /**
- * Copyright © 2007-2020 Kirill Gavrilov <kirill@sview.ru>
+ * Copyright © 2007-2022 Kirill Gavrilov <kirill@sview.ru>
  *
  * StMoviePlayer program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -161,6 +161,7 @@ void StMoviePlayer::updateStrings() {
     params.IsMobileUI->setName(stCString("Mobile UI"));
     params.IsExclusiveFullScreen->setName(tr(MENU_EXCLUSIVE_FULLSCREEN));
     params.IsVSyncOn->setName(tr(MENU_FPS_VSYNC));
+    params.ToUseDeepColor->setName(tr(OPTION_USE_DEEP_COLOR));
     params.ToLimitFps->setName(tr(MENU_FPS_BOUND));
     params.ToSmoothUploads->setName("Smooth texture uploading");
     params.StartWebUI->setName(stCString("Web UI start option"));
@@ -306,6 +307,10 @@ StMoviePlayer::StMoviePlayer(const StHandle<StResourceManager>& theResMgr,
     params.IsVSyncOn   = new StBoolParamNamed(true, stCString("vsync"));
     params.IsVSyncOn->signals.onChanged = stSlot(this, &StMoviePlayer::doSwitchVSync);
     StApplication::params.VSyncMode->setValue(StGLContext::VSync_ON);
+    params.ToUseDeepColor = new StBoolParamNamed(true, stCString("deepColor"));
+#if defined(__ANDROID__)
+    params.ToUseDeepColor->setValue(false);
+#endif
     params.ToLimitFps       = new StBoolParamNamed(true, stCString("toLimitFps"));
     params.ToSmoothUploads  = new StBoolParamNamed(true, stCString("toSmoothUploads"));
     params.StartWebUI       = new StEnumParam(WEBUI_OFF, stCString("webuiOn"));
@@ -371,6 +376,7 @@ StMoviePlayer::StMoviePlayer(const StHandle<StResourceManager>& theResMgr,
     mySettings->loadParam (params.IsMobileUI);
     mySettings->loadParam (params.IsExclusiveFullScreen);
     mySettings->loadParam (params.IsVSyncOn);
+    mySettings->loadParam (params.ToUseDeepColor);
     mySettings->loadParam (params.ToLimitFps);
     mySettings->loadParam (params.ToSmoothUploads);
     mySettings->loadParam (params.UseGpu);
@@ -414,6 +420,7 @@ StMoviePlayer::StMoviePlayer(const StHandle<StResourceManager>& theResMgr,
 
     // no need in Depth buffer
     const StWinAttr anAttribs[] = {
+        StWinAttr_GlColorSize,   (StWinAttr )(params.ToUseDeepColor->getValue() ? 30 : 24),
         StWinAttr_GlDepthSize,   (StWinAttr )0,
         StWinAttr_GlStencilSize, (StWinAttr )0,
         StWinAttr_NULL
@@ -629,6 +636,7 @@ void StMoviePlayer::saveAllParams() {
         mySettings->saveParam (params.IsMobileUI);
         mySettings->saveParam (params.IsExclusiveFullScreen);
         mySettings->saveParam (params.IsVSyncOn);
+        mySettings->saveParam (params.ToUseDeepColor);
         mySettings->saveParam (params.ToLimitFps);
         mySettings->saveParam (params.ToSmoothUploads);
         mySettings->saveParam (params.UseGpu);
