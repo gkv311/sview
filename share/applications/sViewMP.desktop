@@ -1,8 +1,8 @@
 [Desktop Entry]
 Version=1.0
-Name=sView - Stereoscopic Movie Player
+Name=sView
 Comment=Stereoscopic Media Player
-Name[ru]=sView - Универсальный проигрыватель
+Name[ru]=sView
 Comment[ru]=Универсальный проигрыватель стереоскопического видео, аудио и изображений
 Exec=sView --in=video - %U
 StartupWMClass=sView
