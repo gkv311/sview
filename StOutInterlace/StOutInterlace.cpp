@@ -377,7 +377,10 @@ StOutInterlace::StOutInterlace(const StHandle<StResourceManager>& theResMgr,
     params.ToReverse = new StBoolParamNamed(false, stCString("reverse"),     stCString("reverse"));
     params.BindToMon = new StBoolParamNamed(true,  stCString("bindMonitor"), stCString("bindMonitor"));
     params.ToUseMask = new StBoolParamNamed(false, stCString("useMask"),     stCString("useMask"));
-    params.ToSmooth  = new StBoolParamNamed(false, stCString("toSmooth"),    stCString("toSmooth"));
+    params.ToSmooth  = new StBoolParamNamed(true,  stCString("toSmooth"),    stCString("toSmooth"));
+#if defined(__ANDROID__)
+    params.ToSmooth->setValue (false);
+#endif
     updateStrings();
 
     mySettings->loadParam(params.ToReverse);
