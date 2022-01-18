@@ -1458,6 +1458,7 @@ void StWindowImpl::swapEventsBuffers() {
                 break;
             case stEvent_Pause:
                 signals.onPause->emit(anEvent.Pause);
+                myEventsBuffer.resetPausePending();
                 break;
             case stEvent_Size:
                 signals.onResize->emit(anEvent.Size);

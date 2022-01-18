@@ -34,7 +34,8 @@ class StEventsBuffer {
     : myEventsRead (new StEvent[BUFFER_SIZE]),
       myEventsWrite(new StEvent[BUFFER_SIZE]),
       mySizeRead (0),
-      mySizeWrite(0) {
+      mySizeWrite(0),
+      myIsPausePending(false) {
         //
     }
 
@@ -92,6 +93,9 @@ class StEventsBuffer {
 
         StEvent& anEvent = myEventsWrite[mySizeWrite++];
         anEvent = theEvent;
+        if(theEvent.Type == stEvent_Pause) {
+            myIsPausePending = true;
+        }
         if(theEvent.Type == stEvent_FileDrop) {
             if(theEvent.DNDrop.NbFiles == 0) {
                 anEvent.DNDrop.Files = NULL;
@@ -145,6 +149,16 @@ class StEventsBuffer {
         mySizeWrite = 0;
     }
 
+    /**
+     * Return TRUE if pause event is not yet dispatched.
+     */
+    bool isPausePending() const { return myIsPausePending; }
+
+    /**
+     * Mark pending pause event being processed.
+     */
+    void resetPausePending() { myIsPausePending = false; }
+
         private: //! @name private fields
 
     StMutex  myMutex;       //!< mutex for thread-safe access
@@ -152,6 +166,8 @@ class StEventsBuffer {
     StEvent* myEventsWrite; //!< write-only events buffer, each insertion operation is protected with mutex
     size_t   mySizeRead;    //!< number of events in read-only  buffer
     size_t   mySizeWrite;   //!< number of events in write-only buffer
+
+    volatile bool myIsPausePending; //!< pending pause event is not yet processed
 
 };
 

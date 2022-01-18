@@ -328,6 +328,7 @@ class StWindowImpl {
     StCondition        myEventCursorShow;
     StCondition        myEventCursorHide;
     MSG                myEvent;           //!< message for windows' message loop
+    MSG                myEvent2;
 #elif defined(__APPLE__)
     StCocoaCoords      myCocoaCoords;
     IOPMAssertionLevel mySleepAssert;     //!< prevent system going to sleep

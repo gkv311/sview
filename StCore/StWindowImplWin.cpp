@@ -331,7 +331,7 @@ bool StWindowImpl::wndCreateWindows() {
                 // We should process ALL messages cause MsgWaitForMultipleObjects
                 // will NOT triggered for new messages already in stack!!!
                 // Means - do not replace 'while' with 'if(PeekMessage(...))'.
-                while(PeekMessage(&myEvent, NULL, 0U, 0U, PM_REMOVE)) {
+                while(PeekMessageW(&myEvent, NULL, 0U, 0U, PM_REMOVE)) {
                     // we process WM_KEYDOWN/WM_KEYUP manually - TranslateMessage is redundant
                     //TranslateMessage(&myEvent);
                     switch(myEvent.message) {
@@ -487,6 +487,20 @@ LRESULT StWindowImpl::stWndProc(HWND theWin, UINT uMsg, WPARAM wParam, LPARAM lP
                 myIsSystemLocked = false;
             }
             break;
+        }
+        case WM_QUERYENDSESSION: {
+            // about to be closed
+            myStEvent.Type       = stEvent_Pause;
+            myStEvent.Pause.Time = getEventTime(myEvent.time);
+            myEventsBuffer.append(myStEvent);
+            return TRUE;
+        }
+        case WM_ENDSESSION: {
+            // wait until stEvent_Pause has been actually processed in main thread
+            for(; myEventsBuffer.isPausePending();) {
+                StThread::sleep(10);
+            }
+            return 0;
         }
         case WM_CLOSE: {
             myStEvent.Type       = stEvent_Close;
@@ -1280,12 +1294,12 @@ void StWindowImpl::processEvents() {
     updateActiveState();
 
     // get callback for current thread - just null cycle...
-    if(PeekMessage(&myEvent, NULL, 0, 0, PM_REMOVE)) {
-        if(myEvent.message == WM_QUIT) {
+    if(PeekMessageW(&myEvent2, NULL, 0, 0, PM_REMOVE)) {
+        if(myEvent2.message == WM_QUIT) {
             //isOut = true;
         } else {
-            TranslateMessage(&myEvent);
-            DispatchMessageW(&myEvent);
+            TranslateMessage(&myEvent2);
+            DispatchMessageW(&myEvent2);
         }
     }
 

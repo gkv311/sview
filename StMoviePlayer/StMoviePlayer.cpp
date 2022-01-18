@@ -91,6 +91,21 @@ void StMoviePlayer::doChangeDevice(const int32_t theValue) {
 
 void StMoviePlayer::doPause(const StPauseEvent& theEvent) {
     StApplication::doPause(theEvent);
+    if(!myVideo.isNull()
+    && !myGUI.isNull()) {
+        // update playback position before saving settings
+        double aDuration = 0.0;
+        double aPts      = 0.0;
+        bool isVideoPlayed = false, isAudioPlayed = false;
+        myVideo->getPlaybackState(aDuration, aPts, isVideoPlayed, isAudioPlayed);
+        if(aPts > 300.0
+        && aPts < aDuration - 300.0) {
+            StHandle<StStereoParams> aParams = myGUI->myImage->getSource();
+            if(!aParams.isNull()) {
+                aParams->Timestamp = (GLfloat )aPts;
+            }
+        }
+    }
     saveAllParams();
     if(myVideo.isNull()) {
         return;
