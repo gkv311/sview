@@ -1,6 +1,9 @@
 sView - stereoscopic media player
 =================================
 
+[![Downloads](https://img.shields.io/github/downloads/gkv311/sview/total.svg)](https://github.com/gkv311/sview/releases)
+[![License: GPL v3](https://img.shields.io/badge/License-GPLv3-blue.svg)](https://github.com/gkv311/sview/blob/master/docs/LICENSE.md)
+
 sView is a cross-platform solution to view 3D stereoscopic videos and images.
 Please visit official site for more information:<br/>
 https://www.sview.ru
