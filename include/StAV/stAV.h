@@ -86,8 +86,8 @@ extern "C" {
     };
 #endif
 
-
-#if(LIBAVCODEC_VERSION_INT >= AV_VERSION_INT(52, 30, 0))
+#if(LIBAVCODEC_VERSION_INT >= AV_VERSION_INT(52, 30, 0)) \
+&& ((LIBAVCODEC_VERSION_INT < AV_VERSION_INT(58, 9, 100)) || defined(ST_LIBAV_FORK))
     // own lock function
     extern "C" int stFFmpegLock(void** theMutexPtrPtr, enum AVLockOp theOperation);
 #endif
@@ -339,6 +339,7 @@ namespace stAV {
     #endif
     }
 
+#if(LIBAVFORMAT_VERSION_INT < AV_VERSION_INT(59, 0, 100))
     /**
      * Return codec context from the stream using deprecated API.
      * The new API suggests using AVStream::codecpar, but this is confusing.
@@ -349,6 +350,7 @@ namespace stAV {
         return theStream->codec;
     ST_ENABLE_DEPRECATION_WARNINGS
     }
+#endif
 
     /**
      * Get codec type from the stream.
@@ -400,6 +402,7 @@ namespace stAV {
         ST_CPPEXPORT StString getSampleFormatString (const AVCodecContext* theCtx);
         ST_CPPEXPORT StString getSampleRateString   (const AVCodecContext* theCtx);
         ST_CPPEXPORT StString getChannelLayoutString(const AVCodecContext* theCtx);
+        ST_CPPEXPORT StString getChannelLayoutString(int theNbChannels, int theLayout);
 
         namespace SAMPLE_FMT {
         #if(LIBAVCODEC_VERSION_INT >= AV_VERSION_INT(53, 0, 0))

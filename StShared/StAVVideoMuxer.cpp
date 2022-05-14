@@ -117,7 +117,7 @@ class StAVOutContext {
         }
 
     #if !defined(ST_LIBAV_FORK)
-        avformat_alloc_output_context2(&Context, myFormat, NULL, theFile.toCString());
+        avformat_alloc_output_context2(&Context, const_cast<AVOutputFormat*>(myFormat), NULL, theFile.toCString());
     #else
         Context = avformat_alloc_context();
         if(Context == NULL) {
@@ -161,7 +161,7 @@ class StAVOutContext {
 
         private:
 
-    AVOutputFormat* myFormat;
+    const AVOutputFormat* myFormat;
 
 };
 
@@ -192,6 +192,11 @@ const char* formatToMetadata(const StFormat theFormat) {
 
 bool StAVVideoMuxer::addStream(AVFormatContext* theContext,
                                AVStream*        theStream) {
+#if(LIBAVFORMAT_VERSION_INT >= AV_VERSION_INT(59, 0, 100))
+    // TODO
+    (void )theContext; (void )theStream;
+    return false;
+#else
     AVCodecContext* aCodecCtxSrc = stAV::getCodecCtx(theStream);
 #if(LIBAVFORMAT_VERSION_INT >= AV_VERSION_INT(57, 0, 0))
     AVStream* aStreamOut = avformat_new_stream(theContext, aCodecCtxSrc->codec);
@@ -220,6 +225,7 @@ bool StAVVideoMuxer::addStream(AVFormatContext* theContext,
         aCodecCtxNew->flags |= AV_CODEC_FLAG_GLOBAL_HEADER;
     }
     return true;
+#endif
 }
 
 bool StAVVideoMuxer::save(const StString& theFile) {

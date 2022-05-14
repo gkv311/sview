@@ -535,26 +535,29 @@ StString stAV::audio::getSampleRateString(const AVCodecContext* theCtx) {
     return StString(theCtx->sample_rate) + " Hz";
 }
 
-// copied from avcodec_get_channel_layout_string()
 StString stAV::audio::getChannelLayoutString(const AVCodecContext* theCtx) {
+    return getChannelLayoutString(theCtx->channels, theCtx->channel_layout);
+}
+
+StString stAV::audio::getChannelLayoutString(int theNbChannels, int theLayout) {
 #if(LIBAVCODEC_VERSION_INT >= AV_VERSION_INT(53, 0, 0))
-    if(theCtx->channel_layout == 0) {
-        if(theCtx->channels == 1) {
+    if(theLayout == 0) {
+        if(theNbChannels == 1) {
             return "mono";
-        } else if(theCtx->channels == 2) {
+        } else if(theNbChannels == 2) {
             return "stereo";
         }
     }
     char aBuff[128]; aBuff[0] = '\0';
     av_get_channel_layout_string(aBuff, sizeof(aBuff),
-                                 theCtx->channels, theCtx->channel_layout);
+                                 theNbChannels, theLayout);
     return aBuff;
 #else
-    switch(theCtx->channels) {
+    switch(theNbChannels) {
         case 1: return "mono";
         case 2: return "stereo";
         case 4: {
-            switch(theCtx->channel_layout) {
+            switch(theLayout) {
                 //case CH_LAYOUT_4POINT0: return "4.0");
                 case CH_LAYOUT_QUAD:    return "quad";
                 default: return "4.0";
@@ -563,7 +566,7 @@ StString stAV::audio::getChannelLayoutString(const AVCodecContext* theCtx) {
         case 5: return "5.0";
         case 6: return "5.1";
         case 8: {
-            switch(theCtx->channel_layout) {
+            switch(theLayout) {
                 case CH_LAYOUT_5POINT1|CH_LAYOUT_STEREO_DOWNMIX:
                     return "5.1+downmix";
                 case CH_LAYOUT_7POINT1:
@@ -575,7 +578,7 @@ StString stAV::audio::getChannelLayoutString(const AVCodecContext* theCtx) {
             }
         }
         case 10: return "7.1+downmix";
-        default: return StString("unknown") + theCtx->channels;
+        default: return StString("unknown") + theNbChannels;
     }
 #endif
 }

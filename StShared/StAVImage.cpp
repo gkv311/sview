@@ -309,12 +309,13 @@ bool StAVImage::loadExtra(const StString& theFilePath,
             aMemIoCtx->wrapBuffer(theDataPtr, theDataSize);
             myFormatCtx = avformat_alloc_context();
             myFormatCtx->pb = aMemIoCtx->getAvioContext();
-            myFormatCtx->iformat->flags |= AVFMT_NOFILE;
+            // TODO - should be passed to avformat_open_input() somehow?
+            const_cast<AVInputFormat*>(myFormatCtx->iformat)->flags |= AVFMT_NOFILE;
         }
 
-        // open image file and detect its type, its could be non local file!
+        // open image file and detect its type, it could be non local file!
     #if(LIBAVFORMAT_VERSION_INT >= AV_VERSION_INT(53, 2, 0))
-        int avErrCode = avformat_open_input(&myFormatCtx, theFilePath.toCString(), myImageFormat, NULL);
+        int avErrCode = avformat_open_input(&myFormatCtx, theFilePath.toCString(), const_cast<AVInputFormat*>(myImageFormat), NULL);
     #else
         int avErrCode = av_open_input_file (&myFormatCtx, theFilePath.toCString(), myImageFormat, 0, NULL);
     #endif
@@ -351,17 +352,23 @@ bool StAVImage::loadExtra(const StString& theFilePath,
         }
 
         // find the decoder for the video stream
+    #if(LIBAVFORMAT_VERSION_INT < AV_VERSION_INT(59, 0, 100))
         myCodecCtx = stAV::getCodecCtx(myFormatCtx->streams[0]);
         if(theImageType == ST_TYPE_NONE) {
             myCodec = avcodec_find_decoder(myCodecCtx->codec_id);
         }
+    #else
+        if(theImageType == ST_TYPE_NONE) {
+            myCodec = avcodec_find_decoder(myFormatCtx->streams[0]->codecpar->codec_id);
+        }
+    #endif
     }
 
     if(myCodec == NULL) {
         setState("AVCodec library, video codec not found");
         close();
         return false;
-    } else if(myFormatCtx == NULL) {
+    } else if(myFormatCtx == NULL || myCodecCtx == NULL) {
         // use given image type to load decoder
     #if(LIBAVCODEC_VERSION_INT >= AV_VERSION_INT(53, 8, 0))
         myCodecCtx = avcodec_alloc_context3(myCodec);

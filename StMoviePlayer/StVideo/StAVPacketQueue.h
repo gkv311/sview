@@ -160,6 +160,13 @@ class StAVPacketQueue {
     }
 
     /**
+     * @return codec context
+     */
+    ST_LOCAL AVCodecContext* getCodecContext() const {
+        return myCodecCtx;
+    }
+
+    /**
      * Convert time units into seconds.
      */
     ST_LOCAL double unitsToSeconds(const int64_t theTimeUnits) const {
@@ -244,8 +251,8 @@ class StAVPacketQueue {
     AVFormatContext* myFormatCtx;      //!< pointer to video context
     AVStream*        myStream;         //!< pointer to stream in video context
     AVCodecContext*  myCodecCtx;       //!< codec context
-    AVCodec*         myCodec;          //!< codec
-    AVCodec*         myCodecAuto;      //!< original codec (autodetected - before overriding)
+    const AVCodec*   myCodec;          //!< codec
+    const AVCodec*   myCodecAuto;      //!< original codec (autodetected - before overriding)
     AVCodecID        myCodecAutoId;    //!< original code id
     typedef AVPixelFormat (*aGetFrmt_t)(AVCodecContext* , const AVPixelFormat* );
     typedef int           (*aGetBuf2_t)(AVCodecContext* , AVFrame* frame, int );

@@ -337,7 +337,7 @@ class StVideoQueue : public StAVPacketQueue {
     /**
      * Initialize codec context.
      */
-    ST_LOCAL bool initCodec(AVCodec*   theCodec,
+    ST_LOCAL bool initCodec(const AVCodec* theCodec,
                             const bool theToUseGpu);
 
     /**
@@ -398,11 +398,11 @@ private:
 
     StHandle<StHWAccelContext> myHWAccelCtx;
 #if defined(__ANDROID__)
-    AVCodec*                   myCodecH264HW;     //!< h264 decoder using dedicated hardware (Android Media Codec)
-    AVCodec*                   myCodecHevcHW;     //!< hevc decoder using dedicated hardware
-    AVCodec*                   myCodecVp9HW;      //!< vp9  decoder using dedicated hardware
+    const AVCodec*             myCodecH264HW;     //!< h264 decoder using dedicated hardware (Android Media Codec)
+    const AVCodec*             myCodecHevcHW;     //!< hevc decoder using dedicated hardware
+    const AVCodec*             myCodecVp9HW;      //!< vp9  decoder using dedicated hardware
 #endif
-    AVCodec*                   myCodecOpenJpeg;   //!< libopenjpeg decoder
+    const AVCodec*             myCodecOpenJpeg;   //!< libopenjpeg decoder
     bool                       myUseGpu;          //!< activate decoding on GPU when possible
     bool                       myIsGpuFailed;     //!< flag indicating that GPU decoder can not handle input data
     bool                       myUseOpenJpeg;     //!< use OpenJPEG (libopenjpeg) instead of built-in jpeg2000 decoder

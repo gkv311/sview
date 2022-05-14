@@ -151,7 +151,7 @@ bool StVideoQueue::hwaccelInit() { return false; }
 #endif
 
 inline AVCodecID stFindCodecId(const char* theName) {
-    AVCodec* aCodec = avcodec_find_decoder_by_name(theName);
+    const AVCodec* aCodec = avcodec_find_decoder_by_name(theName);
     return aCodec != NULL ? aCodec->id : AV_CODEC_ID_NONE;
 }
 
@@ -266,7 +266,7 @@ namespace {
 
 }
 
-bool StVideoQueue::initCodec(AVCodec*   theCodec,
+bool StVideoQueue::initCodec(const AVCodec* theCodec,
                              const bool theToUseGpu) {
     // close previous codec
     if(myCodec != NULL) {
@@ -358,7 +358,7 @@ bool StVideoQueue::init(AVFormatContext*   theFormatCtx,
 
     // open VIDEO codec
 #if defined(__ANDROID__)
-    AVCodec* aCodecGpu = NULL;
+    const AVCodec* aCodecGpu = NULL;
     if(myUseGpu
     && myCodecCtx->pix_fmt == stAV::PIX_FMT::YUV420P) {
         const StString anAutoCodecName(myCodecAuto->name);

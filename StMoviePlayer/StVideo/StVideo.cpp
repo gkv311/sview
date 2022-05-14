@@ -61,10 +61,17 @@ namespace {
     /**
      * Format stream info.
      */
-    static StString formatStreamInfo(const AVStream* theStream) {
-        AVCodecContext* aCodecCtx = stAV::getCodecCtx(theStream);
+    static StString formatStreamInfo(const AVStream* theStream, AVCodecContext* theCodecCtx) {
+        AVCodecContext* aCodecCtx = theCodecCtx;
+    #if(LIBAVFORMAT_VERSION_INT < AV_VERSION_INT(59, 0, 100))
+        if(aCodecCtx == NULL) {
+            aCodecCtx = stAV::getCodecCtx(theStream);
+        }
+    #endif
         char aFrmtBuff[4096] = {};
-        avcodec_string(aFrmtBuff, sizeof(aFrmtBuff), aCodecCtx, 0);
+        if(aCodecCtx != NULL) {
+            avcodec_string(aFrmtBuff, sizeof(aFrmtBuff), aCodecCtx, 0);
+        }
         StString aStreamInfo(aFrmtBuff);
 
     #ifdef ST_AV_NEWCODECPAR
@@ -89,7 +96,8 @@ namespace {
             if(theStream->time_base.den != 0 && theStream->time_base.num != 0) {
                 aStreamInfo += StString(", ") + formatFps(1 / av_q2d(theStream->time_base)) + " tbn";
             }
-            if(aCodecCtx->time_base.den != 0 && aCodecCtx->time_base.num != 0) {
+            if(aCodecCtx != NULL
+            && aCodecCtx->time_base.den != 0 && aCodecCtx->time_base.num != 0) {
                 aStreamInfo += StString(", ") + formatFps(1 / av_q2d(aCodecCtx->time_base)) + " tbc";
             }
         }
@@ -481,16 +489,22 @@ bool StVideo::addFile(const StString& theFileToLoad,
         } else if(aCodecType == AVMEDIA_TYPE_AUDIO) {
             // audio track
             StString aCodecName;
-            AVCodec* aCodec = avcodec_find_decoder(stAV::getCodecId(aStream));
+            const AVCodec* aCodec = avcodec_find_decoder(stAV::getCodecId(aStream));
             if(aCodec != NULL) {
                 aCodecName = aCodec->name;
             }
 
+        #ifdef ST_AV_NEWCODECPAR
+            const char* aSampleFormatStr = av_get_sample_fmt_name((AVSampleFormat )aStream->codecpar->format);
+            StString aSampleFormat  = aSampleFormatStr != NULL ? StString(aSampleFormatStr) : StString("");
+            StString aSampleRate    = StString(aStream->codecpar->sample_rate) + " Hz";
+            StString aChannelLayout = stAV::audio::getChannelLayoutString(aStream->codecpar->channels, aStream->codecpar->channel_layout);
+        #else
             AVCodecContext* aCodecCtx = stAV::getCodecCtx (aStream);
             StString aSampleFormat  = stAV::audio::getSampleFormatString (aCodecCtx);
             StString aSampleRate    = stAV::audio::getSampleRateString   (aCodecCtx);
             StString aChannelLayout = stAV::audio::getChannelLayoutString(aCodecCtx);
-
+        #endif
             StString aStreamTitle = aCodecName;
             if(!aSampleRate.isEmpty()) {
                 aStreamTitle += StString(", ") + aSampleRate;
@@ -519,7 +533,7 @@ bool StVideo::addFile(const StString& theFileToLoad,
         } else if(aCodecType == AVMEDIA_TYPE_SUBTITLE) {
             // subtitles track
             StString aCodecName("PLAIN");
-            AVCodec* aCodec = avcodec_find_decoder(stAV::getCodecId(aStream));
+            const AVCodec* aCodec = avcodec_find_decoder(stAV::getCodecId(aStream));
             if(aCodec != NULL) {
                 aCodecName = aCodec->name;
             }
@@ -651,7 +665,18 @@ bool StVideo::openSource(const StHandle<StFileNode>&     theNewSource,
             StString aStreamInfoKey = StString("steam ")
                                     + (myCtxList.size() > 1 ? (StString() + aCtxIter + ":" + aStreamId) : (StString() + aStreamId))
                                     + " [" + aLang + "]";
-            myFileInfoTmp->Info.add(StArgument(aStreamInfoKey, formatStreamInfo(aStream)));
+            AVCodecContext* aCodecCtx = NULL;
+            if(myVideoMaster->isInContext(aFormatCtx, aStreamId)) {
+                aCodecCtx = myVideoMaster->getCodecContext();
+            } else if(myVideoSlave->isInContext(aFormatCtx, aStreamId)) {
+                aCodecCtx = myVideoSlave->getCodecContext();
+            } else if(myAudio->isInContext(aFormatCtx, aStreamId)) {
+                aCodecCtx = myAudio->getCodecContext();
+            } else if(mySubtitles->isInContext(aFormatCtx, aStreamId)) {
+                aCodecCtx = mySubtitles->getCodecContext();
+            }
+
+            myFileInfoTmp->Info.add(StArgument(aStreamInfoKey, formatStreamInfo(aStream, aCodecCtx)));
         }
     }
 
@@ -814,11 +839,16 @@ bool StVideo::doSeekStream(AVFormatContext* theFormatCtx,
     bool isSeekDone = av_seek_frame(theFormatCtx, theStreamId, aSeekTarget, aFlags) >= 0;
 
     // try 10 more times in backward direction to work-around huge duration between key frames
+#if(LIBAVFORMAT_VERSION_INT >= AV_VERSION_INT(59, 3, 100))
+    /// TODO AVStream::cur_dts has been removed without libavformat version bump and without entry in APIchanges
+    /// with comment "no reason to have them exposed in a public header"
+#else
     // will not work for some streams with undefined cur_dts (AV_NOPTS_VALUE)!!!
     for(int aTries = 10; isSeekDone && toSeekBack && aTries > 0 && (aStream->cur_dts > aSeekTarget); --aTries) {
         aSeekTarget -= stAV::secondsToUnits(aStream, 1.0);
         isSeekDone = av_seek_frame(theFormatCtx, theStreamId, aSeekTarget, aFlags) >= 0;
     }
+#endif
 
     if(!isSeekDone) {
         ST_DEBUG_LOG("Error while seeking"
@@ -1426,12 +1456,12 @@ void StVideo::mainLoop() {
 
         if(myVideoMaster->isInContext(myCtxList[0])) {
             myVideoTimer = new StVideoTimer(myVideoMaster, myAudio,
-                1000.0 * av_q2d(stAV::getCodecCtx(myCtxList[0]->streams[myVideoMaster->getId()])->time_base));
+                1000.0 * av_q2d(myVideoMaster->getCodecContext()->time_base));
             myVideoTimer->setAudioDelay(myAudioDelayMSec);
             myVideoTimer->setBenchmark(myIsBenchmark);
         } else if(myCtxList.size() > 1 && myVideoMaster->isInContext(myCtxList[1])) {
             myVideoTimer = new StVideoTimer(myVideoMaster, myAudio,
-                1000.0 * av_q2d(stAV::getCodecCtx(myCtxList[1]->streams[myVideoMaster->getId()])->time_base));
+                1000.0 * av_q2d(myVideoMaster->getCodecContext()->time_base));
             myVideoTimer->setAudioDelay(myAudioDelayMSec);
             myVideoTimer->setBenchmark(myIsBenchmark);
         } else {

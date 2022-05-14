@@ -203,18 +203,16 @@ LDSTRIP =
 EXTRA_CFLAGS   += -mmacosx-version-min=$(TARGET_OS_VERSION)
 EXTRA_CXXFLAGS += -mmacosx-version-min=$(TARGET_OS_VERSION)
 EXTRA_LDFLAGS  += -mmacosx-version-min=$(TARGET_OS_VERSION)
-
-# workaround homebrew
-HAS_PKGCONF := $(shell command -v pkg-config 2> /dev/null)
-ifdef HAS_PKGCONF
-EXTRA_CXXFLAGS += $(shell pkg-config --silence-errors freetype2 --cflags)
-endif
-
 endif
 
 ifneq ($(FREETYPE_ROOT),)
 EXTRA_CXXFLAGS += -I$(FREETYPE_ROOT)/include
 EXTRA_LDFLAGS  += -L$(FREETYPE_ROOT)/$(LIBSUBFOLDER)
+else
+HAS_PKGCONF := $(shell command -v pkg-config 2> /dev/null)
+ifdef HAS_PKGCONF
+EXTRA_CXXFLAGS += $(shell pkg-config --silence-errors freetype2 --cflags)
+endif
 endif
 
 ifneq ($(FFMPEG_ROOT),)
