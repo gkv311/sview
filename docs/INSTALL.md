@@ -5,7 +5,6 @@ sView requires several 3rd-party components for building:
 * Code::Blocks (https://www.codeblocks.org/)
 * FFmpeg (https://www.ffmpeg.org)
 * OpenAL soft (https://openal-soft.org/)
-* libwebp, optional (https://developers.google.com/speed/webp/download)
 * GTK2+, Linux only (https://www.gtk.org)
 * libconfig++, Linux and Android (https://www.hyperrealm.com/libconfig/libconfig.html)
 * libxpm, Linux only
@@ -19,7 +18,6 @@ sudo apt-get install \
   libopenal-dev \
   libgl1-mesa-dev \
   libavcodec-dev libavdevice-dev libavformat-dev libavutil-dev libswscale-dev \
-  libwebp-dev \
   libconfig++-dev libconfig-dev \
   libxpm-dev \
   codeblocks
@@ -42,7 +40,7 @@ ALT Linux:
 ~~~~~
 apt-get install \
   gcc8-c++ gcc-c++ libGLU-devel libgtk+2-devel libXrandr-devel libfreetype-devel \
-  libopenal-devel libconfig-devel libconfig-c++-devel libXpm-devel libwebp-devel \
+  libopenal-devel libconfig-devel libconfig-c++-devel libXpm-devel \
   libavcodec-devel libavdevice-devel libavformat-devel libavutil-devel libswscale-devel
 ~~~~~
 
@@ -111,8 +109,6 @@ Several preprocessor directives control building options.
 Notice that by default "include/stconfig.conf" file is used to override these options
 (this file will be used only when ST_HAVE_STCONFIG is defined).
 
-* `ST_HAVE_WEBP` - should be defined to activate libwebp usage
-  (notice that since next releases of FFmpeg might have built-in support for webp/webpll image files)
 * `ST_HAVE_MONGOOSE` - should be defined to activate built-in web UI for remote Movie Player control
 * `ST_DEBUG` - should be defined to activate debugging log output
 * `ST_DEBUG_LOG_TO_FILE` - specifies file name or full path to duplicate debug log output

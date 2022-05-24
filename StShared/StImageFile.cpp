@@ -1,5 +1,5 @@
 /**
- * Copyright © 2010-2020 Kirill Gavrilov <kirill@sview.ru>
+ * Copyright © 2010-2022 Kirill Gavrilov <kirill@sview.ru>
  *
  * This code is licensed under MIT license (see docs/license-mit.txt for details).
  */
@@ -8,7 +8,6 @@
 
 #include <StImage/StDevILImage.h>
 #include <StImage/StFreeImage.h>
-#include <StImage/StWebPImage.h>
 #include <StImage/StStbImage.h>
 #include <StAV/StAVImage.h>
 #include <StFile/StFileNode.h>
@@ -83,9 +82,6 @@ StImageFile::ImageClass StImageFile::imgLibFromString(const StString& thePreferr
     } else if(thePreferred.isEqualsIgnoreCase(stCString("DevIL")) ||
               thePreferred.isEqualsIgnoreCase(stCString("StDevILImage"))) {
         aPreferred = ST_DEVIL;
-    } else if(thePreferred.isEqualsIgnoreCase(stCString("WebP")) ||
-              thePreferred.isEqualsIgnoreCase(stCString("StWebPImage"))) {
-        aPreferred = ST_WEBP;
     } else if(thePreferred.isEqualsIgnoreCase(stCString("stb"))) {
         aPreferred = ST_STB;
     }
@@ -96,7 +92,6 @@ StString StImageFile::imgLibToString(const ImageClass thePreferred) {
     switch(thePreferred) {
         case ST_FREEIMAGE: return "FreeImage";
         case ST_DEVIL:     return "DevIL";
-        case ST_WEBP:      return "WebP";
         case ST_STB:       return "stb";
         default:
         case ST_LIBAV:     return "FFmpeg";
@@ -174,10 +169,6 @@ StHandle<StImageFile> StImageFile::create(StImageFile::ImageClass thePreferred,
         }
         case ST_TYPE_WEBP:
         case ST_TYPE_WEBPLL: {
-            // only WebP currently supports WebP images
-            if(StWebPImage::init()) {
-                return new StWebPImage();
-            }
             break;
         }
         case ST_TYPE_ICO:
@@ -206,12 +197,6 @@ StHandle<StImageFile> StImageFile::create(StImageFile::ImageClass thePreferred,
         case ST_DEVIL: {
             if(StDevILImage::init()) {
                 return new StDevILImage();
-            }
-            break;
-        }
-        case ST_WEBP: {
-            if(StWebPImage::init()) {
-                return new StWebPImage();
             }
             break;
         }

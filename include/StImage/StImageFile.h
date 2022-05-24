@@ -49,7 +49,6 @@ class StImageFile : public StImage {
         ST_LIBAV,
         ST_DEVIL,
         ST_FREEIMAGE,
-        ST_WEBP,
         ST_STB,
     } ImageClass;
 

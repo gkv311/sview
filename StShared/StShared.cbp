@@ -228,7 +228,6 @@
 			<Add library="avcodec" />
 			<Add library="swscale" />
 			<Add library="freetype" />
-			<Add library="libwebp" />
 			<Add directory="../3rdparty/lib/$(TARGET_NAME)" />
 			<Add directory="../lib/$(TARGET_NAME)" />
 		</Linker>
@@ -358,7 +357,6 @@
 		<Unit filename="StThread.cpp" />
 		<Unit filename="StTranslations.cpp" />
 		<Unit filename="StVirtualKeys.cpp" />
-		<Unit filename="StWebPImage.cpp" />
 		<Unit filename="stAV.cpp" />
 		<Unit filename="stConsole.cpp" />
 		<Unit filename="stUtfTools.cpp" />
@@ -461,7 +459,6 @@
 		<Unit filename="../include/StImage/StJpegParser.h" />
 		<Unit filename="../include/StImage/StPixelRGB.h" />
 		<Unit filename="../include/StImage/StStbImage.h" />
-		<Unit filename="../include/StImage/StWebPImage.h" />
 		<Unit filename="../include/StLibrary.h" />
 		<Unit filename="../include/StSettings/StEnumParam.h" />
 		<Unit filename="../include/StSettings/StFloat32Param.h" />

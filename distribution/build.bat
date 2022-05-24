@@ -72,8 +72,6 @@ echo #ifndef SVIEW_SDK_VER_STRING>> "%SVIEW_BUILD_CONF%"
 echo   #define SVIEW_SDK_VER_STRING "%YEAR%.%MONTH00%%SVIEW_VER_TYPE%%DAY%">> "%SVIEW_BUILD_CONF%"
 echo #endif>> "%SVIEW_BUILD_CONF%"
 
-rem Activate experimental WebP support
-echo #define ST_HAVE_WEBP>> "%SVIEW_BUILD_CONF%"
 rem Activate notifications about sView updates available on sview.ru
 echo #define ST_UPDATES_CHECK>> "%SVIEW_BUILD_CONF%"
 
@@ -89,7 +87,6 @@ echo   #define SVIEW_SDK_VER_STATUS %releaseStatus%>> "%SVIEW_BUILD_CONF%"
 echo #endif>> "%SVIEW_BUILD_CONF%"
 
 echo #define ST_HAVE_OPENVR>> "%SVIEW_BUILD_CONF%"
-echo #define ST_HAVE_WEBP>> "%SVIEW_BUILD_CONF%"
 echo #define ST_HAVE_MONGOOSE>> "%SVIEW_BUILD_CONF%"
 
 echo #endif //__stConfig_conf_>> "%SVIEW_BUILD_CONF%"

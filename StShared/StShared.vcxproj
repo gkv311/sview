@@ -96,7 +96,7 @@
       <PreprocessorDefinitions>ST_SHARED_DLL;ST_HAVE_STCONFIG;_CRT_SECURE_NO_WARNINGS;NDEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
     </ResourceCompile>
     <Link>
-      <AdditionalDependencies>opengl32.lib;user32.lib;gdi32.lib;Advapi32.lib;Comdlg32.lib;Shell32.lib;Ole32.lib;Version.lib;Wsock32.lib;avutil.lib;avformat.lib;avcodec.lib;swscale.lib;freetype.lib;libwebp.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>opengl32.lib;user32.lib;gdi32.lib;Advapi32.lib;Comdlg32.lib;Shell32.lib;Ole32.lib;Version.lib;Wsock32.lib;avutil.lib;avformat.lib;avcodec.lib;swscale.lib;freetype.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <SuppressStartupBanner>true</SuppressStartupBanner>
       <AdditionalLibraryDirectories>..\3rdparty\lib\WIN_vc_x86;..\lib\WIN_vc_x86;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
       <SubSystem>Windows</SubSystem>
@@ -130,7 +130,7 @@
       <PreprocessorDefinitions>ST_SHARED_DLL;ST_HAVE_STCONFIG;_CRT_SECURE_NO_WARNINGS;_DEBUG;ST_DEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
     </ResourceCompile>
     <Link>
-      <AdditionalDependencies>opengl32.lib;user32.lib;gdi32.lib;Advapi32.lib;Comdlg32.lib;Shell32.lib;Ole32.lib;Version.lib;Wsock32.lib;avutil.lib;avformat.lib;avcodec.lib;swscale.lib;freetype.lib;libwebp.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>opengl32.lib;user32.lib;gdi32.lib;Advapi32.lib;Comdlg32.lib;Shell32.lib;Ole32.lib;Version.lib;Wsock32.lib;avutil.lib;avformat.lib;avcodec.lib;swscale.lib;freetype.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <SuppressStartupBanner>true</SuppressStartupBanner>
       <AdditionalLibraryDirectories>..\3rdparty\lib\WIN_vc_x86_DEBUG;..\lib\WIN_vc_x86_DEBUG;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
       <GenerateDebugInformation>true</GenerateDebugInformation>
@@ -164,7 +164,7 @@
       <PreprocessorDefinitions>ST_SHARED_DLL;ST_HAVE_STCONFIG;_CRT_SECURE_NO_WARNINGS;NDEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
     </ResourceCompile>
     <Link>
-      <AdditionalDependencies>opengl32.lib;user32.lib;gdi32.lib;Advapi32.lib;Comdlg32.lib;Shell32.lib;Ole32.lib;Version.lib;Wsock32.lib;avutil.lib;avformat.lib;avcodec.lib;swscale.lib;freetype.lib;libwebp.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>opengl32.lib;user32.lib;gdi32.lib;Advapi32.lib;Comdlg32.lib;Shell32.lib;Ole32.lib;Version.lib;Wsock32.lib;avutil.lib;avformat.lib;avcodec.lib;swscale.lib;freetype.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <SuppressStartupBanner>true</SuppressStartupBanner>
       <AdditionalLibraryDirectories>..\3rdparty\lib\WIN_vc_AMD64;..\lib\WIN_vc_AMD64;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
       <SubSystem>Windows</SubSystem>
@@ -198,7 +198,7 @@
       <PreprocessorDefinitions>ST_SHARED_DLL;ST_HAVE_STCONFIG;_CRT_SECURE_NO_WARNINGS;_DEBUG;ST_DEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
     </ResourceCompile>
     <Link>
-      <AdditionalDependencies>opengl32.lib;user32.lib;gdi32.lib;Advapi32.lib;Comdlg32.lib;Shell32.lib;Ole32.lib;Version.lib;Wsock32.lib;avutil.lib;avformat.lib;avcodec.lib;swscale.lib;freetype.lib;libwebp.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>opengl32.lib;user32.lib;gdi32.lib;Advapi32.lib;Comdlg32.lib;Shell32.lib;Ole32.lib;Version.lib;Wsock32.lib;avutil.lib;avformat.lib;avcodec.lib;swscale.lib;freetype.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <SuppressStartupBanner>true</SuppressStartupBanner>
       <AdditionalLibraryDirectories>..\3rdparty\lib\WIN_vc_AMD64_DEBUG;..\lib\WIN_vc_AMD64_DEBUG;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
       <GenerateDebugInformation>true</GenerateDebugInformation>
@@ -277,7 +277,6 @@
     <ClCompile Include="StThread.cpp" />
     <ClCompile Include="StTranslations.cpp" />
     <ClCompile Include="StVirtualKeys.cpp" />
-    <ClCompile Include="StWebPImage.cpp" />
     <ClCompile Include="stAV.cpp" />
     <ClCompile Include="stConsole.cpp" />
     <ClCompile Include="stUtfTools.cpp" />
@@ -374,7 +373,6 @@
     <ClInclude Include="..\include\StImage\StJpegParser.h" />
     <ClInclude Include="..\include\StImage\StPixelRGB.h" />
     <ClInclude Include="..\include\StImage\StStbImage.h" />
-    <ClInclude Include="..\include\StImage\StWebPImage.h" />
     <ClInclude Include="..\include\StSettings\StEnumParam.h" />
     <ClInclude Include="..\include\StSettings\StFloat32Param.h  " />
     <ClInclude Include="..\include\StSettings\StParam.h" />
