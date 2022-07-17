@@ -309,7 +309,7 @@ StMoviePlayer::StMoviePlayer(const StHandle<StResourceManager>& theResMgr,
     params.ToMixImagesVideos = new StBoolParamNamed(false,  stCString("toMixImagesVideos"));
     params.ToMixImagesVideos->signals.onChanged = stSlot(this, &StMoviePlayer::doChangeMixImagesVideos);
     params.SlideShowDelay = new StFloat32Param(4.0f, stCString("slideShowDelay2"));
-    params.SlideShowDelay->setMinMaxValues(1.0f, 10.0f);
+    params.SlideShowDelay->setMinMaxValues(1.0f, 30.0f);
     params.SlideShowDelay->setDefValue(4.0f);
     params.SlideShowDelay->setStep(1.0f);
     params.SlideShowDelay->setTolerance(0.1f);
