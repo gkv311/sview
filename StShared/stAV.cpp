@@ -539,7 +539,7 @@ StString stAV::audio::getChannelLayoutString(const AVCodecContext* theCtx) {
     return getChannelLayoutString(theCtx->channels, theCtx->channel_layout);
 }
 
-StString stAV::audio::getChannelLayoutString(int theNbChannels, int theLayout) {
+StString stAV::audio::getChannelLayoutString(int theNbChannels, uint64_t theLayout) {
 #if(LIBAVCODEC_VERSION_INT >= AV_VERSION_INT(53, 0, 0))
     if(theLayout == 0) {
         if(theNbChannels == 1) {

@@ -402,7 +402,7 @@ namespace stAV {
         ST_CPPEXPORT StString getSampleFormatString (const AVCodecContext* theCtx);
         ST_CPPEXPORT StString getSampleRateString   (const AVCodecContext* theCtx);
         ST_CPPEXPORT StString getChannelLayoutString(const AVCodecContext* theCtx);
-        ST_CPPEXPORT StString getChannelLayoutString(int theNbChannels, int theLayout);
+        ST_CPPEXPORT StString getChannelLayoutString(int theNbChannels, uint64_t theLayout);
 
         namespace SAMPLE_FMT {
         #if(LIBAVCODEC_VERSION_INT >= AV_VERSION_INT(53, 0, 0))
