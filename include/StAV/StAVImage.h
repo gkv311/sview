@@ -96,11 +96,11 @@ class StAVImage : public StImageFile {
 
         private:
 
-    const AVInputFormat* myImageFormat; //!< image format
-    AVFormatContext*     myFormatCtx;   //!< file context
-    AVCodecContext*      myCodecCtx;    //!< codec context
-    const AVCodec*       myCodec;       //!< codec
-    StAVFrame            myFrame;
+    AVInputFormat*   myImageFormat; //!< image format
+    AVFormatContext* myFormatCtx;   //!< file context
+    AVCodecContext*  myCodecCtx;    //!< codec context
+    const AVCodec*   myCodec;       //!< codec
+    StAVFrame        myFrame;
 
 };
 

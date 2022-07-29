@@ -304,18 +304,18 @@ bool StAVImage::loadExtra(const StString& theFilePath,
     StHandle<StAVIOMemContext> aMemIoCtx;
     if(theImageType == ST_TYPE_NONE
     || (theDataPtr == NULL && !StFileNode::isFileExists(theFilePath))) {
+        myImageFormat->flags &= ~AVFMT_NOFILE;
         if(theDataPtr != NULL) {
             aMemIoCtx = new StAVIOMemContext();
             aMemIoCtx->wrapBuffer(theDataPtr, theDataSize);
             myFormatCtx = avformat_alloc_context();
             myFormatCtx->pb = aMemIoCtx->getAvioContext();
-            // TODO - should be passed to avformat_open_input() somehow?
-            const_cast<AVInputFormat*>(myFormatCtx->iformat)->flags |= AVFMT_NOFILE;
+            myImageFormat->flags |= AVFMT_NOFILE;
         }
 
         // open image file and detect its type, it could be non local file!
     #if(LIBAVFORMAT_VERSION_INT >= AV_VERSION_INT(53, 2, 0))
-        int avErrCode = avformat_open_input(&myFormatCtx, theFilePath.toCString(), const_cast<AVInputFormat*>(myImageFormat), NULL);
+        int avErrCode = avformat_open_input(&myFormatCtx, theFilePath.toCString(), myImageFormat, NULL);
     #else
         int avErrCode = av_open_input_file (&myFormatCtx, theFilePath.toCString(), myImageFormat, 0, NULL);
     #endif
