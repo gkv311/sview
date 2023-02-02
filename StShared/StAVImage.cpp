@@ -23,7 +23,8 @@ StAVImage::StAVImage()
   myCodecCtx(NULL),
   myCodec(NULL) {
     StAVImage::init();
-    myImageFormat = av_find_input_format("image2");
+    // TODO remove const_cast<AVInputFormat*>
+    myImageFormat = (AVInputFormat* )av_find_input_format("image2");
 }
 
 StAVImage::~StAVImage() {
