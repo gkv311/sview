@@ -22,7 +22,6 @@
 #include <StAV/StAVImage.h>
 #include <StImage/StDevILImage.h>
 #include <StImage/StFreeImage.h>
-#include <StImage/StWebPImage.h>
 #include <StFile/StRawFile.h>
 
 StTestImageLib::StTestImageLib(const StString& theFile)
@@ -87,14 +86,6 @@ void StTestImageLib::perform() {
     st::cout << stostream_text("DevIL:\n");
     if(StDevILImage::init()) {
         aLoader = new StDevILImage();
-        testLoadSpeed(*aLoader);
-    } else {
-        st::cout << stostream_text("  library is unavailable! Skipped.\n");
-    }
-
-    st::cout << stostream_text("WebP:\n");
-    if(StWebPImage::init()) {
-        aLoader = new StWebPImage();
         testLoadSpeed(*aLoader);
     } else {
         st::cout << stostream_text("  library is unavailable! Skipped.\n");
