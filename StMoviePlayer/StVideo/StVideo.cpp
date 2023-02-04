@@ -498,7 +498,7 @@ bool StVideo::addFile(const StString& theFileToLoad,
             const char* aSampleFormatStr = av_get_sample_fmt_name((AVSampleFormat )aStream->codecpar->format);
             StString aSampleFormat  = aSampleFormatStr != NULL ? StString(aSampleFormatStr) : StString("");
             StString aSampleRate    = StString(aStream->codecpar->sample_rate) + " Hz";
-            StString aChannelLayout = stAV::audio::getChannelLayoutString(aStream->codecpar->channels, aStream->codecpar->channel_layout);
+            StString aChannelLayout = stAV::audio::getChannelLayoutString(aStream);
         #else
             AVCodecContext* aCodecCtx = stAV::getCodecCtx (aStream);
             StString aSampleFormat  = stAV::audio::getSampleFormatString (aCodecCtx);

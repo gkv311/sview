@@ -1,5 +1,5 @@
 /**
- * Copyright © 2011-2020 Kirill Gavrilov <kirill@sview.ru>
+ * Copyright © 2011-2023 Kirill Gavrilov <kirill@sview.ru>
  *
  * This code is licensed under MIT license (see docs/license-mit.txt for details).
  */
@@ -531,12 +531,36 @@ StString stAV::audio::getSampleFormatString(const AVCodecContext* theCtx) {
 #endif
 }
 
+int stAV::audio::getNbChannels(const AVCodecContext* theCtx) {
+#ifdef ST_AV_NEW_CHANNEL_LAYOUT
+    return theCtx->ch_layout.nb_channels;
+#else
+    return theCtx->channels;
+#endif
+}
+
 StString stAV::audio::getSampleRateString(const AVCodecContext* theCtx) {
     return StString(theCtx->sample_rate) + " Hz";
 }
 
+StString stAV::audio::getChannelLayoutString(const AVStream* theStream) {
+#ifdef ST_AV_NEW_CHANNEL_LAYOUT
+    char aBuff[128]; aBuff[0] = '\0';
+    av_channel_layout_describe(&theStream->codecpar->ch_layout, aBuff, sizeof(aBuff));
+    return aBuff;
+#else
+    return getChannelLayoutString(theStream->codecpar->channels, theStream->codecpar->channel_layout);
+#endif
+}
+
 StString stAV::audio::getChannelLayoutString(const AVCodecContext* theCtx) {
+#ifdef ST_AV_NEW_CHANNEL_LAYOUT
+    char aBuff[128]; aBuff[0] = '\0';
+    av_channel_layout_describe(&theCtx->ch_layout, aBuff, sizeof(aBuff));
+    return aBuff;
+#else
     return getChannelLayoutString(theCtx->channels, theCtx->channel_layout);
+#endif
 }
 
 StString stAV::audio::getChannelLayoutString(int theNbChannels, uint64_t theLayout) {
@@ -549,8 +573,10 @@ StString stAV::audio::getChannelLayoutString(int theNbChannels, uint64_t theLayo
         }
     }
     char aBuff[128]; aBuff[0] = '\0';
+    ST_DISABLE_DEPRECATION_WARNINGS // ST_AV_NEW_CHANNEL_LAYOUT should be used instead
     av_get_channel_layout_string(aBuff, sizeof(aBuff),
                                  theNbChannels, theLayout);
+    ST_ENABLE_DEPRECATION_WARNINGS
     return aBuff;
 #else
     switch(theNbChannels) {

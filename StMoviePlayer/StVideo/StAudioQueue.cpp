@@ -1,5 +1,5 @@
 /**
- * Copyright © 2009-2017 Kirill Gavrilov <kirill@sview.ru>
+ * Copyright © 2009-2023 Kirill Gavrilov <kirill@sview.ru>
  *
  * StMoviePlayer program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -406,7 +406,7 @@ bool StAudioQueue::initOut20Soft(const bool theIsPlanar) {
     }
 
     myBufferOut.setupChannels(StChannelMap::CH20, StChannelMap::PCM, 2);
-    myBufferSrc.setupChannels(StChannelMap::CH20, StChannelMap::PCM, theIsPlanar ? myCodecCtx->channels : 1);
+    myBufferSrc.setupChannels(StChannelMap::CH20, StChannelMap::PCM, theIsPlanar ? stAV::audio::getNbChannels(myCodecCtx) : 1);
     stalConfigureSources2_0();
     return true;
 }
@@ -417,7 +417,7 @@ bool StAudioQueue::initOut30Soft(const bool theIsPlanar) {
     }
 
     myBufferOut.setupChannels(StChannelMap::CH30, StChannelMap::PCM, 3);
-    myBufferSrc.setupChannels(StChannelMap::CH30, StChannelMap::PCM, theIsPlanar ? myCodecCtx->channels : 1);
+    myBufferSrc.setupChannels(StChannelMap::CH30, StChannelMap::PCM, theIsPlanar ? stAV::audio::getNbChannels(myCodecCtx) : 1);
     stalConfigureSources3_0();
     return true;
 }
@@ -454,7 +454,7 @@ bool StAudioQueue::initOutStereo(const bool theIsPlanar) {
         default: return false;
     }
 
-    myBufferSrc.setupChannels(StChannelMap::CH20, StChannelMap::PCM, theIsPlanar ? myCodecCtx->channels : 1);
+    myBufferSrc.setupChannels(StChannelMap::CH20, StChannelMap::PCM, theIsPlanar ? stAV::audio::getNbChannels(myCodecCtx) : 1);
     myBufferOut.setupChannels(StChannelMap::CH20, StChannelMap::PCM, 1);
     stalConfigureSources1();
     return true;
@@ -466,7 +466,7 @@ bool StAudioQueue::initOut40Soft(const bool theIsPlanar) {
     }
 
     myBufferOut.setupChannels(StChannelMap::CH40, StChannelMap::PCM, 4);
-    myBufferSrc.setupChannels(StChannelMap::CH40, StChannelMap::PCM, theIsPlanar ? myCodecCtx->channels : 1);
+    myBufferSrc.setupChannels(StChannelMap::CH40, StChannelMap::PCM, theIsPlanar ? stAV::audio::getNbChannels(myCodecCtx) : 1);
     stalConfigureSources4_0();
     return true;
 }
@@ -493,7 +493,7 @@ bool StAudioQueue::initOut40Ext(const bool theIsPlanar) {
         default: return false;
     }
 
-    myBufferSrc.setupChannels(StChannelMap::CH40, StChannelMap::PCM, theIsPlanar ? myCodecCtx->channels : 1);
+    myBufferSrc.setupChannels(StChannelMap::CH40, StChannelMap::PCM, theIsPlanar ? stAV::audio::getNbChannels(myCodecCtx) : 1);
     myBufferOut.setupChannels(StChannelMap::CH40, StChannelMap::PCM, 1);
     stalConfigureSources1();
     return true;
@@ -521,7 +521,7 @@ bool StAudioQueue::initOut40BFormat(const bool theIsPlanar) {
         default: return false;
     }
 
-    myBufferSrc.setupChannels(StChannelMap::CH40, StChannelMap::WYZX, theIsPlanar ? myCodecCtx->channels : 1);
+    myBufferSrc.setupChannels(StChannelMap::CH40, StChannelMap::WYZX, theIsPlanar ? stAV::audio::getNbChannels(myCodecCtx) : 1);
     myBufferOut.setupChannels(StChannelMap::CH40, StChannelMap::PCM, 1);
     stalConfigureSources1();
     return true;
@@ -533,7 +533,7 @@ bool StAudioQueue::initOut50Soft(const bool theIsPlanar) {
     }
 
     myBufferOut.setupChannels(StChannelMap::CH50, StChannelMap::PCM, 5);
-    myBufferSrc.setupChannels(StChannelMap::CH50, StChannelMap::PCM, theIsPlanar ? myCodecCtx->channels : 1);
+    myBufferSrc.setupChannels(StChannelMap::CH50, StChannelMap::PCM, theIsPlanar ? stAV::audio::getNbChannels(myCodecCtx) : 1);
     stalConfigureSources5_0();
     return true;
 }
@@ -557,7 +557,7 @@ bool StAudioQueue::initOut51Soft(const bool theIsPlanar) {
     } else
 #endif
     {
-        myBufferSrc.setupChannels(StChannelMap::CH51, StChannelMap::PCM, theIsPlanar ? myCodecCtx->channels : 1);
+        myBufferSrc.setupChannels(StChannelMap::CH51, StChannelMap::PCM, theIsPlanar ? stAV::audio::getNbChannels(myCodecCtx) : 1);
     }
     stalConfigureSources5_1();
     return true;
@@ -599,7 +599,7 @@ bool StAudioQueue::initOut51Ext(const bool theIsPlanar) {
     } else
 #endif
     {
-        myBufferSrc.setupChannels(StChannelMap::CH51, StChannelMap::PCM, theIsPlanar ? myCodecCtx->channels : 1);
+        myBufferSrc.setupChannels(StChannelMap::CH51, StChannelMap::PCM, theIsPlanar ? stAV::audio::getNbChannels(myCodecCtx) : 1);
     }
     stalConfigureSources1();
     return true;
@@ -611,14 +611,14 @@ bool StAudioQueue::initOut71Soft(const bool theIsPlanar) {
     }
 
     myBufferOut.setupChannels(StChannelMap::CH71, StChannelMap::PCM, 8);
-    myBufferSrc.setupChannels(StChannelMap::CH71, StChannelMap::PCM, theIsPlanar ? myCodecCtx->channels : 1);
+    myBufferSrc.setupChannels(StChannelMap::CH71, StChannelMap::PCM, theIsPlanar ? stAV::audio::getNbChannels(myCodecCtx) : 1);
     stalConfigureSources7_1();
     return true;
 }
 
 bool StAudioQueue::initOut71Ext(const bool theIsPlanar) {
     if(!myAlCtx.hasExtMultiChannel
-     || myCodecCtx->channels != 8) {
+     || stAV::audio::getNbChannels(myCodecCtx) != 8) {
         return false;
     }
 
@@ -643,7 +643,7 @@ bool StAudioQueue::initOut71Ext(const bool theIsPlanar) {
         default: return false;
     }
 
-    myBufferSrc.setupChannels(StChannelMap::CH71, StChannelMap::PCM, theIsPlanar ? myCodecCtx->channels : 1);
+    myBufferSrc.setupChannels(StChannelMap::CH71, StChannelMap::PCM, theIsPlanar ? stAV::audio::getNbChannels(myCodecCtx) : 1);
     myBufferOut.setupChannels(StChannelMap::CH71, StChannelMap::PCM, 1);
     stalConfigureSources1();
     return true;
@@ -659,7 +659,8 @@ bool StAudioQueue::initOutChannels() {
 
     myAlCanBFormat = false;
     myAlIsBFormat  = false;
-    switch(myCodecCtx->channels) {
+    const int aNbChannels = stAV::audio::getNbChannels(myCodecCtx);
+    switch(aNbChannels) {
         case 1: {
             myAlSoftLayout = true; // just unsupported
             return initOutMono();
@@ -679,7 +680,11 @@ bool StAudioQueue::initOutChannels() {
         }
         case 4: {
             myAlCanBFormat = myAlCtx.hasExtBFormat;
-            if(myToForceBFormat && myAlCtx.hasExtBFormat) {
+            bool isAmbisonic = false;
+        #ifdef ST_AV_NEW_CHANNEL_LAYOUT
+            isAmbisonic = myCodecCtx->ch_layout.order == AV_CHANNEL_ORDER_AMBISONIC;
+        #endif
+            if((myToForceBFormat || isAmbisonic) && myAlCtx.hasExtBFormat) {
                 myAlSoftLayout = true;
                 myAlIsBFormat  = true;
                 return initOut40BFormat(isPlanar);
@@ -766,7 +771,7 @@ bool StAudioQueue::init(AVFormatContext*   theFormatCtx,
 bool StAudioQueue::initBuffers() {
     myAvSrcFormat  = myCodecCtx->sample_fmt;
     myAvSampleRate = myCodecCtx->sample_rate;
-    myAvNbChannels = myCodecCtx->channels;
+    myAvNbChannels = stAV::audio::getNbChannels(myCodecCtx);
     if(myCodecCtx->sample_rate < FREQ_5500) {
         signals.onError(StString("FFmpeg: wrong audio frequency ") + myCodecCtx->sample_rate);
         deinit();
@@ -1169,10 +1174,10 @@ void StAudioQueue::decodePacket(const StHandle<StAVPacket>& thePacket,
             }
 
             if(myAvSrcFormat  != myCodecCtx->sample_fmt
-            || myAvNbChannels != myCodecCtx->channels
+            || myAvNbChannels != stAV::audio::getNbChannels(myCodecCtx)
             || myAvSampleRate != myCodecCtx->sample_rate) {
                 ST_DEBUG_LOG("Parameters of the Audio stream has been changed,"
-                           + " Nb. channels: " + myCodecCtx->channels    + " (was " + myAvNbChannels + ")"
+                           + " Nb. channels: " + stAV::audio::getNbChannels(myCodecCtx)    + " (was " + myAvNbChannels + ")"
                            + " Sample Rate: "  + myCodecCtx->sample_rate + " (was " + myAvSampleRate + ")");
                 myBufferSrc.clear();
                 myBufferOut.clear();
@@ -1186,7 +1191,7 @@ void StAudioQueue::decodePacket(const StHandle<StAVPacket>& thePacket,
             }
 
             int aPlaneSize = 0;
-            aDataSize = av_samples_get_buffer_size(&aPlaneSize, myCodecCtx->channels,
+            aDataSize = av_samples_get_buffer_size(&aPlaneSize, stAV::audio::getNbChannels(myCodecCtx),
                                                    myFrame.Frame->nb_samples,
                                                    myCodecCtx->sample_fmt, 1);
             myBufferSrc.setPlaneSize(aPlaneSize); // notice that myFrame.getLineSize(0) contains extra alignment

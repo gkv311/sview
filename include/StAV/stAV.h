@@ -1,5 +1,5 @@
 /**
- * Copyright © 2011-2020 Kirill Gavrilov <kirill@sview.ru>
+ * Copyright © 2011-2023 Kirill Gavrilov <kirill@sview.ru>
  *
  * This code is licensed under MIT license (see docs/license-mit.txt for details).
  */
@@ -41,6 +41,10 @@ extern "C" {
 
 #if(LIBAVFORMAT_VERSION_INT >= AV_VERSION_INT(57, 33, 100))
     #define ST_AV_NEWCODECPAR
+#endif
+
+#if(LIBAVCODEC_VERSION_INT >= AV_VERSION_INT(59, 24, 100))
+    #define ST_AV_NEW_CHANNEL_LAYOUT
 #endif
 
 #ifndef AV_NUM_DATA_POINTERS
@@ -401,7 +405,9 @@ namespace stAV {
 
         ST_CPPEXPORT StString getSampleFormatString (const AVCodecContext* theCtx);
         ST_CPPEXPORT StString getSampleRateString   (const AVCodecContext* theCtx);
+        ST_CPPEXPORT int      getNbChannels         (const AVCodecContext* theCtx);
         ST_CPPEXPORT StString getChannelLayoutString(const AVCodecContext* theCtx);
+        ST_CPPEXPORT StString getChannelLayoutString(const AVStream* theStream);
         ST_CPPEXPORT StString getChannelLayoutString(int theNbChannels, uint64_t theLayout);
 
         namespace SAMPLE_FMT {
