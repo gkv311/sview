@@ -15,7 +15,7 @@ BEGIN
     BEGIN
       VALUE "FileDescription", "sView common algorithms library\000"
       VALUE "FileVersion",     SVIEW_SDK_VER_STRING "\000"
-      VALUE "LegalCopyright",  "\251 2007-2022 Kirill Gavrilov Tartynskih and sView developers\000"
+      VALUE "LegalCopyright",  "\251 2007-2023 Kirill Gavrilov Tartynskih and sView developers\000"
       VALUE "ProductName",     "StShared\000"
       VALUE "ProductVersion",  SVIEW_SDK_VER_STRING "\000"
       VALUE "OfficialSite",    "www.sview.ru\000"

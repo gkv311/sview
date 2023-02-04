@@ -931,7 +931,7 @@ void StMoviePlayerGUI::doAboutProgram(const size_t ) {
     const StGLVec3 THE_WHITE(1.0f, 1.0f, 1.0f);
     const StString anAbout = tr(ABOUT_DPLUGIN_NAME) + '\n'
                            + tr(ABOUT_VERSION) + " " + StVersionInfo::getSDKVersionString()
-                           + "\n \n" + tr(ABOUT_DESCRIPTION).format("2007-2022", "kirill@sview.ru", "www.sview.ru")
+                           + "\n \n" + tr(ABOUT_DESCRIPTION).format("2007-2023", "kirill@sview.ru", "www.sview.ru")
                            + "\n\n<b><i>Used projects</i></b>"
                            + "\n \nFFmpeg " + stAV::getVersionInfo() + " (" + stAV::getLicenseInfo() + ")\nhttps://ffmpeg.org/"
                            + "\n \nOpenAL Soft (LGPL)\nhttps://openal-soft.org/"

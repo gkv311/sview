@@ -21,7 +21,7 @@ BEGIN
       VALUE "FileOpenName",     ST_NPAPI_MIME_DESC
       VALUE "FileVersion",      SVIEW_SDK_VER_STRING "\000"
       VALUE "InternalName",     "StBrowserPlugin\000"
-      VALUE "LegalCopyright",   "\251 2009-2022 Kirill Gavrilov Tartynskih\000"
+      VALUE "LegalCopyright",   "\251 2009-2023 Kirill Gavrilov Tartynskih\000"
       VALUE "LegalTrademarks",  "\000"
       VALUE "MIMEType",         ST_NPAPI_MIME_LIST
       VALUE "OriginalFilename", "npStBrowserPlugin.dll\000"
