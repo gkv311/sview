@@ -51,6 +51,6 @@ Building state of master branch (of this git repository https://github.com/gkv31
 |----------------------|--------------|
 | Ubuntu 18.04 (amd64) | [![status](https://github.com/gkv311/sview/workflows/Build%20(Ubuntu%2018.04)/badge.svg?branch=master)](https://github.com/gkv311/sview/actions?query=branch%3Amaster) (GitHub actions) |
 | Ubuntu 20.04 (amd64) | [![status](https://github.com/gkv311/sview/workflows/Build%20(Ubuntu%2020.04)/badge.svg?branch=master)](https://github.com/gkv311/sview/actions?query=branch%3Amaster) (GitHub actions) |
-| macOS 10.15 (amd64)  | [![status](https://github.com/gkv311/sview/workflows/Build%20(macOS%2010.15)/badge.svg?branch=master)](https://github.com/gkv311/sview/actions?query=branch%3Amaster) (GitHub actions) |
+| macOS 12 (amd64)     | [![status](https://github.com/gkv311/sview/workflows/Build%20(macOS%2012)/badge.svg?branch=master)](https://github.com/gkv311/sview/actions?query=branch%3Amaster) (GitHub actions) |
 | Android (armeabi-v7a)| [![status](https://github.com/gkv311/sview/workflows/Build%20(Android)/badge.svg?branch=master)](https://github.com/gkv311/sview/actions?query=branch%3Amaster) (GitHub actions) |
 | Windows (amd64)      | [![status](https://ci.appveyor.com/api/projects/status/github/gkv311/sview)](https://ci.appveyor.com/project/gkv311/sview/build/messages) (AppVeyor) |
