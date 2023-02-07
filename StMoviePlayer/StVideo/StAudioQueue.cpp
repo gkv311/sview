@@ -684,9 +684,14 @@ bool StAudioQueue::initOutChannels() {
         #ifdef ST_AV_NEW_CHANNEL_LAYOUT
             isAmbisonic = myCodecCtx->ch_layout.order == AV_CHANNEL_ORDER_AMBISONIC;
         #endif
-            if((myToForceBFormat || isAmbisonic) && myAlCtx.hasExtBFormat) {
+            if(myToForceBFormat && myAlCtx.hasExtBFormat) {
                 myAlSoftLayout = true;
                 myAlIsBFormat  = true;
+                return initOut40BFormat(isPlanar);
+            }
+            if(isAmbisonic && myAlCtx.hasExtBFormat) {
+                myAlSoftLayout = true;
+                //myAlIsBFormat  = true; // not forced
                 return initOut40BFormat(isPlanar);
             }
             if(myAlCtx.hasExtMultiChannel && !myToOrientListener) {
