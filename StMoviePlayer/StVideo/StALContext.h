@@ -1,5 +1,5 @@
 /**
- * Copyright © 2009-2017 Kirill Gavrilov <kirill@sview.ru>
+ * Copyright © 2009-2023 Kirill Gavrilov <kirill@sview.ru>
  *
  * StMoviePlayer program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -33,6 +33,19 @@
 #endif
 
 namespace {
+    // ALC_SOFT_output_mode extension
+    #define ALC_OUTPUT_MODE_SOFT                     0x19AC
+    #define ALC_ANY_SOFT                             0x19AD
+    #define ALC_MONO_SOFT                            0x1500
+    #define ALC_STEREO_SOFT                          0x1501
+    #define ALC_STEREO_BASIC_SOFT                    0x19AE
+    #define ALC_STEREO_UHJ_SOFT                      0x19AF
+    #define ALC_STEREO_HRTF_SOFT                     0x19B2
+    #define ALC_QUAD_SOFT                            0x1503
+    #define ALC_SURROUND_5_1_SOFT                    0x1504
+    #define ALC_SURROUND_6_1_SOFT                    0x1505
+    #define ALC_SURROUND_7_1_SOFT                    0x1506
+
     // Accepted as part of the <attrList> parameter of alcCreateContext and alcDeviceResetSOFT(), and as the <paramName> parameter of alcGetIntegerv()
     #define ALC_HRTF_SOFT                            0x1992
 
@@ -76,6 +89,7 @@ class StALContext {
     bool hasExtMultiChannel; //!< has multichannel formats
     bool hasExtBFormat;      //!< AL_EXT_BFORMAT
     bool hasExtDisconnect;   //!< ALC_EXT_disconnect
+    bool hasExtSoftOutMode;  //!< ALC_SOFT_output_mode
     bool hasExtSoftHrtf;     //!< ALC_SOFT_HRTF
 
     alcGetStringiSOFT_t  alcGetStringiSOFT;

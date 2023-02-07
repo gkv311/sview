@@ -1,5 +1,5 @@
 /**
- * Copyright © 2009-2017 Kirill Gavrilov <kirill@sview.ru>
+ * Copyright © 2009-2023 Kirill Gavrilov <kirill@sview.ru>
  *
  * StMoviePlayer program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -26,6 +26,25 @@
 #endif
 
 namespace {
+    /**
+     * Return string for ALC_OUTPUT_MODE_SOFT mode.
+     */
+    const char* outputModeToString(ALCint theMode) {
+        switch(theMode) {
+            case ALC_ANY_SOFT:          return "Auto";
+            case ALC_MONO_SOFT:         return "Mono";
+            case ALC_STEREO_SOFT:       return "Stereo (unspecified)";
+            case ALC_STEREO_BASIC_SOFT: return "Stereo (basic)";
+            case ALC_STEREO_UHJ_SOFT:   return "Stereo (UHJ)";
+            case ALC_STEREO_HRTF_SOFT:  return "Stereo (HRTF)";
+            case ALC_QUAD_SOFT:         return "Quadraphonic";
+            case ALC_SURROUND_5_1_SOFT: return "5.1 Surround";
+            case ALC_SURROUND_6_1_SOFT: return "6.1 Surround";
+            case ALC_SURROUND_7_1_SOFT: return "7.1 Surround";
+        }
+        return "UNKNOWN";
+    }
+
     /**
      * Return string for the status.
      */
@@ -73,6 +92,7 @@ StALContext::StALContext()
   hasExtMultiChannel(false),
   hasExtBFormat(false),
   hasExtDisconnect(false),
+  hasExtSoftOutMode(false),
   hasExtSoftHrtf(false),
   alcGetStringiSOFT(NULL),
   alcResetDeviceSOFT(NULL),
@@ -87,23 +107,16 @@ StALContext::~StALContext() {
 
 StString StALContext::toStringExtensions() const {
     StString anExtList = "OpenAL extensions: ";
-    if(hasExtEAX2) {
-        anExtList += "EAX2.0 ";
-    }
-    if(hasExtFloat32) {
-        anExtList += "float32 ";
-    }
-    if(hasExtFloat64) {
-        anExtList += "float64 ";
-    }
-    if(hasExtMultiChannel) {
-        anExtList += "multi-channel ";
-    }
-    if(hasExtBFormat) {
-        anExtList += "B-Format ";
-    }
-    if(hasExtDisconnect) {
-        anExtList += "ALC_EXT_disconnect ";
+    if(hasExtEAX2)        { anExtList += "EAX2.0 "; }
+    if(hasExtFloat32)     { anExtList += "float32 "; }
+    if(hasExtFloat64)     { anExtList += "float64 "; }
+    if(hasExtMultiChannel){ anExtList += "multi-channel "; }
+    if(hasExtBFormat)     { anExtList += "B-Format "; }
+    if(hasExtDisconnect)  { anExtList += "ALC_EXT_disconnect "; }
+    if(hasExtSoftOutMode) {
+        ALCint anOutMode = ALC_ANY_SOFT;
+        alcGetIntegerv(myAlDevice, ALC_OUTPUT_MODE_SOFT, 1, &anOutMode);
+        anExtList += StString("ALC_SOFT_output_mode [") + outputModeToString(anOutMode) + "] ";
     }
     if(hasExtSoftHrtf) {
         ALCint aHrtfStatus = ALC_HRTF_DISABLED_SOFT;
@@ -132,7 +145,9 @@ bool StALContext::create(const std::string& theDeviceName) {
     hasExtFloat64      = alIsExtensionPresent("AL_EXT_double")    == AL_TRUE;
     hasExtMultiChannel = alIsExtensionPresent("AL_EXT_MCFORMATS") == AL_TRUE;
     hasExtBFormat      = alIsExtensionPresent("AL_EXT_BFORMAT")   == AL_TRUE;
+
     hasExtDisconnect   = alcIsExtensionPresent(myAlDevice, "ALC_EXT_disconnect") == AL_TRUE;
+    hasExtSoftOutMode  = alcIsExtensionPresent(myAlDevice, "ALC_SOFT_output_mode") == AL_TRUE;
     if(alcIsExtensionPresent(myAlDevice, "ALC_SOFT_HRTF") == AL_TRUE) {
         alcGetStringiSOFT  = (alcGetStringiSOFT_t  )alcGetProcAddress(myAlDevice, "alcGetStringiSOFT");
         alcResetDeviceSOFT = (alcResetDeviceSOFT_t )alcGetProcAddress(myAlDevice, "alcResetDeviceSOFT");
@@ -142,26 +157,21 @@ bool StALContext::create(const std::string& theDeviceName) {
 
     // debug info
     ST_DEBUG_LOG(toStringExtensions());
-
     return true;
 }
 
 void StALContext::fullInfo(StDictionary& theMap) const {
-    StString anExtensions, aHrtfState;
-    if(hasExtFloat32) {
-        anExtensions += "AL_EXT_float32 ";
-    }
-    if(hasExtFloat64) {
-        anExtensions += "AL_EXT_double ";
-    }
-    if(hasExtMultiChannel) {
-        anExtensions += "AL_EXT_MCFORMATS ";
-    }
-    if(hasExtBFormat) {
-        anExtensions += "AL_EXT_BFORMAT ";
-    }
-    if(hasExtDisconnect) {
-        anExtensions += "ALC_EXT_disconnect ";
+    StString anExtensions, aHrtfState, aSoftOutput;
+    if(hasExtFloat32)     { anExtensions += "AL_EXT_float32 "; }
+    if(hasExtFloat64)     { anExtensions += "AL_EXT_double "; }
+    if(hasExtMultiChannel){ anExtensions += "AL_EXT_MCFORMATS "; }
+    if(hasExtBFormat)     { anExtensions += "AL_EXT_BFORMAT "; }
+    if(hasExtDisconnect)  { anExtensions += "ALC_EXT_disconnect "; }
+    if(hasExtSoftOutMode) { anExtensions += "ALC_SOFT_output_mode "; }
+    if(hasExtSoftOutMode) {
+        ALCint anOutMode = ALC_ANY_SOFT;
+        alcGetIntegerv(myAlDevice, ALC_OUTPUT_MODE_SOFT, 1, &anOutMode);
+        aSoftOutput = outputModeToString(anOutMode);
     }
     if(hasExtSoftHrtf) {
         ALCint aHrtfStatus = ALC_HRTF_DISABLED_SOFT;
@@ -169,10 +179,22 @@ void StALContext::fullInfo(StDictionary& theMap) const {
         aHrtfState = hrtfStatusToString(aHrtfStatus);
     }
 
+    ALCint aFreq = 0;
+    alcGetIntegerv(myAlDevice, ALC_FREQUENCY, 1, &aFreq);
+    if(alcGetError(myAlDevice) == ALC_NO_ERROR) {
+        //
+    }
+
     theMap.add(StDictEntry("ALvendor",    (const char* )alGetString(AL_VENDOR)));
     theMap.add(StDictEntry("ALrenderer",  (const char* )alGetString(AL_RENDERER)));
     theMap.add(StDictEntry("ALversion",   (const char* )alGetString(AL_VERSION)));
+    if(aFreq > 0) {
+        theMap.add(StDictEntry("Audio device sample rate", StString(aFreq) + " Hz"));
+    }
     theMap.add(StDictEntry("OpenAL extensions", anExtensions));
+    if(!aSoftOutput.isEmpty()) {
+        theMap.add(StDictEntry("OpenAL output mode", aSoftOutput));
+    }
     theMap.add(StDictEntry("OpenAL HRTF mixing", !aHrtfState.isEmpty() ? aHrtfState : "Not implemented"));
 }
 
@@ -192,6 +214,7 @@ void StALContext::destroy() {
     hasExtMultiChannel = false;
     hasExtBFormat      = false;
     hasExtDisconnect   = false;
+    hasExtSoftOutMode  = false;
     hasExtSoftHrtf     = false;
     alcGetStringiSOFT  = NULL;
     alcResetDeviceSOFT = NULL;

@@ -39,23 +39,37 @@ ST_DEFINE_HANDLE(StAudioQueue, StAVPacketQueue);
 
 /**
  * This is Audio playback class (OpenAL is used)
- * which feeded with packets (StAVPacket),
+ * which feed with packets (StAVPacket),
  * so it also implements StAVPacketQueue.
  */
 class StAudioQueue : public StAVPacketQueue {
 
         public:
 
-    enum StAlHrtfRequest {
-        StAlHrtfRequest_Auto     = 0,
-        StAlHrtfRequest_ForceOn  = 1,
-        StAlHrtfRequest_ForceOff = 2,
+    enum StAlHintHrtf {
+        StAlHintHrtf_Auto     = 0,
+        StAlHintHrtf_ForceOn  = 1,
+        StAlHintHrtf_ForceOff = 2,
+    };
+
+    enum StAlHintOutput {
+        StAlHintOutput_Any         = 0, // ALC_ANY_SOFT
+        StAlHintOutput_Mono        = 1, // ALC_MONO_SOFT
+        StAlHintOutput_Stereo      = 2, // ALC_STEREO_SOFT
+        StAlHintOutput_StereoBasic = 3, // ALC_STEREO_BASIC_SOFT
+        StAlHintOutput_StereoUHJ   = 4, // ALC_STEREO_UHJ_SOFT
+        StAlHintOutput_StereoHRTF  = 5, // ALC_STEREO_HRTF_SOFT
+        StAlHintOutput_Quad        = 6, // ALC_QUAD_SOFT
+        StAlHintOutput_Surround51  = 7, // ALC_SURROUND_5_1_SOFT
+        StAlHintOutput_Surround61  = 8, // ALC_SURROUND_6_1_SOFT
+        StAlHintOutput_Surround71  = 9, // ALC_SURROUND_7_1_SOFT
     };
 
         public: //! @name public API
 
     ST_LOCAL StAudioQueue(const std::string& theAlDeviceName,
-                          StAudioQueue::StAlHrtfRequest theAlHrtf);
+                          StAudioQueue::StAlHintOutput theAlOut,
+                          StAudioQueue::StAlHintHrtf theAlHrtf);
     ST_LOCAL virtual ~StAudioQueue();
 
     ST_LOCAL bool isInDowntime() {
@@ -112,10 +126,12 @@ class StAudioQueue : public StAVPacketQueue {
     }
 
     /**
-     * Setup OpenAL HRTF mixing.
+     * Setup OpenAL mixing hints.
      */
-    ST_LOCAL void setAlHrtfRequest(StAlHrtfRequest theAlHrt) {
-        myAlHrtf = theAlHrt;
+    ST_LOCAL void setAlHints(StAlHintOutput theAlOut,
+                             StAlHintHrtf theAlHrt) {
+        myAlHintOut  = theAlOut;
+        myAlHintHrtf = theAlHrt;
     }
 
     /**
@@ -163,18 +179,19 @@ class StAudioQueue : public StAVPacketQueue {
     }
 
     /**
+     * Return TRUE if OpenAL implementation supports output mode hints.
+     */
+    ST_LOCAL bool hasAlHintOutput() const { return myAlCtx.hasExtSoftOutMode; }
+
+    /**
      * Return TRUE if OpenAL implementation provides HRTF mixing feature.
      */
-    ST_LOCAL bool hasAlHrtf() const {
-        return myAlCtx.hasExtSoftHrtf;
-    }
+    ST_LOCAL bool hasAlHintHrtf() const { return myAlCtx.hasExtSoftHrtf; }
 
     /**
      * @return true if device was disconnected and OpenAL should be re-initialized
      */
-    ST_LOCAL bool isDisconnected() const {
-        return myIsDisconnected;
-    }
+    ST_LOCAL bool isDisconnected() const { return myIsDisconnected; }
 
     /**
      * Return OpenAL info.
@@ -193,7 +210,7 @@ class StAudioQueue : public StAVPacketQueue {
     ST_LOCAL bool stalInit();
     ST_LOCAL void stalDeinit();
     ST_LOCAL void stalReinitialize();
-    ST_LOCAL void stalResetHrtf();
+    ST_LOCAL void stalResetAlHints();
     ST_LOCAL void stalOrientListener();
 
     ST_LOCAL void stalConfigureSources1();
@@ -378,8 +395,11 @@ class StAudioQueue : public StAVPacketQueue {
     bool               myAlCanBFormat;  //!< flag indicating that B-Format can be forced (e.g. 4-channels input and extension is available)
     bool               myAlIsBFormat;   //!< flag indicating that using B-Format is enabled (forcibly) for 4-channels input
 
-    StAlHrtfRequest    myAlHrtf;
-    StAlHrtfRequest    myAlHrtfPrev;
+    StAlHintOutput     myAlHintOut;
+    StAlHintOutput     myAlHintOutPrev;
+
+    StAlHintHrtf       myAlHintHrtf;
+    StAlHintHrtf       myAlHintHrtfPrev;
 
         private: //! @name debug items
 

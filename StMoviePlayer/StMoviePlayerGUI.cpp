@@ -2450,7 +2450,10 @@ void StMoviePlayerGUI::doMobileSettings(const size_t ) {
     aRend->getOptions(aParams);
     aParams.add(myPlugin->params.ToShowFps);
     aParams.add(myPlugin->params.UseGpu);
-    if(myPlugin->hasAlHrtf()) {
+    if(myPlugin->hasAlHintOutput()) {
+        aParams.add(myPlugin->params.AudioAlOutput);
+    }
+    if(myPlugin->hasAlHintHrtf()) {
         aParams.add(myPlugin->params.AudioAlHrtf);
     }
 

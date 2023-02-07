@@ -1,5 +1,5 @@
 /**
- * Copyright © 2007-2022 Kirill Gavrilov <kirill@sview.ru>
+ * Copyright © 2007-2023 Kirill Gavrilov <kirill@sview.ru>
  *
  * StMoviePlayer program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -173,9 +173,14 @@ class StMoviePlayer : public StApplication {
     }
 
     /**
+     * Return TRUE if OpenAL implementation supports output mode hints.
+     */
+    ST_CPPEXPORT bool hasAlHintOutput() const;
+
+    /**
      * Return TRUE if OpenAL implementation provides HRTF mixing feature.
      */
-    ST_CPPEXPORT bool hasAlHrtf() const;
+    ST_CPPEXPORT bool hasAlHintHrtf() const;
 
     struct {
 
@@ -191,6 +196,7 @@ class StMoviePlayer : public StApplication {
         StHandle<StEnumParam>         SubtitlesParser;   //!< subtitles parser
         StHandle<StBoolParamNamed>    SubtitlesApplyStereo; //!<  apply stereoscopic format of video to image subtitles
         StHandle<StALDeviceParam>     AudioAlDevice;     //!< active OpenAL device
+        StHandle<StEnumParam>         AudioAlOutput;     //!< OpenAL output hint flag
         StHandle<StEnumParam>         AudioAlHrtf;       //!< OpenAL HRTF flag
         StHandle<StFloat32Param>      AudioGain;         //!< volume factor
         StHandle<StBoolParamNamed>    AudioMute;         //!< volume mute flag
@@ -299,7 +305,7 @@ class StMoviePlayer : public StApplication {
     ST_LOCAL void doChangeMixImagesVideos(const bool );
     ST_LOCAL void doSwitchVSync(const bool theValue);
     ST_LOCAL void doSwitchAudioDevice(const int32_t theDevId);
-    ST_LOCAL void doSwitchAudioAlHrtf(const int32_t theValue);
+    ST_LOCAL void doSwitchAudioAlHints(const int32_t );
     ST_LOCAL void doSetForceBFormat(const bool theToForce);
     ST_LOCAL void doSetAudioVolume(const float theGain);
     ST_LOCAL void doSetAudioMute(const bool theToMute);

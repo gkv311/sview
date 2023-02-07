@@ -1,5 +1,5 @@
 /**
- * Copyright © 2007-2017 Kirill Gavrilov <kirill@sview.ru>
+ * Copyright © 2007-2023 Kirill Gavrilov <kirill@sview.ru>
  *
  * StMoviePlayer program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -105,7 +105,8 @@ class StVideo {
      * Main constructor.
      */
     ST_LOCAL StVideo(const std::string&                 theALDeviceName,
-                     StAudioQueue::StAlHrtfRequest      theAlHrtf,
+                     StAudioQueue::StAlHintOutput       theAlOutput,
+                     StAudioQueue::StAlHintHrtf         theAlHrtf,
                      const StHandle<StResourceManager>& theResMgr,
                      const StHandle<StTranslations>&    theLangMap,
                      const StHandle<StPlayList>&        thePlayList,
@@ -215,17 +216,21 @@ class StVideo {
     }
 
     /**
-     * Return TRUE if OpenAL implementation provides HRTF mixing feature.
+     * Return TRUE if OpenAL implementation supports output mode hints.
      */
-    ST_LOCAL bool hasAlHrtf() const {
-        return myAudio->hasAlHrtf();
-    }
+    ST_LOCAL bool hasAlHintOutput() const { return myAudio->hasAlHintOutput(); }
 
     /**
-     * Setup OpenAL HRTF mixing.
+     * Return TRUE if OpenAL implementation provides HRTF mixing feature.
      */
-    ST_LOCAL void setAlHrtfRequest(StAudioQueue::StAlHrtfRequest theAlHrt) {
-        myAudio->setAlHrtfRequest(theAlHrt);
+    ST_LOCAL bool hasAlHintHrtf() const { return myAudio->hasAlHintHrtf(); }
+
+    /**
+     * Setup OpenAL hints.
+     */
+    ST_LOCAL void setAlHints(StAudioQueue::StAlHintOutput theAlOutput,
+                             StAudioQueue::StAlHintHrtf   theAlHrtf) {
+        myAudio->setAlHints(theAlOutput, theAlHrtf);
     }
 
     /**

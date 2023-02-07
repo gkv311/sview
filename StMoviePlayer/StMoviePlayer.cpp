@@ -1,5 +1,5 @@
 /**
- * Copyright © 2007-2022 Kirill Gavrilov <kirill@sview.ru>
+ * Copyright © 2007-2023 Kirill Gavrilov <kirill@sview.ru>
  *
  * StMoviePlayer program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -136,10 +136,24 @@ void StMoviePlayer::updateStrings() {
     params.SubtitlesParser->defineOption(0, tr(MENU_SUBTITLES_PLAIN_TEXT));
     params.SubtitlesParser->defineOption(1, tr(MENU_SUBTITLES_LITE_HTML));
     params.SubtitlesApplyStereo->setName(tr(MENU_SUBTITLES_STEREO));
+
+    params.AudioAlOutput->setName(stCString("Audio output hint"));
+    params.AudioAlOutput->defineOption(StAudioQueue::StAlHintOutput_Any,         stCString("Auto"));
+    params.AudioAlOutput->defineOption(StAudioQueue::StAlHintOutput_Mono,        stCString("Mono"));
+    params.AudioAlOutput->defineOption(StAudioQueue::StAlHintOutput_Stereo,      stCString("Stereo (unspecified enc.)"));
+    params.AudioAlOutput->defineOption(StAudioQueue::StAlHintOutput_StereoBasic, stCString("Stereo (basic)"));
+    params.AudioAlOutput->defineOption(StAudioQueue::StAlHintOutput_StereoUHJ,   stCString("Stereo (UHJ)"));
+    params.AudioAlOutput->defineOption(StAudioQueue::StAlHintOutput_StereoHRTF,  stCString("Stereo (HRTF)"));
+    params.AudioAlOutput->defineOption(StAudioQueue::StAlHintOutput_Quad,        stCString("Quadraphonic"));
+    params.AudioAlOutput->defineOption(StAudioQueue::StAlHintOutput_Surround51,  stCString("5.1 Surround"));
+    params.AudioAlOutput->defineOption(StAudioQueue::StAlHintOutput_Surround61,  stCString("6.1 Surround"));
+    params.AudioAlOutput->defineOption(StAudioQueue::StAlHintOutput_Surround71,  stCString("7.1 Surround"));
+
     params.AudioAlHrtf->setName(stCString("Audio HRTF mixing"));
-    params.AudioAlHrtf->defineOption(0, stCString("Auto"));
-    params.AudioAlHrtf->defineOption(1, stCString("Forced ON"));
-    params.AudioAlHrtf->defineOption(2, stCString("Forced OFF"));
+    params.AudioAlHrtf->defineOption(StAudioQueue::StAlHintHrtf_Auto,     stCString("Auto"));
+    params.AudioAlHrtf->defineOption(StAudioQueue::StAlHintHrtf_ForceOn,  stCString("Forced ON"));
+    params.AudioAlHrtf->defineOption(StAudioQueue::StAlHintHrtf_ForceOff, stCString("Forced OFF"));
+
     params.AudioMute->setName(stCString("Mute Audio"));
     params.IsFullscreen->setName(tr(MENU_VIEW_FULLSCREEN));
 
@@ -267,7 +281,8 @@ StMoviePlayer::StMoviePlayer(const StHandle<StResourceManager>& theResMgr,
     params.SubtitlesParser = new StEnumParam(1, stCString("subsParser"));
     params.SubtitlesApplyStereo = new StBoolParamNamed(true, stCString("subsApplyStereo"));
     params.AudioAlDevice = new StALDeviceParam();
-    params.AudioAlHrtf   = new StEnumParam(0, stCString("alHrtfRequest"));
+    params.AudioAlOutput = new StEnumParam(StAudioQueue::StAlHintOutput_Any, stCString("alOutputHint"));
+    params.AudioAlHrtf   = new StEnumParam(StAudioQueue::StAlHintHrtf_Auto,  stCString("alHrtfRequest"));
     params.AudioGain = new StFloat32Param( 0.0f, // sound is unattenuated
                                          -50.0f, // almost mute
                                           10.0f, // max amplification
@@ -384,6 +399,7 @@ StMoviePlayer::StMoviePlayer(const StHandle<StResourceManager>& theResMgr,
     mySettings->loadParam (params.ToStickPanorama);
     mySettings->loadParam (params.ToTrackHeadAudio);
     mySettings->loadParam (params.ToForceBFormat);
+    mySettings->loadParam (params.AudioAlOutput);
     mySettings->loadParam (params.AudioAlHrtf);
     mySettings->loadParam (params.ToShowFps);
     mySettings->loadParam (params.SlideShowDelay);
@@ -417,7 +433,8 @@ StMoviePlayer::StMoviePlayer(const StHandle<StResourceManager>& theResMgr,
     params.IsShuffle    ->signals.onChanged.connect(this, &StMoviePlayer::doSwitchShuffle);
     params.ToLoopSingle ->signals.onChanged.connect(this, &StMoviePlayer::doSwitchLoopSingle);
     params.AudioAlDevice->signals.onChanged.connect(this, &StMoviePlayer::doSwitchAudioDevice);
-    params.AudioAlHrtf  ->signals.onChanged.connect(this, &StMoviePlayer::doSwitchAudioAlHrtf);
+    params.AudioAlOutput->signals.onChanged.connect(this, &StMoviePlayer::doSwitchAudioAlHints);
+    params.AudioAlHrtf  ->signals.onChanged.connect(this, &StMoviePlayer::doSwitchAudioAlHints);
     params.ToForceBFormat->signals.onChanged = stSlot(this, &StMoviePlayer::doSetForceBFormat);
 
 #if defined(__ANDROID__)
@@ -630,6 +647,7 @@ void StMoviePlayer::saveAllParams() {
         mySettings->saveParam (params.ToSearchSubs);
         mySettings->saveParam (params.TargetFps);
         mySettings->saveString(params.AudioAlDevice->getKey(), params.AudioAlDevice->getUtfTitle());
+        mySettings->saveParam (params.AudioAlOutput);
         mySettings->saveParam (params.AudioAlHrtf);
         mySettings->saveParam (params.LastUpdateDay);
         mySettings->saveParam (params.CheckUpdatesDays);
@@ -914,7 +932,9 @@ bool StMoviePlayer::init() {
 
     // create the video playback thread
     if(!isReset) {
-        myVideo = new StVideo(params.AudioAlDevice->getCTitle(), (StAudioQueue::StAlHrtfRequest )params.AudioAlHrtf->getValue(),
+        myVideo = new StVideo(params.AudioAlDevice->getCTitle(),
+                              (StAudioQueue::StAlHintOutput )params.AudioAlOutput->getValue(),
+                              (StAudioQueue::StAlHintHrtf   )params.AudioAlHrtf->getValue(),
                               myResMgr, myLangMap, myPlayList, aTextureQueue, aSubQueue);
         myVideo->signals.onError  = stSlot(myMsgQueue.access(), &StMsgQueue::doPushError);
         myVideo->signals.onLoaded = stSlot(this,                &StMoviePlayer::doLoaded);
@@ -1828,14 +1848,20 @@ void StMoviePlayer::doSwitchAudioDevice(const int32_t /*theDevId*/) {
     }
 }
 
-bool StMoviePlayer::hasAlHrtf() const {
+bool StMoviePlayer::hasAlHintOutput() const {
     return !myVideo.isNull()
-         && myVideo->hasAlHrtf();
+         && myVideo->hasAlHintOutput();
 }
 
-void StMoviePlayer::doSwitchAudioAlHrtf(const int32_t theValue) {
+bool StMoviePlayer::hasAlHintHrtf() const {
+    return !myVideo.isNull()
+         && myVideo->hasAlHintHrtf();
+}
+
+void StMoviePlayer::doSwitchAudioAlHints(const int32_t ) {
     if(!myVideo.isNull()) {
-        myVideo->setAlHrtfRequest((StAudioQueue::StAlHrtfRequest )theValue);
+        myVideo->setAlHints((StAudioQueue::StAlHintOutput )params.AudioAlOutput->getValue(),
+                            (StAudioQueue::StAlHintHrtf )params.AudioAlHrtf->getValue());
     }
 }
 

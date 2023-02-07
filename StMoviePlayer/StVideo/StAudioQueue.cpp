@@ -155,7 +155,7 @@ bool StAudioQueue::stalInit() {
         }
     }
     myAlCtx.makeCurrent();
-    stalResetHrtf();
+    stalResetAlHints();
     {
         StMutexAuto aLock(myAlInfoMutex);
         myAlInfo.clear();
@@ -220,27 +220,57 @@ void StAudioQueue::stalReinitialize() {
     myToSwitchDev    = false;
 }
 
-void StAudioQueue::stalResetHrtf() {
-    const bool wasChanged = myAlHrtf != myAlHrtfPrev;
-    myAlHrtfPrev = myAlHrtf;
-    if(!myAlCtx.hasExtSoftHrtf) {
+void StAudioQueue::stalResetAlHints() {
+    const bool wasChanged = myAlHintOut  != myAlHintOutPrev
+                         || myAlHintHrtf != myAlHintHrtfPrev;
+    myAlHintOutPrev  = myAlHintOut;
+    myAlHintHrtfPrev = myAlHintHrtf;
+    if(!myAlCtx.hasExtSoftHrtf && !myAlCtx.hasExtSoftOutMode) {
         return;
     }
 
-    ALCint aHrtfVal = ALC_DONT_CARE_SOFT;
-    if(myAlHrtf == StAlHrtfRequest_ForceOn) {
-        aHrtfVal = ALC_TRUE;
-    } else if(myAlHrtf == StAlHrtfRequest_ForceOff) {
-        aHrtfVal = ALC_FALSE;
-    }
-    ALCint anAttrs[] = {
-        ALC_HRTF_SOFT, aHrtfVal,
-        0
+    ALCint anAttrs[6] = {
+        0, 0,
+        0, 0,
+        0, 0,
     };
+
+    int anAttrIter = 0;
+    if(myAlCtx.hasExtSoftOutMode) {
+        ALCint anOutVal = ALC_ANY_SOFT;
+        switch(myAlHintOut) {
+            case StAlHintOutput_Any:         anOutVal = ALC_ANY_SOFT; break;
+            case StAlHintOutput_Mono:        anOutVal = ALC_MONO_SOFT; break;
+            case StAlHintOutput_Stereo:      anOutVal = ALC_STEREO_SOFT; break;
+            case StAlHintOutput_StereoBasic: anOutVal = ALC_STEREO_BASIC_SOFT; break;
+            case StAlHintOutput_StereoUHJ:   anOutVal = ALC_STEREO_UHJ_SOFT; break;
+            case StAlHintOutput_StereoHRTF:  anOutVal = ALC_STEREO_HRTF_SOFT; break;
+            case StAlHintOutput_Quad:        anOutVal = ALC_QUAD_SOFT; break;
+            case StAlHintOutput_Surround51:  anOutVal = ALC_SURROUND_5_1_SOFT; break;
+            case StAlHintOutput_Surround61:  anOutVal = ALC_SURROUND_6_1_SOFT; break;
+            case StAlHintOutput_Surround71:  anOutVal = ALC_SURROUND_7_1_SOFT; break;
+        }
+        anAttrs[anAttrIter * 2 + 0] = ALC_OUTPUT_MODE_SOFT;
+        anAttrs[anAttrIter * 2 + 1] = anOutVal;
+        ++anAttrIter;
+    }
+    if(myAlCtx.hasExtSoftHrtf) {
+        ALCint aHrtfVal = ALC_DONT_CARE_SOFT;
+        if(myAlHintHrtf == StAlHintHrtf_ForceOn) {
+            aHrtfVal = ALC_TRUE;
+        } else if(myAlHintHrtf == StAlHintHrtf_ForceOff) {
+            aHrtfVal = ALC_FALSE;
+        }
+        anAttrs[anAttrIter * 2 + 0] = ALC_HRTF_SOFT;
+        anAttrs[anAttrIter * 2 + 1] = aHrtfVal;
+        ++anAttrIter;
+    }
+
     myAlCtx.alcResetDeviceSOFT(myAlCtx.getAlDevice(), anAttrs);
+    ST_DEBUG_LOG(myAlCtx.toStringExtensions())
     if(wasChanged) {
         (void )wasChanged;
-        ST_DEBUG_LOG(myAlCtx.toStringExtensions())
+        //ST_DEBUG_LOG(myAlCtx.toStringExtensions())
     }
 }
 
@@ -311,7 +341,8 @@ static SV_THREAD_FUNCTION threadFunction(void* audioQueue) {
 }
 
 StAudioQueue::StAudioQueue(const std::string& theAlDeviceName,
-                           StAudioQueue::StAlHrtfRequest theAlHrtf)
+                           StAudioQueue::StAlHintOutput theAlOut,
+                           StAudioQueue::StAlHintHrtf theAlHrtf)
 : StAVPacketQueue(512),
   myPlaybackTimer(false),
   myDowntimeEvent(true),
@@ -335,8 +366,10 @@ StAudioQueue::StAudioQueue(const std::string& theAlDeviceName,
   myAlIsListOrient(false),
   myAlCanBFormat(false),
   myAlIsBFormat(false),
-  myAlHrtf(theAlHrtf),
-  myAlHrtfPrev(theAlHrtf),
+  myAlHintOut(theAlOut),
+  myAlHintOutPrev(theAlOut),
+  myAlHintHrtf(theAlHrtf),
+  myAlHintHrtfPrev(theAlHrtf),
   myDbgPrevQueued(-1),
   myDbgPrevSrcState(-1) {
     stMemSet(myAlSources, 0, sizeof(myAlSources));
@@ -842,8 +875,9 @@ bool StAudioQueue::parseEvents() {
     if(myToSwitchDev) {
         stalReinitialize();
         return true;
-    } else if(myAlHrtf != myAlHrtfPrev) {
-        stalResetHrtf();
+    } else if(myAlHintOut  != myAlHintOutPrev
+           || myAlHintHrtf != myAlHintHrtfPrev) {
+        stalResetAlHints();
         StMutexAuto aLock(myAlInfoMutex);
         myAlInfo.clear();
         myAlCtx.fullInfo(myAlInfo);

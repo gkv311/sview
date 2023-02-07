@@ -1,5 +1,5 @@
 /**
- * Copyright © 2007-2017 Kirill Gavrilov <kirill@sview.ru>
+ * Copyright © 2007-2023 Kirill Gavrilov <kirill@sview.ru>
  *
  * StMoviePlayer program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -110,7 +110,8 @@ const char* StVideo::ST_IMAGES_MIME_STRING = ST_IMAGE_PLUGIN_MIME_CHAR;
 const char* StVideo::ST_VIDEOS_MIME_STRING = ST_VIDEO_PLUGIN_MIME_CHAR;
 
 StVideo::StVideo(const std::string&                 theALDeviceName,
-                 StAudioQueue::StAlHrtfRequest      theAlHrtf,
+                 StAudioQueue::StAlHintOutput       theAlOutput,
+                 StAudioQueue::StAlHintHrtf         theAlHrtf,
                  const StHandle<StResourceManager>& theResMgr,
                  const StHandle<StTranslations>&    theLangMap,
                  const StHandle<StPlayList>&        thePlayList,
@@ -158,7 +159,7 @@ StVideo::StVideo(const std::string&                 theALDeviceName,
     myVideoSlave  = new StVideoQueue(myTextureQueue, myVideoMaster);
     myVideoSlave->signals.onError.connect(this, &StVideo::doOnErrorRedirect);
 
-    myAudio = new StAudioQueue(theALDeviceName, theAlHrtf);
+    myAudio = new StAudioQueue(theALDeviceName, theAlOutput, theAlHrtf);
     myAudio->signals.onError.connect(this, &StVideo::doOnErrorRedirect);
 
     mySubtitles = new StSubtitleQueue(theSubtitlesQueue);
