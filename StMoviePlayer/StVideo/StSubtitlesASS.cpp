@@ -249,38 +249,53 @@ void StSubtitlesASS::parseStyle(StString& theText) {
 StHandle<StSubItem> StSubtitlesASS::parseEvent(const StString& theString,
                                                double thePts,
                                                double theDuration) {
-    if(!isValid() || !theString.isStartsWithIgnoreCase(HEADER_Dialog)) {
-        return StHandle<StSubItem>();
-    }
-    StHandle< StArrayList<StString> > aList = theString.split(',', size_t(myElementsNb));
-    if(size_t(myElementsNb) > aList->size()) {
+    if(!isValid()) {
         return StHandle<StSubItem>();
     }
 
-    StString& aText = aList->changeValue(myIdText);
+    double aDuration = theDuration;
+    StString* aText = NULL;
+    StHandle< StArrayList<StString> > aList = theString.split(',', size_t(myElementsNb));
+    if(theString.isStartsWithIgnoreCase(HEADER_Dialog)) {
+        if(aList->size() < size_t(myElementsNb)) {
+            return StHandle<StSubItem>();
+        }
+
+        aDuration = parseTime(aList->getValue(myIdPtsEnd)) - parseTime(aList->getValue(myIdPtsStart));
+        if(aDuration <= 0.0) {
+            aDuration = theDuration; // why ASS information is wrong here on current FFmpeg?
+        }
+
+        aText = &aList->changeValue(myIdText);
+    } else {
+        // try handling FFmpeg truncated format defined by ff_ass_get_dialog()
+        // "ReadOrder,Layer,Style,Speaker,0,0,0,,Text"
+        // TODO - where this format is documented?
+        if(aList->size() != 9) {
+            return StHandle<StSubItem>();
+        }
+
+        aText = &aList->changeValue(8);
+    }
 
     // remove trailing newline symbol
-    if(aText.isEndsWith(ST_CRLF_REDUNDANT)) {
-        aText = aText.subString(0, aText.getLength() - 2);
-    } else if(aText.isEndsWith(ST_NEWLINE_NORMAL)) {
-        aText = aText.subString(0, aText.getLength() - 1);
+    if(aText->isEndsWith(ST_CRLF_REDUNDANT)) {
+        *aText = aText->subString(0, aText->getLength() - 2);
+    } else if(aText->isEndsWith(ST_NEWLINE_NORMAL)) {
+        *aText = aText->subString(0, aText->getLength() - 1);
     }
-    if(aText.isEmpty()) {
+    if(aText->isEmpty()) {
         // ignore empty strings
         return StHandle<StSubItem>();
     }
 
     // parse style codes
-    parseStyle(aText);
+    parseStyle(*aText);
 
-    double aDuration = parseTime(aList->getValue(myIdPtsEnd)) - parseTime(aList->getValue(myIdPtsStart));
-    if(aDuration <= 0.0) {
-        aDuration = theDuration; // why ASS information is wrong here on current FFmpeg?
-    }
-    aText.replaceFast(ST_CRLF_REDUNDANT, ST_CRLF_REPLACEMENT);
-    aText.replaceFast(ST_ASS_NEWLINE,    ST_NEWLINE_REPLACEMENT);
-    aText.replaceFast(ST_ASS_NEWLINE2,   ST_NEWLINE_REPLACEMENT);
+    aText->replaceFast(ST_CRLF_REDUNDANT, ST_CRLF_REPLACEMENT);
+    aText->replaceFast(ST_ASS_NEWLINE,    ST_NEWLINE_REPLACEMENT);
+    aText->replaceFast(ST_ASS_NEWLINE2,   ST_NEWLINE_REPLACEMENT);
     StHandle<StSubItem> aNewSubItem = new StSubItem(thePts, thePts + aDuration);
-    aNewSubItem->Text = aText;
+    aNewSubItem->Text = *aText;
     return aNewSubItem;
 }
