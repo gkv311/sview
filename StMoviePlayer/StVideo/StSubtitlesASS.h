@@ -1,5 +1,5 @@
 /**
- * Copyright © 2011-2020 Kirill Gavrilov <kirill@sview.ru>
+ * Copyright © 2011-2023 Kirill Gavrilov <kirill@sview.ru>
  *
  * StMoviePlayer program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by

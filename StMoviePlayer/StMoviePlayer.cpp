@@ -130,7 +130,8 @@ void StMoviePlayer::updateStrings() {
     params.ScaleAdjust->defineOption(StGLRootWidget::ScaleAdjust_Normal, tr(MENU_HELP_SCALE_NORMAL));
     params.ScaleAdjust->defineOption(StGLRootWidget::ScaleAdjust_Big,    tr(MENU_HELP_SCALE_BIG));
     params.ScaleHiDPI2X->setName(tr(MENU_HELP_SCALE_HIDPI2X));
-    params.SubtitlesPlace->setName(stCString("Subtitles Placement"));
+    params.SubtitlesPlace1->setName(stCString("Subtitles Placement"));
+    params.SubtitlesPlace2->setName(stCString("Subtitles Placement"));
     params.ToSearchSubs->setName(stCString("Search additional tracks"));
     params.SubtitlesParser->setName(tr(MENU_SUBTITLES_PARSER));
     params.SubtitlesParser->defineOption(0, tr(MENU_SUBTITLES_PLAIN_TEXT));
@@ -256,22 +257,38 @@ StMoviePlayer::StMoviePlayer(const StHandle<StResourceManager>& theResMgr,
     params.ScaleHiDPI->setStep(1.0f);
     params.ScaleHiDPI->setTolerance(0.001f);
     params.ScaleHiDPI2X     = new StBoolParamNamed(false, stCString("scale2X"));
-    params.SubtitlesPlace   = new StInt32ParamNamed(ST_VCORNER_BOTTOM, stCString("subsPlace"));
-    params.SubtitlesTopDY   = new StFloat32Param(100.0f, stCString("subsTopDY"));
-    params.SubtitlesTopDY->setMinMaxValues(0.0f, 400.0f);
-    params.SubtitlesTopDY->setDefValue(100.0f);
-    params.SubtitlesTopDY->setStep(5.0f);
-    params.SubtitlesTopDY->setTolerance(0.1f);
-    params.SubtitlesBottomDY= new StFloat32Param(100.0f, stCString("subsBottomDY"));
-    params.SubtitlesBottomDY->setMinMaxValues(0.0f, 400.0f);
-    params.SubtitlesBottomDY->setDefValue(100.0f);
-    params.SubtitlesBottomDY->setStep(5.0f);
-    params.SubtitlesBottomDY->setTolerance(0.1f);
-    params.SubtitlesSize    = new StFloat32Param(28.0f, stCString("subsSize"));
-    params.SubtitlesSize->setMinMaxValues(8.0f, 96.0f);
-    params.SubtitlesSize->setDefValue(28.0f);
-    params.SubtitlesSize->setStep(1.0f);
-    params.SubtitlesSize->setTolerance(0.1f);
+    params.SubtitlesPlace1  = new StInt32ParamNamed(ST_VCORNER_BOTTOM, stCString("subsPlace"));
+    params.SubtitlesPlace2  = new StInt32ParamNamed(ST_VCORNER_TOP,    stCString("subsPlace2"));
+    params.SubtitlesTopDY1  = new StFloat32Param(200.0f, stCString("subsTopDY"));
+    params.SubtitlesTopDY1->setMinMaxValues(0.0f, 400.0f);
+    params.SubtitlesTopDY1->setDefValue(200.0f);
+    params.SubtitlesTopDY1->setStep(5.0f);
+    params.SubtitlesTopDY1->setTolerance(0.1f);
+    params.SubtitlesTopDY2  = new StFloat32Param(100.0f, stCString("subsTopDY2"));
+    params.SubtitlesTopDY2->setMinMaxValues(0.0f, 400.0f);
+    params.SubtitlesTopDY2->setDefValue(100.0f);
+    params.SubtitlesTopDY2->setStep(5.0f);
+    params.SubtitlesTopDY2->setTolerance(0.1f);
+    params.SubtitlesBottomDY1 = new StFloat32Param(100.0f, stCString("subsBottomDY"));
+    params.SubtitlesBottomDY1->setMinMaxValues(0.0f, 400.0f);
+    params.SubtitlesBottomDY1->setDefValue(100.0f);
+    params.SubtitlesBottomDY1->setStep(5.0f);
+    params.SubtitlesBottomDY1->setTolerance(0.1f);
+    params.SubtitlesBottomDY2 = new StFloat32Param(200.0f, stCString("subsBottomDY2"));
+    params.SubtitlesBottomDY2->setMinMaxValues(0.0f, 400.0f);
+    params.SubtitlesBottomDY2->setDefValue(200.0f);
+    params.SubtitlesBottomDY2->setStep(5.0f);
+    params.SubtitlesBottomDY2->setTolerance(0.1f);
+    params.SubtitlesSize1 = new StFloat32Param(28.0f, stCString("subsSize"));
+    params.SubtitlesSize1->setMinMaxValues(8.0f, 96.0f);
+    params.SubtitlesSize1->setDefValue(28.0f);
+    params.SubtitlesSize1->setStep(1.0f);
+    params.SubtitlesSize1->setTolerance(0.1f);
+    params.SubtitlesSize2 = new StFloat32Param(28.0f, stCString("subsSize2"));
+    params.SubtitlesSize2->setMinMaxValues(8.0f, 96.0f);
+    params.SubtitlesSize2->setDefValue(28.0f);
+    params.SubtitlesSize2->setStep(1.0f);
+    params.SubtitlesSize2->setTolerance(0.1f);
     params.SubtitlesParallax= new StFloat32Param(0.0f, stCString("subsParallax"));
     params.SubtitlesParallax->setMinMaxValues(-90.0f, 90.0f);
     params.SubtitlesParallax->setDefValue(0.0f);
@@ -349,8 +366,10 @@ StMoviePlayer::StMoviePlayer(const StHandle<StResourceManager>& theResMgr,
     params.WebUIPort        = new StInt32ParamNamed(8080, stCString("webuiPort"));
     params.AudioStream = new StInt32Param(-1);
     params.AudioStream->signals.onChanged = stSlot(this, &StMoviePlayer::doSwitchAudioStream);
-    params.SubtitlesStream = new StInt32Param(-1);
-    params.SubtitlesStream->signals.onChanged = stSlot(this, &StMoviePlayer::doSwitchSubtitlesStream);
+    params.SubtitlesStream1 = new StInt32Param(-1);
+    params.SubtitlesStream1->signals.onChanged = stSlot(this, &StMoviePlayer::doSwitchSubtitlesStream1);
+    params.SubtitlesStream2 = new StInt32Param(-1);
+    params.SubtitlesStream2->signals.onChanged = stSlot(this, &StMoviePlayer::doSwitchSubtitlesStream2);
     params.BlockSleeping = new StEnumParam(StMoviePlayer::BLOCK_SLEEP_PLAYBACK, stCString("blockSleep"));
     params.ToHideStatusBar = new StBoolParamNamed(true, stCString("toHideStatusBar"));
     params.ToHideStatusBar->signals.onChanged = stSlot(this, &StMoviePlayer::doHideSystemBars);
@@ -385,10 +404,14 @@ StMoviePlayer::StMoviePlayer(const StHandle<StResourceManager>& theResMgr,
     mySettings->loadParam (params.AreGlobalMKeys);
     mySettings->loadParam (params.ToShowPlayList);
     mySettings->loadParam (params.ToShowAdjustImage);
-    mySettings->loadParam (params.SubtitlesPlace);
-    mySettings->loadParam (params.SubtitlesTopDY);
-    mySettings->loadParam (params.SubtitlesBottomDY);
-    mySettings->loadParam (params.SubtitlesSize);
+    mySettings->loadParam (params.SubtitlesPlace1);
+    mySettings->loadParam (params.SubtitlesPlace2);
+    mySettings->loadParam (params.SubtitlesTopDY1);
+    mySettings->loadParam (params.SubtitlesTopDY2);
+    mySettings->loadParam (params.SubtitlesBottomDY1);
+    mySettings->loadParam (params.SubtitlesBottomDY2);
+    mySettings->loadParam (params.SubtitlesSize1);
+    mySettings->loadParam (params.SubtitlesSize2);
     mySettings->loadParam (params.SubtitlesParallax);
     mySettings->loadParam (params.SubtitlesParser);
     mySettings->loadParam (params.SubtitlesApplyStereo);
@@ -637,10 +660,14 @@ void StMoviePlayer::saveAllParams() {
         mySettings->saveParam (params.ExitOnEscape);
         mySettings->saveParam (params.ScaleAdjust);
         mySettings->saveParam (params.ScaleHiDPI2X);
-        mySettings->saveParam (params.SubtitlesPlace);
-        mySettings->saveParam (params.SubtitlesTopDY);
-        mySettings->saveParam (params.SubtitlesBottomDY);
-        mySettings->saveParam (params.SubtitlesSize);
+        mySettings->saveParam (params.SubtitlesPlace1);
+        mySettings->saveParam (params.SubtitlesPlace2);
+        mySettings->saveParam (params.SubtitlesTopDY1);
+        mySettings->saveParam (params.SubtitlesTopDY2);
+        mySettings->saveParam (params.SubtitlesBottomDY1);
+        mySettings->saveParam (params.SubtitlesBottomDY2);
+        mySettings->saveParam (params.SubtitlesSize1);
+        mySettings->saveParam (params.SubtitlesSize2);
         mySettings->saveParam (params.SubtitlesParallax);
         mySettings->saveParam (params.SubtitlesParser);
         mySettings->saveParam (params.SubtitlesApplyStereo);
@@ -720,7 +747,8 @@ StMoviePlayer::~StMoviePlayer() {
 }
 
 bool StMoviePlayer::createGui(StHandle<StGLTextureQueue>& theTextureQueue,
-                              StHandle<StSubQueue>&       theSubQueue) {
+                              StHandle<StSubQueue>&       theSubQueue1,
+                              StHandle<StSubQueue>&       theSubQueue2) {
     if(!myGUI.isNull()) {
         saveGuiParams();
         myGUI.nullify();
@@ -729,15 +757,18 @@ bool StMoviePlayer::createGui(StHandle<StGLTextureQueue>& theTextureQueue,
 
     if(!myVideo.isNull()) {
         theTextureQueue = myVideo->getTextureQueue();
-        theSubQueue     = myVideo->getSubtitlesQueue();
+        theSubQueue1    = myVideo->getSubtitlesQueue1();
+        theSubQueue2    = myVideo->getSubtitlesQueue2();
     } else {
         theTextureQueue = new StGLTextureQueue(16);
-        theSubQueue     = new StSubQueue();
+        theSubQueue1    = new StSubQueue();
+        theSubQueue2    = new StSubQueue();
     }
 
     params.ScaleHiDPI->setValue(myWindow->getScaleFactor());
     doChangeMobileUI(params.IsMobileUI->getValue());
-    myGUI = new StMoviePlayerGUI(this, myWindow.access(), myLangMap.access(), myPlayList, theTextureQueue, theSubQueue);
+    myGUI = new StMoviePlayerGUI(this, myWindow.access(), myLangMap.access(), myPlayList,
+                                 theTextureQueue, theSubQueue1, theSubQueue2);
     myGUI->setContext(myContext);
     theTextureQueue->setDeviceCaps(myContext->getDeviceCaps());
 
@@ -917,8 +948,8 @@ bool StMoviePlayer::init() {
 
     // create the GUI with default values
     StHandle<StGLTextureQueue> aTextureQueue;
-    StHandle<StSubQueue>       aSubQueue;
-    if(!createGui(aTextureQueue, aSubQueue)) {
+    StHandle<StSubQueue>       aSubQueue1, aSubQueue2;
+    if(!createGui(aTextureQueue, aSubQueue1, aSubQueue2)) {
         myMsgQueue->pushError(stCString("Movie Player - critical error:\n"
                                         "Frame region initialization failed!"));
         myMsgQueue->popAll();
@@ -935,7 +966,8 @@ bool StMoviePlayer::init() {
         myVideo = new StVideo(params.AudioAlDevice->getCTitle(),
                               (StAudioQueue::StAlHintOutput )params.AudioAlOutput->getValue(),
                               (StAudioQueue::StAlHintHrtf   )params.AudioAlHrtf->getValue(),
-                              myResMgr, myLangMap, myPlayList, aTextureQueue, aSubQueue);
+                              myResMgr, myLangMap, myPlayList,
+                              aTextureQueue, aSubQueue1, aSubQueue2);
         myVideo->signals.onError  = stSlot(myMsgQueue.access(), &StMsgQueue::doPushError);
         myVideo->signals.onLoaded = stSlot(this,                &StMoviePlayer::doLoaded);
         myVideo->params.UseGpu       = params.UseGpu;
@@ -1362,18 +1394,18 @@ void StMoviePlayer::doSubtitlesNext(size_t theDirection) {
         return;
     }
 
-    const int32_t aValue = myVideo->params.activeSubtitles->nextValue(theDirection == 1 ? 1 : -1);
-    params.SubtitlesStream->setValue(aValue);
+    const int32_t aValue = myVideo->params.activeSubtitles1->nextValue(theDirection == 1 ? 1 : -1);
+    params.SubtitlesStream1->setValue(aValue);
 }
 
 void StMoviePlayer::doSubtitlesCopy(size_t ) {
     if(myVideo.isNull()
     || myGUI.isNull()
-    || myGUI->mySubtitles == NULL) {
+    || myGUI->mySubtitles1 == NULL) {
         return;
     }
 
-    const StString& aText = myGUI->mySubtitles->getText();
+    const StString& aText = myGUI->mySubtitles1->getText();
     if(aText.isEmpty()) {
         return;
     }
@@ -1463,7 +1495,7 @@ void StMoviePlayer::doFileDrop(const StDNDropEvent& theEvent) {
 
             myPlayList->addToNode(aCurrFile, aFile1);
             myAudioOnLoad = myVideo->params.activeAudio->getValue();
-            mySubsOnLoad  = myVideo->params.activeSubtitles->getListSize();
+            mySubsOnLoad  = myVideo->params.activeSubtitles1->getListSize();
             mySeekOnLoad  = myVideo->getPts();
             doUpdateStateLoading();
             myVideo->pushPlayEvent(ST_PLAYEVENT_RESUME);
@@ -1575,13 +1607,13 @@ void StMoviePlayer::beforeDraw() {
             aFilePath = myOpenDialog->getPathAudio();
             myPlayList->addToNode(aCurrFile, aFilePath);
             myAudioOnLoad = myVideo->params.activeAudio->getListSize();
-            mySubsOnLoad  = myVideo->params.activeSubtitles->getValue();
+            mySubsOnLoad  = myVideo->params.activeSubtitles1->getValue();
             mySeekOnLoad  = myVideo->getPts();
         } else if(!myOpenDialog->getPathSubtitles().isEmpty()) {
             aFilePath = myOpenDialog->getPathSubtitles();
             myPlayList->addToNode(aCurrFile, aFilePath);
             myAudioOnLoad = myVideo->params.activeAudio->getValue();
-            mySubsOnLoad  = myVideo->params.activeSubtitles->getListSize();
+            mySubsOnLoad  = myVideo->params.activeSubtitles1->getListSize();
             mySeekOnLoad  = myVideo->getPts();
         } else if(!myOpenDialog->getPathRight().isEmpty()) {
             // meta-file
@@ -1620,8 +1652,8 @@ void StMoviePlayer::beforeDraw() {
     if(params.ScaleHiDPI->setValue(myWindow->getScaleFactor())
     || myToRecreateMenu) {
         StHandle<StGLTextureQueue> aTextureQueue;
-        StHandle<StSubQueue>       aSubQueue;
-        createGui(aTextureQueue, aSubQueue);
+        StHandle<StSubQueue>       aSubQueue1, aSubQueue2;
+        createGui(aTextureQueue, aSubQueue1, aSubQueue2);
         myToRecreateMenu = false;
     }
 
@@ -1647,8 +1679,11 @@ void StMoviePlayer::beforeDraw() {
     if(myGUI->myTimeBox != NULL) {
         myGUI->myTimeBox->stglUpdateTime(aPts, aDuration);
     }
-    if(myGUI->mySubtitles != NULL) {
-        myGUI->mySubtitles->setPTS(aPts);
+    if(myGUI->mySubtitles1 != NULL) {
+        myGUI->mySubtitles1->setPTS(aPts);
+    }
+    if(myGUI->mySubtitles2 != NULL) {
+        myGUI->mySubtitles2->setPTS(aPts);
     }
     if(myGUI->mySeekBar != NULL) {
         myGUI->mySeekBar->setProgress(GLfloat(aPosition));
@@ -1913,8 +1948,9 @@ void StMoviePlayer::doUpdateStateLoaded() {
     } else {
         myWindow->setTitle(aFileToLoad + " - sView");
     }
-    params.AudioStream    ->setValue(myVideo->params.activeAudio->getValue());
-    params.SubtitlesStream->setValue(myVideo->params.activeSubtitles->getValue());
+    params.AudioStream     ->setValue(myVideo->params.activeAudio->getValue());
+    params.SubtitlesStream1->setValue(myVideo->params.activeSubtitles1->getValue());
+    params.SubtitlesStream2->setValue(myVideo->params.activeSubtitles2->getValue());
     if(mySeekOnLoad > 0.0) {
         myVideo->pushPlayEvent(ST_PLAYEVENT_SEEK, mySeekOnLoad);
         mySeekOnLoad = -1.0;
@@ -1925,8 +1961,8 @@ void StMoviePlayer::doUpdateStateLoaded() {
         myAudioOnLoad = -1;
     }
     if(mySubsOnLoad >= 0) {
-        myVideo->params.activeSubtitles->setValue(mySubsOnLoad);
-        params.SubtitlesStream->setValue(mySubsOnLoad);
+        myVideo->params.activeSubtitles1->setValue(mySubsOnLoad);
+        params.SubtitlesStream1->setValue(mySubsOnLoad);
         mySubsOnLoad = -1;
     }
 }
@@ -2199,8 +2235,18 @@ void StMoviePlayer::doSwitchAudioStream(const int32_t theStreamId) {
     myVideo->params.activeAudio->setValue(theStreamId);
 }
 
-void StMoviePlayer::doSwitchSubtitlesStream(const int32_t theStreamId) {
-    myVideo->params.activeSubtitles->setValue(theStreamId);
+void StMoviePlayer::doSwitchSubtitlesStream1(const int32_t theStreamId) {
+    if(theStreamId != -1 && params.SubtitlesStream2->getValue() == theStreamId) {
+        params.SubtitlesStream2->setValue(-1);
+    }
+    myVideo->params.activeSubtitles1->setValue(theStreamId);
+}
+
+void StMoviePlayer::doSwitchSubtitlesStream2(const int32_t theStreamId) {
+    if(theStreamId != -1 && params.SubtitlesStream1->getValue() == theStreamId) {
+        params.SubtitlesStream1->setValue(-1);
+    }
+    myVideo->params.activeSubtitles2->setValue(theStreamId);
 }
 
 void StMoviePlayer::doFullscreen(const bool theIsFullscreen) {

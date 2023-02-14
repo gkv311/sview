@@ -187,10 +187,14 @@ class StMoviePlayer : public StApplication {
         StHandle<StEnumParam>         ScaleAdjust;       //!< adjust GUI size, see StGLRootWidget::ScaleAdjust
         StHandle<StFloat32Param>      ScaleHiDPI;        //!< adapt  GUI size for HiDPI resolution
         StHandle<StBoolParamNamed>    ScaleHiDPI2X;      //!< option to set HiDPI resolution to 2.0
-        StHandle<StInt32ParamNamed>   SubtitlesPlace;    //!< subtitles placement
-        StHandle<StFloat32Param>      SubtitlesTopDY;    //!< subtitles vertical displacement
-        StHandle<StFloat32Param>      SubtitlesBottomDY; //!< subtitles vertical displacement
-        StHandle<StFloat32Param>      SubtitlesSize;     //!< subtitles font size
+        StHandle<StInt32ParamNamed>   SubtitlesPlace1;   //!< subtitles placement
+        StHandle<StInt32ParamNamed>   SubtitlesPlace2;   //!< subtitles placement
+        StHandle<StFloat32Param>      SubtitlesTopDY1;   //!< subtitles vertical displacement
+        StHandle<StFloat32Param>      SubtitlesTopDY2;   //!< subtitles vertical displacement
+        StHandle<StFloat32Param>      SubtitlesBottomDY1;//!< subtitles vertical displacement
+        StHandle<StFloat32Param>      SubtitlesBottomDY2;//!< subtitles vertical displacement
+        StHandle<StFloat32Param>      SubtitlesSize1;    //!< subtitles font size
+        StHandle<StFloat32Param>      SubtitlesSize2;    //!< subtitles font size
         StHandle<StFloat32Param>      SubtitlesParallax; //!< subtitles parallax
         StHandle<StBoolParamNamed>    ToSearchSubs;      //!< automatically search for additional subtitles/audio track files nearby video file
         StHandle<StEnumParam>         SubtitlesParser;   //!< subtitles parser
@@ -235,7 +239,8 @@ class StMoviePlayer : public StApplication {
         StHandle<StBoolParamNamed>    IsLocalWebUI;      //!< restrict remote access to 127.0.0.0
         StHandle<StInt32ParamNamed>   WebUIPort;         //!< port to start Web UI
         StHandle<StInt32Param>        AudioStream;       //!< active Audio stream
-        StHandle<StInt32Param>        SubtitlesStream;   //!< active Subtitles stream
+        StHandle<StInt32Param>        SubtitlesStream1;  //!< active Subtitles stream
+        StHandle<StInt32Param>        SubtitlesStream2;  //!< active Subtitles stream
         StHandle<StEnumParam>         BlockSleeping;     //!< active Audio stream
         StHandle<StBoolParamNamed>    ToHideStatusBar;   //!< hide system-provided status bar
         StHandle<StBoolParamNamed>    ToHideNavBar;      //!< hide system-provided navigation bar
@@ -275,7 +280,8 @@ class StMoviePlayer : public StApplication {
     ST_LOCAL void saveGuiParams();
     ST_LOCAL void saveAllParams();
     ST_LOCAL bool createGui(StHandle<StGLTextureQueue>& theTextureQueue,
-                            StHandle<StSubQueue>&       theSubQueue);
+                            StHandle<StSubQueue>&       theSubQueue1,
+                            StHandle<StSubQueue>&       theSubQueue2);
 
     /**
      * Parse arguments.
@@ -320,7 +326,8 @@ class StMoviePlayer : public StApplication {
     ST_LOCAL void doChangeStickPano360(const bool );
     ST_LOCAL void doChangeSwapJPS(const bool );
     ST_LOCAL void doSwitchAudioStream(const int32_t theStreamId);
-    ST_LOCAL void doSwitchSubtitlesStream(const int32_t theStreamId);
+    ST_LOCAL void doSwitchSubtitlesStream1(const int32_t theStreamId);
+    ST_LOCAL void doSwitchSubtitlesStream2(const int32_t theStreamId);
     ST_LOCAL void doShowPlayList(const bool theToShow);
     ST_LOCAL void doShowAdjustImage(const bool theToShow);
     ST_LOCAL void doUpdateStateLoading();

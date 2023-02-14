@@ -111,7 +111,8 @@ class StVideo {
                      const StHandle<StTranslations>&    theLangMap,
                      const StHandle<StPlayList>&        thePlayList,
                      const StHandle<StGLTextureQueue>&  theTextureQueue,
-                     const StHandle<StSubQueue>&        theSubtitlesQueue);
+                     const StHandle<StSubQueue>&        theSubtitlesQueue1,
+                     const StHandle<StSubQueue>&        theSubtitlesQueue2);
 
     /**
      * Destructor.
@@ -123,58 +124,50 @@ class StVideo {
      */
     ST_LOCAL void startDestruction();
 
-    ST_LOCAL inline const StHandle<StGLTextureQueue>& getTextureQueue() const {
-        return myTextureQueue;
-    }
+    ST_LOCAL const StHandle<StGLTextureQueue>& getTextureQueue() const { return myTextureQueue; }
 
-    ST_LOCAL inline const StHandle<StSubQueue>& getSubtitlesQueue() const {
-        return mySubtitles->getSubtitlesQueue();
-    }
+    /**
+     * Return first subtitles queue.
+     */
+    ST_LOCAL const StHandle<StSubQueue>& getSubtitlesQueue1() const { return mySubtitles1->getSubtitlesQueue(); }
+
+    /**
+     * Return secondary subtitles queue.
+     */
+    ST_LOCAL const StHandle<StSubQueue>& getSubtitlesQueue2() const { return mySubtitles2->getSubtitlesQueue(); }
 
     /**
      * Ignore sync rules and perform swap when ready.
      */
     ST_LOCAL void setBenchmark(bool toPerformBenchmark);
 
-    ST_LOCAL double getAverFps() const {
-        return myTargetFps;
-    }
+    ST_LOCAL double getAverFps() const { return myTargetFps; }
 
     /**
      * @return true if audio stream loaded
      */
-    ST_LOCAL bool hasAudioStream() const {
-        return myAudio->isInitialized();
-    }
+    ST_LOCAL bool hasAudioStream() const { return myAudio->isInitialized(); }
 
     /**
      * @return true if video stream loaded
      */
-    ST_LOCAL bool hasVideoStream() const {
-        return myVideoMaster->isInitialized();
-    }
+    ST_LOCAL bool hasVideoStream() const { return myVideoMaster->isInitialized(); }
 
     /**
      * Set the stereoscopic format to be used for video
      * with ambiguous format information.
      */
-    ST_LOCAL void setStereoFormat(const StFormat theSrcFormat) {
-        myVideoMaster->setStereoFormatByUser(theSrcFormat);
-    }
+    ST_LOCAL void setStereoFormat(const StFormat theSrcFormat) { myVideoMaster->setStereoFormatByUser(theSrcFormat); }
 
     /**
      * Set theater mode.
      */
-    ST_LOCAL void setTheaterMode(bool theIsTheater) {
-        myVideoMaster->setTheaterMode(theIsTheater);
-    }
+    ST_LOCAL void setTheaterMode(bool theIsTheater) { myVideoMaster->setTheaterMode(theIsTheater); }
 
     /**
      * Stick to panorama 360 mode.
      */
-    ST_LOCAL void setStickPano360(bool theToStick) {
-        myVideoMaster->setStickPano360(theToStick);
-    }
+    ST_LOCAL void setStickPano360(bool theToStick) { myVideoMaster->setStickPano360(theToStick); }
 
     /**
      * Set if JPS file should be read as Left/Right (TRUE) of as Right/Left (FALSE).
@@ -211,9 +204,7 @@ class StVideo {
     /**
      * Switch audio device.
      */
-    ST_LOCAL void switchAudioDevice(const std::string& theAlDeviceName) {
-        myAudio->switchAudioDevice(theAlDeviceName);
-    }
+    ST_LOCAL void switchAudioDevice(const std::string& theAlDeviceName) { myAudio->switchAudioDevice(theAlDeviceName); }
 
     /**
      * Return TRUE if OpenAL implementation supports output mode hints.
@@ -243,9 +234,7 @@ class StVideo {
     /**
      * Set audio gain.
      */
-    ST_LOCAL void setAudioVolume(const float theGain) {
-        myAudio->setAudioVolume(theGain);
-    }
+    ST_LOCAL void setAudioVolume(const float theGain) { myAudio->setAudioVolume(theGain); }
 
     /**
      * Set head orientation.
@@ -257,18 +246,14 @@ class StVideo {
     /**
      * Set forcing B-Format.
      */
-    ST_LOCAL void setForceBFormat(bool theToForce) {
-        myAudio->setForceBFormat(theToForce);
-    }
+    ST_LOCAL void setForceBFormat(bool theToForce) { myAudio->setForceBFormat(theToForce); }
 
     ST_LOCAL void setAudioDelay(const float theDelaySec);
 
     /**
      * Return OpenAL info.
      */
-    ST_LOCAL void getAlInfo(StDictionary& theInfo) {
-        myAudio->getAlInfo(theInfo);
-    }
+    ST_LOCAL void getAlInfo(StDictionary& theInfo) { myAudio->getAlInfo(theInfo); }
 
         public: //! @name Properties
 
@@ -280,7 +265,8 @@ class StVideo {
         StHandle<StBoolParamNamed>    ToTrackHeadAudio;//!< enable/disable head-tracking for audio listener
         StHandle<StFloat32Param>      SlideShowDelay;  //!< slideshow delay
         StHandle<StParamActiveStream> activeAudio;     //!< active Audio stream
-        StHandle<StParamActiveStream> activeSubtitles; //!< active Subtitles stream
+        StHandle<StParamActiveStream> activeSubtitles1;//!< active Subtitles stream (first)
+        StHandle<StParamActiveStream> activeSubtitles2;//!< active Subtitles stream (secondary)
 
     } params;
 
@@ -407,6 +393,19 @@ class StVideo {
                                 const signed int theStreamId,
                                 const double     theSeekPts,
                                 const bool       toSeekBack);
+    /**
+     * Handle audio stream switching.
+     */
+    ST_LOCAL void doSwitchAudioStream(StArrayList<StAVPacket>& theAVPackets,
+                                      StArrayList<bool>& theQueueIsFull,
+                                      size_t& theEmptyQueues);
+    /**
+     * Handle subtitles stream switching.
+     */
+    ST_LOCAL void doSwitchSubtitlesStream(StArrayList<StAVPacket>& theAVPackets,
+                                          StArrayList<bool>& theQueueIsFull,
+                                          size_t& theEmptyQueues,
+                                          const int theIndex);
     ST_LOCAL bool pushPacket(StHandle<StAVPacketQueue>& theAVPacketQueue,
                              StAVPacket& thePacket);
 
@@ -464,7 +463,8 @@ class StVideo {
     StHandle<StVideoQueue>        myVideoMaster;  //!< Master video decoding thread
     StHandle<StVideoQueue>        myVideoSlave;   //!< Slave  video decoding thread
     StHandle<StAudioQueue>        myAudio;        //!< audio decoding thread
-    StHandle<StSubtitleQueue>     mySubtitles;    //!< subtitles decoding thread
+    StHandle<StSubtitleQueue>     mySubtitles1;   //!< subtitles (first) decoding thread
+    StHandle<StSubtitleQueue>     mySubtitles2;   //!< subtitles (secondary) decoding thread
     AVFormatContext*              mySlaveCtx;     //!< Slave video format context
     signed int                    mySlaveStream;  //!< Slave video stream id
 

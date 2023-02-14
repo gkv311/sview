@@ -1,5 +1,5 @@
 /**
- * Copyright © 2009-2020 Kirill Gavrilov <kirill@sview.ru>
+ * Copyright © 2009-2023 Kirill Gavrilov <kirill@sview.ru>
  *
  * StMoviePlayer program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -57,20 +57,14 @@ class StMoviePlayerGUI : public StGLRootWidget {
     /**
      * @return translation for the string with specified id
      */
-    ST_LOCAL const StString& tr(const size_t theId) const {
-        return myLangMap->getValue(theId);
-    }
+    ST_LOCAL const StString& tr(const size_t theId) const { return myLangMap->getValue(theId); }
 
     /**
      * @return translation for the string with specified id
      */
-    ST_LOCAL const StString& tr(const StString& theId) const {
-        return myLangMap->getValue(theId);
-    }
+    ST_LOCAL const StString& tr(const StString& theId) const { return myLangMap->getValue(theId); }
 
-    ST_LOCAL const StString& trSrcFormat(const StFormat theSrcFormat) const {
-        return tr(trSrcFormatId(theSrcFormat));
-    }
+    ST_LOCAL const StString& trSrcFormat(const StFormat theSrcFormat) const { return tr(trSrcFormatId(theSrcFormat)); }
 
     ST_LOCAL static size_t trSrcFormatId(const StFormat theSrcFormat);
 
@@ -105,7 +99,8 @@ class StMoviePlayerGUI : public StGLRootWidget {
                               StTranslations* theLangMap,
                               const StHandle<StPlayList>&       thePlayList,
                               const StHandle<StGLTextureQueue>& theTextureQueue,
-                              const StHandle<StSubQueue>&       theSubQueue);
+                              const StHandle<StSubQueue>&       theSubQueue1,
+                              const StHandle<StSubQueue>&       theSubQueue2);
     ST_LOCAL virtual ~StMoviePlayerGUI();
 
     ST_LOCAL virtual void stglResize(const StGLBoxPx& theViewPort,
@@ -174,8 +169,8 @@ class StMoviePlayerGUI : public StGLRootWidget {
     ST_LOCAL void fillDisplayRatioMenu(StGLMenu* theMenu);
     ST_LOCAL void fillSrcFormatMenu(StGLMenu* theMenu);
     ST_LOCAL void fillPanoramaMenu (StGLMenu* theMenu);
-    ST_LOCAL void fillSubtitlesFontSize(StGLMenu* theMenu);
-    ST_LOCAL void fillSubtitlesPlacement(StGLMenu* theMenu);
+    ST_LOCAL void fillSubtitlesFontSize(StGLMenu* theMenu, size_t theIndex);
+    ST_LOCAL void fillSubtitlesPlacement(StGLMenu* theMenu, size_t theIndex);
 
         private: //! @name mobile interface creation routines
 
@@ -209,7 +204,9 @@ class StMoviePlayerGUI : public StGLRootWidget {
     ST_LOCAL void doShowMobileExMenu(const size_t );
     ST_LOCAL void doMobileSettings(const size_t );
     ST_LOCAL void doAudioStreamsCombo(const size_t );
-    ST_LOCAL void doSubtitlesStreamsCombo(const size_t );
+    ST_LOCAL void doSubtitlesStreamsCombo1(const size_t ) { doSubtitlesStreamsCombo(0); }
+    ST_LOCAL void doSubtitlesStreamsCombo2(const size_t ) { doSubtitlesStreamsCombo(1); }
+    ST_LOCAL void doSubtitlesStreamsCombo(const size_t theIndex);
     ST_LOCAL void doSubtitlesPlacement(const size_t );
     ST_LOCAL void doDisplayRatioCombo(const size_t );
     ST_LOCAL void doDisplayStereoFormatCombo(const size_t );
@@ -226,7 +223,8 @@ class StMoviePlayerGUI : public StGLRootWidget {
     StGLAnimationLerp   myVisLerp;
 
     StGLImageRegion*    myImage;            //!< the main video frame
-    StGLSubtitles*      mySubtitles;        //!< the subtitles
+    StGLSubtitles*      mySubtitles1;       //!< the subtitles
+    StGLSubtitles*      mySubtitles2;       //!< the subtitles
     StGLDescription*    myDescr;            //!< description text shown near mouse cursor
     StGLMsgStack*       myMsgStack;         //!< messages stack
     StGLPlayList*       myPlayList;
@@ -244,7 +242,8 @@ class StMoviePlayerGUI : public StGLRootWidget {
     StGLTextureButton*  myBtnSrcFrmt;
 
     StGLCheckboxTextured* myBtnAudio;
-    StGLCheckboxTextured* myBtnSubs;
+    StGLCheckboxTextured* myBtnSubs1;
+    StGLCheckboxTextured* myBtnSubs2;
 
     StGLWidget*         myPanelBottom;      //!< bottom toolbar
     StGLSeekBar*        mySeekBar;

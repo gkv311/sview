@@ -116,7 +116,8 @@ StVideo::StVideo(const std::string&                 theALDeviceName,
                  const StHandle<StTranslations>&    theLangMap,
                  const StHandle<StPlayList>&        thePlayList,
                  const StHandle<StGLTextureQueue>&  theTextureQueue,
-                 const StHandle<StSubQueue>&        theSubtitlesQueue)
+                 const StHandle<StSubQueue>&        theSubtitlesQueue1,
+                 const StHandle<StSubQueue>&        theSubtitlesQueue2)
 : myMimesVideo(ST_VIDEOS_MIME_STRING),
   myMimesAudio(ST_AUDIOS_MIME_STRING),
   myMimesSubs(ST_SUBTIT_MIME_STRING),
@@ -148,10 +149,11 @@ StVideo::StVideo(const std::string&                 theALDeviceName,
         myTracksExt.add(anAudioExt.getValue(anExtIter));
     }
 
-    params.UseGpu          = new StBoolParam(false);
-    params.UseOpenJpeg     = new StBoolParam(false);
-    params.activeAudio     = new StParamActiveStream();
-    params.activeSubtitles = new StParamActiveStream();
+    params.UseGpu           = new StBoolParam(false);
+    params.UseOpenJpeg      = new StBoolParam(false);
+    params.activeAudio      = new StParamActiveStream();
+    params.activeSubtitles1 = new StParamActiveStream();
+    params.activeSubtitles2 = new StParamActiveStream();
 
     myVideoMaster = new StVideoQueue(myTextureQueue);
     myVideoMaster->signals.onError.connect(this, &StVideo::doOnErrorRedirect);
@@ -162,8 +164,11 @@ StVideo::StVideo(const std::string&                 theALDeviceName,
     myAudio = new StAudioQueue(theALDeviceName, theAlOutput, theAlHrtf);
     myAudio->signals.onError.connect(this, &StVideo::doOnErrorRedirect);
 
-    mySubtitles = new StSubtitleQueue(theSubtitlesQueue);
-    mySubtitles->signals.onError.connect(this, &StVideo::doOnErrorRedirect);
+    mySubtitles1 = new StSubtitleQueue(theSubtitlesQueue1);
+    mySubtitles1->signals.onError.connect(this, &StVideo::doOnErrorRedirect);
+
+    mySubtitles2 = new StSubtitleQueue(theSubtitlesQueue2);
+    mySubtitles2->signals.onError.connect(this, &StVideo::doOnErrorRedirect);
 
     // launch working thread
     myThread = new StThread(threadFunction, (void* )this, "StVideo");
@@ -267,7 +272,8 @@ StVideo::~StVideo() {
 
     // close all decoding threads
     aHangKiller.nextStage();
-    mySubtitles.nullify();
+    mySubtitles2.nullify();
+    mySubtitles1.nullify();
     aHangKiller.nextStage();
     myAudio.nullify();
     aHangKiller.nextStage();
@@ -279,10 +285,11 @@ StVideo::~StVideo() {
 }
 
 void StVideo::close() {
-    if(!myVideoSlave.isNull())  myVideoSlave->deinit();
-    if(!myVideoMaster.isNull()) myVideoMaster->deinit();
-    if(!myAudio.isNull())       myAudio->deinit();
-    if(!mySubtitles.isNull())   mySubtitles->deinit();
+    if(!myVideoSlave.isNull())  { myVideoSlave->deinit(); }
+    if(!myVideoMaster.isNull()) { myVideoMaster->deinit(); }
+    if(!myAudio.isNull())       { myAudio->deinit(); }
+    if(!mySubtitles1.isNull())  { mySubtitles1->deinit(); }
+    if(!mySubtitles2.isNull())  { mySubtitles2->deinit(); }
     for(size_t ctxId = 0; ctxId < myCtxList.size(); ++ctxId) {
         AVFormatContext*& formatCtx = myCtxList[ctxId];
         if(formatCtx != NULL) {
@@ -301,7 +308,8 @@ void StVideo::close() {
     mySlaveStream = -1;
 
     params.activeAudio->clearList();
-    params.activeSubtitles->clearList();
+    params.activeSubtitles1->clearList();
+    params.activeSubtitles2->clearList();
     myCurrNode.nullify();
     myCurrParams.nullify();
     myCurrPlsFile.nullify();
@@ -673,8 +681,10 @@ bool StVideo::openSource(const StHandle<StFileNode>&     theNewSource,
                 aCodecCtx = myVideoSlave->getCodecContext();
             } else if(myAudio->isInContext(aFormatCtx, aStreamId)) {
                 aCodecCtx = myAudio->getCodecContext();
-            } else if(mySubtitles->isInContext(aFormatCtx, aStreamId)) {
-                aCodecCtx = mySubtitles->getCodecContext();
+            } else if(mySubtitles1->isInContext(aFormatCtx, aStreamId)) {
+                aCodecCtx = mySubtitles1->getCodecContext();
+            } else if(mySubtitles2->isInContext(aFormatCtx, aStreamId)) {
+                aCodecCtx = mySubtitles2->getCodecContext();
             }
 
             myFileInfoTmp->Info.add(StArgument(aStreamInfoKey, formatStreamInfo(aStream, aCodecCtx)));
@@ -726,8 +736,9 @@ bool StVideo::openSource(const StHandle<StFileNode>&     theNewSource,
     myCurrPlsFile = theNewPlsFile;
     myFileInfoTmp->Id = myCurrParams;
 
-    params.activeAudio    ->setList(aStreamsInfo.AudioList,    aStreamsInfo.LoadedAudio);
-    params.activeSubtitles->setList(aStreamsInfo.SubtitleList, aStreamsInfo.LoadedSubtitles);
+    params.activeAudio     ->setList(aStreamsInfo.AudioList,    aStreamsInfo.LoadedAudio);
+    params.activeSubtitles1->setList(aStreamsInfo.SubtitleList, aStreamsInfo.LoadedSubtitles);
+    params.activeSubtitles2->setList(aStreamsInfo.SubtitleList, aStreamsInfo.LoadedSubtitles);
 
     myEventMutex.lock();
         myDuration = aStreamsInfo.Duration;
@@ -739,21 +750,24 @@ bool StVideo::openSource(const StHandle<StFileNode>&     theNewSource,
 
 void StVideo::doFlush() {
     // clear packet queues from obsolete data
-    mySubtitles->clear();
+    mySubtitles1->clear();
+    mySubtitles2->clear();
     myAudio->clear();
     myVideoMaster->clear();
     myVideoSlave->clear();
 
     // push FLUSH packet to queues so they must flush FFmpeg codec buffers
-    if(myVideoMaster->isInitialized()) myVideoMaster->pushFlush();
-    if(myVideoSlave->isInitialized())  myVideoSlave->pushFlush();
-    if(myAudio->isInitialized())       myAudio->pushFlush();
-    if(mySubtitles->isInitialized())   mySubtitles->pushFlush();
+    if(myVideoMaster->isInitialized()) { myVideoMaster->pushFlush(); }
+    if(myVideoSlave->isInitialized())  { myVideoSlave->pushFlush(); }
+    if(myAudio->isInitialized())       { myAudio->pushFlush(); }
+    if(mySubtitles1->isInitialized())  { mySubtitles1->pushFlush(); }
+    if(mySubtitles2->isInitialized())  { mySubtitles2->pushFlush(); }
 }
 
 void StVideo::doFlushSoft() {
     // clear packet queues from obsolete data
-    mySubtitles->clear();
+    mySubtitles1->clear();
+    mySubtitles2->clear();
     myAudio->clear();
     myVideoMaster->clear();
     myVideoSlave->clear();
@@ -767,12 +781,9 @@ void StVideo::doFlushSoft() {
     && !myVideoSlave->isAttachedPicture()) {
         myVideoSlave->pushFlush();
     }
-    if(myAudio->isInitialized()) {
-        myAudio->pushFlush();
-    }
-    if(mySubtitles->isInitialized()) {
-        mySubtitles->pushFlush();
-    }
+    if(myAudio->isInitialized())      { myAudio->pushFlush(); }
+    if(mySubtitles1->isInitialized()) { mySubtitles1->pushFlush(); }
+    if(mySubtitles2->isInitialized()) { mySubtitles2->pushFlush(); }
 }
 
 void StVideo::doSeek(const double theSeekPts,
@@ -796,12 +807,19 @@ void StVideo::doSeekContext(AVFormatContext* theFormatCtx,
         isSeekDone = doSeekStream(theFormatCtx, myVideoSlave->getId(), theSeekPts, toSeekBack);
     } else if(myAudio->isInContext(theFormatCtx)) {
         //
-    } else if(mySubtitles->isInContext(theFormatCtx)) {
-        if(mySubtitles->getFileName().isEndsWithIgnoreCase(stCString(".srt"))) {
+    } else if(mySubtitles1->isInContext(theFormatCtx)) {
+        if(mySubtitles1->getFileName().isEndsWithIgnoreCase(stCString(".srt"))) {
             // workaround SRT seeking issues - make a heavy seek (usual size of SRT file is not greater than 200 KiB)
-            isSeekDone = doSeekStream(theFormatCtx, mySubtitles->getId(), 0.0, true);
+            isSeekDone = doSeekStream(theFormatCtx, mySubtitles1->getId(), 0.0, true);
         } else {
-            isSeekDone = doSeekStream(theFormatCtx, mySubtitles->getId(), theSeekPts, toSeekBack);
+            isSeekDone = doSeekStream(theFormatCtx, mySubtitles1->getId(), theSeekPts, toSeekBack);
+        }
+    } else if(mySubtitles2->isInContext(theFormatCtx)) {
+        if(mySubtitles2->getFileName().isEndsWithIgnoreCase(stCString(".srt"))) {
+            // workaround SRT seeking issues - make a heavy seek (usual size of SRT file is not greater than 200 KiB)
+            isSeekDone = doSeekStream(theFormatCtx, mySubtitles2->getId(), 0.0, true);
+        } else {
+            isSeekDone = doSeekStream(theFormatCtx, mySubtitles2->getId(), theSeekPts, toSeekBack);
         }
     }
     if(!isSeekDone && myAudio->isInContext(theFormatCtx)) {
@@ -920,6 +938,127 @@ void StVideo::checkInitVideoStreams() {
     }
 }
 
+void StVideo::doSwitchAudioStream(StArrayList<StAVPacket>& theAVPackets,
+                                  StArrayList<bool>& theQueueIsFull,
+                                  size_t& theEmptyQueues) {
+    double aCurrPts = getPts();
+    doFlushSoft();
+    const bool toPlayNewAudio = isPlaying();
+    if(myAudio->isInitialized()) {
+        myAudio->pushEnd();
+        while(!myAudio->isEmpty() || !myAudio->isInDowntime()) {
+            if(toQuit) {
+                myQuitEvent.set();
+                break;
+            }
+            StThread::sleep(10);
+        }
+        myAudio->deinit();
+    }
+    size_t anActiveStreamId = size_t(params.activeAudio->getValue());
+    if(!myVideoMaster->isInitialized() && anActiveStreamId == size_t(-1)) {
+        anActiveStreamId = 0; // just prevent crash - should be protected in GUI
+    }
+    if(anActiveStreamId != size_t(-1)) {
+        size_t aCounter = 0;
+        for(size_t aCtxId = 0; aCtxId < myCtxList.size() && !myAudio->isInitialized(); ++aCtxId) {
+            AVFormatContext* aFormatCtx = myCtxList[aCtxId];
+            for(unsigned int aStreamId = 0; aStreamId < aFormatCtx->nb_streams; ++aStreamId) {
+                if(stAV::getCodecType(aFormatCtx->streams[aStreamId]) == AVMEDIA_TYPE_AUDIO) {
+                    if(aCounter == anActiveStreamId) {
+                        myAudio->init(aFormatCtx, aStreamId, myFileList[aCtxId]);
+                        myAudio->pushStart();
+                        break;
+                    }
+                    ++aCounter;
+                }
+            }
+        }
+    }
+
+    // exclude inactive contexts
+    myPlayCtxList.clear();
+    theAVPackets.clear();
+    theQueueIsFull.clear();
+    theEmptyQueues = 0;
+    for(size_t aCtxId = 0; aCtxId < myCtxList.size(); ++aCtxId) {
+        AVFormatContext* aFormatCtx = myCtxList[aCtxId];
+        if(!myVideoMaster->isInContext(aFormatCtx)
+        && !myVideoSlave ->isInContext(aFormatCtx)
+        && !myAudio      ->isInContext(aFormatCtx)
+        && !mySubtitles1 ->isInContext(aFormatCtx)
+        && !mySubtitles2 ->isInContext(aFormatCtx)) {
+            continue;
+        }
+        myPlayCtxList.add(aFormatCtx);
+        theAVPackets.add(StAVPacket(myCurrParams));
+        theQueueIsFull.add(false);
+    }
+
+    pushPlayEvent(ST_PLAYEVENT_SEEK, aCurrPts);
+    if(toPlayNewAudio) {
+        myAudio->pushPlayEvent(ST_PLAYEVENT_PLAY);
+    }
+}
+
+void StVideo::doSwitchSubtitlesStream(StArrayList<StAVPacket>& theAVPackets,
+                                      StArrayList<bool>& theQueueIsFull,
+                                      size_t& theEmptyQueues,
+                                      const int theIndex) {
+    double aCurrPts = getPts();
+    doFlushSoft();
+    StHandle<StSubtitleQueue>& aSubsQueue = theIndex == 0 ? mySubtitles1 : mySubtitles2;
+    if(aSubsQueue->isInitialized()) {
+        aSubsQueue->pushEnd();
+        while(!aSubsQueue->isEmpty() || !aSubsQueue->isInDowntime()) {
+            if(toQuit) {
+                myQuitEvent.set();
+                break;
+            }
+            StThread::sleep(10);
+        }
+        aSubsQueue->deinit();
+    }
+    size_t anActiveStreamId = size_t(theIndex == 0 ? params.activeSubtitles1->getValue() : params.activeSubtitles2->getValue());
+    if(anActiveStreamId != size_t(-1)) {
+        size_t aCounter = 0;
+        for(size_t aCtxId = 0; aCtxId < myCtxList.size() && !aSubsQueue->isInitialized(); ++aCtxId) {
+            AVFormatContext* aFormatCtx = myCtxList[aCtxId];
+            for(unsigned int aStreamId = 0; aStreamId < aFormatCtx->nb_streams; ++aStreamId) {
+                if(stAV::getCodecType(aFormatCtx->streams[aStreamId]) == AVMEDIA_TYPE_SUBTITLE) {
+                    if(aCounter == anActiveStreamId) {
+                        aSubsQueue->init(aFormatCtx, aStreamId, myFileList[aCtxId]);
+                        aSubsQueue->pushStart();
+                        break;
+                    }
+                    ++aCounter;
+                }
+            }
+        }
+    }
+
+    // exclude inactive contexts
+    myPlayCtxList.clear();
+    theAVPackets.clear();
+    theQueueIsFull.clear();
+    theEmptyQueues = 0;
+    for(size_t aCtxId = 0; aCtxId < myCtxList.size(); ++aCtxId) {
+      AVFormatContext* aFormatCtx = myCtxList[aCtxId];
+      if(!myVideoMaster->isInContext(aFormatCtx)
+      && !myVideoSlave ->isInContext(aFormatCtx)
+      && !myAudio      ->isInContext(aFormatCtx)
+      && !mySubtitles1 ->isInContext(aFormatCtx)
+      && !mySubtitles2 ->isInContext(aFormatCtx)) {
+        continue;
+      }
+      myPlayCtxList.add(aFormatCtx);
+      theAVPackets.add(StAVPacket(myCurrParams));
+      theQueueIsFull.add(false);
+    }
+
+    pushPlayEvent(ST_PLAYEVENT_SEEK, aCurrPts);
+}
+
 void StVideo::packetsLoop() {
 #ifdef ST_DEBUG
     double aPtsbar  = 10.0;
@@ -927,13 +1066,13 @@ void StVideo::packetsLoop() {
     double aSeekPts = 0.0;
     bool toSeekBack = false;
     StPlayEvent_t aPlayEvent = ST_PLAYEVENT_NONE;
-    AVFormatContext* aFormatCtx = NULL;
 
     // wake up threads
-    if(myVideoMaster->isInitialized()) myVideoMaster->pushStart();
-    if(myVideoSlave->isInitialized())  myVideoSlave->pushStart();
-    if(myAudio->isInitialized())       myAudio->pushStart();
-    if(mySubtitles->isInitialized())   mySubtitles->pushStart();
+    if(myVideoMaster->isInitialized()) { myVideoMaster->pushStart(); }
+    if(myVideoSlave->isInitialized())  { myVideoSlave->pushStart(); }
+    if(myAudio->isInitialized())       { myAudio->pushStart(); }
+    if(mySubtitles1->isInitialized())  { mySubtitles1->pushStart(); }
+    if(mySubtitles2->isInitialized())  { mySubtitles2->pushStart(); }
 
     const bool toKeepPlaying = isPlaying();
 
@@ -959,13 +1098,13 @@ void StVideo::packetsLoop() {
     StArrayList<bool> aQueueIsEmpty(myCtxList.size());
     myPlayCtxList.clear();
     size_t anEmptyQueues = 0;
-    size_t aCtxId = 0;
-    for(aCtxId = 0; aCtxId < myCtxList.size(); ++aCtxId) {
-        aFormatCtx = myCtxList[aCtxId];
+    for(size_t aCtxId = 0; aCtxId < myCtxList.size(); ++aCtxId) {
+        AVFormatContext* aFormatCtx = myCtxList[aCtxId];
         if(!myVideoMaster->isInContext(aFormatCtx)
         && !myVideoSlave->isInContext(aFormatCtx)
         && !myAudio->isInContext(aFormatCtx)
-        && !mySubtitles->isInContext(aFormatCtx)) {
+        && !mySubtitles1->isInContext(aFormatCtx)
+        && !mySubtitles2->isInContext(aFormatCtx)) {
             continue;
         }
 
@@ -982,8 +1121,8 @@ void StVideo::packetsLoop() {
 
     for(;;) {
         anEmptyQueues = 0;
-        for(aCtxId = 0; aCtxId < myPlayCtxList.size(); ++aCtxId) {
-            aFormatCtx = myPlayCtxList[aCtxId];
+        for(size_t aCtxId = 0; aCtxId < myPlayCtxList.size(); ++aCtxId) {
+            AVFormatContext* aFormatCtx = myPlayCtxList[aCtxId];
             StAVPacket& aPacket = anAVPackets[aCtxId];
             if(!aQueueIsFull[aCtxId]) {
                 // read next packet
@@ -993,18 +1132,11 @@ void StVideo::packetsLoop() {
                         aQueueIsEmpty[aCtxId] = true;
                         // force decoding of last frame
                         const StAVPacket aDummyLastPacket(myCurrParams, StAVPacket::LAST_PACKET);
-                        if(myVideoMaster->isInContext(aFormatCtx)) {
-                            myVideoMaster->push(aDummyLastPacket);
-                        }
-                        if(myVideoSlave->isInContext(aFormatCtx)) {
-                            myVideoSlave->push(aDummyLastPacket);
-                        }
-                        if(myAudio->isInContext(aFormatCtx)) {
-                            myAudio->push(aDummyLastPacket);
-                        }
-                        if(mySubtitles->isInContext(aFormatCtx)) {
-                            mySubtitles->push(aDummyLastPacket);
-                        }
+                        if(myVideoMaster->isInContext(aFormatCtx)) { myVideoMaster->push(aDummyLastPacket); }
+                        if(myVideoSlave ->isInContext(aFormatCtx)) { myVideoSlave ->push(aDummyLastPacket); }
+                        if(myAudio      ->isInContext(aFormatCtx)) { myAudio      ->push(aDummyLastPacket); }
+                        if(mySubtitles1 ->isInContext(aFormatCtx)) { mySubtitles1 ->push(aDummyLastPacket); }
+                        if(mySubtitles2 ->isInContext(aFormatCtx)) { mySubtitles2 ->push(aDummyLastPacket); }
                     }
                     continue;
                 }
@@ -1013,9 +1145,7 @@ void StVideo::packetsLoop() {
             // push packet to appropriate queue
             if(myVideoMaster->isInContext(aFormatCtx, aPacket.getStreamId())) {
                 aQueueIsFull[aCtxId] = !pushPacket(myVideoMaster, aPacket);
-                if(aQueueIsFull[aCtxId]) {
-                    continue;
-                }
+                if(aQueueIsFull[aCtxId]) { continue; }
                 const double aTagerFpsNew = myVideoTimer->getAverFps();
                 if(myTargetFps != aTagerFpsNew) {
                     myEventMutex.lock();
@@ -1024,19 +1154,16 @@ void StVideo::packetsLoop() {
                 }
             } else if(myVideoSlave->isInContext(aFormatCtx, aPacket.getStreamId())) {
                 aQueueIsFull[aCtxId] = !pushPacket(myVideoSlave, aPacket);
-                if(aQueueIsFull[aCtxId]) {
-                    continue;
-                }
+                if(aQueueIsFull[aCtxId]) { continue; }
             } else if(myAudio->isInContext(aFormatCtx, aPacket.getStreamId())) {
                 aQueueIsFull[aCtxId] = !pushPacket(myAudio, aPacket);
-                if(aQueueIsFull[aCtxId]) {
-                    continue;
-                }
-            } else if(mySubtitles->isInContext(aFormatCtx, aPacket.getStreamId())) {
-                aQueueIsFull[aCtxId] = !pushPacket(mySubtitles, aPacket);
-                if(aQueueIsFull[aCtxId]) {
-                    continue;
-                }
+                if(aQueueIsFull[aCtxId]) { continue; }
+            } else if(mySubtitles1->isInContext(aFormatCtx, aPacket.getStreamId())) {
+                aQueueIsFull[aCtxId] = !pushPacket(mySubtitles1, aPacket);
+                if(aQueueIsFull[aCtxId]) { continue; }
+            } else if(mySubtitles2->isInContext(aFormatCtx, aPacket.getStreamId())) {
+                aQueueIsFull[aCtxId] = !pushPacket(mySubtitles2, aPacket);
+                if(aQueueIsFull[aCtxId]) { continue; }
             }
             aPacket.free();
         }
@@ -1081,118 +1208,15 @@ void StVideo::packetsLoop() {
                 break;
             }
         } else if(params.activeAudio->wasChanged()) {
-            double aCurrPts = getPts();
-            doFlushSoft();
-            const bool toPlayNewAudio = isPlaying();
-            if(myAudio->isInitialized()) {
-                myAudio->pushEnd();
-                while(!myAudio->isEmpty() || !myAudio->isInDowntime()) {
-                    if(toQuit) {
-                        myQuitEvent.set();
-                        break;
-                    }
-                    StThread::sleep(10);
-                }
-                myAudio->deinit();
-            }
-            size_t anActiveStreamId = size_t(params.activeAudio->getValue());
-            if(!myVideoMaster->isInitialized() && anActiveStreamId == size_t(-1)) {
-                anActiveStreamId = 0; // just prevent crash - should be protected in GUI
-            }
-            if(anActiveStreamId != size_t(-1)) {
-                size_t aCounter = 0;
-                for(aCtxId = 0; aCtxId < myCtxList.size() && !myAudio->isInitialized(); ++aCtxId) {
-                    aFormatCtx = myCtxList[aCtxId];
-                    for(unsigned int aStreamId = 0; aStreamId < aFormatCtx->nb_streams; ++aStreamId) {
-                        if(stAV::getCodecType(aFormatCtx->streams[aStreamId]) == AVMEDIA_TYPE_AUDIO) {
-                            if(aCounter == anActiveStreamId) {
-                                myAudio->init(aFormatCtx, aStreamId, myFileList[aCtxId]);
-                                myAudio->pushStart();
-                                break;
-                            }
-                            ++aCounter;
-                        }
-                    }
-                }
-            }
-
-            // exclude inactive contexts
-            myPlayCtxList.clear();
-            anAVPackets.clear();
-            aQueueIsFull.clear();
-            anEmptyQueues = 0;
-            for(aCtxId = 0; aCtxId < myCtxList.size(); ++aCtxId) {
-                aFormatCtx = myCtxList[aCtxId];
-                if(!myVideoMaster->isInContext(aFormatCtx)
-                && !myVideoSlave->isInContext(aFormatCtx)
-                && !myAudio->isInContext(aFormatCtx)
-                && !mySubtitles->isInContext(aFormatCtx)) {
-                    continue;
-                }
-                myPlayCtxList.add(aFormatCtx);
-                anAVPackets.add(StAVPacket(myCurrParams));
-                aQueueIsFull.add(false);
-            }
-
-            pushPlayEvent(ST_PLAYEVENT_SEEK, aCurrPts);
-            if(toPlayNewAudio) {
-                myAudio->pushPlayEvent(ST_PLAYEVENT_PLAY);
-            }
-        } else if(params.activeSubtitles->wasChanged()) {
-            double aCurrPts = getPts();
-            doFlushSoft();
-            if(mySubtitles->isInitialized()) {
-                mySubtitles->pushEnd();
-                while(!mySubtitles->isEmpty() || !mySubtitles->isInDowntime()) {
-                    if(toQuit) {
-                        myQuitEvent.set();
-                        break;
-                    }
-                    StThread::sleep(10);
-                }
-                mySubtitles->deinit();
-            }
-            size_t anActiveStreamId = size_t(params.activeSubtitles->getValue());
-            if(anActiveStreamId != size_t(-1)) {
-                size_t aCounter = 0;
-                for(aCtxId = 0; aCtxId < myCtxList.size() && !mySubtitles->isInitialized(); ++aCtxId) {
-                    aFormatCtx = myCtxList[aCtxId];
-                    for(unsigned int aStreamId = 0; aStreamId < aFormatCtx->nb_streams; ++aStreamId) {
-                        if(stAV::getCodecType(aFormatCtx->streams[aStreamId]) == AVMEDIA_TYPE_SUBTITLE) {
-                            if(aCounter == anActiveStreamId) {
-                                mySubtitles->init(aFormatCtx, aStreamId, myFileList[aCtxId]);
-                                mySubtitles->pushStart();
-                                break;
-                            }
-                            ++aCounter;
-                        }
-                    }
-                }
-            }
-
-            // exclude inactive contexts
-            myPlayCtxList.clear();
-            anAVPackets.clear();
-            aQueueIsFull.clear();
-            anEmptyQueues = 0;
-            for(aCtxId = 0; aCtxId < myCtxList.size(); ++aCtxId) {
-                aFormatCtx = myCtxList[aCtxId];
-                if(!myVideoMaster->isInContext(aFormatCtx)
-                && !myVideoSlave->isInContext(aFormatCtx)
-                && !myAudio->isInContext(aFormatCtx)
-                && !mySubtitles->isInContext(aFormatCtx)) {
-                    continue;
-                }
-                myPlayCtxList.add(aFormatCtx);
-                anAVPackets.add(StAVPacket(myCurrParams));
-                aQueueIsFull.add(false);
-            }
-
-            pushPlayEvent(ST_PLAYEVENT_SEEK, aCurrPts);
+            doSwitchAudioStream(anAVPackets, aQueueIsFull, anEmptyQueues);
+        } else if(params.activeSubtitles1->wasChanged()) {
+            doSwitchSubtitlesStream(anAVPackets, aQueueIsFull, anEmptyQueues, 0);
+        } else if(params.activeSubtitles2->wasChanged()) {
+            doSwitchSubtitlesStream(anAVPackets, aQueueIsFull, anEmptyQueues, 1);
         } else if(aPlayEvent == ST_PLAYEVENT_SEEK) {
             doSeek(aSeekPts, toSeekBack);
             // ignore current packet
-            for(aCtxId = 0; aCtxId < myPlayCtxList.size(); ++aCtxId) {
+            for(size_t aCtxId = 0; aCtxId < myPlayCtxList.size(); ++aCtxId) {
                 aQueueIsFull[aCtxId] = false;
                 anAVPackets[aCtxId].free();
             }
@@ -1221,7 +1245,8 @@ void StVideo::packetsLoop() {
             while(!myVideoMaster->isEmpty() || !myVideoMaster->isInDowntime()
                || !myAudio->isEmpty()       || !myAudio->isInDowntime()
                || !myVideoSlave->isEmpty()  || !myVideoSlave->isInDowntime()
-               || !mySubtitles->isEmpty()   || !mySubtitles->isInDowntime()) {
+               || !mySubtitles1->isEmpty()  || !mySubtitles1->isInDowntime()
+               || !mySubtitles2->isEmpty()  || !mySubtitles2->isInDowntime()) {
                 StThread::sleep(10);
                 if(!areFlushed && (popPlayEvent(aSeekPts, toSeekBack) == ST_PLAYEVENT_NEXT)) {
                     isPendingPlayNext = true;
@@ -1280,16 +1305,18 @@ void StVideo::packetsLoop() {
     }
 
     // now send 'end-packet'
-    if(myVideoMaster->isInitialized()) myVideoMaster->pushEnd();
-    if(myVideoSlave->isInitialized())  myVideoSlave->pushEnd();
-    if(myAudio->isInitialized())       myAudio->pushEnd();
-    if(mySubtitles->isInitialized())   mySubtitles->pushEnd();
+    if(myVideoMaster->isInitialized()) { myVideoMaster->pushEnd(); }
+    if(myVideoSlave ->isInitialized()) { myVideoSlave ->pushEnd(); }
+    if(myAudio      ->isInitialized()) { myAudio      ->pushEnd(); }
+    if(mySubtitles1 ->isInitialized()) { mySubtitles1 ->pushEnd(); }
+    if(mySubtitles2 ->isInitialized()) { mySubtitles2 ->pushEnd(); }
 
     // wait for queues receive 'end-packet'
     while(!myVideoMaster->isEmpty() || !myVideoMaster->isInDowntime()
-       || !myAudio->isEmpty()       || !myAudio->isInDowntime()
-       || !myVideoSlave->isEmpty()  || !myVideoSlave->isInDowntime()
-       || !mySubtitles->isEmpty()   || !mySubtitles->isInDowntime()) {
+       || !myAudio      ->isEmpty() || !myAudio      ->isInDowntime()
+       || !myVideoSlave ->isEmpty() || !myVideoSlave ->isInDowntime()
+       || !mySubtitles1 ->isEmpty() || !mySubtitles1 ->isInDowntime()
+       || !mySubtitles2 ->isEmpty() || !mySubtitles2 ->isInDowntime()) {
         StThread::sleep(10);
     }
 }
@@ -1400,10 +1427,11 @@ StHandle<StMovieInfo> StVideo::getFileInfo(const StHandle<StStereoParams>& thePa
     anInfo->HasVideo  = myVideoMaster->isInitialized();
 
     anInfo->Codecs.clear();
-    anInfo->Codecs.add(StArgument("vcodec1",   myVideoMaster->getCodecInfo()));
-    anInfo->Codecs.add(StArgument("vcodec2",   myVideoSlave->getCodecInfo()));
-    anInfo->Codecs.add(StArgument("audio",     myAudio->getCodecInfo()));
-    anInfo->Codecs.add(StArgument("subtitles", mySubtitles->getCodecInfo()));
+    anInfo->Codecs.add(StArgument("vcodec1",    myVideoMaster->getCodecInfo()));
+    anInfo->Codecs.add(StArgument("vcodec2",    myVideoSlave ->getCodecInfo()));
+    anInfo->Codecs.add(StArgument("audio",      myAudio      ->getCodecInfo()));
+    anInfo->Codecs.add(StArgument("subtitles",  mySubtitles1 ->getCodecInfo()));
+    anInfo->Codecs.add(StArgument("subtitles2", mySubtitles2 ->getCodecInfo()));
 
     return anInfo;
 }
