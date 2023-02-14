@@ -255,8 +255,9 @@ StHandle<StSubItem> StSubtitlesASS::parseEvent(const StString& theString,
 
     double aDuration = theDuration;
     StString* aText = NULL;
-    StHandle< StArrayList<StString> > aList = theString.split(',', size_t(myElementsNb));
+    StHandle< StArrayList<StString> > aList;
     if(theString.isStartsWithIgnoreCase(HEADER_Dialog)) {
+        aList = theString.split(',', size_t(myElementsNb));
         if(aList->size() < size_t(myElementsNb)) {
             return StHandle<StSubItem>();
         }
@@ -271,6 +272,7 @@ StHandle<StSubItem> StSubtitlesASS::parseEvent(const StString& theString,
         // try handling FFmpeg truncated format defined by ff_ass_get_dialog()
         // "ReadOrder,Layer,Style,Speaker,0,0,0,,Text"
         // TODO - where this format is documented?
+        aList = theString.split(',', size_t(9));
         if(aList->size() != 9) {
             return StHandle<StSubItem>();
         }
