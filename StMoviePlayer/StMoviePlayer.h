@@ -196,6 +196,7 @@ class StMoviePlayer : public StApplication {
         StHandle<StFloat32Param>      SubtitlesSize1;    //!< subtitles font size
         StHandle<StFloat32Param>      SubtitlesSize2;    //!< subtitles font size
         StHandle<StFloat32Param>      SubtitlesParallax; //!< subtitles parallax
+        StHandle<StBoolParamNamed>    ToAutoLoadSubs;    //!< automatically load subtitles
         StHandle<StBoolParamNamed>    ToSearchSubs;      //!< automatically search for additional subtitles/audio track files nearby video file
         StHandle<StEnumParam>         SubtitlesParser;   //!< subtitles parser
         StHandle<StBoolParamNamed>    SubtitlesApplyStereo; //!<  apply stereoscopic format of video to image subtitles

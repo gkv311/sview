@@ -132,6 +132,7 @@ void StMoviePlayer::updateStrings() {
     params.ScaleHiDPI2X->setName(tr(MENU_HELP_SCALE_HIDPI2X));
     params.SubtitlesPlace1->setName(stCString("Subtitles Placement"));
     params.SubtitlesPlace2->setName(stCString("Subtitles Placement"));
+    params.ToAutoLoadSubs->setName(stCString("Always load subtitles"));
     params.ToSearchSubs->setName(stCString("Search additional tracks"));
     params.SubtitlesParser->setName(tr(MENU_SUBTITLES_PARSER));
     params.SubtitlesParser->defineOption(0, tr(MENU_SUBTITLES_PLAIN_TEXT));
@@ -294,6 +295,7 @@ StMoviePlayer::StMoviePlayer(const StHandle<StResourceManager>& theResMgr,
     params.SubtitlesParallax->setDefValue(0.0f);
     params.SubtitlesParallax->setStep(1.0f);
     params.SubtitlesParallax->setTolerance(0.1f);
+    params.ToAutoLoadSubs = new StBoolParamNamed(false, stCString("toAutoLoadSubs"));
     params.ToSearchSubs = new StBoolParamNamed(true, stCString("toSearchSubs"));
     params.SubtitlesParser = new StEnumParam(1, stCString("subsParser"));
     params.SubtitlesApplyStereo = new StBoolParamNamed(true, stCString("subsApplyStereo"));
@@ -415,6 +417,7 @@ StMoviePlayer::StMoviePlayer(const StHandle<StResourceManager>& theResMgr,
     mySettings->loadParam (params.SubtitlesParallax);
     mySettings->loadParam (params.SubtitlesParser);
     mySettings->loadParam (params.SubtitlesApplyStereo);
+    mySettings->loadParam (params.ToAutoLoadSubs);
     mySettings->loadParam (params.ToSearchSubs);
 
     myToCheckPoorOrient = !mySettings->loadParam(params.ToTrackHead);
@@ -671,6 +674,7 @@ void StMoviePlayer::saveAllParams() {
         mySettings->saveParam (params.SubtitlesParallax);
         mySettings->saveParam (params.SubtitlesParser);
         mySettings->saveParam (params.SubtitlesApplyStereo);
+        mySettings->saveParam (params.ToAutoLoadSubs);
         mySettings->saveParam (params.ToSearchSubs);
         mySettings->saveParam (params.TargetFps);
         mySettings->saveString(params.AudioAlDevice->getKey(), params.AudioAlDevice->getUtfTitle());
@@ -972,6 +976,7 @@ bool StMoviePlayer::init() {
         myVideo->signals.onLoaded = stSlot(this,                &StMoviePlayer::doLoaded);
         myVideo->params.UseGpu       = params.UseGpu;
         myVideo->params.UseOpenJpeg  = params.UseOpenJpeg;
+        myVideo->params.ToAutoLoadSubs = params.ToAutoLoadSubs;
         myVideo->params.ToSearchSubs = params.ToSearchSubs;
         myVideo->params.ToTrackHeadAudio = params.ToTrackHeadAudio;
         myVideo->params.SlideShowDelay = params.SlideShowDelay;

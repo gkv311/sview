@@ -425,6 +425,7 @@ bool StVideo::addFile(const StString& theFileToLoad,
 
     const StString& aPrefLangAudio = myLangMap->getLanguageCode();
     int32_t anAudioStreamId = (int32_t )theInfo.AudioList->size();
+    int32_t aSubsStreamId = (int32_t )theInfo.SubtitleList->size();
 
     theInfo.Duration = stMax(theInfo.Duration, stAV::unitsToSeconds(aFormatCtx->duration));
     for(unsigned int aStreamId = 0; aStreamId < aFormatCtx->nb_streams; ++aStreamId) {
@@ -555,6 +556,13 @@ bool StVideo::addFile(const StString& theFileToLoad,
                 aStreamTitle += StString(", ") + aFileName;
             }
             theInfo.SubtitleList->add(aStreamTitle);
+
+            if(params.ToAutoLoadSubs->getValue()
+            && !mySubtitles1->isInitialized()
+            && (aPrefLangAudio.isEmpty() || aLang == aPrefLangAudio)
+            &&  mySubtitles1->init(aFormatCtx, aStreamId, aTitleString)) {
+                theInfo.LoadedSubtitles1 = (int32_t )(theInfo.SubtitleList->size() - 1);
+            }
         }
     }
 
@@ -580,6 +588,32 @@ bool StVideo::addFile(const StString& theFileToLoad,
                 break;
             }
             ++anAudioStreamId;
+        }
+    }
+
+    // load subtitles stream
+    if(params.ToAutoLoadSubs->getValue()
+    && !mySubtitles1->isInitialized()
+    && !aPrefLangAudio.isEmpty()
+    && !theInfo.SubtitleList->isEmpty()) {
+        for(unsigned int aStreamId = 0; aStreamId < aFormatCtx->nb_streams; ++aStreamId) {
+            AVStream* aStream = aFormatCtx->streams[aStreamId];
+            if(stAV::getCodecType(aStream) != AVMEDIA_TYPE_SUBTITLE) {
+                continue;
+            }
+
+            StString aLanguage;
+        #if(LIBAVUTIL_VERSION_INT >= AV_VERSION_INT(51, 5, 0))
+            stAV::meta::readTag(aStream, stCString("language"), aLanguage);
+        #else
+            aLanguage = aStream->language;
+        #endif
+            if(aLanguage != aPrefLangAudio
+            && mySubtitles1->init(aFormatCtx, aStreamId, aTitleString)) {
+                theInfo.LoadedSubtitles1 = aSubsStreamId;
+                break;
+            }
+            ++aSubsStreamId;
         }
     }
 
@@ -737,8 +771,8 @@ bool StVideo::openSource(const StHandle<StFileNode>&     theNewSource,
     myFileInfoTmp->Id = myCurrParams;
 
     params.activeAudio     ->setList(aStreamsInfo.AudioList,    aStreamsInfo.LoadedAudio);
-    params.activeSubtitles1->setList(aStreamsInfo.SubtitleList, aStreamsInfo.LoadedSubtitles);
-    params.activeSubtitles2->setList(aStreamsInfo.SubtitleList, aStreamsInfo.LoadedSubtitles);
+    params.activeSubtitles1->setList(aStreamsInfo.SubtitleList, aStreamsInfo.LoadedSubtitles1);
+    params.activeSubtitles2->setList(aStreamsInfo.SubtitleList, aStreamsInfo.LoadedSubtitles2);
 
     myEventMutex.lock();
         myDuration = aStreamsInfo.Duration;

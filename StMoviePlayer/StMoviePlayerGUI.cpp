@@ -2499,6 +2499,7 @@ void StMoviePlayerGUI::doMobileSettings(const size_t ) {
     if(myPlugin->hasAlHintHrtf()) {
         aParams.add(myPlugin->params.AudioAlHrtf);
     }
+    aParams.add(myPlugin->params.ToAutoLoadSubs);
 
     if(avcodec_find_decoder_by_name("libopenjpeg") != NULL) {
         aParams.add(myPlugin->params.UseOpenJpeg);

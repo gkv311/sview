@@ -63,12 +63,14 @@ struct StStreamsInfo {
     StHandle< StArrayList<StString> > SubtitleList;
     double                            Duration;
     int32_t                           LoadedAudio;
-    int32_t                           LoadedSubtitles;
+    int32_t                           LoadedSubtitles1;
+    int32_t                           LoadedSubtitles2;
 
     StStreamsInfo()
     : Duration(0.0),
       LoadedAudio(-1),
-      LoadedSubtitles(-1) {
+      LoadedSubtitles1(-1),
+      LoadedSubtitles2(-1) {
         AudioList    = new StArrayList<StString>(8);
         SubtitleList = new StArrayList<StString>(8);
     }
@@ -261,6 +263,7 @@ class StVideo {
 
         StHandle<StBoolParam>         UseGpu;          //!< use video decoding on GPU when available
         StHandle<StBoolParam>         UseOpenJpeg;     //!< use OpenJPEG (libopenjpeg) instead of built-in jpeg2000 decoder
+        StHandle<StBoolParam>         ToAutoLoadSubs;  //!< load subtitles by default
         StHandle<StBoolParam>         ToSearchSubs;    //!< automatically search for additional subtitles/audio track files nearby video file
         StHandle<StBoolParamNamed>    ToTrackHeadAudio;//!< enable/disable head-tracking for audio listener
         StHandle<StFloat32Param>      SlideShowDelay;  //!< slideshow delay
