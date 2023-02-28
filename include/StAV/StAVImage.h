@@ -1,5 +1,5 @@
 /**
- * Copyright © 2011-2020 Kirill Gavrilov <kirill@sview.ru>
+ * Copyright © 2011-2023 Kirill Gavrilov <kirill@sview.ru>
  *
  * This code is licensed under MIT license (see docs/license-mit.txt for details).
  */
@@ -96,10 +96,9 @@ class StAVImage : public StImageFile {
 
         private:
 
-    AVInputFormat*   myImageFormat; //!< image format
-    AVFormatContext* myFormatCtx;   //!< file context
-    AVCodecContext*  myCodecCtx;    //!< codec context
-    const AVCodec*   myCodec;       //!< codec
+    AVFormatContext* myFormatCtx; //!< file context
+    AVCodecContext*  myCodecCtx;  //!< codec context
+    const AVCodec*   myCodec;     //!< codec
     StAVFrame        myFrame;
 
 };

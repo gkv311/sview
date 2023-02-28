@@ -1,5 +1,5 @@
 /**
- * Copyright © 2011-2020 Kirill Gavrilov <kirill@sview.ru>
+ * Copyright © 2011-2023 Kirill Gavrilov <kirill@sview.ru>
  *
  * This code is licensed under MIT license (see docs/license-mit.txt for details).
  */
@@ -18,13 +18,10 @@ bool StAVImage::init() {
 }
 
 StAVImage::StAVImage()
-: myImageFormat(NULL),
-  myFormatCtx(NULL),
+: myFormatCtx(NULL),
   myCodecCtx(NULL),
   myCodec(NULL) {
     StAVImage::init();
-    // TODO remove const_cast<AVInputFormat*>
-    myImageFormat = (AVInputFormat* )av_find_input_format("image2");
 }
 
 StAVImage::~StAVImage() {
@@ -305,20 +302,27 @@ bool StAVImage::loadExtra(const StString& theFilePath,
     StHandle<StAVIOMemContext> aMemIoCtx;
     if(theImageType == ST_TYPE_NONE
     || (theDataPtr == NULL && !StFileNode::isFileExists(theFilePath))) {
-        myImageFormat->flags &= ~AVFMT_NOFILE;
+        AVInputFormat* anImgFormat = NULL;
         if(theDataPtr != NULL) {
+            static AVInputFormat* anImg2Format = (AVInputFormat* )av_find_input_format("image2");
+            anImgFormat = anImg2Format;
+            //anImgFormat->flags |= AVFMT_NOFILE;
+
             aMemIoCtx = new StAVIOMemContext();
             aMemIoCtx->wrapBuffer(theDataPtr, theDataSize);
             myFormatCtx = avformat_alloc_context();
             myFormatCtx->pb = aMemIoCtx->getAvioContext();
-            myImageFormat->flags |= AVFMT_NOFILE;
+        } else {
+            static AVInputFormat* anImg2PipeFormat = (AVInputFormat* )av_find_input_format("image2pipe");
+            anImgFormat = anImg2PipeFormat;
+            //anImgFormat->flags &= ~AVFMT_NOFILE;
         }
 
         // open image file and detect its type, it could be non local file!
     #if(LIBAVFORMAT_VERSION_INT >= AV_VERSION_INT(53, 2, 0))
-        int avErrCode = avformat_open_input(&myFormatCtx, theFilePath.toCString(), myImageFormat, NULL);
+        int avErrCode = avformat_open_input(&myFormatCtx, theFilePath.toCString(), anImgFormat, NULL);
     #else
-        int avErrCode = av_open_input_file (&myFormatCtx, theFilePath.toCString(), myImageFormat, 0, NULL);
+        int avErrCode = av_open_input_file (&myFormatCtx, theFilePath.toCString(), anImgFormat, 0, NULL);
     #endif
         if(avErrCode != 0
         || myFormatCtx->nb_streams < 1
