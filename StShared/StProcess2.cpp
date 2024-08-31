@@ -37,7 +37,7 @@ StArrayList<StString> StProcess::getArguments() {
     }
 #elif (defined(__linux__) || defined(__linux))
     stUtf8_t aCmdlineInfoFile[4096];
-    sprintf(aCmdlineInfoFile, "/proc/%d/cmdline", getpid());
+    stsprintf(aCmdlineInfoFile, 4096, "/proc/%d/cmdline", getpid());
     std::ifstream iFile;
     iFile.open(aCmdlineInfoFile);
     if(iFile.is_open()) {
