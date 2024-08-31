@@ -51,7 +51,7 @@ class StAVIOJniHttpContext : public StAVIOContext {
     /**
      * Writing is not supported.
      */
-    ST_LOCAL virtual int write(uint8_t* , int ) ST_ATTR_OVERRIDE { return -1; }
+    ST_LOCAL virtual int write(const uint8_t* , const int ) ST_ATTR_OVERRIDE { return -1; }
 
     /**
      * Seek within the file.

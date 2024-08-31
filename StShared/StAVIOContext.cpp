@@ -23,7 +23,11 @@ namespace {
      * Callback for writing the data.
      */
     static int writeCallback(void*    theOpaque,
+                         #if(LIBAVFORMAT_VERSION_MAJOR >= 61)
+                             const uint8_t* theBuf,
+                         #else
                              uint8_t* theBuf,
+                         #endif
                              int      theBufSize) {
         return theOpaque != NULL
              ? ((StAVIOContext* )theOpaque)->write(theBuf, theBufSize)

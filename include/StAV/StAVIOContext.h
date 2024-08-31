@@ -40,8 +40,8 @@ class StAVIOContext {
     /**
      * Virtual method for writing the data.
      */
-    virtual int write(uint8_t* theBuf,
-                      int      theBufSize) = 0;
+    virtual int write(const uint8_t* theBuf,
+                      const int      theBufSize) = 0;
 
     /**
      * Virtual method for seeking to new position.

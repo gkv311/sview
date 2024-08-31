@@ -46,8 +46,8 @@ class StAVIOFileContext : public StAVIOContext {
     /**
      * Write into the file.
      */
-    ST_CPPEXPORT virtual int write(uint8_t* theBuf,
-                                   int      theBufSize) ST_ATTR_OVERRIDE;
+    ST_CPPEXPORT virtual int write(const uint8_t* theBuf,
+                                   const int      theBufSize) ST_ATTR_OVERRIDE;
 
     /**
      * Seek within the file.
