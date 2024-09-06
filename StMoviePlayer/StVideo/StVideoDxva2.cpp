@@ -664,6 +664,10 @@ bool StDxva2Context::decoderCreate(StVideoQueue&   theVideo,
     myDxvaCtxAV.surface_count = myNbSurfaces;
     myDxvaCtxAV.workaround    = 0;
     if(::IsEqualGUID(myDecoderGuid, DXVADDI_Intel_ModeH264_E)) {
+    #ifndef FF_DXVA2_WORKAROUND_INTEL_CLEARVIDEO
+        // should be removed? moved to dxva2_internal.h
+        const unsigned int FF_DXVA2_WORKAROUND_INTEL_CLEARVIDEO = 2;
+    #endif
         myDxvaCtxAV.workaround |= FF_DXVA2_WORKAROUND_INTEL_CLEARVIDEO;
     }
 

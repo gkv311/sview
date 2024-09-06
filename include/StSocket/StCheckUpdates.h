@@ -100,7 +100,7 @@ class StCheckUpdates {
 
         const StVersionInfo aCurrVer = StVersionInfo::getSDKVersionInfo();
         char anUrl[2048];
-        sprintf(anUrl, THE_URL_TEMPLATE, aCurrVer.getYear(), aCurrVer.getMonth(), aCurrVer.getReleaseStatus(), aCurrVer.getSubVersion());
+        stsprintf(anUrl, 2048, THE_URL_TEMPLATE, aCurrVer.getYear(), aCurrVer.getMonth(), aCurrVer.getReleaseStatus(), aCurrVer.getSubVersion());
 
         const StString anAnswer = StRawFile::readTextFile(StString(anUrl));
         if(anAnswer.isEmpty()) {

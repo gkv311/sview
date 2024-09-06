@@ -572,12 +572,17 @@ StString stAV::audio::getChannelLayoutString(int theNbChannels, uint64_t theLayo
             return "stereo";
         }
     }
+
+#if(LIBAVCODEC_VERSION_INT >= AV_VERSION_INT(61, 0, 0))
+    return "UNKNOWN";
+#else
     char aBuff[128]; aBuff[0] = '\0';
     ST_DISABLE_DEPRECATION_WARNINGS // ST_AV_NEW_CHANNEL_LAYOUT should be used instead
     av_get_channel_layout_string(aBuff, sizeof(aBuff),
                                  theNbChannels, theLayout);
     ST_ENABLE_DEPRECATION_WARNINGS
     return aBuff;
+#endif
 #else
     switch(theNbChannels) {
         case 1: return "mono";

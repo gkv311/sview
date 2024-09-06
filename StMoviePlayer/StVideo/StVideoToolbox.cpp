@@ -82,7 +82,9 @@ class StVideoToolboxContext : public StHWAccelContext {
         myPoolsTmp[2].release();
         myPoolsTmp[3].release();
         if(theCodecCtx != NULL && myHasDevice) {
+        #if(LIBAVCODEC_VERSION_INT < AV_VERSION_INT(61, 0, 0))
             av_videotoolbox_default_free(theCodecCtx);
+        #endif
         }
         myHasDevice = false;
     }
@@ -95,11 +97,16 @@ class StVideoToolboxContext : public StHWAccelContext {
         const StSignal<void (const StCString& )>& onError = theVideo.signals.onError;
         decoderDestroy(theCodecCtx);
 
+    #if(LIBAVCODEC_VERSION_INT >= AV_VERSION_INT(61, 0, 0))
+        onError(stCString("StVideoQueue: Videotoolbox decoder support has been dropped since FFmpeg 7.0"));
+        return false;
+    #else
         const int anAvErr = av_videotoolbox_default_init(theCodecCtx);
         if(anAvErr < 0) {
             onError(stCString("StVideoQueue: Error creating Videotoolbox decoder"));
             return false;
         }
+    #endif
         myHasDevice = true;
         return true;
     }

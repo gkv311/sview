@@ -57,8 +57,8 @@ int StAVIOMemContext::read(uint8_t* theBuf,
     return aNbRead;
 }
 
-int StAVIOMemContext::write(uint8_t* theBuf,
-                            int      theBufSize) {
+int StAVIOMemContext::write(const uint8_t* theBuf,
+                            const int      theBufSize) {
     if(theBuf == NULL
     || theBufSize <= 0
     || mySrcBuffer == NULL

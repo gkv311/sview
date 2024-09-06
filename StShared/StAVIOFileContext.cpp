@@ -52,8 +52,8 @@ int StAVIOFileContext::read(uint8_t* theBuf,
     return aNbRead;
 }
 
-int StAVIOFileContext::write(uint8_t* theBuf,
-                             int      theBufSize) {
+int StAVIOFileContext::write(const uint8_t* theBuf,
+                             const int      theBufSize) {
     if(myFile == NULL) {
         return -1;
     }

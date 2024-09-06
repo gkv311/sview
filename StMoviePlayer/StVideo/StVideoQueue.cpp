@@ -433,7 +433,19 @@ bool StVideoQueue::init(AVFormatContext*   theFormatCtx,
     myRotateDeg = 0;
 
 #ifdef ST_AV_NEWSPHERICAL
-    if(const AVSphericalMapping* aSpherical = (AVSphericalMapping* )av_stream_get_side_data(myStream, AV_PKT_DATA_SPHERICAL, NULL)) {
+    const AVSphericalMapping* aSpherical = NULL;
+#if(LIBAVFORMAT_VERSION_INT >= AV_VERSION_INT(60, 15, 100))
+    for(int i = 0; i < myStream->codecpar->nb_coded_side_data; i++) {
+        const AVPacketSideData* aSideData = &myStream->codecpar->coded_side_data[i];
+        if(aSideData->type == AV_PKT_DATA_SPHERICAL) {
+            aSpherical = (const AVSphericalMapping *)aSideData->data;
+            break;
+        }
+    }
+#else
+    aSpherical = (AVSphericalMapping* )av_stream_get_side_data(myStream, AV_PKT_DATA_SPHERICAL, NULL);
+#endif
+    if(aSpherical != NULL) {
         switch(aSpherical->projection) {
             case AV_SPHERICAL_EQUIRECTANGULAR: {
                 theNewParams->ViewingMode = StViewSurface_Sphere;
@@ -467,7 +479,19 @@ bool StVideoQueue::init(AVFormatContext*   theFormatCtx,
 #endif
 
 #if(LIBAVUTIL_VERSION_INT >= AV_VERSION_INT(55, 0, 0))
-    if(const uint8_t* aDispMatrix = av_stream_get_side_data(myStream, AV_PKT_DATA_DISPLAYMATRIX, NULL)) {
+    const uint8_t* aDispMatrix = NULL;
+#if(LIBAVFORMAT_VERSION_INT >= AV_VERSION_INT(60, 15, 100))
+    for(int i = 0; i < myStream->codecpar->nb_coded_side_data; ++i) {
+        const AVPacketSideData* aSideData = &myStream->codecpar->coded_side_data[i];
+        if(aSideData->type == AV_PKT_DATA_DISPLAYMATRIX) {
+            aDispMatrix = aSideData->data;
+            break;
+        }
+    }
+#else
+    aDispMatrix = av_stream_get_side_data(myStream, AV_PKT_DATA_DISPLAYMATRIX, NULL);
+#endif
+    if(aDispMatrix != NULL) {
         const double aRotDeg = -av_display_rotation_get((const int32_t* )aDispMatrix);
         if(!st::isNaN(aRotDeg)) {
             myRotateDeg = -int(aRotDeg - 360 * std::floor(aRotDeg / 360 + 0.9 / 360));
