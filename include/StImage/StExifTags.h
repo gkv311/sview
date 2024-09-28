@@ -48,9 +48,14 @@ namespace StExifTags {
     extern const StExifTag OLYMP_TAGS[];
 
     enum Image {
+        Image_ImageWidth =  0x0100,
+        Image_ImageLength = 0x0101,
         Image_Orientation = 0x0112,
         Image_DateTime    = 0x0132,
+        Image_Make        = 0x010F,
+        Image_Model       = 0x0110,
         Image_MakerNote   = 0x927C, // matches TAG_MAKER_NOTE
+        Image_UserComment = 0x9286,
     };
 
     enum Fuji {

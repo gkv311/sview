@@ -230,6 +230,10 @@ bool StExifDir::readDirectory(StExifDir::List& theParentList,
                     aSubDir = new StExifDir();
                     aSubDir->IsFileBE = false;
                     aSubDir->Type     = DType_MakerCanon;
+                } else if(CameraMaker.isStartsWith(stCString("Kandao"))) {
+                    aSubDir = new StExifDir();
+                    aSubDir->IsFileBE = IsFileBE;
+                    aSubDir->Type     = DType_MakerKandao;
                 }
                 if(!aSubDir.isNull()) {
                     ST_DEBUG_LOG("StExifDir, reading " + CameraMaker + " maker notes");
@@ -452,6 +456,17 @@ void StExifDir::fillDictionary(StDictionary& theDict,
                     formatTag(anEntry.Tag, aTagHex);
                     format(anEntry, theDict.addChange(StString("Exif.MP.") + aTagHex).changeValue());
                 }
+            }
+            break;
+        }
+        case DType_MakerKandao: {
+            if(!theToShowUnknown) {
+                break;
+            }
+            for(size_t anEntryId = 0; anEntryId < Entries.size(); ++anEntryId) {
+                const StExifEntry& anEntry = Entries[anEntryId];
+                formatTag(anEntry.Tag, aTagHex);
+                format(anEntry, theDict.addChange(StString("Exif.Kandao.") + aTagHex).changeValue());
             }
             break;
         }

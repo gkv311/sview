@@ -32,6 +32,7 @@ class StExifDir {
         DType_MakerOlypm, //!< Maker Note sub-directory ("OLYMP")
         DType_MakerCanon, //!< Maker Note sub-directory ("Canon")
         DType_MakerFuji,  //!< Maker Note sub-directory ("FUJIFILM")
+        DType_MakerKandao,//!< Maker Note sub-directory ("Kandao")
         DType_MPO,        //!< MP extensions
     };
 
