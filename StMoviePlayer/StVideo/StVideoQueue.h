@@ -255,7 +255,7 @@ class StVideoQueue : public StAVPacketQueue {
      * @return PAR
      */
     ST_LOCAL GLfloat getPixelRatio() const {
-        return myPixelRatio;
+        return myPixelRatio * myPixelRatioComp;
     }
 
     /**
@@ -420,6 +420,7 @@ private:
 
     double                     myFramePts;
     GLfloat                    myPixelRatio;      //!< pixel aspect ratio
+    GLfloat                    myPixelRatioComp;  //!< pixel aspect ratio compensation for 3d
     int                        myHParallax;       //!< horizontal parallax in pixels stored in metadata
     int                        myRotateDeg;       //!< rotate angle in degrees
 

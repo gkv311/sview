@@ -1070,9 +1070,12 @@ void StGLImageRegion::stglDrawView(unsigned int theView) {
                 case RATIO_AUTO:
                 default: {
                     aDispRatio = aTextures.getPlane().getDisplayRatio();
+                    // this is rather an obscure logic - probably better to be removed
                     if(params.ToHealAnamorphicRatio->getValue()
                     && aParams->Src2SizeX == 0 && aParams->Src2SizeY == 0
-                    && ((aParams->Src1SizeX == 1920 && aParams->Src1SizeY >= 800 && aParams->Src1SizeY <= 1088)
+                    && ((aParams->Src1SizeX == 3840 && aParams->Src1SizeY >= 1080 && aParams->Src1SizeY <= 1088)
+                     || (aParams->Src1SizeX == 3840 && aParams->Src1SizeY == 2160)
+                     || (aParams->Src1SizeX == 1920 && aParams->Src1SizeY >= 800 && aParams->Src1SizeY <= 1088)
                      || (aParams->Src1SizeX == 1280 && aParams->Src1SizeY >= 530 && aParams->Src1SizeY <= 720))) {
                         switch(aParams->StereoFormat) {
                              case StFormat_SideBySide_LR:

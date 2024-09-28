@@ -185,6 +185,7 @@ StVideoQueue::StVideoQueue(const StHandle<StGLTextureQueue>& theTextureQueue,
   myAvDiscard(AVDISCARD_DEFAULT),
   myFramePts(0.0),
   myPixelRatio(1.0f),
+  myPixelRatioComp(1.0f),
   myHParallax(0),
   myRotateDeg(0),
   //
@@ -398,6 +399,7 @@ bool StVideoQueue::init(AVFormatContext*   theFormatCtx,
     myFrame.reset();
 
     // compute PAR
+    myPixelRatioComp = 1.0f;
     if(myStream->sample_aspect_ratio.num && av_cmp_q(myStream->sample_aspect_ratio, myCodecCtx->sample_aspect_ratio)) {
         myPixelRatio = GLfloat(myStream->sample_aspect_ratio.num) / GLfloat(myStream->sample_aspect_ratio.den);
     } else {
@@ -416,11 +418,11 @@ bool StVideoQueue::init(AVFormatContext*   theFormatCtx,
     const StString aHorParallaxKeyWMV = "StereoscopicHorizontalParallax";
     if(stAV::meta::readTag(myFormatCtx, aHalfHeightKeyWMV, aValue)) {
         if(aValue == "1") {
-            myPixelRatio *= 0.5;
+            myPixelRatioComp = 0.5f;
         }
     } else if(stAV::meta::readTag(myFormatCtx, aHalfWidthKeyWMV, aValue)) {
         if(aValue == "1") {
-            myPixelRatio *= 2.0;
+            myPixelRatioComp = 2.0f;
         }
     }
     myHParallax = 0;
@@ -528,10 +530,10 @@ bool StVideoQueue::init(AVFormatContext*   theFormatCtx,
     && isAnamorphByName) {
         if(myStFormatByName == StFormat_SideBySide_LR
         || myStFormatByName == StFormat_SideBySide_RL) {
-            myPixelRatio *= 2.0;
+            myPixelRatioComp = 2.0f;
         } else if(myStFormatByName == StFormat_TopBottom_LR
                || myStFormatByName == StFormat_TopBottom_RL) {
-            myPixelRatio *= 0.5;
+            myPixelRatioComp = 0.5f;
         }
     }
     return true;
@@ -545,6 +547,7 @@ void StVideoQueue::deinit() {
     }
     mySlave.nullify();
     myPixelRatio = 1.0f;
+    myPixelRatioComp = 1.0f;
     myDataAdp.nullify();
 
     myDataRGB.nullify();
@@ -1073,6 +1076,18 @@ bool StVideoQueue::decodeFrame(const StHandle<StAVPacket>& thePacket,
         if(aStereo->flags & AV_STEREO3D_FLAG_INVERT) {
             myStFormatInStream = st::formatReversed(myStFormatInStream);
         }
+
+        // MKV specs define halving/doubling PAR in case of SBS/AB streams
+        // and FFmpeg doesn't correct it back...
+        /*if(myStFormatInStream == StFormat_SideBySide_LR
+        || myStFormatInStream == StFormat_SideBySide_RL) {
+            myPixelRatioComp = 2.0f;
+        } else if(myStFormatInStream == StFormat_TopBottom_LR
+               || myStFormatInStream == StFormat_TopBottom_RL) {
+            myPixelRatioComp = 2.0f;
+        } else {
+            myPixelRatioComp = 1.0f;
+        }*/
     }
 #endif
 #if(LIBAVUTIL_VERSION_INT >= AV_VERSION_INT(55, 0, 0))
