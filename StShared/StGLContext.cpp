@@ -576,7 +576,7 @@ void StGLContext::stglSetScissorRect(const StGLBoxPx& theRect,
         core11fwd->glEnable(GL_SCISSOR_TEST);
     }
     if(thePushStack || myScissorStack.empty()) {
-        StGLBoxPx aDummyRect; // will be initialized right after
+        StGLBoxPx aDummyRect = {{0, 0, 0, 0}}; // will be initialized right after
         myScissorStack.push(aDummyRect);
     }
 
