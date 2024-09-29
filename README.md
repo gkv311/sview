@@ -45,12 +45,13 @@ See the [docs/INSTALL](docs/INSTALL.md) file.
 
 ## Continuous Integration
 
-Building state of master branch (of this git repository https://github.com/gkv311/sview.git).
+Building state of [master branch](https://github.com/gkv311/sview/actions?query=branch%3Amaster) (of this git repository https://github.com/gkv311/sview.git).
 
 | Target platform      | Build Status |
 |----------------------|--------------|
-| Ubuntu 18.04 (amd64) | [![status](https://github.com/gkv311/sview/workflows/Build%20(Ubuntu%2018.04)/badge.svg?branch=master)](https://github.com/gkv311/sview/actions?query=branch%3Amaster) (GitHub actions) |
-| Ubuntu 20.04 (amd64) | [![status](https://github.com/gkv311/sview/workflows/Build%20(Ubuntu%2020.04)/badge.svg?branch=master)](https://github.com/gkv311/sview/actions?query=branch%3Amaster) (GitHub actions) |
-| macOS 12 (amd64)     | [![status](https://github.com/gkv311/sview/workflows/Build%20(macOS%2012)/badge.svg?branch=master)](https://github.com/gkv311/sview/actions?query=branch%3Amaster) (GitHub actions) |
-| Android (armeabi-v7a)| [![status](https://github.com/gkv311/sview/workflows/Build%20(Android)/badge.svg?branch=master)](https://github.com/gkv311/sview/actions?query=branch%3Amaster) (GitHub actions) |
+| Ubuntu 20.04 (amd64) | ![status](https://github.com/gkv311/sview/actions/workflows/build_ubuntu_20.04.yml/badge.svg?branch=master) |
+| Ubuntu 22.04 (amd64) | ![status](https://github.com/gkv311/sview/actions/workflows/build_ubuntu_22.04.yml/badge.svg?branch=master) |
+| Ubuntu 24.04 (amd64) | ![status](https://github.com/gkv311/sview/actions/workflows/build_ubuntu_24.04.yml/badge.svg?branch=master) |
+| macOS 12 (amd64)     | ![status](https://github.com/gkv311/sview/actions/workflows/build_macos_12.yml/badge.svg?branch=master) |
+| Android (armeabi-v7a)| ![status](https://github.com/gkv311/sview/actions/workflows/build_android.yml/badge.svg?branch=master) |
 | Windows (amd64)      | [![status](https://ci.appveyor.com/api/projects/status/github/gkv311/sview)](https://ci.appveyor.com/project/gkv311/sview/build/messages) (AppVeyor) |

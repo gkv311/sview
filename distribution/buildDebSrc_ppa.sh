@@ -33,8 +33,9 @@ aCurrentDate=`date --rfc-2822`
 # Ubuntu 20.10     (Groovy Gorilla)
 # Ubuntu 21.04     (Hirsute Hippo)
 # Ubuntu 21.10     (Impish Indri)
-#aDistribs=("xenial" "bionic" "focal")
-aDistribs=("xenial" "bionic" "focal" "impish")
+# Ubuntu 22.04 LTS (Jammy Jellyfish)
+# Ubuntu 24.04 LTS (Noble Numbat)
+aDistribs=("focal" "jammy" "noble")
 
 # Debian
 #aDistribs=("stable" "unstable" "testing-proposed-updates" "experimental")

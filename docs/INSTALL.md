@@ -16,7 +16,7 @@ sudo apt-get install \
   g++ \
   libgtk2.0-dev \
   libopenal-dev \
-  libgl1-mesa-dev \
+  libgl-dev \
   libavcodec-dev libavdevice-dev libavformat-dev libavutil-dev libswscale-dev \
   libconfig++-dev libconfig-dev \
   libxpm-dev \
