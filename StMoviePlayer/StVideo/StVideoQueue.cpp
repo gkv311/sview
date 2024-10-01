@@ -55,9 +55,42 @@ namespace {
 
 }
 
-AVPixelFormat StVideoQueue::getFrameFormat(const AVPixelFormat* theFormats) {
+AVPixelFormat StVideoQueue::getFrameFormat(AVCodecContext*      theCodecCtx,
+                                           const AVPixelFormat* theFormats) {
+#if(LIBAVCODEC_VERSION_INT >= AV_VERSION_INT(61, 19, 100))
+    // request multiple views within AV_STEREO3D_FRAMESEQUENCE video stream
+    unsigned int aNbAllViewIds = 0, aNbAllViewPos = 0;
+    int anAvErr1 = av_opt_get_array_size(theCodecCtx, "view_ids_available", AV_OPT_SEARCH_CHILDREN, &aNbAllViewIds);
+    int anAvErr2 = av_opt_get_array_size(theCodecCtx, "view_pos_available", AV_OPT_SEARCH_CHILDREN, &aNbAllViewPos);
+    //if(anAvErr1 < 0) { ST_ERROR_LOG("view_ids_available NOT FOUND in " + theCodecCtx->codec->name); }
+    (void)anAvErr1; (void)anAvErr2;
+    if(aNbAllViewIds >= 2 && aNbAllViewIds == aNbAllViewPos) {
+        StArray<unsigned int> anViewIds(aNbAllViewIds, 0);
+        StArray<unsigned int> anViewPos(aNbAllViewIds, AV_STEREO3D_VIEW_UNSPEC);
+        anAvErr1 = av_opt_get_array(theCodecCtx, "view_ids_available", AV_OPT_SEARCH_CHILDREN, 0, aNbAllViewIds, AV_OPT_TYPE_UINT, &anViewIds[0]);
+        anAvErr2 = av_opt_get_array(theCodecCtx, "view_pos_available", AV_OPT_SEARCH_CHILDREN, 0, aNbAllViewIds, AV_OPT_TYPE_UINT, &anViewPos[0]);
+        int aLeftId = -1, aRightId = -1;
+        for(unsigned int aViewIter = 0; aViewIter < aNbAllViewIds; ++aViewIter) {
+            if(aLeftId == -1 && anViewPos[aViewIter] == AV_STEREO3D_VIEW_LEFT) {
+                aLeftId = anViewIds[aViewIter];
+            }
+            if(aRightId == -1 && anViewPos[aViewIter] == AV_STEREO3D_VIEW_RIGHT) {
+                aRightId = anViewIds[aViewIter];
+            }
+        }
+        if(aLeftId != -1 && aRightId != -1) {
+            av_opt_set(theCodecCtx, "view_ids", NULL, AV_OPT_SEARCH_CHILDREN);
+            //const int aViewIds[1] = { -1 };
+            //anAvErr1 = av_opt_set_array(theCodecCtx, "view_ids", AV_OPT_SEARCH_CHILDREN, 0, 1, AV_OPT_TYPE_INT, aViewIds);
+            const int aViewIds[2] = { aLeftId, aRightId };
+            anAvErr1 = av_opt_set_array(theCodecCtx, "view_ids", AV_OPT_SEARCH_CHILDREN, 0, 2, AV_OPT_TYPE_INT, aViewIds);
+            //if(anAvErr1 < 0) { ST_ERROR_LOG("av_opt_set_array('view_ids') FAILED"); }
+        }
+    }
+#endif
+
     if(!myUseGpu || myIsGpuFailed) {
-        return avcodec_default_get_format(myCodecCtx, theFormats);
+        return avcodec_default_get_format(theCodecCtx, theFormats);
     }
 
     for(const AVPixelFormat* aFormatIter = theFormats; *aFormatIter != stAV::PIX_FMT::NONE; ++aFormatIter) {
@@ -70,7 +103,7 @@ AVPixelFormat StVideoQueue::getFrameFormat(const AVPixelFormat* theFormats) {
         if(*aFormatIter == stAV::PIX_FMT::DXVA2_VLD) {
             if(!hwaccelInit()) {
                 myIsGpuFailed = true;
-                return avcodec_default_get_format(myCodecCtx, theFormats);
+                return avcodec_default_get_format(theCodecCtx, theFormats);
             }
             return *aFormatIter;
         }
@@ -78,7 +111,7 @@ AVPixelFormat StVideoQueue::getFrameFormat(const AVPixelFormat* theFormats) {
         if(*aFormatIter == stAV::PIX_FMT::VIDEOTOOLBOX_VLD) {
             if(!hwaccelInit()) {
                 myIsGpuFailed = true;
-                return avcodec_default_get_format(myCodecCtx, theFormats);
+                return avcodec_default_get_format(theCodecCtx, theFormats);
             }
             return *aFormatIter;
         }
@@ -844,6 +877,7 @@ void StVideoQueue::decodeLoop() {
                 if(myMaster.isNull()) {
                     myTextureQueue->clear();
                 }
+                myCachedFrame.nullify();
                 myAudioClock = 0.0;
                 myVideoClock = 0.0;
                 myToFlush    = false;
@@ -1076,6 +1110,15 @@ bool StVideoQueue::decodeFrame(const StHandle<StAVPacket>& thePacket,
         if(aStereo->flags & AV_STEREO3D_FLAG_INVERT) {
             myStFormatInStream = st::formatReversed(myStFormatInStream);
         }
+    #if(LIBAVCODEC_VERSION_INT >= AV_VERSION_INT(61, 19, 100))
+        if(myStFormatInStream == StFormat_FrameSequence) {
+            // technically, view_ids_available/view_pos_available codec context options should be checked
+            // if there are actually both views defined in the stream...
+            if(aStereo->view == AV_STEREO3D_VIEW_LEFT || aStereo->view == AV_STEREO3D_VIEW_RIGHT) {
+                myFramesCounter = (aStereo->view == AV_STEREO3D_VIEW_RIGHT) ? 2 : 1;
+            }
+        }
+    #endif
 
         // MKV specs define halving/doubling PAR in case of SBS/AB streams
         // and FFmpeg doesn't correct it back...
@@ -1196,10 +1239,19 @@ bool StVideoQueue::decodeFrame(const StHandle<StAVPacket>& thePacket,
 
         // simple one-stream case
         if(aSrcFormat == StFormat_FrameSequence) {
-            if(isOddNumber(myFramesCounter)) {
+            const bool isRightView = !isOddNumber(myFramesCounter);
+            if(!isRightView) {
                 myCachedFrame.fill(myDataAdp, false);
             } else {
                 pushFrame(myCachedFrame, myDataAdp, thePacket->getSource(), StFormat_FrameSequence, aCubemapFormat, myFramePts);
+            }
+            ++myFramesCounter;
+        } else if(myStFormatInStream == StFormat_FrameSequence) {
+            // this is counter-efficient - it is better requesting single view
+            // within "view_ids" decoder context when displaying MONO
+            const bool isRightView = !isOddNumber(myFramesCounter);
+            if(!isRightView) {
+                pushFrame(myDataAdp, myEmptyImage, thePacket->getSource(), aSrcFormat, aCubemapFormat, myFramePts);
             }
             ++myFramesCounter;
         } else {

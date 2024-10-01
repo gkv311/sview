@@ -310,7 +310,7 @@ class StVideoQueue : public StAVPacketQueue {
     ST_LOCAL static AVPixelFormat stGetFrameFormat(AVCodecContext*      theCodecCtx,
                                                    const AVPixelFormat* theFormats) {
         StVideoQueue* aVideoQueue = (StVideoQueue* )theCodecCtx->opaque;
-        return aVideoQueue->getFrameFormat(theFormats);
+        return aVideoQueue->getFrameFormat(theCodecCtx, theFormats);
     }
 
     /**
@@ -343,7 +343,8 @@ class StVideoQueue : public StAVPacketQueue {
     /**
      * Select frame format from the list.
      */
-    ST_LOCAL AVPixelFormat getFrameFormat(const AVPixelFormat* theFormats);
+    ST_LOCAL AVPixelFormat getFrameFormat(AVCodecContext*      theCodecCtx,
+                                          const AVPixelFormat* theFormats);
 
     /**
      * Frame buffer allocation callback.
