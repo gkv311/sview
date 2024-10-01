@@ -484,12 +484,18 @@ bool StVideoQueue::init(AVFormatContext*   theFormatCtx,
         switch(aSpherical->projection) {
             case AV_SPHERICAL_EQUIRECTANGULAR: {
                 theNewParams->ViewingMode = StViewSurface_Sphere;
-                if(sizeX() == sizeY()) {
-                    // TODO - hemisphere information should be somewhere in the file
-                    //theNewParams->ViewingMode = StViewSurface_Hemisphere;
-                }
                 break;
             }
+        #if(LIBAVUTIL_VERSION_INT >= AV_VERSION_INT(59, 23, 100))
+            case AV_SPHERICAL_HALF_EQUIRECTANGULAR: {
+                theNewParams->ViewingMode = StViewSurface_Hemisphere;
+                break;
+            }
+            case AV_SPHERICAL_RECTILINEAR:
+            case AV_SPHERICAL_FISHEYE: {
+                break;
+            }
+        #endif
             case AV_SPHERICAL_CUBEMAP: {
                 theNewParams->ViewingMode = StViewSurface_Cubemap;
                 //spherical->padding
