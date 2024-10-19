@@ -167,12 +167,12 @@ void StSearchMonitors::findMonitorsWinAPI() {
         if(*ddMon.DeviceString == L'\0') {
             EnumDisplayDevicesW(dispDevice.DeviceName, 0, &ddMon, 0);
             if(*ddMon.DeviceString == L'\0') {
-                lstrcpy(ddMon.DeviceString, L"Default Monitor");
+                lstrcpyW(ddMon.DeviceString, L"Default Monitor");
             }
         }
 
         // get information about the display's position and the current display mode
-        DEVMODE dm; ZeroMemory(&dm, sizeof(dm)); dm.dmSize = sizeof(dm);
+        DEVMODEW dm; ZeroMemory(&dm, sizeof(dm)); dm.dmSize = sizeof(dm);
         if(EnumDisplaySettingsExW(dispDevice.DeviceName, ENUM_CURRENT_SETTINGS, &dm, 0) == FALSE) {
             EnumDisplaySettingsExW(dispDevice.DeviceName, ENUM_REGISTRY_SETTINGS, &dm, 0);
         }

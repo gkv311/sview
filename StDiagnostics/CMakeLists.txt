@@ -1,0 +1,43 @@
+project (StDiagnostics)
+
+set (USED_SRCFILES
+  StColorProgram.cpp
+  StDiagnostics.cpp
+  StDiagnosticsGUI.cpp
+  StGeometryTest.cpp
+)
+
+set (USED_INCFILES
+  StColorProgram.h
+  StDiagnostics.h
+  StDiagnosticsGUI.h
+  StGeometryTest.h
+)
+
+set (USED_RESFILES "")
+if (WIN32)
+  set (USED_RESFILES "StDiagnostics.rc")
+endif()
+
+source_group ("Source Files"   FILES ${USED_SRCFILES})
+source_group ("Header Files"   FILES ${USED_INCFILES})
+source_group ("Resource Files" FILES ${USED_RESFILES})
+
+# library to build
+add_library (${PROJECT_NAME} SHARED
+  ${USED_SRCFILES} ${USED_INCFILES} ${USED_RESFILES}
+)
+
+set_target_properties (${PROJECT_NAME} PROPERTIES FOLDER "Apps")
+st_set_target_output_dirs(${PROJECT_NAME})
+
+# internal dependencies
+set (aDeps StGLWidgets StOutAnaglyph StOutDual StOutIZ3D StOutInterlace StOutPageFlip StOutDistorted StCore StShared)
+foreach (aDepIter ${aDeps})
+  add_dependencies (${PROJECT_NAME} ${aDepIter})
+  target_link_libraries (${PROJECT_NAME} PRIVATE ${aDepIter})
+endforeach()
+
+# external dependencies
+target_link_libraries (${PROJECT_NAME} PRIVATE freetype)
+target_link_libraries (${PROJECT_NAME} PRIVATE ${OPENGL_LIBRARIES})
