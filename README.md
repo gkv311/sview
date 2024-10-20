@@ -54,4 +54,4 @@ Building state of [master branch](https://github.com/gkv311/sview/actions?query=
 | Ubuntu 24.04 (amd64) | ![status](https://github.com/gkv311/sview/actions/workflows/build_ubuntu_24.04.yml/badge.svg?branch=master) |
 | macOS 12 (amd64)     | ![status](https://github.com/gkv311/sview/actions/workflows/build_macos_12.yml/badge.svg?branch=master) |
 | Android (armeabi-v7a)| ![status](https://github.com/gkv311/sview/actions/workflows/build_android.yml/badge.svg?branch=master) |
-| Windows (amd64)      | [![status](https://ci.appveyor.com/api/projects/status/github/gkv311/sview)](https://ci.appveyor.com/project/gkv311/sview/build/messages) (AppVeyor) |
+| Windows (amd64)      | ![status](https://github.com/gkv311/sview/actions/workflows/build_msvc.yml/badge.svg?branch=master) |

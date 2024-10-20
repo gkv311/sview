@@ -96,10 +96,9 @@ Notice that the following compilers should be configured within Code::Blocks:
 
 3rd-parties should be either configured as Code::Blocks global compiler options or placed into "3rdparty" folder.
 
-## IV. Visual Studio
+## IV. CMake
 
-sView comes within Visual Studio solution file, compatible with Visual Studio 2015 and higher.
-Visual Studio solution might require some extra steps for setting up paths to external libraries and for copying sView resources.
+sView comes within CMake scripts, compatible with Visual Studio 2015 and higher.
 
 Notice that for historical and compatibility reasons, sView install packages for Windows are build using Code::Blocks, configured to Visual Studio 2010 compiler.
 
