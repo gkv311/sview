@@ -2,7 +2,6 @@
 
 sView requires several 3rd-party components for building:
 * C/C++ compiler (g++, MSVC 2010+)
-* Code::Blocks (https://www.codeblocks.org/)
 * FFmpeg (https://www.ffmpeg.org)
 * OpenAL soft (https://openal-soft.org/)
 * GTK2+, Linux only (https://www.gtk.org)
@@ -19,8 +18,7 @@ sudo apt-get install \
   libgl-dev \
   libavcodec-dev libavdevice-dev libavformat-dev libavutil-dev libswscale-dev \
   libconfig++-dev libconfig-dev \
-  libxpm-dev \
-  codeblocks
+  libxpm-dev
 ~~~~~
  
 The similar command for RPM-based distributives:
@@ -72,35 +70,10 @@ The building can be run on a Linux host with compatible Java SDK, Android NDK an
 
 *distribution/qmake/sView.pro* defines a project file for Qt Creator.
 This is not a self-sustained solution, but rather a wrapper over existing UNIX `Makefile`, allowing to develop and build sView for macOS, Linux and Android targets within IDE.
-It has been introduced as an alternative to Code::Blocks having severe stability and usability problem on many platforms.
-
-## III. Code::Blocks
-
-For historical reasons, sView building environment was initially defined by a Code::Blocks (https://www.codeblocks.org/) workspace, allowing to develop and build application on multiple platforms.
-Code::Blocks remains the main way for building sView on Windows platform, although development can be done using Visual Studio (see below).
-
-There are several building targets depending on platform
-(macOS, Linux, Windows) and debugging possibilities:
-* `WIN_vc_x86`,        32-bit target using Visual Studio compiler
-* `WIN_vc_AMD64_DEBUG`,64-bit target with debugging options
-* `WIN_vc_AMD64`,      64-bit target using Visual Studio compiler
-* `LINUX_gcc`,         Linux target, g++ compiler
-* `LINUX_gcc_DEBUG`,   Linux target with debugging options
-* `MAC_gcc`,           macOS target, g++ compatible compiler
-* `MAC_gcc_DEBUG`,     macOS target with debugging options
-
-Notice that the following compilers should be configured within Code::Blocks:
-* `gcc`,               configured to g++ or compatible compiler (on systems other than Windows)
-* `msvc10`,            configured to Visual Studio 2010+ compiler, PSDK and DXSDK
-* `windows_sdk_x86_64` (copy of msvc10) configured to 64-bit libraries and compiler toolchain
-
-3rd-parties should be either configured as Code::Blocks global compiler options or placed into "3rdparty" folder.
 
 ## IV. CMake
 
 sView comes within CMake scripts, compatible with Visual Studio 2015 and higher.
-
-Notice that for historical and compatibility reasons, sView install packages for Windows are build using Code::Blocks, configured to Visual Studio 2010 compiler.
 
 ## V. Building options
 
@@ -117,10 +90,9 @@ Notice that by default "include/stconfig.conf" file is used to override these op
 Several script were written to automate distribution routines.
 All them were placed in "distribution" folder.
 
-* `build.bat`, batch script for Windows. Performs re-building of **WIN_vc_x86** and **WIN_vc_AMD64** targets
-  using Code::Blocks and pack result binaries using InnoSetup script.
-  Notice that all dependencies should be available (including InnoSetup),
-  and DLLs should be placed into **bin/WIN_vc_x86** and **bin/WIN_vc_AMD64** folders.
+* `build.bat`, batch script for Windows. Performs re-building of x86 and x86_64 targets
+  using Visual Studio and pack result binaries using InnoSetup script.
+  Notice that all dependencies should be available (including InnoSetup).
 * `buildDebSrc.sh`, bash script for Linux to pack sources into Debian source package.
 * `buildMac.sh`, bash script to pack binaries from **bin/MAC_gcc** folder into DMG image.
   3rd-party libraries should be already located in "bin/MAC_gcc_DEBUG/sView.app/Contents/Frameworks/"
