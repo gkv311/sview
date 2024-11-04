@@ -56,7 +56,7 @@ add_library (${PROJECT_NAME} SHARED
 )
 
 set_target_properties (${PROJECT_NAME} PROPERTIES FOLDER "Apps")
-st_set_target_output_dirs(${PROJECT_NAME})
+sview_set_target_output_dirs(${PROJECT_NAME})
 if (MSVC)
   set_target_properties(${PROJECT_NAME} PROPERTIES
     VS_DEBUGGER_COMMAND "$<TARGET_FILE:sView>"

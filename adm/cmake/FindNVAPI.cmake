@@ -23,7 +23,9 @@ set (NVAPI_TKLIST "nvapi")
 set (NVAPI_TKSUFFIX "")
 math (EXPR MY_BITNESS "32 + 32*(${CMAKE_SIZEOF_VOID_P}/8)")
 if (WIN32)
-  set (NVAPI_TKSUFFIX "${MY_BITNESS}")
+  if ("${MY_BITNESS}" STREQUAL "64")
+    set (NVAPI_TKSUFFIX "${MY_BITNESS}")
+  endif()
 endif()
 
 # validate location of libraries and headers

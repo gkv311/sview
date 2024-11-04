@@ -32,7 +32,7 @@ add_library (${PROJECT_NAME} SHARED
 )
 
 set_target_properties (${PROJECT_NAME} PROPERTIES FOLDER "Outputs")
-st_set_target_output_dirs(${PROJECT_NAME})
+sview_set_target_output_dirs(${PROJECT_NAME})
 
 # internal dependencies
 set (aDeps StCore StShared)

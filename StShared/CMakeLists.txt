@@ -245,7 +245,7 @@ add_library (${PROJECT_NAME} SHARED
 )
 
 set_target_properties (${PROJECT_NAME} PROPERTIES FOLDER "Core")
-st_set_target_output_dirs(${PROJECT_NAME})
+sview_set_target_output_dirs(${PROJECT_NAME})
 
 # external dependencies
 target_link_libraries (${PROJECT_NAME} PRIVATE avformat avcodec swscale avutil)
