@@ -71,9 +71,6 @@ echo #ifndef SVIEW_SDK_VER_STRING>> "%SVIEW_BUILD_CONF%"
 echo   #define SVIEW_SDK_VER_STRING "%YEAR%.%MONTH00%%SVIEW_VER_TYPE%%DAY%">> "%SVIEW_BUILD_CONF%"
 echo #endif>> "%SVIEW_BUILD_CONF%"
 
-rem Activate notifications about sView updates available on sview.ru
-echo #define ST_UPDATES_CHECK>> "%SVIEW_BUILD_CONF%"
-
 rem Create configuration for InnoSetup build script
 echo #define SVIEW_VER      "%YEAR%.%MONTH%.%SVIEW_VER_TYPE_NUM%.%DAY%"> config.iss
 echo #define SVIEW_VER_FULL "v.%YEAR%.%MONTH00%%SVIEW_VER_TYPE%%DAY%">> config.iss
@@ -84,9 +81,6 @@ echo #define SVIEW_DISTR_PATH_AMD64 "%SVIEW_DISTR_PATH_AMD64%">> config.iss
 echo #ifndef SVIEW_SDK_VER_STATUS>> "%SVIEW_BUILD_CONF%"
 echo   #define SVIEW_SDK_VER_STATUS %releaseStatus%>> "%SVIEW_BUILD_CONF%"
 echo #endif>> "%SVIEW_BUILD_CONF%"
-
-echo #define ST_HAVE_OPENVR>> "%SVIEW_BUILD_CONF%"
-echo #define ST_HAVE_MONGOOSE>> "%SVIEW_BUILD_CONF%"
 
 echo #endif //__stConfig_conf_>> "%SVIEW_BUILD_CONF%"
 rem END creating config file
@@ -210,6 +204,9 @@ set USE_OPENVR=ON
 set USE_FREEIMAGE=ON
 set USE_DEVIL=ON
 set USE_MSVCR=ON
+set USE_MONGOOSE=ON
+rem Activate notifications about sView updates available on sview.ru
+set USE_UPDATER=ON
 
 rem Configuration file
 if exist "%~dp0msvc_custom.bat" call "%~dp0msvc_custom.bat"
@@ -251,6 +248,8 @@ cmake -G "Ninja" ^
  -D CMAKE_BUILD_TYPE:STRING="Release" ^
  -D CMAKE_INSTALL_PREFIX:PATH="%aDestDir%" ^
  -D BUILD_FORCE_RelWithDebInfo:BOOL="ON" ^
+ -D USE_MONGOOSE:BOOL="%USE_MONGOOSE%" ^
+ -D USE_UPDATER:BOOL="%USE_UPDATER%" ^
  -D FREETYPE_DIR:PATH="%aFreeType%" ^
  -D FFMPEG_DIR:PATH="%anFFmpeg%" ^
  -D NVAPI_DIR:PATH="%anNVAPI%" ^

@@ -38,5 +38,7 @@ endforeach()
 
 # external dependencies
 target_link_libraries (${PROJECT_NAME} PRIVATE avutil)
-target_link_libraries (${PROJECT_NAME} PRIVATE openvr_api)
+if (USE_OPENVR)
+  target_link_libraries (${PROJECT_NAME} PRIVATE openvr_api)
+endif()
 target_link_libraries (${PROJECT_NAME} PRIVATE ${OPENGL_LIBRARIES})
