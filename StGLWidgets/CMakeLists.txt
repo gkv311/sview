@@ -1,15 +1,5 @@
 project (StGLWidgets)
 
-set (USED_MMFILES
-  StCocoaCoords.mm
-  StCocoaLocalPool.mm
-  StFileNode.ObjC.mm
-  StLogger.ObjC.mm
-  StPListImpl.mm
-  StSocket.ObjC.mm
-  StStringUnicode.ObjC.mm
-)
-
 set (USED_SRCFILES
   StGLAssignHotKey.cpp
   StGLButton.cpp
@@ -93,13 +83,9 @@ if (WIN32)
   set (USED_RESFILES "StGLWidgets.rc")
 endif()
 
-source_group ("Source Files"   FILES ${USED_SRCFILES} ${USED_MMFILES})
+source_group ("Source Files"   FILES ${USED_SRCFILES})
 source_group ("Header Files"   FILES ${USED_INCFILES})
 source_group ("Resource Files" FILES ${USED_RESFILES})
-
-if (APPLE)
-  set (USED_SRCFILES ${USED_SRCFILES} ${USED_MMFILES})
-endif()
 
 # library to build
 add_library (${PROJECT_NAME} SHARED

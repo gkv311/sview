@@ -76,6 +76,15 @@ set (USED_SRCFILES
   stConsole.cpp
   stUtfTools.cpp
 )
+set (USED_MMFILES
+  StCocoaCoords.mm
+  StCocoaLocalPool.mm
+  StFileNode.ObjC.mm
+  StLogger.ObjC.mm
+  StPListImpl.mm
+  StSocket.ObjC.mm
+  StStringUnicode.ObjC.mm
+)
 
 set (USED_INCFILES
   ../include/StAV/stAV.h
@@ -233,15 +242,21 @@ if (WIN32)
   set (USED_RESFILES "StShared.rc")
 endif()
 
+if (NOT APPLE)
+  foreach (aFileIter ${USED_MMFILES})
+    set_source_files_properties (${aFileIter} PROPERTIES HEADER_FILE_ONLY TRUE)
+  endforeach()
+endif()
+
 add_definitions(-DST_SHARED_DLL)
 
-source_group ("Source Files"   FILES ${USED_SRCFILES})
+source_group ("Source Files"   FILES ${USED_SRCFILES} ${USED_MMFILES})
 source_group ("Header Files"   FILES ${USED_INCFILES})
 source_group ("Resource Files" FILES ${USED_RESFILES})
 
 # library to build
 add_library (${PROJECT_NAME} SHARED
-  ${USED_SRCFILES} ${USED_INCFILES} ${USED_RESFILES}
+  ${USED_SRCFILES} ${USED_MMFILES} ${USED_INCFILES} ${USED_RESFILES}
 )
 
 set_target_properties (${PROJECT_NAME} PROPERTIES FOLDER "Core")

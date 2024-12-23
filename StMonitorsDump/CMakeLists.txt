@@ -2,6 +2,8 @@ project (StMonitorsDump)
 
 set (USED_SRCFILES
   main.cpp
+)
+set (USED_MMFILES
   main_1.mm
 )
 
@@ -12,13 +14,19 @@ if (WIN32)
   set (USED_MANFILES "../dpiAware.manifest")
 endif()
 
-source_group ("Source Files"   FILES ${USED_SRCFILES})
+if (NOT APPLE)
+  foreach (aFileIter ${USED_MMFILES})
+    set_source_files_properties (${aFileIter} PROPERTIES HEADER_FILE_ONLY TRUE)
+  endforeach()
+endif()
+
+source_group ("Source Files"   FILES ${USED_SRCFILES} ${USED_MMFILES})
 source_group ("Header Files"   FILES ${USED_INCFILES})
 source_group ("Resource Files" FILES ${USED_RESFILES} ${USED_MANFILES})
 
 # library to build
 add_executable (${PROJECT_NAME}
-  ${USED_SRCFILES} ${USED_INCFILES} ${USED_RESFILES} ${USED_MANFILES}
+  ${USED_SRCFILES} ${USED_MMFILES} ${USED_INCFILES} ${USED_RESFILES} ${USED_MANFILES}
 )
 
 set_target_properties (${PROJECT_NAME} PROPERTIES FOLDER "Tools")

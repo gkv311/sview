@@ -10,6 +10,8 @@ set (USED_SRCFILES
   StOutPageFlip.cpp
   StOutPageFlipExt.cpp
   StQuadBufferCheck.cpp
+)
+set (USED_MMFILES
   StQuadBufferCheck.ObjC.mm
 )
 
@@ -34,13 +36,19 @@ if (WIN32)
   set (USED_RESFILES "StOutPageFlip.rc")
 endif()
 
-source_group ("Source Files"   FILES ${USED_SRCFILES})
+if (NOT APPLE)
+  foreach (aFileIter ${USED_MMFILES})
+    set_source_files_properties (${aFileIter} PROPERTIES HEADER_FILE_ONLY TRUE)
+  endforeach()
+endif()
+
+source_group ("Source Files"   FILES ${USED_SRCFILES} ${USED_MMFILES})
 source_group ("Header Files"   FILES ${USED_INCFILES})
 source_group ("Resource Files" FILES ${USED_RESFILES})
 
 # library to build
 add_library (${PROJECT_NAME} SHARED
-  ${USED_SRCFILES} ${USED_INCFILES} ${USED_RESFILES}
+  ${USED_SRCFILES} ${USED_MMFILES} ${USED_INCFILES} ${USED_RESFILES}
 )
 
 set_target_properties (${PROJECT_NAME} PROPERTIES FOLDER "Outputs")
