@@ -29,6 +29,20 @@ StMonitor::StMonitor(const StMonitor& theCopy)
     //
 }
 
+StMonitor& StMonitor::operator=(const StMonitor& theCopy) {
+    myPnpId = theCopy.myPnpId;
+    myName = theCopy.myName;
+    myGpuName = theCopy.myGpuName;
+    myEdid = theCopy.myEdid;
+    myRect = theCopy.myRect;
+    mySysId = theCopy.mySysId;
+    myFreq = theCopy.myFreq;
+    myFreqMax = theCopy.myFreqMax;
+    myScale = theCopy.myScale;
+    myOrient = theCopy.myOrient;
+    return *this;
+}
+
 bool StMonitor::isValid() const {
     return (myRect.width() > 1) && (myRect.height() > 1);
 }

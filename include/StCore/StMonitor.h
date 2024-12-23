@@ -39,6 +39,11 @@ class StMonitor {
      */
     ST_CPPEXPORT StMonitor(const StMonitor& theCopy);
 
+    /**
+     * Assignment operator.
+     */
+    ST_CPPEXPORT StMonitor& operator=(const StMonitor& theCopy);
+
     ST_CPPEXPORT bool isValid() const;
 
     ST_LOCAL int getId() const {
