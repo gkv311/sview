@@ -56,4 +56,7 @@ endforeach()
 
 # external dependencies
 target_link_libraries (${PROJECT_NAME} PRIVATE avutil)
+if (USE_XLIB)
+  target_link_libraries (${PROJECT_NAME} PRIVATE X11::Xrandr X11::Xext X11::Xpm X11::X11)
+endif()
 target_link_libraries (${PROJECT_NAME} PRIVATE ${OPENGL_LIBRARIES})

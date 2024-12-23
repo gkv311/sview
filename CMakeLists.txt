@@ -85,6 +85,9 @@ else()
 endif()
 
 # define major 3rd-party folders in advance for cmake-gui
+set (USE_LIBCONFIG OFF)
+set (USE_GTK       OFF)
+set (USE_XLIB      OFF)
 set (FREETYPE_DIR ""  CACHE PATH "Path to FreeType library.")
 set (FFMPEG_DIR   ""  CACHE PATH "Path to FFmpeg libraries.")
 set (OPENAL_DIR   ""  CACHE PATH "Path to OpenAL library.")
@@ -182,6 +185,41 @@ if (WIN32)
       message (STATUS "MSVCR_BINARY_DIR=${MSVCR_BINARY_DIR}")
     endif()
   endif()
+elseif (APPLE)
+  #
+elseif (ANDROID)
+  #
+else()
+  # Linux
+  set (USE_GTK       ON)
+  set (USE_XLIB      ON)
+  set (USE_LIBCONFIG ON)
+
+  find_package (GTK2 REQUIRED gtk)
+  if (NOT GTK2_FOUND)
+    message (FATAL_ERROR "could not find GTK2 (libgtk2.0-dev)" )
+  endif()
+  if (NOT GTK2_INCLUDE_DIRS)
+    message (FATAL_ERROR "could not find GTK2 (GTK2_INCLUDE_DIRS)" )
+  endif()
+  message (STATUS "GTK2_INCLUDE_DIRS=${GTK2_INCLUDE_DIRS}")
+
+  find_package (X11 REQUIRED)
+  if (NOT X11_FOUND)
+    message (FATAL_ERROR "could not find X11" )
+  endif()
+  message (STATUS "X11_INCLUDE_DIR=${X11_INCLUDE_DIR}")
+
+  #find_package (libconfig++ REQUIRED)
+  find_path    (LIBCONFIGCPP_INCLUDE_DIR "libconfig.h++")
+  find_library (LIBCONFIGCPP_LIBRARY "config++" CMAKE_FIND_ROOT_PATH_BOTH)
+  message (STATUS "LIBCONFIGCPP_INCLUDE_DIR=${LIBCONFIGCPP_INCLUDE_DIR}")
+  message (STATUS "LIBCONFIGCPP_LIBRARY=${LIBCONFIGCPP_LIBRARY}")
+  add_library (libconfig++ SHARED IMPORTED)
+  set_property (TARGET libconfig++ APPEND PROPERTY IMPORTED_CONFIGURATIONS RELEASE)
+  set_target_properties (libconfig++ PROPERTIES IMPORTED_IMPLIB "${LIBCONFIGCPP_LIBRARY}")
+  set_target_properties (libconfig++ PROPERTIES INTERFACE_INCLUDE_DIRECTORIES "${LIBCONFIGCPP_INCLUDE_DIR}")
+  set_target_properties (libconfig++ PROPERTIES IMPORTED_LOCATION "${LIBCONFIGCPP_LIBRARY}")
 endif()
 
 # solution search folders
@@ -273,7 +311,7 @@ function (sview_set_target_output_dirs theTarget)
   # add install target
   install (TARGETS "${theTarget}"
            RUNTIME DESTINATION "${SVIEW_INSTALL_BIN}"
-	   LIBRARY DESTINATION "${SVIEW_INSTALL_LIB}")
+           LIBRARY DESTINATION "${SVIEW_INSTALL_LIB}")
 endfunction()
 
 # core libraries
