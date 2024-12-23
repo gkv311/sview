@@ -821,6 +821,7 @@ void StImageLoader::mainLoop() {
                 }
                 // re-load image file
             }
+            ST_FALLTHROUGH
             case Action_NONE:
             default: {
                 // load next image (set as current in playlist)

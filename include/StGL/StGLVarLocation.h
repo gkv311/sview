@@ -44,8 +44,7 @@ class StGLVarLocation {
     /**
      * Convert operators help silently put object to GL functions like glUniform*.
      */
-    operator const GLint() const { return myLocation; }
-    operator       GLint()       { return myLocation; }
+    operator GLint() const { return myLocation; }
 
 };
 

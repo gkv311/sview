@@ -72,12 +72,29 @@ inline void StUtfIterator<Type>::readUTF8() {
     const unsigned char aBytesToRead = UTF8_BYTES_MINUS_ONE[*aPos];
     myCharUtf32 = 0;
     switch(aBytesToRead) {
-        case 5: myCharUtf32 += *aPos++; myCharUtf32 <<= 6; // remember, illegal UTF-8
-        case 4: myCharUtf32 += *aPos++; myCharUtf32 <<= 6; // remember, illegal UTF-8
-        case 3: myCharUtf32 += *aPos++; myCharUtf32 <<= 6;
-        case 2: myCharUtf32 += *aPos++; myCharUtf32 <<= 6;
-        case 1: myCharUtf32 += *aPos++; myCharUtf32 <<= 6;
-        case 0: myCharUtf32 += *aPos++;
+        case 5:
+            myCharUtf32 += *aPos++;
+            myCharUtf32 <<= 6; // remember, illegal UTF-8
+            ST_FALLTHROUGH
+        case 4:
+            myCharUtf32 += *aPos++;
+            myCharUtf32 <<= 6; // remember, illegal UTF-8
+            ST_FALLTHROUGH
+        case 3:
+            myCharUtf32 += *aPos++;
+            myCharUtf32 <<= 6;
+            ST_FALLTHROUGH
+        case 2:
+            myCharUtf32 += *aPos++;
+            myCharUtf32 <<= 6;
+            ST_FALLTHROUGH
+        case 1:
+            myCharUtf32 += *aPos++;
+            myCharUtf32 <<= 6;
+            ST_FALLTHROUGH
+        case 0:
+            myCharUtf32 += *aPos++;
+            break;
     }
     myCharUtf32 -= offsetsFromUTF8[aBytesToRead];
     myPosNext = (Type* )aPos;

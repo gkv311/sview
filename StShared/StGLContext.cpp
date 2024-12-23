@@ -633,10 +633,8 @@ bool StGLContext::stglSetVSync(const VSync_Mode theVSyncMode) {
     GLint aSyncInt = 0;
     switch(theVSyncMode) {
         case VSync_MIXED:
-            if(extSwapTear) {
-                aSyncInt = -1;
-                break;
-            }
+            aSyncInt = extSwapTear ? -1 : 1;
+            break;
         case VSync_ON:
             aSyncInt = 1;
             break;

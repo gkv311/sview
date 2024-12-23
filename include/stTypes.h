@@ -72,6 +72,17 @@
     #define ST_ATTR_OVERRIDE
 #endif
 
+// Attribute to suppress -Wimplicit-fallthrough compiler warnings on switch cases without break
+#if defined(__cplusplus) && (__cplusplus >= 201703L)
+    // part of C++17 standard
+    #define ST_FALLTHROUGH [[fallthrough]];
+#elif defined(__GNUC__) && (__GNUC__ >= 7)
+    // gcc 7+
+    #define ST_FALLTHROUGH __attribute__((fallthrough));
+#else
+    #define ST_FALLTHROUGH
+#endif
+
 #if defined(_MSC_VER)
     // M_PI on old MSVC
     #define _USE_MATH_DEFINES

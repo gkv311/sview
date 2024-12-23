@@ -140,6 +140,7 @@ bool StGLAssignHotKey::doKeyDown(const StKeyEvent& theEvent) {
                 return StGLMessageBox::doKeyDown(theEvent);
             }
         }
+        ST_FALLTHROUGH
         default: {
             if(theEvent.VKey == ST_VK_ESCAPE) {
                 if(myKeyFlags == 0) {

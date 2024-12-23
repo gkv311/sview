@@ -52,13 +52,13 @@ class StGLMenuItem : public StGLTextArea {
     ST_CPPEXPORT virtual bool tryClick  (const StClickEvent& theEvent, bool& theIsItemClicked)   ST_ATTR_OVERRIDE;
     ST_CPPEXPORT virtual bool tryUnClick(const StClickEvent& theEvent, bool& theIsItemUnclicked) ST_ATTR_OVERRIDE;
 
-    ST_LOCAL const int computeTextWidth() {
+    ST_LOCAL int computeTextWidth() {
         int aWidth = 0, aHeight = 0;
         StGLTextArea::computeTextWidth(-1.0f, aWidth, aHeight);
         return aWidth;
     }
 
-    ST_LOCAL const int computeTextWidth(const StString& theText) {
+    ST_LOCAL int computeTextWidth(const StString& theText) {
         int aWidth = 0, aHeight = 0;
         StGLTextArea::computeTextWidth(theText, -1.0f, aWidth, aHeight);
         return aWidth;
