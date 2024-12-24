@@ -571,6 +571,9 @@ int StWinHandles::glCreateContext(StWinHandles*    theSlave,
     return STWIN_INIT_SUCCESS;
 #elif defined(__linux__)
     (void )theColorSize;
+    (void )theDepthSize;
+    (void )theStencilSize;
+    (void )theIsQuadStereo;
     // create an OpenGL rendering context
 #if defined(ST_HAVE_EGL) || defined(__ANDROID__)
     // GL context is created beforehand for EGL

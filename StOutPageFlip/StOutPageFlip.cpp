@@ -1003,6 +1003,8 @@ void StOutPageFlip::dxDraw(unsigned int view) {
             myOutD3d.DxWindow->update();
         }
     }
+#else
+    (void)view;
 #endif
 }
 
