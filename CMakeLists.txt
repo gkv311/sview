@@ -69,7 +69,14 @@ elseif (CMAKE_COMPILER_IS_GNUCC OR CMAKE_COMPILER_IS_GNUCXX OR "${CMAKE_CXX_COMP
 endif()
 
 # generated config header file
-add_definitions(-DST_HAVE_STCONFIG)
+if (WIN32)
+  set (USE_STCONFIG ON  CACHE BOOL "Use 'stconfig.conf' configuration file.")
+else()
+  set (USE_STCONFIG OFF CACHE BOOL "Use 'stconfig.conf' configuration file.")
+endif()
+if (USE_STCONFIG)
+  add_definitions(-DST_HAVE_STCONFIG)
+endif()
 
 # add verbose debug logging for debug config
 set (CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -DST_DEBUG")
