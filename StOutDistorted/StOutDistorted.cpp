@@ -112,10 +112,11 @@ namespace {
               return "Compositor Error: Index out of range";
             case vr::VRCompositorError_AlreadySubmitted:
               return "Compositor Error: Already submitted";
-            case 109: //vr::VRCompositorError_InvalidBounds:
-              return "Compositor Error: Invalid Bounds";
-            case 110: //vr::VRCompositorError_AlreadySet:
-              return "Compositor Error: Already Set";
+            //case vr::VRCompositorError_InvalidBounds:
+            //  return "Compositor Error: Invalid Bounds";
+            //case vr::VRCompositorError_AlreadySet:
+            //  return "Compositor Error: Already Set";
+            default: break;
         }
         return StString("Compositor Error: UNKNOWN #") + int(theVRError);
     }
