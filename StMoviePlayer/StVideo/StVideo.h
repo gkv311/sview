@@ -33,6 +33,8 @@
 #include <StImage/StImageFile.h>
 #include <StSettings/StTranslations.h>
 
+#include <vector>
+
 // forward declarations
 class StSubQueue;
 
@@ -399,14 +401,14 @@ class StVideo {
     /**
      * Handle audio stream switching.
      */
-    ST_LOCAL void doSwitchAudioStream(StArrayList<StAVPacket>& theAVPackets,
-                                      StArrayList<bool>& theQueueIsFull,
+    ST_LOCAL void doSwitchAudioStream(std::vector<StAVPacket>& theAVPackets,
+                                      std::vector<bool>& theQueueIsFull,
                                       size_t& theEmptyQueues);
     /**
      * Handle subtitles stream switching.
      */
-    ST_LOCAL void doSwitchSubtitlesStream(StArrayList<StAVPacket>& theAVPackets,
-                                          StArrayList<bool>& theQueueIsFull,
+    ST_LOCAL void doSwitchSubtitlesStream(std::vector<StAVPacket>& theAVPackets,
+                                          std::vector<bool>& theQueueIsFull,
                                           size_t& theEmptyQueues,
                                           const int theIndex);
     ST_LOCAL bool pushPacket(StHandle<StAVPacketQueue>& theAVPacketQueue,

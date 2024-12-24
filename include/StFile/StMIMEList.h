@@ -29,6 +29,12 @@ class StMIMEList : public StArrayList<StMIME> {
         }
     }
 
+    /** Assignment operator */
+    const StMIMEList& operator=(const StMIMEList& theCopy) {
+        StArrayList<StMIME>::operator=(theCopy);
+        return *this;
+    }
+
     /**
      * Creates list of extensions from MIME description list.
      * @return extensions list (StArrayList<StString> ).
