@@ -67,7 +67,7 @@ if (FFMPEG_INCLUDE_DIR_FOUND AND FFMPEG_LIBRARY_DIR_FOUND)
     endif()
   endforeach()
 else()
-  # no fallback searching - there are no known CMake configs
+  # FFmpeg doesn't provide CMake configs, but has pkgconfig
   find_package (PkgConfig REQUIRED)
   pkg_check_modules (LIBAV REQUIRED IMPORTED_TARGET libavcodec libavdevice libavformat libavutil libswscale)
   if (LIBAV_FOUND)

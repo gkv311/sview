@@ -18,7 +18,8 @@ sudo apt-get install \
   libgl-dev \
   libavcodec-dev libavdevice-dev libavformat-dev libavutil-dev libswscale-dev \
   libconfig++-dev libconfig-dev \
-  libxpm-dev
+  libxpm-dev \
+  libopenvr-dev
 ~~~~~
  
 The similar command for RPM-based distributives:
