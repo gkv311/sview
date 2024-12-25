@@ -28,4 +28,16 @@ jobs:
           libavcodec-dev libavdevice-dev libavformat-dev libavutil-dev libswscale-dev
     - name: Compile
       run: |
-        ./continuousIntegration/build_sview_linux.sh
+        bash ./continuousIntegration/build_sview_linux.sh
+    - name: Extra Dependencies
+      run: |
+        sudo apt-get install -y \
+          build-essential devscripts
+    - name: Debian package
+      run: |
+        bash ./distribution/buildDebSrc.sh
+    #- name: Upload artifacts
+    #  uses: actions/upload-artifact@v4
+    #  with:
+    #    name: sview-debpackage
+    #    path: distribution/temp
