@@ -32,7 +32,7 @@ jobs:
     - name: Extra Dependencies
       run: |
         sudo apt-get install -y \
-          build-essential devscripts
+          build-essential devscripts cmake
     - name: Debian package
       run: |
         bash ./distribution/buildDebSrc.sh

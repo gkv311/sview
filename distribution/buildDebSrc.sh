@@ -60,6 +60,8 @@ rm --force --recursive     $aDebSrcRoot
 mkdir -p $aDebSrcRoot
 cp -f -r ../debian         $aDebSrcRoot/
 cp -f -r ../share          $aDebSrcRoot/
+mkdir -p $aDebSrcRoot/distribution
+cp -f -r ../distribution/info $aDebSrcRoot/distribution/
 cp -f -r ../include        $aDebSrcRoot/
 rm --force $aDebSrcRoot/include/stconfig.conf
 cp -f -r ../StCore         $aDebSrcRoot/
@@ -78,7 +80,12 @@ cp -f -r ../StShared       $aDebSrcRoot/
 cp -f -r ../sview          $aDebSrcRoot/
 cp -f -r ../textures       $aDebSrcRoot/
 cp -f -r ../docs           $aDebSrcRoot/
-cp -f    ../Makefile       $aDebSrcRoot/
+#cp -f    ../Makefile       $aDebSrcRoot/
+cp -f -r ../adm            $aDebSrcRoot/
+cp -f    ../CMakeLists.txt $aDebSrcRoot/
+cp -f -r ../StMonitorsDump $aDebSrcRoot/
+cp -f -r ../StTests        $aDebSrcRoot/
+cp -f -r ../StBrowserPlugin $aDebSrcRoot/
 cp -f    ../README.md      $aDebSrcRoot/
 cp -f    ../README.md      $aDebSrcRoot/README
 cp -f    ../LICENSE_GPL_3-0.txt $aDebSrcRoot/LICENSE
