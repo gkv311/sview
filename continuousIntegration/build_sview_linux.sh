@@ -19,7 +19,10 @@ unset ANDROID_NDK
 
 cmake -G "Ninja Multi-Config" \
       -D BUILD_TREAT_WARNINGS_AS_ERRORS=ON \
+      -D CMAKE_INSTALL_PREFIX="$aBuildPath/install" \
       -S "$aScriptPath/.." -B "$aBuildPath"
 
 cmake --build "$aBuildPath" --config Release --target clean
 cmake --build "$aBuildPath" --config Release
+
+cmake --build "$aBuildPath" --config Release --target install

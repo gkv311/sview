@@ -249,6 +249,13 @@ StString StProcess::getStShareFolder() {
         return aProcessPath;
     }
 #ifndef _WIN32
+    if (aProcessPath.isEndsWith(stCString("/bin/")) || aProcessPath.isEndsWith(stCString("/lib/"))) {
+        const StString aRelPath = aProcessPath + "../share/sView/";
+        if (isValidStSharePath(aRelPath)) {
+            return aRelPath;
+        }
+    }
+
     if(isValidStSharePath(ST_DEFAULT_PATH)) {
         return ST_DEFAULT_PATH;
     }
