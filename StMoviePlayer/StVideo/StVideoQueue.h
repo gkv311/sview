@@ -255,7 +255,7 @@ class StVideoQueue : public StAVPacketQueue {
      * @return PAR
      */
     ST_LOCAL GLfloat getPixelRatio() const {
-        return myPixelRatio;
+        return myPixelRatio * myPixelRatioComp;
     }
 
     /**
@@ -310,7 +310,7 @@ class StVideoQueue : public StAVPacketQueue {
     ST_LOCAL static AVPixelFormat stGetFrameFormat(AVCodecContext*      theCodecCtx,
                                                    const AVPixelFormat* theFormats) {
         StVideoQueue* aVideoQueue = (StVideoQueue* )theCodecCtx->opaque;
-        return aVideoQueue->getFrameFormat(theFormats);
+        return aVideoQueue->getFrameFormat(theCodecCtx, theFormats);
     }
 
     /**
@@ -343,7 +343,8 @@ class StVideoQueue : public StAVPacketQueue {
     /**
      * Select frame format from the list.
      */
-    ST_LOCAL AVPixelFormat getFrameFormat(const AVPixelFormat* theFormats);
+    ST_LOCAL AVPixelFormat getFrameFormat(AVCodecContext*      theCodecCtx,
+                                          const AVPixelFormat* theFormats);
 
     /**
      * Frame buffer allocation callback.
@@ -420,6 +421,7 @@ private:
 
     double                     myFramePts;
     GLfloat                    myPixelRatio;      //!< pixel aspect ratio
+    GLfloat                    myPixelRatioComp;  //!< pixel aspect ratio compensation for 3d
     int                        myHParallax;       //!< horizontal parallax in pixels stored in metadata
     int                        myRotateDeg;       //!< rotate angle in degrees
 

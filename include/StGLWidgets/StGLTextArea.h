@@ -152,7 +152,7 @@ class StGLTextArea : public StGLWidget {
      */
     ST_CPPEXPORT void setTextWidth(const int theWidth);
 
-    inline const int getFontSize() const {
+    inline int getFontSize() const {
         switch(mySize) {
             case SIZE_SMALLEST:
                 return 10;

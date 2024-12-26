@@ -1,7 +1,10 @@
 #!/usr/bin/make -f
 
+override_dh_auto_test:
+	echo "No tests"
+
 %:
-	dh $@ 
+	dh $@ --buildsystem=cmake+ninja
 
 #clean:
 #	-$(MAKE) distclean

@@ -323,6 +323,7 @@ template<> class StHandle<TheChildClass> : public StHandle<TheBaseClass> { \
     StHandle()                          : TheBaseHandle() {} \
     StHandle(TheChildClass* theObject)  : TheBaseHandle((TheBaseClass* )theObject) {} \
     StHandle(const StHandle& theHandle) : TheBaseHandle(theHandle) {} \
+    StHandle& operator=(const StHandle& theHandle) { TheBaseHandle::operator=(theHandle); return *this; } \
           TheChildClass* access()           { return  (TheChildClass* )TheBaseHandle::access(); } \
     const TheChildClass* access()     const { return  (TheChildClass* )TheBaseHandle::access(); } \
           TheChildClass* operator->()       { return  (TheChildClass* )TheBaseHandle::access(); } \
@@ -364,6 +365,7 @@ class Handle : public TheBaseClass::Handle { \
     Handle()                         : TheBaseHandle() {} \
     Handle(TheChildClass* theObject) : TheBaseHandle(theObject) {} \
     Handle(const Handle& theHandle)  : TheBaseHandle(theHandle) {} \
+    Handle& operator=(const Handle& theHandle) { TheBaseHandle::operator=(theHandle); return *this; } \
           TheChildClass* access()           { return  (TheChildClass* )TheBaseHandle::access(); } \
     const TheChildClass* access()     const { return  (TheChildClass* )TheBaseHandle::access(); } \
           TheChildClass* operator->()       { return  (TheChildClass* )TheBaseHandle::access(); } \

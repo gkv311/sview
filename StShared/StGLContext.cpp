@@ -32,6 +32,13 @@
     #include <GL/glx.h> // glXGetProcAddress()
 #endif
 
+// suppress warning on glXSwapIntervalEXT with inconsistent forward-declared function prototype
+#if defined(__GNUC__) && !defined(__INTEL_COMPILER) && !defined(__clang__)
+    #if (__GNUC__ > 8) || ((__GNUC__ == 8) && (__GNUC_MINOR__ >= 1))
+        #pragma GCC diagnostic ignored "-Wcast-function-type"
+    #endif
+#endif
+
 StGLContext::StGLContext(const StHandle<StResourceManager>& theResMgr)
 : core11(NULL),
   core11fwd(NULL),
@@ -576,7 +583,7 @@ void StGLContext::stglSetScissorRect(const StGLBoxPx& theRect,
         core11fwd->glEnable(GL_SCISSOR_TEST);
     }
     if(thePushStack || myScissorStack.empty()) {
-        StGLBoxPx aDummyRect; // will be initialized right after
+        StGLBoxPx aDummyRect = {{0, 0, 0, 0}}; // will be initialized right after
         myScissorStack.push(aDummyRect);
     }
 
@@ -633,10 +640,8 @@ bool StGLContext::stglSetVSync(const VSync_Mode theVSyncMode) {
     GLint aSyncInt = 0;
     switch(theVSyncMode) {
         case VSync_MIXED:
-            if(extSwapTear) {
-                aSyncInt = -1;
-                break;
-            }
+            aSyncInt = extSwapTear ? -1 : 1;
+            break;
         case VSync_ON:
             aSyncInt = 1;
             break;

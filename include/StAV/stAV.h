@@ -23,6 +23,7 @@ extern "C" {
     #include <libswscale/swscale.h>
 
     #include <libavutil/mathematics.h>
+    #include <libavutil/opt.h>
 
     // new stereoscopic info API
 #if(LIBAVUTIL_VERSION_INT >= AV_VERSION_INT(52, 56, 100))

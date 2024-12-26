@@ -291,7 +291,7 @@ void StApplication::beforeDraw() {
 }
 
 void StApplication::doDrawProxy(unsigned int theView) {
-    stglDraw(!myWindow.isNull() && myWindow->isStereoOutput() ? theView : ST_DRAW_MONO);
+    stglDraw(!myWindow.isNull() && myWindow->isStereoOutput() ? theView : (unsigned int)ST_DRAW_MONO);
 }
 
 void StApplication::stglDraw(unsigned int ) {

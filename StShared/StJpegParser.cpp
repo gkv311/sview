@@ -669,6 +669,31 @@ bool StJpegParser::Image::get360PanoMakerNote(bool& theIsStereo) const {
     return false;
 }
 
+bool StJpegParser::Image::getQooCamMakerNote(StFormat& theFormat) const {
+    if(SizeX != 8000 || SizeY != 3000) {
+        return false;
+    }
+
+    // we don't have maker note specification - just consider side-by-side pair by side information
+    StExifDir::Query aQueryMake(StExifDir::DType_General, StExifTags::Image_Make, StExifEntry::FMT_STRING);
+    if(!StExifDir::findEntry(Exif, aQueryMake)
+    || ::strncmp((char* )aQueryMake.Entry.ValuePtr, "Kandao", 6) != 0) {
+        return false;
+    }
+
+    StExifDir::Query aQueryComment(StExifDir::DType_General, StExifTags::Image_UserComment, StExifEntry::FMT_UNDEFINED);
+    if(!StExifDir::findEntry(Exif, aQueryComment)
+    || aQueryComment.Entry.Components < 9
+    || ::strncmp((char* )aQueryComment.Entry.ValuePtr, "ASCII\0\0\0", 8) != 0
+    || ::strstr((char* )aQueryComment.Entry.ValuePtr + 8, "EXPINFO0=") == NULL
+    || ::strstr((char* )aQueryComment.Entry.ValuePtr + 8, "EXPINFO1=") == NULL) {
+        return false;
+    }
+
+    theFormat = StFormat_SideBySide_LR;
+    return true;
+}
+
 bool StJpegParser::Image::getParallax(double& theParallax) const {
     StExifDir::Query aQuery(StExifDir::DType_MakerFuji, StExifTags::Fuji_Parallax);
     if(!StExifDir::findEntry(Exif, aQuery)

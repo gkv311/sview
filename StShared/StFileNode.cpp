@@ -86,8 +86,20 @@ bool StFileNode::isFileReadOnly(const StCString& thePath) {
     DWORD anAttribs = ::GetFileAttributesW(aPath.toCString());
     return (anAttribs & FILE_ATTRIBUTE_READONLY) != 0;
 #else
-    // not implemented
-    return false;
+#if (defined(__APPLE__))
+    struct stat aStatBuffer;
+    if (stat(thePath.toCString(), &aStatBuffer) != 0) {
+        return false;
+    }
+#else
+    struct stat64 aStatBuffer;
+    if (stat64(thePath.toCString(), &aStatBuffer) != 0) {
+        return false;
+    }
+#endif
+    return (aStatBuffer.st_mode & S_IWUSR) != 0
+        || (aStatBuffer.st_mode & S_IWGRP) != 0
+        || (aStatBuffer.st_mode & S_IWOTH) != 0;
 #endif
 }
 
@@ -106,6 +118,7 @@ bool StFileNode::removeReadOnlyFlag(const StCString& thePath) {
     return ::SetFileAttributesW(aPath.toCString(), anAttribs) != FALSE;
 #else
     // not implemented
+    (void)thePath;
     return false;
 #endif
 }

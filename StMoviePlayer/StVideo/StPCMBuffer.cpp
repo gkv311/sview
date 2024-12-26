@@ -111,6 +111,7 @@ StChannelMap::StChannelMap(const StChannelMap::Channels   theChannels,
                     return;
                 }
             }
+            return;
         case StChannelMap::CH71:
             count = 8;
             FL  = 0;
@@ -470,6 +471,7 @@ bool StPCMBuffer::addData(const StPCMBuffer& theBuffer) {
                     case StPcmFormat_Float32: return addConvert<uint8_t, float  >(theBuffer);
                     case StPcmFormat_Float64: return addConvert<uint8_t, double >(theBuffer);
                 }
+                return false;
             case StPcmFormat_Int16:
                 switch(myPCMFormat) {
                     case StPcmFormat_UInt8:   return addConvert<int16_t, uint8_t>(theBuffer);
@@ -478,6 +480,7 @@ bool StPCMBuffer::addData(const StPCMBuffer& theBuffer) {
                     case StPcmFormat_Float32: return addConvert<int16_t, float  >(theBuffer);
                     case StPcmFormat_Float64: return addConvert<int16_t, double >(theBuffer);
                 }
+                return false;
             case StPcmFormat_Int32:
                 switch(myPCMFormat) {
                     case StPcmFormat_UInt8:   return addConvert<int32_t, uint8_t>(theBuffer);
@@ -486,6 +489,7 @@ bool StPCMBuffer::addData(const StPCMBuffer& theBuffer) {
                     case StPcmFormat_Float32: return addConvert<int32_t, float  >(theBuffer);
                     case StPcmFormat_Float64: return addConvert<int32_t, double >(theBuffer);
                 }
+                return false;
             case StPcmFormat_Float32:
                 switch(myPCMFormat) {
                     case StPcmFormat_UInt8:   return addConvert<float, uint8_t>(theBuffer);
@@ -494,6 +498,7 @@ bool StPCMBuffer::addData(const StPCMBuffer& theBuffer) {
                     case StPcmFormat_Float32: return addConvert<float, float  >(theBuffer);
                     case StPcmFormat_Float64: return addConvert<float, double >(theBuffer);
                 }
+                return false;
             case StPcmFormat_Float64:
                 switch(myPCMFormat) {
                     case StPcmFormat_UInt8:   return addConvert<double, uint8_t>(theBuffer);
@@ -502,6 +507,7 @@ bool StPCMBuffer::addData(const StPCMBuffer& theBuffer) {
                     case StPcmFormat_Float32: return addConvert<double, float  >(theBuffer);
                     case StPcmFormat_Float64: return addConvert<double, double >(theBuffer);
                 }
+                return false;
         }
         return true;
     } else if(myChMap == theBuffer.myChMap) {

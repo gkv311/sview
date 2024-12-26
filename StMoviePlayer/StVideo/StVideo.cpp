@@ -972,8 +972,8 @@ void StVideo::checkInitVideoStreams() {
     }
 }
 
-void StVideo::doSwitchAudioStream(StArrayList<StAVPacket>& theAVPackets,
-                                  StArrayList<bool>& theQueueIsFull,
+void StVideo::doSwitchAudioStream(std::vector<StAVPacket>& theAVPackets,
+                                  std::vector<bool>& theQueueIsFull,
                                   size_t& theEmptyQueues) {
     double aCurrPts = getPts();
     doFlushSoft();
@@ -1025,8 +1025,8 @@ void StVideo::doSwitchAudioStream(StArrayList<StAVPacket>& theAVPackets,
             continue;
         }
         myPlayCtxList.add(aFormatCtx);
-        theAVPackets.add(StAVPacket(myCurrParams));
-        theQueueIsFull.add(false);
+        theAVPackets.push_back(StAVPacket(myCurrParams));
+        theQueueIsFull.push_back(false);
     }
 
     pushPlayEvent(ST_PLAYEVENT_SEEK, aCurrPts);
@@ -1035,8 +1035,8 @@ void StVideo::doSwitchAudioStream(StArrayList<StAVPacket>& theAVPackets,
     }
 }
 
-void StVideo::doSwitchSubtitlesStream(StArrayList<StAVPacket>& theAVPackets,
-                                      StArrayList<bool>& theQueueIsFull,
+void StVideo::doSwitchSubtitlesStream(std::vector<StAVPacket>& theAVPackets,
+                                      std::vector<bool>& theQueueIsFull,
                                       size_t& theEmptyQueues,
                                       const int theIndex) {
     double aCurrPts = getPts();
@@ -1086,8 +1086,8 @@ void StVideo::doSwitchSubtitlesStream(StArrayList<StAVPacket>& theAVPackets,
         continue;
       }
       myPlayCtxList.add(aFormatCtx);
-      theAVPackets.add(StAVPacket(myCurrParams));
-      theQueueIsFull.add(false);
+      theAVPackets.push_back(StAVPacket(myCurrParams));
+      theQueueIsFull.push_back(false);
     }
 
     pushPlayEvent(ST_PLAYEVENT_SEEK, aCurrPts);
@@ -1127,9 +1127,12 @@ void StVideo::packetsLoop() {
     // indicate new file opened
     signals.onLoaded();
 
-    StArrayList<StAVPacket> anAVPackets(myCtxList.size());
-    StArrayList<bool> aQueueIsFull(myCtxList.size());
-    StArrayList<bool> aQueueIsEmpty(myCtxList.size());
+    std::vector<StAVPacket> anAVPackets;
+    std::vector<bool> aQueueIsFull;
+    std::vector<bool> aQueueIsEmpty;
+    anAVPackets.reserve(myCtxList.size());
+    aQueueIsFull.reserve(myCtxList.size());
+    aQueueIsEmpty.reserve(myCtxList.size());
     myPlayCtxList.clear();
     size_t anEmptyQueues = 0;
     for(size_t aCtxId = 0; aCtxId < myCtxList.size(); ++aCtxId) {
@@ -1143,9 +1146,9 @@ void StVideo::packetsLoop() {
         }
 
         myPlayCtxList.add(aFormatCtx);
-        anAVPackets.add(StAVPacket(myCurrParams));
-        aQueueIsFull.add(false);
-        aQueueIsEmpty.add(false);
+        anAVPackets.push_back(StAVPacket(myCurrParams));
+        aQueueIsFull.push_back(false);
+        aQueueIsEmpty.push_back(false);
     }
 
     // reset target FPS

@@ -26,6 +26,10 @@ StFTFontRegistry::StFTFontRegistry() {
     myExtensions.add("ttc");
     myExtensions.add("otf");
 
+    const StString aCustFontDir = StProcess::getStShareFolder() + "fonts" + SYS_FS_SPLITTER;
+    if(StFolder::isFolder(aCustFontDir)) {
+        myFolders.add(aCustFontDir);
+    }
 #ifdef _WIN32
     myFolders.add(StProcess::getWindowsFolder() + "fonts");
 
@@ -133,6 +137,12 @@ StFTFontRegistry::StFTFontRegistry() {
     }
 #endif
     if(myFolders.isEmpty()) {
+    #ifdef APP_PREFIX
+        if(!StString(stCString(APP_PREFIX)).isEquals(stCString("/usr"))) {
+            myFolders.add(stCString(APP_PREFIX"/share/fonts"));
+            myFolders.add(stCString(APP_PREFIX"/local/share/fonts"));
+        }
+    #endif
         myFolders.add(stCString("/usr/share/fonts"));
         myFolders.add(stCString("/usr/local/share/fonts"));
     }

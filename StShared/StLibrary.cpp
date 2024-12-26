@@ -88,6 +88,8 @@ void StLibrary::suppressSystemErrors(bool toSuppress) {
 #ifdef _WIN32
     SetErrorMode(toSuppress ? SEM_FAILCRITICALERRORS : 0);
     ST_DEBUG_LOG("WinAPI, Critical errors " + (toSuppress ? "suppressed!" : "unsuppressed."));
+#else
+    (void)toSuppress;
 #endif
 }
 

@@ -1,0 +1,53 @@
+name: Build (MSVC)
+on:
+  push:
+    branches: [ master ]
+  pull_request:
+    branches: [ master ]
+  workflow_dispatch:
+
+jobs:
+  build-windows-msvc:
+    name: Build on Windows with MSVC
+    runs-on: windows-latest
+    steps:
+    - name: Clone source tree
+      uses: actions/checkout@v1
+      with:
+        fetch-depth: 1
+    - name: Clone 3rdparty libraries
+      uses: actions/checkout@v1
+      with:
+        repository: gkv311/sview-deps-wnt
+        ref: 'master'
+        path: sview-deps-wnt
+        fetch-depth: 1
+    - name: Setup MSVC
+      uses: ilammy/msvc-dev-cmd@v1.13.0
+      with:
+        arch: x64
+    - name: Install dependencies
+      run: |
+        choco install cmake --installargs 'ADD_CMAKE_TO_PATH=System' -y
+    - name: Configure project
+      shell: cmd
+      run: |
+        mkdir "build"
+        call ..\sview-deps-wnt\unpack.bat
+        cmake -T host=x64 ^
+          -D BUILD_TREAT_WARNINGS_AS_ERRORS=OFF ^
+          -D FREETYPE_DIR=../sview-deps-wnt/%ST_FREETYPE% ^
+          -D FFMPEG_DIR=../sview-deps-wnt/%ST_FFMPEG% ^
+          -D OPENAL_DIR=../sview-deps-wnt/%ST_OPENAL% ^
+          -D OPENVR_DIR=../sview-deps-wnt/%ST_OPENVR% ^
+          -D NVAPI_DIR=../sview-deps-wnt/%ST_NVAPI% ^
+          -S . -B "./build"
+    - name: Build project
+      run: |
+        cmake --build "./build" --config Release -- /m
+
+    - name: Upload artifacts
+      uses: actions/upload-artifact@v4
+      with:
+        name: sview-msvc
+        path: build/Release

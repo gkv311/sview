@@ -360,9 +360,13 @@ bool StImageLoader::loadImage(const StHandle<StFileNode>& theSource,
                 anEntry.changeValue() = aTime;
             }
         }
-        if(myStFormatByUser == StFormat_AUTO
-        && aParser.getSrcFormat() != StFormat_AUTO) {
-            aSrcFormatCurr = aParser.getSrcFormat();
+        if(myStFormatByUser == StFormat_AUTO) {
+            if(aParser.getSrcFormat() != StFormat_AUTO) {
+                aSrcFormatCurr = aParser.getSrcFormat();
+            } else if(!anImg1.isNull() && anImg2.isNull()
+                    && anImg1->getQooCamMakerNote(aSrcFormatCurr)) {
+                //
+            }
         }
         aSrcPanorama = aParser.getPanorama();
 
@@ -817,6 +821,7 @@ void StImageLoader::mainLoop() {
                 }
                 // re-load image file
             }
+            ST_FALLTHROUGH
             case Action_NONE:
             default: {
                 // load next image (set as current in playlist)

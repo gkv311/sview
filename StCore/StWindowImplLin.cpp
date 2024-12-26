@@ -44,6 +44,7 @@ int stXErrorHandler(Display*     theDisplay,
 Bool StWindowImpl::stXWaitMapped(Display* theDisplay,
                                  XEvent*  theEvent,
                                  char*    theArg) {
+    (void)theDisplay;
     return (theEvent->type        == MapNotify)
         && (theEvent->xmap.window == (Window )theArg);
 }
@@ -1083,6 +1084,7 @@ bool StWindowImpl::toClipboard(const StString& theText) {
 }
 
 bool StWindowImpl::fromClipboard(StString& theText) {
+    (void)theText;
     return false;
 }
 

@@ -398,6 +398,7 @@ bool StAudioQueue::setupOutMonoFormat() {
                 return true;
             }
         }
+        ST_FALLTHROUGH
         case StPcmFormat_Int32:
         case StPcmFormat_Float32: {
             if(myAlCtx.hasExtFloat32) {
@@ -407,6 +408,7 @@ bool StAudioQueue::setupOutMonoFormat() {
                 return true;
             }
         }
+        ST_FALLTHROUGH
         case StPcmFormat_Int16: {
             // default - int16_t
             myAlFormat = AL_FORMAT_MONO16;
@@ -465,6 +467,7 @@ bool StAudioQueue::initOutStereo(const bool theIsPlanar) {
                 break;
             }
         }
+        ST_FALLTHROUGH
         case StPcmFormat_Int32:
         case StPcmFormat_Float32: {
             if(myAlCtx.hasExtFloat32) {
@@ -473,6 +476,7 @@ bool StAudioQueue::initOutStereo(const bool theIsPlanar) {
                 break;
             }
         }
+        ST_FALLTHROUGH
         case StPcmFormat_Int16: {
             // default - int16_t
             myAlFormat = AL_FORMAT_STEREO16;

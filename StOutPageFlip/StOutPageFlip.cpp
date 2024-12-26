@@ -880,6 +880,7 @@ bool StOutPageFlip::create() {
                                                               "OpenGL Hardware QuadBuffer is unavailable!"));
             }
         }
+        ST_FALLTHROUGH
         default:
             myContext->stglSetVSync((StGLContext::VSync_Mode )StWindow::params.VSyncMode->getValue());
             break;
@@ -1002,6 +1003,8 @@ void StOutPageFlip::dxDraw(unsigned int view) {
             myOutD3d.DxWindow->update();
         }
     }
+#else
+    (void)view;
 #endif
 }
 

@@ -1,0 +1,43 @@
+name: Build (Ubuntu 24.04)
+on:
+  push:
+    branches: [ master ]
+  pull_request:
+    branches: [ master ]
+  workflow_dispatch:
+
+jobs:
+  Ubuntu:
+    runs-on: ubuntu-24.04
+    steps:
+    - name: Clone Tree
+      uses: actions/checkout@v1
+      with:
+        fetch-depth: 1
+    - name: Install Dependencies
+      run: |
+        sudo apt-get update
+        sudo apt-get install -y \
+          g++ ninja-build \
+          libgtk2.0-dev \
+          libopenal-dev \
+          libopenvr-dev \
+          libgl-dev \
+          libconfig++-dev libconfig-dev \
+          libxpm-dev \
+          libavcodec-dev libavdevice-dev libavformat-dev libavutil-dev libswscale-dev
+    - name: Compile
+      run: |
+        bash ./continuousIntegration/build_sview_linux.sh
+    - name: Extra Dependencies
+      run: |
+        sudo apt-get install -y \
+          build-essential devscripts cmake
+    - name: Debian package
+      run: |
+        bash ./distribution/buildDebSrc.sh
+    #- name: Upload artifacts
+    #  uses: actions/upload-artifact@v4
+    #  with:
+    #    name: sview-debpackage
+    #    path: distribution/temp

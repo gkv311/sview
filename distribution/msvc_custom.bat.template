@@ -1,0 +1,21 @@
+rem Environment configuration template for msvc_build.bat (to be renamed as msvc_custom.bat)
+set "aCmakeBin=c:\Storage\Develop\DEVsoft\CMake\bin"
+set "aParties=C:\Storage\Develop\sView\sview-deps-wnt.git"
+set "aFreeType64=%aParties%\freetype-2.5.5-vc10-64"
+set "anFFmpeg64=%aParties%\ffmpeg-4.1.1-x86_64-w64-mingw32-lgpl"
+set "anNVAPI64=%aParties%\nvapi-vc10-64"
+set "anOpenAL64=%aParties%\openal-soft-1.17.0-vc10-64"
+set "anOpenVR64=%aParties%\openvr-1.0.5-64"
+
+set "aCmakeGen=Visual Studio 14 2015 Win64"
+rem set "aCmakeGen=Ninja"
+rem set "aVsVars=C:\Program Files (x86)\Microsoft Visual Studio 14.0\Common7\Tools\..\..\VC\vcvarsall.bat"
+
+rem Uncomment to customize building steps
+rem set "aBuildRoot=work"
+set "toCMake=1"
+set "toClean=1"
+set "toMake=1"
+set "toInstall=1"
+set "toPack=0"
+set "toDebug=0"

@@ -73,6 +73,11 @@ class StJpegParser : public StRawFile {
         ST_CPPEXPORT StString getDateTime() const;
 
         /**
+         * Read QooCam metadata.
+         */
+        ST_CPPEXPORT bool getQooCamMakerNote(StFormat& theFormat) const;
+
+        /**
          * Read 360Mono and 360Stereo EXIF property.
          */
         ST_CPPEXPORT bool get360PanoMakerNote(bool& theIsStereo) const;
