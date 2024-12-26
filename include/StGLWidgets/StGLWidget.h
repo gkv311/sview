@@ -37,8 +37,8 @@ public:
      */
     ST_LOCAL StGLAnimationLerp()
     : myValue(0.0),
-      myOnMs(2500.0),
-      myOffMs(5000.0),
+      myOnMs(1000.0),
+      myOffMs(2000.0),
       myOnTimer(false),
       myOffTimer(true) {}
 
