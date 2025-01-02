@@ -13,7 +13,7 @@
     #include <windows.h>
 #elif defined(__ANDROID__)
     //
-#elif defined(__linux__)
+#elif defined(ST_HAVE_GTK)
     #include <sys/types.h>
     #include <sys/stat.h>
     #include <dirent.h>
@@ -136,7 +136,7 @@ bool StFileNode::openFileDialog(StString& theFilePath,
 #elif defined(__ANDROID__)
     //bool ST_NOT_IMPLEMENTED_FOR_ANDROID = true;
     return false;
-#elif defined(__linux__)
+#elif defined(ST_HAVE_GTK)
     if(!StMessageBox::initGlobals()) {
         return false;
     }
@@ -167,6 +167,96 @@ bool StFileNode::openFileDialog(StString& theFilePath,
     gdk_flush(); // we need this call!
     gdk_threads_leave();
     return isFileSelected;
+#elif(__linux__)
+    // use Zenity
+    static const char ST_ZENITY[] = "/usr/bin/zenity";
+
+    StString aCmd = StString(ST_ZENITY) + " --file-selection --modal";
+    if (theToSave) {
+        aCmd += " --save --confirm-overwrite";
+    }
+
+    if (!theInfo.Title.isEmpty()) {
+        aCmd += StString(" --title=\"") + theInfo.Title + "\"";
+    }
+
+    if (!theInfo.Folder.isEmpty()) {
+        StString aFolder = theInfo.Folder;
+        if (!aFolder.isEndsWith('/')) {
+            aFolder += "/";
+        }
+        aCmd += StString(" --filename=\"") + aFolder + "\"";
+    }
+
+    StString aFilterString, anAllSupportedExt, anExtraSupportedExt;
+    for(size_t aMimeId = 0; aMimeId < theInfo.Filter.size(); ++aMimeId) {
+        const StMIME& aMime = theInfo.Filter[aMimeId];
+        if(aMimeId > 0) {
+            anAllSupportedExt += StString(' ');
+        }
+        anAllSupportedExt += StString("*.") + aMime.getExtension();
+    }
+
+    // add 'All supported'
+    if(!anAllSupportedExt.isEmpty() && theInfo.Filter.size() > 1) {
+        aCmd += " --file-filter=\"";
+        aCmd += !theInfo.FilterTitle.isEmpty() ? theInfo.FilterTitle : StString("All supported");
+        aCmd += StString(" | ") + anAllSupportedExt + "\"";
+    }
+
+    // add 'Extra supported'
+    for(size_t aMimeId = 0; aMimeId < theInfo.ExtraFilter.size(); ++aMimeId) {
+        const StMIME& aMime = theInfo.ExtraFilter[aMimeId];
+        if(aMimeId > 0) {
+            anExtraSupportedExt += StString(' ');
+        }
+        anExtraSupportedExt += StString("*.") + aMime.getExtension();
+    }
+    if(!anExtraSupportedExt.isEmpty() && theInfo.ExtraFilter.size() > 1) {
+        aCmd += " --file-filter=\"";
+        aCmd += !theInfo.ExtraFilterTitle.isEmpty() ? theInfo.ExtraFilterTitle : StString("Extra supported");
+        aCmd += StString(" | ") + anExtraSupportedExt + "\"";
+    }
+
+    // add per-type filters
+    for(size_t aMimeId = 0; aMimeId < theInfo.Filter.size(); ++aMimeId) {
+        const StMIME& aMime = theInfo.Filter[aMimeId];
+        if((aMimeId > 0) && (aMime.getDescription() == theInfo.Filter[aMimeId - 1].getDescription())) {
+            // append extension to previous MIME (prevent duplication)
+            aCmd = aCmd.subString(0, aCmd.getLength() - 1); // backstep
+            aCmd += StString(" *.") + aMime.getExtension() + "\"";
+        } else {
+            aCmd += StString(" --file-filter=\"") + aMime.getDescription() + StString(" | *.") + aMime.getExtension() + "\"";
+        }
+    }
+
+    // add 'Any File'
+    aCmd += " --file-filter=\"All Files (*) | *\"";
+
+    //ST_DEBUG_LOG(aCmd);
+    FILE* aPipe = popen(aCmd.toCString(), "r");
+    if (aPipe == NULL) {
+        ST_DEBUG_LOG(ST_ZENITY + " is not found!");
+        return false;
+    }
+
+    char aBuffer[4096] = {};
+    if (fgets(aBuffer, sizeof(aBuffer), aPipe) == NULL) {
+        ST_DEBUG_LOG(ST_ZENITY + " calling failure");
+    }
+    int aRes = pclose(aPipe);
+    if (aRes != 0) {
+        return false;
+    }
+
+    theFilePath = aBuffer;
+    if (theFilePath.isEndsWith('\n')) {
+        if (theFilePath.getLength() == 1) {
+            return false;
+        }
+        theFilePath = theFilePath.subString(0, theFilePath.getLength() - 1);
+    }
+    return true;
 #endif
 }
 

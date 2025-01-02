@@ -13,6 +13,8 @@
 
 #if defined(__ANDROID__)
     #include <android/log.h>
+#elif defined(__linux__)
+    static const char ST_ZENITY[] = "/usr/bin/zenity";
 #endif
 
 // we do not use st::cerr here to avoid
@@ -217,7 +219,7 @@ void StLogger::write(const StString&       theMessage,
     #include <windows.h>
 #elif defined(__ANDROID__)
     //
-#elif defined(__linux__)
+#elif defined(ST_HAVE_GTK)
     #include <gtk/gtk.h>
     #include <X11/Xlib.h>
 namespace {
@@ -258,8 +260,12 @@ void StMessageBox::setCallback(msgBoxFunc_t theFunc) {
 
 #elif defined(__linux__)
 bool StMessageBox::initGlobals() {
+#ifdef ST_HAVE_GTK
     static const bool isInitOK = stGtkInitForce();
     return isInitOK;
+#else
+    return true;
+#endif
 }
 #endif
 
@@ -273,7 +279,7 @@ void StMessageBox::Info(const StString& theMessage) {
     } else {
         StMessageBox::InfoConsole(theMessage);
     }
-#elif defined(__linux__)
+#elif defined(ST_HAVE_GTK)
     if(initGlobals()) {
         gdk_threads_enter();
         GtkWidget* dialog = gtk_message_dialog_new(NULL, GTK_DIALOG_DESTROY_WITH_PARENT, GTK_MESSAGE_INFO, GTK_BUTTONS_OK, "%s", theMessage.toCString());
@@ -282,6 +288,26 @@ void StMessageBox::Info(const StString& theMessage) {
         gdk_flush(); // we need this call!
         gdk_threads_leave();
     }
+#elif defined(__linux__)
+    // use Zenity
+    /*StArrayList<StString> anArgs(4);
+    anArgs.add("--info").add("--no-markup").add("--no-wrap").add(StString() + "--text=" + theMessage + "");
+    if(!StProcess::execProcess(ST_ZENITY, anArgs)) { ST_DEBUG_LOG(ST_ZENITY + " is not found!"); }*/
+
+    const StString aMsg = theMessage.replace(stCString("\""), stCString("\\\""));
+    const StString aCmd = StString(ST_ZENITY) + " --info --no-markup --no-wrap --text=\"" + aMsg + "\"";
+
+    FILE* aPipe = popen(aCmd.toCString(), "r");
+    if (aPipe == NULL) {
+        ST_DEBUG_LOG(ST_ZENITY + " is not found!");
+        return;
+    }
+
+    char aBuffer[4096] = {};
+    if (fgets(aBuffer, sizeof(aBuffer), aPipe) == NULL) {
+        //
+    }
+    pclose(aPipe);
 #endif
 }
 
@@ -295,7 +321,7 @@ void StMessageBox::Warn(const StString& theMessage) {
     } else {
         StMessageBox::WarnConsole(theMessage);
     }
-#elif defined(__linux__)
+#elif defined(ST_HAVE_GTK)
     if(initGlobals()) {
         gdk_threads_enter();
         GtkWidget* dialog = gtk_message_dialog_new(NULL, GTK_DIALOG_DESTROY_WITH_PARENT, GTK_MESSAGE_WARNING, GTK_BUTTONS_OK, "%s", theMessage.toCString());
@@ -304,6 +330,26 @@ void StMessageBox::Warn(const StString& theMessage) {
         gdk_flush(); // we need this call!
         gdk_threads_leave();
     }
+#elif defined(__linux__)
+    // use Zenity
+    /*StArrayList<StString> anArgs(4);
+    anArgs.add("--warning").add("--no-markup").add("--no-wrap").add(StString() + "--text=" + theMessage + "");
+    if(!StProcess::execProcess(ST_ZENITY, anArgs)) { ST_DEBUG_LOG(ST_ZENITY + " is not found!"); }*/
+
+    const StString aMsg = theMessage.replace(stCString("\""), stCString("\\\""));
+    const StString aCmd = StString(ST_ZENITY) + " --warning --no-markup --no-wrap --text=\"" + aMsg + "\"";
+
+    FILE* aPipe = popen(aCmd.toCString(), "r");
+    if (aPipe == NULL) {
+        ST_DEBUG_LOG(ST_ZENITY + " is not found!");
+        return;
+    }
+
+    char aBuffer[4096] = {};
+    if (fgets(aBuffer, sizeof(aBuffer), aPipe) == NULL) {
+        //
+    }
+    pclose(aPipe);
 #endif
 }
 
@@ -317,7 +363,7 @@ void StMessageBox::Error(const StString& theMessage) {
     } else {
         StMessageBox::ErrorConsole(theMessage);
     }
-#elif defined(__linux__)
+#elif defined(ST_HAVE_GTK)
     if(initGlobals()) {
         gdk_threads_enter();
         GtkWidget* dialog = gtk_message_dialog_new(NULL, GTK_DIALOG_DESTROY_WITH_PARENT, GTK_MESSAGE_ERROR, GTK_BUTTONS_OK, "%s", theMessage.toCString());
@@ -326,6 +372,26 @@ void StMessageBox::Error(const StString& theMessage) {
         gdk_flush(); // we need this call!
         gdk_threads_leave();
     }
+#elif defined(__linux__)
+    // use Zenity
+    /*StArrayList<StString> anArgs(4);
+    anArgs.add("--error").add("--no-markup").add("--no-wrap").add(StString() + "--text=" + theMessage + "");
+    if(!StProcess::execProcess(ST_ZENITY, anArgs)) { ST_DEBUG_LOG(ST_ZENITY + " is not found!"); }*/
+
+    const StString aMsg = theMessage.replace(stCString("\""), stCString("\\\""));
+    const StString aCmd = StString(ST_ZENITY) + " --error --no-markup --no-wrap --text=\"" + aMsg + "\"";
+
+    FILE* aPipe = popen(aCmd.toCString(), "r");
+    if (aPipe == NULL) {
+        ST_DEBUG_LOG(ST_ZENITY + " is not found!");
+        return;
+    }
+
+    char aBuffer[4096] = {};
+    if (fgets(aBuffer, sizeof(aBuffer), aPipe) == NULL) {
+        //
+    }
+    pclose(aPipe);
 #endif
 }
 
@@ -338,7 +404,7 @@ bool StMessageBox::Question(const StString& theMessage) {
     } else {
         return StMessageBox::QuestionConsole(theMessage);
     }
-#elif defined(__linux__)
+#elif defined(ST_HAVE_GTK)
     if(initGlobals()) {
         gdk_threads_enter();
         GtkWidget* aDialog = gtk_message_dialog_new(NULL, GTK_DIALOG_DESTROY_WITH_PARENT, GTK_MESSAGE_QUESTION, GTK_BUTTONS_YES_NO, "%s", theMessage.toCString());
@@ -349,6 +415,27 @@ bool StMessageBox::Question(const StString& theMessage) {
         return anAnswer == GTK_RESPONSE_YES;
     }
     return false;
+#elif defined(__linux__)
+    // use Zenity
+    /*StArrayList<StString> anArgs(4);
+    anArgs.add("--question").add("--no-markup").add("--no-wrap").add(StString() + "--text=" + theMessage + "");
+    if(!StProcess::execProcess(ST_ZENITY, anArgs)) { ST_DEBUG_LOG(ST_ZENITY + " is not found!"); }*/
+
+    const StString aMsg = theMessage.replace(stCString("\""), stCString("\\\""));
+    const StString aCmd = StString(ST_ZENITY) + " --question --no-markup --no-wrap --text=\"" + aMsg + "\"";
+
+    FILE* aPipe = popen(aCmd.toCString(), "r");
+    if (aPipe == NULL) {
+        ST_DEBUG_LOG(ST_ZENITY + " is not found!");
+        return false;
+    }
+
+    char aBuffer[4096] = {};
+    if (fgets(aBuffer, sizeof(aBuffer), aPipe) == NULL) {
+        //
+    }
+    int aRes = pclose(aPipe);
+    return aRes == 0;
 #endif
 }
 

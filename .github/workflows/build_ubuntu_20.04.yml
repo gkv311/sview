@@ -19,12 +19,12 @@ jobs:
         sudo apt-get update
         sudo apt-get install -y \
           g++ ninja-build \
-          libgtk2.0-dev \
           libopenal-dev \
           libopenvr-dev \
           libgl-dev \
+          libfreetype-dev libfontconfig-dev \
           libconfig++-dev libconfig-dev \
-          libxpm-dev \
+          libxrandr-dev libxpm-dev \
           libavcodec-dev libavdevice-dev libavformat-dev libavutil-dev libswscale-dev
     - name: Compile
       run: |

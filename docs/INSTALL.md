@@ -4,29 +4,31 @@ sView requires several 3rd-party components for building:
 * C/C++ compiler (g++, MSVC 2010+)
 * FFmpeg (https://www.ffmpeg.org)
 * OpenAL soft (https://openal-soft.org/)
-* GTK2+, Linux only (https://www.gtk.org)
+* FreeType
 * libconfig++, Linux and Android (https://www.hyperrealm.com/libconfig/libconfig.html)
-* libxpm, Linux only
+* libxrandr, libxpm, libfontconfig, Linux only
+* zenity, Linux only (https://help.gnome.org/users/zenity/stable/)
 
 On Debian/Ubuntu you might use the following command to install all dependencies at once:
 
 ~~~~~
 sudo apt-get install \
-  g++ \
-  libgtk2.0-dev \
+  g++ cmake \
+  zenity \
   libopenal-dev \
   libgl-dev \
   libavcodec-dev libavdevice-dev libavformat-dev libavutil-dev libswscale-dev \
   libconfig++-dev libconfig-dev \
-  libxpm-dev \
+  libfreetype-dev libfontconfig-dev \
+  libxrandr-dev libxpm-dev \
   libopenvr-dev
 ~~~~~
- 
+
 The similar command for RPM-based distributives:
 
 ~~~~~
 yum install gcc gcc-c++ \
-  gtk+-devel gtk2-devel \
+  gtk+-devel \
   mesa-libGLU-devel glew-devel \
   openal-devel \
   libconfig-devel
@@ -38,7 +40,7 @@ yum install ffmpeg-devel
 ALT Linux:
 ~~~~~
 apt-get install \
-  gcc8-c++ gcc-c++ libGLU-devel libgtk+2-devel libXrandr-devel libfreetype-devel \
+  gcc8-c++ gcc-c++ libGLU-devel libXrandr-devel libfreetype-devel \
   libopenal-devel libconfig-devel libconfig-c++-devel libXpm-devel \
   libavcodec-devel libavdevice-devel libavformat-devel libavutil-devel libswscale-devel
 ~~~~~
@@ -74,7 +76,7 @@ This is not a self-sustained solution, but rather a wrapper over existing UNIX `
 
 ## IV. CMake
 
-sView comes within CMake scripts, compatible with Visual Studio 2015 and higher.
+sView comes within CMake scripts, compatible with Windows (Visual Studio 2015 and higher) and Linux.
 
 ## V. Building options
 

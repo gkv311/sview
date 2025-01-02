@@ -2,13 +2,13 @@ Source: sview
 Section: contrib/video
 Priority: extra
 Maintainer: Kirill Gavrilov <kirill@sview.ru>
-Build-Depends: debhelper (>= 7.0.50~), g++ (>= 4.0), cmake, ninja-build, libopenal-dev, libgl-dev, libgtk2.0-dev, libxpm-dev, libavcodec-dev, libavdevice-dev, libavformat-dev, libavutil-dev, libswscale-dev, libconfig++-dev, libfreetype-dev, libxpm-dev, libopenvr-dev
+Build-Depends: debhelper (>= 7.0.50~), g++ (>= 4.0), cmake, ninja-build, libopenal-dev, libgl-dev, libxrandr-dev, libxpm-dev, libavcodec-dev, libavdevice-dev, libavformat-dev, libavutil-dev, libswscale-dev, libconfig++-dev, libfontconfig-dev, libfreetype-dev, libxpm-dev, libopenvr-dev
 Standards-Version: 3.9.1
 Homepage: http://www.sview.ru
 
 Package: sview
 Architecture: any
-Depends: ${shlibs:Depends}, ${misc:Depends}, xdg-utils
+Depends: ${shlibs:Depends}, ${misc:Depends}, xdg-utils, zenity
 Description: stereoscopic media player sView
  .
  sView is a stereoscopic Image Viewer and Movie Player.
