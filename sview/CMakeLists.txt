@@ -18,7 +18,7 @@ set (USED_RESFILES
   sview.rc
 )
 if (WIN32)
-  set (USED_MANFILES "../dpiAware.manifest")
+  set (USED_MANFILES "../adm/cmake/dpiAware.manifest")
 endif()
 
 if (NOT APPLE)

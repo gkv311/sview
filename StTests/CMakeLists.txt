@@ -26,7 +26,7 @@ set (USED_INCFILES
 set (USED_MANFILES "")
 set (USED_RESFILES "")
 if (WIN32)
-  set (USED_MANFILES "../dpiAware.manifest")
+  set (USED_MANFILES "../adm/cmake/dpiAware.manifest")
 endif()
 
 if (NOT APPLE)
