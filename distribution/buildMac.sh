@@ -34,7 +34,7 @@ mkdir -p $buildRoot/sView.app/Contents/MacOS/info/
 
 # copy common files
 cp -f media/sView_SetupMac.png $buildRoot/.background/
-cp -f info/changelog.txt     $buildRoot/sView.app/Contents/MacOS/info/
+cp -f ../CHANGELOG.md             $buildRoot/sView.app/Contents/MacOS/info/
 cp -f ../docs/license-gpl-3.0.txt $buildRoot/sView.app/Contents/MacOS/info/license.txt
 
 # copy sView compiled files
