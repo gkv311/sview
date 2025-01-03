@@ -22,4 +22,4 @@ jobs:
           ffmpeg
     - name: Compile
       run: |
-        ./continuousIntegration/build_sview_osx.sh
+        ./adm/ci/build_sview_osx.sh

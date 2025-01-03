@@ -21,4 +21,4 @@ jobs:
           g++
     - name: Compile
       run: |
-        ./continuousIntegration/build_sview_android.sh
+        ./adm/ci/build_sview_android.sh

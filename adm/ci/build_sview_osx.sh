@@ -8,9 +8,11 @@ aScriptPath=${BASH_SOURCE%/*}; if [ -d "${aScriptPath}" ]; then cd "$aScriptPath
 # define number of jobs from available CPU cores
 aNbJobs="$(getconf _NPROCESSORS_ONLN)"
 
+aSrcRoot=$aScriptPath/../..
+
 # avoid implicit Android target build when NDK is installed system-wide
 unset ANDROID_NDK
 
 # perform building itself
-make --directory=$aScriptPath/.. clean
-make --directory=$aScriptPath/.. -j $aNbJobs WERROR_LEVEL=1
+make --directory=$aSrcRoot clean
+make --directory=$aSrcRoot -j $aNbJobs WERROR_LEVEL=1

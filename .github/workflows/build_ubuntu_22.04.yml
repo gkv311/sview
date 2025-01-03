@@ -28,4 +28,4 @@ jobs:
           libavcodec-dev libavdevice-dev libavformat-dev libavutil-dev libswscale-dev
     - name: Compile
       run: |
-        ./continuousIntegration/build_sview_linux.sh
+        ./adm/ci/build_sview_linux.sh
