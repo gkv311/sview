@@ -74,16 +74,73 @@ if (APPLE)
   target_link_libraries (${PROJECT_NAME} PRIVATE "-framework Appkit" objc)
 endif()
 
+if (APPLE)
+  # pre-compile main menu at configuration time
+  find_program (IBTOOL ibtool REQUIRED)
+  execute_process (COMMAND ${IBTOOL} --compile ${CMAKE_CURRENT_BINARY_DIR}/MainMenu.nib ${CMAKE_CURRENT_SOURCE_DIR}/Resources/English.lproj/MainMenu.xib)
+endif()
+
 # copy common resources to build folder
 file (GLOB TEXTURE_FILES ../textures/*.png)
 foreach (aCfgIter ${CMAKE_CONFIGURATION_TYPES})
-  file (MAKE_DIRECTORY "${CMAKE_BINARY_DIR}/${aCfgIter}/textures")
-  #file (CREATE_LINK "${PROJECT_SOURCE_DIR}/textures" "${CMAKE_BINARY_DIR}/${aCfgIter}/textures" SYMBOLIC)
+  file (MAKE_DIRECTORY "${CMAKE_BINARY_DIR}/${aCfgIter}${SVIEW_BUNDLE_BIN}/textures")
+  #file (CREATE_LINK "${PROJECT_SOURCE_DIR}/textures" "${CMAKE_BINARY_DIR}/${aCfgIter}${SVIEW_BUNDLE_BIN}/textures" SYMBOLIC)
   foreach (aFileIter ${TEXTURE_FILES})
     #message (FATAL_ERROR "aFileIter= ${aFileIter}")
-    configure_file ("${aFileIter}" "${CMAKE_BINARY_DIR}/${aCfgIter}/textures/" COPYONLY)
+    configure_file ("${aFileIter}" "${CMAKE_BINARY_DIR}/${aCfgIter}${SVIEW_BUNDLE_BIN}/textures/" COPYONLY)
   endforeach()
 endforeach()
+
+# copy macOS bundle resources
+if (APPLE)
+  foreach (aCfgIter ${CMAKE_CONFIGURATION_TYPES})
+    file (MAKE_DIRECTORY "${CMAKE_BINARY_DIR}/${aCfgIter}${SVIEW_BUNDLE_EXT}/Contents/Frameworks")
+    file (MAKE_DIRECTORY "${CMAKE_BINARY_DIR}/${aCfgIter}${SVIEW_BUNDLE_EXT}/Contents/Resources/English.lproj")
+    configure_file ("Contents/PkgInfo"           "${CMAKE_BINARY_DIR}/${aCfgIter}${SVIEW_BUNDLE_EXT}/Contents/" COPYONLY)
+    configure_file ("Contents/Info.plist"        "${CMAKE_BINARY_DIR}/${aCfgIter}${SVIEW_BUNDLE_EXT}/Contents/" COPYONLY)
+    configure_file ("Resources/sView.icns"       "${CMAKE_BINARY_DIR}/${aCfgIter}${SVIEW_BUNDLE_EXT}/Contents/Resources/" COPYONLY)
+    configure_file ("Resources/sView_Media.icns" "${CMAKE_BINARY_DIR}/${aCfgIter}${SVIEW_BUNDLE_EXT}/Contents/Resources/" COPYONLY)
+
+    # copy pre-compiled main menu
+    configure_file (${CMAKE_CURRENT_BINARY_DIR}/MainMenu.nib "${CMAKE_BINARY_DIR}/${aCfgIter}${SVIEW_BUNDLE_EXT}/Contents/Resources/English.lproj/" COPYONLY)
+  endforeach()
+endif()
+
+# compile main menu for bundle
+if (APPLE)
+  #add_custom_command (TARGET ${PROJECT_NAME} POST_BUILD
+  #  COMMAND ${IBTOOL} --compile "$<TARGET_FILE_DIR:${PROJECT_NAME}>/../Resources/English.lproj/MainMenu.nib"
+  #          "${CMAKE_CURRENT_SOURCE_DIR}/Resources/English.lproj/MainMenu.xib")
+endif()
+
+# copy OpenAL resources
+if (APPLE)
+  file (GLOB OPENAL_HRFT_FILES ${OPENAL_LIBRARY_DIR}/../share/openal/hrtf/*.mhr)
+  file (GLOB OPENAL_PRST_FILES ${OPENAL_LIBRARY_DIR}/../share/openal/presets/*.ambdec)
+  foreach (aCfgIter ${CMAKE_CONFIGURATION_TYPES})
+    file (MAKE_DIRECTORY "${CMAKE_BINARY_DIR}/${aCfgIter}${SVIEW_BUNDLE_BIN}/openal/hrtf")
+    file (MAKE_DIRECTORY "${CMAKE_BINARY_DIR}/${aCfgIter}${SVIEW_BUNDLE_BIN}/openal/presets")
+    foreach (aFileIter ${OPENAL_HRFT_FILES})
+      configure_file ("${aFileIter}" "${CMAKE_BINARY_DIR}/${aCfgIter}${SVIEW_BUNDLE_BIN}/openal/hrtf/" COPYONLY)
+    endforeach()
+    foreach (aFileIter ${OPENAL_PRST_FILES})
+      configure_file ("${aFileIter}" "${CMAKE_BINARY_DIR}/${aCfgIter}${SVIEW_BUNDLE_BIN}/openal/presets/" COPYONLY)
+    endforeach()
+  endforeach()
+endif()
+
+# copy libraries to bundle
+if (APPLE)
+  add_custom_command (TARGET ${PROJECT_NAME} POST_BUILD
+    COMMAND cp -R -f "${FREETYPE_LIBRARY_DIR}/libfreetype*.dylib" "$<TARGET_FILE_DIR:${PROJECT_NAME}>/../Frameworks")
+  add_custom_command (TARGET ${PROJECT_NAME} POST_BUILD
+    COMMAND cp -R -f "${OPENAL_LIBRARY_DIR}/libopenal*.dylib" "$<TARGET_FILE_DIR:${PROJECT_NAME}>/../Frameworks")
+
+  foreach (aLibIter ${FFMPEG_TKLIST})
+    add_custom_command (TARGET ${PROJECT_NAME} POST_BUILD
+      COMMAND cp -R -f "${FFMPEG_LIBRARY_DIR}/lib${aLibIter}*.dylib" "$<TARGET_FILE_DIR:${PROJECT_NAME}>/../Frameworks")
+  endforeach()
+endif()
 
 # install target
 install (TARGETS "${PROJECT_NAME}"

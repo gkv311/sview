@@ -264,12 +264,16 @@ include_directories (${PROJECT_SOURCE_DIR}/include)
 set_property(GLOBAL PROPERTY USE_FOLDERS ON)
 
 # install options
+set (SVIEW_BUNDLE_EXT "")
+set (SVIEW_BUNDLE_BIN "")
 if (WIN32)
   set (USR_BIN "")
   set (USR_LIB "")
   set (USR_SHARE "")
   set (USR_SVIEW "")
 elseif (APPLE)
+  set (SVIEW_BUNDLE_EXT ".app")
+  set (SVIEW_BUNDLE_BIN ".app/Contents/MacOS")
   set (USR_BIN   "/Contents/MacOS")
   set (USR_LIB   "/Contents/MacOS")
   set (USR_SHARE "/Contents/MacOS")
@@ -307,7 +311,7 @@ set (aLangMap_korean   Korean)
 set (aLangMap_czech    Czech)
 foreach (aCfgIter ${CMAKE_CONFIGURATION_TYPES})
   foreach (aLangIter ${aLangList})
-    file (MAKE_DIRECTORY "${CMAKE_BINARY_DIR}/${aCfgIter}/lang/${aLangMap_${aLangIter}}")
+    file (MAKE_DIRECTORY "${CMAKE_BINARY_DIR}/${aCfgIter}${SVIEW_BUNDLE_BIN}/lang/${aLangMap_${aLangIter}}")
   endforeach()
 endforeach()
 
@@ -315,14 +319,14 @@ endforeach()
 function (st_set_target_output_dirs theTarget)
   # move sub-projects outputs into common folder
   set_target_properties(${theTarget} PROPERTIES
-    ARCHIVE_OUTPUT_DIRECTORY_RELEASE "${CMAKE_BINARY_DIR}/Release/"
-    LIBRARY_OUTPUT_DIRECTORY_RELEASE "${CMAKE_BINARY_DIR}/Release/"
-    RUNTIME_OUTPUT_DIRECTORY_RELEASE "${CMAKE_BINARY_DIR}/Release/"
-    PDB_OUTPUT_DIRECTORY_RELEASE     "${CMAKE_BINARY_DIR}/Release/"
-    ARCHIVE_OUTPUT_DIRECTORY_DEBUG   "${CMAKE_BINARY_DIR}/Debug/"
-    LIBRARY_OUTPUT_DIRECTORY_DEBUG   "${CMAKE_BINARY_DIR}/Debug/"
-    RUNTIME_OUTPUT_DIRECTORY_DEBUG   "${CMAKE_BINARY_DIR}/Debug/"
-    PDB_OUTPUT_DIRECTORY_DEBUG       "${CMAKE_BINARY_DIR}/Debug/"
+    ARCHIVE_OUTPUT_DIRECTORY_RELEASE "${CMAKE_BINARY_DIR}/Release${SVIEW_BUNDLE_BIN}/"
+    LIBRARY_OUTPUT_DIRECTORY_RELEASE "${CMAKE_BINARY_DIR}/Release${SVIEW_BUNDLE_BIN}/"
+    RUNTIME_OUTPUT_DIRECTORY_RELEASE "${CMAKE_BINARY_DIR}/Release${SVIEW_BUNDLE_BIN}/"
+    PDB_OUTPUT_DIRECTORY_RELEASE     "${CMAKE_BINARY_DIR}/Release${SVIEW_BUNDLE_BIN}/"
+    ARCHIVE_OUTPUT_DIRECTORY_DEBUG   "${CMAKE_BINARY_DIR}/Debug${SVIEW_BUNDLE_BIN}/"
+    LIBRARY_OUTPUT_DIRECTORY_DEBUG   "${CMAKE_BINARY_DIR}/Debug${SVIEW_BUNDLE_BIN}/"
+    RUNTIME_OUTPUT_DIRECTORY_DEBUG   "${CMAKE_BINARY_DIR}/Debug${SVIEW_BUNDLE_BIN}/"
+    PDB_OUTPUT_DIRECTORY_DEBUG       "${CMAKE_BINARY_DIR}/Debug${SVIEW_BUNDLE_BIN}/"
   )
 
   if (APPLE)
@@ -347,9 +351,9 @@ function (st_set_target_output_dirs theTarget)
   if (EXISTS "${PROJECT_SOURCE_DIR}/lang/")
     foreach (aCfgIter ${CMAKE_CONFIGURATION_TYPES})
       foreach (aLangIter ${aLangList})
-        configure_file ("${PROJECT_SOURCE_DIR}/lang/${aLangIter}/${theTarget}.lng" "${CMAKE_BINARY_DIR}/${aCfgIter}/lang/${aLangMap_${aLangIter}}/" COPYONLY)
+        configure_file ("${PROJECT_SOURCE_DIR}/lang/${aLangIter}/${theTarget}.lng" "${CMAKE_BINARY_DIR}/${aCfgIter}${SVIEW_BUNDLE_BIN}/lang/${aLangMap_${aLangIter}}/" COPYONLY)
         if (EXISTS "${PROJECT_SOURCE_DIR}/lang/${aLangIter}/language.lng")
-          configure_file ("${PROJECT_SOURCE_DIR}/lang/${aLangIter}/language.lng" "${CMAKE_BINARY_DIR}/${aCfgIter}/lang/${aLangMap_${aLangIter}}/" COPYONLY)
+          configure_file ("${PROJECT_SOURCE_DIR}/lang/${aLangIter}/language.lng" "${CMAKE_BINARY_DIR}/${aCfgIter}${SVIEW_BUNDLE_BIN}/lang/${aLangMap_${aLangIter}}/" COPYONLY)
         endif()
       endforeach()
     endforeach()

@@ -20,7 +20,7 @@ set (FFMPEG_BINARY_DIR   "${FFMPEG_DIR}/bin")
 set (FFMPEG_RESOURCE_DIR "${FFMPEG_DIR}/res")
 
 #  list of toolkits
-set (FFMPEG_TKLIST "avcodec" "avdevice" "avformat" "avutil" "swscale")
+set (FFMPEG_TKLIST "avcodec" "avdevice" "avformat" "avutil" "swscale" "swresample")
 
 # validate location of libraries and headers
 set (FFMPEG_INCLUDE_DIR_FOUND)
