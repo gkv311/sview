@@ -38,3 +38,7 @@ foreach (aDepIter ${aDeps})
   add_dependencies (${PROJECT_NAME} ${aDepIter})
   target_link_libraries (${PROJECT_NAME} PRIVATE ${aDepIter})
 endforeach()
+
+if (APPLE)
+  target_link_libraries (${PROJECT_NAME} PRIVATE "-framework Appkit" objc)
+endif()

@@ -50,6 +50,18 @@ if (WIN32)
   add_definitions(-DUNICODE -D_UNICODE)
 endif()
 
+# minimum OS version
+if (APPLE)
+  # minimal supported version of macOS:
+  # - CMake: CMAKE_OSX_DEPLOYMENT
+  # - qmake: QMAKE_MACOSX_DEPLOYMENT_TARGET = $(TARGET_OS_VERSION)
+  # - environment variable: export MACOSX_DEPLOYMENT_TARGET=$(TARGET_OS_VERSION)
+  #EXTRA_CFLAGS   += -mmacosx-version-min=$(TARGET_OS_VERSION)
+  #EXTRA_CXXFLAGS += -mmacosx-version-min=$(TARGET_OS_VERSION)
+  #EXTRA_LDFLAGS  += -mmacosx-version-min=$(TARGET_OS_VERSION)
+  set (CMAKE_OSX_DEPLOYMENT_TARGET "10.10" CACHE STRING "Minimum OS X deployment version" FORCE)
+endif()
+
 # increase compiler warnings level (-W3 for MSVC, -Wextra for GCC)
 set (BUILD_TREAT_WARNINGS_AS_ERRORS OFF CACHE BOOL "Treat compilation warnings as errors")
 if (MSVC)
@@ -80,6 +92,16 @@ endif()
 
 # add verbose debug logging for debug config
 set (CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -DST_DEBUG")
+# create log file at specified location (useful for debugging on systems like Android)
+#set (CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -DST_DEBUG_LOG_TO_FILE=\"/storage/emulated/0/Android/data/com.sview/files/sview.log\")
+# debug OpenGL context
+#set (CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -DST_DEBUG_GL")
+# log verbose messages from FFmpeg
+#set (CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -DST_DEBUG_FFMPEG_VERBOSE")
+# dump messages into system log
+#set (CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -DST_DEBUG_SYSLOG")
+# prefix each message with thread id
+#set (CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -DST_DEBUG_THREADID")
 
 # Define 3rd-party root dir
 if (NOT DEFINED 3RDPARTY_DIR)

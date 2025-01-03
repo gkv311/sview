@@ -26,6 +26,7 @@
 #include "StTestImageLib.h"
 #include "StTestGlStress.h"
 
+#ifndef __APPLE__
 int main(int , char** ) { // force console output
 #if defined(_WIN32)
     setlocale(LC_ALL, ".OCP"); // we set default locale for console output
@@ -120,3 +121,4 @@ int main(int , char** ) { // force console output
     st::cout << stostream_text("Press any key to exit...") << st::SYS_PAUSE_EMPTY;
     return 0;
 }
+#endif

@@ -34,7 +34,7 @@ namespace {
 
     static StTestResponder* TheAppResponder = NULL;
 
-};
+}
 
 @implementation StTestResponder
 

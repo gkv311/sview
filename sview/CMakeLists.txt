@@ -70,6 +70,10 @@ endforeach()
 # external dependencies
 target_link_libraries (${PROJECT_NAME} PRIVATE freetype)
 
+if (APPLE)
+  target_link_libraries (${PROJECT_NAME} PRIVATE "-framework Appkit" objc)
+endif()
+
 # copy common resources to build folder
 file (GLOB TEXTURE_FILES ../textures/*.png)
 foreach (aCfgIter ${CMAKE_CONFIGURATION_TYPES})

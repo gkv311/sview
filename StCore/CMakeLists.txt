@@ -14,6 +14,13 @@ set (USED_SRCFILES
   StWinHandles.cpp
   StXDisplay.cpp
 )
+set (USED_MMFILES
+  StCocoaView.mm
+  StCocoaWin.mm
+  StSearchMonitors.ObjC.mm
+  StWindowImplMac.mm
+  StWinHandles.ObjC.mm
+)
 
 set (USED_INCFILES
   ../include/StCore/StAndroidGlue.h
@@ -45,13 +52,19 @@ if (WIN32)
   set (USED_RESFILES "StCore.rc")
 endif()
 
-source_group ("Source Files"   FILES ${USED_SRCFILES})
+if (NOT APPLE)
+  foreach (aFileIter ${USED_MMFILES})
+    set_source_files_properties (${aFileIter} PROPERTIES HEADER_FILE_ONLY TRUE)
+  endforeach()
+endif()
+
+source_group ("Source Files"   FILES ${USED_SRCFILES} ${USED_MMFILES})
 source_group ("Header Files"   FILES ${USED_INCFILES})
 source_group ("Resource Files" FILES ${USED_RESFILES})
 
 # library to build
 add_library (${PROJECT_NAME} SHARED
-  ${USED_SRCFILES} ${USED_INCFILES} ${USED_RESFILES}
+  ${USED_SRCFILES} ${USED_MMFILES} ${USED_INCFILES} ${USED_RESFILES}
 )
 
 set_target_properties (${PROJECT_NAME} PROPERTIES FOLDER "Core")
@@ -69,6 +82,8 @@ include_directories (../3rdparty/include)
 if (WIN32)
   target_link_libraries (${PROJECT_NAME} PRIVATE user32 gdi32 Advapi32 Comdlg32 Shell32 Winmm)
   target_link_libraries (${PROJECT_NAME} PRIVATE nvapi)
+elseif (APPLE)
+  target_link_libraries (${PROJECT_NAME} PRIVATE "-framework IOKit" "-framework CoreFoundation" "-framework CoreGraphics" "-framework Appkit" objc)
 endif()
 target_link_libraries (${PROJECT_NAME} PRIVATE ${OPENGL_LIBRARIES})
 if (USE_XLIB)

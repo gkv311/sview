@@ -77,6 +77,9 @@ target_link_libraries (${PROJECT_NAME} PRIVATE avformat avcodec swscale avutil)
 target_link_libraries (${PROJECT_NAME} PRIVATE freetype)
 target_link_libraries (${PROJECT_NAME} PRIVATE openal)
 target_link_libraries (${PROJECT_NAME} PRIVATE ${OPENGL_LIBRARIES})
+if (APPLE)
+  target_link_libraries (${PROJECT_NAME} PRIVATE "-framework CoreVideo" objc)
+endif()
 
 # copy web resources to build folder
 file (GLOB TEXTURE_FILES ../textures/*.svg)
