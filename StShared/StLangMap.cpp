@@ -44,6 +44,7 @@ bool StLangMap::read(const char* theContent,
 
     const char* anEnd = theContent + theLen;
     size_t aNbLines = 0;
+    (void)aNbLines; // verbose variable
     for(StUtf8Iter aCharIter(theContent); aCharIter.getBufferHere() < anEnd && *aCharIter != 0; ++aCharIter) {
         if(*aCharIter == '-'
         || *aCharIter == '#'
