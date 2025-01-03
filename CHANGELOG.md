@@ -14,6 +14,14 @@ sView ??.?? (in development)
 - Linux - enable building with `libopenvr-dev` for **OpenVR** support (untested).
 - Linux - **zenity** is now used instead of `GTK2` for open-file dialog.
 
+sView 23.02 (2023-02-14)
+-----------------------------------------------------------------------------------------------------------------------
+
+- Upgraded to **FFmpeg 5.1** (Windows)
+- Added setting for **OpenAL soft** device layout output hint.
+- Added feature displaying 2 subtitiles streams in parallel.
+- Added option to load subtitles on opening file.
+
 sView 22.01 (2022-01-16)
 -----------------------------------------------------------------------------------------------------------------------
 
