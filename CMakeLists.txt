@@ -137,6 +137,9 @@ else()
   set (USE_DEVIL     OFF)
   set (USE_MSVCR     OFF)
 endif()
+if (APPLE)
+  set (USE_OPENVR    OFF)
+endif()
 
 find_package (OpenGL REQUIRED)
 

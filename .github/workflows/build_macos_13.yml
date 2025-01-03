@@ -19,7 +19,8 @@ jobs:
         brew update
         brew install \
           freetype \
-          ffmpeg
+          ffmpeg \
+          openal-soft
     - name: Compile
       run: |
         ./adm/ci/build_sview_osx.sh
