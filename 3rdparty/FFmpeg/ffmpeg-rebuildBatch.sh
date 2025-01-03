@@ -35,20 +35,20 @@ else
 fi
 
 # build for Win32 x86
-#./rebuild.sh "$rebuildTarget" GPL  DEBUG   "i686-w64-mingw32-"
-./rebuild.sh "$rebuildTarget" LGPL DEBUG   "i686-w64-mingw32-"
-./rebuild.sh "$rebuildTarget" GPL  RELEASE "i686-w64-mingw32-"
-./rebuild.sh "$rebuildTarget" LGPL RELEASE "i686-w64-mingw32-"
+#./ffmpeg-rebuild.sh "$rebuildTarget" GPL  DEBUG   "i686-w64-mingw32-"
+./ffmpeg-rebuild.sh "$rebuildTarget" LGPL DEBUG   "i686-w64-mingw32-"
+./ffmpeg-rebuild.sh "$rebuildTarget" GPL  RELEASE "i686-w64-mingw32-"
+./ffmpeg-rebuild.sh "$rebuildTarget" LGPL RELEASE "i686-w64-mingw32-"
 
 # build for Win32 AMD64
-#./rebuild.sh "$rebuildTarget" GPL  DEBUG   "x86_64-w64-mingw32-"
-#./rebuild.sh "$rebuildTarget" LGPL DEBUG   "x86_64-w64-mingw32-"
-#./rebuild.sh "$rebuildTarget" GPL  RELEASE "x86_64-w64-mingw32-"
-./rebuild.sh "$rebuildTarget" LGPL RELEASE "x86_64-w64-mingw32-"
+#./ffmpeg-rebuild.sh "$rebuildTarget" GPL  DEBUG   "x86_64-w64-mingw32-"
+#./ffmpeg-rebuild.sh "$rebuildTarget" LGPL DEBUG   "x86_64-w64-mingw32-"
+#./ffmpeg-rebuild.sh "$rebuildTarget" GPL  RELEASE "x86_64-w64-mingw32-"
+./ffmpeg-rebuild.sh "$rebuildTarget" LGPL RELEASE "x86_64-w64-mingw32-"
 
 # build for Linux
-./rebuild.sh "$rebuildTarget" GPL  RELEASE
-./rebuild.sh "$rebuildTarget" LGPL RELEASE
+./ffmpeg-rebuild.sh "$rebuildTarget" GPL  RELEASE
+./ffmpeg-rebuild.sh "$rebuildTarget" LGPL RELEASE
 
 # build for Android
-#./rebuild.sh "$rebuildTarget" GPL RELEASE "android"
+#./ffmpeg-rebuild.sh "$rebuildTarget" GPL RELEASE "android"

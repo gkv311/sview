@@ -159,8 +159,12 @@ configArguments="\
  --enable-runtime-cpudetect"
 
 if [ "$aSystem" == "Darwin" ]; then
+  export MACOSX_DEPLOYMENT_TARGET=10.10
+  anExtraCFlags="$anExtraCFlags -mmacosx-version-min=10.10"
   configArguments="$configArguments --disable-audiotoolbox --disable-hwaccel=xvmc"
-  configArguments="$configArguments --enable-vda --libdir=@executable_path/../Frameworks"
+  #configArguments="$configArguments --enable-vda"
+  #configArguments="$configArguments --disable-videotoolbox"
+  configArguments="$configArguments --libdir=@executable_path/../Frameworks"
 fi
 
 export PKG_CONFIG_LIBDIR=
