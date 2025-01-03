@@ -60,6 +60,9 @@ if (APPLE)
   #EXTRA_CXXFLAGS += -mmacosx-version-min=$(TARGET_OS_VERSION)
   #EXTRA_LDFLAGS  += -mmacosx-version-min=$(TARGET_OS_VERSION)
   set (CMAKE_OSX_DEPLOYMENT_TARGET "10.10" CACHE STRING "Minimum OS X deployment version" FORCE)
+
+  #set (CMAKE_INSTALL_NAME_DIR "@executable_path/../Frameworks")
+  set (INSTALL_NAME_DIR "@executable_path" CACHE STRING "Directory name for installed targets on Apple platforms")
 endif()
 
 # increase compiler warnings level (-W3 for MSVC, -Wextra for GCC)
@@ -321,6 +324,13 @@ function (st_set_target_output_dirs theTarget)
     RUNTIME_OUTPUT_DIRECTORY_DEBUG   "${CMAKE_BINARY_DIR}/Debug/"
     PDB_OUTPUT_DIRECTORY_DEBUG       "${CMAKE_BINARY_DIR}/Debug/"
   )
+
+  if (APPLE)
+    if (NOT "${INSTALL_NAME_DIR}" STREQUAL "")
+      #set_target_properties (${theTarget} PROPERTIES BUILD_WITH_INSTALL_RPATH 1 INSTALL_NAME_DIR "${INSTALL_NAME_DIR}")
+      set_target_properties (${theTarget} PROPERTIES BUILD_WITH_INSTALL_NAME_DIR 1 INSTALL_NAME_DIR "${INSTALL_NAME_DIR}")
+    endif()
+  endif()
 
   # configure DLL search path for VS debugger
   #get_target_property (avutil_location avutil LOCATION)
