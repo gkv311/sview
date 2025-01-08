@@ -649,6 +649,8 @@ void StSearchMonitors::init(const bool theForced) {
         THE_MONS_CACHED.initGlobal();
         THE_MON_IS_FIRST_CALL = false;
     }
+#else
+    (void)theForced;
 #endif
 
     for(size_t aMonIter = 0; aMonIter < THE_MONS_CACHED.size(); ++aMonIter) {

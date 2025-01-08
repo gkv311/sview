@@ -93,7 +93,7 @@ void StWindowImpl::updateChildRect() {
 }
 
 void StWindowImpl::setFullScreen(bool theFullscreen) {
-    //
+    (void)theFullscreen;
 }
 
 void StWindowImpl::updateWindowPos() {
@@ -570,10 +570,12 @@ void StWindowImpl::processEvents() {
 }
 
 bool StWindowImpl::toClipboard(const StString& theText) {
+    (void)theText;
     return false;
 }
 
 bool StWindowImpl::fromClipboard(StString& theText) {
+    (void)theText;
     return false;
 }
 

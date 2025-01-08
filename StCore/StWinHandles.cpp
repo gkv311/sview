@@ -25,6 +25,7 @@ static EGLConfig chooseEglSurfConfig(EGLDisplay theDisplay,
                                      int8_t     theGlColorSize,
                                      int8_t     theGlDepthSize,
                                      int8_t     theGlStencilSize) {
+    (void)theDebugCtx;
     EGLint aConfigAttribs[] = {
         EGL_RED_SIZE,   theGlColorSize >= 30 ? 10 : 8,
         EGL_GREEN_SIZE, theGlColorSize >= 30 ? 10 : 8,
@@ -580,6 +581,7 @@ int StWinHandles::glCreateContext(StWinHandles*    theSlave,
     ST_GL_ERROR_CHECK(!hRC.isNull() && hRC->isValid(),
                       STWIN_ERROR_X_GLRC_CREATE, "EGL, could not create rendering context for Master");
 
+    (void)theDebugCtx;
 #if defined(__ANDROID__)
     EGLint aFormat = 0;
     eglGetConfigAttrib(hRC->getDisplay(), hRC->getConfig(), EGL_NATIVE_VISUAL_ID, &aFormat);

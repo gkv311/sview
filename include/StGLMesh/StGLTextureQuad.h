@@ -70,6 +70,8 @@ class StGLTextureQuad : public StGLTexture {
         StGLTexture::unbind(theCtx);
         theCtx.core11->glDisable(GL_TEXTURE_2D);
         theCtx.core20fwd->glDisable(GL_BLEND);
+    #else
+        (void)theCtx;
     #endif
     }
 

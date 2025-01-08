@@ -135,6 +135,9 @@ bool StFileNode::openFileDialog(StString& theFilePath,
     return false;
 #elif defined(__ANDROID__)
     //bool ST_NOT_IMPLEMENTED_FOR_ANDROID = true;
+    (void)theFilePath;
+    (void)theInfo;
+    (void)theToSave;
     return false;
 #elif defined(ST_HAVE_GTK)
     if(!StMessageBox::initGlobals()) {

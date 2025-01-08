@@ -81,6 +81,7 @@ inline double stStringToDouble(const char*      theString,
 #ifdef _MSC_VER
     return _strtod_l(theString, theNextPtr, theCLocale);
 #elif defined(ST_NO_XLOCALE)
+    (void)theCLocale;
     return strtod(theString, theNextPtr);
 #else
     return  strtod_l(theString, theNextPtr, theCLocale);
@@ -99,6 +100,7 @@ inline long stStringToLong(const char*      theString,
 #ifdef _MSC_VER
     return _strtol_l(theString, theNextPtr, theBase, theCLocale);
 #elif defined(ST_NO_XLOCALE)
+    (void)theCLocale;
     return  strtol(theString, theNextPtr, theBase);
 #else
     return  strtol_l(theString, theNextPtr, theBase, theCLocale);

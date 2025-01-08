@@ -938,41 +938,49 @@ bool StAndroidGlue::isKeyOverridden(int theKeyCode) {
 
 jexp void JNICALL Java_com_sview_StActivity_cppSetOpenPath(JNIEnv* theEnv, jobject theObj, jlong theCppPtr,
                                                            jstring theOpenPath, jstring theMimeType, jboolean theIsLaunchedFromHistory) {
+    (void)theEnv; (void)theObj;
     ((StAndroidGlue* )theCppPtr)->setOpenPath(theOpenPath, theMimeType, theIsLaunchedFromHistory);
 }
 
 jexp void JNICALL Java_com_sview_StActivity_cppOnBackPressed(JNIEnv* theEnv, jobject theObj, jlong theCppPtr) {
+    (void)theEnv; (void)theObj;
     ((StAndroidGlue* )theCppPtr)->writeCommand(StAndroidGlue::CommandId_BackPressed);
 }
 
 jexp void JNICALL Java_com_sview_StActivity_cppOnBeforeSurfaceChanged(JNIEnv* theEnv, jobject theObj, jlong theCppPtr, jboolean theIsBefore) {
+    (void)theEnv; (void)theObj;
     ((StAndroidGlue* )theCppPtr)->setChangingSurface(theIsBefore == JNI_TRUE);
 }
 
 jexp void JNICALL Java_com_sview_StActivity_cppDefineOrientationSensor(JNIEnv* theEnv, jobject theObj, jlong theCppPtr,
                                                                        jboolean theHasOri, jboolean theIsPoorOri) {
+    (void)theEnv; (void)theObj;
     ((StAndroidGlue* )theCppPtr)->defineOrientationSensor(theHasOri == JNI_TRUE, theIsPoorOri == JNI_TRUE);
 }
 
 jexp void JNICALL Java_com_sview_StActivity_cppSetQuaternion(JNIEnv* theEnv, jobject theObj, jlong theCppPtr,
                                                              jfloat theX, jfloat theY, jfloat theZ, jfloat theW,
                                                              jfloat theScreenRotDeg) {
+    (void)theEnv; (void)theObj;
     ((StAndroidGlue* )theCppPtr)->setQuaternion(StQuaternion<float>(theX, theY, theZ, theW), theScreenRotDeg);
 }
 
 jexp void JNICALL Java_com_sview_StActivity_cppSetOrientation(JNIEnv* theEnv, jobject theObj, jlong theCppPtr,
                                                               jfloat theAzimuthDeg, jfloat thePitchDeg, jfloat theRollDeg,
                                                               jfloat theScreenRotDeg) {
+    (void)theEnv; (void)theObj;
     ((StAndroidGlue* )theCppPtr)->setOrientation(theAzimuthDeg, thePitchDeg, theRollDeg, theScreenRotDeg);
 }
 
 jexp void JNICALL Java_com_sview_StActivity_cppSetSwapEyes(JNIEnv* theEnv, jobject theObj, jlong theCppPtr,
                                                            jboolean theToSwap) {
+    (void)theEnv; (void)theObj;
     ((StAndroidGlue* )theCppPtr)->setSwapEyes(theToSwap == JNI_TRUE);
 }
 
 jexp jboolean JNICALL Java_com_sview_StActivity_cppIsKeyOverridden(JNIEnv* theEnv, jobject theObj, jlong theCppPtr,
                                                                    jint theKeyCode) {
+    (void)theEnv; (void)theObj;
     return ((StAndroidGlue* )theCppPtr)->isKeyOverridden(theKeyCode);
 }
 

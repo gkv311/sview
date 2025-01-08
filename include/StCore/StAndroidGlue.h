@@ -401,6 +401,7 @@ class StAndroidGlue {
     ST_LOCAL static void onNativeWindowDestroyed(ANativeActivity* theActivity,
                                                  ANativeWindow*   theWindow) {
         StAndroidGlue* anApp = (StAndroidGlue* )theActivity->instance;
+        (void)theWindow;
         anApp->setWindow(NULL);
     }
 
@@ -412,7 +413,8 @@ class StAndroidGlue {
 
     ST_LOCAL static void onInputQueueDestroyed(ANativeActivity* theActivity,
                                                AInputQueue*     theQueue) {
-        StAndroidGlue* anApp = (StAndroidGlue* )theActivity->instance;;
+        StAndroidGlue* anApp = (StAndroidGlue* )theActivity->instance;
+        (void)theQueue;
         anApp->setInput(NULL);
     }
 
