@@ -753,8 +753,8 @@ endif
 
 $(sViewApkManifest):
 	cp -f -r $(SRCDIR)/sview/AndroidManifest.xml.in $(SRCDIR)/build/AndroidManifest.xml
-	sed -i "s/__SVIEW_APK_VER_CODE__/$(SVIEW_APK_CODE)/gi"          $(SRCDIR)/build/AndroidManifest.xml
-	sed -i "s/__SVIEW_SDK_VER_STRING__/$(SVIEW_SDK_VER_STRING)/gi"  $(SRCDIR)/build/AndroidManifest.xml
+	sed -i "s/@SVIEW_APK_VERSIONCODE@/$(SVIEW_APK_CODE)/gi"       $(SRCDIR)/build/AndroidManifest.xml
+	sed -i "s/@SVIEW_APK_VERSIONNAME@/$(SVIEW_SDK_VER_STRING)/gi" $(SRCDIR)/build/AndroidManifest.xml
 
 $(sViewApk): $(sViewApkSigned)
 	$(ANDROID_BUILD_TOOLS)/zipalign -v -f 4 $< $(sViewApk)

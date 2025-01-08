@@ -52,6 +52,6 @@ target_link_libraries (${PROJECT_NAME} PRIVATE ${ST_OPENGL_LIBRARIES})
 # copy resources to build folder
 foreach (aCfgIter ${CMAKE_CONFIGURATION_TYPES})
   foreach (aShaderIter ${USED_SHADERFILES})
-    configure_file ("${CMAKE_CURRENT_SOURCE_DIR}/shaders/${aShaderIter}" "${CMAKE_BINARY_DIR}/${aCfgIter}${SVIEW_BUNDLE_BIN}/shaders/${PROJECT_NAME}/${aShaderIter}" COPYONLY)
+    configure_file ("${CMAKE_CURRENT_SOURCE_DIR}/shaders/${aShaderIter}" "${CMAKE_BINARY_DIR}/${aCfgIter}${SVIEW_BUNDLE_RES}/shaders/${PROJECT_NAME}/${aShaderIter}" COPYONLY)
   endforeach()
 endforeach()

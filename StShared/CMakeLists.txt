@@ -5,6 +5,7 @@ set (USED_SRCFILES
   StAVImage.cpp
   StAVIOContext.cpp
   StAVIOFileContext.cpp
+  StAVIOJniHttpContext.cpp
   StAVIOMemContext.cpp
   StAVPacket.cpp
   StAVVideoMuxer.cpp
@@ -52,6 +53,7 @@ set (USED_SRCFILES
   StImage.cpp
   StImageFile.cpp
   StImagePlane.cpp
+  StJNIEnv.cpp
   StJpegParser.cpp
   StLangMap.cpp
   StLibrary.cpp
@@ -93,6 +95,7 @@ set (USED_INCFILES
   ../include/StAV/StAVImage.h
   ../include/StAV/StAVIOContext.h
   ../include/StAV/StAVIOFileContext.h
+  ../include/StAV/StAVIOJniHttpContext.h
   ../include/StAV/StAVIOMemContext.h
   ../include/StAV/StAVPacket.h
   ../include/StAV/StAVVideoMuxer.h
@@ -108,6 +111,7 @@ set (USED_INCFILES
   ../include/StFT/StFTFont.h
   ../include/StFT/StFTFontRegistry.h
   ../include/StFT/StFTLibrary.h
+  ../include/StJNI/StJNIEnv.h
   ../include/StGL/StGLArbFbo.h
   ../include/StGL/StGLBrightnessMatrix.h
   ../include/StGL/StGLContext.h
@@ -271,7 +275,7 @@ if (WIN32)
 elseif (APPLE)
   target_link_libraries (${PROJECT_NAME} PRIVATE "-framework CoreGraphics" "-framework Appkit" objc)
 elseif (ANDROID)
-  target_link_libraries (${PROJECT_NAME} PRIVATE android)
+  target_link_libraries (${PROJECT_NAME} PRIVATE log android)
 endif()
 if (USE_GTK)
   target_link_libraries (${PROJECT_NAME} PRIVATE GTK2::gtk GTK2::gthread)
