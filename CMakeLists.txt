@@ -51,6 +51,8 @@ else()
 endif()
 if (WIN32)
   add_definitions(-DUNICODE -D_UNICODE)
+elseif (ANDROID)
+  add_definitions(-D__STDC_CONSTANT_MACROS)
 endif()
 
 # minimum OS version
