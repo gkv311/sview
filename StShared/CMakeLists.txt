@@ -265,7 +265,7 @@ sview_set_target_output_dirs(${PROJECT_NAME})
 # external dependencies
 target_link_libraries (${PROJECT_NAME} PRIVATE avformat avcodec swscale avutil)
 target_link_libraries (${PROJECT_NAME} PRIVATE freetype)
-target_link_libraries (${PROJECT_NAME} PRIVATE ${OPENGL_LIBRARIES})
+target_link_libraries (${PROJECT_NAME} PRIVATE ${ST_OPENGL_LIBRARIES})
 if (WIN32)
   target_link_libraries (${PROJECT_NAME} PRIVATE Version user32 gdi32 Advapi32 Comdlg32 Shell32 Ole32)
 elseif (APPLE)

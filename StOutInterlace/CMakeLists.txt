@@ -42,7 +42,7 @@ foreach (aDepIter ${aDeps})
 endforeach()
 
 # external dependencies
-target_link_libraries (${PROJECT_NAME} PRIVATE ${OPENGL_LIBRARIES})
+target_link_libraries (${PROJECT_NAME} PRIVATE ${ST_OPENGL_LIBRARIES})
 
 # copy resources to build folder
 foreach (aCfgIter ${CMAKE_CONFIGURATION_TYPES})

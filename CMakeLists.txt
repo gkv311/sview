@@ -141,8 +141,6 @@ if (APPLE)
   set (USE_OPENVR    OFF)
 endif()
 
-find_package (OpenGL REQUIRED)
-
 if (USE_MONGOOSE)
   add_definitions(-DST_HAVE_MONGOOSE)
 endif()
@@ -259,6 +257,22 @@ else()
   set_target_properties (libconfig++ PROPERTIES INTERFACE_INCLUDE_DIRECTORIES "${LIBCONFIGCPP_INCLUDE_DIR}")
   set_target_properties (libconfig++ PROPERTIES IMPORTED_LOCATION "${LIBCONFIGCPP_LIBRARY}")
 endif()
+
+set (OpenGL_GL_PREFERENCE "GLVND")
+find_package (OpenGL REQUIRED)
+# OPENGL_LIBRARIES includes GLU library which is not needed
+#message (STATUS "OPENGL_LIBRARIES=${OPENGL_LIBRARIES}")
+if (ANDROID)
+  #set (ST_OPENGL_LIBRARIES "${OPENGL_gles2_LIBRARY}" "${OPENGL_egl_LIBRARY}")
+  set (ST_OPENGL_LIBRARIES "OpenGL::GLES2" "OpenGL::EGL")
+elseif (USE_XLIB)
+  #set (ST_OPENGL_LIBRARIES "${OPENGL_opengl_LIBRARY}" "${OPENGL_glx_LIBRARY}")
+  set (ST_OPENGL_LIBRARIES "OpenGL::GL")
+else()
+  #set (ST_OPENGL_LIBRARIES ${OPENGL_gl_LIBRARY})
+  set (ST_OPENGL_LIBRARIES "OpenGL::GL")
+endif()
+message (STATUS "ST_OPENGL_LIBRARIES=${ST_OPENGL_LIBRARIES}")
 
 # solution search folders
 include_directories (${PROJECT_SOURCE_DIR}/include)
