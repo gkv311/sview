@@ -35,9 +35,16 @@ if (APPLE)
 endif()
 
 # library to build
-add_executable (${PROJECT_NAME} WIN32
-  ${USED_SRCFILES} ${USED_MMFILES} ${USED_INCFILES} ${USED_RESFILES} ${USED_MANFILES}
-)
+if (ANDROID)
+  set (PROJECT_NAME "sview")
+  add_library (${PROJECT_NAME} SHARED
+    ${USED_SRCFILES} ${USED_MMFILES} ${USED_INCFILES} ${USED_RESFILES}
+  )
+else()
+  add_executable (${PROJECT_NAME} WIN32
+    ${USED_SRCFILES} ${USED_MMFILES} ${USED_INCFILES} ${USED_RESFILES} ${USED_MANFILES}
+  )
+endif()
 
 if (WIN32)
   # add_executable() has WIN32 argument which cannot be switched between release/debug...
