@@ -408,6 +408,9 @@ function (sview_set_target_output_dirs theTarget)
   install (TARGETS "${theTarget}"
            RUNTIME DESTINATION "${SVIEW_INSTALL_BIN}"
            LIBRARY DESTINATION "${SVIEW_INSTALL_LIB}")
+  if (MSVC)
+    install (FILES "$<TARGET_PDB_FILE:${theTarget}>" DESTINATION "${SVIEW_INSTALL_BIN}" OPTIONAL)
+  endif()
 endfunction()
 
 # core libraries
