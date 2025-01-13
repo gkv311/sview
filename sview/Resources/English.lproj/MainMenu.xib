@@ -228,7 +228,7 @@
 							<object class="NSTextFieldCell" key="NSCell" id="955175397">
 								<int key="NSCellFlags">70385217</int>
 								<int key="NSCellFlags2">138544128</int>
-								<string key="NSContents">Copyright © Kirill Gavrilov Tartynskih, 2007-2023 www.sview.ru</string>
+								<string key="NSContents">Copyright © Kirill Gavrilov Tartynskih, 2007-2025 www.sview.ru</string>
 								<object class="NSFont" key="NSSupport" id="26">
 									<string key="NSName">LucidaGrande</string>
 									<double key="NSSize">11</double>
