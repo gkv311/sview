@@ -26,6 +26,8 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) { // prevent console output
 #else
 int main(int , char** ) {
 #endif
+    StProcess::setupProcessSignals();
+
     StOutPageFlip::initGlobalsAsync();
     if(!StVersionInfo::checkTimeBomb("sView")) {
         return 1;

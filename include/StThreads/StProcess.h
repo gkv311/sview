@@ -136,6 +136,10 @@ class StProcess {
      */
     ST_CPPEXPORT static void openURL(const StString& theUrl);
 
+    /**
+     * Setup process catcher for signals like SIGSEV.
+     */
+    ST_CPPEXPORT static void setupProcessSignals();
 };
 
 #endif // __StProcess_h_
