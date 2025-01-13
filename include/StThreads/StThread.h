@@ -109,6 +109,29 @@ class StThread {
     ST_CPPEXPORT static size_t getCurrentThreadId();
 
     /**
+     * Appends backtrace to a message buffer.
+     * Stack information might be incomplete in case of stripped binaries.
+     *
+     * On non-Windows platform, this function is a wrapper to backtrace() system call.
+     * On Windows (Win32) platform, the function loads DbgHelp.dll dynamically,
+     * and no stack will be provided if this or companion libraries (SymSrv.dll, SrcSrv.dll, etc.) will not be found;
+     * .pdb symbols should be provided on Windows platform to retrieve a meaningful stack;
+     * only x86_64 CPU architecture is currently implemented.
+     * @param[in, out] theBuffer message buffer to extend
+     * @param[in] theBufferSize  message buffer size
+     * @param[in] theNbTraces maximum number of stack traces
+     * @param[in] theContext  optional platform-dependent frame context;
+     *                        in case of DbgHelp (Windows) should be a pointer to CONTEXT
+     * @param[in] theNbTopSkip number of traces on top of the stack to skip
+     * @return TRUE on success
+     */
+    ST_CPPEXPORT static bool addStackTrace(char* theBuffer,
+                                           const int theBufferSize,
+                                           const int theNbTraces = 10,
+                                           void* theContext = NULL,
+                                           const int theNbTopSkip = 0);
+
+    /**
      * The function cannot be used by one thread to create a handle that can be used by other threads to refer to the first thread!
      * /
     static StThread getCurrentThread() {

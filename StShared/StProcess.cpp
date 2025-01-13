@@ -448,6 +448,15 @@ struct StSEHandler {
             if (theCode == EXCEPTION_IN_PAGE_ERROR) {
                 aStr << "Underlying NTSTATUS code that resulted in the exception " << theExcPtr->ExceptionRecord->ExceptionInformation[2] << "\n";
             }
+
+            const int aStackLength = 10;
+            const int aStackBufLen = stMax(aStackLength * 200, 2048);
+            char* aStackBuffer = aStackLength != 0 ? (char*)alloca(aStackBufLen) : NULL;
+            if (aStackBuffer != NULL) {
+                memset(aStackBuffer, 0, aStackBufLen);
+                StThread::addStackTrace(aStackBuffer, aStackBufLen, aStackLength, theExcPtr->ContextRecord);
+                aStr << aStackBuffer;
+            }
         }
 
         return aStr.str();
