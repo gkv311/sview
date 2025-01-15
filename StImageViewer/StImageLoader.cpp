@@ -336,6 +336,15 @@ bool StImageLoader::loadImage(const StHandle<StFileNode>& theSource,
             anImgInfo->Info.add(StArgument(tr(INFO_DIMENSIONS) + (" (") + anImgCounter + ")",
                                            StString() + anImgIter->SizeX + " x " + anImgIter->SizeY));
         }
+        if (anImg1.isNull()) {
+            // handle broken or unknown JPEG files / issues in JPEG parser
+            ST_DEBUG_LOG("Warning, StJpegParser returned inconclusive list of sub-images");
+            anImg1 = aParser.getImage(0);
+        }
+        if (anImg1.isNull()) {
+            processLoadFail(StString("StJpegParser failed on \"") + aFilePath + '\"');
+            return false;
+        }
 
         // copy metadata
         if(!aParser.getComment().isEmpty()) {
