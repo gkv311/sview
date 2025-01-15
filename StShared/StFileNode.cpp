@@ -97,9 +97,9 @@ bool StFileNode::isFileReadOnly(const StCString& thePath) {
         return false;
     }
 #endif
-    return (aStatBuffer.st_mode & S_IWUSR) != 0
-        || (aStatBuffer.st_mode & S_IWGRP) != 0
-        || (aStatBuffer.st_mode & S_IWOTH) != 0;
+    return (aStatBuffer.st_mode & S_IWUSR) == 0
+        && (aStatBuffer.st_mode & S_IWGRP) == 0
+        && (aStatBuffer.st_mode & S_IWOTH) == 0;
 #endif
 }
 
