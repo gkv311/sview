@@ -126,8 +126,9 @@ AVPixelFormat StVideoQueue::getFrameFormat(AVCodecContext*      theCodecCtx,
     return *theFormats;
 }
 
-int StVideoQueue::getFrameBuffer(AVFrame* theFrame,
-                                 int      theFlags) {
+int StVideoQueue::getFrameBuffer(AVCodecContext* theCodecCtx,
+                                 AVFrame* theFrame,
+                                 int theFlags) {
     int aResult = 0;
 #if(LIBAVCODEC_VERSION_INT >= AV_VERSION_INT(55, 0, 0))
     bool isDone = false;
@@ -151,7 +152,7 @@ int StVideoQueue::getFrameBuffer(AVFrame* theFrame,
         }*/
     #endif
         if(!isDone) {
-            aResult = avcodec_default_get_buffer2(myCodecCtx, theFrame, theFlags);
+            aResult = avcodec_default_get_buffer2(theCodecCtx, theFrame, theFlags);
         }
 
     #ifdef ST_AV_OLDSYNC
@@ -165,7 +166,7 @@ int StVideoQueue::getFrameBuffer(AVFrame* theFrame,
     #endif
     #endif
 #else
-    aResult = avcodec_default_get_buffer(myCodecCtx, theFrame);
+    aResult = avcodec_default_get_buffer(theCodecCtx, theFrame);
     #ifdef ST_AV_OLDSYNC
     #ifdef ST_USE64PTR
         theFrame->opaque = (void* )myVideoPktPts;

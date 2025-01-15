@@ -319,7 +319,7 @@ class StVideoQueue : public StAVPacketQueue {
     ST_LOCAL static int stGetFrameBuffer1(AVCodecContext* theCodecCtx,
                                           AVFrame*        theFrame) {
         StVideoQueue* aVideoQueue = (StVideoQueue* )theCodecCtx->opaque;
-        return aVideoQueue->getFrameBuffer(theFrame, 0);
+        return aVideoQueue->getFrameBuffer(theCodecCtx, theFrame, 0);
     }
 
     /**
@@ -329,7 +329,7 @@ class StVideoQueue : public StAVPacketQueue {
                                           AVFrame*        theFrame,
                                           int             theFlags) {
         StVideoQueue* aVideoQueue = (StVideoQueue* )theCodecCtx->opaque;
-        return aVideoQueue->getFrameBuffer(theFrame, theFlags);
+        return aVideoQueue->getFrameBuffer(theCodecCtx, theFrame, theFlags);
     }
 
         private:
@@ -349,8 +349,9 @@ class StVideoQueue : public StAVPacketQueue {
     /**
      * Frame buffer allocation callback.
      */
-    ST_LOCAL int getFrameBuffer(AVFrame* theFrame,
-                                int      theFlags);
+    ST_LOCAL int getFrameBuffer(AVCodecContext* theCodecCtx,
+                                AVFrame* theFrame,
+                                int theFlags);
 
     /**
      * Initialize hardware accelerated decoder.
