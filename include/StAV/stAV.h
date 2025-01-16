@@ -267,6 +267,8 @@ namespace stAV {
         ST_SHARED_CPPEXPORT AVPixelFormat BGRA32;
         ST_SHARED_CPPEXPORT AVPixelFormat RGBA64;
         ST_SHARED_CPPEXPORT AVPixelFormat BGRA64;
+        ST_SHARED_CPPEXPORT AVPixelFormat GBRPF32;
+        ST_SHARED_CPPEXPORT AVPixelFormat GBRAPF32;
         // XYZ formats
         ST_SHARED_CPPEXPORT AVPixelFormat XYZ12;
         // HWAccel formats

@@ -576,6 +576,38 @@ bool StAVImage::loadExtra(const StString& theFilePath,
         changePlane(0).initWrapper(StImagePlane::ImgRGBA64, myFrame.getPlane(0),
                                    myCodecCtx->width, myCodecCtx->height,
                                    myFrame.getLineSize(0));
+    } else if(myCodecCtx->pix_fmt == stAV::PIX_FMT::GBRPF32 || myCodecCtx->pix_fmt == stAV::PIX_FMT::GBRAPF32) {
+        // planar RGB(A) is somewhat unusual and suboptimal - always convert to packed RGB(A)
+        const bool hasAlpha = myCodecCtx->pix_fmt == stAV::PIX_FMT::GBRAPF32;
+
+        StImagePlane aPlanes[4];
+        aPlanes[0].initWrapper(StImagePlane::ImgGrayF, myFrame.getPlane(2),
+                               myCodecCtx->width, myCodecCtx->height, myFrame.getLineSize(2));
+        aPlanes[1].initWrapper(StImagePlane::ImgGrayF, myFrame.getPlane(0),
+                               myCodecCtx->width, myCodecCtx->height, myFrame.getLineSize(0));
+        aPlanes[2].initWrapper(StImagePlane::ImgGrayF, myFrame.getPlane(1),
+                               myCodecCtx->width, myCodecCtx->height, myFrame.getLineSize(1));
+        if (hasAlpha) {
+            aPlanes[3].initWrapper(StImagePlane::ImgGrayF, myFrame.getPlane(3),
+                                   myCodecCtx->width, myCodecCtx->height, myFrame.getLineSize(3));
+        }
+
+        setColorModel(hasAlpha ? StImage::ImgColor_RGBA : StImage::ImgColor_RGB);
+        changePlane(0).initZero(hasAlpha ? StImagePlane::ImgRGBAF : StImagePlane::ImgRGBF, myCodecCtx->width, myCodecCtx->height);
+        const int aNbComps = hasAlpha ? 4 : 3;
+        for (int aPlnIter = 0; aPlnIter < 4; ++aPlnIter) {
+            const StImagePlane& aSrcPln = aPlanes[aPlnIter];
+            if (aSrcPln.isNull()) {
+                continue;
+            }
+            for (int aRow = 0; aRow < myCodecCtx->height; ++aRow) {
+                float* aDstRow = (float*)changePlane(0).changeData(aRow) + aPlnIter;
+                const float* aSrcRow = (const float*)aSrcPln.getData(aRow);
+                for(int aCol = 0; aCol < myCodecCtx->width; ++aCol) {
+                    aDstRow[aCol * aNbComps] = aSrcRow[aCol];
+                }
+            }
+        }
     } else if(stAV::isFormatYUVPlanar(myCodecCtx, aDimsYUV) && !theIsOnlyRGB) {
     #if(LIBAVCODEC_VERSION_INT >= AV_VERSION_INT(52, 29, 0))
         if(myCodecCtx->color_range == AVCOL_RANGE_JPEG) {

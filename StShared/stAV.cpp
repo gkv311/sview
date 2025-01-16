@@ -135,6 +135,8 @@ const AVPixelFormat stAV::PIX_FMT::RGB48      = ST_AV_GETPIXFMT("rgb48");
 const AVPixelFormat stAV::PIX_FMT::BGR48      = ST_AV_GETPIXFMT("bgr48");
 const AVPixelFormat stAV::PIX_FMT::RGBA64     = ST_AV_GETPIXFMT("rgba64");
 const AVPixelFormat stAV::PIX_FMT::BGRA64     = ST_AV_GETPIXFMT("bgra64");
+const AVPixelFormat stAV::PIX_FMT::GBRPF32    = ST_AV_GETPIXFMT("gbrpf32");
+const AVPixelFormat stAV::PIX_FMT::GBRAPF32   = ST_AV_GETPIXFMT("gbrapf32");
 const AVPixelFormat stAV::PIX_FMT::XYZ12      = ST_AV_GETPIXFMT("xyz12");
 const AVPixelFormat stAV::PIX_FMT::DXVA2_VLD  = ST_AV_GETPIXFMT("dxva2_vld");
 const AVPixelFormat stAV::PIX_FMT::VIDEOTOOLBOX_VLD  = ST_AV_GETPIXFMT("videotoolbox_vld");
@@ -148,7 +150,7 @@ namespace {
 
     static const AVRational ST_AV_TIME_BASE_Q = {1, AV_TIME_BASE};
     static const double     ST_AV_TIME_BASE_D = av_q2d(ST_AV_TIME_BASE_Q);
-};
+}
 
 const AVPixelFormat stAV::PIX_FMT::RGBA32 = (AvPixFmtRGBA != stAV::PIX_FMT::NONE) ? AvPixFmtRGBA : AvPixFmtBGR32;
 const AVPixelFormat stAV::PIX_FMT::BGRA32 = (AvPixFmtBGRA != stAV::PIX_FMT::NONE) ? AvPixFmtBGRA : AvPixFmtRGB32;
