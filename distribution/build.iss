@@ -5,8 +5,7 @@
 ;#define SVIEW_VER "12.7.0.0"
 ;#define SVIEW_VER_FULL "v.12.00alpha00"
 ;#define SVIEW_VER_NAME "sView (12.00alpha00)"
-;#define SVIEW_DISTR_PATH_x86   "sView_x86"
-;#define SVIEW_DISTR_PATH_AMD64 "sView_AMD64"
+;#define SVIEW_DISTR_PATH "sView_AMD64"
 
 #define SVIEW_NAME "sView"
 #define SVIEW_PUBLISHER "Kirill Gavrilov"
@@ -28,6 +27,8 @@ VersionInfoVersion={#SVIEW_VER}
 VersionInfoTextVersion={#SVIEW_VER_NAME}
 VersionInfoDescription=sView - Media Player
 ArchitecturesInstallIn64BitMode=x64
+;ArchitecturesAllowed=x64compatible and not arm64
+ArchitecturesAllowed=x64compatible
 ; Output package options
 OutputDir=repository\win
 OutputBaseFilename=sViewSetup_{#SVIEW_VER_FULL}
@@ -52,14 +53,14 @@ AlwaysShowComponentsList=false
 FlatComponentsList=false
 
 [Languages]
-;InfoBeforeFile: {#SVIEW_DISTR_PATH_x86}\info\ReadMeEn.rtf
-Name: english; MessagesFile: compiler:Default.isl;           LicenseFile: {#SVIEW_DISTR_PATH_x86}\info\license.rtf
-Name: russian; MessagesFile: compiler:Languages\Russian.isl; LicenseFile: {#SVIEW_DISTR_PATH_x86}\info\license.rtf
-Name: spanish; MessagesFile: compiler:Languages\Spanish.isl; LicenseFile: {#SVIEW_DISTR_PATH_x86}\info\license.rtf
-Name: french;  MessagesFile: compiler:Languages\French.isl;  LicenseFile: {#SVIEW_DISTR_PATH_x86}\info\license.rtf
-Name: german;  MessagesFile: compiler:Languages\German.isl;  LicenseFile: {#SVIEW_DISTR_PATH_x86}\info\license.rtf
-Name: korean;  MessagesFile: compiler:Languages\Korean.isl;  LicenseFile: {#SVIEW_DISTR_PATH_x86}\info\license.rtf
-Name: chinese; MessagesFile: compiler:Languages\ChineseSimplified.isl; LicenseFile: {#SVIEW_DISTR_PATH_x86}\info\license.rtf
+;InfoBeforeFile: {#SVIEW_DISTR_PATH}\info\ReadMeEn.rtf
+Name: english; MessagesFile: compiler:Default.isl;           LicenseFile: {#SVIEW_DISTR_PATH}\info\license.rtf
+Name: russian; MessagesFile: compiler:Languages\Russian.isl; LicenseFile: {#SVIEW_DISTR_PATH}\info\license.rtf
+Name: spanish; MessagesFile: compiler:Languages\Spanish.isl; LicenseFile: {#SVIEW_DISTR_PATH}\info\license.rtf
+Name: french;  MessagesFile: compiler:Languages\French.isl;  LicenseFile: {#SVIEW_DISTR_PATH}\info\license.rtf
+Name: german;  MessagesFile: compiler:Languages\German.isl;  LicenseFile: {#SVIEW_DISTR_PATH}\info\license.rtf
+Name: korean;  MessagesFile: compiler:Languages\Korean.isl;  LicenseFile: {#SVIEW_DISTR_PATH}\info\license.rtf
+Name: chinese; MessagesFile: compiler:Languages\ChineseSimplified.isl; LicenseFile: {#SVIEW_DISTR_PATH}\info\license.rtf
 
 [CustomMessages]
 ; Installation types
@@ -172,115 +173,86 @@ Name: flagAssocPlaylists;    Description: "{cm:AssocPlaylists}";        GroupDes
 
 [Files]
 ; Core files
-Source: {#SVIEW_DISTR_PATH_x86}\*.exe;            DestDir: {app};        Flags: 32bit ignoreversion; Components: StCore
-Source: {#SVIEW_DISTR_PATH_x86}\info\*;           DestDir: {app}\info;   Flags: 32bit ignoreversion; Components: StCore
-Source: {#SVIEW_DISTR_PATH_AMD64}\*.exe;          DestDir: {app}\amd64;  Flags: 64bit ignoreversion; Components: StCore; Check: IsWin64
-Source: {#SVIEW_DISTR_PATH_x86}\StShared.dll;     DestDir: {app};        Flags: 32bit ignoreversion; Components: StCore
-Source: {#SVIEW_DISTR_PATH_x86}\StGLWidgets.dll;  DestDir: {app};        Flags: 32bit ignoreversion; Components: StCore
-Source: {#SVIEW_DISTR_PATH_x86}\StCore.dll;       DestDir: {app};        Flags: 32bit ignoreversion; Components: StCore
-Source: {#SVIEW_DISTR_PATH_AMD64}\StShared.dll;   DestDir: {app}\amd64;  Flags: 64bit ignoreversion; Components: StCore; Check: IsWin64
-Source: {#SVIEW_DISTR_PATH_AMD64}\StGLWidgets.dll;DestDir: {app}\amd64;  Flags: 64bit ignoreversion; Components: StCore; Check: IsWin64
-Source: {#SVIEW_DISTR_PATH_AMD64}\StCore.dll;     DestDir: {app}\amd64;  Flags: 64bit ignoreversion; Components: StCore; Check: IsWin64
-Source: {#SVIEW_DISTR_PATH_x86}\StDiagnostics.dll;   DestDir: {app};       Flags: 32bit ignoreversion; Components: StCore
-Source: {#SVIEW_DISTR_PATH_AMD64}\StDiagnostics.dll; DestDir: {app}\amd64; Flags: 64bit ignoreversion; Components: StCore; Check: IsWin64
-Source: {#SVIEW_DISTR_PATH_x86}\lang\Korean\language.lng;      DestDir: {app}\lang\Korean;               Flags: 32bit ignoreversion; Components: StCore
-Source: {#SVIEW_DISTR_PATH_x86}\lang\ChineseS\language.lng;    DestDir: {app}\lang\ChineseS;             Flags: 32bit ignoreversion; Components: StCore
-Source: {#SVIEW_DISTR_PATH_x86}\lang\Czech\language.lng;       DestDir: {app}\lang\Czech;                Flags: 32bit ignoreversion; Components: StCore
+Source: {#SVIEW_DISTR_PATH}\info\*;                     DestDir: {app}\info;          Flags: ignoreversion; Components: StCore
+Source: {#SVIEW_DISTR_PATH}\lang\Czech\language.lng;    DestDir: {app}\lang\Czech;    Flags: ignoreversion; Components: StCore
+Source: {#SVIEW_DISTR_PATH}\lang\Korean\language.lng;   DestDir: {app}\lang\Korean;   Flags: ignoreversion; Components: StCore
+Source: {#SVIEW_DISTR_PATH}\lang\ChineseS\language.lng; DestDir: {app}\lang\ChineseS; Flags: ignoreversion; Components: StCore
+
+Source: {#SVIEW_DISTR_PATH}\*.exe;                    DestDir: {app};  Flags: 64bit ignoreversion; Components: StCore
+Source: {#SVIEW_DISTR_PATH}\StShared.dll;             DestDir: {app};  Flags: 64bit ignoreversion; Components: StCore
+Source: {#SVIEW_DISTR_PATH}\StGLWidgets.dll;          DestDir: {app};  Flags: 64bit ignoreversion; Components: StCore
+Source: {#SVIEW_DISTR_PATH}\StCore.dll;               DestDir: {app};  Flags: 64bit ignoreversion; Components: StCore
+Source: {#SVIEW_DISTR_PATH}\StDiagnostics.dll;        DestDir: {app};  Flags: 64bit ignoreversion; Components: StCore
 ; MSVC C-Runtime libraries (mask compatible for vc100)
-Source: {#SVIEW_DISTR_PATH_x86}\msvc*.dll;        DestDir: {app};        Flags: 32bit ignoreversion; Components: StCore
-Source: {#SVIEW_DISTR_PATH_AMD64}\msvc*.dll;      DestDir: {app}\amd64;  Flags: 64bit ignoreversion; Components: StCore; Check: IsWin64
+Source: {#SVIEW_DISTR_PATH}\msvc*.dll;                DestDir: {app};  Flags: 64bit ignoreversion; Components: StCore
 ; FreeType2 library commonly used
-Source: {#SVIEW_DISTR_PATH_x86}\freetype.dll;     DestDir: {app};        Flags: 32bit ignoreversion; Components: StCore
-Source: {#SVIEW_DISTR_PATH_AMD64}\freetype.dll;   DestDir: {app}\amd64;  Flags: 64bit ignoreversion; Components: StCore; Check: IsWin64
+Source: {#SVIEW_DISTR_PATH}\freetype.dll;             DestDir: {app};  Flags: 64bit ignoreversion; Components: StCore
 ; FFmpeg libraries are commonly used
-Source: {#SVIEW_DISTR_PATH_x86}\av*.dll;          DestDir: {app};        Flags: 32bit ignoreversion; Components: StCore
-Source: {#SVIEW_DISTR_PATH_x86}\sw*.dll;          DestDir: {app};        Flags: 32bit ignoreversion; Components: StCore
-Source: {#SVIEW_DISTR_PATH_AMD64}\av*.dll;        DestDir: {app}\amd64;  Flags: 64bit ignoreversion; Components: StCore; Check: IsWin64
-Source: {#SVIEW_DISTR_PATH_AMD64}\sw*.dll;        DestDir: {app}\amd64;  Flags: 64bit ignoreversion; Components: StCore; Check: IsWin64
+Source: {#SVIEW_DISTR_PATH}\av*.dll;                  DestDir: {app};  Flags: 64bit ignoreversion; Components: StCore
+Source: {#SVIEW_DISTR_PATH}\sw*.dll;                  DestDir: {app};  Flags: 64bit ignoreversion; Components: StCore
 
 ; StRenderers -> StOutAnaglyph
-Source: {#SVIEW_DISTR_PATH_x86}\StOutAnaglyph.dll;                DestDir: {app};                              Flags: 32bit ignoreversion;                Components: StRenderers\StOutAnaglyph
-Source: {#SVIEW_DISTR_PATH_x86}\lang\*StOutAnaglyph.lng;          DestDir: {app}\lang;                         Flags: 32bit ignoreversion recursesubdirs; Components: StRenderers\StOutAnaglyph
-Source: {#SVIEW_DISTR_PATH_x86}\shaders\StOutAnaglyph\*;          DestDir: {app}\shaders\StOutAnaglyph;        Flags: 32bit ignoreversion recursesubdirs; Components: StRenderers\StOutAnaglyph
-Source: {#SVIEW_DISTR_PATH_AMD64}\StOutAnaglyph.dll;              DestDir: {app}\amd64;                        Flags: 64bit ignoreversion;                Components: StRenderers\StOutAnaglyph; Check: IsWin64
+Source: {#SVIEW_DISTR_PATH}\lang\*StOutAnaglyph.lng;  DestDir: {app}\lang;                   Flags: ignoreversion recursesubdirs;       Components: StRenderers\StOutAnaglyph
+Source: {#SVIEW_DISTR_PATH}\shaders\StOutAnaglyph\*;  DestDir: {app}\shaders\StOutAnaglyph;  Flags: ignoreversion recursesubdirs;       Components: StRenderers\StOutAnaglyph
+Source: {#SVIEW_DISTR_PATH}\StOutAnaglyph.dll;        DestDir: {app};                        Flags: 64bit ignoreversion;                Components: StRenderers\StOutAnaglyph
 ; StRenderers -> StOutDual
-Source: {#SVIEW_DISTR_PATH_x86}\StOutDual.dll;                    DestDir: {app};                              Flags: 32bit ignoreversion;                Components: StRenderers\StOutDual
-Source: {#SVIEW_DISTR_PATH_x86}\lang\*StOutDual.lng;              DestDir: {app}\lang;                         Flags: 32bit ignoreversion recursesubdirs; Components: StRenderers\StOutDual
-Source: {#SVIEW_DISTR_PATH_AMD64}\StOutDual.dll;                  DestDir: {app}\amd64;                        Flags: 64bit ignoreversion;                Components: StRenderers\StOutDual; Check: IsWin64
+Source: {#SVIEW_DISTR_PATH}\lang\*StOutDual.lng;      DestDir: {app}\lang;                   Flags: ignoreversion recursesubdirs;       Components: StRenderers\StOutDual
+Source: {#SVIEW_DISTR_PATH}\StOutDual.dll;            DestDir: {app};                        Flags: 64bit ignoreversion;                Components: StRenderers\StOutDual
 ; StRenderers -> StOutInterlace
-Source: {#SVIEW_DISTR_PATH_x86}\StOutInterlace.dll;               DestDir: {app};                              Flags: 32bit ignoreversion;                Components: StRenderers\StOutInterlace
-Source: {#SVIEW_DISTR_PATH_x86}\lang\*StOutInterlace.lng;         DestDir: {app}\lang;                         Flags: 32bit ignoreversion recursesubdirs; Components: StRenderers\StOutInterlace
-Source: {#SVIEW_DISTR_PATH_x86}\shaders\StOutInterlace\*;         DestDir: {app}\shaders\StOutInterlace;       Flags: 32bit ignoreversion recursesubdirs; Components: StRenderers\StOutInterlace
-Source: {#SVIEW_DISTR_PATH_AMD64}\StOutInterlace.dll;             DestDir: {app}\amd64;                        Flags: 64bit ignoreversion;                Components: StRenderers\StOutInterlace; Check: IsWin64
+Source: {#SVIEW_DISTR_PATH}\lang\*StOutInterlace.lng; DestDir: {app}\lang;                   Flags: ignoreversion recursesubdirs;       Components: StRenderers\StOutInterlace
+Source: {#SVIEW_DISTR_PATH}\shaders\StOutInterlace\*; DestDir: {app}\shaders\StOutInterlace; Flags: 64bit ignoreversion recursesubdirs; Components: StRenderers\StOutInterlace
+Source: {#SVIEW_DISTR_PATH}\StOutInterlace.dll;       DestDir: {app};                        Flags: 64bit ignoreversion;                Components: StRenderers\StOutInterlace
 ; StRenderers -> StOutIZ3D
-Source: {#SVIEW_DISTR_PATH_x86}\StOutIZ3D.dll;                    DestDir: {app};                              Flags: 32bit ignoreversion;                Components: StRenderers\StOutIZ3D
-Source: {#SVIEW_DISTR_PATH_x86}\lang\*StOutIZ3D.lng;              DestDir: {app}\lang;                         Flags: 32bit ignoreversion recursesubdirs; Components: StRenderers\StOutIZ3D
-Source: {#SVIEW_DISTR_PATH_x86}\shaders\StOutIZ3D\*;              DestDir: {app}\shaders\StOutIZ3D;            Flags: 32bit ignoreversion recursesubdirs; Components: StRenderers\StOutIZ3D
-Source: {#SVIEW_DISTR_PATH_AMD64}\StOutIZ3D.dll;                  DestDir: {app}\amd64;                        Flags: 64bit ignoreversion;                Components: StRenderers\StOutIZ3D; Check: IsWin64
+Source: {#SVIEW_DISTR_PATH}\lang\*StOutIZ3D.lng;      DestDir: {app}\lang;                   Flags: ignoreversion recursesubdirs;       Components: StRenderers\StOutIZ3D
+Source: {#SVIEW_DISTR_PATH}\shaders\StOutIZ3D\*;      DestDir: {app}\shaders\StOutIZ3D;      Flags: 64bit ignoreversion recursesubdirs; Components: StRenderers\StOutIZ3D
+Source: {#SVIEW_DISTR_PATH}\StOutIZ3D.dll;            DestDir: {app};                        Flags: 64bit ignoreversion;                Components: StRenderers\StOutIZ3D
 ; StRenderers -> StOutPageFlip
-Source: {#SVIEW_DISTR_PATH_x86}\StOutPageFlip.dll;                DestDir: {app};                              Flags: 32bit ignoreversion;                Components: StRenderers\StOutPageFlip
-Source: {#SVIEW_DISTR_PATH_x86}\lang\*StOutPageFlip.lng;          DestDir: {app}\lang;                         Flags: 32bit ignoreversion recursesubdirs; Components: StRenderers\StOutPageFlip
-Source: {#SVIEW_DISTR_PATH_AMD64}\StOutPageFlip.dll;              DestDir: {app}\amd64;                        Flags: 64bit ignoreversion;                Components: StRenderers\StOutPageFlip; Check: IsWin64
+Source: {#SVIEW_DISTR_PATH}\lang\*StOutPageFlip.lng;  DestDir: {app}\lang;                   Flags: ignoreversion recursesubdirs;       Components: StRenderers\StOutPageFlip
+Source: {#SVIEW_DISTR_PATH}\StOutPageFlip.dll;        DestDir: {app};                        Flags: 64bit ignoreversion;                Components: StRenderers\StOutPageFlip
 ; StRenderers -> StOutDistorted
-Source: {#SVIEW_DISTR_PATH_x86}\StOutDistorted.dll;               DestDir: {app};                              Flags: 32bit ignoreversion;                Components: StRenderers\StOutDistorted
-Source: {#SVIEW_DISTR_PATH_x86}\openvr_api.dll;                   DestDir: {app};                              Flags: 32bit ignoreversion;                Components: StRenderers\StOutDistorted
-Source: {#SVIEW_DISTR_PATH_x86}\lang\*StOutDistorted.lng;         DestDir: {app}\lang;                         Flags: 32bit ignoreversion recursesubdirs; Components: StRenderers\StOutDistorted
-Source: {#SVIEW_DISTR_PATH_AMD64}\StOutDistorted.dll;             DestDir: {app}\amd64;                        Flags: 64bit ignoreversion;                Components: StRenderers\StOutDistorted; Check: IsWin64
-Source: {#SVIEW_DISTR_PATH_AMD64}\openvr_api.dll;                 DestDir: {app}\amd64;                        Flags: 64bit ignoreversion;                Components: StRenderers\StOutDistorted; Check: IsWin64
+Source: {#SVIEW_DISTR_PATH}\lang\*StOutDistorted.lng; DestDir: {app}\lang;                   Flags: ignoreversion recursesubdirs;       Components: StRenderers\StOutDistorted
+Source: {#SVIEW_DISTR_PATH}\StOutDistorted.dll;       DestDir: {app};                        Flags: 64bit ignoreversion;                Components: StRenderers\StOutDistorted
+Source: {#SVIEW_DISTR_PATH}\openvr_api.dll;           DestDir: {app};                        Flags: 64bit ignoreversion;                Components: StRenderers\StOutDistorted
 
 ; StDrawers
-Source: {#SVIEW_DISTR_PATH_x86}\textures\*;                    DestDir: {app}\textures;        Flags: 32bit ignoreversion; Components: StDrawers\StImageViewer or StDrawers\StMoviePlayer
-Source: {#SVIEW_DISTR_PATH_x86}\icons\sView_Media.ico;         DestDir: {app}\icons;           Flags: 32bit ignoreversion; Components: StDrawers\StImageViewer or StDrawers\StMoviePlayer
+Source: {#SVIEW_DISTR_PATH}\textures\*;               DestDir: {app}\textures;               Flags: ignoreversion;         Components: StDrawers\StImageViewer or StDrawers\StMoviePlayer
+Source: {#SVIEW_DISTR_PATH}\icons\sView_Media.ico;    DestDir: {app}\icons;                  Flags: ignoreversion;         Components: StDrawers\StImageViewer or StDrawers\StMoviePlayer
 ; StDrawers -> Image Viewer
-Source: {#SVIEW_DISTR_PATH_x86}\StImageViewer.dll;             DestDir: {app};                 Flags: 32bit ignoreversion; Components: StCore
-Source: {#SVIEW_DISTR_PATH_x86}\lang\*StImageViewer.lng;       DestDir: {app}\lang;            Flags: 32bit ignoreversion recursesubdirs; Components: StCore
-Source: {#SVIEW_DISTR_PATH_x86}\icons\sView_JPS.ico;           DestDir: {app}\icons;           Flags: 32bit ignoreversion; Components: StDrawers\StImageViewer
-Source: {#SVIEW_DISTR_PATH_x86}\icons\sView_PNS.ico;           DestDir: {app}\icons;           Flags: 32bit ignoreversion; Components: StDrawers\StImageViewer
-Source: {#SVIEW_DISTR_PATH_x86}\demo.jps;                      DestDir: {app};                 Flags: 32bit ignoreversion; Components: StDrawers\StImageViewer
-Source: {#SVIEW_DISTR_PATH_x86}\demo_robot.jps;                DestDir: {app};                 Flags: 32bit ignoreversion; Components: StDrawers\StImageViewer
-Source: {#SVIEW_DISTR_PATH_AMD64}\StImageViewer.dll;           DestDir: {app}\amd64;           Flags: 64bit ignoreversion; Components: StCore; Check: IsWin64
+Source: {#SVIEW_DISTR_PATH}\lang\*StImageViewer.lng;  DestDir: {app}\lang;                   Flags: ignoreversion recursesubdirs; Components: StCore
+Source: {#SVIEW_DISTR_PATH}\icons\sView_JPS.ico;      DestDir: {app}\icons;                  Flags: ignoreversion;         Components: StDrawers\StImageViewer
+Source: {#SVIEW_DISTR_PATH}\icons\sView_PNS.ico;      DestDir: {app}\icons;                  Flags: ignoreversion;         Components: StDrawers\StImageViewer
+Source: {#SVIEW_DISTR_PATH}\demo.jps;                 DestDir: {app};                        Flags: ignoreversion;         Components: StDrawers\StImageViewer
+Source: {#SVIEW_DISTR_PATH}\demo_robot.jps;           DestDir: {app};                        Flags: ignoreversion;         Components: StDrawers\StImageViewer
+Source: {#SVIEW_DISTR_PATH}\StImageViewer.dll;        DestDir: {app};                        Flags: 64bit ignoreversion;   Components: StCore
 ; FreeImage library (should be optional)
-Source: {#SVIEW_DISTR_PATH_x86}\FreeImage.dll;                 DestDir: {app};                 Flags: 32bit ignoreversion; Components: StDrawers\StImageViewer
-Source: {#SVIEW_DISTR_PATH_AMD64}\FreeImage.dll;               DestDir: {app}\amd64;           Flags: 64bit ignoreversion; Components: StDrawers\StImageViewer; Check: IsWin64
+Source: {#SVIEW_DISTR_PATH}\FreeImage.dll;            DestDir: {app};                        Flags: 64bit ignoreversion;   Components: StDrawers\StImageViewer
 ; DevIL libraries (should be optional)
-Source: {#SVIEW_DISTR_PATH_x86}\DevIL.dll;                     DestDir: {app};                 Flags: 32bit ignoreversion; Components: StDrawers\StImageViewer
-Source: {#SVIEW_DISTR_PATH_x86}\ILU.dll;                       DestDir: {app};                 Flags: 32bit ignoreversion; Components: StDrawers\StImageViewer
-Source: {#SVIEW_DISTR_PATH_AMD64}\DevIL.dll;                   DestDir: {app}\amd64;           Flags: 64bit ignoreversion; Components: StDrawers\StImageViewer; Check: IsWin64
-Source: {#SVIEW_DISTR_PATH_AMD64}\ILU.dll;                     DestDir: {app}\amd64;           Flags: 64bit ignoreversion; Components: StDrawers\StImageViewer; Check: IsWin64
+Source: {#SVIEW_DISTR_PATH}\DevIL.dll;                DestDir: {app};                        Flags: 64bit ignoreversion;   Components: StDrawers\StImageViewer
+Source: {#SVIEW_DISTR_PATH}\ILU.dll;                  DestDir: {app};                        Flags: 64bit ignoreversion;   Components: StDrawers\StImageViewer
 
 ; StDrawers -> Movie Player
-Source: {#SVIEW_DISTR_PATH_x86}\StMoviePlayer.dll;             DestDir: {app};                 Flags: 32bit ignoreversion; Components: StCore
-Source: {#SVIEW_DISTR_PATH_x86}\lang\*StMoviePlayer.lng;       DestDir: {app}\lang;            Flags: 32bit ignoreversion recursesubdirs; Components: StCore
-Source: {#SVIEW_DISTR_PATH_x86}\web\*.htm;                     DestDir: {app}\web;             Flags: 32bit ignoreversion recursesubdirs; Components: StDrawers\StMoviePlayer
-Source: {#SVIEW_DISTR_PATH_x86}\OpenAL32.dll;                  DestDir: {app};                 Flags: 32bit ignoreversion; Components: StCore
-Source: alsoft51.ini;                                          DestDir: {userappdata};   DestName: "alsoft.ini";     Tasks: flagOpenAL51; Components: StCore
-Source: openal\hrtf\*;                                         DestDir: {commonappdata}\openal\hrtf; Components: StCore
-Source: {#SVIEW_DISTR_PATH_AMD64}\StMoviePlayer.dll;           DestDir: {app}\amd64;           Flags: 64bit ignoreversion; Components: StCore; Check: IsWin64
-Source: {#SVIEW_DISTR_PATH_AMD64}\OpenAL32.dll;                DestDir: {app}\amd64;           Flags: 64bit ignoreversion; Components: StCore; Check: IsWin64
+Source: {#SVIEW_DISTR_PATH}\lang\*StMoviePlayer.lng;  DestDir: {app}\lang;                   Flags: ignoreversion recursesubdirs; Components: StCore
+Source: {#SVIEW_DISTR_PATH}\web\*.htm;                DestDir: {app}\web;                    Flags: ignoreversion recursesubdirs; Components: StDrawers\StMoviePlayer
+Source: alsoft51.ini;                                 DestDir: {userappdata}; DestName: "alsoft.ini"; Tasks: flagOpenAL51; Components: StCore
+Source: openal\hrtf\*;                                DestDir: {commonappdata}\openal\hrtf;                                Components: StCore
+Source: {#SVIEW_DISTR_PATH}\StMoviePlayer.dll;        DestDir: {app};                        Flags: 64bit ignoreversion;   Components: StCore
+Source: {#SVIEW_DISTR_PATH}\OpenAL32.dll;             DestDir: {app};                        Flags: 64bit ignoreversion;   Components: StCore
 
 ; StDrawers -> Tiny CAD viewer
-;Source: {#SVIEW_DISTR_PATH_x86}\StCADViewer.exe;               DestDir: {app};                 Flags: 32bit ignoreversion; Components: StCore
-;Source: {#SVIEW_DISTR_PATH_AMD64}\StCADViewer.exe;             DestDir: {app}\amd64;           Flags: 64bit ignoreversion; Components: StCore; Check: IsWin64
+;Source: {#SVIEW_DISTR_PATH}\StCADViewer.exe; DestDir: {app}; Flags: 64bit ignoreversion; Components: StCore
 
 [Icons]
-Name: {group}\sView - Image Viewer; Filename: {app}\{#SVIEW_EXE_NAME};       Components: StDrawers\StImageViewer; IconFilename: {app}\{#SVIEW_EXE_NAME};       Comment: "{cm:StImageViewer}";  IconIndex: 0; Parameters: "--in=image --demo=""{app}\demo.jps"""; Check: not IsWin64
-Name: {group}\sView - Image Viewer; Filename: {app}\amd64\{#SVIEW_EXE_NAME}; Components: StDrawers\StImageViewer; IconFilename: {app}\amd64\{#SVIEW_EXE_NAME}; Comment: "{cm:StImageViewer}";  IconIndex: 0; Parameters: "--in=image --demo=""{app}\demo.jps"""; Check: IsWin64
-Name: {group}\sView - Movie Player; Filename: {app}\{#SVIEW_EXE_NAME};       Components: StDrawers\StMoviePlayer; IconFilename: {app}\{#SVIEW_EXE_NAME};       Comment: "{cm:StMoviePlayer}";  IconIndex: 0; Parameters: "--in=video"; Check: not IsWin64
-Name: {group}\sView - Movie Player; Filename: {app}\amd64\{#SVIEW_EXE_NAME}; Components: StDrawers\StMoviePlayer; IconFilename: {app}\amd64\{#SVIEW_EXE_NAME}; Comment: "{cm:StMoviePlayer}";  IconIndex: 0; Parameters: "--in=video"; Check: IsWin64
-Name: {group}\Extras\sView - Autodetection;               Filename: {app}\{#SVIEW_EXE_NAME};       Components: StDrawers\StImageViewer; IconFilename: {app}\{#SVIEW_EXE_NAME};       Comment: Failsafe sView launch; IconIndex: 0; Parameters: --out=Auto --in=image
-Name: {group}\Extras\sView - Movie Player (Last File);    Filename: {app}\{#SVIEW_EXE_NAME};       Components: StDrawers\StMoviePlayer; IconFilename: {app}\{#SVIEW_EXE_NAME};       Comment: "{cm:StMoviePlayer}";  IconIndex: 0; Parameters: "--last";             Check: not IsWin64
-Name: {group}\Extras\sView - Movie Player (Last File);    Filename: {app}\amd64\{#SVIEW_EXE_NAME}; Components: StDrawers\StMoviePlayer; IconFilename: {app}\amd64\{#SVIEW_EXE_NAME}; Comment: "{cm:StMoviePlayer}";  IconIndex: 0; Parameters: "--last";             Check: IsWin64
-Name: {group}\Extras\sView - Diagnostics;                 Filename: {app}\{#SVIEW_EXE_NAME};       Components: StCore;                  IconFilename: {app}\{#SVIEW_EXE_NAME};       Comment: sView Diagnostics;     IconIndex: 0; Parameters: "--in=StDiagnostics"; Check: not IsWin64
-Name: {group}\Extras\sView - Diagnostics;                 Filename: {app}\amd64\{#SVIEW_EXE_NAME}; Components: StCore;                  IconFilename: {app}\amd64\{#SVIEW_EXE_NAME}; Comment: sView Diagnostics;     IconIndex: 0; Parameters: "--in=StDiagnostics"; Check: IsWin64
-Name: {group}\Extras\Monitors Dump;                       Filename: {app}\StMonitorsDump.exe;       Components: StCore;                 Comment: Information about connected displays; Check: not IsWin64
-Name: {group}\Extras\Monitors Dump;                       Filename: {app}\amd64\StMonitorsDump.exe; Components: StCore;                 Comment: Information about connected displays; Check: IsWin64
+Name: {group}\sView - Image Viewer;                    Filename: {app}\{#SVIEW_EXE_NAME};  Components: StDrawers\StImageViewer; IconFilename: {app}\{#SVIEW_EXE_NAME}; Comment: "{cm:StImageViewer}";  IconIndex: 0; Parameters: "--in=image --demo=""{app}\demo.jps"""
+Name: {group}\sView - Movie Player;                    Filename: {app}\{#SVIEW_EXE_NAME};  Components: StDrawers\StMoviePlayer; IconFilename: {app}\{#SVIEW_EXE_NAME}; Comment: "{cm:StMoviePlayer}";  IconIndex: 0; Parameters: "--in=video"
+Name: {group}\Extras\sView - Autodetection;            Filename: {app}\{#SVIEW_EXE_NAME};  Components: StDrawers\StImageViewer; IconFilename: {app}\{#SVIEW_EXE_NAME}; Comment: Failsafe sView launch; IconIndex: 0; Parameters: --out=Auto --in=image
+Name: {group}\Extras\sView - Movie Player (Last File); Filename: {app}\{#SVIEW_EXE_NAME};  Components: StDrawers\StMoviePlayer; IconFilename: {app}\{#SVIEW_EXE_NAME}; Comment: "{cm:StMoviePlayer}";  IconIndex: 0; Parameters: "--last"
+Name: {group}\Extras\sView - Diagnostics;              Filename: {app}\{#SVIEW_EXE_NAME};  Components: StCore;                  IconFilename: {app}\{#SVIEW_EXE_NAME}; Comment: sView Diagnostics;     IconIndex: 0; Parameters: "--in=StDiagnostics"
+Name: {group}\Extras\Monitors Dump;                    Filename: {app}\StMonitorsDump.exe; Components: StCore;                                                         Comment: Information about connected displays
 
-;Name: {group}\user manual;          Filename: {app}\info\manual.pdf;         Comment: User manual; Tasks: ; Languages:
+;Name: {group}\user manual;          Filename: {app}\info\manual.pdf; Comment: User manual; Tasks: ; Languages:
 Name: {group}\{cm:UninstallProgram,{#SVIEW_NAME}}; Filename: {uninstallexe}
-Name: {commondesktop}\{#SVIEW_NAME};Filename: {app}\{#SVIEW_EXE_NAME};       Tasks: desktopicon; Components: StDrawers\StImageViewer; IconFilename: {app}\{#SVIEW_EXE_NAME};       Comment: "{cm:StImageViewer}"; IconIndex: 0; Parameters: "--in=image --demo=""{app}\demo.jps"""; Check: not IsWin64
-Name: {commondesktop}\{#SVIEW_NAME};Filename: {app}\amd64\{#SVIEW_EXE_NAME}; Tasks: desktopicon; Components: StDrawers\StImageViewer; IconFilename: {app}\amd64\{#SVIEW_EXE_NAME}; Comment: "{cm:StImageViewer}"; IconIndex: 0; Parameters: "--in=image --demo=""{app}\demo.jps"""; Check: IsWin64
-Name: {userappdata}\Microsoft\Internet Explorer\Quick Launch\{#SVIEW_NAME}; Filename: {app}\{#SVIEW_EXE_NAME};       Tasks: quicklaunchicon; Components: StDrawers\StImageViewer; IconFilename: {app}\{#SVIEW_EXE_NAME};       Comment: "{cm:StImageViewer}"; IconIndex: 0; Parameters: "--in=image --demo=""{app}\demo.jps"""; Check: not IsWin64
-Name: {userappdata}\Microsoft\Internet Explorer\Quick Launch\{#SVIEW_NAME}; Filename: {app}\amd64\{#SVIEW_EXE_NAME}; Tasks: quicklaunchicon; Components: StDrawers\StImageViewer; IconFilename: {app}\amd64\{#SVIEW_EXE_NAME}; Comment: "{cm:StImageViewer}"; IconIndex: 0; Parameters: "--in=image --demo=""{app}\demo.jps"""; Check: IsWin64
+Name: {commondesktop}\{#SVIEW_NAME}; Filename: {app}\{#SVIEW_EXE_NAME}; Tasks: desktopicon; Components: StDrawers\StImageViewer; IconFilename: {app}\{#SVIEW_EXE_NAME}; Comment: "{cm:StImageViewer}"; IconIndex: 0; Parameters: "--in=image --demo=""{app}\demo.jps"""
+Name: {userappdata}\Microsoft\Internet Explorer\Quick Launch\{#SVIEW_NAME}; Filename: {app}\{#SVIEW_EXE_NAME}; Tasks: quicklaunchicon; Components: StDrawers\StImageViewer; IconFilename: {app}\{#SVIEW_EXE_NAME}; Comment: "{cm:StImageViewer}"; IconIndex: 0; Parameters: "--in=image --demo=""{app}\demo.jps"""
 
 [Run]
 ;Filename: {app}\{#SVIEW_EXE_NAME}; WorkingDir: {app}; Components: StDrawers\StImageViewer; Description: {cm:LaunchProgram,{#SVIEW_NAME}}; Parameters: --in=image - demo.jps; Flags: nowait postinstall skipifsilent
@@ -298,26 +270,22 @@ Root: HKCU; Subkey: Software\sView\sView; ValueType: string; ValueName: language
 ; Associations JPS
 Root: HKCR; SubKey: .jps;                                      ValueType: string; ValueData: JPEG Stereo Image;             Tasks: flagAssocStereoImages; Flags: uninsdeletekey
 Root: HKCR; SubKey: JPEG Stereo Image;                         ValueType: string; ValueData: JPEG Stereo Image;             Tasks: flagAssocStereoImages; Flags: uninsdeletekey
-Root: HKCR; SubKey: JPEG Stereo Image\Shell\Open\Command;      ValueType: string; ValueData: """{app}\{#SVIEW_EXE_NAME}"" --in=image - ""%1"""; Tasks: flagAssocStereoImages; Flags: uninsdeletevalue; Check: not IsWin64
-Root: HKCR; SubKey: JPEG Stereo Image\Shell\Open\Command;      ValueType: string; ValueData: """{app}\amd64\{#SVIEW_EXE_NAME}"" --in=image - ""%1"""; Tasks: flagAssocStereoImages; Flags: uninsdeletevalue; Check: IsWin64
+Root: HKCR; SubKey: JPEG Stereo Image\Shell\Open\Command;      ValueType: string; ValueData: """{app}\{#SVIEW_EXE_NAME}"" --in=image - ""%1"""; Tasks: flagAssocStereoImages; Flags: uninsdeletevalue
 Root: HKCR; Subkey: JPEG Stereo Image\DefaultIcon;             ValueType: string; ValueData: {app}\icons\sView_JPS.ico;     Tasks: flagAssocStereoImages; Flags: uninsdeletevalue
 ; Associations PNS
 Root: HKCR; SubKey: .pns;                                      ValueType: string; ValueData: PNG Stereo Image;              Tasks: flagAssocStereoImages; Flags: uninsdeletekey
 Root: HKCR; SubKey: PNG Stereo Image;                          ValueType: string; ValueData: PNG Stereo Image;              Tasks: flagAssocStereoImages; Flags: uninsdeletekey
-Root: HKCR; SubKey: PNG Stereo Image\Shell\Open\Command;       ValueType: string; ValueData: """{app}\{#SVIEW_EXE_NAME}"" --in=image - ""%1"""; Tasks: flagAssocStereoImages; Flags: uninsdeletevalue; Check: not IsWin64
-Root: HKCR; SubKey: PNG Stereo Image\Shell\Open\Command;       ValueType: string; ValueData: """{app}\amd64\{#SVIEW_EXE_NAME}"" --in=image - ""%1"""; Tasks: flagAssocStereoImages; Flags: uninsdeletevalue; Check: IsWin64
+Root: HKCR; SubKey: PNG Stereo Image\Shell\Open\Command;       ValueType: string; ValueData: """{app}\{#SVIEW_EXE_NAME}"" --in=image - ""%1"""; Tasks: flagAssocStereoImages; Flags: uninsdeletevalue
 Root: HKCR; Subkey: PNG Stereo Image\DefaultIcon;              ValueType: string; ValueData: {app}\icons\sView_PNS.ico;     Tasks: flagAssocStereoImages; Flags: uninsdeletevalue
 ; Associations MPO
 Root: HKCR; SubKey: .mpo;                                      ValueType: string; ValueData: Multi Picture Object;          Tasks: flagAssocStereoImages; Flags: uninsdeletekey
 Root: HKCR; SubKey: Multi Picture Object;                      ValueType: string; ValueData: Multi Picture Object;          Tasks: flagAssocStereoImages; Flags: uninsdeletekey
-Root: HKCR; SubKey: Multi Picture Object\Shell\Open\Command;   ValueType: string; ValueData: """{app}\{#SVIEW_EXE_NAME}"" --in=image - ""%1"""; Tasks: flagAssocStereoImages; Flags: uninsdeletevalue; Check: not IsWin64
-Root: HKCR; SubKey: Multi Picture Object\Shell\Open\Command;   ValueType: string; ValueData: """{app}\amd64\{#SVIEW_EXE_NAME}"" --in=image - ""%1"""; Tasks: flagAssocStereoImages; Flags: uninsdeletevalue; Check: IsWin64
+Root: HKCR; SubKey: Multi Picture Object\Shell\Open\Command;   ValueType: string; ValueData: """{app}\{#SVIEW_EXE_NAME}"" --in=image - ""%1"""; Tasks: flagAssocStereoImages; Flags: uninsdeletevalue
 Root: HKCR; Subkey: Multi Picture Object\DefaultIcon;          ValueType: string; ValueData: {app}\icons\sView_Media.ico;   Tasks: flagAssocStereoImages; Flags: uninsdeletevalue
 
 ; Associations Images
 Root: HKCR; SubKey: sView Image;                               ValueType: string; ValueData: sView Image;                   Tasks: flagAssocImages;       Flags: uninsdeletekey
-Root: HKCR; SubKey: sView Image\Shell\Open\Command;            ValueType: string; ValueData: """{app}\{#SVIEW_EXE_NAME}"" --in=image - ""%1""";       Tasks: flagAssocImages; Flags: uninsdeletevalue; Check: not IsWin64
-Root: HKCR; SubKey: sView Image\Shell\Open\Command;            ValueType: string; ValueData: """{app}\amd64\{#SVIEW_EXE_NAME}"" --in=image - ""%1"""; Tasks: flagAssocImages; Flags: uninsdeletevalue; Check: IsWin64
+Root: HKCR; SubKey: sView Image\Shell\Open\Command;            ValueType: string; ValueData: """{app}\{#SVIEW_EXE_NAME}"" --in=image - ""%1"""; Tasks: flagAssocImages; Flags: uninsdeletevalue
 Root: HKCR; Subkey: sView Image\DefaultIcon;                   ValueType: string; ValueData: {app}\icons\sView_Media.ico;   Tasks: flagAssocImages;       Flags: uninsdeletevalue
 
 Root: HKCR; SubKey: .bmp;                                      ValueType: string; ValueData: sView Image;                   Tasks: flagAssocImages;       Flags: uninsdeletekey
@@ -337,8 +305,7 @@ Root: HKCR; SubKey: .tiff;                                     ValueType: string
 
 ; Associations Video
 Root: HKCR; SubKey: sView Video;                               ValueType: string; ValueData: sView Video;                   Tasks: flagAssocMovies; Flags: uninsdeletekey
-Root: HKCR; SubKey: sView Video\Shell\Open\Command;            ValueType: string; ValueData: """{app}\{#SVIEW_EXE_NAME}"" --in=video - ""%1"""; Tasks: flagAssocMovies; Flags: uninsdeletevalue; Check: not IsWin64
-Root: HKCR; SubKey: sView Video\Shell\Open\Command;            ValueType: string; ValueData: """{app}\amd64\{#SVIEW_EXE_NAME}"" --in=video - ""%1"""; Tasks: flagAssocMovies; Flags: uninsdeletevalue; Check: IsWin64
+Root: HKCR; SubKey: sView Video\Shell\Open\Command;            ValueType: string; ValueData: """{app}\{#SVIEW_EXE_NAME}"" --in=video - ""%1"""; Tasks: flagAssocMovies; Flags: uninsdeletevalue
 Root: HKCR; Subkey: sView Video\DefaultIcon;                   ValueType: string; ValueData: {app}\icons\sView_Media.ico;   Tasks: flagAssocMovies; Flags: uninsdeletevalue
 
 Root: HKCR; SubKey: .avi;                                      ValueType: string; ValueData: sView Video;                   Tasks: flagAssocMovies; Flags: uninsdeletekey
@@ -366,8 +333,7 @@ Root: HKCR; SubKey: .mj2;                                      ValueType: string
 
 ; Associations Audio
 Root: HKCR; SubKey: sView Audio;                               ValueType: string; ValueData: sView Audio;                   Tasks: flagAssocMusic;  Flags: uninsdeletekey
-Root: HKCR; SubKey: sView Audio\Shell\Open\Command;            ValueType: string; ValueData: """{app}\{#SVIEW_EXE_NAME}"" --in=video - ""%1"""; Tasks: flagAssocMusic; Flags: uninsdeletevalue; Check: not IsWin64
-Root: HKCR; SubKey: sView Audio\Shell\Open\Command;            ValueType: string; ValueData: """{app}\amd64\{#SVIEW_EXE_NAME}"" --in=video - ""%1"""; Tasks: flagAssocMusic; Flags: uninsdeletevalue; Check: IsWin64
+Root: HKCR; SubKey: sView Audio\Shell\Open\Command;            ValueType: string; ValueData: """{app}\{#SVIEW_EXE_NAME}"" --in=video - ""%1"""; Tasks: flagAssocMusic; Flags: uninsdeletevalue
 Root: HKCR; Subkey: sView Audio\DefaultIcon;                   ValueType: string; ValueData: {app}\icons\sView_Media.ico;   Tasks: flagAssocMusic; Flags: uninsdeletevalue
 
 Root: HKCR; SubKey: .mp3;                                      ValueType: string; ValueData: sView Audio;                   Tasks: flagAssocMusic;  Flags: uninsdeletekey
@@ -382,19 +348,16 @@ Root: HKCR; SubKey: .ape;                                      ValueType: string
 Root: HKCR; SubKey: .mka;                                      ValueType: string; ValueData: sView Audio;                   Tasks: flagAssocMusic;  Flags: uninsdeletekey
 
 ; Associations Playlists
-Root: HKCR; SubKey: sView PlayList;                            ValueType: string; ValueData: sView PlayList;                Tasks: flagAssocImages;       Flags: uninsdeletekey
-Root: HKCR; SubKey: sView PlayList\Shell\Open\Command;         ValueType: string; ValueData: """{app}\{#SVIEW_EXE_NAME}"" --in=video - ""%1""";       Tasks: flagAssocPlaylists; Flags: uninsdeletevalue; Check: not IsWin64
-Root: HKCR; SubKey: sView PlayList\Shell\Open\Command;         ValueType: string; ValueData: """{app}\amd64\{#SVIEW_EXE_NAME}"" --in=video - ""%1"""; Tasks: flagAssocPlaylists; Flags: uninsdeletevalue; Check: IsWin64
-Root: HKCR; Subkey: sView PlayList\DefaultIcon;                ValueType: string; ValueData: {app}\icons\sView_Media.ico;   Tasks: flagAssocPlaylists;    Flags: uninsdeletevalue
-Root: HKCR; SubKey: .m3u;                                      ValueType: string; ValueData: sView PlayList;                Tasks: flagAssocPlaylists;    Flags: uninsdeletekey
+Root: HKCR; SubKey: sView PlayList;                            ValueType: string; ValueData: sView PlayList;                Tasks: flagAssocImages;    Flags: uninsdeletekey
+Root: HKCR; SubKey: sView PlayList\Shell\Open\Command;         ValueType: string; ValueData: """{app}\{#SVIEW_EXE_NAME}"" --in=video - ""%1"""; Tasks: flagAssocPlaylists; Flags: uninsdeletevalue
+Root: HKCR; Subkey: sView PlayList\DefaultIcon;                ValueType: string; ValueData: {app}\icons\sView_Media.ico;   Tasks: flagAssocPlaylists; Flags: uninsdeletevalue
+Root: HKCR; SubKey: .m3u;                                      ValueType: string; ValueData: sView PlayList;                Tasks: flagAssocPlaylists; Flags: uninsdeletekey
 
 ; StCoreXX environment variables
-Root: HKLM32; SubKey: SYSTEM\CurrentControlSet\Control\Session Manager\Environment; ValueType: string; ValueName: StShare;  ValueData: {app}\; Flags: uninsdeletevalue
-Root: HKCU32; SubKey: Environment;                                                  ValueType: string; ValueName: StShare;  ValueData: {app}\; Flags: uninsdeletevalue
-Root: HKLM32; SubKey: SYSTEM\CurrentControlSet\Control\Session Manager\Environment; ValueType: string; ValueName: StCore32; ValueData: {app}\; Flags: uninsdeletevalue
-Root: HKCU32; SubKey: Environment;                                                  ValueType: string; ValueName: StCore32; ValueData: {app}\; Flags: uninsdeletevalue
-Root: HKLM64; SubKey: SYSTEM\CurrentControlSet\Control\Session Manager\Environment; ValueType: string; ValueName: StCore64; ValueData: {app}\amd64\; Flags: uninsdeletevalue; Check: IsWin64
-Root: HKCU64; SubKey: Environment;                                                  ValueType: string; ValueName: StCore64; ValueData: {app}\amd64\; Flags: uninsdeletevalue; Check: IsWin64
+Root: HKLM64; SubKey: SYSTEM\CurrentControlSet\Control\Session Manager\Environment; ValueType: string; ValueName: StShare;  ValueData: {app}\; Flags: uninsdeletevalue
+Root: HKCU64; SubKey: Environment;                                                  ValueType: string; ValueName: StShare;  ValueData: {app}\; Flags: uninsdeletevalue
+Root: HKLM64; SubKey: SYSTEM\CurrentControlSet\Control\Session Manager\Environment; ValueType: string; ValueName: StCore64; ValueData: {app}\; Flags: uninsdeletevalue
+Root: HKCU64; SubKey: Environment;                                                  ValueType: string; ValueName: StCore64; ValueData: {app}\; Flags: uninsdeletevalue
 
 [INI]
 Filename: {app}\sview.ru.url; Section: InternetShortcut; Key: URL; String: {#SVIEW_URL}
@@ -414,3 +377,4 @@ Name: {app}\input\;            Type: filesandordirs
 Name: {app}\StRenderers\;      Type: filesandordirs
 ; legacy files from previous installations
 Name: {app}\StBrowserPlugins\; Type: filesandordirs
+Name: {app}\amd64\;            Type: filesandordirs

@@ -12,14 +12,14 @@ rem Paths to 3rd-party tools and libraries
 set "aCmakeBin="
 set "aVsVars="
 set "aCmakeGen=Visual Studio 14 2015 Win64"
-set "aFreeType64="
-set "anFFmpeg64="
-set "anNVAPI64="
-set "anOpenAL64="
-set "anOpenVR64="
-set "aDevIL64="
-set "aFreeImage64="
-set "anMsvcr64="
+set "aFreeType="
+set "anFFmpeg="
+set "anNVAPI="
+set "anOpenAL="
+set "anOpenVR="
+set "aDevIL="
+set "aFreeImage="
+set "anMsvcr="
 
 set USE_OPENVR=ON
 set USE_FREEIMAGE=OFF
@@ -129,18 +129,18 @@ if ["%toCMake%"] == ["1"] (
  -D CMAKE_BUILD_TYPE:STRING="%aBuildType%" ^
  -D CMAKE_INSTALL_PREFIX:PATH="%aDestDir%" ^
  -D BUILD_FORCE_RelWithDebInfo:BOOL="ON" ^
- -D FREETYPE_DIR:PATH="%aFreeType64%" ^
- -D FFMPEG_DIR:PATH="%anFFmpeg64%" ^
- -D NVAPI_DIR:PATH="%anNVAPI64%" ^
- -D OPENAL_DIR:PATH="%anOpenAL64%" ^
+ -D FREETYPE_DIR:PATH="%aFreeType%" ^
+ -D FFMPEG_DIR:PATH="%anFFmpeg%" ^
+ -D NVAPI_DIR:PATH="%anNVAPI%" ^
+ -D OPENAL_DIR:PATH="%anOpenAL%" ^
  -D USE_OPENVR:BOOL="%USE_OPENVR%" ^
- -D OPENVR_DIR:PATH="%anOpenVR64%" ^
+ -D OPENVR_DIR:PATH="%anOpenVR%" ^
  -D USE_FREEIMAGE:BOOL="%USE_FREEIMAGE%" ^
- -D FREEIMAGE_DIR:PATH="%aFreeImage64%" ^
+ -D FREEIMAGE_DIR:PATH="%aFreeImage%" ^
  -D USE_DEVIL:BOOL="%USE_DEVIL%" ^
- -D DEVIL_DIR:PATH="%aDevIL64%" ^
+ -D DEVIL_DIR:PATH="%aDevIL%" ^
  -D USE_MSVCR:BOOL="%USE_MSVCR%" ^
- -D MSVCR_DIR:PATH="%anMsvcr64%" ^
+ -D MSVCR_DIR:PATH="%anMsvcr%" ^
  -B "%aWorkDir%" -S "%aSrcRoot%"
 
   if errorlevel 1 (
