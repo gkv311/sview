@@ -269,29 +269,48 @@ bool StAVImage::loadExtra(const StString& theFilePath,
     close();
     myMetadata.clear();
 
+    AVInputFormat* anImgFormat = NULL;
+    bool isForcedCodec = false;
     switch(theImageType) {
         case ST_TYPE_PNG:
         case ST_TYPE_PNS: {
             myCodec = avcodec_find_decoder_by_name("png");
+            isForcedCodec = true;
             break;
         }
         case ST_TYPE_JPEG:
         case ST_TYPE_MPO:
         case ST_TYPE_JPS: {
             myCodec = avcodec_find_decoder_by_name("mjpeg");
+            isForcedCodec = true;
             break;
         }
         case ST_TYPE_EXR: {
             myCodec = avcodec_find_decoder_by_name("exr");
+            isForcedCodec = true;
             break;
         }
         case ST_TYPE_WEBP:
         case ST_TYPE_WEBPLL: {
             myCodec = avcodec_find_decoder_by_name("webp");
+            isForcedCodec = true;
             break;
         }
         case ST_TYPE_DDS: {
             myCodec = avcodec_find_decoder_by_name("dds");
+            isForcedCodec = true;
+            break;
+        }
+        case ST_TYPE_PSD: {
+            myCodec = avcodec_find_decoder_by_name("psd");
+            isForcedCodec = true;
+            break;
+        }
+        case ST_TYPE_ICO: {
+            // .ico is a container format referring to multiple codecs
+            static AVInputFormat* anIcoFormat = (AVInputFormat* )av_find_input_format("ico");
+            anImgFormat = anIcoFormat;
+            isForcedCodec = false;
             break;
         }
         default: {
@@ -300,10 +319,11 @@ bool StAVImage::loadExtra(const StString& theFilePath,
     }
 
     StHandle<StAVIOMemContext> aMemIoCtx;
-    if(theImageType == ST_TYPE_NONE
+    if(!isForcedCodec
     || (theDataPtr == NULL && !StFileNode::isFileExists(theFilePath))) {
-        AVInputFormat* anImgFormat = NULL;
-        if(theDataPtr != NULL) {
+        if (anImgFormat != NULL) {
+            //
+        } else if (theDataPtr != NULL) {
             static AVInputFormat* anImg2Format = (AVInputFormat* )av_find_input_format("image2");
             anImgFormat = anImg2Format;
             //anImgFormat->flags |= AVFMT_NOFILE;
@@ -359,11 +379,11 @@ bool StAVImage::loadExtra(const StString& theFilePath,
         // find the decoder for the video stream
     #if(LIBAVFORMAT_VERSION_INT < AV_VERSION_INT(59, 0, 100))
         myCodecCtx = stAV::getCodecCtx(myFormatCtx->streams[0]);
-        if(theImageType == ST_TYPE_NONE) {
+        if (!isForcedCodec) {
             myCodec = avcodec_find_decoder(myCodecCtx->codec_id);
         }
     #else
-        if(theImageType == ST_TYPE_NONE) {
+        if (!isForcedCodec) {
             myCodec = avcodec_find_decoder(myFormatCtx->streams[0]->codecpar->codec_id);
         }
     #endif
