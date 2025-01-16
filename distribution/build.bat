@@ -9,12 +9,8 @@ set "anFFmpeg="
 set "anNVAPI="
 set "anOpenAL="
 set "anOpenVR="
-set "aFreeImage="
-set "aDevIL="
 set "anMsvcr="
 set USE_OPENVR=ON
-set USE_FREEIMAGE=ON
-set USE_DEVIL=ON
 set USE_MSVCR=ON
 set USE_MONGOOSE=ON
 rem Activate notifications about sView updates available on sview.ru
@@ -165,10 +161,6 @@ cmake -G "Ninja" ^
  -D OPENAL_DIR:PATH="%anOpenAL%" ^
  -D USE_OPENVR:BOOL="%USE_OPENVR%" ^
  -D OPENVR_DIR:PATH="%anOpenVR%" ^
- -D USE_FREEIMAGE:BOOL="%USE_FREEIMAGE%" ^
- -D FREEIMAGE_DIR:PATH="%aFreeImage%" ^
- -D USE_DEVIL:BOOL="%USE_DEVIL%" ^
- -D DEVIL_DIR:PATH="%aDevIL%" ^
  -D USE_MSVCR:BOOL="%USE_MSVCR%" ^
  -D MSVCR_DIR:PATH="%anMsvcr%" ^
  -B "%aWorkDir%" -S "%aSrcRoot%"

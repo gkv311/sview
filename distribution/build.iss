@@ -224,11 +224,6 @@ Source: {#SVIEW_DISTR_PATH}\icons\sView_PNS.ico;      DestDir: {app}\icons;     
 Source: {#SVIEW_DISTR_PATH}\demo.jps;                 DestDir: {app};                        Flags: ignoreversion;         Components: StDrawers\StImageViewer
 Source: {#SVIEW_DISTR_PATH}\demo_robot.jps;           DestDir: {app};                        Flags: ignoreversion;         Components: StDrawers\StImageViewer
 Source: {#SVIEW_DISTR_PATH}\StImageViewer.dll;        DestDir: {app};                        Flags: 64bit ignoreversion;   Components: StCore
-; FreeImage library (should be optional)
-Source: {#SVIEW_DISTR_PATH}\FreeImage.dll;            DestDir: {app};                        Flags: 64bit ignoreversion;   Components: StDrawers\StImageViewer
-; DevIL libraries (should be optional)
-Source: {#SVIEW_DISTR_PATH}\DevIL.dll;                DestDir: {app};                        Flags: 64bit ignoreversion;   Components: StDrawers\StImageViewer
-Source: {#SVIEW_DISTR_PATH}\ILU.dll;                  DestDir: {app};                        Flags: 64bit ignoreversion;   Components: StDrawers\StImageViewer
 
 ; StDrawers -> Movie Player
 Source: {#SVIEW_DISTR_PATH}\lang\*StMoviePlayer.lng;  DestDir: {app}\lang;                   Flags: ignoreversion recursesubdirs; Components: StCore

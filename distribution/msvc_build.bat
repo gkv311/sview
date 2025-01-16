@@ -17,13 +17,9 @@ set "anFFmpeg="
 set "anNVAPI="
 set "anOpenAL="
 set "anOpenVR="
-set "aDevIL="
-set "aFreeImage="
 set "anMsvcr="
 
 set USE_OPENVR=ON
-set USE_FREEIMAGE=OFF
-set USE_DEVIL=OFF
 set USE_MSVCR=OFF
 
 rem Build stages to perform
@@ -135,10 +131,6 @@ if ["%toCMake%"] == ["1"] (
  -D OPENAL_DIR:PATH="%anOpenAL%" ^
  -D USE_OPENVR:BOOL="%USE_OPENVR%" ^
  -D OPENVR_DIR:PATH="%anOpenVR%" ^
- -D USE_FREEIMAGE:BOOL="%USE_FREEIMAGE%" ^
- -D FREEIMAGE_DIR:PATH="%aFreeImage%" ^
- -D USE_DEVIL:BOOL="%USE_DEVIL%" ^
- -D DEVIL_DIR:PATH="%aDevIL%" ^
  -D USE_MSVCR:BOOL="%USE_MSVCR%" ^
  -D MSVCR_DIR:PATH="%anMsvcr%" ^
  -B "%aWorkDir%" -S "%aSrcRoot%"
