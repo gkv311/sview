@@ -230,6 +230,7 @@ namespace stAV {
 
         ST_SHARED_CPPEXPORT AVPixelFormat GRAY8;     //!< Y,  8bpp
         ST_SHARED_CPPEXPORT AVPixelFormat GRAY16;    //!< Y, 16bpp
+        ST_SHARED_CPPEXPORT AVPixelFormat GRAYF32;   //!< Y, 32bpp float
         // planar YUV formats
         ST_SHARED_CPPEXPORT AVPixelFormat YUV420P;   //!< planar YUV 4:2:0, 12bpp, (1 Cr & Cb sample per 2x2 Y samples)
         ST_SHARED_CPPEXPORT AVPixelFormat YUVA420P;  //!< planar YUV 4:2:0, 20bpp, (1 Cr & Cb sample per 2x2 Y & A samples)

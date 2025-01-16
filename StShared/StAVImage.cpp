@@ -38,6 +38,7 @@ int StAVImage::getAVPixelFormat(const StImage& theImage) {
             case StImagePlane::ImgBGRA:   return stAV::PIX_FMT::BGRA32;
             case StImagePlane::ImgGray:   return stAV::PIX_FMT::GRAY8;
             case StImagePlane::ImgGray16: return stAV::PIX_FMT::GRAY16;
+            case StImagePlane::ImgGrayF:  return stAV::PIX_FMT::GRAYF32;
             default:                      return stAV::PIX_FMT::NONE;
         }
     }
@@ -168,6 +169,7 @@ static int getAVPixelFormatForPlane(const StImagePlane& theImage) {
         case StImagePlane::ImgBGRA:   return stAV::PIX_FMT::BGRA32;
         case StImagePlane::ImgGray:   return stAV::PIX_FMT::GRAY8;
         case StImagePlane::ImgGray16: return stAV::PIX_FMT::GRAY16;
+        case StImagePlane::ImgGrayF:  return stAV::PIX_FMT::GRAYF32;
         default:                      return stAV::PIX_FMT::NONE;
     }
 }
@@ -557,6 +559,11 @@ bool StAVImage::loadExtra(const StString& theFilePath,
     } else if(myCodecCtx->pix_fmt == stAV::PIX_FMT::GRAY16) {
         setColorModel(StImage::ImgColor_GRAY);
         changePlane(0).initWrapper(StImagePlane::ImgGray16, myFrame.getPlane(0),
+                                   myCodecCtx->width, myCodecCtx->height,
+                                   myFrame.getLineSize(0));
+    } else if(myCodecCtx->pix_fmt == stAV::PIX_FMT::GRAYF32) {
+        setColorModel(StImage::ImgColor_GRAY);
+        changePlane(0).initWrapper(StImagePlane::ImgGrayF, myFrame.getPlane(0),
                                    myCodecCtx->width, myCodecCtx->height,
                                    myFrame.getLineSize(0));
     } else if(myCodecCtx->pix_fmt == stAV::PIX_FMT::RGB48) {

@@ -107,6 +107,7 @@ const AVPixelFormat stAV::PIX_FMT::YUVA420P   = ST_AV_GETPIXFMT("yuva420p");
 const AVPixelFormat stAV::PIX_FMT::PAL8       = ST_AV_GETPIXFMT("pal8");
 const AVPixelFormat stAV::PIX_FMT::GRAY8      = ST_AV_GETPIXFMT("gray");
 const AVPixelFormat stAV::PIX_FMT::GRAY16     = ST_AV_GETPIXFMT("gray16");
+const AVPixelFormat stAV::PIX_FMT::GRAYF32    = ST_AV_GETPIXFMT("grayf32");
 const AVPixelFormat stAV::PIX_FMT::YUV422P    = ST_AV_GETPIXFMT("yuv422p");
 const AVPixelFormat stAV::PIX_FMT::YUVA422P   = ST_AV_GETPIXFMT("yuva422p");
 const AVPixelFormat stAV::PIX_FMT::YUV444P    = ST_AV_GETPIXFMT("yuv444p");
@@ -165,6 +166,8 @@ StCString stAV::PIX_FMT::getString(const AVPixelFormat theFrmt) {
         return stCString("gray8");
     } else if(theFrmt == stAV::PIX_FMT::GRAY16) {
         return stCString("gray16");
+    } else if(theFrmt == stAV::PIX_FMT::GRAYF32) {
+        return stCString("grayf32");
     } else if(theFrmt == stAV::PIX_FMT::YUV422P) {
         return stCString("yuv422p");
     } else if(theFrmt == stAV::PIX_FMT::YUVA422P) {
