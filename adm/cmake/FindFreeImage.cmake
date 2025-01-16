@@ -7,15 +7,14 @@
 #  FREEIMAGE_INCLUDE_DIR  - directory with headers
 #  FREEIMAGE_LIBRARY_DIR  - directory with libraries for linker
 #  FREEIMAGE_BINARY_DIR   - directory with DLLs
-#  FREEIMAGE_RESOURCE_DIR - directory with resource files
 include(FindPackageHandleStandardArgs)
 
 set (FREEIMAGE_DIR "" CACHE PATH "Path to FreeImage library.")
 
 # default paths
-set (FREEIMAGE_INCLUDE_DIR  "${FREEIMAGE_DIR}/include")
-set (FREEIMAGE_LIBRARY_DIR  "${FREEIMAGE_DIR}/lib")
-set (FREEIMAGE_BINARY_DIR   "${FREEIMAGE_DIR}/bin")
+set (FREEIMAGE_INCLUDE_DIR "${FREEIMAGE_DIR}/include")
+set (FREEIMAGE_LIBRARY_DIR "${FREEIMAGE_DIR}/lib")
+set (FREEIMAGE_BINARY_DIR  "${FREEIMAGE_DIR}/bin")
 
 #  list of toolkits
 set (FREEIMAGE_TKLIST "freeimage")
@@ -52,7 +51,6 @@ endif()
 
 if (FREEIMAGE_INCLUDE_DIR_FOUND AND FREEIMAGE_LIBRARY_DIR_FOUND)
   set (FREEIMAGE_FOUND ON)
-  set (FREEIMAGE_INSTALL_PREFIX ${FREEIMAGE_DIR})
 
   # Define toolkits so that CMake can put absolute paths to linker; the library existence is not checked here.
   add_library (freeimage SHARED IMPORTED)

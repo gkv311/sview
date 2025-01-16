@@ -7,7 +7,6 @@
 #  DEVIL_INCLUDE_DIR  - directory with headers
 #  DEVIL_LIBRARY_DIR  - directory with libraries for linker
 #  DEVIL_BINARY_DIR   - directory with DLLs
-#  DEVIL_RESOURCE_DIR - directory with resource files
 include(FindPackageHandleStandardArgs)
 
 set (DEVIL_DIR "" CACHE PATH "Path to DevIL library.")
@@ -30,8 +29,6 @@ endif()
 
 if (DEVIL_INCLUDE_DIR_FOUND AND DEVIL_BINARY_DIR_FOUND)
   set (DEVIL_FOUND ON)
-  set (DEVIL_INSTALL_PREFIX ${DEVIL_DIR})
 else()
-  # no fallback searching for CMake configs
   set (DEVIL_FOUND OFF)
 endif()

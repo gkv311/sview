@@ -3,7 +3,44 @@ rem This script prepare distribution package for sView
 rem under Window platform
 
 rem Configure environment
-if "%INNO_PATH%"=="" set "INNO_PATH=%PROGRAMFILES%\Inno Setup 5"
+
+rem Paths to 3rd-party tools and libraries
+set "aCmakeBin="
+set "aVsVars="
+set "aFreeType32="
+set "aFreeType64="
+set "anFFmpeg32="
+set "anFFmpeg64="
+set "anNVAPI32="
+set "anNVAPI64="
+set "anOpenAL32="
+set "anOpenAL64="
+set "anOpenVR32="
+set "anOpenVR64="
+set "aFreeImage32="
+set "aFreeImage64="
+set "aDevIL32="
+set "aDevIL64="
+set "anMsvcr32="
+set "anMsvcr64="
+set USE_OPENVR=ON
+set USE_FREEIMAGE=ON
+set USE_DEVIL=ON
+set USE_MSVCR=ON
+set USE_MONGOOSE=ON
+rem Activate notifications about sView updates available on sview.ru
+set USE_UPDATER=ON
+
+rem Configuration file
+if exist "%~dp0msvc_custom.bat" call "%~dp0msvc_custom.bat"
+
+if "%INNO_PATH%"=="" (
+  if exist "%PROGRAMFILES%\Inno Setup 6\Compil32.exe" set "INNO_PATH=%PROGRAMFILES%\Inno Setup 6"
+)
+if "%INNO_PATH%"=="" (
+  if exist "%PROGRAMFILES%\Inno Setup 5\Compil32.exe" set "INNO_PATH=%PROGRAMFILES%\Inno Setup 5"
+)
+echo "INNO_PATH=%INNO_PATH%"
 
 rem Build type
 set releaseStatus=ST_RELEASE
@@ -21,8 +58,6 @@ if "%1"=="ST_RELEASE_CANDIDATE" (
   set SVIEW_VER_TYPE=rc
   set SVIEW_VER_TYPE_NUM=3
 )
-
-if exist "%~dp0env.bat" call "%~dp0env.bat"
 
 for /F "skip=1 delims=" %%F in ('
   wmic PATH Win32_LocalTime GET Day^,Month^,Year /FORMAT:TABLE
@@ -180,36 +215,6 @@ goto :eof
 :build_sview
 set "aSrcRoot=%~dp0.."
 set "aBuildRoot=%~1"
-
-rem Paths to 3rd-party tools and libraries
-set "aCmakeBin="
-set "aVsVars="
-set "aFreeType32="
-set "aFreeType64="
-set "anFFmpeg32="
-set "anFFmpeg64="
-set "anNVAPI32="
-set "anNVAPI64="
-set "anOpenAL32="
-set "anOpenAL64="
-set "anOpenVR32="
-set "anOpenVR64="
-set "aFreeImage32="
-set "aFreeImage64="
-set "aDevIL32="
-set "aDevIL64="
-set "anMsvcr32="
-set "anMsvcr64="
-set USE_OPENVR=ON
-set USE_FREEIMAGE=ON
-set USE_DEVIL=ON
-set USE_MSVCR=ON
-set USE_MONGOOSE=ON
-rem Activate notifications about sView updates available on sview.ru
-set USE_UPDATER=ON
-
-rem Configuration file
-if exist "%~dp0msvc_custom.bat" call "%~dp0msvc_custom.bat"
 
 if /i "%~2" == "x86" (
   call "%aVsVars%" x86
