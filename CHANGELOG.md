@@ -7,13 +7,17 @@ Not all changes are documented here - please check git log for complete list.
 sView ??.?? (in development)
 -----------------------------------------------------------------------------------------------------------------------
 
-- Configuration, building environment moved to *CMake*.
-- Fixed building with **FFmpeg 7.0+**.
 - Movie Player now supports new **FFmpeg 7.1** API for decoding frame sequence stereoscopic video.
 - Image Viewer now detects side-by-side stereopairs from **QooCam EGO** camera.
-- Linux - enable building with `libopenvr-dev` for **OpenVR** support (untested).
-- Linux - **zenity** is now used instead of `GTK2` for open-file dialog.
-- Removed legacy NPAPI/ActiveX plugin (browsers dropped support for native plugins since 2015-2018).
+- Image Viewer now supports floating-point RGB(A) formats of FFmpeg (e.g. from `EXR`, `HDR` image files).
+- Linux, **zenity** is now used instead of `GTK2` for open-file dialog.
+- Linux, enable building with `libopenvr-dev` for **OpenVR** support (untested).
+- Windows, removed 32-bit binaries from package.
+- Windows, removed FreeImage and DevIL libraries from package.
+- macOS, DMG packages are now built for ARM64.
+- Removed legacy **NPAPI**/**ActiveX** plugin (browsers dropped support for native plugins since 2015-2018).
+- Configuration, building environment moved to *CMake*.
+- Fixed building with **FFmpeg 7.0+**.
 
 sView 23.02 (2023-02-14)
 -----------------------------------------------------------------------------------------------------------------------
