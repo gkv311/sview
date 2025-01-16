@@ -60,7 +60,10 @@ for /F "skip=1 delims=" %%F in ('
 )
 set YEAR=%YEAR:~-2,4%
 
-set "SVIEW_DISTR_PATH=%~dp0temp\sView-win-amd64"
+set "anArchName=sView_v.%YEAR%.%MONTH00%%SVIEW_VER_TYPE%%DAY%_amd64"
+rem set "SVIEW_DISTR_PATH=%~dp0temp\sView-win-amd64"
+set "SVIEW_DISTR_PATH=%~dp0temp\%anArchName%"
+rmdir /S /Q "%SVIEW_DISTR_PATH%
 
 rem make backup of default config file
 move /Y ..\include\stconfig.conf ..\include\stconfig.conf.buildbak
@@ -95,13 +98,10 @@ echo #endif //__stConfig_conf_>> "%SVIEW_BUILD_CONF%"
 rem END creating config file
 
 set "aPathBack2=%PATH%"
-set "SVIEW_BUILD_PATH=%~dp0temp\bin\WIN_vc_AMD64"
-rmdir /S /Q "%SVIEW_DISTR_PATH%
 if not exist "%~dp0temp" ( mkdir "%~dp0temp" )
-if not exist "%~dp0temp\bin" ( mkdir "%~dp0temp\bin" )
 
 echo Perform rebuild MSVC x86_64
-call :build_sview "%SVIEW_BUILD_PATH%" x64
+call :build_sview "%SVIEW_DISTR_PATH%" x64
 if errorlevel 1 (
   move /Y ..\include\stconfig.conf.buildbak ..\include\stconfig.conf
   echo Build FAILED
@@ -114,48 +114,12 @@ set "PATH=%aPathBack2%"
 rem move default config file back
 move /Y ..\include\stconfig.conf.buildbak ..\include\stconfig.conf
 
-echo Copy files into intermidiate directory:
-rem x86_64 binaries
-echo "%SVIEW_DISTR_PATH%"
-rmdir /S /Q "%SVIEW_DISTR_PATH%"
-xcopy /Y "%SVIEW_BUILD_PATH%\*.dll"           "%SVIEW_DISTR_PATH%\"
-xcopy /Y "%SVIEW_BUILD_PATH%\*.exe"           "%SVIEW_DISTR_PATH%\"
-
-rem shared resources
-xcopy /Y "..\share\sView\demo\demo.jps"       "%SVIEW_DISTR_PATH%\"
-xcopy /Y "..\share\sView\demo\demo_robot.jps" "%SVIEW_DISTR_PATH%\"
-xcopy /S /Y "%SVIEW_BUILD_PATH%\lang\*"       "%SVIEW_DISTR_PATH%\lang\"
-xcopy /S /Y "%SVIEW_BUILD_PATH%\shaders\*"    "%SVIEW_DISTR_PATH%\shaders\"
-xcopy /Y "%SVIEW_BUILD_PATH%\textures\*"      "%SVIEW_DISTR_PATH%\textures\"
-xcopy /Y "%SVIEW_BUILD_PATH%\web\*"           "%SVIEW_DISTR_PATH%\web\"
-xcopy /Y "media\sView_JPS.ico"                "%SVIEW_DISTR_PATH%\icons\"
-xcopy /Y "media\sView_PNS.ico"                "%SVIEW_DISTR_PATH%\icons\"
-xcopy /Y "media\sView_Media.ico"              "%SVIEW_DISTR_PATH%\icons\"
-xcopy /S /Y "info\*"                          "%SVIEW_DISTR_PATH%\info\"
-copy  /Y "..\docs\license-gpl-3.0.txt"        "%SVIEW_DISTR_PATH%\info\license.txt"
-
 rem Archive tool
 set "THE_7Z_PARAMS=-t7z -m0=lzma -mx=9 -mfb=64 -md=32m -ms=on"
 set "THE_7Z_PATH=%ProgramW6432%\7-Zip\7z.exe"
-set "anArchName=sView_v.%YEAR%.%MONTH00%%SVIEW_VER_TYPE%%DAY%_amd64"
-set "SVIEW_DISTR_PATH_ARCH=%~dp0temp\arch\%anArchName%"
 echo Creating archive %anArchName%.7z
-rmdir /S /Q "%~dp0temp\arch"
 if exist "%~dp0repository\win\%anArchName%.7z" del "%~dp0repository\win\%anArchName%.7z"
-xcopy /Y "%SVIEW_BUILD_PATH%\*.dll"           "%SVIEW_DISTR_PATH_ARCH%\"
-xcopy /Y "%SVIEW_BUILD_PATH%\*.exe"           "%SVIEW_DISTR_PATH_ARCH%\"
-xcopy /Y "..\share\sView\demo\demo.jps"       "%SVIEW_DISTR_PATH_ARCH%\"
-xcopy /Y "..\share\sView\demo\demo_robot.jps" "%SVIEW_DISTR_PATH_ARCH%\"
-xcopy /S /Y "%SVIEW_BUILD_PATH%\lang\*"       "%SVIEW_DISTR_PATH_ARCH%\lang\"
-xcopy /S /Y "%SVIEW_BUILD_PATH%\shaders\*"    "%SVIEW_DISTR_PATH_ARCH%\shaders\"
-xcopy /Y "%SVIEW_BUILD_PATH%\textures\*"      "%SVIEW_DISTR_PATH_ARCH%\textures\"
-xcopy /Y "%SVIEW_BUILD_PATH%\web\*"           "%SVIEW_DISTR_PATH_ARCH%\web\"
-xcopy /Y "media\sView_JPS.ico"                "%SVIEW_DISTR_PATH_ARCH%\icons\"
-xcopy /Y "media\sView_PNS.ico"                "%SVIEW_DISTR_PATH_ARCH%\icons\"
-xcopy /Y "media\sView_Media.ico"              "%SVIEW_DISTR_PATH_ARCH%\icons\"
-xcopy /S /Y "info\*"                          "%SVIEW_DISTR_PATH_ARCH%\info\"
-copy  /Y "..\docs\license-gpl-3.0.txt"        "%SVIEW_DISTR_PATH_ARCH%\info\license.txt"
-pushd "%~dp0temp\arch"
+pushd "%~dp0temp"
 "%THE_7Z_PATH%" a -r %THE_7Z_PARAMS% "%~dp0repository/win/%anArchName%.7z" "%anArchName%"
 popd
 

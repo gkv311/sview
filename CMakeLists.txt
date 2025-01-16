@@ -473,6 +473,11 @@ install (DIRECTORY "${CMAKE_BINARY_DIR}/Release/lang"               DESTINATION 
 install (DIRECTORY "${CMAKE_BINARY_DIR}/Release/shaders"            DESTINATION "${SVIEW_INSTALL_RES}")
 install (DIRECTORY "${CMAKE_BINARY_DIR}/Release/web"                DESTINATION "${SVIEW_INSTALL_RES}")
 if (WIN32)
+  # association icons
+  install (FILES "${CMAKE_SOURCE_DIR}/distribution/media/sView_JPS.ico"   DESTINATION "${SVIEW_INSTALL_RES}/icons/")
+  install (FILES "${CMAKE_SOURCE_DIR}/distribution/media/sView_PNS.ico"   DESTINATION "${SVIEW_INSTALL_RES}/icons/")
+  install (FILES "${CMAKE_SOURCE_DIR}/distribution/media/sView_Media.ico" DESTINATION "${SVIEW_INSTALL_RES}/icons/")
+
   # copy FreeType
   set (aFreeTypeDll "${FREETYPE_BINARY_DIR}/${CMAKE_SHARED_LIBRARY_PREFIX}freetype${CMAKE_SHARED_LIBRARY_SUFFIX}")
   if (EXISTS "${aFreeTypeDll}")
