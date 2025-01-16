@@ -43,7 +43,7 @@ namespace {
                 exit(0);
             }
         }
-        return DefWindowProc(theWinHandle, theMsg, theWParam, theLParam);
+        return DefWindowProcW(theWinHandle, theMsg, theWParam, theLParam);
     }
 #endif
 
@@ -60,11 +60,11 @@ bool StTestEmbed::createNative() {
 #if defined(_WIN32)
     WNDCLASSW aWinClass;
     stMemSet(&aWinClass, 0, sizeof(aWinClass));
-    HINSTANCE anAppInst = GetModuleHandle(NULL);
+    HINSTANCE anAppInst = GetModuleHandleW(NULL);
     aWinClass.lpfnWndProc   = (WNDPROC )embedWindowProc;
     aWinClass.hInstance     = anAppInst;
-    aWinClass.hIcon         = LoadIcon(NULL, IDI_WINLOGO);
-    aWinClass.hCursor       = LoadCursor(NULL, IDC_ARROW);
+    aWinClass.hIcon         = LoadIconW(NULL, IDI_WINLOGO);
+    aWinClass.hCursor       = LoadCursorW(NULL, IDC_ARROW);
     aWinClass.lpszClassName = L"DummyClass";
     if(!RegisterClassW(&aWinClass)) {
         st::cout << stostream_text("RegisterClass() failed:\nCannot register window class 'DummyClass'.\n");
@@ -135,9 +135,9 @@ void StTestEmbed::embedAppLoop() {
 void StTestEmbed::nativeLoop() {
 #if defined(_WIN32)
     MSG aMsg;
-    while(GetMessage(&aMsg, NULL, 0, 0)) {
+    while(GetMessageW(&aMsg, NULL, 0, 0)) {
         TranslateMessage(&aMsg);
-        DispatchMessage(&aMsg);
+        DispatchMessageW(&aMsg);
     }
     DestroyWindow(myParent);
 #elif defined(__linux__)

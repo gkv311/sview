@@ -13,15 +13,13 @@
 #include <StThreads/StTimer.h>
 
 #ifdef _WIN32
+#ifdef ST_HAVE_NVAPI
     #include <wnt/nvapi.h>
     #ifdef _MSC_VER
-        #ifdef _WIN64
-            #pragma comment(lib, "nvapi64.lib")
-        #else
-            #pragma comment(lib, "nvapi.lib")
-        #endif
+        //#pragma comment(lib, "nvapi64.lib")
+        #pragma comment(linker, "/NODEFAULTLIB:libcmt.lib")
     #endif
-    #pragma comment(linker, "/NODEFAULTLIB:libcmt.lib")
+#endif
 #elif defined(__ANDROID__)
     //
 #elif defined(__linux__)
@@ -536,7 +534,7 @@ void StSearchMonitors::listEDID(StArrayList<StEDIDParser>& theEdids) {
     }
 #endif // !__APPLE__
 
-#ifdef _WIN32
+#ifdef ST_HAVE_NVAPI
     NvAPI_Status anErrStateNv = NvAPI_Initialize();
     if(anErrStateNv == NVAPI_OK) {
         NvPhysicalGpuHandle nvGPUHandles[NVAPI_MAX_PHYSICAL_GPUS];

@@ -14,14 +14,12 @@
 #include <StThreads/StCondition.h>
 #include <StThreads/StThread.h>
 
+#ifdef ST_HAVE_NVAPI
 #include <wnt/nvapi.h>
 #ifdef _MSC_VER
-    #ifdef _WIN64
-        #pragma comment(lib, "nvapi64.lib")
-    #else
-        #pragma comment(lib, "nvapi.lib")
-    #endif
+    //#pragma comment(lib, "nvapi64.lib")
     #pragma comment(linker, "/NODEFAULTLIB:libcmt.lib")
+#endif
 #endif
 
 namespace {
@@ -457,15 +455,15 @@ bool StDXManager::getInfo(StDXInfo&  theInfo,
     }
 
     const StStringUtfWide AQBS_TEST_CLASS = L"StTESTAqbsWin";
-    HINSTANCE anAppInst = GetModuleHandle(NULL);
+    HINSTANCE anAppInst = GetModuleHandleW(NULL);
     WNDCLASSW aWinClass;
     aWinClass.style         = CS_HREDRAW | CS_VREDRAW | CS_OWNDC;
     aWinClass.lpfnWndProc   = (WNDPROC )aDummyWinProc;
     aWinClass.cbClsExtra    = 0;
     aWinClass.cbWndExtra    = 0;
     aWinClass.hInstance     = anAppInst;
-    aWinClass.hIcon         = LoadIcon(anAppInst, L"A");
-    aWinClass.hCursor       = LoadCursor(NULL, IDC_ARROW);
+    aWinClass.hIcon         = LoadIconW(anAppInst, L"A");
+    aWinClass.hCursor       = LoadCursorW(NULL, IDC_ARROW);
     aWinClass.hbrBackground = NULL;
     aWinClass.lpszMenuName  = NULL;
     aWinClass.lpszClassName = AQBS_TEST_CLASS.toCString(); // class name
@@ -505,14 +503,16 @@ bool StDXManager::getInfo(StDXInfo&  theInfo,
     // release resources
     aDXManager.nullify();
     DestroyWindow(aWinHandle);
-    UnregisterClass(AQBS_TEST_CLASS.toCString(), anAppInst);
+    UnregisterClassW(AQBS_TEST_CLASS.toCString(), anAppInst);
 
     // check NVIDIA Stereo enabled state
+#ifdef ST_HAVE_NVAPI
     if(NvAPI_Initialize() == NVAPI_OK) {
         NvU8 isStereoEnabled = FALSE;
         NvAPI_Stereo_IsEnabled(&isStereoEnabled);
         theInfo.hasNvStereoSupport = isStereoEnabled == TRUE;
     }
+#endif
 
     //ST_DEBUG_LOG("DXInfo, AMD(" + int(theInfo.hasAmdAdapter) + "), AQBS(" + int(theInfo.hasAqbsSupport)
     //           + "); NVIDIA(" + int(theInfo.hasNvAdapter) + "), NvStereo(" + int(theInfo.hasNvStereoSupport) + ")");

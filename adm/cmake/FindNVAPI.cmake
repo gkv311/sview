@@ -1,4 +1,4 @@
-# This script finds NVAPI libraries.
+# This script finds NVAPI::NVAPI libraries.
 # The script requires:
 #  NVAPI_DIR - root folder or folder with CMake configuration files
 #
@@ -6,17 +6,13 @@
 #  NVAPI_FOUND        - package is successfully found
 #  NVAPI_INCLUDE_DIR  - directory with headers
 #  NVAPI_LIBRARY_DIR  - directory with libraries for linker
-#  NVAPI_BINARY_DIR   - directory with DLLs
-#  NVAPI_RESOURCE_DIR - directory with resource files
 include(FindPackageHandleStandardArgs)
 
 set (NVAPI_DIR "" CACHE PATH "Path to NVAPI library.")
 
 # default paths
-set (NVAPI_INCLUDE_DIR  "${NVAPI_DIR}/include")
-set (NVAPI_LIBRARY_DIR  "${NVAPI_DIR}/lib")
-set (NVAPI_BINARY_DIR   "${NVAPI_DIR}/bin")
-set (NVAPI_RESOURCE_DIR "${NVAPI_DIR}/res")
+set (NVAPI_INCLUDE_DIR "${NVAPI_DIR}/include")
+set (NVAPI_LIBRARY_DIR "${NVAPI_DIR}/lib")
 
 #  list of toolkits
 set (NVAPI_TKLIST "nvapi")
@@ -45,16 +41,13 @@ endif()
 
 if (NVAPI_INCLUDE_DIR_FOUND AND NVAPI_LIBRARY_DIR_FOUND)
   set (NVAPI_FOUND ON)
-  set (NVAPI_INSTALL_PREFIX ${NVAPI_DIR})
 
   # Define toolkits so that CMake can put absolute paths to linker; the library existence is not checked here.
-  foreach (aLibIter ${NVAPI_TKLIST})
-    add_library (${aLibIter} SHARED IMPORTED)
+  add_library (NVAPI::NVAPI SHARED IMPORTED)
 
-    set_property (TARGET ${aLibIter} APPEND PROPERTY IMPORTED_CONFIGURATIONS RELEASE)
-    set_target_properties (${aLibIter} PROPERTIES IMPORTED_IMPLIB "${NVAPI_LIBRARY_DIR}/${CMAKE_SHARED_LIBRARY_PREFIX}${aLibIter}${NVAPI_TKSUFFIX}${NVAPI_IMPLIB_SUFFIX}")
-    set_target_properties (${aLibIter} PROPERTIES INTERFACE_INCLUDE_DIRECTORIES ${NVAPI_INCLUDE_DIR})
-  endforeach()
+  set_property (TARGET NVAPI::NVAPI APPEND PROPERTY IMPORTED_CONFIGURATIONS RELEASE)
+  set_target_properties (NVAPI::NVAPI PROPERTIES IMPORTED_IMPLIB "${NVAPI_LIBRARY_DIR}/${CMAKE_SHARED_LIBRARY_PREFIX}nvapi${NVAPI_TKSUFFIX}${NVAPI_IMPLIB_SUFFIX}")
+  set_target_properties (NVAPI::NVAPI PROPERTIES INTERFACE_INCLUDE_DIRECTORIES ${NVAPI_INCLUDE_DIR})
 else()
   # no fallback
   set (NVAPI_FOUND OFF)
