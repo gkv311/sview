@@ -40,8 +40,6 @@ mkdir -p $aDebRoot/usr/bin
 mkdir -p $aDebRoot/usr/lib
 mkdir -p $aDebRoot/usr/share
 mkdir -p $aDebRoot/usr/lib/sView/info
-mkdir -p $aDebRoot/usr/lib/firefox/plugins
-mkdir -p $aDebRoot/usr/lib/mozilla/plugins
 
 # copy common files
 cp -f -r ../share/*     $aDebRoot/usr/share/
@@ -52,10 +50,8 @@ mv -f ../bin/LINUX_gcc/build.log $aDebRoot/
 cp -f -r ../bin/LINUX_gcc/* $aDebRoot/usr/lib/sView/
 
 # create symbolic links
-ln --force --symbolic /usr/lib/sView/sView                                 $aDebRoot/usr/bin/sView
-ln --force --symbolic /usr/lib/sView/StBrowserPlugins/npStBrowserPlugin.so $aDebRoot/usr/lib/firefox/plugins/npStBrowserPlugin.so
-ln --force --symbolic /usr/lib/sView/StBrowserPlugins/npStBrowserPlugin.so $aDebRoot/usr/lib/mozilla/plugins/npStBrowserPlugin.so
-ln --force --symbolic ../../share/sView/demo/demo.jps                      $aDebRoot/usr/lib/sView/demo.jps
+ln --force --symbolic /usr/lib/sView/sView            $aDebRoot/usr/bin/sView
+ln --force --symbolic ../../share/sView/demo/demo.jps $aDebRoot/usr/lib/sView/demo.jps
 
 # create DEB control file
 debControlFile=$aDebRoot/debian/control
@@ -93,7 +89,7 @@ EOF
 #cd $aDebRoot
 #sViewBin=$PWD/usr/share/sView
 #results=$PWD/debian/substvars
-#dpkg-shlibdeps -O $sViewBin/StDrawers/StImageViewer.so $sViewBin/StDrawers/StMoviePlayer.so $sViewBin/sView $sViewBin/StCore.so $sViewBin/StMonitorsDump.so $sViewBin/StBrowserPlugins/npStBrowserPlugin.so $sViewBin/StRenderers/StOutAnaglyph.so $sViewBin/StRenderers/StOutDual.so $sViewBin/StRenderers/StOutInterlace.so $sViewBin/StRenderers/StOutIZ3D.so $sViewBin/StRenderers/StOutPageFlip.so
+#dpkg-shlibdeps -O $sViewBin/StDrawers/StImageViewer.so $sViewBin/StDrawers/StMoviePlayer.so $sViewBin/sView $sViewBin/StCore.so $sViewBin/StMonitorsDump.so $sViewBin/StRenderers/StOutAnaglyph.so $sViewBin/StRenderers/StOutDual.so $sViewBin/StRenderers/StOutInterlace.so $sViewBin/StRenderers/StOutIZ3D.so $sViewBin/StRenderers/StOutPageFlip.so
 #cd ..
 
 # prepare directory for dpkg --build

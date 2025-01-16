@@ -82,12 +82,6 @@ english.StCore=Core files
 spanish.StCore=Archivos compartidos
 russian.StCore=Общие файлы
 german.StCore=Core-Dateien
-english.StBrowserPlugins=NPAPI Browser plugin (Firefox, Google Chrome, Opera,...)
-spanish.StBrowserPlugins=Plugin de navegador NPAPI (Firefox, Google Chrome, Opera,...)
-russian.StBrowserPlugins=NPAPI плагин для браузеров Firefox, Google Chrome, Opera,...
-english.StActiveXPlugin=ActiveX control for Internet Explorer
-spanish.StActiveXPlugin=Control ActiveX para Internet Explorer
-russian.StActiveXPlugin=ActiveX плагин для браузера Internet Explorer
 english.StDrawers=Media types support
 spanish.StDrawers=Soporte de tipos de medios
 russian.StDrawers=Поддержка медиа-типов
@@ -155,8 +149,6 @@ Name: custom; Description: "{cm:CustomInstallation}"; Flags: iscustom
 
 [Components]
 Name: StCore;                     Description: "{cm:StCore}";           Types: custom full; Flags: fixed
-Name: StBrowserPlugins;           Description: "{cm:StBrowserPlugins}"; Types: custom full
-Name: StActiveXPlugin;            Description: "{cm:StActiveXPlugin}";  Types: custom full
 Name: StDrawers;                  Description: "{cm:StDrawers}";        Types: custom full; Flags: fixed
 Name: StDrawers\StImageViewer;    Description: "{cm:StImageViewer}";    Types: custom full
 Name: StDrawers\StMoviePlayer;    Description: "{cm:StMoviePlayer}";    Types: custom full
@@ -206,12 +198,6 @@ Source: {#SVIEW_DISTR_PATH_x86}\sw*.dll;          DestDir: {app};        Flags: 
 Source: {#SVIEW_DISTR_PATH_AMD64}\av*.dll;        DestDir: {app}\amd64;  Flags: 64bit ignoreversion; Components: StCore; Check: IsWin64
 Source: {#SVIEW_DISTR_PATH_AMD64}\sw*.dll;        DestDir: {app}\amd64;  Flags: 64bit ignoreversion; Components: StCore; Check: IsWin64
 
-; Browser plugin
-Source: {#SVIEW_DISTR_PATH_x86}\npStBrowserPlugin.dll;   DestDir: {app};       Flags: 32bit ignoreversion; Components: StBrowserPlugins or StActiveXPlugin
-Source: {#SVIEW_DISTR_PATH_AMD64}\npStBrowserPlugin.dll; DestDir: {app}\amd64; Flags: 64bit ignoreversion; Components: StBrowserPlugins or StActiveXPlugin; Check: IsWin64
-Source: {#SVIEW_DISTR_PATH_x86}\mfc*.dll;                DestDir: {app};       Flags: 32bit ignoreversion; Components: StBrowserPlugins or StActiveXPlugin
-Source: {#SVIEW_DISTR_PATH_AMD64}\mfc*.dll;              DestDir: {app}\amd64; Flags: 64bit ignoreversion; Components: StBrowserPlugins or StActiveXPlugin; Check: IsWin64
-
 ; StRenderers -> StOutAnaglyph
 Source: {#SVIEW_DISTR_PATH_x86}\StOutAnaglyph.dll;                DestDir: {app};                              Flags: 32bit ignoreversion;                Components: StRenderers\StOutAnaglyph
 Source: {#SVIEW_DISTR_PATH_x86}\lang\*StOutAnaglyph.lng;          DestDir: {app}\lang;                         Flags: 32bit ignoreversion recursesubdirs; Components: StRenderers\StOutAnaglyph
@@ -243,7 +229,7 @@ Source: {#SVIEW_DISTR_PATH_AMD64}\StOutDistorted.dll;             DestDir: {app}
 Source: {#SVIEW_DISTR_PATH_AMD64}\openvr_api.dll;                 DestDir: {app}\amd64;                        Flags: 64bit ignoreversion;                Components: StRenderers\StOutDistorted; Check: IsWin64
 
 ; StDrawers
-Source: {#SVIEW_DISTR_PATH_x86}\textures\*;                    DestDir: {app}\textures;        Flags: 32bit ignoreversion; Components: StDrawers\StImageViewer or StDrawers\StMoviePlayer or StBrowserPlugins or StActiveXPlugin
+Source: {#SVIEW_DISTR_PATH_x86}\textures\*;                    DestDir: {app}\textures;        Flags: 32bit ignoreversion; Components: StDrawers\StImageViewer or StDrawers\StMoviePlayer
 Source: {#SVIEW_DISTR_PATH_x86}\icons\sView_Media.ico;         DestDir: {app}\icons;           Flags: 32bit ignoreversion; Components: StDrawers\StImageViewer or StDrawers\StMoviePlayer
 ; StDrawers -> Image Viewer
 Source: {#SVIEW_DISTR_PATH_x86}\StImageViewer.dll;             DestDir: {app};                 Flags: 32bit ignoreversion; Components: StCore
@@ -298,9 +284,6 @@ Name: {userappdata}\Microsoft\Internet Explorer\Quick Launch\{#SVIEW_NAME}; File
 
 [Run]
 ;Filename: {app}\{#SVIEW_EXE_NAME}; WorkingDir: {app}; Components: StDrawers\StImageViewer; Description: {cm:LaunchProgram,{#SVIEW_NAME}}; Parameters: --in=image - demo.jps; Flags: nowait postinstall skipifsilent
-; ActiveX Control registration
-Filename: regsvr32; Parameters: "/s ""{app}\npStBrowserPlugin.dll""";       Components: StActiveXPlugin; Flags: 32bit
-Filename: regsvr32; Parameters: "/s ""{app}\amd64\npStBrowserPlugin.dll"""; Components: StActiveXPlugin; Flags: 64bit; Check: IsWin64
 
 [Registry]
 ; Install/Uninstall info
@@ -412,45 +395,6 @@ Root: HKLM32; SubKey: SYSTEM\CurrentControlSet\Control\Session Manager\Environme
 Root: HKCU32; SubKey: Environment;                                                  ValueType: string; ValueName: StCore32; ValueData: {app}\; Flags: uninsdeletevalue
 Root: HKLM64; SubKey: SYSTEM\CurrentControlSet\Control\Session Manager\Environment; ValueType: string; ValueName: StCore64; ValueData: {app}\amd64\; Flags: uninsdeletevalue; Check: IsWin64
 Root: HKCU64; SubKey: Environment;                                                  ValueType: string; ValueName: StCore64; ValueData: {app}\amd64\; Flags: uninsdeletevalue; Check: IsWin64
-; x86 NPAPI Browser plugin registration
-Root: HKLM32; SubKey: SOFTWARE\MozillaPlugins\@sview.ru/sView;   ValueType: string; ValueName: Path;        ValueData: {app}\npStBrowserPlugin.dll; Components: StBrowserPlugins; Flags: uninsdeletekey
-Root: HKLM32; SubKey: SOFTWARE\MozillaPlugins\@sview.ru/sView;   ValueType: string; ValueName: ProductName; ValueData: sView;                  Components: StBrowserPlugins; Flags: uninsdeletekey
-Root: HKLM32; SubKey: SOFTWARE\MozillaPlugins\@sview.ru/sView;   ValueType: string; ValueName: Vendor;      ValueData: sView;                  Components: StBrowserPlugins; Flags: uninsdeletekey
-Root: HKLM32; SubKey: SOFTWARE\MozillaPlugins\@sview.ru/sView;   ValueType: string; ValueName: Description; ValueData: sView - Browser Plugin; Components: StBrowserPlugins; Flags: uninsdeletekey
-; AMD64 NPAPI Browser plugin registration
-Root: HKLM64; SubKey: SOFTWARE\MozillaPlugins\@sview.ru/sView;   ValueType: string; ValueName: Path;        ValueData: {app}\amd64\npStBrowserPlugin.dll; Components: StBrowserPlugins; Flags: uninsdeletekey; Check: IsWin64
-Root: HKLM64; SubKey: SOFTWARE\MozillaPlugins\@sview.ru/sView;   ValueType: string; ValueName: ProductName; ValueData: sView;                  Components: StBrowserPlugins; Flags: uninsdeletekey; Check: IsWin64
-Root: HKLM64; SubKey: SOFTWARE\MozillaPlugins\@sview.ru/sView;   ValueType: string; ValueName: Vendor;      ValueData: sView;                  Components: StBrowserPlugins; Flags: uninsdeletekey; Check: IsWin64
-Root: HKLM64; SubKey: SOFTWARE\MozillaPlugins\@sview.ru/sView;   ValueType: string; ValueName: Description; ValueData: sView - Browser Plugin; Components: StBrowserPlugins; Flags: uninsdeletekey; Check: IsWin64
-; NPAPI Browser plugin MIME types
-Root: HKLM; SubKey: SOFTWARE\MozillaPlugins\@sview.ru/sView\MimeTypes\image/jps;   ValueType: string; ValueName: Description; ValueData: JPS - jpeg stereo image;    Components: StBrowserPlugins; Flags: uninsdeletekey
-Root: HKLM; SubKey: SOFTWARE\MozillaPlugins\@sview.ru/sView\MimeTypes\image/jps;   ValueType: string; ValueName: Suffixes;    ValueData: jps;                        Components: StBrowserPlugins; Flags: uninsdeletekey
-Root: HKLM; SubKey: SOFTWARE\MozillaPlugins\@sview.ru/sView\MimeTypes\image/x-jps; ValueType: string; ValueName: Description; ValueData: JPS - jpeg stereo image;    Components: StBrowserPlugins; Flags: uninsdeletekey
-Root: HKLM; SubKey: SOFTWARE\MozillaPlugins\@sview.ru/sView\MimeTypes\image/x-jps; ValueType: string; ValueName: Suffixes;    ValueData: jps;                        Components: StBrowserPlugins; Flags: uninsdeletekey
-Root: HKLM; SubKey: SOFTWARE\MozillaPlugins\@sview.ru/sView\MimeTypes\image/pns;   ValueType: string; ValueName: Description; ValueData: PNS - png stereo image;     Components: StBrowserPlugins; Flags: uninsdeletekey
-Root: HKLM; SubKey: SOFTWARE\MozillaPlugins\@sview.ru/sView\MimeTypes\image/pns;   ValueType: string; ValueName: Suffixes;    ValueData: pns;                        Components: StBrowserPlugins; Flags: uninsdeletekey
-Root: HKLM; SubKey: SOFTWARE\MozillaPlugins\@sview.ru/sView\MimeTypes\image/x-pns; ValueType: string; ValueName: Description; ValueData: PNS - png stereo image;     Components: StBrowserPlugins; Flags: uninsdeletekey
-Root: HKLM; SubKey: SOFTWARE\MozillaPlugins\@sview.ru/sView\MimeTypes\image/x-pns; ValueType: string; ValueName: Suffixes;    ValueData: pns;                        Components: StBrowserPlugins; Flags: uninsdeletekey
-Root: HKLM; SubKey: SOFTWARE\MozillaPlugins\@sview.ru/sView\MimeTypes\image/mpo;   ValueType: string; ValueName: Description; ValueData: MPO - multi picture object; Components: StBrowserPlugins; Flags: uninsdeletekey
-Root: HKLM; SubKey: SOFTWARE\MozillaPlugins\@sview.ru/sView\MimeTypes\image/mpo;   ValueType: string; ValueName: Suffixes;    ValueData: mpo;                        Components: StBrowserPlugins; Flags: uninsdeletekey
-Root: HKLM; SubKey: SOFTWARE\MozillaPlugins\@sview.ru/sView\MimeTypes\image/x-mpo; ValueType: string; ValueName: Description; ValueData: MPO - multi picture object; Components: StBrowserPlugins; Flags: uninsdeletekey
-Root: HKLM; SubKey: SOFTWARE\MozillaPlugins\@sview.ru/sView\MimeTypes\image/x-mpo; ValueType: string; ValueName: Suffixes;    ValueData: mpo;                        Components: StBrowserPlugins; Flags: uninsdeletekey
-Root: HKLM; SubKey: SOFTWARE\MozillaPlugins\@sview.ru/sView\Suffixes;              ValueType: string; ValueName: jps;                                                Components: StBrowserPlugins; Flags: uninsdeletekey
-Root: HKLM; SubKey: SOFTWARE\MozillaPlugins\@sview.ru/sView\Suffixes;              ValueType: string; ValueName: pns;                                                Components: StBrowserPlugins; Flags: uninsdeletekey
-Root: HKLM; SubKey: SOFTWARE\MozillaPlugins\@sview.ru/sView\Suffixes;              ValueType: string; ValueName: mpo;                                                Components: StBrowserPlugins; Flags: uninsdeletekey
-; ActiveX Control MIME types registration
-Root: HKCR; SubKey: MIME\Database\Content Type\image/jps;   ValueType: string; ValueName: CLSID;     ValueData: {{027792d0-5136-4ea3-9bec-34276dfe4362}; Components: StActiveXPlugin; Flags: uninsdeletekey
-Root: HKCR; SubKey: MIME\Database\Content Type\image/jps;   ValueType: string; ValueName: Extension; ValueData: .jps;                                    Components: StActiveXPlugin; Flags: uninsdeletekey
-Root: HKCR; SubKey: MIME\Database\Content Type\image/x-jps; ValueType: string; ValueName: CLSID;     ValueData: {{027792d0-5136-4ea3-9bec-34276dfe4362}; Components: StActiveXPlugin; Flags: uninsdeletekey
-Root: HKCR; SubKey: MIME\Database\Content Type\image/x-jps; ValueType: string; ValueName: Extension; ValueData: .jps;                                    Components: StActiveXPlugin; Flags: uninsdeletekey
-Root: HKCR; SubKey: MIME\Database\Content Type\image/pns;   ValueType: string; ValueName: CLSID;     ValueData: {{027792d0-5136-4ea3-9bec-34276dfe4362}; Components: StActiveXPlugin; Flags: uninsdeletekey
-Root: HKCR; SubKey: MIME\Database\Content Type\image/pns;   ValueType: string; ValueName: Extension; ValueData: .pns;                                    Components: StActiveXPlugin; Flags: uninsdeletekey
-Root: HKCR; SubKey: MIME\Database\Content Type\image/x-pns; ValueType: string; ValueName: CLSID;     ValueData: {{027792d0-5136-4ea3-9bec-34276dfe4362}; Components: StActiveXPlugin; Flags: uninsdeletekey
-Root: HKCR; SubKey: MIME\Database\Content Type\image/x-pns; ValueType: string; ValueName: Extension; ValueData: .pns;                                    Components: StActiveXPlugin; Flags: uninsdeletekey
-Root: HKCR; SubKey: MIME\Database\Content Type\image/mpo;   ValueType: string; ValueName: CLSID;     ValueData: {{027792d0-5136-4ea3-9bec-34276dfe4362}; Components: StActiveXPlugin; Flags: uninsdeletekey
-Root: HKCR; SubKey: MIME\Database\Content Type\image/mpo;   ValueType: string; ValueName: Extension; ValueData: .mpo;                                    Components: StActiveXPlugin; Flags: uninsdeletekey
-Root: HKCR; SubKey: MIME\Database\Content Type\image/x-mpo; ValueType: string; ValueName: CLSID;     ValueData: {{027792d0-5136-4ea3-9bec-34276dfe4362}; Components: StActiveXPlugin; Flags: uninsdeletekey
-Root: HKCR; SubKey: MIME\Database\Content Type\image/x-mpo; ValueType: string; ValueName: Extension; ValueData: .mpo;                                    Components: StActiveXPlugin; Flags: uninsdeletekey
 
 [INI]
 Filename: {app}\sview.ru.url; Section: InternetShortcut; Key: URL; String: {#SVIEW_URL}
@@ -459,9 +403,7 @@ Filename: {app}\sview.ru.url; Section: InternetShortcut; Key: URL; String: {#SVI
 Type: files; Name: {app}\sview.ru.url
 
 [UninstallRun]
-; ActiveX Control de-registration
-Filename: regsvr32; Parameters: "/u /s ""{app}\npStBrowserPlugin.dll""";       Components: StActiveXPlugin; Flags: 32bit
-Filename: regsvr32; Parameters: "/u /s ""{app}\amd64\npStBrowserPlugin.dll"""; Components: StActiveXPlugin; Flags: 64bit; Check: IsWin64
+; nothing
 
 [Dirs]
 
@@ -470,4 +412,5 @@ Name: {app}\;                  Type: filesandordirs
 Name: {group}\;                Type: filesandordirs
 Name: {app}\input\;            Type: filesandordirs
 Name: {app}\StRenderers\;      Type: filesandordirs
+; legacy files from previous installations
 Name: {app}\StBrowserPlugins\; Type: filesandordirs

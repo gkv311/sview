@@ -13,6 +13,7 @@ sView ??.?? (in development)
 - Image Viewer now detects side-by-side stereopairs from **QooCam EGO** camera.
 - Linux - enable building with `libopenvr-dev` for **OpenVR** support (untested).
 - Linux - **zenity** is now used instead of `GTK2` for open-file dialog.
+- Removed legacy NPAPI/ActiveX plugin (browsers dropped support for native plugins since 2015-2018).
 
 sView 23.02 (2023-02-14)
 -----------------------------------------------------------------------------------------------------------------------

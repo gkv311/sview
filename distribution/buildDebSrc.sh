@@ -85,7 +85,6 @@ cp -f -r ../adm            $aDebSrcRoot/
 cp -f    ../CMakeLists.txt $aDebSrcRoot/
 cp -f -r ../StMonitorsDump $aDebSrcRoot/
 cp -f -r ../StTests        $aDebSrcRoot/
-cp -f -r ../StBrowserPlugin $aDebSrcRoot/
 cp -f    ../README.md      $aDebSrcRoot/
 cp -f    ../README.md      $aDebSrcRoot/README
 cp -f    ../LICENSE_GPL_3-0.txt $aDebSrcRoot/LICENSE

@@ -437,7 +437,6 @@ add_subdirectory(StImageViewer)
 add_subdirectory(StMoviePlayer)
 
 if (NOT ANDROID)
-  add_subdirectory(StBrowserPlugin)
   add_subdirectory(StMonitorsDump)
   add_subdirectory(StTests)
 endif()
