@@ -150,36 +150,7 @@ StHandle<StImageFile> StImageFile::create(const StString& thePreferred,
 
 StHandle<StImageFile> StImageFile::create(StImageFile::ImageClass thePreferred,
                                           ImageType               theImgType) {
-    // firstly parse image type - exceptions
-    // that supported not by all libraries
-    switch(theImgType) {
-        case ST_TYPE_EXR: {
-            // only FreeImage currently supports OpenEXR images
-            if(StFreeImage::init()) {
-                return new StFreeImage();
-            }
-            break;
-        }
-        case ST_TYPE_PSD:
-        case ST_TYPE_ICO:
-        case ST_TYPE_WEBP:
-        case ST_TYPE_WEBPLL: {
-            break;
-        }
-        case ST_TYPE_HDR: {
-            // FFmpeg doesn't support HDR
-            // DevIL supports them best (FreeImage has problems)
-            if(StDevILImage::init()) {
-                return new StDevILImage();
-            } else if(StFreeImage::init()) {
-                return new StFreeImage();
-            }
-            break;
-        }
-        default:
-            break;
-    }
-
+    (void)theImgType;
     // open requested library if it exists
     switch(thePreferred) {
         case ST_FREEIMAGE: {
