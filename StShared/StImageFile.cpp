@@ -160,20 +160,14 @@ StHandle<StImageFile> StImageFile::create(StImageFile::ImageClass thePreferred,
             }
             break;
         }
-        case ST_TYPE_PSD: {
-            // only DevIL currently supports PSD images
-            if(StDevILImage::init()) {
-                return new StDevILImage();
-            }
-            break;
-        }
+        case ST_TYPE_PSD:
+        case ST_TYPE_ICO:
         case ST_TYPE_WEBP:
         case ST_TYPE_WEBPLL: {
             break;
         }
-        case ST_TYPE_ICO:
         case ST_TYPE_HDR: {
-            // FFmpeg doesn't supports ICO and HDR
+            // FFmpeg doesn't support HDR
             // DevIL supports them best (FreeImage has problems)
             if(StDevILImage::init()) {
                 return new StDevILImage();
