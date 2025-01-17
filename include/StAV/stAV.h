@@ -54,7 +54,7 @@ namespace stAV {
     /**
      * Should be called at application start.
      */
-    ST_CPPEXPORT bool init();
+    ST_CPPEXPORT bool init(int theLogLevel = -1);
 
     /**
      * Returns string description for AVError code.

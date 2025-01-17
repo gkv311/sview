@@ -18,6 +18,11 @@
 
 #include "StEventsBuffer.h"
 
+namespace stAV
+{
+  ST_CPPIMPORT bool init(int theLogLevel);
+}
+
 namespace {
 
     static const StCString ST_SETTING_RENDERER_AUTO = stCString("rendererPluginAuto");
@@ -541,6 +546,7 @@ StHandle<StOpenInfo> StApplication::parseProcessArguments() {
     const StString ARGUMENT_LEFT_VIEW         = "left";
     const StString ARGUMENT_RIGHT_VIEW        = "right";
     const StString ARGUMENT_DEMO              = "demo";
+    const StString ARGUMENT_AVLOG             = "avlog";
     // parse extra parameters
     for(size_t aParamIter = 1; aParamIter < anArguments.size(); ++aParamIter) {
         StString aParam = anArguments[aParamIter];
@@ -578,6 +584,26 @@ StHandle<StOpenInfo> StApplication::parseProcessArguments() {
                 anArg.setValue(aFilePath);
                 anInfo->setPath(aFilePath);
                 anOpenFileArgs.add(anArg);
+            } else if(anArg.getKey().isEqualsIgnoreCase(ARGUMENT_AVLOG)) {
+                int aLevel = 0;
+                if (anArg.getValue().isEquals(stCString("0"))
+                 || anArg.getValue().isEqualsIgnoreCase(stCString("off"))) {
+                    aLevel = 0;
+                } else if (anArg.getValue().isEquals(stCString("1"))
+                        || anArg.getValue().isEqualsIgnoreCase(stCString("on"))) {
+                    aLevel = 1;
+                } else if (anArg.getValue().isEquals(stCString("2"))
+                        || anArg.getValue().isEqualsIgnoreCase(stCString("trace"))
+                        || anArg.getValue().isEqualsIgnoreCase(stCString("verbose"))) {
+                    aLevel = 2;
+                } else if (anArg.getValue().isEquals(stCString("-1"))
+                        || anArg.getValue().isEqualsIgnoreCase(stCString("auto"))) {
+                    aLevel = -1;
+                } else {
+                    stErrorConsole(StString("Syntax error at '") + aParam + "'");
+                    return NULL;
+                }
+                stAV::init(aLevel);
             } else {
                 // pass argument unchanged
                 anOpenFileArgs.add(anArg);

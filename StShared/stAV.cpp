@@ -167,16 +167,22 @@ StCString stAV::PIX_FMT::getString(const AVPixelFormat theFrmt) {
 
 namespace {
 
-#if defined(ST_DEBUG_FFMPEG) || defined(ST_DEBUG_FFMPEG_VERBOSE)
+    static int ST_FFMPEG_DEBUG_LEVEL =
+#if defined(ST_DEBUG_FFMPEG_VERBOSE)
+      2;
+#elif defined(ST_DEBUG_FFMPEG)
+      1;
+#else
+      0;
+#endif
+
     /**
      * Logger callback.
      */
     static void stAvLogCallback(void* thePtr, int theLevel, const char* theFormat, va_list theArgs) {
-    #if !defined(ST_DEBUG_FFMPEG_VERBOSE)
-        if(theLevel > AV_LOG_INFO) {
+        if(ST_FFMPEG_DEBUG_LEVEL < 2 && theLevel > AV_LOG_INFO) {
             return;
         }
-    #endif
 
         //static int aPrintPrefix = 1;
         int aPrintPrefix = 1;
@@ -202,15 +208,17 @@ namespace {
 
         StLogger::GetDefault().write(StString(aLine), aLevelSt);
     }
-#endif
 
-    static bool initOnce() {
+    static bool initOnce(int theLogLevel) {
         avformat_network_init();
         ST_DEBUG_LOG("FFmpeg initialized:");
 
-    #if defined(ST_DEBUG_FFMPEG) || defined(ST_DEBUG_FFMPEG_VERBOSE)
-        av_log_set_callback(stAvLogCallback);
-    #endif
+        if (theLogLevel != -1) {
+            ST_FFMPEG_DEBUG_LEVEL = theLogLevel;
+        }
+        if (ST_FFMPEG_DEBUG_LEVEL > 0) {
+            av_log_set_callback(&stAvLogCallback);
+        }
 
         // show up information about dynamically linked libraries
         ST_DEBUG_LOG("  libavutil\t"   + stAV::Version::libavutil().toString());
@@ -223,8 +231,8 @@ namespace {
 
 }
 
-bool stAV::init() {
-    static const bool isFFmpegInitiailed = initOnce();
+bool stAV::init(int theLogLevel) {
+    static const bool isFFmpegInitiailed = initOnce(theLogLevel);
     return isFFmpegInitiailed;
 }
 

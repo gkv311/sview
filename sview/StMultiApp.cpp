@@ -49,6 +49,7 @@ static StString getAbout() {
             + st::formatToString(StFormat_FrameSequence) + "\n"
         + "  --left=PATH          Specify source for left view\n"
           "  --right=PATH         Specify source for right view\n"
+          "  --avlog=LEVEL        Specify log level for FFmpeg library (0: off, 1: on, 2: verbose)\n"
           "  --webuiCmdPort=PORT  Use http://localhost:PORT for remote control (see --invokeAction).\n"
           "  --invokeAction=ACT   Invoke action on http://localhost:PORT.\n"
           "                       play - play/pause\n"
