@@ -639,9 +639,19 @@ bool StAVImage::loadExtra(const StString& theFilePath,
         }
     } else {
         ///ST_DEBUG_LOG("StAVImage, perform conversion from Pixel format '" + avcodec_get_pix_fmt_name(myCodecCtx->pix_fmt) + "' to RGB");
+
+        // TODO - rely on AV_PIX_FMT_FLAG_ALPHA
+        //const AVPixFmtDescriptor* aDesc = av_pix_fmt_desc_get(myCodecCtx->pix_fmt);
+        //const bool hasAlpha = aDesc != NULL && (aDesc->flags & AV_PIX_FMT_FLAG_ALPHA);
+        const bool hasAlpha = myCodecCtx->pix_fmt == stAV::PIX_FMT::GBRAP
+                           || myCodecCtx->pix_fmt == stAV::PIX_FMT::GBRAP10
+                           || myCodecCtx->pix_fmt == stAV::PIX_FMT::GBRAP12
+                           || myCodecCtx->pix_fmt == stAV::PIX_FMT::GBRAP14
+                           || myCodecCtx->pix_fmt == stAV::PIX_FMT::GBRAP16;
+
         // initialize software scaler/converter
         SwsContext* pToRgbCtx = sws_getContext(myCodecCtx->width, myCodecCtx->height, myCodecCtx->pix_fmt,    // source
-                                               myCodecCtx->width, myCodecCtx->height, stAV::PIX_FMT::RGB24, // destination
+                                               myCodecCtx->width, myCodecCtx->height, hasAlpha ? stAV::PIX_FMT::RGBA32 : stAV::PIX_FMT::RGB24, // destination
                                                SWS_BICUBIC, NULL, NULL, NULL);
         if(pToRgbCtx == NULL) {
             setState("SWScale library, failed to create SWScaler context");
@@ -650,8 +660,8 @@ bool StAVImage::loadExtra(const StString& theFilePath,
         }
 
         // initialize additional buffer for converted RGB data
-        setColorModel(StImage::ImgColor_RGB);
-        changePlane(0).initTrash(StImagePlane::ImgRGB,
+        setColorModel(hasAlpha ? StImage::ImgColor_RGBA : StImage::ImgColor_RGB);
+        changePlane(0).initTrash(hasAlpha ? StImagePlane::ImgRGBA : StImagePlane::ImgRGB,
                                  myCodecCtx->width, myCodecCtx->height);
 
         uint8_t* rgbData[4]; stMemZero(rgbData,     sizeof(rgbData));

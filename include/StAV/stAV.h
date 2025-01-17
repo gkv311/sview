@@ -24,6 +24,7 @@ extern "C" {
 
     #include <libavutil/mathematics.h>
     #include <libavutil/opt.h>
+    #include <libavutil/pixdesc.h>
 
     // new stereoscopic info API
 #if(LIBAVUTIL_VERSION_INT >= AV_VERSION_INT(52, 56, 100))
@@ -258,7 +259,7 @@ namespace stAV {
         ST_SHARED_CPPEXPORT AVPixelFormat YUVJ422P;  //!< planar YUV 4:2:2, 16bpp, full scale (JPEG)
         ST_SHARED_CPPEXPORT AVPixelFormat YUVJ444P;  //!< planar YUV 4:4:4, 24bpp, full scale (JPEG)
         ST_SHARED_CPPEXPORT AVPixelFormat YUVJ440P;  //!< planar YUV 4:4:0 full scale (JPEG)
-        // RGB formats
+        // packed RGB formats
         ST_SHARED_CPPEXPORT AVPixelFormat RGB24;     //!< packed RGB 8:8:8, 24bpp, RGBRGB...
         ST_SHARED_CPPEXPORT AVPixelFormat BGR24;     //!< packed RGB 8:8:8, 24bpp, BGRBGR...
         ST_SHARED_CPPEXPORT AVPixelFormat RGB48;
@@ -267,6 +268,14 @@ namespace stAV {
         ST_SHARED_CPPEXPORT AVPixelFormat BGRA32;
         ST_SHARED_CPPEXPORT AVPixelFormat RGBA64;
         ST_SHARED_CPPEXPORT AVPixelFormat BGRA64;
+        // planar GBR(A)
+        //ST_SHARED_CPPEXPORT AVPixelFormat GBRP;
+        //ST_SHARED_CPPEXPORT AVPixelFormat GBRP16;
+        ST_SHARED_CPPEXPORT AVPixelFormat GBRAP;
+        ST_SHARED_CPPEXPORT AVPixelFormat GBRAP10;
+        ST_SHARED_CPPEXPORT AVPixelFormat GBRAP12;
+        ST_SHARED_CPPEXPORT AVPixelFormat GBRAP14;
+        ST_SHARED_CPPEXPORT AVPixelFormat GBRAP16;
         ST_SHARED_CPPEXPORT AVPixelFormat GBRPF32;
         ST_SHARED_CPPEXPORT AVPixelFormat GBRAPF32;
         // XYZ formats
