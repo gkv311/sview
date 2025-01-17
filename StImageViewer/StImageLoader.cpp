@@ -750,8 +750,10 @@ bool StImageLoader::saveImage(const StHandle<StFileNode>&     theSource,
         if(toSave) {
             ST_DEBUG_LOG("Save snapshot to the path '" + aFileToSave + '\'');
             StString strSaveState;
-            if(!aDataResult->save(aFileToSave, theImgType,
-                                  toSaveStereo ? StFormat_SideBySide_RL : StFormat_AUTO)) {
+            StImageFile::SaveImageParams aSaveParams;
+            aSaveParams.SaveImageType = theImgType;
+            aSaveParams.StereoFormat = toSaveStereo ? StFormat_SideBySide_RL : StFormat_AUTO;
+            if(!aDataResult->save(aFileToSave, aSaveParams)) {
                 // TODO (Kirill Gavrilov#7)
                 myMsgQueue->pushError(aDataResult->getState());
                 return false;

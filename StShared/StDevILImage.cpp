@@ -401,11 +401,10 @@ bool StDevILImage::resize(size_t theSizeX, size_t theSizeY) {
 }
 
 bool StDevILImage::save(const StString& theFilePath,
-                        ImageType       theImageType,
-                        StFormat ) {
+                        const SaveImageParams& theParams) {
     setState();
 
-    ILenum anImageTypeIl = convertStImage2DevIL(theImageType);
+    ILenum anImageTypeIl = convertStImage2DevIL(theParams.SaveImageType);
     if(anImageTypeIl == IL_TYPE_UNKNOWN) {
         setState("DevIL library, doesn't requested image type");
         return false;

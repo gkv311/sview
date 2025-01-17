@@ -653,8 +653,7 @@ bool StAVImage::loadExtra(const StString& theFilePath,
 }
 
 bool StAVImage::save(const StString& theFilePath,
-                     ImageType       theImageType,
-                     StFormat        theSrcFormat) {
+                     const SaveImageParams& theParams) {
     close();
     setState();
     if(isNull()) {
@@ -668,7 +667,7 @@ bool StAVImage::save(const StString& theFilePath,
     }
 
     StImage anImage;
-    switch(theImageType) {
+    switch(theParams.SaveImageType) {
         case ST_TYPE_PNG:
         case ST_TYPE_PNS: {
             myCodec = avcodec_find_encoder_by_name("png");
@@ -770,7 +769,7 @@ bool StAVImage::save(const StString& theFilePath,
     fillPointersAV(anImage, myFrame.Frame->data, myFrame.Frame->linesize);
 
     bool isReversed = false;
-    AVStereo3DType anAvStereoType = stAV::stereo3dStToAv(theSrcFormat, isReversed);
+    AVStereo3DType anAvStereoType = stAV::stereo3dStToAv(theParams.StereoFormat, isReversed);
     if(anAvStereoType != (AVStereo3DType )-1) {
         AVStereo3D* aStereo = av_stereo3d_create_side_data(myFrame.Frame);
         if(aStereo != NULL) {
@@ -806,11 +805,11 @@ bool StAVImage::save(const StString& theFilePath,
     aRawFile.setDataSize((size_t )anEncSize);
 
     // save metadata when possible
-    if(theImageType == ST_TYPE_JPEG
-    || theImageType == ST_TYPE_JPS) {
+    if(theParams.SaveImageType == ST_TYPE_JPEG
+    || theParams.SaveImageType == ST_TYPE_JPS) {
         if(aRawFile.parse()) {
-            if(theSrcFormat != StFormat_AUTO) {
-                aRawFile.setupJps(theSrcFormat);
+            if(theParams.StereoFormat != StFormat_AUTO) {
+                aRawFile.setupJps(theParams.StereoFormat);
             }
         } else {
             ST_ERROR_LOG("AVCodec library, created JPEG can not be parsed!");

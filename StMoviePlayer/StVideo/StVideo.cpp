@@ -1389,8 +1389,10 @@ bool StVideo::saveSnapshotAs(StImageFile::ImageType theImgType) {
             fileToSave += StString('.') + saveExt;
         }
         ST_DEBUG_LOG("Save snapshot to the path '" + fileToSave + '\'');
-        if(!dataResult->save(fileToSave, theImgType,
-                             toSaveStereo ? StFormat_SideBySide_RL : StFormat_AUTO)) {
+        StImageFile::SaveImageParams aSaveParams;
+        aSaveParams.SaveImageType = theImgType;
+        aSaveParams.StereoFormat = toSaveStereo ? StFormat_SideBySide_RL : StFormat_AUTO;
+        if(!dataResult->save(fileToSave, aSaveParams)) {
             // TODO (Kirill Gavrilov#7)
             signals.onError(dataResult->getState());
             return false;

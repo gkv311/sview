@@ -400,14 +400,13 @@ bool StFreeImage::loadExtra(const StString& theFilePath,
 }
 
 bool StFreeImage::save(const StString& theFilePath,
-                       ImageType       theImageType,
-                       StFormat ) {
+                       const SaveImageParams& theParams) {
     if(!StFreeImage::init()) {
         setState("FreeImage library is not initialized");
         return false;
     }
 
-    FREE_IMAGE_FORMAT aFIF = convertToFIF(theImageType);
+    FREE_IMAGE_FORMAT aFIF = convertToFIF(theParams.SaveImageType);
     if(aFIF == FIF_UNKNOWN) {
         setState("FreeImage library, not supported image file format");
         return false;

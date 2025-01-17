@@ -82,8 +82,7 @@ class StAVImage : public StImageFile {
      * Save image to specified path.
      */
     ST_CPPEXPORT virtual bool save(const StString& theFilePath,
-                                   ImageType       theImageType,
-                                   StFormat        theSrcFormat = StFormat_AUTO) ST_ATTR_OVERRIDE;
+                                   const SaveImageParams& theParams) ST_ATTR_OVERRIDE;
 
         private:
 

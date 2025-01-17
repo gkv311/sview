@@ -52,6 +52,16 @@ class StImageFile : public StImage {
         ST_STB,
     } ImageClass;
 
+    /** Structure for passing parameters to image saving. */
+    struct SaveImageParams {
+        /** Image type. */
+        ImageType  SaveImageType;
+        /** Stereo format to be stored as metadata. */
+        StFormat   StereoFormat;
+
+        SaveImageParams() : SaveImageType(ST_TYPE_NONE), StereoFormat(StFormat_AUTO) {}
+    };
+
         public:
 
     ST_CPPEXPORT static ImageClass imgLibFromString(const StString&  thePreferred);
@@ -161,14 +171,12 @@ class StImageFile : public StImage {
 
     /**
      * This virtual function should be implemented by inheritors.
-     * @param theFilePath  path to save the file
-     * @param theImageType image type
-     * @param theSrcFormat stereo format - might be stored as metadata
+     * @param theFilePath path to save the file
+     * @param theParams   saving parameters
      * @return true on success
      */
     virtual bool save(const StString& theFilePath,
-                      ImageType       theImageType,
-                      StFormat        theSrcFormat) = 0;
+                      const SaveImageParams& theParams) = 0;
 
     /**
      * Create new instance of this class.
