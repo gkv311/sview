@@ -717,9 +717,8 @@ bool StAVImage::save(const StString& theFilePath,
 
             if(aPFormatAV == stAV::PIX_FMT::YUVJ420P
             || aPFormatAV == stAV::PIX_FMT::YUVJ422P
-            //|| aPFormatAV == stAV::PIX_FMT::YUVJ444P not supported by FFmpeg... yet?
-            //|| aPFormatAV == stAV::PIX_FMT::YUVJ440P
-               ) {
+            || aPFormatAV == stAV::PIX_FMT::YUVJ444P
+            || aPFormatAV == stAV::PIX_FMT::YUVJ440P) {
                 anImage.initWrapper(*this);
             } else {
                 // convert to compatible pixel format
