@@ -58,8 +58,10 @@ class StImageFile : public StImage {
         ImageType  SaveImageType;
         /** Stereo format to be stored as metadata. */
         StFormat   StereoFormat;
+        /** Compression level within [0..1] range (0 minimal compression, 1 maximum, -1 default). */
+        float      Compression;
 
-        SaveImageParams() : SaveImageType(ST_TYPE_NONE), StereoFormat(StFormat_AUTO) {}
+        SaveImageParams() : SaveImageType(ST_TYPE_NONE), StereoFormat(StFormat_AUTO), Compression(-1.0) {}
     };
 
         public:

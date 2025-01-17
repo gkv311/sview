@@ -701,7 +701,13 @@ bool StAVImage::save(const StString& theFilePath,
             myCodecCtx->height  = (int )anImage.getSizeY();
             myCodecCtx->time_base.num = 1;
             myCodecCtx->time_base.den = 1;
-            myCodecCtx->compression_level = 9; // 0..9
+
+            // PNG compression level is within [0..9] range
+            static const int PNG_QLOWER = 0;
+            static const int PNG_QUPPER = 9;
+            const float aRatio = stClamp(theParams.Compression >= 0.0f ? theParams.Compression : 1.0f, 0.0f, 1.0f);
+            int aQLevel = stRound(stLerp(float(PNG_QLOWER), float(PNG_QUPPER), aRatio));
+            myCodecCtx->compression_level = aQLevel;
             break;
         }
         case ST_TYPE_JPEG:
@@ -746,7 +752,13 @@ bool StAVImage::save(const StString& theFilePath,
             myCodecCtx->height  = (int )anImage.getSizeY();
             myCodecCtx->time_base.num = 1;
             myCodecCtx->time_base.den = 1;
-            myCodecCtx->qmin = myCodecCtx->qmax = 5; // quality factor - lesser is better
+
+            // quantizer factor within 1..31 range, lesser is better
+            static const int JPEG_QLOWER = 1;
+            static const int JPEG_QUPPER = 31;
+            const float aRatio = stClamp(theParams.Compression >= 0.0f ? theParams.Compression : 0.10f, 0.0f, 1.0f);
+            int aQFactor = stRound(stLerp(float(JPEG_QLOWER), float(JPEG_QUPPER), aRatio));
+            myCodecCtx->qmin = myCodecCtx->qmax = aQFactor;
             break;
         }
         case ST_TYPE_NONE:

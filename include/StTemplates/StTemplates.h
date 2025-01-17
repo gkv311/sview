@@ -76,4 +76,14 @@ inline Type stClamp(const Type theValue,
     return theValue;
 }
 
+/**
+ * Compute linear interpolation between two values.
+ * @param theT interpolation coefficient 0..1
+ * @return interpolation result
+ */
+template<typename Type, typename ElemType>
+inline Type stLerp(const Type& theFrom, const Type& theTo, const ElemType theT) {
+    return theFrom * (ElemType(1) - theT) + theTo * theT;
+}
+
 #endif //__StTemplates_H__

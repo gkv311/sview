@@ -345,7 +345,7 @@ class StVec3 {
     }
 
     /**
-     * Compute linear interpolation between to vectors.
+     * Compute linear interpolation between two vectors.
      * @param theT (const Element_t ) - interpolation coefficient 0..1;
      * @return interpolation result.
      */
