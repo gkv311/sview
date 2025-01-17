@@ -1,5 +1,5 @@
 /**
- * Copyright © 2009-2023 Kirill Gavrilov <kirill@sview.ru>
+ * Copyright © 2009-2025 Kirill Gavrilov <kirill@sview.ru>
  *
  * StMoviePlayer program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -59,30 +59,6 @@ namespace {
     static const StGLVec3 THE_LISTENER_UP           ( 0.0f, 1.0f,  0.0f);
 
 }
-
-#if(LIBAVCODEC_VERSION_INT < AV_VERSION_INT(53, 0, 0))
-/**
- * Check if dynamically linked version of FFmpeg libraries
- * is old or not.
- */
-inline bool isReoderingNeededInit() {
-    stAV::Version aVersion = stAV::Version::libavcodec();
-    // I have no idea which version introduce this feature for ac3 and ogg streams...
-    // but experimentally detect that FFmpeg 0.5.1 is old and FFmpeg 0.6 include this
-    // We check libavcodec version here and hopes this will true for most packages
-    bool isUpToDate = ( aVersion.myMajor  > 52) ||
-                      ((aVersion.myMajor == 52) && (aVersion.myMinor >= 72));
-    if(!isUpToDate) {
-        ST_DEBUG_LOG("Used old FFmpeg, enabled sView channel reorder for multichannel AC3 and OGG Vorbis streams!");
-    }
-    return !isUpToDate;
-}
-
-inline bool isReoderingNeeded() {
-    static bool isNeeded = isReoderingNeededInit();
-    return isNeeded;
-}
-#endif
 
 void StAudioQueue::stalConfigureSources1() {
     alSourcefv(myAlSources[0], AL_POSITION, THE_POSITION_CENTER);
@@ -581,21 +557,7 @@ bool StAudioQueue::initOut51Soft(const bool theIsPlanar) {
     }
 
     myBufferOut.setupChannels(StChannelMap::CH51, StChannelMap::PCM, 6);
-#if(LIBAVCODEC_VERSION_INT < AV_VERSION_INT(53, 0, 0))
-    if(isReoderingNeeded()) {
-        // workaround for old FFmpeg
-        if(myCodec->id == CODEC_ID_AC3) {
-            myBufferSrc.setupChannels(StChannelMap::CH51, StChannelMap::AC3, 1);
-        } else if(myCodec->id == CODEC_ID_VORBIS) {
-            myBufferSrc.setupChannels(StChannelMap::CH51, StChannelMap::OGG, 1);
-        } else {
-            myBufferSrc.setupChannels(StChannelMap::CH51, StChannelMap::PCM, 1);
-        }
-    } else
-#endif
-    {
-        myBufferSrc.setupChannels(StChannelMap::CH51, StChannelMap::PCM, theIsPlanar ? stAV::audio::getNbChannels(myCodecCtx) : 1);
-    }
+    myBufferSrc.setupChannels(StChannelMap::CH51, StChannelMap::PCM, theIsPlanar ? stAV::audio::getNbChannels(myCodecCtx) : 1);
     stalConfigureSources5_1();
     return true;
 }
@@ -623,21 +585,7 @@ bool StAudioQueue::initOut51Ext(const bool theIsPlanar) {
     }
 
     myBufferOut.setupChannels(StChannelMap::CH51, StChannelMap::PCM, 1);
-#if(LIBAVCODEC_VERSION_INT < AV_VERSION_INT(53, 0, 0))
-    if(isReoderingNeeded()) {
-        // workaround for old FFmpeg
-        if(myCodec->id == CODEC_ID_AC3) {
-            myBufferSrc.setupChannels(StChannelMap::CH51, StChannelMap::AC3, 1);
-        } else if(myCodec->id == CODEC_ID_VORBIS) {
-            myBufferSrc.setupChannels(StChannelMap::CH51, StChannelMap::OGG, 1);
-        } else {
-            myBufferSrc.setupChannels(StChannelMap::CH51, StChannelMap::PCM, 1);
-        }
-    } else
-#endif
-    {
-        myBufferSrc.setupChannels(StChannelMap::CH51, StChannelMap::PCM, theIsPlanar ? stAV::audio::getNbChannels(myCodecCtx) : 1);
-    }
+    myBufferSrc.setupChannels(StChannelMap::CH51, StChannelMap::PCM, theIsPlanar ? stAV::audio::getNbChannels(myCodecCtx) : 1);
     stalConfigureSources1();
     return true;
 }
@@ -687,12 +635,7 @@ bool StAudioQueue::initOut71Ext(const bool theIsPlanar) {
 }
 
 bool StAudioQueue::initOutChannels() {
-    const bool isPlanar =
-    #if(LIBAVCODEC_VERSION_INT >= AV_VERSION_INT(53, 40, 0))
-        av_sample_fmt_is_planar(myCodecCtx->sample_fmt) != 0;
-    #else
-        false;
-    #endif
+    const bool isPlanar = av_sample_fmt_is_planar(myCodecCtx->sample_fmt) != 0;
 
     myAlCanBFormat = false;
     myAlIsBFormat  = false;
@@ -789,11 +732,7 @@ bool StAudioQueue::init(AVFormatContext*   theFormatCtx,
         return false;
     }
 
-#if(LIBAVCODEC_VERSION_INT >= AV_VERSION_INT(53, 8, 0))
     if(avcodec_open2(myCodecCtx, myCodecAuto, NULL) < 0) {
-#else
-    if(avcodec_open(myCodecCtx, myCodecAuto) < 0) {
-#endif
         signals.onError(stCString("FFmpeg: could not open audio codec"));
         deinit();
         return false;
@@ -1151,19 +1090,14 @@ void StAudioQueue::stalFillBuffers(const double thePts,
 
 void StAudioQueue::decodePacket(const StHandle<StAVPacket>& thePacket,
                                 double&                     thePts) {
-    const uint8_t* anAudioPktData = thePacket->getData();
     int anAudioPktSize = thePacket->getSize();
     bool checkMoreFrames = false;
-    int isGotFrame = 0;
     bool toSendPacket = true;
     // packet could store multiple frames
     for(;;) {
         while(anAudioPktSize > 0) {
             int aDataSize = (int )myBufferSrc.getBufferSizeWhole();
-
-        #if(LIBAVCODEC_VERSION_INT >= AV_VERSION_INT(57, 106, 102))
-            (void )anAudioPktData; // legacy API
-            (void )aDataSize;
+            (void)aDataSize;
             if(toSendPacket) {
                 const int aRes = avcodec_send_packet(myCodecCtx, thePacket->getType() == StAVPacket::DATA_PACKET ? thePacket->getAVpkt() : NULL);
                 if(aRes < 0 && aRes != AVERROR_EOF) {
@@ -1178,42 +1112,6 @@ void StAudioQueue::decodePacket(const StHandle<StAVPacket>& thePacket,
             if(aRes2 < 0) {
                 anAudioPktSize = 0;
                 break;
-            }
-            isGotFrame = 1;
-            int aLen1 = 0; // dummy for code compatible with old syntax
-        #elif(LIBAVCODEC_VERSION_INT >= AV_VERSION_INT(52, 23, 0))
-            StAVPacket anAvPkt;
-            anAvPkt.getAVpkt()->data = (uint8_t* )anAudioPktData;
-            anAvPkt.getAVpkt()->size = anAudioPktSize;
-            (void )toSendPacket;
-
-            #if(LIBAVCODEC_VERSION_INT >= AV_VERSION_INT(53, 40, 0))
-            (void )aDataSize;
-            myFrame.reset();
-            const int aLen1 = avcodec_decode_audio4(myCodecCtx, myFrame.Frame,
-                                                    &isGotFrame, anAvPkt.getAVpkt());
-            #else
-            const int aLen1 = avcodec_decode_audio3(myCodecCtx,
-                                                    (int16_t* )myBufferSrc.getPlane(0), &aDataSize,
-                                                    anAvPkt.getAVpkt());
-            #endif
-        #else
-            const int aLen1 = avcodec_decode_audio2(myCodecCtx,
-                                                    (int16_t* )myBufferSrc.getPlane(0), &aDataSize,
-                                                    anAudioPktData, anAudioPktSize);
-        #endif
-            if(aLen1 < 0) {
-                // if error, we skip the frame
-                anAudioPktSize = 0;
-                break;
-            }
-
-            anAudioPktData += aLen1;
-            anAudioPktSize -= aLen1;
-
-        #if(LIBAVCODEC_VERSION_INT >= AV_VERSION_INT(53, 40, 0))
-            if(isGotFrame == 0) {
-                continue;
             }
 
             if(myAvSrcFormat  != myCodecCtx->sample_fmt
@@ -1238,13 +1136,6 @@ void StAudioQueue::decodePacket(const StHandle<StAVPacket>& thePacket,
                                                    myFrame.Frame->nb_samples,
                                                    myCodecCtx->sample_fmt, 1);
             myBufferSrc.setPlaneSize(aPlaneSize); // notice that myFrame.getLineSize(0) contains extra alignment
-        #else
-            (void )isGotFrame;
-            if(aDataSize <= 0) {
-                continue;
-            }
-            myBufferSrc.setDataSize(aDataSize);
-        #endif
 
             checkMoreFrames = true;
             if(myBufferOut.addData(myBufferSrc)) {
@@ -1253,10 +1144,7 @@ void StAudioQueue::decodePacket(const StHandle<StAVPacket>& thePacket,
             }
 
             if(!myBufferOut.isEmpty()) {
-                int64_t aPtsU = stAV::NOPTS_VALUE;
-            #if(LIBAVCODEC_VERSION_INT >= AV_VERSION_INT(53, 40, 0))
-                aPtsU = myFrame.Frame->pts;
-            #endif
+                int64_t aPtsU = myFrame.Frame->pts;
                 if(aPtsU == stAV::NOPTS_VALUE) {
                     aPtsU = thePacket->getPts();
                 }
@@ -1338,11 +1226,7 @@ void StAudioQueue::decodeLoop() {
                 break;
             }
             case StAVPacket::LAST_PACKET: {
-            #if(LIBAVCODEC_VERSION_INT >= AV_VERSION_INT(57, 106, 102))
                 break; // redirect NULL packet to avcodec_send_packet()
-            #else
-                continue;
-            #endif
             }
             case StAVPacket::END_PACKET: {
                 pushPlayEvent(ST_PLAYEVENT_NONE);

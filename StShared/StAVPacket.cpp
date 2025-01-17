@@ -1,5 +1,5 @@
 /**
- * Copyright © 2009-2013 Kirill Gavrilov <kirill@sview.ru>
+ * Copyright © 2009-2025 Kirill Gavrilov <kirill@sview.ru>
  *
  * This code is licensed under MIT license (see docs/license-mit.txt for details).
  */
@@ -12,14 +12,12 @@ void StAVPacket::avDestructPacket(AVPacket* thePkt) {
     thePkt->data = NULL;
     thePkt->size = 0;
 
-#if(LIBAVCODEC_VERSION_INT >= AV_VERSION_INT(52, 118, 0))
     for(int anIter = 0; anIter < thePkt->side_data_elems; ++anIter) {
         stMemFreeAligned(thePkt->side_data[anIter].data);
     }
     stMemFreeAligned(thePkt->side_data);
     thePkt->side_data       = NULL;
     thePkt->side_data_elems = 0;
-#endif
 }
 
 void StAVPacket::avInitPacket() {
@@ -62,11 +60,7 @@ StAVPacket::StAVPacket(const StAVPacket& theCopy)
   myIsOwn(false) {
     avInitPacket();
     if(myType == DATA_PACKET) {
-    #if(LIBAVCODEC_VERSION_INT >= AV_VERSION_INT(57, 106, 102))
         av_packet_ref(&myPacket, &theCopy.myPacket); // copy by reference
-    #else
-        setAVpkt(theCopy.myPacket);
-    #endif
     }
 }
 
@@ -79,18 +73,7 @@ void StAVPacket::free() {
         avDestructPacket(&myPacket);
         avInitPacket();
     } else {
-    #if(LIBAVCODEC_VERSION_INT >= AV_VERSION_INT(57, 12, 100))
         av_packet_unref(&myPacket);
-    #elif(LIBAVCODEC_VERSION_INT >= AV_VERSION_INT(55, 0, 0))
-        av_free_packet(&myPacket);
-        avInitPacket();
-    #else
-        if(myPacket.destruct != NULL) {
-            myPacket.destruct(&myPacket);
-            myPacket.destruct = NULL;
-        }
-        avInitPacket();
-    #endif
     }
     myIsOwn = false;
 }
@@ -105,16 +88,13 @@ void StAVPacket::setAVpkt(const AVPacket& theCopy) {
     // copy values
     myIsOwn  = true;
     myPacket = theCopy;
-#if(LIBAVCODEC_VERSION_INT >= AV_VERSION_INT(55, 0, 0))
     myPacket.buf = NULL;
-#endif
 
     // now copy data with special padding space
     myPacket.data = stMemAllocAligned<uint8_t*>((theCopy.size + AV_INPUT_BUFFER_PADDING_SIZE), 16); // data must be aligned to 16 bytes for SSE!
     stMemCpy (myPacket.data, theCopy.data, theCopy.size);
     stMemZero(myPacket.data + (ptrdiff_t )theCopy.size, AV_INPUT_BUFFER_PADDING_SIZE);
 
-#if(LIBAVCODEC_VERSION_INT >= AV_VERSION_INT(52, 118, 0))
     if(myPacket.side_data_elems > 0) {
         size_t aSize = theCopy.side_data_elems * sizeof(*theCopy.side_data);
         // weird anonymouse structure...
@@ -128,5 +108,4 @@ void StAVPacket::setAVpkt(const AVPacket& theCopy) {
             stMemZero(myPacket.side_data[anIter].data + (ptrdiff_t )aSize, AV_INPUT_BUFFER_PADDING_SIZE);
         }
     }
-#endif
 }

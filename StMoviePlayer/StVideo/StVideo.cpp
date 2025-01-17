@@ -1,5 +1,5 @@
 /**
- * Copyright © 2007-2023 Kirill Gavrilov <kirill@sview.ru>
+ * Copyright © 2007-2025 Kirill Gavrilov <kirill@sview.ru>
  *
  * StMoviePlayer program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -37,7 +37,6 @@ namespace {
         return SV_THREAD_RETURN 0;
     }
 
-#ifdef ST_AV_NEWCODECPAR
     /**
      * Format framerate value.
      */
@@ -56,7 +55,6 @@ namespace {
         }
         return aBuff;
     }
-#endif
 
     /**
      * Format stream info.
@@ -73,8 +71,6 @@ namespace {
             avcodec_string(aFrmtBuff, sizeof(aFrmtBuff), aCodecCtx, 0);
         }
         StString aStreamInfo(aFrmtBuff);
-
-    #ifdef ST_AV_NEWCODECPAR
         //aStreamInfo = aStreamInfo + ", " + theStream->codec_info_nb_frames + ", " + theStream->time_base.num + "/" + theStream->time_base.den;
         if(theStream->sample_aspect_ratio.num && av_cmp_q(theStream->sample_aspect_ratio, theStream->codecpar->sample_aspect_ratio)) {
             AVRational aDispAspectRatio;
@@ -101,7 +97,6 @@ namespace {
                 aStreamInfo += StString(", ") + formatFps(1 / av_q2d(aCodecCtx->time_base)) + " tbc";
             }
         }
-    #endif
         return aStreamInfo;
     }
 }
@@ -293,11 +288,7 @@ void StVideo::close() {
     for(size_t ctxId = 0; ctxId < myCtxList.size(); ++ctxId) {
         AVFormatContext*& formatCtx = myCtxList[ctxId];
         if(formatCtx != NULL) {
-        #if(LIBAVFORMAT_VERSION_INT >= AV_VERSION_INT(53, 17, 0))
             avformat_close_input(&formatCtx);
-        #else
-            av_close_input_file(formatCtx); // close video file at all
-        #endif
         }
     }
     myFileList.clear();
@@ -362,47 +353,27 @@ bool StVideo::addFile(const StString& theFileToLoad,
         aFormatCtx->pb = anIOContext->getAvioContext();
     }
 
-#if(LIBAVFORMAT_VERSION_INT >= AV_VERSION_INT(53, 2, 0))
     int avErrCode = avformat_open_input(&aFormatCtx, theFileToLoad.toCString(), NULL, NULL);
-#else
-    int avErrCode = av_open_input_file (&aFormatCtx, theFileToLoad.toCString(), NULL, 0, NULL);
-#endif
     if(avErrCode != 0) {
         signals.onError(StString("FFmpeg: Couldn't open video file '") + theFileToLoad
                       + "'\nError: " + stAV::getAVErrorDescription(avErrCode));
         if(aFormatCtx != NULL) {
-        #if(LIBAVFORMAT_VERSION_INT >= AV_VERSION_INT(53, 17, 0))
             avformat_close_input(&aFormatCtx);
-        #else
-            av_close_input_file(aFormatCtx); // close video file
-        #endif
         }
         return false;
     }
 
     // retrieve stream information
-#if(LIBAVFORMAT_VERSION_INT >= AV_VERSION_INT(53, 6, 0))
     if(avformat_find_stream_info(aFormatCtx, NULL) < 0) {
-#else
-    if(av_find_stream_info(aFormatCtx) < 0) {
-#endif
         signals.onError(StString("FFmpeg: Couldn't find stream information in '") + theFileToLoad + "'");
         if(aFormatCtx != NULL) {
-        #if(LIBAVFORMAT_VERSION_INT >= AV_VERSION_INT(53, 17, 0))
             avformat_close_input(&aFormatCtx);
-        #else
-            av_close_input_file(aFormatCtx); // close video file at all
-        #endif
         }
         return false;
     }
 
 #ifdef ST_DEBUG
-#if(LIBAVCODEC_VERSION_INT >= AV_VERSION_INT(52, 101, 0))
     av_dump_format(aFormatCtx, 0, theFileToLoad.toCString(), false);
-#else
-    dump_format   (aFormatCtx, 0, theFileToLoad.toCString(), false);
-#endif
 #endif
 
     StString aTitleString, aFolder;
@@ -504,17 +475,10 @@ bool StVideo::addFile(const StString& theFileToLoad,
                 aCodecName = aCodec->name;
             }
 
-        #ifdef ST_AV_NEWCODECPAR
             const char* aSampleFormatStr = av_get_sample_fmt_name((AVSampleFormat )aStream->codecpar->format);
-            StString aSampleFormat  = aSampleFormatStr != NULL ? StString(aSampleFormatStr) : StString("");
-            StString aSampleRate    = StString(aStream->codecpar->sample_rate) + " Hz";
-            StString aChannelLayout = stAV::audio::getChannelLayoutString(aStream);
-        #else
-            AVCodecContext* aCodecCtx = stAV::getCodecCtx (aStream);
-            StString aSampleFormat  = stAV::audio::getSampleFormatString (aCodecCtx);
-            StString aSampleRate    = stAV::audio::getSampleRateString   (aCodecCtx);
-            StString aChannelLayout = stAV::audio::getChannelLayoutString(aCodecCtx);
-        #endif
+            const StString aSampleFormat  = aSampleFormatStr != NULL ? StString(aSampleFormatStr) : StString("");
+            const StString aSampleRate    = StString(aStream->codecpar->sample_rate) + " Hz";
+            const StString aChannelLayout = stAV::audio::getChannelLayoutString(aStream);
             StString aStreamTitle = aCodecName;
             if(!aSampleRate.isEmpty()) {
                 aStreamTitle += StString(", ") + aSampleRate;
@@ -577,11 +541,7 @@ bool StVideo::addFile(const StString& theFileToLoad,
             }
 
             StString aLanguage;
-        #if(LIBAVUTIL_VERSION_INT >= AV_VERSION_INT(51, 5, 0))
             stAV::meta::readTag(aStream, stCString("language"), aLanguage);
-        #else
-            aLanguage = aStream->language;
-        #endif
             if(aLanguage != aPrefLangAudio
             && myAudio->init(aFormatCtx, aStreamId, aTitleString)) {
                 theInfo.LoadedAudio = anAudioStreamId;
@@ -603,11 +563,7 @@ bool StVideo::addFile(const StString& theFileToLoad,
             }
 
             StString aLanguage;
-        #if(LIBAVUTIL_VERSION_INT >= AV_VERSION_INT(51, 5, 0))
             stAV::meta::readTag(aStream, stCString("language"), aLanguage);
-        #else
-            aLanguage = aStream->language;
-        #endif
             if(aLanguage != aPrefLangAudio
             && mySubtitles1->init(aFormatCtx, aStreamId, aTitleString)) {
                 theInfo.LoadedSubtitles1 = aSubsStreamId;
@@ -867,11 +823,7 @@ void StVideo::doSeekContext(AVFormatContext* theFormatCtx,
         isSeekDone = av_seek_frame(theFormatCtx, -1, aSeekTarget, aFlags) >= 0;
         if(!isSeekDone) {
         #ifdef ST_DEBUG
-        #if(LIBAVFORMAT_VERSION_INT >= AV_VERSION_INT(58, 7, 100))
             const char* aFileName = theFormatCtx->url;
-        #else
-            const char* aFileName = theFormatCtx->filename;
-        #endif
             ST_ERROR_LOG("Disaster! Seeking to " + theSeekPts + " [" + aFileName + "] has failed.");
         #endif
         }

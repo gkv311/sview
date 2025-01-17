@@ -39,13 +39,11 @@ class StAVBufferPool {
      * Release the pool (reference-counted buffer will be released when needed).
      */
     ST_LOCAL void release() {
-    #if(LIBAVCODEC_VERSION_INT >= AV_VERSION_INT(55, 45, 101))
         if(myPool != NULL) {
             av_buffer_pool_uninit(&myPool);
             myPool       = NULL;
             myBufferSize = 0;
          }
-    #endif
     }
 
     /**
@@ -61,13 +59,9 @@ class StAVBufferPool {
             return true;
         }
 
-    #if(LIBAVCODEC_VERSION_INT >= AV_VERSION_INT(55, 45, 101))
         myPool       = av_buffer_pool_init(theBufferSize, NULL);
         myBufferSize = theBufferSize;
         return myPool != NULL;
-    #else
-        return false;
-    #endif
     }
 
     /**
@@ -81,11 +75,7 @@ class StAVBufferPool {
      * Get new buffer from the pool.
      */
     ST_LOCAL AVBufferRef* getBuffer() {
-    #if(LIBAVCODEC_VERSION_INT >= AV_VERSION_INT(55, 45, 101))
         return av_buffer_pool_get(myPool);
-    #else
-        return NULL;
-    #endif
     }
 
         private:

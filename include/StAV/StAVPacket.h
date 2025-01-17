@@ -1,5 +1,5 @@
 /**
- * Copyright © 2009-2013 Kirill Gavrilov <kirill@sview.ru>
+ * Copyright © 2009-2025 Kirill Gavrilov <kirill@sview.ru>
  *
  * This code is licensed under MIT license (see docs/license-mit.txt for details).
  */
@@ -89,11 +89,7 @@ class StAVPacket {
     }
 
     ST_LOCAL int64_t getConvergenceDuration() const {
-    #if(LIBAVCODEC_VERSION_INT >= AV_VERSION_INT(57, 24, 0))
         return myPacket.duration;
-    #else
-        return myPacket.convergence_duration;
-    #endif
     }
 
     ST_LOCAL int64_t getDuration() const {

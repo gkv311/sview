@@ -70,7 +70,6 @@ bool StRawFile::openFile(StRawFile::ReadWrite theFlags,
     }
 
     StString aFilePath = getPath();
-#if(LIBAVFORMAT_VERSION_INT >= AV_VERSION_INT(53, 21, 0))
     if(StFileNode::isRemoteProtocolPath(aFilePath)
     && stAV::init()) {
         AVIOInterruptCB anInterruptCB;
@@ -88,7 +87,6 @@ bool StRawFile::openFile(StRawFile::ReadWrite theFlags,
         }
         return true;
     }
-#endif
 
 #ifdef _WIN32
     StStringUtfWide aPathWide;

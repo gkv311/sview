@@ -1,5 +1,5 @@
 /**
- * Copyright © 2009-2019 Kirill Gavrilov <kirill@sview.ru>
+ * Copyright © 2009-2025 Kirill Gavrilov <kirill@sview.ru>
  *
  * StMoviePlayer program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -27,22 +27,6 @@
 #endif
 
 namespace {
-
-#if(LIBAVCODEC_VERSION_INT < AV_VERSION_INT(55, 0, 0))
-    /**
-     * Release the frame buffer (old API).
-     */
-    static void stReleaseFrameBuffer(AVCodecContext* theCodecCtx,
-                                     AVFrame*        theFrame) {
-    #if defined(ST_AV_OLDSYNC) && !defined(ST_USE64PTR)
-        if(theFrame != NULL) {
-            delete (int64_t* )theFrame->opaque;
-            theFrame->opaque = NULL;
-        }
-    #endif
-        avcodec_default_release_buffer(theCodecCtx, theFrame);
-    }
-#endif
 
     /**
      * Thread function just call decodeLoop() function.
@@ -130,53 +114,29 @@ int StVideoQueue::getFrameBuffer(AVCodecContext* theCodecCtx,
                                  AVFrame* theFrame,
                                  int theFlags) {
     int aResult = 0;
-#if(LIBAVCODEC_VERSION_INT >= AV_VERSION_INT(55, 0, 0))
     bool isDone = false;
-    #if defined(_WIN32)
-        if(theFrame->format == stAV::PIX_FMT::DXVA2_VLD) {
-            if(!myHWAccelCtx.isNull()) {
-                aResult = myHWAccelCtx->getFrameBuffer(*this, theFrame);
-            } else {
-                aResult = -1;
-            }
-            isDone  = true;
+#if defined(_WIN32)
+    if(theFrame->format == stAV::PIX_FMT::DXVA2_VLD) {
+        if(!myHWAccelCtx.isNull()) {
+            aResult = myHWAccelCtx->getFrameBuffer(*this, theFrame);
+        } else {
+            aResult = -1;
         }
-    /*#elif defined(__APPLE__) // standard FFmpeg VideoToolbox wrapper is used - action is not needed
-        if(theFrame->format == stAV::PIX_FMT::VIDEOTOOLBOX_VLD) {
-            if(!myHWAccelCtx.isNull()) {
-                aResult = myHWAccelCtx->getFrameBuffer(*this, theFrame);
-            } else {
-                aResult = -1;
-            }
-            isDone  = true;
-        }*/
-    #endif
-        if(!isDone) {
-            aResult = avcodec_default_get_buffer2(theCodecCtx, theFrame, theFlags);
+        isDone  = true;
+    }
+/*#elif defined(__APPLE__) // standard FFmpeg VideoToolbox wrapper is used - action is not needed
+    if(theFrame->format == stAV::PIX_FMT::VIDEOTOOLBOX_VLD) {
+        if(!myHWAccelCtx.isNull()) {
+            aResult = myHWAccelCtx->getFrameBuffer(*this, theFrame);
+        } else {
+            aResult = -1;
         }
-
-    #ifdef ST_AV_OLDSYNC
-    #ifdef ST_USE64PTR
-        theFrame->opaque = (void* )myVideoPktPts;
-    #else
-        AVFrameSideData* aSideDataSync = av_frame_new_side_data(theFrame, (AVFrameSideDataType )1000, sizeof(myVideoPktPts));
-        if(aSideDataSync != NULL) {
-            memcpy(aSideDataSync->data, &myVideoPktPts, sizeof(myVideoPktPts));
-        }
-    #endif
-    #endif
-#else
-    aResult = avcodec_default_get_buffer(theCodecCtx, theFrame);
-    #ifdef ST_AV_OLDSYNC
-    #ifdef ST_USE64PTR
-        theFrame->opaque = (void* )myVideoPktPts;
-    #else
-        int64_t* aPts = new int64_t();
-        *aPts = myVideoPktPts;
-        theFrame->opaque = aPts;
-    #endif
-    #endif
+        isDone  = true;
+    }*/
 #endif
+    if(!isDone) {
+        aResult = avcodec_default_get_buffer2(theCodecCtx, theFrame, theFlags);
+    }
     return aResult;
 }
 
@@ -243,9 +203,7 @@ StVideoQueue::StVideoQueue(const StHandle<StGLTextureQueue>& theTextureQueue,
     myFrame.Frame->opaque = NULL;
 #endif
 
-#if(LIBAVCODEC_VERSION_INT >= AV_VERSION_INT(55, 45, 101))
     myFrameBufRef = new StAVFrameCounter();
-#endif
 
     myThread = new StThread(threadFunction, (void* )this, theMaster.isNull() ? "StVideoQueueM" : "StVideoQueueS");
 }
@@ -307,52 +265,34 @@ bool StVideoQueue::initCodec(const AVCodec* theCodec,
     if(myCodec != NULL) {
         myCodec = NULL;
         fillCodecInfo(NULL);
-    #ifdef ST_AV_NEWCODECPAR
         avcodec_free_context(&myCodecCtx);
         myCodecCtx = avcodec_alloc_context3(NULL);
         if(avcodec_parameters_to_context(myCodecCtx, myStream->codecpar) < 0) {
             signals.onError(stCString("Internal error: unable to copy codec parameters"));
             return false;
         }
-    #else
-        avcodec_close(myCodecCtx);
-    #endif
     }
 
     myCodecCtx->opaque         = this;
     myCodecCtx->get_format     = stGetFrameFormat;
-#if(LIBAVCODEC_VERSION_INT >= AV_VERSION_INT(55, 0, 0))
     if(check720in1080()) {
         myCodecCtx->flags2 |= AV_CODEC_FLAG2_IGNORE_CROP;
     }
     myCodecCtx->get_buffer2    = stGetFrameBuffer2;
-#else
-    myCodecCtx->get_buffer     = stGetFrameBuffer1;
-    myCodecCtx->release_buffer = stReleaseFrameBuffer;
-#endif
 
     // configure the codec
     myCodecCtx->codec_id = theCodec->id;
     stAV::meta::Dict* anOpts = NULL;
-#if(LIBAVCODEC_VERSION_INT >= AV_VERSION_INT(55, 45, 101))
     av_dict_set(&anOpts, "refcounted_frames", "1", 0);
-#endif
 
     // attached pics are sparse, therefore we would not want to delay their decoding till EOF
     int aNbThreads = theToUseGpu || isAttachedPicture()
                    ? 1
                    : StThread::countLogicalProcessors();
     myCodecCtx->thread_count = aNbThreads;
-#if(LIBAVCODEC_VERSION_INT < AV_VERSION_INT(52, 112, 0))
-    avcodec_thread_init(myCodecCtx, aNbThreads);
-#endif
 
     // open codec
-#if(LIBAVCODEC_VERSION_INT >= AV_VERSION_INT(53, 8, 0))
     if(avcodec_open2(myCodecCtx, theCodec, &anOpts) < 0) {
-#else
-    if(avcodec_open(myCodecCtx, theCodec) < 0) {
-#endif
         return false;
     }
 
@@ -468,7 +408,6 @@ bool StVideoQueue::init(AVFormatContext*   theFormatCtx,
     // we can read information from Display Matrix in side data or from metadata key
     myRotateDeg = 0;
 
-#ifdef ST_AV_NEWSPHERICAL
     const AVSphericalMapping* aSpherical = NULL;
 #if(LIBAVFORMAT_VERSION_INT >= AV_VERSION_INT(60, 15, 100))
     for(int i = 0; i < myStream->codecpar->nb_coded_side_data; i++) {
@@ -518,9 +457,7 @@ bool StVideoQueue::init(AVFormatContext*   theFormatCtx,
             theNewParams->setRotateZero((float )-aYaw, (float )aPitch, (float )myRotateDeg);
         }
     }
-#endif
 
-#if(LIBAVUTIL_VERSION_INT >= AV_VERSION_INT(55, 0, 0))
     const uint8_t* aDispMatrix = NULL;
 #if(LIBAVFORMAT_VERSION_INT >= AV_VERSION_INT(60, 15, 100))
     for(int i = 0; i < myStream->codecpar->nb_coded_side_data; ++i) {
@@ -539,12 +476,6 @@ bool StVideoQueue::init(AVFormatContext*   theFormatCtx,
             myRotateDeg = -int(aRotDeg - 360 * std::floor(aRotDeg / 360 + 0.9 / 360));
         }
     }
-#else
-    if(stAV::meta::readTag(myStream, THE_ROTATE_KEY, aValue)) {
-        StCLocale aCLocale;
-        myRotateDeg = (int )-stStringToLong(aValue.toCString(), 10, aCLocale);
-    }
-#endif
 
     // stereoscopic mode tags
     myStFormatInStream = check720in1080() ? StFormat_Tiled4x : StFormat_AUTO;
@@ -599,9 +530,6 @@ void StVideoQueue::deinit() {
     myFramesCounter = 1;
     myCachedFrame.nullify();
 
-#if !defined(ST_AV_NEWCODECPAR)
-    if(myCodecCtx != NULL) { myCodecCtx->codec_id = myCodecAutoId; }
-#endif
     StAVPacketQueue::deinit();
     if(!myHWAccelCtx.isNull()) {
         myHWAccelCtx->decoderDestroy(myCodecCtx);
@@ -610,25 +538,6 @@ void StVideoQueue::deinit() {
         myCodecCtx->hwaccel_context = NULL;
     }
 }
-
-#ifdef ST_AV_OLDSYNC
-void StVideoQueue::syncVideo(AVFrame* theSrcFrame,
-                             double*  thePts) {
-    if(*thePts != 0.0) {
-        // if we have pts, set video clock to it
-        myVideoClock = *thePts;
-    } else {
-        // if we aren't given a pts, set it to the clock
-        *thePts = myVideoClock;
-    }
-
-    // update the video clock
-    double aFrameDelay = av_q2d(myCodecCtx->time_base);
-    // if we are repeating a frame, adjust clock accordingly
-    aFrameDelay  += theSrcFrame->repeat_pict * (aFrameDelay * 0.5);
-    myVideoClock += aFrameDelay;
-}
-#endif
 
 void StVideoQueue::prepareFrame(const StFormat theSrcFormat) {
     int           aFrameSizeX = 0;
@@ -664,13 +573,8 @@ void StVideoQueue::prepareFrame(const StFormat theSrcFormat) {
                                              size_t(aFrameSizeX), size_t(aFrameSizeY),
                                              myFrame.getLineSize(0));
         return;
-#if(LIBAVCODEC_VERSION_INT >= AV_VERSION_INT(53, 5, 0))
     } else if(stAV::isFormatYUVPlanar(myFrame.Frame,
-#else
-    } else if(stAV::isFormatYUVPlanar(myCodecCtx,
-#endif
                                       aDimsYUV)) {
-
         /// TODO (Kirill Gavrilov#5) remove hack
         // workaround for incorrect frame dimensions information in some files
         // critical for tiled source format that should be 1080p
@@ -686,12 +590,10 @@ void StVideoQueue::prepareFrame(const StFormat theSrcFormat) {
         }
 
         StImagePlane::ImgFormat aPlaneFrmt = StImagePlane::ImgGray;
-    #if(LIBAVCODEC_VERSION_INT >= AV_VERSION_INT(52, 29, 0))
         if(myCodecCtx->color_range == AVCOL_RANGE_JPEG) {
             // there no color range information in the AVframe (yet)
             aDimsYUV.isFullScale = true;
         }
-    #endif
         myDataAdp.setColorScale(aDimsYUV.isFullScale ? StImage::ImgScale_Full : StImage::ImgScale_Mpeg);
         if(aDimsYUV.bitsPerComp == 9) {
             aPlaneFrmt = StImagePlane::ImgGray16;
@@ -723,12 +625,11 @@ void StVideoQueue::prepareFrame(const StFormat theSrcFormat) {
         }
     } else if(aPixFmt == stAV::PIX_FMT::NV12) {
         aDimsYUV.isFullScale = false;
-    #if(LIBAVCODEC_VERSION_INT >= AV_VERSION_INT(52, 29, 0))
         if(myCodecCtx->color_range == AVCOL_RANGE_JPEG) {
             // there no color range information in the AVframe (yet)
             aDimsYUV.isFullScale = true;
         }
-    #endif
+
         myDataAdp.setColorScale(aDimsYUV.isFullScale ? StImage::ImgScale_NvFull : StImage::ImgScale_NvMpeg);
         myDataAdp.setColorModel(StImage::ImgColor_YUV);
         myDataAdp.setPixelRatio(getPixelRatio());
@@ -904,11 +805,7 @@ void StVideoQueue::decodeLoop() {
                 break;
             }
             case StAVPacket::LAST_PACKET: {
-            #if(LIBAVCODEC_VERSION_INT >= AV_VERSION_INT(57, 106, 102))
                 break; // redirect NULL packet to avcodec_send_packet()break;
-            #else
-                continue;
-            #endif
             }
             case StAVPacket::END_PACKET: {
                 // TODO at the end of the stream it might be needed calling
@@ -966,7 +863,6 @@ bool StVideoQueue::decodeFrame(const StHandle<StAVPacket>& thePacket,
     bool toTryMoreFrames = false;
     (void )theToSendPacket;
     const bool toTryGpu = myUseGpu && !myIsGpuFailed;
-#if(LIBAVCODEC_VERSION_INT >= AV_VERSION_INT(57, 106, 102))
     if(theToSendPacket) {
         theToSendPacket = false;
         const int aRes = avcodec_send_packet(myCodecCtx, thePacket->getType() == StAVPacket::DATA_PACKET ? thePacket->getAVpkt() : NULL);
@@ -998,36 +894,10 @@ bool StVideoQueue::decodeFrame(const StHandle<StAVPacket>& thePacket,
         return theToSendPacket;
     }
     toTryMoreFrames = true;
-#elif(LIBAVCODEC_VERSION_INT >= AV_VERSION_INT(52, 23, 0))
-    int isFrameFinished = 0;
-    avcodec_decode_video2(myCodecCtx, myFrame.Frame, &isFrameFinished, thePacket->getAVpkt());
-    const bool isGpuUsed = myUseGpu && !myIsGpuFailed;
-    if(isGpuUsed != toTryGpu) {
-        if(!initCodec(myCodecAuto, isGpuUsed)) {
-            signals.onError(stCString("FFmpeg: Could not re-open video codec"));
-            deinit();
-            return false;
-        }
-        return true;
-    }
-    if(isFrameFinished == 0) {
-        // need more packets to decode whole frame
-        return false;
-    }
-#else
-    int isFrameFinished = 0;
-    avcodec_decode_video(myCodecCtx, myFrame.Frame, &isFrameFinished,
-                         thePacket->getData(), thePacket->getSize());
-    if(isFrameFinished == 0) {
-        // need more packets to decode whole frame
-        return false;
-    }
-#endif
     if(thePacket->isKeyFrame()) { // !theToSentPacket?
         myFramesCounter = 1;
     }
 
-#ifndef ST_AV_OLDSYNC
     myVideoPktPts = myFrame.getBestEffortTimestamp();
     if(myVideoPktPts == stAV::NOPTS_VALUE) {
         // TODO why best_effort_timestamp is invalid in case of h264_mediacodec?
@@ -1039,32 +909,6 @@ bool StVideoQueue::decodeFrame(const StHandle<StAVPacket>& thePacket,
 
     myFramePts  = double(myVideoPktPts) * av_q2d(myStream->time_base);
     myFramePts -= myPtsStartBase; // normalize PTS
-#else
-    // Save global pts to be stored in pFrame in first call
-    myVideoPktPts = thePacket->getPts();
-
-    myFramePts = 0.0;
-    if(thePacket->getDts() != stAV::NOPTS_VALUE) {
-        myFramePts = double(thePacket->getDts());
-    } else {
-        int64_t aPktPtsSync = stAV::NOPTS_VALUE;
-    #ifdef ST_USE64PTR
-        aPktPtsSync = (int64_t )myFrame.Frame->opaque;
-    #else
-        AVFrameSideData* aSideDataSync = av_frame_get_side_data(myFrame.Frame, (AVFrameSideDataType )1000);
-        if(aSideDataSync != NULL) {
-            memcpy(&aPktPtsSync, &aSideDataSync->data, sizeof(myVideoPktPts));
-        }
-    #endif
-        if(aPktPtsSync != stAV::NOPTS_VALUE) {
-            myFramePts = double(aPktPtsSync);
-        }
-    }
-    myFramePts *= av_q2d(myStream->time_base);
-    myFramePts -= myPtsStartBase; // normalize PTS
-
-    syncVideo(myFrame.Frame, &myFramePts);
-#endif
 
     const double aDelay = myFramePts - thePrevPts;
     if(aDelay > 0.0 && aDelay < 1.0) {
@@ -1110,7 +954,6 @@ bool StVideoQueue::decodeFrame(const StHandle<StAVPacket>& thePacket,
     }
 
     // we currently allow to override source format stored in metadata
-#ifdef ST_AV_NEWSTEREO
     if(AVFrameSideData* aSideDataS3d = av_frame_get_side_data(myFrame.Frame, AV_FRAME_DATA_STEREO3D)) {
         AVStereo3D* aStereo = (AVStereo3D* )aSideDataS3d->data;
         myStFormatInStream = stAV::stereo3dAvToSt(aStereo->type);
@@ -1139,8 +982,7 @@ bool StVideoQueue::decodeFrame(const StHandle<StAVPacket>& thePacket,
             myPixelRatioComp = 1.0f;
         }*/
     }
-#endif
-#if(LIBAVUTIL_VERSION_INT >= AV_VERSION_INT(55, 0, 0))
+
     if(const AVFrameSideData* aSideDataRot = av_frame_get_side_data(myFrame.Frame, AV_FRAME_DATA_DISPLAYMATRIX)) {
         if(aSideDataRot->size >= int(9 * sizeof(int32_t))) {
             const double aRotDeg = -av_display_rotation_get((const int32_t* )aSideDataRot->data);
@@ -1149,7 +991,7 @@ bool StVideoQueue::decodeFrame(const StHandle<StAVPacket>& thePacket,
             }
         }
     }
-#endif
+
     if(stAV::meta::readTag(myFrame.Frame, THE_SRC_MODE_KEY, theTagValue)) {
         for(size_t aSrcId = 0;; ++aSrcId) {
             const StFFmpegStereoFormat& aFlag = STEREOFLAGS[aSrcId];

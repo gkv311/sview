@@ -1,5 +1,5 @@
 /**
- * Copyright © 2011-2023 Kirill Gavrilov <kirill@sview.ru>
+ * Copyright © 2011-2025 Kirill Gavrilov <kirill@sview.ru>
  *
  * This code is licensed under MIT license (see docs/license-mit.txt for details).
  */

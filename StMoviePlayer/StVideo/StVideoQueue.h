@@ -1,5 +1,5 @@
 /**
- * Copyright © 2009-2019 Kirill Gavrilov <kirill@sview.ru>
+ * Copyright © 2009-2025 Kirill Gavrilov <kirill@sview.ru>
  *
  * StMoviePlayer program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -77,10 +77,6 @@ class StHWAccelContext {
 
 // define StHandle template specialization
 ST_DEFINE_HANDLE(StVideoQueue, StAVPacketQueue);
-
-#if(LIBAVCODEC_VERSION_INT < AV_VERSION_INT(54, 18, 100)) || defined(ST_LIBAV_FORK)
-    #define ST_AV_OLDSYNC
-#endif
 
 /**
  * This is Video playback class (filled OpenGL textures)
@@ -241,10 +237,6 @@ class StVideoQueue : public StAVPacketQueue {
      */
     ST_LOCAL virtual void deinit() ST_ATTR_OVERRIDE;
 
-#ifdef ST_AV_OLDSYNC
-    ST_LOCAL void syncVideo(AVFrame* srcFrame, double* pts);
-#endif
-
     /**
      * Main decoding loop.
      * Give packets from queue, decode them and push to stereo textures queue for playback.
@@ -276,22 +268,14 @@ class StVideoQueue : public StAVPacketQueue {
      * @return frame coded width (before cropping)
      */
     ST_LOCAL int getCodedSizeX() const {
-    #if(LIBAVCODEC_VERSION_INT >= AV_VERSION_INT(55, 0, 0))
         return (myCodecCtx != NULL) ? myCodecCtx->coded_width : 0;
-    #else
-        return (myCodecCtx != NULL) ? myCodecCtx->width : 0;
-    #endif
     }
 
     /**
      * @return frame coded height (before cropping)
      */
     ST_LOCAL int getCodedSizeY() const {
-    #if(LIBAVCODEC_VERSION_INT >= AV_VERSION_INT(55, 0, 0))
         return (myCodecCtx != NULL) ? myCodecCtx->coded_height : 0;
-    #else
-        return (myCodecCtx != NULL) ? myCodecCtx->height : 0;
-    #endif
     }
 
     ST_LOCAL StHandle<StGLTextureQueue>& getTextureQueue() {
@@ -311,15 +295,6 @@ class StVideoQueue : public StAVPacketQueue {
                                                    const AVPixelFormat* theFormats) {
         StVideoQueue* aVideoQueue = (StVideoQueue* )theCodecCtx->opaque;
         return aVideoQueue->getFrameFormat(theCodecCtx, theFormats);
-    }
-
-    /**
-     * Frame buffer allocation callback (deprecated form).
-     */
-    ST_LOCAL static int stGetFrameBuffer1(AVCodecContext* theCodecCtx,
-                                          AVFrame*        theFrame) {
-        StVideoQueue* aVideoQueue = (StVideoQueue* )theCodecCtx->opaque;
-        return aVideoQueue->getFrameBuffer(theCodecCtx, theFrame, 0);
     }
 
     /**

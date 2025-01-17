@@ -1,5 +1,5 @@
 /**
- * Copyright © 2011-2023 Kirill Gavrilov <kirill@sview.ru>
+ * Copyright © 2011-2025 Kirill Gavrilov <kirill@sview.ru>
  *
  * This code is licensed under MIT license (see docs/license-mit.txt for details).
  */
@@ -9,8 +9,7 @@
 
 #include <StGLStereo/StFormatEnum.h>
 
-// libav* libraries written on pure C,
-// and we must around includes manually
+// libav* libraries written on pure C, and we must around includes manually
 extern "C" {
 #ifdef _MSC_VER
     // suppress some common warnings in FFmpeg headers
@@ -19,84 +18,25 @@ extern "C" {
 
     #include <libavcodec/avcodec.h>
     #include <libavformat/avformat.h>
-    #include <libavutil/avutil.h>
     #include <libswscale/swscale.h>
 
+    #include <libavutil/avutil.h>
+    #include <libavutil/channel_layout.h>
+    #include <libavutil/display.h>
     #include <libavutil/mathematics.h>
     #include <libavutil/opt.h>
     #include <libavutil/pixdesc.h>
-
-    // new stereoscopic info API
-#if(LIBAVUTIL_VERSION_INT >= AV_VERSION_INT(52, 56, 100))
-    #define ST_AV_NEWSTEREO
-    #include <libavutil/stereo3d.h>
-#endif
-
-#if(LIBAVUTIL_VERSION_INT >= AV_VERSION_INT(55, 0, 0))
-    #include <libavutil/display.h>
-#endif
-
-#if(LIBAVUTIL_VERSION_INT >= AV_VERSION_INT(55, 57, 100))
-    #define ST_AV_NEWSPHERICAL
     #include <libavutil/spherical.h>
-#endif
-
-#if(LIBAVFORMAT_VERSION_INT >= AV_VERSION_INT(57, 33, 100))
-    #define ST_AV_NEWCODECPAR
-#endif
+    #include <libavutil/stereo3d.h>
 
 #if(LIBAVCODEC_VERSION_INT >= AV_VERSION_INT(59, 24, 100))
     #define ST_AV_NEW_CHANNEL_LAYOUT
-#endif
-
-#ifndef AV_NUM_DATA_POINTERS
-    #define AV_NUM_DATA_POINTERS 4
-#endif
-
-// Compatibility with older FFmpeg (API change since 2015-07-27 - lavc 56.56.100 / 56.35.0)
-#ifndef AV_INPUT_BUFFER_PADDING_SIZE
-    #define AV_INPUT_BUFFER_PADDING_SIZE FF_INPUT_BUFFER_PADDING_SIZE
-#endif
-#ifndef AV_CODEC_FLAG_GLOBAL_HEADER
-    #define AV_CODEC_FLAG_GLOBAL_HEADER CODEC_FLAG_GLOBAL_HEADER
-#endif
-#ifndef AV_CODEC_FLAG2_IGNORE_CROP
-    #define AV_CODEC_FLAG2_IGNORE_CROP CODEC_FLAG2_IGNORE_CROP
 #endif
 
 #ifdef _MSC_VER
     #pragma warning(default : 4244)
 #endif
 };
-
-// Detect FFmpeg vs. LibAV.
-// Current check is unsafe - there is no guarantee that flag AVIO_FLAG_DIRECT
-// (introduced in libavformat/avio.h since '2012)
-// will not be removed in further FFmpeg release,
-// will not be converted to enum,
-// and LibAV will not merge this change
-#if(LIBAVCODEC_VERSION_INT >= AV_VERSION_INT(54, 18, 100)) && !defined(AVIO_FLAG_DIRECT)
-    #define ST_LIBAV_FORK
-#endif
-
-#if(LIBAVUTIL_VERSION_INT < AV_VERSION_INT(50, 13, 0))
-    // enumeration was renamed from CodecType
-    enum AVMediaType {
-        AVMEDIA_TYPE_UNKNOWN = -1,
-        AVMEDIA_TYPE_VIDEO,
-        AVMEDIA_TYPE_AUDIO,
-        AVMEDIA_TYPE_DATA,
-        AVMEDIA_TYPE_SUBTITLE,
-        AVMEDIA_TYPE_ATTACHMENT,
-        AVMEDIA_TYPE_NB
-    };
-#endif
-
-#if(LIBAVCODEC_VERSION_INT >= AV_VERSION_INT(52, 30, 0)) \
-&& ((LIBAVCODEC_VERSION_INT < AV_VERSION_INT(58, 9, 100)) || defined(ST_LIBAV_FORK))
-    // own lock function
-    extern "C" int stFFmpegLock(void** theMutexPtrPtr, enum AVLockOp theOperation);
-#endif
 
 #ifdef ST_SHARED_DLL
     #define ST_SHARED_CPPEXPORT ST_CPPEXPORT extern const
@@ -331,7 +271,6 @@ namespace stAV {
                                  theDims);
     }
 
-#if(LIBAVCODEC_VERSION_INT >= AV_VERSION_INT(53, 5, 0))
     inline bool isFormatYUVPlanar(const AVFrame* theFrame,
                                   dimYUV&        theDims) {
         return isFormatYUVPlanar((AVPixelFormat )theFrame->format,
@@ -339,7 +278,6 @@ namespace stAV {
                                  theFrame->height,
                                  theDims);
     }
-#endif
 
     /**
      * Check is stream represents attached picture (e.g. NOT a video stream).
@@ -349,11 +287,7 @@ namespace stAV {
             return false;
         }
 
-    #if(LIBAVFORMAT_VERSION_INT >= AV_VERSION_INT(54, 2, 100))
         return (theStream->disposition & AV_DISPOSITION_ATTACHED_PIC) != 0;
-    #else
-        return false;
-    #endif
     }
 
 #if(LIBAVFORMAT_VERSION_INT < AV_VERSION_INT(59, 0, 100))
@@ -373,22 +307,14 @@ namespace stAV {
      * Get codec type from the stream.
      */
     inline AVMediaType getCodecType(const AVStream* theStream) {
-    #ifdef ST_AV_NEWCODECPAR
         return theStream->codecpar->codec_type;
-    #else
-        return theStream->codec->codec_type;
-    #endif
     }
 
     /**
      * Get codec id from the stream.
      */
     inline AVCodecID getCodecId(const AVStream* theStream) {
-    #ifdef ST_AV_NEWCODECPAR
         return theStream->codecpar->codec_id;
-    #else
-        return theStream->codec->codec_id;
-    #endif
     }
 
     /**
@@ -424,7 +350,6 @@ namespace stAV {
         ST_CPPEXPORT StString getChannelLayoutString(int theNbChannels, uint64_t theLayout);
 
         namespace SAMPLE_FMT {
-        #if(LIBAVCODEC_VERSION_INT >= AV_VERSION_INT(53, 0, 0))
             static const AVSampleFormat NONE = (AVSampleFormat )-1;
             ST_SHARED_CPPEXPORT AVSampleFormat U8;
             ST_SHARED_CPPEXPORT AVSampleFormat S16;
@@ -436,19 +361,6 @@ namespace stAV {
             ST_SHARED_CPPEXPORT AVSampleFormat S32P;
             ST_SHARED_CPPEXPORT AVSampleFormat FLTP;
             ST_SHARED_CPPEXPORT AVSampleFormat DBLP;
-        #else
-            static const SampleFormat NONE = (SampleFormat )-1;
-            ST_SHARED_CPPEXPORT SampleFormat   U8;
-            ST_SHARED_CPPEXPORT SampleFormat   S16;
-            ST_SHARED_CPPEXPORT SampleFormat   S32;
-            ST_SHARED_CPPEXPORT SampleFormat   FLT;
-            ST_SHARED_CPPEXPORT SampleFormat   DBL;
-            static const SampleFormat U8P  = (SampleFormat )-1;
-            static const SampleFormat S16P = (SampleFormat )-1;
-            static const SampleFormat S32P = (SampleFormat )-1;
-            static const SampleFormat FLTP = (SampleFormat )-1;
-            static const SampleFormat DBLP = (SampleFormat )-1;
-        #endif
         }
 
     }
@@ -458,21 +370,12 @@ namespace stAV {
      */
     namespace meta {
 
-    #if(LIBAVUTIL_VERSION_INT >= AV_VERSION_INT(51, 5, 0))
         typedef AVDictionaryEntry Tag;
         typedef AVDictionary      Dict;
         enum {
             SEARCH_MATCH_CASE    = AV_DICT_MATCH_CASE,    // 1
             SEARCH_IGNORE_SUFFIX = AV_DICT_IGNORE_SUFFIX, // 2
         };
-    #else
-        typedef AVMetadataTag     Tag;
-        typedef AVMetadata        Dict;
-        enum {
-            SEARCH_MATCH_CASE    = AV_METADATA_MATCH_CASE,    // 1
-            SEARCH_IGNORE_SUFFIX = AV_METADATA_IGNORE_SUFFIX, // 2
-        };
-    #endif
 
         /**
          * Alias for av_frame_get_metadata().
@@ -529,18 +432,13 @@ namespace stAV {
          * Retrieve language id from the stream.
          */
         inline StString readLang(AVStream* theStream) {
-        #if(LIBAVUTIL_VERSION_INT >= AV_VERSION_INT(51, 5, 0))
             StString aLang;
             stAV::meta::readTag(theStream, stCString("language"), aLang);
             return aLang;
-        #else
-            return theStream->language;
-        #endif
         }
 
     }
 
-#ifdef ST_AV_NEWSTEREO
     /**
      * Convert stereo3d enumeration from FFmpeg to sView definition.
      */
@@ -593,7 +491,6 @@ namespace stAV {
             //case StFormat_Tiled4x:
         }
     }
-#endif
 
 }
 

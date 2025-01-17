@@ -1,5 +1,5 @@
 /**
- * Copyright © 2009-2016 Kirill Gavrilov <kirill@sview.ru>
+ * Copyright © 2009-2025 Kirill Gavrilov <kirill@sview.ru>
  *
  * StMoviePlayer program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -112,7 +112,6 @@ bool StAVPacketQueue::init(AVFormatContext*   theFormatCtx,
         deinit();
         return false;
     }
-#ifdef ST_AV_NEWCODECPAR
     myCodecAutoId = myStream->codecpar->codec_id;
     myCodecCtx = avcodec_alloc_context3(NULL);
     if(avcodec_parameters_to_context(myCodecCtx, myStream->codecpar) < 0) {
@@ -121,15 +120,8 @@ bool StAVPacketQueue::init(AVFormatContext*   theFormatCtx,
         return false;
     }
 
-#else
-    myCodecCtx    = stAV::getCodecCtx(myStream);
-    myCodecAutoId = myCodecCtx->codec_id;
-#endif
-
-    myGetFrmtInit    = myCodecCtx->get_format;
-#if(LIBAVCODEC_VERSION_INT >= AV_VERSION_INT(55, 0, 0))
-    myGetBuffInit    = myCodecCtx->get_buffer2;
-#endif
+    myGetFrmtInit = myCodecCtx->get_format;
+    myGetBuffInit = myCodecCtx->get_buffer2;
 
     if(myCodecAutoId == AV_CODEC_ID_TEXT) {
         return true; // special case - decoder is not needed
@@ -166,19 +158,9 @@ void StAVPacketQueue::deinit() {
     if(myCodec != NULL) {
         fillCodecInfo(NULL);
     }
-#ifdef ST_AV_NEWCODECPAR
     if(myCodecCtx != NULL) {
         avcodec_free_context(&myCodecCtx);
     }
-#else
-    if(myCodec != NULL && myCodecCtx != NULL) {
-        avcodec_close(myCodecCtx);
-        myCodecCtx->get_format  = myGetFrmtInit;
-    #if(LIBAVCODEC_VERSION_INT >= AV_VERSION_INT(55, 0, 0))
-        myCodecCtx->get_buffer2 = myGetBuffInit;
-    #endif
-    }
-#endif
     myCodec       = NULL;
     myCodecAuto   = NULL;
     myCodecAutoId = AV_CODEC_ID_NONE;

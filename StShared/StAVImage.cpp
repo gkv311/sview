@@ -1,5 +1,5 @@
 /**
- * Copyright © 2011-2023 Kirill Gavrilov <kirill@sview.ru>
+ * Copyright © 2011-2025 Kirill Gavrilov <kirill@sview.ru>
  *
  * This code is licensed under MIT license (see docs/license-mit.txt for details).
  */
@@ -245,12 +245,7 @@ void StAVImage::closeAvCtx() {
     }
     myCodec = NULL;
     if(myFormatCtx != NULL) {
-    #if(LIBAVFORMAT_VERSION_INT >= AV_VERSION_INT(53, 17, 0))
         avformat_close_input(&myFormatCtx);
-    #else
-        av_close_input_file(myFormatCtx); // close video file
-        myFormatCtx = NULL;
-    #endif
         // codec context allocated by av_open_input_file() function
         myCodecCtx = NULL;
     } else if(myCodecCtx != NULL) {
@@ -341,21 +336,12 @@ bool StAVImage::loadExtra(const StString& theFilePath,
         }
 
         // open image file and detect its type, it could be non local file!
-    #if(LIBAVFORMAT_VERSION_INT >= AV_VERSION_INT(53, 2, 0))
         int avErrCode = avformat_open_input(&myFormatCtx, theFilePath.toCString(), anImgFormat, NULL);
-    #else
-        int avErrCode = av_open_input_file (&myFormatCtx, theFilePath.toCString(), anImgFormat, 0, NULL);
-    #endif
         if(avErrCode != 0
         || myFormatCtx->nb_streams < 1
         || stAV::getCodecId(myFormatCtx->streams[0]) == AV_CODEC_ID_NONE) {
             if(myFormatCtx != NULL) {
-            #if(LIBAVFORMAT_VERSION_INT >= AV_VERSION_INT(53, 17, 0))
                 avformat_close_input(&myFormatCtx);
-            #else
-                av_close_input_file(myFormatCtx);
-                myFormatCtx = NULL;
-            #endif
             }
 
             if(theDataPtr != NULL) {
@@ -364,11 +350,7 @@ bool StAVImage::loadExtra(const StString& theFilePath,
                 myFormatCtx = avformat_alloc_context();
                 myFormatCtx->pb = aMemIoCtx->getAvioContext();
             }
-        #if(LIBAVFORMAT_VERSION_INT >= AV_VERSION_INT(53, 2, 0))
             avErrCode = avformat_open_input(&myFormatCtx, theFilePath.toCString(), NULL, NULL);
-        #else
-            avErrCode = av_open_input_file(&myFormatCtx, theFilePath.toCString(), NULL, 0, NULL);
-        #endif
         }
 
         if(avErrCode != 0
@@ -397,11 +379,7 @@ bool StAVImage::loadExtra(const StString& theFilePath,
         return false;
     } else if(myFormatCtx == NULL || myCodecCtx == NULL) {
         // use given image type to load decoder
-    #if(LIBAVCODEC_VERSION_INT >= AV_VERSION_INT(53, 8, 0))
         myCodecCtx = avcodec_alloc_context3(myCodec);
-    #else
-        myCodecCtx = avcodec_alloc_context();
-    #endif
     }
 
     // stupid check
@@ -412,11 +390,7 @@ bool StAVImage::loadExtra(const StString& theFilePath,
     }
 
     // open VIDEO codec
-#if(LIBAVCODEC_VERSION_INT >= AV_VERSION_INT(53, 8, 0))
     if(avcodec_open2(myCodecCtx, myCodec, NULL) < 0) {
-#else
-    if(avcodec_open(myCodecCtx, myCodec) < 0) {
-#endif
         setState("AVCodec library, could not open video codec");
         close();
         return false;
@@ -449,17 +423,10 @@ bool StAVImage::loadExtra(const StString& theFilePath,
 
     // decode one frame
     int isFrameFinished = 0;
-#if(LIBAVCODEC_VERSION_INT >= AV_VERSION_INT(57, 106, 102))
     if(avcodec_send_packet(myCodecCtx, anAvPkt.getAVpkt()) == 0
     && avcodec_receive_frame(myCodecCtx, myFrame.Frame) == 0) {
         isFrameFinished = 1;
     }
-#elif(LIBAVCODEC_VERSION_INT >= AV_VERSION_INT(52, 23, 0))
-    avcodec_decode_video2(myCodecCtx, myFrame.Frame, &isFrameFinished, anAvPkt.getAVpkt());
-#else
-    avcodec_decode_video(myCodecCtx, myFrame.Frame, &isFrameFinished,
-                         theDataPtr, theDataSize);
-#endif
 
     if(isFrameFinished == 0) {
         const bool toRetry = myFormatCtx == NULL && theImageType != ST_TYPE_NONE;
@@ -493,7 +460,6 @@ bool StAVImage::loadExtra(const StString& theFilePath,
         }
     }
 
-#ifdef ST_AV_NEWSTEREO
     // currently it is unlikely... but maybe in future?
     AVFrameSideData* aSideData = av_frame_get_side_data(myFrame.Frame, AV_FRAME_DATA_STEREO3D);
     if(aSideData != NULL) {
@@ -505,7 +471,6 @@ bool StAVImage::loadExtra(const StString& theFilePath,
     } else {
         mySrcFormat = StFormat_AUTO;
     }
-#endif
 
     // it is unlikely that there would be any metadata from format...
     // but lets try
@@ -609,11 +574,10 @@ bool StAVImage::loadExtra(const StString& theFilePath,
             }
         }
     } else if(stAV::isFormatYUVPlanar(myCodecCtx, aDimsYUV) && !theIsOnlyRGB) {
-    #if(LIBAVCODEC_VERSION_INT >= AV_VERSION_INT(52, 29, 0))
         if(myCodecCtx->color_range == AVCOL_RANGE_JPEG) {
             aDimsYUV.isFullScale = true;
         }
-    #endif
+
         setColorModel(aDimsYUV.hasAlpha ? StImage::ImgColor_YUVA : StImage::ImgColor_YUV);
         setColorScale(aDimsYUV.isFullScale ? StImage::ImgScale_Full : StImage::ImgScale_Mpeg);
         StImagePlane::ImgFormat aPlaneFrmt = StImagePlane::ImgGray;
@@ -730,11 +694,7 @@ bool StAVImage::save(const StString& theFilePath,
                 }
                 aPFormatAV = aPFrmtTarget;
             }
-        #if(LIBAVCODEC_VERSION_INT >= AV_VERSION_INT(53, 8, 0))
             myCodecCtx = avcodec_alloc_context3(myCodec);
-        #else
-            myCodecCtx = avcodec_alloc_context();
-        #endif
 
             // setup encoder
             myCodecCtx->pix_fmt = aPFormatAV;
@@ -782,11 +742,7 @@ bool StAVImage::save(const StString& theFilePath,
                 aPFormatAV = aPFrmtTarget;
             }
 
-        #if(LIBAVCODEC_VERSION_INT >= AV_VERSION_INT(53, 8, 0))
             myCodecCtx = avcodec_alloc_context3(myCodec);
-        #else
-            myCodecCtx = avcodec_alloc_context();
-        #endif
             myCodecCtx->pix_fmt = aPFormatAV;
             myCodecCtx->width   = (int )anImage.getSizeX();
             myCodecCtx->height  = (int )anImage.getSizeY();
@@ -802,11 +758,7 @@ bool StAVImage::save(const StString& theFilePath,
     }
 
     // open VIDEO codec
-#if(LIBAVCODEC_VERSION_INT >= AV_VERSION_INT(53, 8, 0))
     if(avcodec_open2(myCodecCtx, myCodec, NULL) < 0) {
-#else
-    if(avcodec_open(myCodecCtx, myCodec) < 0) {
-#endif
         setState("AVCodec library, could not open video codec");
         close();
         return false;
@@ -818,7 +770,6 @@ bool StAVImage::save(const StString& theFilePath,
     myFrame.Frame->height = myCodecCtx->height;
     fillPointersAV(anImage, myFrame.Frame->data, myFrame.Frame->linesize);
 
-#ifdef ST_AV_NEWSTEREO
     bool isReversed = false;
     AVStereo3DType anAvStereoType = stAV::stereo3dStToAv(theSrcFormat, isReversed);
     if(anAvStereoType != (AVStereo3DType )-1) {
@@ -830,7 +781,6 @@ bool StAVImage::save(const StString& theFilePath,
             }
         }
     }
-#endif
 
     StJpegParser aRawFile(theFilePath);
     if(!aRawFile.openFile(StRawFile::WRITE)) {
@@ -841,7 +791,6 @@ bool StAVImage::save(const StString& theFilePath,
 
     // encode the image
     StAVPacket aPacket;
-#if(LIBAVCODEC_VERSION_INT >= AV_VERSION_INT(57, 106, 102))
     int anEncSize = 0;
     if(avcodec_send_frame(myCodecCtx, myFrame.Frame) == 0
     && avcodec_receive_packet(myCodecCtx, aPacket.getAVpkt()) == 0
@@ -849,22 +798,7 @@ bool StAVImage::save(const StString& theFilePath,
         anEncSize = aPacket.getSize();
         aRawFile.wrapBuffer(aPacket.getAVpkt()->data, anEncSize);
     }
-#else
-    // allocate the buffer, large enough (stupid formula copied from ffmpeg.c)
-    int aBuffSize = int(getSizeX() * getSizeY() * 10);
-    aRawFile.initBuffer(aBuffSize);
-    aPacket.getAVpkt()->data = (uint8_t* )aRawFile.changeBuffer();
-    aPacket.getAVpkt()->size = aBuffSize;
-#if(LIBAVCODEC_VERSION_INT >= AV_VERSION_INT(54, 2, 100))
-    int isGotPacket = 0;
-    int anEncSize   = avcodec_encode_video2(myCodecCtx, aPacket.getAVpkt(), myFrame.Frame, &isGotPacket);
-    if(anEncSize == 0 && isGotPacket != 0) {
-        anEncSize = aPacket.getSize();
-    }
-#else
-    int anEncSize = avcodec_encode_video(myCodecCtx, aPacket.changeData(), aPacket.getSize(), myFrame.Frame);
-#endif
-#endif
+
     if(anEncSize <= 0) {
         setState("AVCodec library, fail to encode the image");
         close();

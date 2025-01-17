@@ -1,5 +1,5 @@
 /**
- * Copyright © 2015 Kirill Gavrilov <kirill@sview.ru>
+ * Copyright © 2015-2025 Kirill Gavrilov <kirill@sview.ru>
  *
  * This code is licensed under MIT license (see docs/license-mit.txt for details).
  */
@@ -25,11 +25,7 @@ void StAVVideoMuxer::close() {
     for(size_t aCtxId = 0; aCtxId < myCtxListSrc.size(); ++aCtxId) {
         AVFormatContext*& aFormatCtx = myCtxListSrc[aCtxId];
         if(aFormatCtx != NULL) {
-        #if(LIBAVFORMAT_VERSION_INT >= AV_VERSION_INT(53, 17, 0))
             avformat_close_input(&aFormatCtx);
-        #else
-            av_close_input_file(aFormatCtx);
-        #endif
         }
     }
     myCtxListSrc.clear();
@@ -40,47 +36,27 @@ bool StAVVideoMuxer::addFile(const StString& theFileToLoad) {
     StFileNode::getFolderAndFile(theFileToLoad, aDummy, aFileName);
 
     AVFormatContext* aFormatCtx = NULL;
-#if(LIBAVFORMAT_VERSION_INT >= AV_VERSION_INT(53, 2, 0))
     int avErrCode = avformat_open_input(&aFormatCtx, theFileToLoad.toCString(), NULL, NULL);
-#else
-    int avErrCode = av_open_input_file (&aFormatCtx, theFileToLoad.toCString(), NULL, 0, NULL);
-#endif
     if(avErrCode != 0) {
         signals.onError(StString("FFmpeg: Couldn't open video file '") + theFileToLoad
                       + "'\nError: " + stAV::getAVErrorDescription(avErrCode));
         if(aFormatCtx != NULL) {
-        #if(LIBAVFORMAT_VERSION_INT >= AV_VERSION_INT(53, 17, 0))
             avformat_close_input(&aFormatCtx);
-        #else
-            av_close_input_file(aFormatCtx);
-        #endif
         }
         return false;
     }
 
     // retrieve stream information
-#if(LIBAVFORMAT_VERSION_INT >= AV_VERSION_INT(53, 6, 0))
     if(avformat_find_stream_info(aFormatCtx, NULL) < 0) {
-#else
-    if(av_find_stream_info(aFormatCtx) < 0) {
-#endif
         signals.onError(StString("FFmpeg: Couldn't find stream information in '") + theFileToLoad + "'");
         if(aFormatCtx != NULL) {
-        #if(LIBAVFORMAT_VERSION_INT >= AV_VERSION_INT(53, 17, 0))
             avformat_close_input(&aFormatCtx);
-        #else
-            av_close_input_file(aFormatCtx); // close video file at all
-        #endif
         }
         return false;
     }
 
 #ifdef ST_DEBUG
-#if(LIBAVCODEC_VERSION_INT >= AV_VERSION_INT(52, 101, 0))
     av_dump_format(aFormatCtx, 0, theFileToLoad.toCString(), false);
-#else
-    dump_format   (aFormatCtx, 0, theFileToLoad.toCString(), false);
-#endif
 #endif
 
     myCtxListSrc.add(aFormatCtx);
@@ -116,32 +92,7 @@ class StAVOutContext {
             return false;
         }
 
-    #if !defined(ST_LIBAV_FORK)
         avformat_alloc_output_context2(&Context, const_cast<AVOutputFormat*>(myFormat), NULL, theFile.toCString());
-    #else
-        Context = avformat_alloc_context();
-        if(Context == NULL) {
-            return false;
-        }
-
-        Context->oformat = myFormat;
-        if(Context->oformat->priv_data_size > 0) {
-            Context->priv_data = av_mallocz(Context->oformat->priv_data_size);
-            if(!Context->priv_data) {
-                //goto nomem;
-            }
-            if(Context->oformat->priv_class) {
-                *(const AVClass**)Context->priv_data = Context->oformat->priv_class;
-                //av_opt_set_defaults(aCtxOut->priv_data);
-            }
-        } else {
-            Context->priv_data = NULL;
-        }
-
-        const size_t aStrLen = stMin(theFile.Size + 1, size_t(1024));
-        stMemCpy(Context->filename, theFile.toCString(), aStrLen);
-        Context->filename[1023] = '\0';
-    #endif
         return Context != NULL;
     }
 
@@ -198,11 +149,7 @@ bool StAVVideoMuxer::addStream(AVFormatContext* theContext,
     return false;
 #else
     AVCodecContext* aCodecCtxSrc = stAV::getCodecCtx(theStream);
-#if(LIBAVFORMAT_VERSION_INT >= AV_VERSION_INT(57, 0, 0))
     AVStream* aStreamOut = avformat_new_stream(theContext, aCodecCtxSrc->codec);
-#else
-    AVStream* aStreamOut = avformat_new_stream(theContext, (AVCodec* )aCodecCtxSrc->codec);
-#endif
     if(aStreamOut == NULL) {
         signals.onError(StString("Failed allocating output stream."));
         return false;
@@ -213,9 +160,7 @@ bool StAVVideoMuxer::addStream(AVFormatContext* theContext,
         return false;
     }
     av_dict_copy(&aStreamOut->metadata, theStream->metadata, AV_DICT_DONT_OVERWRITE);
-//#if(LIBAVFORMAT_VERSION_INT >= AV_VERSION_INT(54, 2, 100))
-//    myIsAttachedPic = (theStream->disposition & AV_DISPOSITION_ATTACHED_PIC) != 0;
-//#endif
+//  myIsAttachedPic = (theStream->disposition & AV_DISPOSITION_ATTACHED_PIC) != 0;
     if(aCodecCtxSrc->codec_type == AVMEDIA_TYPE_VIDEO) {
         aStreamOut->sample_aspect_ratio   = theStream->sample_aspect_ratio;
         aCodecCtxNew->sample_aspect_ratio = aStreamOut->sample_aspect_ratio;
@@ -333,11 +278,7 @@ bool StAVVideoMuxer::save(const StString& theFile) {
             AVStream* aStreamIn  = aCtxSrc.Context->streams[aPacket.getStreamId()];
             AVStream* aStreamOut = aCtxOut.Context->streams[aStreamOutIndex];
 
-        #ifdef ST_LIBAV_FORK
-            const AVRounding aRoundParams = AV_ROUND_NEAR_INF;
-        #else
             const AVRounding aRoundParams = AVRounding(AV_ROUND_NEAR_INF | AV_ROUND_PASS_MINMAX);
-        #endif
             aPacket.getAVpkt()->pts      = av_rescale_q_rnd(aPacket.getPts(), aStreamIn->time_base, aStreamOut->time_base, aRoundParams);
             aPacket.getAVpkt()->dts      = av_rescale_q_rnd(aPacket.getDts(), aStreamIn->time_base, aStreamOut->time_base, aRoundParams);
             aPacket.getAVpkt()->duration = static_cast<int >(av_rescale_q(aPacket.getDuration(), aStreamIn->time_base, aStreamOut->time_base));

@@ -1,5 +1,5 @@
 /**
- * Copyright © 2011-2014 Kirill Gavrilov <kirill@sview.ru>
+ * Copyright © 2011-2025 Kirill Gavrilov <kirill@sview.ru>
  *
  * StMoviePlayer program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -26,7 +26,7 @@
 namespace {
     static const StString ST_CRLF_REDUNDANT   = "\x0D\x0A";
     static const StString ST_CRLF_REPLACEMENT = " \x0A";
-};
+}
 
 /**
  * Thread function just call decodeLoop() function.
@@ -69,11 +69,7 @@ bool StSubtitleQueue::init(AVFormatContext*   theFormatCtx,
 
     if(myCodecAutoId != AV_CODEC_ID_TEXT) {
         // open SUBTITLE codec
-    #if(LIBAVCODEC_VERSION_INT >= AV_VERSION_INT(53, 8, 0))
         if(avcodec_open2(myCodecCtx, myCodecAuto, NULL) < 0) {
-    #else
-        if(avcodec_open(myCodecCtx, myCodecAuto) < 0) {
-    #endif
             signals.onError(stCString("FFmpeg: Could not open subtitle codec"));
             deinit();
             return false;
@@ -81,11 +77,9 @@ bool StSubtitleQueue::init(AVFormatContext*   theFormatCtx,
         myCodec = myCodecAuto;
 
         // initialize ASS parser
-    #if(LIBAVCODEC_VERSION_INT >= AV_VERSION_INT(52, 95, 0))
         /// TODO (Kirill Gavrilov#6) when we should do that?
         myASS.init((char* )myCodecCtx->subtitle_header,
                    myCodecCtx->subtitle_header_size);
-    #endif
     }
     if(myCodecAuto != NULL && StString(myCodecAuto->name).isEquals(stCString("pgssub"))) {
         myImageScale = 0.5f;
@@ -151,15 +145,8 @@ void StSubtitleQueue::decodeLoop() {
         aDuration = unitsToSeconds(aPacket->getConvergenceDuration());
         if(myCodec != NULL) {
             // decode subtitle item
-        #if(LIBAVCODEC_VERSION_INT >= AV_VERSION_INT(52, 23, 0))
             avcodec_decode_subtitle2(myCodecCtx, &aSubtitle,
                                      &isFrameFinished, aPacket->getAVpkt());
-        #else
-            avcodec_decode_subtitle(myCodecCtx, &aSubtitle,
-                                    &isFrameFinished,
-                                    aPacket->getData(), aPacket->getSize());
-        #endif
-
             if(isFrameFinished != 0 && aPacket->getPts() != stAV::NOPTS_VALUE) {
                 for(unsigned aRectId = 0; aRectId < aSubtitle.num_rects; ++aRectId) {
                     AVSubtitleRect* aRect = aSubtitle.rects[aRectId];
@@ -178,13 +165,8 @@ void StSubtitleQueue::decodeLoop() {
                             aNewSubItem->Image.initTrash(StImagePlane::ImgRGBA, aRect->w, aRect->h);
                             aNewSubItem->Scale = myImageScale;
 
-                        #if(LIBAVCODEC_VERSION_INT >= AV_VERSION_INT(57, 9, 100))
                             uint8_t** anImgData = aRect->data;
                             int* anImgLineSizes = aRect->linesize;
-                        #else
-                            uint8_t** anImgData = aRect->pict.data;
-                            int* anImgLineSizes = aRect->pict.linesize;
-                        #endif
 
                             SwsContext* aCtxToRgb = sws_getContext(aRect->w, aRect->h, stAV::PIX_FMT::PAL8,
                                                                    aRect->w, aRect->h, stAV::PIX_FMT::RGBA32,
@@ -234,21 +216,7 @@ void StSubtitleQueue::decodeLoop() {
                     }
                 }
             }
-        #if(LIBAVCODEC_VERSION_INT >= AV_VERSION_INT(52, 82, 0))
             avsubtitle_free(&aSubtitle);
-        #else
-            for(unsigned aRectId = 0; aRectId < aSubtitle.num_rects; ++aRectId) {
-                av_freep(&aSubtitle.rects[aRectId]->pict.data[0]);
-                av_freep(&aSubtitle.rects[aRectId]->pict.data[1]);
-                av_freep(&aSubtitle.rects[aRectId]->pict.data[2]);
-                av_freep(&aSubtitle.rects[aRectId]->pict.data[3]);
-                av_freep(&aSubtitle.rects[aRectId]->text);
-                av_freep(&aSubtitle.rects[aRectId]->ass);
-                av_freep(&aSubtitle.rects[aRectId]);
-            }
-            av_freep(&aSubtitle.rects);
-            stMemSet(&aSubtitle, 0, sizeof(AVSubtitle));
-        #endif
         } else {
             // just plain text
             StHandle<StSubItem> aNewSubItem = new StSubItem(aPts, aPts + aDuration);

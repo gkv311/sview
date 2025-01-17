@@ -1,5 +1,5 @@
 /**
- * Copyright © 2011-2023 Kirill Gavrilov <kirill@sview.ru>
+ * Copyright © 2011-2025 Kirill Gavrilov <kirill@sview.ru>
  *
  * This code is licensed under MIT license (see docs/license-mit.txt for details).
  */
@@ -8,87 +8,12 @@
 #include <StThreads/StMutex.h>
 #include <StStrings/StLogger.h>
 
-// libav* libraries written on pure C,
-// and we must around includes manually
+// libav* libraries written on pure C, and we must around includes manually
 extern "C" {
-#if(LIBAVUTIL_VERSION_INT >= AV_VERSION_INT(50, 8, 0))
-    #include <libavutil/pixdesc.h>
-#endif
-
-#if(LIBAVCODEC_VERSION_INT >= AV_VERSION_INT(53, 0, 0))
-    // #include <libavresample/avresample.h>
-    #include <libavutil/channel_layout.h>
-#endif
-
 #if defined(__ANDROID__)
     #include <libavcodec/jni.h>
 #endif
 };
-
-#ifdef ST_LIBAV_FORK
-    #ifdef _MSC_VER
-        #pragma message("stAV.cpp(28) : warning C4996: LibAV detected - compatibility workarounds have been activated!")
-    #else
-        #warning LibAV detected - compatibility workarounds have been activated!
-    #endif
-#endif
-
-#if(LIBAVCODEC_VERSION_INT >= AV_VERSION_INT(52, 30, 0)) \
-&& ((LIBAVCODEC_VERSION_INT < AV_VERSION_INT(58, 9, 100)) || defined(ST_LIBAV_FORK))
-class StFFMpegLocker {
-
-        public:
-
-    StFFMpegLocker() {
-        //
-    }
-
-    ~StFFMpegLocker() {
-        av_lockmgr_register(NULL); // unregister to avoid usage of dead function pointer
-    }
-
-    void init() {
-        if(av_lockmgr_register(stFFmpegLock) != 0) {
-            ST_DEBUG_LOG("FFmpeg, fail to register own mutex!");
-        }
-    }
-
-        private:
-
-    static int stFFmpegLock(void** theMutexPtrPtr, enum AVLockOp theOperation) {
-        StMutex* stMutex = (StMutex* )*theMutexPtrPtr;
-        switch(theOperation) {
-            case AV_LOCK_CREATE: {
-                // create a mutex
-                stMutex = new StMutex();
-                *theMutexPtrPtr = (void* )stMutex;
-                return 0;
-            }
-            case AV_LOCK_OBTAIN: {
-                // lock the mutex
-                stMutex->lock();
-                return 0;
-            }
-            case AV_LOCK_RELEASE: {
-                // unlock the mutex
-                stMutex->unlock();
-                return 0;
-            }
-            case AV_LOCK_DESTROY: {
-                // free mutex resources
-                delete stMutex;
-                *theMutexPtrPtr = NULL;
-                return 0;
-            }
-            default: {
-                ST_DEBUG_LOG("FFmpeg, Unsupported lock operation " + theOperation);
-                return 1;
-            }
-        }
-    }
-
-} static stFFMpegLocker;
-#endif
 
 // this is just redeclaration AV_NOPTS_VALUE
 const int64_t stAV::NOPTS_VALUE = 0x8000000000000000LL;
@@ -96,11 +21,7 @@ const int64_t stAV::NOPTS_VALUE = 0x8000000000000000LL;
 /**
  * Reproduced AVPixelFormat enumeration.
  */
-#if(LIBAVUTIL_VERSION_INT >= AV_VERSION_INT(50, 8, 0))
-    #define ST_AV_GETPIXFMT(theName) av_get_pix_fmt(theName)
-#else
-    #define ST_AV_GETPIXFMT(theName) avcodec_get_pix_fmt(theName)
-#endif
+#define ST_AV_GETPIXFMT(theName) av_get_pix_fmt(theName)
 const AVPixelFormat stAV::PIX_FMT::NONE       = AVPixelFormat(-1);
 const AVPixelFormat stAV::PIX_FMT::YUV420P    = AVPixelFormat( 0);
 const AVPixelFormat stAV::PIX_FMT::YUVA420P   = ST_AV_GETPIXFMT("yuva420p");
@@ -284,23 +205,7 @@ namespace {
 #endif
 
     static bool initOnce() {
-    #if(LIBAVCODEC_VERSION_INT >= AV_VERSION_INT(52, 30, 0)) \
-    && ((LIBAVCODEC_VERSION_INT < AV_VERSION_INT(58, 9, 100)) || defined(ST_LIBAV_FORK))
-        // register own mutex to prevent multithreading errors
-        // while using FFmpeg functions
-        stFFMpegLocker.init();
-    #endif
-
-    #if(LIBAVFORMAT_VERSION_INT < AV_VERSION_INT(58, 9, 100)) || defined(ST_LIBAV_FORK)
-        // Notice, this call is absolutely not thread safe!
-        // you should never call it first time from concurrent threads.
-        // But after first initialization is done this is safe to call it anyhow
-        av_register_all();
-    #endif
-
-    #if(LIBAVFORMAT_VERSION_INT >= AV_VERSION_INT(53, 13, 0))
         avformat_network_init();
-    #endif
         ST_DEBUG_LOG("FFmpeg initialized:");
 
     #if defined(ST_DEBUG_FFMPEG) || defined(ST_DEBUG_FFMPEG_VERBOSE)
@@ -316,7 +221,7 @@ namespace {
         return true;
     }
 
-};
+}
 
 bool stAV::init() {
     static const bool isFFmpegInitiailed = initOnce();
@@ -431,7 +336,6 @@ bool stAV::isFormatYUVPlanar(const AVPixelFormat thePixFmt,
 }
 
 StString stAV::getAVErrorDescription(int avErrCode) {
-#if(LIBAVUTIL_VERSION_INT >= AV_VERSION_INT(50, 13, 0))
     char aBuff[4096];
     stMemSet(aBuff, 0, sizeof(aBuff));
     if(av_strerror(avErrCode, aBuff, 4096) == -1) {
@@ -450,9 +354,6 @@ StString stAV::getAVErrorDescription(int avErrCode) {
     #endif
     }
     return aBuff;
-#else
-    return StString(" #") + avErrCode;
-#endif
 }
 
 stAV::Version::Version(const unsigned theVersionInt)
@@ -500,47 +401,20 @@ stAV::Version stAV::Version::libswscale() {
 }
 
 /// TODO (Kirill Gavrilov#9) replace with av_get_sample_fmt() on next libavcodec major version
-#if(LIBAVCODEC_VERSION_INT >= AV_VERSION_INT(53, 0, 0))
-    const AVSampleFormat stAV::audio::SAMPLE_FMT::U8   = AV_SAMPLE_FMT_U8;  //= av_get_sample_fmt("u8");
-    const AVSampleFormat stAV::audio::SAMPLE_FMT::S16  = AV_SAMPLE_FMT_S16; //= av_get_sample_fmt("s16");
-    const AVSampleFormat stAV::audio::SAMPLE_FMT::S32  = AV_SAMPLE_FMT_S32; //= av_get_sample_fmt("s32");
-    const AVSampleFormat stAV::audio::SAMPLE_FMT::FLT  = AV_SAMPLE_FMT_FLT; //= av_get_sample_fmt("flt");
-    const AVSampleFormat stAV::audio::SAMPLE_FMT::DBL  = AV_SAMPLE_FMT_DBL; //= av_get_sample_fmt("dbl");
-    #if(LIBAVCODEC_VERSION_INT >= AV_VERSION_INT(53, 40, 0))
-    const AVSampleFormat stAV::audio::SAMPLE_FMT::U8P  = AV_SAMPLE_FMT_U8P;
-    const AVSampleFormat stAV::audio::SAMPLE_FMT::S16P = AV_SAMPLE_FMT_S16P;
-    const AVSampleFormat stAV::audio::SAMPLE_FMT::S32P = AV_SAMPLE_FMT_S32P;
-    const AVSampleFormat stAV::audio::SAMPLE_FMT::FLTP = AV_SAMPLE_FMT_FLTP;
-    const AVSampleFormat stAV::audio::SAMPLE_FMT::DBLP = AV_SAMPLE_FMT_DBLP;
-    #else
-    const AVSampleFormat stAV::audio::SAMPLE_FMT::U8P  = (AVSampleFormat )-1;
-    const AVSampleFormat stAV::audio::SAMPLE_FMT::S16P = (AVSampleFormat )-1;
-    const AVSampleFormat stAV::audio::SAMPLE_FMT::S32P = (AVSampleFormat )-1;
-    const AVSampleFormat stAV::audio::SAMPLE_FMT::FLTP = (AVSampleFormat )-1;
-    const AVSampleFormat stAV::audio::SAMPLE_FMT::DBLP = (AVSampleFormat )-1;
-    #endif
-#else
-    const SampleFormat   stAV::audio::SAMPLE_FMT::U8   = SAMPLE_FMT_U8;
-    const SampleFormat   stAV::audio::SAMPLE_FMT::S16  = SAMPLE_FMT_S16;
-    const SampleFormat   stAV::audio::SAMPLE_FMT::S32  = SAMPLE_FMT_S32;
-    const SampleFormat   stAV::audio::SAMPLE_FMT::FLT  = SAMPLE_FMT_FLT;
-    const SampleFormat   stAV::audio::SAMPLE_FMT::DBL  = SAMPLE_FMT_DBL;
-#endif
+const AVSampleFormat stAV::audio::SAMPLE_FMT::U8   = AV_SAMPLE_FMT_U8;  //= av_get_sample_fmt("u8");
+const AVSampleFormat stAV::audio::SAMPLE_FMT::S16  = AV_SAMPLE_FMT_S16; //= av_get_sample_fmt("s16");
+const AVSampleFormat stAV::audio::SAMPLE_FMT::S32  = AV_SAMPLE_FMT_S32; //= av_get_sample_fmt("s32");
+const AVSampleFormat stAV::audio::SAMPLE_FMT::FLT  = AV_SAMPLE_FMT_FLT; //= av_get_sample_fmt("flt");
+const AVSampleFormat stAV::audio::SAMPLE_FMT::DBL  = AV_SAMPLE_FMT_DBL; //= av_get_sample_fmt("dbl");
+const AVSampleFormat stAV::audio::SAMPLE_FMT::U8P  = AV_SAMPLE_FMT_U8P;
+const AVSampleFormat stAV::audio::SAMPLE_FMT::S16P = AV_SAMPLE_FMT_S16P;
+const AVSampleFormat stAV::audio::SAMPLE_FMT::S32P = AV_SAMPLE_FMT_S32P;
+const AVSampleFormat stAV::audio::SAMPLE_FMT::FLTP = AV_SAMPLE_FMT_FLTP;
+const AVSampleFormat stAV::audio::SAMPLE_FMT::DBLP = AV_SAMPLE_FMT_DBLP;
 
 StString stAV::audio::getSampleFormatString(const AVCodecContext* theCtx) {
-#if(LIBAVUTIL_VERSION_INT >= AV_VERSION_INT(51, 17, 0))
     const char* aStr = av_get_sample_fmt_name(theCtx->sample_fmt);
     return aStr != NULL ? StString(aStr) : StString("");
-#else
-    switch(theCtx->sample_fmt) {
-        case stAV::audio::SAMPLE_FMT::U8:  return stCString("u8");
-        case stAV::audio::SAMPLE_FMT::S16: return stCString("s16");
-        case stAV::audio::SAMPLE_FMT::S32: return stCString("s32");
-        case stAV::audio::SAMPLE_FMT::FLT: return stCString("flt");
-        case stAV::audio::SAMPLE_FMT::DBL: return stCString("dbl");
-        default: return stCString("??");
-    }
-#endif
 }
 
 int stAV::audio::getNbChannels(const AVCodecContext* theCtx) {
@@ -576,7 +450,6 @@ StString stAV::audio::getChannelLayoutString(const AVCodecContext* theCtx) {
 }
 
 StString stAV::audio::getChannelLayoutString(int theNbChannels, uint64_t theLayout) {
-#if(LIBAVCODEC_VERSION_INT >= AV_VERSION_INT(53, 0, 0))
     if(theLayout == 0) {
         if(theNbChannels == 1) {
             return "mono";
@@ -595,46 +468,13 @@ StString stAV::audio::getChannelLayoutString(int theNbChannels, uint64_t theLayo
     ST_ENABLE_DEPRECATION_WARNINGS
     return aBuff;
 #endif
-#else
-    switch(theNbChannels) {
-        case 1: return "mono";
-        case 2: return "stereo";
-        case 4: {
-            switch(theLayout) {
-                //case CH_LAYOUT_4POINT0: return "4.0");
-                case CH_LAYOUT_QUAD:    return "quad";
-                default: return "4.0";
-            }
-        }
-        case 5: return "5.0";
-        case 6: return "5.1";
-        case 8: {
-            switch(theLayout) {
-                case CH_LAYOUT_5POINT1|CH_LAYOUT_STEREO_DOWNMIX:
-                    return "5.1+downmix";
-                case CH_LAYOUT_7POINT1:
-                    return "7.1";
-                case CH_LAYOUT_7POINT1_WIDE:
-                    return "7.1(wide)";
-                default:
-                    return "unknown 8.0";
-            }
-        }
-        case 10: return "7.1+downmix";
-        default: return StString("unknown") + theNbChannels;
-    }
-#endif
 }
 
 stAV::meta::Tag* stAV::meta::findTag(stAV::meta::Dict*      theDict,
                                      const char*            theKey,
                                      const stAV::meta::Tag* thePrevTag,
                                      const int              theFlags) {
-#if(LIBAVUTIL_VERSION_INT >= AV_VERSION_INT(51, 5, 0))
-    return av_dict_get    (theDict, theKey, thePrevTag, theFlags);
-#else
-    return av_metadata_get(theDict, theKey, thePrevTag, theFlags);
-#endif
+    return av_dict_get(theDict, theKey, thePrevTag, theFlags);
 }
 
 bool stAV::meta::readTag(stAV::meta::Dict* theDict,
@@ -653,13 +493,7 @@ bool stAV::meta::readTag(stAV::meta::Dict* theDict,
 }
 
 stAV::meta::Dict* stAV::meta::getFrameMetadata(AVFrame* theFrame) {
-#if(LIBAVCODEC_VERSION_INT >= AV_VERSION_INT(57, 81, 102)) && !defined(ST_LIBAV_FORK)
     return theFrame->metadata;
-#elif(LIBAVCODEC_VERSION_INT >= AV_VERSION_INT(54, 38, 100)) && !defined(ST_LIBAV_FORK)
-    return av_frame_get_metadata(theFrame);
-#else
-    return NULL;
-#endif
 }
 
 double stAV::unitsToSeconds(const AVRational& theTimeBase,
@@ -702,17 +536,9 @@ bool stAV::isEnabledInputProtocol(const StString& theProtocol) {
 }
 
 StString stAV::getVersionInfo() {
-#if(LIBAVCODEC_VERSION_INT >= AV_VERSION_INT(57, 24, 0))
     return av_version_info();
-#else
-    return "";
-#endif
 }
 
 StString stAV::getLicenseInfo() {
-#if(LIBAVCODEC_VERSION_INT >= AV_VERSION_INT(57, 24, 0))
     return avutil_license();
-#else
-    return "";
-#endif
 }
