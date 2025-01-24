@@ -158,6 +158,9 @@ configArguments="\
  --disable-doc \
  --enable-runtime-cpudetect"
 
+# enable AV1 decoder
+configArguments="$configArguments --enable-libdav1d"
+
 if [ "$aSystem" == "Darwin" ]; then
   export MACOSX_DEPLOYMENT_TARGET=10.10
   anExtraCFlags="$anExtraCFlags -mmacosx-version-min=10.10"
