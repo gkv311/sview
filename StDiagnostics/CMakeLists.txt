@@ -30,6 +30,12 @@ add_library (${PROJECT_NAME} SHARED
 
 set_target_properties (${PROJECT_NAME} PROPERTIES FOLDER "Apps")
 sview_set_target_output_dirs(${PROJECT_NAME})
+if (MSVC)
+  set_target_properties(${PROJECT_NAME} PROPERTIES
+    VS_DEBUGGER_COMMAND "$<TARGET_FILE:sView.com>"
+    VS_DEBUGGER_COMMAND_ARGUMENTS  "--in=diag"
+  )
+endif()
 
 # internal dependencies
 set (aDeps StGLWidgets StOutAnaglyph StOutDual StOutIZ3D StOutInterlace StOutPageFlip StOutDistorted StCore StShared)

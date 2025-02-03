@@ -45,43 +45,40 @@ else()
     ${USED_SRCFILES} ${USED_MMFILES} ${USED_INCFILES} ${USED_RESFILES} ${USED_MANFILES}
   )
 endif()
-
-if (WIN32)
-  # add_executable() has WIN32 argument which cannot be switched between release/debug...
-  # if ST_DEBUG
-  string (REGEX MATCH "/subsystem:windows" ISFLAG "${CMAKE_EXE_LINKER_FLAGS_DEBUG}")
-  if (ISFLAG)
-    string (REGEX REPLACE "/subsystem:windows" "/subsystem:console" CMAKE_EXE_LINKER_FLAGS_DEBUG "${CMAKE_EXE_LINKER_FLAGS_DEBUG}")
-  else()
-    set(CMAKE_EXE_LINKER_FLAGS_DEBUG "${CMAKE_EXE_LINKER_FLAGS_DEBUG} /subsystem:console")
-  endif()
-
-  string (REGEX MATCH "/subsystem:console" ISFLAG "${CMAKE_EXE_LINKER_FLAGS_RELEASE}")
-  if (ISFLAG)
-    string (REGEX REPLACE "/subsystem:console" "/subsystem:windows" CMAKE_EXE_LINKER_FLAGS_RELEASE "${CMAKE_EXE_LINKER_FLAGS_RELEASE}")
-  else()
-    set(CMAKE_EXE_LINKER_FLAGS_RELEASE "${CMAKE_EXE_LINKER_FLAGS_RELEASE} /subsystem:windows")
-  endif()
-endif()
-
 set_target_properties (${PROJECT_NAME} PROPERTIES FOLDER "Apps")
 st_set_target_output_dirs(${PROJECT_NAME})
+
+if (WIN32)
+  set (PROJECT_NAME_COM "sView.com")
+  add_executable (${PROJECT_NAME_COM}
+    ${USED_SRCFILES} ${USED_MMFILES} ${USED_INCFILES} ${USED_RESFILES} ${USED_MANFILES}
+  )
+  set_target_properties (${PROJECT_NAME_COM} PROPERTIES FOLDER "Apps")
+  st_set_target_output_dirs(${PROJECT_NAME_COM})
+  
+  set_target_properties (${PROJECT_NAME_COM} PROPERTIES OUTPUT_NAME "sView.com") 
+endif()
 
 # internal dependencies
 set (aDeps StOutPageFlip StMoviePlayer StImageViewer StDiagnostics StCore StShared)
 foreach (aDepIter ${aDeps})
   add_dependencies (${PROJECT_NAME} ${aDepIter})
   target_link_libraries (${PROJECT_NAME} PRIVATE ${aDepIter})
+  if (WIN32)
+    add_dependencies (${PROJECT_NAME_COM} ${aDepIter})
+    target_link_libraries (${PROJECT_NAME_COM} PRIVATE ${aDepIter})
+  endif()
 endforeach()
 
 # external dependencies
 target_link_libraries (${PROJECT_NAME} PRIVATE freetype)
+if (WIN32)
+  target_link_libraries (${PROJECT_NAME_COM} PRIVATE freetype)
+endif()
 
 if (ANDROID)
   target_link_libraries (${PROJECT_NAME} PRIVATE log android EGL GLESv2 c)
-endif()
-
-if (APPLE)
+elseif (APPLE)
   target_link_libraries (${PROJECT_NAME} PRIVATE "-framework Appkit" objc)
 endif()
 
@@ -172,8 +169,13 @@ endif()
 install (TARGETS "${PROJECT_NAME}"
          RUNTIME DESTINATION "${SVIEW_INSTALL_BIN}"
          PERMISSIONS OWNER_READ OWNER_WRITE OWNER_EXECUTE GROUP_READ GROUP_EXECUTE WORLD_READ WORLD_EXECUTE)
+if (WIN32)
+  install (TARGETS "${PROJECT_NAME_COM}"
+           RUNTIME DESTINATION "${SVIEW_INSTALL_BIN}")
+endif()
 if (MSVC)
-  install (FILES "$<TARGET_PDB_FILE:${PROJECT_NAME}>" DESTINATION "${SVIEW_INSTALL_BIN}" OPTIONAL)
+  install (FILES "$<TARGET_PDB_FILE:${PROJECT_NAME}>"     DESTINATION "${SVIEW_INSTALL_BIN}" OPTIONAL)
+  install (FILES "$<TARGET_PDB_FILE:${PROJECT_NAME_COM}>" DESTINATION "${SVIEW_INSTALL_BIN}" OPTIONAL)
 endif()
 
 if (ANDROID)
