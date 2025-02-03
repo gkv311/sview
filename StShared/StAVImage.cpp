@@ -604,14 +604,8 @@ bool StAVImage::loadExtra(const StString& theFilePath,
     } else {
         ///ST_DEBUG_LOG("StAVImage, perform conversion from Pixel format '" + avcodec_get_pix_fmt_name(myCodecCtx->pix_fmt) + "' to RGB");
 
-        // TODO - rely on AV_PIX_FMT_FLAG_ALPHA
-        //const AVPixFmtDescriptor* aDesc = av_pix_fmt_desc_get(myCodecCtx->pix_fmt);
-        //const bool hasAlpha = aDesc != NULL && (aDesc->flags & AV_PIX_FMT_FLAG_ALPHA);
-        const bool hasAlpha = myCodecCtx->pix_fmt == stAV::PIX_FMT::GBRAP
-                           || myCodecCtx->pix_fmt == stAV::PIX_FMT::GBRAP10
-                           || myCodecCtx->pix_fmt == stAV::PIX_FMT::GBRAP12
-                           || myCodecCtx->pix_fmt == stAV::PIX_FMT::GBRAP14
-                           || myCodecCtx->pix_fmt == stAV::PIX_FMT::GBRAP16;
+        const AVPixFmtDescriptor* aDesc = av_pix_fmt_desc_get(myCodecCtx->pix_fmt);
+        const bool hasAlpha = aDesc != NULL && (aDesc->flags & AV_PIX_FMT_FLAG_ALPHA) != 0;
 
         // initialize software scaler/converter
         SwsContext* pToRgbCtx = sws_getContext(myCodecCtx->width, myCodecCtx->height, myCodecCtx->pix_fmt,    // source
