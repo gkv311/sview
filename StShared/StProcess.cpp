@@ -25,35 +25,6 @@
 
 #include <sstream>
 
-namespace {
-
-    static const StCString ST_FILE_PROTOCOL = stCString("file://");
-
-    static const StString ST_ENV_NAME_STSHARE     = "StShare";
-#if defined(_WIN64) || defined(_LP64) || defined(__LP64__)
-    static const StString ST_ENV_NAME_STCORE_PATH = "StCore64";
-#else
-    static const StString ST_ENV_NAME_STCORE_PATH = "StCore32";
-#endif
-
-#ifdef _WIN32
-    static const StString STCORE_NAME = StString("StCore")    + ST_DLIB_SUFFIX;
-#else
-    static const StString STCORE_NAME = StString("libStCore") + ST_DLIB_SUFFIX;
-#endif
-
-    inline bool isValidStSharePath(const StString& thePath) {
-        return !thePath.isEmpty()
-            && StFileNode::isFileExists(thePath + "textures");
-    }
-
-    inline bool isValidStCorePath(const StString& thePath) {
-        return !thePath.isEmpty()
-            && StFileNode::isFileExists(thePath + STCORE_NAME);
-    }
-
-}
-
 StString StProcess::getProcessFullPath() {
 #ifdef _WIN32
     // TODO (Kirill Gavrilov#9) - implement correct method
@@ -184,6 +155,8 @@ StString StProcess::getTempFolder() {
 }
 
 StString StProcess::getAbsolutePath(const StString& thePath) {
+    static const StCString ST_FILE_PROTOCOL = stCString("file://");
+
     StString aPath;
     if(thePath.isStartsWith(ST_FILE_PROTOCOL)) {
         const StString aData = thePath.subString(ST_FILE_PROTOCOL.getLength(), thePath.getLength());
@@ -226,8 +199,18 @@ bool loadStringFromRegister(const StString& theRegisterPath, const StString& the
 }
 #endif
 
-StString StProcess::getStShareFolder() {
-    StString aShareEnvValue = getEnv(ST_ENV_NAME_STSHARE);
+/** Verify location of shared resources by searching for a texture. */
+static bool isValidStSharePath(const StString& thePath) {
+    static const char TEST_TEXTURE[] = "textures/actionBack16.png";
+    return !thePath.isEmpty()
+        && StFileNode::isFileExists(thePath + TEST_TEXTURE);
+}
+
+/** Find location of shared resources. */
+static StString initStShareFolder() {
+    static const StCString ST_ENV_NAME_STSHARE = stCString("StShare");
+
+    StString aShareEnvValue = StProcess::getEnv(ST_ENV_NAME_STSHARE);
 #ifdef _WIN32
     if(aShareEnvValue.isEmpty()) {
         // read env. value directly from registry (before first log off / log in)
@@ -246,7 +229,7 @@ StString StProcess::getStShareFolder() {
         return aShareEnvValue;
     }
 
-    const StString aProcessPath = getProcessFolder();
+    const StString aProcessPath = StProcess::getProcessFolder();
     if(isValidStSharePath(aProcessPath)) {
         return aProcessPath;
     }
@@ -261,7 +244,29 @@ StString StProcess::getStShareFolder() {
     return StString();
 }
 
+StString StProcess::getStShareFolder() {
+    static const StString ST_SHARE_FOLDER = initStShareFolder();
+    return ST_SHARE_FOLDER;
+}
+
+/** Verify location of StCore folder by existance of the library. */
+static bool isValidStCorePath(const StString& thePath) {
+#ifdef _WIN32
+    static const StString STCORE_NAME = StString("StCore")    + ST_DLIB_SUFFIX;
+#else
+    static const StString STCORE_NAME = StString("libStCore") + ST_DLIB_SUFFIX;
+#endif
+    return !thePath.isEmpty()
+        && StFileNode::isFileExists(thePath + STCORE_NAME);
+}
+
 StString StProcess::getStCoreFolder() {
+#if defined(_WIN64) || defined(_LP64) || defined(__LP64__)
+    static const StCString ST_ENV_NAME_STCORE_PATH = stCString("StCore64");
+#else
+    static const StCString ST_ENV_NAME_STCORE_PATH = stCString("StCore32");
+#endif
+
     StString aCoreEnvValue = getEnv(ST_ENV_NAME_STCORE_PATH);
 #ifdef _WIN32
     if(aCoreEnvValue.isEmpty()) {
