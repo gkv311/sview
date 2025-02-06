@@ -198,7 +198,7 @@ StOutDual::StOutDual(const StHandle<StResourceManager>& theResMgr,
 
     // detect connected displays
     int aSupportLevel = ST_DEVICE_SUPPORT_NONE;
-    if(aMonitors.size() >= 2) {
+    /*if(aMonitors.size() >= 2) {
         const StMonitor& aMon0 = aMonitors[0];
         const StMonitor& aMon1 = aMonitors[1];
         if(aMon0.getVRect().width()  == aMon1.getVRect().width()
@@ -206,7 +206,7 @@ StOutDual::StOutDual(const StHandle<StResourceManager>& theResMgr,
         && aMon0.getFreq()           == aMon1.getFreq()) {
             aSupportLevel = ST_DEVICE_SUPPORT_HIGHT;
         }
-    }
+    }*/
 
     // devices list
     StHandle<StOutDevice> aDevDual = new StOutDevice();
