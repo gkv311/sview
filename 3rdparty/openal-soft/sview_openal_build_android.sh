@@ -1,84 +1,75 @@
 #!/bin/bash
 
 # go to the script directory
-anOpenAlSrc=${BASH_SOURCE%/*}
-if [ -d "$anOpenAlSrc" ]; then cd "$anOpenAlSrc"; fi
-anOpenAlSrc="$PWD"
+aScriptPath=${BASH_SOURCE%/*}; if [ -d "${aScriptPath}" ]; then cd "$aScriptPath"; fi; aScriptPath="$PWD";
 
-aNbJobs="$(getconf _NPROCESSORS_ONLN)"
+aProjName=openal-soft-1.24.2
 
-anNdkPath=$HOME/develop/android-ndk-r12b
-aToolchain=$HOME/develop/android-cmake/android.toolchain.cmake
+PATH=~/develop/tools/cmake-3.31.5-linux-x86_64/bin:$PATH
 
-# remove SO version from library - unsupported by Android
-if grep -q PROPERTIES\ VERSION $anOpenAlSrc/CMakeLists.txt; then
-  cp -f $anOpenAlSrc/CMakeLists.txt $anOpenAlSrc/CMakeLists.bak.txt
-  sed -i '/PROPERTIES\ VERSION/,+1 d' CMakeLists.txt
-fi
+#CMAKE_ANDROID_NDK=~/develop/tools/android-ndk-r12b
+CMAKE_ANDROID_NDK=~/develop/tools/android-ndk-r27c
+CMAKE_BUILD_TYPE=Release
 
-cmakeBuildOpenAl() {
-  anApi="$1"
-  anAbi="$2"
-  aPlatformAndCompiler=android-$anAbi
-  aWorkDir=build/${aPlatformAndCompiler}-make
-  aLogFile=$anOpenAlSrc/build-${aPlatformAndCompiler}.log
+aSrcRoot=${aScriptPath}/${aProjName}.git
+aBuildRoot=${aScriptPath}/android-make
+aDestRoot=${aScriptPath}/android
+aDestMulti=${aDestRoot}/${aProjName}
+aCppLib=c++_shared
 
-  mkdir -p $aWorkDir
-  rm    -f $aLogFile
+rm -f -r "$aDestMulti"
+mkdir -p "$aBuildRoot"
 
-  pushd $aWorkDir
+set -o pipefail
 
-  set -o pipefail
+function buildArch {
+  anAbi=$1
+  anApi=$2
 
-  echo Configuring OpenAL-soft for Android...
-  cmake -G "Unix Makefiles" \
- -D CMAKE_TOOLCHAIN_FILE:FILEPATH="$aToolchain" \
- -D ANDROID_NDK:FILEPATH="$anNdkPath" \
- -D ANDROID_ABI:STRING="$anAbi" \
- -D ANDROID_NATIVE_API_LEVEL:STRING="$anApi" \
- -D ANDROID_STL:STRING="gnustl_shared" \
- -D CMAKE_BUILD_TYPE:STRING="Release" \
- -D BUILD_LIBRARY_TYPE:STRING="Shared" \
- -D ALSOFT_BACKEND_OPENSL:BOOL="ON" \
- -D ALSOFT_REQUIRE_OPENSL:BOOL="ON" \
- -D ALSOFT_BACKEND_WAVE:BOOL="OFF" \
- -D ALSOFT_EXAMPLES:BOOL="OFF" \
- -D ALSOFT_TESTS:BOOL="OFF" \
- -D ALSOFT_UTILS:BOOL="OFF" \
- -D ALSOFT_NO_CONFIG_UTIL:BOOL="ON" \
- -D CMAKE_INSTALL_PREFIX:PATH="$anOpenAlSrc/build/$aPlatformAndCompiler" \
- "$anOpenAlSrc" | tee -a $aLogFile
+  aBuildPath=${aBuildRoot}/${aProjName}-${anAbi}-make
+  CMAKE_INSTALL_PREFIX=${aDestRoot}/${aProjName}-${anAbi}
+  rm -r -f ${aBuildPath}
+  rm -r -f ${CMAKE_INSTALL_PREFIX}
 
-  aResult=$?; if [[ $aResult != 0 ]]; then exit $aResult; fi
-  make clean
-
-  echo Building OpenAL-soft...
-  make -j$aNbJobs | tee -a $aLogFile
+  cmake -G "Ninja" \
+   -D CMAKE_SYSTEM_NAME:STRING="Android" \
+   -D CMAKE_ANDROID_NDK="$CMAKE_ANDROID_NDK" \
+   -D CMAKE_BUILD_TYPE:STRING="$CMAKE_BUILD_TYPE" \
+   -D CMAKE_ANDROID_ARCH_ABI:STRING="$anAbi" \
+   -D CMAKE_SYSTEM_VERSION:STRING="$anApi" \
+   -D CMAKE_ANDROID_STL_TYPE="$aCppLib" \
+   -D CMAKE_INSTALL_PREFIX:STRING="$CMAKE_INSTALL_PREFIX" \
+   -D CMAKE_C_FLAGS:STRING="$CMAKE_C_FLAGS" \
+   -D BUILD_SHARED_LIBS:BOOL=ON \
+   -D ALSOFT_BACKEND_OPENSL:BOOL="ON" \
+   -D ALSOFT_REQUIRE_OPENSL:BOOL="ON" \
+   -D ALSOFT_BACKEND_WAVE:BOOL="OFF" \
+   -D ALSOFT_EXAMPLES:BOOL="OFF" \
+   -D ALSOFT_TESTS:BOOL="OFF" \
+   -D ALSOFT_UTILS:BOOL="OFF" \
+   -D ALSOFT_NO_CONFIG_UTIL:BOOL="ON" \
+   -B "$aBuildPath" -S "$aSrcRoot"
   aResult=$?; if [[ $aResult != 0 ]]; then exit $aResult; fi
 
-  echo Installing OpenAL into $anOpenAlSrc/work/$aPlatformAndCompiler...
-  make install | tee -a $aLogFile
+  cmake --build "$aBuildPath" --config Release --target clean
+  cmake --build "$aBuildPath" --config Release
+  aResult=$?; if [[ $aResult != 0 ]]; then exit $aResult; fi
+  cmake --build "$aBuildPath" --config Release --target install
 
-  popd
+  cp -f "$aSrcRoot/COPYING"   "$CMAKE_INSTALL_PREFIX/"
+  cp -f "$aSrcRoot/README.md" "$CMAKE_INSTALL_PREFIX/"
+
+  mkdir -p "$aDestMulti/libs/$anAbi"
+  cp -f    "$CMAKE_INSTALL_PREFIX/lib/libopenal.so" "$aDestMulti/libs/$anAbi/"
+  cp -f -r "$CMAKE_INSTALL_PREFIX/include"          "$aDestMulti"
+  cp -f -r "$CMAKE_INSTALL_PREFIX/share"            "$aDestMulti"
 }
 
-cmakeBuildOpenAl "15" "armeabi-v7a"
-cmakeBuildOpenAl "15" "x86"
-cmakeBuildOpenAl "21" "arm64-v8a"
+for anArchIter in armeabi-v7a arm64-v8a x86 x86_64; do buildArch $anArchIter 21; done
+#buildArch armeabi-v7a 16; buildArch arm64-v8a 21; buildArch x86 16; buildArch x86_64 21
 
-OUTPUT_FOLDER="$anOpenAlSrc/install/openal-soft-android"
-rm -f -r "$OUTPUT_FOLDER"
-mkdir -p "$OUTPUT_FOLDER/include"
-mkdir -p "$OUTPUT_FOLDER/libs/armeabi-v7a"
-mkdir -p "$OUTPUT_FOLDER/libs/x86"
-mkdir -p "$OUTPUT_FOLDER/libs/arm64-v8a"
-cp -f    "$anOpenAlSrc/COPYING"           "$OUTPUT_FOLDER"
-cp -f    "$anOpenAlSrc/README"            "$OUTPUT_FOLDER"
-cp -f -r "$anOpenAlSrc/build/android-armeabi-v7a/include"          "$OUTPUT_FOLDER"
-cp -f -r "$anOpenAlSrc/build/android-armeabi-v7a/share"            "$OUTPUT_FOLDER"
-cp -f -L "$anOpenAlSrc/build/android-armeabi-v7a/lib/libopenal.so" "$OUTPUT_FOLDER/libs/armeabi-v7a"
-cp -f -L "$anOpenAlSrc/build/android-x86/lib/libopenal.so"         "$OUTPUT_FOLDER/libs/x86"
-cp -f -L "$anOpenAlSrc/build/android-arm64-v8a/lib/libopenal.so"   "$OUTPUT_FOLDER/libs/arm64-v8a"
+cp -f "$aSrcRoot/COPYING"   "$aDestMulti"
+cp -f "$aSrcRoot/README.md" "$aDestMulti"
 
-rm $OUTPUT_FOLDER/../openal-soft-android.7z &>/dev/null
-7za a -t7z -m0=lzma -mx=9 -mfb=64 -md=32m -ms=on $OUTPUT_FOLDER/../openal-soft-android.7z $OUTPUT_FOLDER
+#rm $aDestMulti/../${aProjName}-android.7z &>/dev/null
+#7za a -t7z -m0=lzma -mx=9 -mfb=64 -md=32m -ms=on $aDestMulti/../${aProjName}-android.7z $aDestMulti
