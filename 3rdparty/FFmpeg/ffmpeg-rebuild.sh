@@ -9,20 +9,28 @@ rebuildLicense="lgpl"
 rebuildDebug="false"
 rebuildAndroid="false"
 compilerPrefix=""
-androidTarget=""
 androidAbi="armeabi-v7a"
-androidNdkRoot="$HOME/develop/android-ndk-r12b"
+#androidNdkRoot="$HOME/develop/android-ndk-r12b"
+androidNdkRoot="$HOME/develop/tools/android-ndk-r27c"
 aSystem=`uname -s`
 aPwdBack=$PWD
 
 for i in $*
 do
-  if [ "$i" == "gpl"       ] || [ "$i" == "GPL" ]; then
+  if [ "$i" == "gpl" ] || [ "$i" == "GPL" ]; then
     rebuildLicense="gpl"
-  elif [ "$i" == "lgpl"    ] || [ "$i" == "LGPL" ]; then
+  elif [ "$i" == "lgpl" ] || [ "$i" == "LGPL" ]; then
     rebuildLicense="lgpl"
   elif [ "$i" == "android" ]; then
     rebuildAndroid="true"
+  elif [ "$i" == "armeabi-v7a" ] || [ "$i" == "arm" ] || [ "$i" == "arm32" ]; then
+    androidAbi="armeabi-v7a"
+  elif [ "$i" == "arm64-v8a" ] || [ "$i" == "aarch64" ] || [ "$i" == "arm64" ]; then
+    androidAbi="arm64-v8a"
+  elif [ "$i" == "x86" ] || [ "$i" == "i686" ]; then
+    androidAbi="x86"
+  elif [ "$i" == "x86_64" ]; then
+    androidAbi="x86_64"
   elif [ "$i" == "debug"   ] || [ "$i" == "DEBUG" ]; then
     rebuildDebug="true"
   elif [ "$i" == "release" ] || [ "$i" == "RELEASE" ]; then
@@ -35,36 +43,48 @@ do
 done
 
 if [ "$rebuildAndroid" == "true" ]; then
-  if [ "$androidTarget" == "" ]; then
-    androidTarget="arm"
-    #androidTarget="arm64"
+  if [ -x "${androidNdkRoot}/toolchains/${aPrefixShort}-4.9" ]; then
+    # legacy NDK with GCC 4.9
+    aToolPathPrefix="$androidAbi"
+    if [ "$androidAbi" == "arm64-v8a" ]; then
+      aPrefixShort="aarch64-linux-android"
+      aToolPathPrefix="$aPrefixShort"
+      anAndSysRoot="${androidNdkRoot}/platforms/android-21/arch-arm64"
+    elif [ "$androidAbi" == "armeabi-v7a" ]; then
+      aPrefixShort="arm-linux-androideabi"
+      aToolPathPrefix="$aPrefixShort"
+      anAndSysRoot="${androidNdkRoot}/platforms/android-15/arch-arm"
+    elif [ "$androidAbi" == "x86_64" ]; then
+      aPrefixShort="${androidAbi}-linux-androideabi"
+      aToolPathPrefix="$androidAbi"
+      anAndSysRoot="${androidNdkRoot}/platforms/android-21/arch-${androidAbi}"
+    elif [ "$androidAbi" == "x86" ]; then
+      aPrefixShort="i686-linux-androideabi"
+      aToolPathPrefix="$androidAbi"
+      anAndSysRoot="${androidNdkRoot}/platforms/android-21/arch-${androidAbi}"
+    fi
+    toolchainBin="${androidNdkRoot}/toolchains/${aToolPathPrefix}-4.9/prebuilt/linux-x86_64/bin"
+  else
+    # modern NDK
+    if [ "$androidAbi" == "arm64-v8a" ]; then
+      aPrefixShort="aarch64-linux-android21"
+    elif [ "$androidAbi" == "armeabi-v7a" ]; then
+      aPrefixShort="armv7a-linux-androideabi21"
+    elif [ "$androidAbi" == "x86" ]; then
+      aPrefixShort="i686-linux-android21"
+    else
+      aPrefixShort="${androidAbi}-linux-android21"
+    fi
+    toolchainBin="${androidNdkRoot}/toolchains/llvm/prebuilt/linux-x86_64/bin"
+    anAndSysRoot="${androidNdkRoot}/toolchains/llvm/prebuilt/linux-x86_64/sysroot"
   fi
+  compilerPrefix="${toolchainBin}/${aPrefixShort}-"
 fi
-
-# cross-compilers prefixes
-GCC_MACHINE_MINGW_32="i686-w64-mingw32"
-GCC_MACHINE_MINGW_32_1="i686-mingw32"
-GCC_MACHINE_MINGW_64="x86_64-w64-mingw32"
-GCC_MACHINE_MINGW_64_1="x86_64-pc-mingw32"
-#GCC_MACHINE_LINUX_32=mingw32
-GCC_MACHINE_LINUX_64="x86_64-linux-gnu"
 
 if [ "$rebuildAndroid" == "true" ]; then
-  if [ "$androidTarget" == "arm64" ]; then
-    aPrefixShort="aarch64-linux-android"
-    androidAbi="arm64-v8a"
-  else
-    aPrefixShort="arm-linux-androideabi"
-    androidAbi="armeabi-v7a"
-  fi
-
-  compilerPrefix="${androidNdkRoot}/toolchains/${aPrefixShort}-4.8/prebuilt/linux-x86_64/bin/${aPrefixShort}-"
-  if [ -x "${androidNdkRoot}/toolchains/${aPrefixShort}-4.9" ]; then
-    compilerPrefix="${androidNdkRoot}/toolchains/${aPrefixShort}-4.9/prebuilt/linux-x86_64/bin/${aPrefixShort}-"
-  fi
-fi
-
-if [ "$compilerPrefix" != "" ]; then
+  gccVersion=$("$compilerPrefix"clang -dumpversion)
+  gccMachine=$("$compilerPrefix"clang -dumpmachine)
+elif [ "$compilerPrefix" != "" ]; then
   gccVersion=$("$compilerPrefix"gcc -dumpversion)
   gccMachine=$("$compilerPrefix"gcc -dumpmachine)
 else
@@ -73,7 +93,7 @@ else
 fi
 
 echo "  Start building FFmpeg $rebuildLicense from $rebuildTarget"
-cd $rebuildTarget
+pushd $rebuildTarget
 
 # releases extract the version number from the RELEASE file
 ffmpegVersion=$(cat RELEASE 2> /dev/null)
@@ -86,7 +106,6 @@ test $ffmpegVersion || ffmpegVersion=$ffmpegRevision
 # remove slashes
 rebuildTarget="${rebuildTarget//\//}"
 SOURCES_NAME="ffmpeg-$ffmpegVersion"
-#OUTPUT_NAME="$SOURCES_NAME-$gccMachine-$gccVersion-$rebuildLicense"
 OUTPUT_NAME="$SOURCES_NAME-$gccMachine-$rebuildLicense"
 SOURCES_NAME="$SOURCES_NAME-src"
 if [ "$rebuildDebug" == "true" ]; then
@@ -100,9 +119,7 @@ if [ "$aSystem" == "Darwin" ]; then
   OUTPUT_FOLDER_BIN="$OUTPUT_FOLDER/MacOS"
   OUTPUT_FOLDER_LIB="$OUTPUT_FOLDER/Frameworks"
 fi
-if [ "$androidTarget" == "arm64" ]; then
-  OUTPUT_FOLDER_LIB="$OUTPUT_FOLDER/libs/$androidAbi"
-elif [ "$androidTarget" == "arm" ]; then
+if [ "$rebuildAndroid" == "true" ]; then
   OUTPUT_FOLDER_LIB="$OUTPUT_FOLDER/libs/$androidAbi"
 fi
 
@@ -170,9 +187,14 @@ if [ "$aSystem" == "Darwin" ]; then
   configArguments="$configArguments --libdir=@executable_path/../Frameworks"
 fi
 
+# configure pkg-config paths for cross-compilation targets
 export PKG_CONFIG_LIBDIR=
+export PKG_CONFIG_PATH=
 
-#if [ "$gccMachine" != "$GCC_MACHINE_LINUX_64" ]; then
+GCC_MACHINE_MINGW_32="i686-w64-mingw32"
+GCC_MACHINE_MINGW_32_1="i686-mingw32"
+GCC_MACHINE_MINGW_64="x86_64-w64-mingw32"
+GCC_MACHINE_MINGW_64_1="x86_64-pc-mingw32"
 if [ "$gccMachine" == "$GCC_MACHINE_MINGW_32" ] || [ "$gccMachine" == "$GCC_MACHINE_MINGW_32_1" ] \
 || [ "$gccMachine" == "$GCC_MACHINE_MINGW_64" ] || [ "$gccMachine" == "$GCC_MACHINE_MINGW_64_1" ]; then
   # WinAPI threads are used only partially in FFmpeg
@@ -194,7 +216,7 @@ else
   configArguments="$configArguments --disable-libopenjpeg"
 fi
 
-# cross-compiling options
+# cross-compiling MinGW options
 if [ "$gccMachine" == "$GCC_MACHINE_MINGW_32" ] || [ "$gccMachine" == "$GCC_MACHINE_MINGW_32_1" ]; then
   targetFlags="--cross-prefix=$compilerPrefix --arch=x86_32"
   configArguments="$configArguments --enable-cross-compile --target-os=mingw32 $targetFlags"
@@ -204,26 +226,27 @@ elif [ "$gccMachine" == "$GCC_MACHINE_MINGW_64" ] || [ "$gccMachine" == "$GCC_MA
   configArguments="$configArguments --enable-cross-compile --target-os=mingw32 $targetFlags"
 elif [ "$rebuildAndroid" == "true" ]; then
   anAndArch=arm
-  anAndSysRoot=${androidNdkRoot}/platforms/android-15/arch-arm
-  if [ "$androidTarget" == "arm64" ]; then
+  if [ "$androidAbi" == "arm64-v8a" ]; then
     anAndArch=aarch64
-    anAndSysRoot=${androidNdkRoot}/platforms/android-21/arch-arm64
   fi
   configArguments="$configArguments --enable-cross-compile --target-os=android --cross-prefix=$compilerPrefix --sysroot=${anAndSysRoot} --arch=${anAndArch}"
-  #if [ -x "${androidNdkRoot}/sysroot" ]; then
-    #configArguments="$configArguments --sysinclude=${androidNdkRoot}/sysroot/usr/include"
-  #fi
+  configArguments="$configArguments --pkg-config=pkg-config --strip=${toolchainBin}/llvm-strip --nm=${toolchainBin}/llvm-nm"
+  configArguments="$configArguments --enable-jni --enable-mediacodec"
 
-  if [ "$androidTarget" == "arm64" ]; then
+  if [ "$androidAbi" == "arm64-v8a" ]; then
     anExtraCFlags="$anExtraCFlags -march=armv8-a"
   else
     anExtraCFlags="$anExtraCFlags -march=armv7-a -mfloat-abi=softfp -fno-builtin-sin -fno-builtin-sinf"
   fi
 
-  configArguments="$configArguments --enable-jni --enable-mediacodec"
+  # dav1d is checked only by pgk-config in ffmpeg configure
+  PKG_CONFIG_PATH="$aPwdBack/android/dav1d-1.5.1-$androidAbi/lib/pkgconfig"
 
-  configArguments="$configArguments --enable-mbedtls --extra-ldflags=-L$aPwdBack/mbedtls-2.16.2-android/libs/$androidAbi"
-  anExtraCFlags="$anExtraCFlags -I$aPwdBack/mbedtls-2.16.2-android/include"
+  # mbedtls check through pkg-config is broken in ffmpeg configure, use alternative
+  #PKG_CONFIG_PATH="$PKG_CONFIG_PATH:$aPwdBack/android/mbedtls-3.6.2-$androidAbi/lib/pkgconfig"
+  configArguments="$configArguments --enable-mbedtls"
+  configArguments="$configArguments --enable-mbedtls --extra-ldflags=-L$aPwdBack/android/mbedtls-3.6.2/libs/$androidAbi"
+  anExtraCFlags="$anExtraCFlags -I$aPwdBack/android/mbedtls-3.6.2/include"
 fi
 
 # More options
@@ -231,12 +254,12 @@ fi
 #--enable-libfaac --enable-libmp3lame --enable-libgsm --enable-libspeex --enable-libtheora --enable-libvorbis --enable-libx264 --enable-libxvid
 
 if [ "$rebuildDebug" == "true" ]; then
-  #disable stripping of executables and shared libraries
+  # disable stripping of executables and shared libraries
   configArguments="$configArguments --disable-stripping --disable-optimizations --enable-debug=3"
   #configArguments="$configArguments --extra-cflags=-fno-inline" #configArguments="$configArguments --extra-cflags=\"-O0 -fno-inline\""
 else
-  #disable debugging symbols
-  configArguments="$configArguments --disable-debug"
+  # disable debugging symbols
+  configArguments="$configArguments --disable-debug --disable-stripping"
 fi
 
 # enable (L)GPL version 3
@@ -254,7 +277,11 @@ fi
 set -o pipefail
 
 aNbJobs="$(getconf _NPROCESSORS_ONLN)"
-"$compilerPrefix"gcc --version > $OUTPUT_FOLDER/gccInfo-$gccMachine-$rebuildLicense.log
+if [ "$rebuildAndroid" == "true" ]; then
+  "$compilerPrefix"clang --version > $OUTPUT_FOLDER/gccInfo-$gccMachine-$rebuildLicense.log
+else
+  "$compilerPrefix"gcc --version > $OUTPUT_FOLDER/gccInfo-$gccMachine-$rebuildLicense.log
+fi
 
 # --extra-cflags should be passed as single dedicated argument
 anExtraCFlags="--extra-cflags=${anExtraCFlags}"
@@ -376,8 +403,9 @@ rm $OUTPUT_FOLDER_BIN/avcodec.dll $OUTPUT_FOLDER_BIN/swresample.dll $OUTPUT_FOLD
 # create binaries archive
 if [ "$aSystem" == "Darwin" ]; then
   rm $OUTPUT_FOLDER/../$OUTPUT_NAME.tar.gz &>/dev/null
-  cd $OUTPUT_FOLDER
+  pushd $OUTPUT_FOLDER
   tar -cvzf $OUTPUT_FOLDER/../$OUTPUT_NAME.tar.gz *
+  popd
 elif command -v 7za &>/dev/null
 then
   rm $OUTPUT_FOLDER/../$OUTPUT_NAME.7z &>/dev/null
@@ -385,5 +413,5 @@ then
 fi
 
 # come back
-cd $aPwdBack
+popd
 #rm -f -r $OUTPUT_FOLDER
