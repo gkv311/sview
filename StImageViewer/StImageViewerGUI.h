@@ -1,5 +1,5 @@
 /**
- * Copyright © 2009-2020 Kirill Gavrilov <kirill@sview.ru>
+ * Copyright © 2009-2025 Kirill Gavrilov <kirill@sview.ru>
  *
  * StImageViewer program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -102,14 +102,18 @@ class StImageViewerGUI : public StGLRootWidget {
                                      float theAspect) ST_ATTR_OVERRIDE;
     ST_LOCAL virtual void stglDraw(unsigned int theView) ST_ATTR_OVERRIDE;
 
-    /**
-     * Handle gesture.
-     */
+        public: //! @name visibility
+
+    /** Track touches. */
+    ST_LOCAL void doTouch(const StTouchEvent& theEvent);
+
+    /** Handle gesture. */
     ST_LOCAL void doGesture(const StGestureEvent& theEvent);
-    ST_LOCAL bool isVisibleGUI() const { return myVisLerp.getValue() > 0.0; }
+    ST_LOCAL bool isVisibleGUI() const { return !myAnimVisibility.isHidden(); }
     ST_LOCAL void setVisibility(const StPointD_t& theCursor,
                                 bool theToForceHide,
                                 bool theToForceShow = false);
+    ST_LOCAL void updateDescLabel(const StPointD_t& theCursor, StFormat theSrcFormat, StViewSurface theViewMode);
 
         public:
 
@@ -208,10 +212,7 @@ class StImageViewerGUI : public StGLRootWidget {
     StImageViewer*      myPlugin;           //!< link to the main Drawer class
     StWindow*           myWindow;           //!< link to the window instance
     StTranslations*     myLangMap;          //!< translated strings map
-    StTimer             myVisibilityTimer;  //!< minimum visible delay
-    StTimer             myEmptyTimer;       //!< empty list delay
-    StTimer             myTapTimer;         //!< single tap delay
-    StGLAnimationLerp   myVisLerp;
+    StGLAnimVisibility  myAnimVisibility;
 
     StGLImageRegion*    myImage;            //!< the main image
     StGLDescription*    myDescr;            //!< description text shown near mouse cursor
@@ -245,7 +246,6 @@ class StImageViewerGUI : public StGLRootWidget {
 
     StGLTable*          myHKeysTable;
 
-    bool                myIsVisibleGUI;
     bool                myIsMinimalGUI;
 
         private:

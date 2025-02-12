@@ -55,7 +55,6 @@ namespace {
     static const char ST_SETTING_RECENT_R[]    = "recentR";
     static const char ST_SETTING_COMPRESS[]    = "toCompress";
     static const char ST_SETTING_ESCAPENOQUIT[]= "escNoQuit";
-    static const char ST_SETTING_FULLSCREENUI[]= "fullScreenUI";
 
     static const char ST_SETTING_SLIDESHOW[]   = "slideshow";
     static const char ST_SETTING_VIEWMODE[]    = "viewMode";
@@ -137,7 +136,6 @@ StImageViewer::StImageViewer(const StHandle<StResourceManager>& theResMgr,
   myToCheckUpdates(true),
   myToSaveSrcFormat(false),
   myEscNoQuit(false),
-  myToHideUIFullScr(false),
   myToCheckPoorOrient(true) {
     mySettings = new StSettings(myResMgr, myAppName);
     myLangMap  = new StTranslations(myResMgr, StImageViewer::ST_DRAWER_PLUGIN_NAME);
@@ -592,7 +590,6 @@ void StImageViewer::parseArguments(const StArgumentsMap& theArguments) {
     StArgument anArgImgLibrary = theArguments[ST_SETTING_IMAGELIB];
     StArgument anArgToCompress = theArguments[ST_SETTING_COMPRESS];
     StArgument anArgEscNoQuit  = theArguments[ST_SETTING_ESCAPENOQUIT];
-    StArgument anArgFullScreenUI = theArguments[ST_SETTING_FULLSCREENUI];
     StArgument anArgShowMenu   = theArguments[params.ToShowMenu->getKey()];
     StArgument anArgShowTopbar = theArguments[params.ToShowTopbar->getKey()];
     StArgument anArgSaveRecent = theArguments[params.ToSaveRecent->getKey()];
@@ -645,9 +642,6 @@ void StImageViewer::parseArguments(const StArgumentsMap& theArguments) {
     }
     if(anArgEscNoQuit.isValid()) {
         myEscNoQuit = !anArgEscNoQuit.isValueOff();
-    }
-    if(anArgFullScreenUI.isValid()) {
-        myToHideUIFullScr = anArgFullScreenUI.isValueOff();
     }
     if(anArgShowMenu.isValid()) {
         params.ToShowMenu->setValue(!anArgShowMenu.isValueOff());
@@ -974,6 +968,12 @@ void StImageViewer::doMouseUp(const StClickEvent& theEvent) {
     myGUI->tryUnClick(theEvent);
 }
 
+void StImageViewer::doTouch(const StTouchEvent& theEvent) {
+    if(!myGUI.isNull()) {
+        myGUI->doTouch(theEvent);
+    }
+}
+
 void StImageViewer::doGesture(const StGestureEvent& theEvent) {
     if(!myGUI.isNull()) {
         myGUI->doGesture(theEvent);
@@ -1107,7 +1107,7 @@ void StImageViewer::beforeDraw() {
     }
 
     const bool isFullScreen = params.IsFullscreen->getValue();
-    myGUI->setVisibility(myWindow->getMousePos(), myToHideUIFullScr && isFullScreen);
+    myGUI->setVisibility(myWindow->getMousePos(), false);
     bool toHideCursor = isFullScreen && myGUI->toHideCursor();
     myWindow->showCursor(!toHideCursor);
 

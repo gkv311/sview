@@ -1,5 +1,5 @@
 /**
- * Copyright © 2009-2023 Kirill Gavrilov <kirill@sview.ru>
+ * Copyright © 2009-2025 Kirill Gavrilov <kirill@sview.ru>
  *
  * StMoviePlayer program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -1629,7 +1629,6 @@ StMoviePlayerGUI::StMoviePlayerGUI(StMoviePlayer*  thePlugin,
   myPlugin(thePlugin),
   myWindow(theWindow),
   myLangMap(theLangMap),
-  myVisibilityTimer(true),
   //
   myImage(NULL),
   mySubtitles1(NULL),
@@ -1677,7 +1676,6 @@ StMoviePlayerGUI::StMoviePlayerGUI(StMoviePlayer*  thePlugin,
   myBtnResetColor2(NULL),
   myHKeysTable(NULL),
   //
-  myIsVisibleGUI(true),
   myIsExperimental(myPlugin->params.ToShowExtra->getValue()),
   myIconStep(64),
   myBottomBarNbLeft(0),
@@ -1912,15 +1910,14 @@ namespace {
 
 }
 
+void StMoviePlayerGUI::doTouch(const StTouchEvent& theEvent) {
+    myAnimVisibility.doTouch(theEvent);
+}
+
 void StMoviePlayerGUI::doGesture(const StGestureEvent& theEvent) {
+    myAnimVisibility.doGesture(theEvent);
     if(myImage == NULL) {
         return;
-    }
-
-    if(theEvent.Type == stEvent_Gesture1Tap) {
-        myTapTimer.restart();
-    } else if(theEvent.Type == stEvent_Gesture1DoubleTap) {
-        myTapTimer.stop();
     }
 
     for(StGLWidget *aChildIter(getChildren()->getLast()), *aChildActive(NULL); aChildIter != NULL;) {
@@ -1946,30 +1943,20 @@ void StMoviePlayerGUI::setVisibility(const StPointD_t& theCursor,
                              && myPanelUpper != NULL;
     const bool hasBottomPanel = myPlugin->params.ToShowBottom->getValue()
                              && (myPanelBottom != NULL || mySeekBar != NULL);
-
     const int  aRootSizeY     = getRectPx().height();
-    const bool hasVideo       = myPlugin->myVideo->hasVideoStream();
-    if(!hasVideo && !myTapTimer.isOn()
-    && !myPlugin->myPlayList->isEmpty()) {
-        myEmptyTimer.restart();
-    } else {
-        myEmptyTimer.stop();
-    }
-    if(myEmptyTimer.getElapsedTime() >= 2.5) {
-        myVisibilityTimer.restart();
-        myEmptyTimer.stop();
-    }
-    if(myTapTimer.getElapsedTime() >= 0.5) {
-        myVisibilityTimer.restart();
-        myTapTimer.stop();
-    }
-    if(theToForceShow) {
-        myVisibilityTimer.restart();
-    } else if(theToForceHide) {
-        myVisibilityTimer.restart(THE_VISIBILITY_IDLE_TIME + 0.001);
-    }
-    const bool isMouseActive  = myWindow->isMouseMoved();
-    const double aStillTime   = myVisibilityTimer.getElapsedTime();
+
+    myAnimVisibility.setMouseMoved(myWindow->isMouseMoved());
+    myAnimVisibility.setMouseOnGui((hasUpperPanel && myPanelUpper->isPointIn(theCursor))
+                                || (hasBottomPanel && myPanelBottom != NULL
+                                 && int(aRootSizeY * theCursor.y()) > (aRootSizeY - 2 * myPanelBottom->getRectPx().height())
+                                 && theCursor.y() < 1.0)
+                                || (hasBottomPanel && mySeekBar != NULL && mySeekBar->isPointIn(theCursor))
+                                || (hasBottomPanel && myPlayList != NULL && toShowPlayList && myPlayList->isPointIn(theCursor))
+                                || (hasMainMenu && myMenuRoot->isActive()));
+
+    const bool hasVideo = myPlugin->myVideo->hasVideoStream();
+    myAnimVisibility.setEmptyImage(!hasVideo && !myPlugin->myPlayList->isEmpty());
+    myAnimVisibility.updateVisibility(theToForceHide, theToForceShow);
 
     StHandle<StStereoParams> aParams = myImage->getSource();
     StFormat aSrcFormat = (StFormat )myPlugin->params.SrcStereoFormat->getValue();
@@ -1987,57 +1974,41 @@ void StMoviePlayerGUI::setVisibility(const StPointD_t& theCursor,
                          && aSrcFormat != StFormat_Mono
                          && aSrcFormat != StFormat_AUTO;
 
-    myIsVisibleGUI = isMouseActive
-        || aParams.isNull()
-        || aStillTime < THE_VISIBILITY_IDLE_TIME
-        || (hasUpperPanel && myPanelUpper->isPointIn(theCursor))
-        || (hasBottomPanel && myPanelBottom != NULL
-         && int(aRootSizeY * theCursor.y()) > (aRootSizeY - 2 * myPanelBottom->getRectPx().height())
-         && theCursor.y() < 1.0)
-        || (hasBottomPanel && mySeekBar != NULL && mySeekBar->isPointIn(theCursor))
-        || (hasBottomPanel && myPlayList != NULL && toShowPlayList && myPlayList->isPointIn(theCursor))
-        || (hasMainMenu           && myMenuRoot->isActive());
-    if(!myIsVisibleGUI
-     && myBtnPlay != NULL
-     && myBtnPlay->getFaceId() == 0
-     && (theCursor.x() < 0.0 || theCursor.x() > 1.0
-      || theCursor.y() < 0.0 || theCursor.y() > 1.0)) {
-        myIsVisibleGUI = true;
+    bool toShowAll = myAnimVisibility.isVisibleGui();
+    if(!toShowAll && aParams.isNull()) {
+        // reveal GUI if nothing is open
+        toShowAll = true;
     }
-    const float anOpacity = (float )myVisLerp.perform(myIsVisibleGUI, theToForceHide || theToForceShow);
-    if(isMouseActive) {
-        myVisibilityTimer.restart();
+    if(!toShowAll
+        // reveal GUI if video is in paused state and mouse cursor is not on the window
+        && myBtnPlay != NULL
+        && myBtnPlay->getFaceId() == 0
+        && (theCursor.x() < 0.0 || theCursor.x() > 1.0
+         || theCursor.y() < 0.0 || theCursor.y() > 1.0)) {
+        toShowAll = true;
     }
+    toShowAll = toShowAll && !theToForceHide;
+    const float anOpacity = myAnimVisibility.updateOpacity(toShowAll, theToForceHide || theToForceShow);
 
-    if(myMenuRoot != NULL) {
-        myMenuRoot->setOpacity(hasMainMenu ? anOpacity : 0.0f, false);
-    }
-    if(myPanelUpper != NULL) {
-        myPanelUpper->setOpacity(hasUpperPanel ? anOpacity : 0.0f, true);
-    }
-    if(mySeekBar != NULL) {
-        mySeekBar->setOpacity(hasBottomPanel ? anOpacity : 0.0f, false);
-    }
-    if(myPanelBottom != NULL) {
-        myPanelBottom->setOpacity(hasBottomPanel ? anOpacity : 0.0f, true);
-    }
+    setWidgetOpacity(myMenuRoot, hasMainMenu ? anOpacity : 0.0f, false);
+    setWidgetOpacity(myPanelUpper, hasUpperPanel ? anOpacity : 0.0f, true);
+    setWidgetOpacity(mySeekBar, hasBottomPanel ? anOpacity : 0.0f, false);
+    setWidgetOpacity(myPanelBottom, hasBottomPanel ? anOpacity : 0.0f, true);
 
-    if(myAdjustOverlay != NULL
-    && toShowAdjust) {
-        myAdjustOverlay->setOpacity(anOpacity, true);
+    if(toShowAdjust) {
+        setWidgetOpacity(myAdjustOverlay, anOpacity, true);
         if(!has3dInput) {
-            myBtnSepDx  ->setOpacity(0.0f, false);
-            myBtnSepDy  ->setOpacity(0.0f, false);
-            myBtnSepRot ->setOpacity(0.0f, false);
-            myBtnReset3d->setOpacity(0.0f, false);
-            myBtnResetColor2->setOpacity(0.0f, false);
+            setWidgetOpacity(myBtnSepDx, 0.0f, false);
+            setWidgetOpacity(myBtnSepDy, 0.0f, false);
+            setWidgetOpacity(myBtnSepRot, 0.0f, false);
+            setWidgetOpacity(myBtnReset3d, 0.0f, false);
+            setWidgetOpacity(myBtnResetColor2, 0.0f, false);
         } else {
-            myBtnResetColor1->setOpacity(0.0f, false);
+            setWidgetOpacity(myBtnResetColor1, 0.0f, false);
         }
     }
-    if(myPlayList != NULL
-    && toShowPlayList) {
-        myPlayList->setOpacity(hasBottomPanel ? anOpacity : 0.0f, true);
+    if(toShowPlayList) {
+        setWidgetOpacity(myPlayList, hasBottomPanel ? anOpacity : 0.0f, true);
     }
 
     const StPlayList::CurrentPosition aCurrPos = myPlugin->myPlayList->getCurrentPosition();
@@ -2068,9 +2039,7 @@ void StMoviePlayerGUI::setVisibility(const StPointD_t& theCursor,
         }
         myBtnFullScr->setFaceId(aFirstFace + (myPlugin->params.IsFullscreen->getValue() ? 1 : 0));
     }
-    if(myBtnSwapLR != NULL) {
-        myBtnSwapLR->setOpacity(has3dInput ? anOpacity : 0.0f, false);
-    }
+    setWidgetOpacity(myBtnSwapLR, has3dInput ? anOpacity : 0.0f, false);
 
     ///
 
@@ -2088,75 +2057,79 @@ void StMoviePlayerGUI::setVisibility(const StPointD_t& theCursor,
     }
     if(myBtnPanorama != NULL) {
         myBtnPanorama->getTrackedValue()->setValue(aViewMode != StViewSurface_Plain);
-        myBtnPanorama->setOpacity(toShowPano ? anOpacity : 0.0f, false);
+        setWidgetOpacity(myBtnPanorama, toShowPano ? anOpacity : 0.0f, false);
     }
     myWindow->setTrackOrientation(aViewMode != StViewSurface_Plain
                                && myPlugin->params.ToTrackHead->getValue());
     StQuaternion<double> aQ = myWindow->getDeviceOrientation();
     myImage->setDeviceOrientation(StGLQuaternion((float )aQ.x(), (float )aQ.y(), (float )aQ.z(), (float )aQ.w()));
+    updateDescLabel(theCursor, aSrcFormat, aViewMode);
+}
 
-    if(myDescr != NULL) {
-        bool wasEmpty = myDescr->getText().isEmpty();
-        if(::isPointIn(myBtnOpen, theCursor)) {
-            myDescr->setText(tr(FILE_VIDEO_OPEN));
-        } else if(::isPointIn(myBtnInfo,   theCursor)) {
-            myDescr->setText(tr(MENU_MEDIA_FILE_INFO));
-        } else if(::isPointIn(myBtnSwapLR, theCursor)) {
-            size_t aLngId = myImage->params.SwapLR->getValue() ? SWAP_LR_ON : SWAP_LR_OFF;
-            myDescr->setText(tr(aLngId));
-        } else if(::isPointIn(myBtnSrcFrmt, theCursor)) {
-            myDescr->setText(tr(BTN_SRC_FORMAT) + "\n" + trSrcFormat(aSrcFormat));
-        } else if(::isPointIn(myBtnPanorama, theCursor)) {
-            size_t aTrPano = MENU_VIEW_SURFACE_PLANE;
-            switch(aViewMode) {
-                case StViewSurface_Plain:      aTrPano = MENU_VIEW_SURFACE_PLANE;   break;
-                case StViewSurface_Theater:    aTrPano = MENU_VIEW_SURFACE_THEATER; break;
-                case StViewSurface_Sphere:     aTrPano = MENU_VIEW_SURFACE_SPHERE;  break;
-                case StViewSurface_Hemisphere: aTrPano = MENU_VIEW_SURFACE_HEMISPHERE;  break;
-                case StViewSurface_Cubemap:    aTrPano = MENU_VIEW_SURFACE_CUBEMAP;  break;
-                case StViewSurface_CubemapEAC: aTrPano = MENU_VIEW_SURFACE_CUBEMAP_EAC; break;
-                case StViewSurface_Cylinder:   aTrPano = MENU_VIEW_SURFACE_CYLINDER; break;
-            }
-            myDescr->setText(tr(MENU_VIEW_PANORAMA) + "\n" + tr(aTrPano));
-        } else if(::isPointIn(myBtnAdjust, theCursor)) {
-            myDescr->setText(tr(MENU_VIEW_IMAGE_ADJUST));
-        } else if(::isPointIn(myBtnAudio, theCursor)) {
-            myDescr->setText(tr(MENU_AUDIO));
-        } else if(::isPointIn(myBtnSubs1, theCursor)) {
-            myDescr->setText(tr(MENU_SUBTITLES));
-        } else if(::isPointIn(myBtnSubs2, theCursor)) {
-            myDescr->setText(tr(MENU_SUBTITLES) + " (2)");
-        } else if(::isPointIn(myBtnVolume, theCursor)) {
-            myDescr->setText("Mute");
-        } else if(::isPointIn(myBtnPlay, theCursor)) {
-            myDescr->setText(tr(VIDEO_PLAYPAUSE));
-        } else if(::isPointIn(myBtnPrev, theCursor)) {
-            myDescr->setText(tr(VIDEO_LIST_PREV));
-        } else if(::isPointIn(myBtnNext, theCursor)) {
-            myDescr->setText(tr(VIDEO_LIST_NEXT));
-        } else if(::isPointIn(myBtnList, theCursor)) {
-            myDescr->setText(tr(VIDEO_LIST));
-        } else if(::isPointIn(myBtnShuffle, theCursor)) {
-            myDescr->setText(tr(MENU_MEDIA_SHUFFLE));
-        } else if(::isPointIn(myBtnLoop, theCursor)) {
-            myDescr->setText("Loop single item");
-        } else if(::isPointIn(myBtnFullScr, theCursor)) {
-            myDescr->setText(tr(FULLSCREEN));
-        } else {
-            myDescr->setText("");
-        }
-
-        if(wasEmpty
-        && aStillTime < 1.0) {
-            myDescr->setText("");
-        } else if(getFocus() != NULL
-               || (myMenuRoot != NULL && myMenuRoot->isActive())) {
-            // hide within active dialog - should be replaced by z-layer check
-            myDescr->setText("");
-        }
-
-        myDescr->setOpacity(!myDescr->getText().isEmpty() ? 1.0f : 0.0f, false);
+void StMoviePlayerGUI::updateDescLabel(const StPointD_t& theCursor, StFormat theSrcFormat, StViewSurface theViewMode) {
+    if (myDescr == NULL) {
+        return;
     }
+
+    bool wasEmpty = myDescr->getText().isEmpty();
+    if (::isPointIn(myBtnOpen, theCursor)) {
+        myDescr->setText(tr(FILE_VIDEO_OPEN));
+    } else if (::isPointIn(myBtnInfo,   theCursor)) {
+        myDescr->setText(tr(MENU_MEDIA_FILE_INFO));
+    } else if (::isPointIn(myBtnSwapLR, theCursor)) {
+        size_t aLngId = myImage->params.SwapLR->getValue() ? SWAP_LR_ON : SWAP_LR_OFF;
+        myDescr->setText(tr(aLngId));
+    } else if (::isPointIn(myBtnSrcFrmt, theCursor)) {
+        myDescr->setText(tr(BTN_SRC_FORMAT) + "\n" + trSrcFormat(theSrcFormat));
+    } else if (::isPointIn(myBtnPanorama, theCursor)) {
+        size_t aTrPano = MENU_VIEW_SURFACE_PLANE;
+        switch (theViewMode) {
+            case StViewSurface_Plain:      aTrPano = MENU_VIEW_SURFACE_PLANE;   break;
+            case StViewSurface_Theater:    aTrPano = MENU_VIEW_SURFACE_THEATER; break;
+            case StViewSurface_Sphere:     aTrPano = MENU_VIEW_SURFACE_SPHERE;  break;
+            case StViewSurface_Hemisphere: aTrPano = MENU_VIEW_SURFACE_HEMISPHERE;  break;
+            case StViewSurface_Cubemap:    aTrPano = MENU_VIEW_SURFACE_CUBEMAP;  break;
+            case StViewSurface_CubemapEAC: aTrPano = MENU_VIEW_SURFACE_CUBEMAP_EAC; break;
+            case StViewSurface_Cylinder:   aTrPano = MENU_VIEW_SURFACE_CYLINDER; break;
+        }
+        myDescr->setText(tr(MENU_VIEW_PANORAMA) + "\n" + tr(aTrPano));
+    } else if (::isPointIn(myBtnAdjust, theCursor)) {
+        myDescr->setText(tr(MENU_VIEW_IMAGE_ADJUST));
+    } else if (::isPointIn(myBtnAudio, theCursor)) {
+        myDescr->setText(tr(MENU_AUDIO));
+    } else if (::isPointIn(myBtnSubs1, theCursor)) {
+        myDescr->setText(tr(MENU_SUBTITLES));
+    } else if (::isPointIn(myBtnSubs2, theCursor)) {
+        myDescr->setText(tr(MENU_SUBTITLES) + " (2)");
+    } else if (::isPointIn(myBtnVolume, theCursor)) {
+        myDescr->setText("Mute");
+    } else if (::isPointIn(myBtnPlay, theCursor)) {
+        myDescr->setText(tr(VIDEO_PLAYPAUSE));
+    } else if (::isPointIn(myBtnPrev, theCursor)) {
+        myDescr->setText(tr(VIDEO_LIST_PREV));
+    } else if (::isPointIn(myBtnNext, theCursor)) {
+        myDescr->setText(tr(VIDEO_LIST_NEXT));
+    } else if (::isPointIn(myBtnList, theCursor)) {
+        myDescr->setText(tr(VIDEO_LIST));
+    } else if (::isPointIn(myBtnShuffle, theCursor)) {
+        myDescr->setText(tr(MENU_MEDIA_SHUFFLE));
+    } else if (::isPointIn(myBtnLoop, theCursor)) {
+        myDescr->setText("Loop single item");
+    } else if (::isPointIn(myBtnFullScr, theCursor)) {
+        myDescr->setText(tr(FULLSCREEN));
+    } else {
+        myDescr->setText("");
+    }
+
+    if(wasEmpty && myAnimVisibility.getStillDuration() < 1.0) {
+        myDescr->setText("");
+    } else if(getFocus() != NULL
+           || (myMenuRoot != NULL && myMenuRoot->isActive())) {
+        // hide within active dialog - should be replaced by z-layer check
+        myDescr->setText("");
+    }
+
+    myDescr->setOpacity(!myDescr->getText().isEmpty() ? 1.0f : 0.0f, false);
 }
 
 void StMoviePlayerGUI::doAudioStreamsCombo(const size_t ) {

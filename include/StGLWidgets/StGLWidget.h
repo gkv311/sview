@@ -23,6 +23,7 @@ class  StGLContext;
 struct StClickEvent;
 struct StKeyEvent;
 struct StGestureEvent;
+struct StTouchEvent;
 struct StScrollEvent;
 
 /**
@@ -71,6 +72,18 @@ private:
  * Please do NOT use this for native 3D GUI elements.
  */
 class StGLWidget {
+
+        public:
+
+    /**
+     * Set widget opacity, if it is not NULL.
+     */
+    static void setWidgetOpacity(StGLWidget* theWidget, const float theOpacity, bool theToSetChildren) {
+        if(theWidget == NULL) {
+            return;
+        }
+        theWidget->setOpacity(theOpacity, theToSetChildren);
+    }
 
         public:
 
