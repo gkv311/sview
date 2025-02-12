@@ -1932,6 +1932,20 @@ void StMoviePlayerGUI::doGesture(const StGestureEvent& theEvent) {
     }
 }
 
+bool StMoviePlayerGUI::tryUnClick(const StClickEvent& theEvent,
+                                  bool& theIsItemUnclicked) {
+    const bool wasClickedImage = myImage != NULL && myImage->isClicked(ST_MOUSE_LEFT);
+    bool aRes = StGLRootWidget::tryUnClick(theEvent, theIsItemUnclicked);
+    if (theEvent.Button == ST_MOUSE_LEFT && theIsItemUnclicked && !wasClickedImage) {
+        // prevent switching GUI visibility after interaction with widget, save the image
+        StGestureEvent aReset;
+        aReset.clearGesture();
+        aReset.Type = stEvent_None;
+        myAnimVisibility.doGesture(aReset);
+    }
+    return aRes;
+}
+
 void StMoviePlayerGUI::setVisibility(const StPointD_t& theCursor,
                                      bool theToForceHide,
                                      bool theToForceShow) {

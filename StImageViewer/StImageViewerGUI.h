@@ -101,6 +101,9 @@ class StImageViewerGUI : public StGLRootWidget {
                                      const StMarginsI& theMargins,
                                      float theAspect) ST_ATTR_OVERRIDE;
     ST_LOCAL virtual void stglDraw(unsigned int theView) ST_ATTR_OVERRIDE;
+    ST_LOCAL virtual bool tryUnClick(const StClickEvent& theEvent,
+                                     bool& theIsItemUnclicked) ST_ATTR_OVERRIDE;
+    using StGLRootWidget::tryUnClick;
 
         public: //! @name visibility
 
