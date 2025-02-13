@@ -159,10 +159,24 @@ elseif (ANDROID)
       COMMAND cp -R -f "${FFMPEG_LIBRARY_DIR}/lib${aLibIter}.so" "$<TARGET_FILE_DIR:${PROJECT_NAME}>/")
   endforeach()
 
-  add_custom_command (TARGET ${PROJECT_NAME} POST_BUILD
+  set (aSysRootArch "${CMAKE_ANDROID_ARCH_ABI}-linux-android")
+  if ("${CMAKE_ANDROID_ARCH_ABI}" STREQUAL "arm64-v8a")
+    set (aSysRootArch "aarch64-linux-android")
+  elseif ("${CMAKE_ANDROID_ARCH_ABI}" STREQUAL "armeabi-v7a")
+    set (aSysRootArch "arm-linux-androideabi")
+  endif ()
+
+  if ("${CMAKE_ANDROID_STL_TYPE}" STREQUAL "gnustl_shared")
+    add_custom_command (TARGET ${PROJECT_NAME} POST_BUILD
       COMMAND cp -R -f "${CMAKE_ANDROID_NDK}/sources/cxx-stl/gnu-libstdc++/4.9/libs/${CMAKE_ANDROID_ARCH_ABI}/libgnustl_shared.so" "$<TARGET_FILE_DIR:${PROJECT_NAME}>/"
       #COMMAND ${CMAKE_CXX_ANDROID_TOOLCHAIN_PREFIX}strip${CMAKE_CXX_ANDROID_TOOLCHAIN_SUFFIX} --strip-unneeded "$<TARGET_FILE_DIR:${PROJECT_NAME}>/libgnustl_shared.so"
-  )
+    )
+  else()
+    add_custom_command (TARGET ${PROJECT_NAME} POST_BUILD
+      COMMAND cp -R -f "${CMAKE_ANDROID_NDK}/toolchains/llvm/prebuilt/linux-x86_64/sysroot/usr/lib/${aSysRootArch}/libc++_shared.so" "$<TARGET_FILE_DIR:${PROJECT_NAME}>/"
+      #COMMAND ${CMAKE_CXX_ANDROID_TOOLCHAIN_PREFIX}strip${CMAKE_CXX_ANDROID_TOOLCHAIN_SUFFIX} --strip-unneeded "$<TARGET_FILE_DIR:${PROJECT_NAME}>/libc++_shared.so"
+    )
+  endif()
 endif()
 
 # install target

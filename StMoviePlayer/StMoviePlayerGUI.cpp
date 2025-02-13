@@ -62,8 +62,6 @@ using namespace StMoviePlayerStrings;
 
 namespace {
 
-    static const float THE_VISIBILITY_IDLE_TIME = 2.0f;
-
     static const int DISPL_Y_REGION_UPPER  = 32;
     static const int DISPL_X_REGION_UPPER  = 32;
     static const int DISPL_X_REGION_BOTTOM = 52;

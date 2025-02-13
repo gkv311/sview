@@ -91,7 +91,9 @@ public class StActivity extends NativeActivity implements SensorEventListener {
         }
 
         wasNativesLoadCalled = true;
-        if(!loadLibVerbose("gnustl_shared",   theInfo)
+        if(
+        // !loadLibVerbose("gnustl_shared",   theInfo)
+           !loadLibVerbose("c++_shared",      theInfo)
         //|| !loadLibVerbose("config++",        theInfo)
         || !loadLibVerbose("freetype",        theInfo)
         || !loadLibVerbose("avutil",          theInfo)
