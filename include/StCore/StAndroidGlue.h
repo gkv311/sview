@@ -35,7 +35,7 @@ struct StAndroidPollSource {
     /**
      * Function to call to perform the standard processing of data from this source.
      */
-    void (*process)(struct StAndroidGlue* theApp, StAndroidPollSource* theSource);
+    void (*process)(class StAndroidGlue* theApp, StAndroidPollSource* theSource);
 };
 
 /**

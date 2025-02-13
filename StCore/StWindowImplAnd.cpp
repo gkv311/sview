@@ -51,9 +51,9 @@ bool StWindowImpl::create() {
 
     // first start - wait for CommandId_WindowInit...
     int aPollRes  = 0;
-    int aNbEvents = 0;
+    int aPollEvents = 0;
     StAndroidPollSource* aSource = NULL;
-    while((aPollRes = ALooper_pollAll(-1, NULL, &aNbEvents, (void** )&aSource)) >= 0) {
+    while((aPollRes = ALooper_pollOnce(-1, NULL, &aPollEvents, (void** )&aSource)) >= 0) {
         if(aSource != NULL) {
             aSource->process(myParentWin, aSource);
         }
@@ -525,10 +525,10 @@ void StWindowImpl::processEvents() {
 
     StPointD_t anOldMousePt = myMousePt;
     int aPollRes  = 0;
-    int aNbEvents = 0;
+    int aPollEvents = 0;
     StAndroidPollSource* aSource = NULL;
     bool toWaitEvents = false;
-    while((aPollRes = ALooper_pollAll(toWaitEvents ? -1 : 0, NULL, &aNbEvents, (void** )&aSource)) >= 0) {
+    while((aPollRes = ALooper_pollOnce(toWaitEvents ? -1 : 0, NULL, &aPollEvents, (void** )&aSource)) >= 0) {
         if(aSource != NULL) {
             aSource->process(myParentWin, aSource);
         }

@@ -530,9 +530,9 @@ void StAndroidGlue::threadEntry() {
         }
 
         StAndroidPollSource* aSource = NULL;
-        int aNbEvents = 0;
-        ALooper_pollAll(-1, NULL, &aNbEvents, (void** )&aSource);
-        if(aSource != NULL) {
+        int aPollEvents = 0;
+        const int aPollRes = ALooper_pollOnce(-1, NULL, &aPollEvents, (void** )&aSource);
+        if(aPollRes >= 0 && aSource != NULL) {
             aSource->process(this, aSource);
         }
     }

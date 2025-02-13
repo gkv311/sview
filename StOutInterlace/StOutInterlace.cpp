@@ -24,10 +24,12 @@ namespace {
 
     static const char ST_OUT_PLUGIN_NAME[] = "StOutInterlace";
 
+#if !defined(__ANDROID__)
     // shaders data files
     static const char VSHADER_ED[]              = "vED.shv";
     static const char FSHADER_EDINTERLACE_ON[]  = "fEDinterlace.shf";
     static const char FSHADER_ED_OFF[]          = "fEDoff.shf";
+#endif
 
     static const char ST_SETTING_DEVICE_ID[]    = "deviceId";
     static const char ST_SETTING_WINDOWPOS[]    = "windowPos";
