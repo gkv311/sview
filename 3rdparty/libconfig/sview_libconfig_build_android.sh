@@ -20,6 +20,7 @@ aBuildRoot=${aScriptPath}/android-make
 aDestRoot=${aScriptPath}/android
 aDestMulti=${aDestRoot}/${aProjName}
 aCppLib=c++_shared
+CMAKE_C_FLAGS=-fPIC
 
 rm -f -r "$aDestMulti"
 mkdir -p "$aBuildRoot"
@@ -44,6 +45,7 @@ function buildArch {
    -D CMAKE_ANDROID_STL_TYPE="$aCppLib" \
    -D CMAKE_INSTALL_PREFIX:STRING="$CMAKE_INSTALL_PREFIX" \
    -D CMAKE_C_FLAGS:STRING="$CMAKE_C_FLAGS" \
+   -D CMAKE_CXX_FLAGS:STRING="$CMAKE_C_FLAGS" \
    -D BUILD_SHARED_LIBS:BOOL=OFF \
    -D BUILD_EXAMPLES:BOOL=OFF \
    -D BUILD_TESTS:BOOL=OFF \
