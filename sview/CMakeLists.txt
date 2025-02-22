@@ -232,9 +232,8 @@ if (ANDROID)
   endif()
 
   # generate APK manifest file with version codes (should be incremented for each build)
+  # SVIEW_APK_VERSIONCODE and SVIEW_APK_VERSIONNAME configured in root CMakeLists.txt
   set (SVIEW_APK_MANIFEST "${CMAKE_BINARY_DIR}/AndroidManifest.xml")
-  set (SVIEW_APK_VERSIONCODE "1")
-  set (SVIEW_APK_VERSIONNAME "20.1")
   configure_file ("${CMAKE_CURRENT_SOURCE_DIR}/AndroidManifest.xml.in" "${SVIEW_APK_MANIFEST}")
 
   # compile APK resources
