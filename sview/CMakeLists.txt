@@ -10,15 +10,26 @@ set (USED_MMFILES
 set (USED_JNIFILES
   jni/main.cpp
 )
-
 set (USED_INCFILES
   StAppResponder.h
   StMultiApp.h
+)
+set (USED_JAVAFILES
+  src/com/sview/CrashReportActivity.java
+  src/com/sview/MainActivity.java
+  src/com/sview/StActivity.java
+  src/com/sview/StImageActivity.java
+  src/com/sview/StMovieActivity.java
+  src/com/sview/StMovieService.java
+  src/com/sview/StS3dvSurface.java
 )
 
 set (USED_MANFILES "")
 set (USED_RESFILES
   sview.rc
+  AndroidManifest.xml.in
+  Resources/English.lproj/MainMenu.xib
+  Contents/Info.plist
 )
 if (WIN32)
   set (USED_MANFILES "../adm/cmake/dpiAware.manifest")
@@ -29,20 +40,31 @@ if (NOT APPLE)
     set_source_files_properties (${aFileIter} PROPERTIES HEADER_FILE_ONLY TRUE)
   endforeach()
 endif()
+if (NOT ANDROID)
+  foreach (aFileIter ${USED_JNIFILES})
+    set_source_files_properties (${aFileIter} PROPERTIES HEADER_FILE_ONLY TRUE)
+  endforeach()
+endif()
+foreach (aFileIter ${USED_JAVAFILES})
+  set_source_files_properties (${aFileIter} PROPERTIES HEADER_FILE_ONLY TRUE)
+endforeach()
+set_source_files_properties (Resources/English.lproj/MainMenu.xib PROPERTIES HEADER_FILE_ONLY TRUE)
+set_source_files_properties (Contents/Info.plist PROPERTIES HEADER_FILE_ONLY TRUE)
 
-source_group ("Source Files"   FILES ${USED_SRCFILES} ${USED_MMFILES} ${USED_JNIFILES})
+source_group ("Source Files"   FILES ${USED_SRCFILES} ${USED_MMFILES})
 source_group ("Header Files"   FILES ${USED_INCFILES})
 source_group ("Resource Files" FILES ${USED_RESFILES} ${USED_MANFILES})
+source_group ("Android Files"  FILES ${USED_JNIFILES} ${USED_JAVAFILES})
 
 # library to build
 if (ANDROID)
   set (PROJECT_NAME "sview")
   add_library (${PROJECT_NAME} SHARED
-    ${USED_SRCFILES} ${USED_JNIFILES} ${USED_INCFILES} ${USED_RESFILES}
+    ${USED_SRCFILES} ${USED_JNIFILES} ${USED_INCFILES} ${USED_RESFILES} ${USED_JAVAFILES}
   )
 else()
   add_executable (${PROJECT_NAME} WIN32
-    ${USED_SRCFILES} ${USED_MMFILES} ${USED_INCFILES} ${USED_RESFILES} ${USED_MANFILES}
+    ${USED_SRCFILES} ${USED_MMFILES} ${USED_INCFILES} ${USED_RESFILES} ${USED_MANFILES} ${USED_JNIFILES} ${USED_JAVAFILES}
   )
 endif()
 set_target_properties (${PROJECT_NAME} PROPERTIES FOLDER "Apps")
@@ -224,16 +246,6 @@ if (ANDROID)
   add_custom_target (genjavares ALL DEPENDS ${AAPT_RESOURCES_OUTPUT})
 
   # compile Java files
-  set (USED_JAVAFILES
-    src/com/sview/CrashReportActivity.java
-    src/com/sview/MainActivity.java
-    src/com/sview/StActivity.java
-    src/com/sview/StImageActivity.java
-    src/com/sview/StMovieActivity.java
-    src/com/sview/StMovieService.java
-    src/com/sview/StS3dvSurface.java
-  )
-
   set (JAVAC_INPUT)
   set (JAVAC_OUTPUT)
   set (JAVAC_OUTPUT_DIR "${CMAKE_BINARY_DIR}/java/classes")
