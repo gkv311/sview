@@ -2480,9 +2480,11 @@ void StMoviePlayerGUI::doMobileSettings(const size_t ) {
     aParams.add(myPlugin->params.UseGpu);
     if(myPlugin->hasAlHintOutput()) {
         aParams.add(myPlugin->params.AudioAlOutput);
-    }
-    if(myPlugin->hasAlHintHrtf()) {
-        aParams.add(myPlugin->params.AudioAlHrtf);
+        if(myPlugin->params.AudioAlHrtf->getValue() != 0) {
+            aParams.add(myPlugin->params.AudioAlHrtf);
+        }
+    } else if(myPlugin->hasAlHintHrtf()) {
+        aParams.add(myPlugin->params.AudioAlHrtf); // legacy option
     }
     aParams.add(myPlugin->params.ToAutoLoadSubs);
 
