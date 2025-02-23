@@ -68,12 +68,12 @@ public class StActivity extends NativeActivity implements SensorEventListener {
         } catch(java.lang.UnsatisfiedLinkError theError) {
             theErrors.append("Error: native library \"");
             theErrors.append(theLibName);
-            theErrors.append("\" is unavailable:\n  " + theError.getMessage());
+            theErrors.append("\" is unavailable:\n  " + theError.getMessage() + "\n");
             return false;
         } catch(SecurityException theError) {
             theErrors.append("Error: native library \"");
             theErrors.append(theLibName);
-            theErrors.append("\" can not be loaded for security reasons:\n  " + theError.getMessage());
+            theErrors.append("\" can not be loaded for security reasons:\n  " + theError.getMessage() + "\n");
             return false;
         }
     }
@@ -91,34 +91,31 @@ public class StActivity extends NativeActivity implements SensorEventListener {
         }
 
         wasNativesLoadCalled = true;
-        if(
-        // !loadLibVerbose("gnustl_shared",   theInfo)
-           !loadLibVerbose("c++_shared",      theInfo)
-        //|| !loadLibVerbose("config++",        theInfo)
-        || !loadLibVerbose("freetype",        theInfo)
-        || !loadLibVerbose("avutil",          theInfo)
-        || !loadLibVerbose("swresample",      theInfo)
-        || !loadLibVerbose("avcodec",         theInfo)
-        || !loadLibVerbose("avformat",        theInfo)
-        || !loadLibVerbose("swscale",         theInfo)
-        || !loadLibVerbose("openal",          theInfo)
-        || !loadLibVerbose("StShared",        theInfo)
-        || !loadLibVerbose("StGLWidgets",     theInfo)
-        || !loadLibVerbose("StCore",          theInfo)
-        || !loadLibVerbose("StOutAnaglyph",   theInfo)
-        || !loadLibVerbose("StOutDistorted",  theInfo)
-        //|| !loadLibVerbose("StOutDual",       theInfo)
-        || !loadLibVerbose("StOutInterlace",  theInfo)
-        //|| !loadLibVerbose("StOutIZ3D",       theInfo)
-        //|| !loadLibVerbose("StOutPageFlip",   theInfo)
-        || !loadLibVerbose("StImageViewer",   theInfo)
-        || !loadLibVerbose("StMoviePlayer",   theInfo)
-        || !loadLibVerbose("sview",           theInfo)) {
-            areNativeLoaded = false;
+
+        // libraries to load in the opposite order of their dependencies
+        String[] aLibs = {
+            "freetype",
+            //"config++", // linked statically
+            "avutil", "swresample", "avcodec", "avformat", "swscale",
+            "openal",
+            "StShared", "StGLWidgets", "StCore",
+            "StOutAnaglyph", "StOutDistorted", "StOutInterlace",
+            //"StOutDual", "StOutIZ3D", "StOutPageFlip", // useless on Android
+            "StImageViewer", "StMoviePlayer", "sview"
+        };
+
+        // load C++ runtime first
+        boolean hasErrors = !(loadLibVerbose("c++_shared", theInfo)
+                           || loadLibVerbose("gnustl_shared", theInfo));
+        for (String aLibIter : aLibs) {
+            hasErrors = !loadLibVerbose(aLibIter, theInfo) || hasErrors;
+        }
+
+        areNativeLoaded = !hasErrors;
+        if (hasErrors) {
             StActivity.exitWithError(theActivity, "Broken apk?\n" + theInfo);
             return false;
         }
-        areNativeLoaded = false;
         return true;
     }
 
