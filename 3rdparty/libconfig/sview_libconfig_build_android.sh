@@ -1,91 +1,76 @@
 #!/bin/bash
 
-# small help to build libconfig for Android [for sView project]
+# Small help to build libconfig for Android [for sView project].
 # http://www.hyperrealm.com/libconfig/
-
-# place up-to-date config.sub to libconfig-1.4.9/aux-build
-# http://git.savannah.gnu.org/gitweb/?p=config.git;a=tree
-#wget http://git.savannah.gnu.org/gitweb/?p=config.git;a=blob_plain;f=config.guess;hb=HEAD
-#wget http://git.savannah.gnu.org/gitweb/?p=config.git;a=blob_plain;f=config.sub;hb=HEAD
-
-#$HOME/develop/android-ndk-r12b/build/tools/make-standalone-toolchain.sh --platform=android-15 --install-dir=$HOME/develop/android15-armv7a  --ndk-dir=$HOME/develop/android-ndk-r12b --toolchain=arm-linux-androideabi-4.9
-#$HOME/develop/android-ndk-r12b/build/tools/make-standalone-toolchain.sh --platform=android-21 --install-dir=$HOME/develop/android21-aarch64 --ndk-dir=$HOME/develop/android-ndk-r12b --toolchain=aarch64-linux-android-4.9
-#$HOME/develop/android-ndk-r12b/build/tools/make-standalone-toolchain.sh --platform=android-15 --install-dir=$HOME/develop/android15-x86     --ndk-dir=$HOME/develop/android-ndk-r12b --toolchain=x86-4.9
+# https://github.com/hyperrealm/libconfig
 
 # go to the script directory
-aScriptPath=${BASH_SOURCE%/*}
-if [ -d "$aScriptPath" ]; then
-  cd "$aScriptPath"
-fi
+aScriptPath=${BASH_SOURCE%/*}; if [ -d "${aScriptPath}" ]; then cd "$aScriptPath"; fi; aScriptPath="$PWD";
 
-# define number of jobs from available CPU cores
-aNbJobs="$(getconf _NPROCESSORS_ONLN)"
+aProjName=libconfig-1.7.3
+
+PATH=~/develop/tools/cmake-3.31.5-linux-x86_64/bin:$PATH
+
+#CMAKE_ANDROID_NDK=~/develop/tools/android-ndk-r12b
+CMAKE_ANDROID_NDK=~/develop/tools/android-ndk-r27c
+CMAKE_BUILD_TYPE=Release
+
+aSrcRoot=${aScriptPath}/${aProjName}.git
+aBuildRoot=${aScriptPath}/android-make
+aDestRoot=${aScriptPath}/android
+aDestMulti=${aDestRoot}/${aProjName}
+aCppLib=c++_shared
+CMAKE_C_FLAGS=-fPIC
+
+rm -f -r "$aDestMulti"
+mkdir -p "$aBuildRoot"
+
 set -o pipefail
 
-aPathBak="$PATH"
-aLibRoot="$PWD"
-aCFlagsArmv7a="-O2 -march=armv7-a -mfloat-abi=softfp"
-aCFlagsArmv8a="-O2 -march=armv8-a"
-aCFlagsx86="-O2 -march=i686 -mtune=intel -mssse3 -mfpmath=sse -m32"
+function buildArch {
+  anAbi=$1
+  anApi=$2
 
-OUTPUT_FOLDER="$aLibRoot/install/libconfig-android"
-rm -f -r "$OUTPUT_FOLDER"
-mkdir -p "$OUTPUT_FOLDER/include"
-mkdir -p "$OUTPUT_FOLDER/libs/armeabi-v7a"
-mkdir -p "$OUTPUT_FOLDER/libs/x86"
-mkdir -p "$OUTPUT_FOLDER/libs/arm64-v8a"
-cp -f    "$aLibRoot/COPYING.LIB"       "$OUTPUT_FOLDER"
-cp -f    "$aLibRoot/README"            "$OUTPUT_FOLDER"
-cp -f    "$aLibRoot/lib/libconfig.h"   "$OUTPUT_FOLDER/include"
-cp -f    "$aLibRoot/lib/libconfig.h++" "$OUTPUT_FOLDER/include"
-echo "Output directory: $OUTPUT_FOLDER"
+  aBuildPath=${aBuildRoot}/${aProjName}-${anAbi}-make
+  CMAKE_INSTALL_PREFIX=${aDestRoot}/${aProjName}-${anAbi}
+  rm -r -f ${aBuildPath}
+  rm -r -f ${CMAKE_INSTALL_PREFIX}
 
-# armv7a
-export "PATH=$HOME/develop/android15-armv7a/bin:$aPathBak"
-export "CC=arm-linux-androideabi-gcc"
-export "CXX=arm-linux-androideabi-g++"
-export "CFLAGS=$aCFlagsArmv7a"
-export "CXXFLAGS=$aCFlagsArmv7a"
-./configure --host arm-linux-androideabi 2>&1 | tee $OUTPUT_FOLDER/config-armv7a.log
-aResult=$?; if [[ $aResult != 0 ]]; then exit $aResult; fi
-make clean
-make -j$aNbJobs
-aResult=$?; if [[ $aResult != 0 ]]; then exit $aResult; fi
-#cp -f "$aLibRoot/lib/.libs/libconfig++.so" "$OUTPUT_FOLDER/libs/armeabi-v7a"
-cp -f "$aLibRoot/lib/.libs/libconfig.a"   "$OUTPUT_FOLDER/libs/armeabi-v7a"
-cp -f "$aLibRoot/lib/.libs/libconfig++.a" "$OUTPUT_FOLDER/libs/armeabi-v7a"
+  cmake -G "Ninja" \
+   -D CMAKE_SYSTEM_NAME:STRING="Android" \
+   -D CMAKE_ANDROID_NDK="$CMAKE_ANDROID_NDK" \
+   -D CMAKE_BUILD_TYPE:STRING="$CMAKE_BUILD_TYPE" \
+   -D CMAKE_ANDROID_ARCH_ABI:STRING="$anAbi" \
+   -D CMAKE_SYSTEM_VERSION:STRING="$anApi" \
+   -D CMAKE_ANDROID_STL_TYPE="$aCppLib" \
+   -D CMAKE_INSTALL_PREFIX:STRING="$CMAKE_INSTALL_PREFIX" \
+   -D CMAKE_C_FLAGS:STRING="$CMAKE_C_FLAGS" \
+   -D CMAKE_CXX_FLAGS:STRING="$CMAKE_C_FLAGS" \
+   -D BUILD_SHARED_LIBS:BOOL=OFF \
+   -D BUILD_EXAMPLES:BOOL=OFF \
+   -D BUILD_TESTS:BOOL=OFF \
+   -B "$aBuildPath" -S "$aSrcRoot"
+  aResult=$?; if [[ $aResult != 0 ]]; then exit $aResult; fi
 
-# x86
-export "PATH=$HOME/develop/android15-x86/bin:$aPathBak"
-export "CC=i686-linux-android-gcc"
-export "CXX=i686-linux-android-g++"
-export "CFLAGS=$aCFlagsx86"
-export "CXXFLAGS=$aCFlagsx86"
-./configure --host i686-linux-android 2>&1 | tee $OUTPUT_FOLDER/config-x86.log
-aResult=$?; if [[ $aResult != 0 ]]; then exit $aResult; fi
-make clean
-make -j$aNbJobs
-aResult=$?; if [[ $aResult != 0 ]]; then exit $aResult; fi
-#cp -f "$aLibRoot/lib/.libs/libconfig++.so" "$OUTPUT_FOLDER/libs/x86"
-cp -f "$aLibRoot/lib/.libs/libconfig.a"   "$OUTPUT_FOLDER/libs/x86"
-cp -f "$aLibRoot/lib/.libs/libconfig++.a" "$OUTPUT_FOLDER/libs/x86"
+  cmake --build "$aBuildPath" --config Release --target clean
+  cmake --build "$aBuildPath" --config Release
+  aResult=$?; if [[ $aResult != 0 ]]; then exit $aResult; fi
+  cmake --build "$aBuildPath" --config Release --target install
 
-# armv8a
-export "PATH=$HOME/develop/android21-aarch64/bin:$aPathBak"
-export "CC=aarch64-linux-android-gcc"
-export "CXX=aarch64-linux-android-g++"
-export "CFLAGS=$aCFlagsArmv8a"
-export "CXXFLAGS=$aCFlagsArmv8a"
-./configure --host aarch64-linux-android 2>&1 | tee $OUTPUT_FOLDER/config-aarch64.log
-aResult=$?; if [[ $aResult != 0 ]]; then exit $aResult; fi
-make clean
-make -j$aNbJobs
-aResult=$?; if [[ $aResult != 0 ]]; then exit $aResult; fi
-#cp -f "$aLibRoot/lib/.libs/libconfig++.so" "$OUTPUT_FOLDER/libs/arm64-v8a"
-cp -f "$aLibRoot/lib/.libs/libconfig.a"   "$OUTPUT_FOLDER/libs/arm64-v8a"
-cp -f "$aLibRoot/lib/.libs/libconfig++.a" "$OUTPUT_FOLDER/libs/arm64-v8a"
+  cp -f "$aSrcRoot/LICENSE" "$CMAKE_INSTALL_PREFIX/"
+  cp -f "$aSrcRoot/README"  "$CMAKE_INSTALL_PREFIX/"
 
-export "PATH=$aPathBak"
+  mkdir -p "$aDestMulti/libs/$anAbi"
+  cp -f    "$CMAKE_INSTALL_PREFIX/lib/libconfig.a"   "$aDestMulti/libs/$anAbi/"
+  cp -f    "$CMAKE_INSTALL_PREFIX/lib/libconfig++.a" "$aDestMulti/libs/$anAbi/"
+  cp -f -r "$CMAKE_INSTALL_PREFIX/include" "$aDestMulti"
+}
 
-rm $OUTPUT_FOLDER/../libconfig-android.7z &>/dev/null
-7za a -t7z -m0=lzma -mx=9 -mfb=64 -md=32m -ms=on $OUTPUT_FOLDER/../libconfig-android.7z $OUTPUT_FOLDER
+for anArchIter in armeabi-v7a arm64-v8a x86 x86_64; do buildArch $anArchIter 21; done
+#buildArch armeabi-v7a 16; buildArch arm64-v8a 21; buildArch x86 16; buildArch x86_64 21
+
+cp -f "$aSrcRoot/LICENSE" "$aDestMulti"
+cp -f "$aSrcRoot/README"  "$aDestMulti"
+
+#rm $aDestMulti/../${aProjName}-android.7z &>/dev/null
+#7za a -t7z -m0=lzma -mx=9 -mfb=64 -md=32m -ms=on $aDestMulti/../${aProjName}-android.7z $aDestMulti

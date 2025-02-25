@@ -69,6 +69,9 @@ class StFloat32Param : public StParam<float> {
         //
     }
 
+    /** Destructor */
+    ST_CPPEXPORT virtual ~StFloat32Param();
+
     /**
      * @return parameter key
      */

@@ -1,5 +1,5 @@
 /**
- * Copyright © 2009-2023 Kirill Gavrilov <kirill@sview.ru>
+ * Copyright © 2009-2025 Kirill Gavrilov <kirill@sview.ru>
  *
  * StMoviePlayer program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -121,7 +121,25 @@ StString StALContext::toStringExtensions() const {
     if(hasExtSoftHrtf) {
         ALCint aHrtfStatus = ALC_HRTF_DISABLED_SOFT;
         alcGetIntegerv(myAlDevice, ALC_HRTF_STATUS_SOFT, 1, &aHrtfStatus);
-        anExtList += StString("ALC_SOFT_HRTF [") + hrtfStatusToString(aHrtfStatus) + "] ";
+
+        anExtList += StString("ALC_SOFT_HRTF [");
+        anExtList += hrtfStatusToString(aHrtfStatus);
+
+        const StString aSpec = (alcGetString(myAlDevice, ALC_HRTF_SPECIFIER_SOFT));
+        if (!aSpec.isEmpty()) {
+            anExtList += StString("; specifier: '") + aSpec + "'";
+        }
+
+        ALCint aNbHrtfSpecs = 0;
+        alcGetIntegerv(myAlDevice, ALC_NUM_HRTF_SPECIFIERS_SOFT, 1, &aNbHrtfSpecs);\
+        if (aNbHrtfSpecs != 0) {
+            anExtList += StString("; specifiers: ");
+            for (ALCint aSpecIter = 0; aSpecIter < aNbHrtfSpecs; ++aSpecIter) {
+                if (aSpecIter != 0) { anExtList += ","; }
+                anExtList += StString("'") + alcGetStringiSOFT(myAlDevice, ALC_HRTF_SPECIFIER_SOFT, aSpecIter) + "'";
+            }
+        }
+        anExtList += "] ";
     }
     return anExtList;
 }
@@ -161,22 +179,45 @@ bool StALContext::create(const std::string& theDeviceName) {
 }
 
 void StALContext::fullInfo(StDictionary& theMap) const {
-    StString anExtensions, aHrtfState, aSoftOutput;
+    StString anExtensions, aSoftOutput;
+    StString aHrtfInfo, aHrtfState, aHrtfSpec, aHrtfSpecList;
     if(hasExtFloat32)     { anExtensions += "AL_EXT_float32 "; }
     if(hasExtFloat64)     { anExtensions += "AL_EXT_double "; }
     if(hasExtMultiChannel){ anExtensions += "AL_EXT_MCFORMATS "; }
     if(hasExtBFormat)     { anExtensions += "AL_EXT_BFORMAT "; }
     if(hasExtDisconnect)  { anExtensions += "ALC_EXT_disconnect "; }
-    if(hasExtSoftOutMode) { anExtensions += "ALC_SOFT_output_mode "; }
     if(hasExtSoftOutMode) {
+        anExtensions += "ALC_SOFT_output_mode ";
+
         ALCint anOutMode = ALC_ANY_SOFT;
         alcGetIntegerv(myAlDevice, ALC_OUTPUT_MODE_SOFT, 1, &anOutMode);
         aSoftOutput = outputModeToString(anOutMode);
     }
     if(hasExtSoftHrtf) {
+        anExtensions += "ALC_SOFT_HRTF ";
+
         ALCint aHrtfStatus = ALC_HRTF_DISABLED_SOFT;
         alcGetIntegerv(myAlDevice, ALC_HRTF_STATUS_SOFT, 1, &aHrtfStatus);
         aHrtfState = hrtfStatusToString(aHrtfStatus);
+
+        aHrtfSpec = alcGetString(myAlDevice, ALC_HRTF_SPECIFIER_SOFT);
+
+        ALCint aNbHrtfSpecs = 0;
+        alcGetIntegerv(myAlDevice, ALC_NUM_HRTF_SPECIFIERS_SOFT, 1, &aNbHrtfSpecs);\
+        if (aNbHrtfSpecs != 0) {
+            for (ALCint aSpecIter = 0; aSpecIter < aNbHrtfSpecs; ++aSpecIter) {
+                if (aSpecIter != 0) { aHrtfSpecList += ", "; }
+                aHrtfSpecList += StString("'") + alcGetStringiSOFT(myAlDevice, ALC_HRTF_SPECIFIER_SOFT, aSpecIter) + "'";
+            }
+        }
+
+        aHrtfInfo = StString("State: ") + aHrtfState;
+        if (!aHrtfSpec.isEmpty()) {
+            aHrtfInfo += StString("\nSpecifier: '") + aHrtfSpec + "'";
+        }
+        if (aNbHrtfSpecs != 0) {
+            aHrtfInfo += StString("\nSpecifiers: ") + aHrtfSpecList;
+        }
     }
 
     ALCint aFreq = 0;
@@ -195,7 +236,7 @@ void StALContext::fullInfo(StDictionary& theMap) const {
     if(!aSoftOutput.isEmpty()) {
         theMap.add(StDictEntry("OpenAL output mode", aSoftOutput));
     }
-    theMap.add(StDictEntry("OpenAL HRTF mixing", !aHrtfState.isEmpty() ? aHrtfState : "Not implemented"));
+    theMap.add(StDictEntry("OpenAL HRTF mixing", !aHrtfInfo.isEmpty() ? aHrtfInfo : "Not implemented"));
 }
 
 void StALContext::destroy() {

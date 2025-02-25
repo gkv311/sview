@@ -1341,6 +1341,12 @@ void StMoviePlayer::doMouseUp(const StClickEvent& theEvent) {
     }
 }
 
+void StMoviePlayer::doTouch(const StTouchEvent& theEvent) {
+    if(!myGUI.isNull()) {
+        myGUI->doTouch(theEvent);
+    }
+}
+
 void StMoviePlayer::doGesture(const StGestureEvent& theEvent) {
     if(!myGUI.isNull()) {
         myGUI->doGesture(theEvent);

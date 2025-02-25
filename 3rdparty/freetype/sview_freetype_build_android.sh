@@ -1,88 +1,86 @@
 #!/bin/bash
 
-# small help to build FreeType for Android [for sView project]
+# Small help to build FreeType for Android [for sView project].
 # https://www.freetype.org
 
-#$HOME/develop/android-ndk-r12b/build/tools/make-standalone-toolchain.sh --platform=android-15 --install-dir=$HOME/develop/android15-armv7a  --ndk-dir=$HOME/develop/android-ndk-r12b --toolchain=arm-linux-androideabi-4.9
-#$HOME/develop/android-ndk-r12b/build/tools/make-standalone-toolchain.sh --platform=android-21 --install-dir=$HOME/develop/android21-aarch64 --ndk-dir=$HOME/develop/android-ndk-r12b --toolchain=aarch64-linux-android-4.9
-#$HOME/develop/android-ndk-r12b/build/tools/make-standalone-toolchain.sh --platform=android-15 --install-dir=$HOME/develop/android15-x86     --ndk-dir=$HOME/develop/android-ndk-r12b --toolchain=x86-4.9
-
 # go to the script directory
-aScriptPath=${BASH_SOURCE%/*}
-if [ -d "$aScriptPath" ]; then
-  cd "$aScriptPath"
-fi
+aScriptPath=${BASH_SOURCE%/*}; if [ -d "${aScriptPath}" ]; then cd "$aScriptPath"; fi; aScriptPath="$PWD";
 
-# define number of jobs from available CPU cores
-aNbJobs="$(getconf _NPROCESSORS_ONLN)"
+aProjName=freetype-2.10.4
+
+PATH=~/develop/tools/cmake-3.31.5-linux-x86_64/bin:$PATH
+
+#CMAKE_ANDROID_NDK=~/develop/tools/android-ndk-r12b
+CMAKE_ANDROID_NDK=~/develop/tools/android-ndk-r27c
+CMAKE_BUILD_TYPE=Release
+
+aSrcRoot=${aScriptPath}/${aProjName}.git
+aBuildRoot=${aScriptPath}/android-make
+aDestRoot=${aScriptPath}/android
+aDestMulti=${aDestRoot}/${aProjName}
+aCppLib=c++_shared
+
+rm -f -r "$aDestMulti"
+mkdir -p "$aBuildRoot"
+
 set -o pipefail
 
-aPathBak="$PATH"
-aLibRoot="$PWD"
-aCFlagsArmv7a="-O2 -march=armv7-a -mfloat-abi=softfp"
-aCFlagsArmv8a="-O2 -march=armv8-a"
-aCFlagsx86="-O2 -march=i686 -mtune=intel -mssse3 -mfpmath=sse -m32"
-aCPrefixArmv7a="arm-linux-androideabi-"
-aCPrefixArmv8a="aarch64-linux-android-"
-aCPrefixx86="i686-linux-android-"
+function buildArch {
+  anAbi=$1
+  anApi=$2
 
-OUTPUT_FOLDER="$aLibRoot/install/freetype-android"
-rm -f -r "$OUTPUT_FOLDER"
-mkdir -p "$OUTPUT_FOLDER/include"
-mkdir -p "$OUTPUT_FOLDER/libs/armeabi-v7a"
-mkdir -p "$OUTPUT_FOLDER/libs/x86"
-mkdir -p "$OUTPUT_FOLDER/libs/arm64-v8a"
-cp -f    "$aLibRoot/README"         "$OUTPUT_FOLDER"
-cp -f    "$aLibRoot/docs/FTL.TXT"   "$OUTPUT_FOLDER"
-cp -f    "$aLibRoot/docs/GPLv2.TXT" "$OUTPUT_FOLDER"
-cp -f    "$aLibRoot/docs/CHANGES"   "$OUTPUT_FOLDER"
-cp -f -r "$aLibRoot/include"        "$OUTPUT_FOLDER"
-rm -f -r "$OUTPUT_FOLDER/include/freetype/internal"
-echo "Output directory: $OUTPUT_FOLDER"
+  aBuildPath=${aBuildRoot}/${aProjName}-${anAbi}-make
+  CMAKE_INSTALL_PREFIX=${aDestRoot}/${aProjName}-${anAbi}
+  rm -r -f ${aBuildPath}
+  rm -r -f ${CMAKE_INSTALL_PREFIX}
 
-# armv7a
-export "PATH=$HOME/develop/android15-armv7a/bin:$aPathBak"
-export "CC=${aCPrefixArmv7a}gcc"
-export "CXX=${aCPrefixArmv7a}g++"
-export "CFLAGS=$aCFlagsArmv7a"
-./configure --host arm-linux-androideabi --enable-shared --with-png=no --with-harfbuzz=no 2>&1 | tee $OUTPUT_FOLDER/config-armv7a.log
-aResult=$?; if [[ $aResult != 0 ]]; then exit $aResult; fi
-make clean
-make -j$aNbJobs
-aResult=$?; if [[ $aResult != 0 ]]; then exit $aResult; fi
-cp -f "$aLibRoot/objs/.libs/libfreetype.so" "$OUTPUT_FOLDER/libs/armeabi-v7a"
-${aCPrefixArmv7a}strip --strip-unneeded     "$OUTPUT_FOLDER/libs/armeabi-v7a/libfreetype.so"
-#cp -f "$aLibRoot/objs/.libs/libfreetype.a" "$OUTPUT_FOLDER/libs/armeabi-v7a"
+  cmake -G "Ninja" \
+   -D CMAKE_SYSTEM_NAME:STRING="Android" \
+   -D CMAKE_ANDROID_NDK="$CMAKE_ANDROID_NDK" \
+   -D CMAKE_BUILD_TYPE:STRING="$CMAKE_BUILD_TYPE" \
+   -D CMAKE_ANDROID_ARCH_ABI:STRING="$anAbi" \
+   -D CMAKE_SYSTEM_VERSION:STRING="$anApi" \
+   -D CMAKE_ANDROID_STL_TYPE="$aCppLib" \
+   -D CMAKE_INSTALL_PREFIX:STRING="$CMAKE_INSTALL_PREFIX" \
+   -D BUILD_SHARED_LIBS:BOOL=ON \
+   -D FT_WITH_ZLIB=ON      -D CMAKE_DISABLE_FIND_PACKAGE_ZLIB:BOOL=OFF \
+   -D FT_WITH_BZIP2=OFF    -D CMAKE_DISABLE_FIND_PACKAGE_BZip2:BOOL=TRUE \
+   -D FT_WITH_PNG=OFF      -D CMAKE_DISABLE_FIND_PACKAGE_PNG:BOOL=TRUE \
+   -D FT_WITH_HARFBUZZ=OFF -D CMAKE_DISABLE_FIND_PACKAGE_HarfBuzz:BOOL=TRUE \
+   -D FT_WITH_BROTLI=OFF   -D CMAKE_DISABLE_FIND_PACKAGE_BrotliDec:BOOL=TRUE \
+   -B "$aBuildPath" -S "$aSrcRoot"
+  aResult=$?; if [[ $aResult != 0 ]]; then exit $aResult; fi
 
-# x86
-export "PATH=$HOME/develop/android15-x86/bin:$aPathBak"
-export "CC=${aCPrefixx86}gcc"
-export "CXX=${aCPrefixx86}g++"
-export "CFLAGS=$aCFlagsx86"
-./configure --host i686-linux-android --enable-shared --with-png=no --with-harfbuzz=no 2>&1 | tee $OUTPUT_FOLDER/config-x86.log
-aResult=$?; if [[ $aResult != 0 ]]; then exit $aResult; fi
-make clean
-make -j$aNbJobs
-aResult=$?; if [[ $aResult != 0 ]]; then exit $aResult; fi
-cp -f "$aLibRoot/objs/.libs/libfreetype.so" "$OUTPUT_FOLDER/libs/x86"
-${aCPrefixx86}strip --strip-unneeded        "$OUTPUT_FOLDER/libs/x86/libfreetype.so"
-#cp -f "$aLibRoot/objs/.libs/libfreetype.a" "$OUTPUT_FOLDER/libs/x86"
+  cmake --build "$aBuildPath" --config Release --target clean
+  cmake --build "$aBuildPath" --config Release
+  aResult=$?; if [[ $aResult != 0 ]]; then exit $aResult; fi
+  cmake --build "$aBuildPath" --config Release --target install
 
-# armv8a
-export "PATH=$HOME/develop/android21-aarch64/bin:$aPathBak"
-export "CC=${aCPrefixArmv8a}gcc"
-export "CXX=${aCPrefixArmv8a}g++"
-export "CFLAGS=$aCFlagsArmv8a"
-./configure --host aarch64-linux-android --enable-shared --with-png=no --with-harfbuzz=no 2>&1 | tee $OUTPUT_FOLDER/config-aarch64.log
-aResult=$?; if [[ $aResult != 0 ]]; then exit $aResult; fi
-make clean
-make -j$aNbJobs
-aResult=$?; if [[ $aResult != 0 ]]; then exit $aResult; fi
-cp -f "$aLibRoot/objs/.libs/libfreetype.so" "$OUTPUT_FOLDER/libs/arm64-v8a"
-${aCPrefixArmv8a}strip --strip-unneeded     "$OUTPUT_FOLDER/libs/arm64-v8a/libfreetype.so"
-#cp -f "$aLibRoot/objs/.libs/libfreetype.a" "$OUTPUT_FOLDER/libs/arm64-v8a"
+  cp -f "$aSrcRoot/docs/FTL.TXT"   "$CMAKE_INSTALL_PREFIX/"
+  cp -f "$aSrcRoot/docs/GPLv2.TXT" "$CMAKE_INSTALL_PREFIX/"
+  cp -f "$aSrcRoot/docs/CHANGES"   "$CMAKE_INSTALL_PREFIX/"
+  cp -f "$aSrcRoot/docs/README"    "$CMAKE_INSTALL_PREFIX/"
+  if [ -f "$aSrcRoot/LICENSE.TXT" ]; then
+    cp -f "$aSrcRoot/LICENSE.TXT"  "$CMAKE_INSTALL_PREFIX/"
+  else
+    cp -f "$aSrcRoot/docs/LICENSE.TXT" "$CMAKE_INSTALL_PREFIX/"
+  fi
 
-export "PATH=$aPathBak"
+  mkdir -p "$aDestMulti/libs/$anAbi"
+  cp -f "$CMAKE_INSTALL_PREFIX/lib/libfreetype.so" "$aDestMulti/libs/$anAbi/"
+  cp -f "$CMAKE_INSTALL_PREFIX/LICENSE.TXT"        "$aDestMulti/"
+}
 
-rm $OUTPUT_FOLDER/../freetype-android.7z &>/dev/null
-7za a -t7z -m0=lzma -mx=9 -mfb=64 -md=32m -ms=on $OUTPUT_FOLDER/../freetype-android.7z $OUTPUT_FOLDER
+for anArchIter in armeabi-v7a arm64-v8a x86 x86_64; do buildArch $anArchIter 21; done
+#buildArch armeabi-v7a 16; buildArch arm64-v8a 21; buildArch x86 16; buildArch x86_64 21
+
+mkdir -p "$aDestMulti/include"
+cp -f    "$aSrcRoot/README"         "$aDestMulti"
+cp -f    "$aSrcRoot/docs/FTL.TXT"   "$aDestMulti"
+cp -f    "$aSrcRoot/docs/GPLv2.TXT" "$aDestMulti"
+cp -f    "$aSrcRoot/docs/CHANGES"   "$aDestMulti"
+cp -f -r "$aSrcRoot/include"        "$aDestMulti"
+rm -f -r "$aDestMulti/include/freetype/internal"
+
+#rm $aDestMulti/../${aProjName}-android.7z &>/dev/null
+#7za a -t7z -m0=lzma -mx=9 -mfb=64 -md=32m -ms=on $aDestMulti/../${aProjName}-android.7z $aDestMulti

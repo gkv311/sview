@@ -266,6 +266,7 @@ class StMoviePlayer : public StApplication {
     ST_LOCAL virtual void doKeyUp    (const StKeyEvent&    theEvent) ST_ATTR_OVERRIDE;
     ST_LOCAL virtual void doMouseDown(const StClickEvent&  theEvent) ST_ATTR_OVERRIDE;
     ST_LOCAL virtual void doMouseUp  (const StClickEvent&  theEvent) ST_ATTR_OVERRIDE;
+    ST_LOCAL virtual void doTouch    (const StTouchEvent&  theEvent) ST_ATTR_OVERRIDE;
     ST_LOCAL virtual void doGesture  (const StGestureEvent& theEvent) ST_ATTR_OVERRIDE;
     ST_LOCAL virtual void doScroll   (const StScrollEvent& theEvent) ST_ATTR_OVERRIDE;
     ST_LOCAL virtual void doFileDrop (const StDNDropEvent& theEvent) ST_ATTR_OVERRIDE;

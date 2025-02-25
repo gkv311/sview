@@ -37,6 +37,9 @@ class StEnumParam : public StInt32ParamNamed {
         //
     }
 
+    /** Destructor */
+    ST_CPPEXPORT virtual ~StEnumParam();
+
     /**
      * Change the value.
      * @param theValue new value

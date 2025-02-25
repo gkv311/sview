@@ -541,3 +541,75 @@ void StGLRootWidget::setModalDialog(StGLMessageBox* theWidget,
     }
     myModalDialog = theWidget;
 }
+
+StGLAnimVisibility::StGLAnimVisibility()
+: myVisTimer(true), myIsMouseMoved(false), myIsMouseOnGui(false), myIsEmptyImage(false), myIsVisibleGui(true) {
+    //
+}
+
+void StGLAnimVisibility::doTouch(const StTouchEvent& theEvent) {
+    if (theEvent.NbTouches > 0 && theEvent.Touches[0].OnScreen) {
+        myTouchTimer.restart();
+    }
+}
+
+void StGLAnimVisibility::doGesture(const StGestureEvent& theEvent) {
+    if(theEvent.Type == stEvent_Gesture1Tap) {
+        // give some time to abort tapping event - start dedicated timer
+        myTapTimer.restart();
+    } else if(theEvent.Type == stEvent_Gesture1DoubleTap) {
+        // abort tapping on double-tap
+        myTapTimer.stop();
+    } else if(theEvent.Type == stEvent_None) {
+        // special event to abort tapping after interaction with GUI
+        myTapTimer.stop();
+    }
+}
+
+void StGLAnimVisibility::updateVisibility(bool theToForceHide, bool theToForceShow) {
+    static const double THE_VISIBILITY_IDLE_TIME = 1.0;
+    static const double THE_TOUCHSREEN_LOCK_TIME = 10.0;
+
+    if (myIsEmptyImage && !myEmptyTimer.isOn()) {
+        myEmptyTimer.restart();
+    } else {
+        myEmptyTimer.stop();
+    }
+    if (myEmptyTimer.getElapsedTime() >= 2.5) {
+        myVisTimer.restart();
+        myEmptyTimer.stop();
+    }
+    if (myIsMouseMoved && myTouchTimer.isOn()) {
+        if (myTouchTimer.getElapsedTime() < THE_TOUCHSREEN_LOCK_TIME) {
+            myIsMouseMoved = false;
+        } else {
+            myTouchTimer.stop();
+        }
+    }
+    if (myTapTimer.getElapsedTime() >= 0.5) {
+        // handling of stEvent_Gesture1Tap is delayed to ignore possible following
+        // stEvent_Gesture1DoubleTap (0.5 threshold should be in sync with StWindowImpl::doTouch())
+        myTapTimer.stop();
+        // just switch visibility on each single tap
+        myIsVisibleGui = !myIsVisibleGui;
+    }
+
+    if (theToForceShow) {
+        myVisTimer.restart();
+        myTouchTimer.stop();
+    } else if (theToForceHide) {
+        myVisTimer.restart(THE_VISIBILITY_IDLE_TIME + 0.001);
+        myTouchTimer.stop();
+    }
+
+    if (myTouchTimer.isOn()) {
+        // prevent hiding GUI by idle timeout within touchscreen input
+        return;
+    }
+
+    const double aStillTime = getStillDuration();
+    myIsVisibleGui = myIsMouseMoved || myIsMouseOnGui || aStillTime < THE_VISIBILITY_IDLE_TIME;
+    if(myIsMouseMoved) {
+        myVisTimer.restart();
+    }
+}

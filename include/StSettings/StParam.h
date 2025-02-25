@@ -17,7 +17,7 @@ class StParamBase {
 
       public:
 
-    virtual ~StParamBase() {}
+    ST_CPPEXPORT virtual ~StParamBase();
 
 };
 
@@ -93,6 +93,9 @@ class StInt32Param : public StParam<int32_t> {
         //
     }
 
+    /** Destructor */
+    ST_CPPEXPORT virtual ~StInt32Param();
+
 };
 
 // define StHandle template specialization
@@ -113,6 +116,9 @@ class StBoolParam : public StParam<bool> {
     : StParam<bool>(theValue) {
         //
     }
+
+    /** Destructor */
+    ST_CPPEXPORT virtual ~StBoolParam();
 
     /**
      * Reverse current value.
@@ -166,6 +172,9 @@ class StBoolParamNamed : public StBoolParam {
       myParamName(theParamKey) {
         //
     }
+
+    /** Destructor */
+    ST_CPPEXPORT virtual ~StBoolParamNamed();
 
     /**
      * @return parameter key
@@ -227,6 +236,9 @@ class StInt32ParamNamed : public StInt32Param {
       myParamName(theParamKey) {
         //
     }
+
+    /** Destructor */
+    ST_CPPEXPORT virtual ~StInt32ParamNamed();
 
     /**
      * @return parameter key

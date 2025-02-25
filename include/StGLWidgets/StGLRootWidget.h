@@ -548,4 +548,60 @@ class StGLRootWidget : public StGLWidget {
 
 };
 
+/**
+ * Auxiliary tool for managing visibility of GUI based on user input activity.
+ */
+struct StGLAnimVisibility {
+
+    /** Empty constructor. */
+    ST_CPPEXPORT StGLAnimVisibility();
+
+    /** Track touches. */
+    ST_CPPEXPORT void doTouch(const StTouchEvent& theEvent);
+
+    /** Track touchscreen gestures. */
+    ST_CPPEXPORT void doGesture(const StGestureEvent& theEvent);
+
+    /** Set mouse activity state. */
+    ST_LOCAL void setMouseMoved(bool theIsMoved) { myIsMouseMoved = theIsMoved; }
+
+    /** Set flag indicating mouse over some active GUI control. */
+    ST_LOCAL void setMouseOnGui(bool theIsOnGui) { myIsMouseOnGui = theIsOnGui; }
+
+    /** Set empty image state. */
+    ST_LOCAL void setEmptyImage(bool theIsEmpty) { myIsEmptyImage = theIsEmpty; }
+
+    /** Update visibility state. */
+    ST_CPPEXPORT void updateVisibility(bool theToForceHide, bool theToForceShow);
+
+    /** Return still duration. */
+    ST_LOCAL double getStillDuration() const { return myVisTimer.getElapsedTime(); }
+
+    /** Return GUI visibility state. */
+    ST_LOCAL bool isVisibleGui() const { return myIsVisibleGui; }
+
+    /** Update opacity value in accordance with visibility trend. */
+    ST_LOCAL float updateOpacity(bool theDirUp, bool theToForce) { return (float )myVisLerp.perform(theDirUp, theToForce); }
+
+    /** Return opacity value. */
+    ST_LOCAL float getOpacity() const { return (float )myVisLerp.getValue(); }
+
+    /** Return TRUE if opacity value is zero. */
+    ST_LOCAL bool isHidden() const { return myVisLerp.getValue() <= 0.0; }
+
+private:
+
+    StGLAnimationLerp myVisLerp;
+
+    StTimer myVisTimer;     //!< minimum visible delay
+    StTimer myEmptyTimer;   //!< empty list delay
+    StTimer myTapTimer;     //!< single tap delay
+    StTimer myTouchTimer;   //!< touchsreen lock
+    bool    myIsMouseMoved; //!< mouse activity state
+    bool    myIsMouseOnGui; //!< flag indicating mouse over some active GUI control
+    bool    myIsEmptyImage; //!< empty image/video state
+    bool    myIsVisibleGui; //!< GUI visibility state
+
+};
+
 #endif // __StGLRootWidget_h_

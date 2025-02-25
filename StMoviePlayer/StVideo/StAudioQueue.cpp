@@ -230,7 +230,7 @@ void StAudioQueue::stalResetAlHints() {
         anAttrs[anAttrIter * 2 + 1] = anOutVal;
         ++anAttrIter;
     }
-    if(myAlCtx.hasExtSoftHrtf) {
+    if(myAlCtx.hasExtSoftHrtf && (!myAlCtx.hasExtSoftOutMode || myAlHintHrtf != StAlHintHrtf_Auto)) {
         ALCint aHrtfVal = ALC_DONT_CARE_SOFT;
         if(myAlHintHrtf == StAlHintHrtf_ForceOn) {
             aHrtfVal = ALC_TRUE;

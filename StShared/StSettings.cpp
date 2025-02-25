@@ -5,10 +5,41 @@
  */
 
 #include <StSettings/StSettings.h>
+
+#include <StSettings/StEnumParam.h>
+#include <StSettings/StFloat32Param.h>
 #include <StSlots/StAction.h>
 #include <StCore/StVirtualKeys.h>
 
 #include <sstream>
+
+StParamBase::~StParamBase() {
+    //
+}
+
+StBoolParam::~StBoolParam() {
+    //
+}
+
+StBoolParamNamed::~StBoolParamNamed() {
+    //
+}
+
+StInt32Param::~StInt32Param() {
+    //
+}
+
+StInt32ParamNamed::~StInt32ParamNamed() {
+    //
+}
+
+StFloat32Param::~StFloat32Param() {
+    //
+}
+
+StEnumParam::~StEnumParam() {
+    //
+}
 
 bool StSettings::loadBool(const StString& theLabel,
                           bool&           theValue) {

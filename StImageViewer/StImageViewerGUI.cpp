@@ -1,5 +1,5 @@
 /**
- * Copyright © 2009-2020 Kirill Gavrilov <kirill@sview.ru>
+ * Copyright © 2009-2025 Kirill Gavrilov <kirill@sview.ru>
  *
  * StImageViewer program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -55,8 +55,6 @@
 using namespace StImageViewerStrings;
 
 namespace {
-
-    static const float THE_VISIBILITY_IDLE_TIME = 2.0f;
 
     static const int DISPL_Y_REGION_UPPER = 32;
     static const int DISPL_X_REGION_UPPER = 32;
@@ -1240,7 +1238,6 @@ StImageViewerGUI::StImageViewerGUI(StImageViewer*  thePlugin,
   myPlugin(thePlugin),
   myWindow(theWindow),
   myLangMap(theLangMap),
-  myVisibilityTimer(true),
   //
   myImage(NULL),
   myDescr(NULL),
@@ -1272,7 +1269,6 @@ StImageViewerGUI::StImageViewerGUI(StImageViewer*  thePlugin,
   myFpsWidget(NULL),
   myHKeysTable(NULL),
   //
-  myIsVisibleGUI(true),
   myIsMinimalGUI(true) {
     const GLfloat aScale = myPlugin->params.ScaleHiDPI2X->getValue() ? 2.0f : myPlugin->params.ScaleHiDPI ->getValue();
     setScale(aScale, (StGLRootWidget::ScaleAdjust )myPlugin->params.ScaleAdjust->getValue());
@@ -1345,15 +1341,14 @@ size_t StImageViewerGUI::trSrcFormatId(const StFormat theSrcFormat) {
     }
 }
 
+void StImageViewerGUI::doTouch(const StTouchEvent& theEvent) {
+    myAnimVisibility.doTouch(theEvent);
+}
+
 void StImageViewerGUI::doGesture(const StGestureEvent& theEvent) {
+    myAnimVisibility.doGesture(theEvent);
     if(myImage == NULL) {
         return;
-    }
-
-    if(theEvent.Type == stEvent_Gesture1Tap) {
-        myTapTimer.restart();
-    } else if(theEvent.Type == stEvent_Gesture1DoubleTap) {
-        myTapTimer.stop();
     }
 
     for(StGLWidget *aChildIter(getChildren()->getLast()), *aChildActive(NULL); aChildIter != NULL;) {
@@ -1366,6 +1361,20 @@ void StImageViewerGUI::doGesture(const StGestureEvent& theEvent) {
             return;
         }
     }
+}
+
+bool StImageViewerGUI::tryUnClick(const StClickEvent& theEvent,
+                                  bool& theIsItemUnclicked) {
+    const bool wasClickedImage = myImage != NULL && myImage->isClicked(ST_MOUSE_LEFT);
+    bool aRes = StGLRootWidget::tryUnClick(theEvent, theIsItemUnclicked);
+    if (theEvent.Button == ST_MOUSE_LEFT && theIsItemUnclicked && !wasClickedImage) {
+        // prevent switching GUI visibility after interaction with widget, save the image
+        StGestureEvent aReset;
+        aReset.clearGesture();
+        aReset.Type = stEvent_None;
+        myAnimVisibility.doGesture(aReset);
+    }
+    return aRes;
 }
 
 void StImageViewerGUI::setVisibility(const StPointD_t& theCursor,
@@ -1382,25 +1391,15 @@ void StImageViewerGUI::setVisibility(const StPointD_t& theCursor,
                              &&  myPlugin->params.ToShowBottom->getValue()
                              &&  myPanelBottom != NULL;
 
+    myAnimVisibility.setMouseMoved(myWindow->isMouseMoved());
+    myAnimVisibility.setMouseOnGui((hasUpperPanel  && myPanelUpper ->isPointIn(theCursor))
+                                || (hasBottomPanel && myPanelBottom->isPointIn(theCursor))
+                                || (toShowPlayList && myPlayList != NULL && myPlayList->isPointIn(theCursor))
+                                || (hasMainMenu    && myMenuRoot->isActive()));
+
     StHandle<StStereoParams> aParams = myImage->getSource();
-    if(aParams.isNull() && !myEmptyTimer.isOn()
-    && !myPlugin->myPlayList->isEmpty()) {
-        myEmptyTimer.restart();
-    } else {
-        myEmptyTimer.stop();
-    }
-    if(myEmptyTimer.getElapsedTime() >= 2.5) {
-        myVisibilityTimer.restart();
-        myEmptyTimer.stop();
-    }
-    if(myTapTimer.getElapsedTime() >= 0.5) {
-        myVisibilityTimer.restart();
-        myTapTimer.stop();
-    }
-    if(theToForceShow) {
-        myVisibilityTimer.restart();
-    }
-    const bool isMouseActive  = myWindow->isMouseMoved();
+    myAnimVisibility.setEmptyImage(aParams.isNull() && !myPlugin->myPlayList->isEmpty());
+    myAnimVisibility.updateVisibility(theToForceHide, theToForceShow);
 
     StFormat aSrcFormat = (StFormat )myPlugin->params.SrcStereoFormat->getValue();
     if(aSrcFormat == StFormat_AUTO
@@ -1412,50 +1411,30 @@ void StImageViewerGUI::setVisibility(const StPointD_t& theCursor,
         aSrcFormat = st::formatReversed(aSrcFormat);
     }
 
-    const double aStillTime = myVisibilityTimer.getElapsedTime();
-    myIsVisibleGUI = isMouseActive
-        || aStillTime < THE_VISIBILITY_IDLE_TIME
-        || (hasUpperPanel  && myPanelUpper ->isPointIn(theCursor))
-        || (hasBottomPanel && myPanelBottom->isPointIn(theCursor))
-        || (myPlayList != NULL && toShowPlayList && myPlayList->isPointIn(theCursor))
-        || (hasMainMenu    && myMenuRoot->isActive());
+    const bool  toShowAll = !myIsMinimalGUI && myAnimVisibility.isVisibleGui() && !theToForceHide;
+    const float anOpacity = myAnimVisibility.updateOpacity(toShowAll, theToForceHide || theToForceShow);
 
-    if(isMouseActive) {
-        myVisibilityTimer.restart();
-    }
-    const bool  toShowAll = !myIsMinimalGUI && myIsVisibleGUI && !theToForceHide;
-    const float anOpacity = (float )myVisLerp.perform(toShowAll, theToForceHide || theToForceShow);
-
-    if(myMenuRoot != NULL) {
-        myMenuRoot->setOpacity(hasMainMenu ? anOpacity : 0.0f, true);
-    }
-    if(myPanelUpper != NULL) {
-        myPanelUpper->setOpacity(hasUpperPanel ? anOpacity : 0.0f, true);
-    }
-    if(myPanelBottom != NULL) {
-        myPanelBottom->setOpacity(hasBottomPanel ? anOpacity : 0.0f, true);
-    }
-    if(myAdjustOverlay != NULL
-    && toShowAdjust) {
-        myAdjustOverlay->setOpacity(anOpacity, true);
+    setWidgetOpacity(myMenuRoot, hasMainMenu ? anOpacity : 0.0f, true);
+    setWidgetOpacity(myPanelUpper, hasUpperPanel ? anOpacity : 0.0f, true);
+    setWidgetOpacity(myPanelBottom, hasBottomPanel ? anOpacity : 0.0f, true);
+    if(toShowAdjust) {
+        setWidgetOpacity(myAdjustOverlay, anOpacity, true);
         if(aSrcFormat == StFormat_Mono) {
-            myBtnSepDx  ->setOpacity(0.0f, false);
-            myBtnSepDy  ->setOpacity(0.0f, false);
-            myBtnSepRot ->setOpacity(0.0f, false);
-            myBtnReset3d->setOpacity(0.0f, false);
-            myBtnResetColor2->setOpacity(0.0f, false);
+            setWidgetOpacity(myBtnSepDx, 0.0f, false);
+            setWidgetOpacity(myBtnSepDy, 0.0f, false);
+            setWidgetOpacity(myBtnSepRot, 0.0f, false);
+            setWidgetOpacity(myBtnReset3d, 0.0f, false);
+            setWidgetOpacity(myBtnResetColor2, 0.0f, false);
         } else {
-            myBtnResetColor1->setOpacity(0.0f, false);
+            setWidgetOpacity(myBtnResetColor1, 0.0f, false);
         }
     }
-    if(myPlayList != NULL
-    && toShowPlayList) {
-        myPlayList->setOpacity(myPlugin->params.ToShowBottom->getValue() ? anOpacity : 0.0f, true);
+    if(toShowPlayList) {
+        setWidgetOpacity(myPlayList, myPlugin->params.ToShowBottom->getValue() ? anOpacity : 0.0f, true);
     }
     if(myBtnFull != NULL) {
-        if(myIsMinimalGUI
-        && myPanelBottom != NULL) {
-            myPanelBottom->setOpacity(1.0f, false);
+        if(myIsMinimalGUI) {
+            setWidgetOpacity(myPanelBottom, 1.0f, false);
         }
 
         int aFirstFace = 0;
@@ -1479,9 +1458,7 @@ void StImageViewerGUI::setVisibility(const StPointD_t& theCursor,
     if(myBtnSrcFrmt != NULL) {
         myBtnSrcFrmt->setFaceId(aSrcFormat != StFormat_AUTO ? aSrcFormat : StFormat_Mono);
     }
-    if(myBtnSwapLR != NULL) {
-        myBtnSwapLR->setOpacity(aSrcFormat != StFormat_Mono ? myPanelUpper->getOpacity() : 0.0f, false);
-    }
+    setWidgetOpacity(myBtnSwapLR, aSrcFormat != StFormat_Mono ? myPanelUpper->getOpacity() : 0.0f, false);
 
     const StViewSurface aViewMode = !aParams.isNull()
                                   ? aParams->ViewingMode
@@ -1496,61 +1473,65 @@ void StImageViewerGUI::setVisibility(const StPointD_t& theCursor,
     }
     if(myBtnPanorama != NULL) {
         myBtnPanorama->getTrackedValue()->setValue(aViewMode != StViewSurface_Plain);
-        myBtnPanorama->setOpacity(toShowPano ? myPanelUpper->getOpacity() : 0.0f, false);
+        setWidgetOpacity(myBtnPanorama, toShowPano ? myPanelUpper->getOpacity() : 0.0f, false);
     }
     myWindow->setTrackOrientation(aViewMode != StViewSurface_Plain
                                && myPlugin->params.ToTrackHead->getValue());
     StQuaternion<double> aQ = myWindow->getDeviceOrientation();
     myImage->setDeviceOrientation(StGLQuaternion((float )aQ.x(), (float )aQ.y(), (float )aQ.z(), (float )aQ.w()));
+    updateDescLabel(theCursor, aSrcFormat, aViewMode);
+}
 
-    if(myDescr != NULL) {
-        bool wasEmpty = myDescr->getText().isEmpty();
-        if(::isPointIn(myBtnOpen, theCursor)) {
-            myDescr->setText(tr(IMAGE_OPEN));
-        } else if(::isPointIn(myBtnPrev, theCursor)) {
-            myDescr->setText(tr(IMAGE_PREVIOUS));
-        } else if(::isPointIn(myBtnNext, theCursor)) {
-            myDescr->setText(tr(IMAGE_NEXT));
-        } else if(::isPointIn(myBtnInfo, theCursor)) {
-            myDescr->setText(tr(MENU_MEDIA_FILE_INFO));
-        } else if(::isPointIn(myBtnSwapLR, theCursor)) {
-            size_t aLngId = myImage->params.SwapLR->getValue() ? SWAP_LR_ON : SWAP_LR_OFF;
-            myDescr->setText(tr(aLngId));
-        } else if(::isPointIn(myBtnList, theCursor)) {
-            myDescr->setText(tr(PLAYLIST));
-        } else if(::isPointIn(myBtnFull, theCursor)) {
-            myDescr->setText(tr(FULLSCREEN));
-        } else if(::isPointIn(myBtnSrcFrmt, theCursor)) {
-            myDescr->setText(tr(BTN_SRC_FORMAT) + "\n" + trSrcFormat(aSrcFormat));
-        } else if(::isPointIn(myBtnAdjust, theCursor)) {
-            myDescr->setText(tr(MENU_VIEW_IMAGE_ADJUST));
-        } else if(::isPointIn(myBtnPanorama, theCursor)) {
-            size_t aTrPano = MENU_VIEW_SURFACE_PLANE;
-            switch(aViewMode) {
-                case StViewSurface_Plain:      aTrPano = MENU_VIEW_SURFACE_PLANE;   break;
-                case StViewSurface_Theater:    aTrPano = MENU_VIEW_SURFACE_THEATER; break;
-                case StViewSurface_Sphere:     aTrPano = MENU_VIEW_SURFACE_SPHERE;  break;
-                case StViewSurface_Hemisphere: aTrPano = MENU_VIEW_SURFACE_HEMISPHERE; break;
-                case StViewSurface_Cubemap:    aTrPano = MENU_VIEW_SURFACE_CUBEMAP;  break;
-                case StViewSurface_CubemapEAC: aTrPano = MENU_VIEW_SURFACE_CUBEMAP_EAC; break;
-                case StViewSurface_Cylinder:   aTrPano = MENU_VIEW_SURFACE_CYLINDER; break;
-            }
-            myDescr->setText(tr(MENU_VIEW_PANORAMA) + "\n" + tr(aTrPano));
-        } else {
-            myDescr->setText("");
-        }
-
-        if(wasEmpty
-        && aStillTime < 1.0) {
-            myDescr->setText("");
-        } else if(getFocus() != NULL
-               || (myMenuRoot != NULL && myMenuRoot->isActive())) {
-            // hide within active dialog - should be replaced by z-layer check
-            myDescr->setText("");
-        }
-
-        myDescr->setOpacity(!myDescr->getText().isEmpty() ? 1.0f : 0.0f, true);
+void StImageViewerGUI::updateDescLabel(const StPointD_t& theCursor, StFormat theSrcFormat, StViewSurface theViewMode) {
+    if (myDescr == NULL) {
+        return;
     }
+
+    bool wasEmpty = myDescr->getText().isEmpty();
+    if (::isPointIn(myBtnOpen, theCursor)) {
+        myDescr->setText(tr(IMAGE_OPEN));
+    } else if (::isPointIn(myBtnPrev, theCursor)) {
+        myDescr->setText(tr(IMAGE_PREVIOUS));
+    } else if (::isPointIn(myBtnNext, theCursor)) {
+        myDescr->setText(tr(IMAGE_NEXT));
+    } else if (::isPointIn(myBtnInfo, theCursor)) {
+        myDescr->setText(tr(MENU_MEDIA_FILE_INFO));
+    } else if (::isPointIn(myBtnSwapLR, theCursor)) {
+        size_t aLngId = myImage->params.SwapLR->getValue() ? SWAP_LR_ON : SWAP_LR_OFF;
+        myDescr->setText(tr(aLngId));
+    } else if (::isPointIn(myBtnList, theCursor)) {
+        myDescr->setText(tr(PLAYLIST));
+    } else if (::isPointIn(myBtnFull, theCursor)) {
+        myDescr->setText(tr(FULLSCREEN));
+    } else if (::isPointIn(myBtnSrcFrmt, theCursor)) {
+        myDescr->setText(tr(BTN_SRC_FORMAT) + "\n" + trSrcFormat(theSrcFormat));
+    } else if (::isPointIn(myBtnAdjust, theCursor)) {
+        myDescr->setText(tr(MENU_VIEW_IMAGE_ADJUST));
+    } else if (::isPointIn(myBtnPanorama, theCursor)) {
+        size_t aTrPano = MENU_VIEW_SURFACE_PLANE;
+        switch (theViewMode) {
+            case StViewSurface_Plain:      aTrPano = MENU_VIEW_SURFACE_PLANE;   break;
+            case StViewSurface_Theater:    aTrPano = MENU_VIEW_SURFACE_THEATER; break;
+            case StViewSurface_Sphere:     aTrPano = MENU_VIEW_SURFACE_SPHERE;  break;
+            case StViewSurface_Hemisphere: aTrPano = MENU_VIEW_SURFACE_HEMISPHERE; break;
+            case StViewSurface_Cubemap:    aTrPano = MENU_VIEW_SURFACE_CUBEMAP;  break;
+            case StViewSurface_CubemapEAC: aTrPano = MENU_VIEW_SURFACE_CUBEMAP_EAC; break;
+            case StViewSurface_Cylinder:   aTrPano = MENU_VIEW_SURFACE_CYLINDER; break;
+        }
+        myDescr->setText(tr(MENU_VIEW_PANORAMA) + "\n" + tr(aTrPano));
+    } else {
+        myDescr->setText("");
+    }
+
+    if(wasEmpty && myAnimVisibility.getStillDuration() < 1.0) {
+        myDescr->setText("");
+    } else if(getFocus() != NULL
+               || (myMenuRoot != NULL && myMenuRoot->isActive())) {
+        // hide within active dialog - should be replaced by z-layer check
+        myDescr->setText("");
+    }
+
+    myDescr->setOpacity(!myDescr->getText().isEmpty() ? 1.0f : 0.0f, true);
 }
 
 void StImageViewerGUI::stglUpdate(const StPointD_t& thePointZo,

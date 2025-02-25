@@ -85,6 +85,7 @@ class StImageViewer : public StApplication {
     ST_LOCAL virtual void doKeyUp    (const StKeyEvent&    theEvent) ST_ATTR_OVERRIDE;
     ST_LOCAL virtual void doMouseDown(const StClickEvent&  theEvent) ST_ATTR_OVERRIDE;
     ST_LOCAL virtual void doMouseUp  (const StClickEvent&  theEvent) ST_ATTR_OVERRIDE;
+    ST_LOCAL virtual void doTouch    (const StTouchEvent&  theEvent) ST_ATTR_OVERRIDE;
     ST_LOCAL virtual void doGesture  (const StGestureEvent& theEvent) ST_ATTR_OVERRIDE;
     ST_LOCAL virtual void doScroll   (const StScrollEvent& theEvent) ST_ATTR_OVERRIDE;
     ST_LOCAL virtual void doFileDrop (const StDNDropEvent& theEvent) ST_ATTR_OVERRIDE;
@@ -276,7 +277,6 @@ class StImageViewer : public StApplication {
     bool                        myToCheckUpdates;
     bool                        myToSaveSrcFormat; //!< indicates that active source format should be saved or not
     bool                        myEscNoQuit;       //!< if true then Escape will not quit application
-    bool                        myToHideUIFullScr; //!< if true then GUI will be hidden in full-screen mode
     bool                        myToCheckPoorOrient; //!< switch off orientation sensor with poor quality
 
         private:
