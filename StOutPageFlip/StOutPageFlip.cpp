@@ -503,7 +503,9 @@ StOutPageFlip::StOutPageFlip(const StHandle<StResourceManager>& theResMgr,
     int aSupportLevelVuzix    = StVuzixSDK::isConnected(aMonitors) ? ST_DEVICE_SUPPORT_PREFER : ST_DEVICE_SUPPORT_NONE;
     const StMonitor aMon = getHigestFreqMonitor(aMonitors);
     if(aMon.getFreqMax() >= 110) {
-        aSupportLevelShutters = ST_DEVICE_SUPPORT_HIGHT;
+        // high frequesncy displays become common nowadays,
+        // and has no correllation with shutter glasses
+        //aSupportLevelShutters = ST_DEVICE_SUPPORT_HIGHT;
     }
 
 #if !defined(__APPLE__)
