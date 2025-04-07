@@ -14,7 +14,8 @@ sView ??.?? (in development)
 - Linux, enable building with `libopenvr-dev` for **OpenVR** support (untested).
 - Windows, removed 32-bit binaries from package.
 - Windows, removed FreeImage and DevIL libraries from package.
-- Android, taps on touchsreen now hide/show user interface.
+- Windows, fixed saving a pair of input images into single one.
+- Android, taps on touchscreen now hide/show user interface.
 - Android, OpenAL soft has been upgraded to 1.24.2.
 - macOS, DMG packages are now built for ARM64.
 - Removed legacy **NPAPI**/**ActiveX** plugin (browsers dropped support for native plugins since 2015-2018).

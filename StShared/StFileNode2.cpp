@@ -106,7 +106,8 @@ bool StFileNode::openFileDialog(StString& theFilePath,
     stUtfWide_t aFileTitle[4096]; aFileTitle[0] = L'\0';
     StStringUtfWide aFilePathIn(theFilePath.toCString());
     if(!aFilePathIn.isEmpty()
-     && aFilePathIn.getSize() < 4096) {
+     && aFilePathIn.getSize() < 4096
+     && !theFilePath.isEquals(stCString("\\"))) {
         stMemCpy(aFilePath, aFilePathIn.toCString(), (aFilePathIn.getSize() + 1) * sizeof(wchar_t));
     }
     OPENFILENAMEW anOpenStruct; stMemSet(&anOpenStruct, 0, sizeof(OPENFILENAMEW));
