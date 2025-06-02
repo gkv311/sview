@@ -1,5 +1,5 @@
 /**
- * Copyright © 2013-2015 Kirill Gavrilov <kirill@sview.ru>
+ * Copyright © 2013-2025 Kirill Gavrilov <kirill@sview.ru>
  *
  * This code is licensed under MIT license (see docs/license-mit.txt for details).
  */
@@ -44,6 +44,19 @@ struct StGLFontTypeKey {
  * Font manager.
  */
 class StGLFontManager : public StGLResource {
+        public:
+
+    /** Return name of fallback font entry. */
+    static const char* getFallbackFontName() {
+        static const char* aName = "ST_DejaVuSerif_ttf";
+        return aName;
+    }
+
+    /** Return path of fallback font. */
+    static const char* getFallbackFontPath() {
+        static const char* aName = "internal://DejaVuSerif_internal.ttf";
+        return aName;
+    }
 
         public:
 
