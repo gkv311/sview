@@ -158,7 +158,7 @@ bool StFileNode::moveFile(const StCString& thePathFrom,
 
 StString StFileNode::getCompatibleName(const StString& theFileName) {
 #ifdef _WIN32
-    stUtfWide_t aShortNameWide[MAX_PATH];
+    stUtfWide_t aShortNameWide[MAX_PATH] = {};
     GetShortPathNameW(theFileName.toUtfWide().toCString(), aShortNameWide, MAX_PATH);
     return *aShortNameWide != L'\0' ? StString(aShortNameWide) : theFileName;
 #else

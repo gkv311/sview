@@ -28,7 +28,7 @@
 StString StProcess::getProcessFullPath() {
 #ifdef _WIN32
     // TODO (Kirill Gavrilov#9) - implement correct method
-    stUtfWide_t aBuff[MAX_PATH];
+    stUtfWide_t aBuff[MAX_PATH] = {};
     if(GetModuleFileNameW(NULL, aBuff, MAX_PATH) == 0) {
         return StString();
     }
@@ -174,7 +174,7 @@ StString StProcess::getAbsolutePath(const StString& thePath) {
 #ifdef _WIN32
 StString StProcess::getWindowsFolder() {
     StString aWinFolder;
-    stUtfWide_t aWndFldr[MAX_PATH];
+    stUtfWide_t aWndFldr[MAX_PATH] = {};
     GetWindowsDirectoryW(aWndFldr, MAX_PATH);
     aWndFldr[MAX_PATH - 1] = L'\0';
     aWinFolder = StString(aWndFldr) + SYS_FS_SPLITTER;
