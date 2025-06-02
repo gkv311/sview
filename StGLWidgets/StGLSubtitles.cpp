@@ -176,7 +176,7 @@ StGLSubtitles::StGLSubtitles(StGLImageRegion* theParent,
                                StGLTextFormatter::ST_ALIGN_Y_BOTTOM);
 
     StHandle<StGLFont> aFontNew = new StGLFont();
-    StHandle<StFTLibrary> aLib = getRoot()->getFontManager()->getLibraty();
+    StHandle<StFTLibrary> aLib = getRoot()->getFontManager()->getLibrary();
     const FontSize     aSize       = (FontSize )(int )params.FontSize->getValue();
     const unsigned int aResolution = getRoot()->getFontManager()->getResolution();
     for(size_t anIter = 0; anIter < StFTFont::SubsetsNB; ++anIter) {
