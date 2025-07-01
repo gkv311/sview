@@ -59,6 +59,8 @@ namespace {
     static const char ST_SETTING_SLIDESHOW[]   = "slideshow";
     static const char ST_SETTING_VIEWMODE[]    = "viewMode";
     static const char ST_SETTING_GAMMA[]       = "viewGamma";
+    static const char ST_SETTING_BRIGHTNESS[]  = "viewBrightness";
+    static const char ST_SETTING_SATURATION[]  = "viewSaturation";
     static const char ST_SETTING_IMAGELIB[]    = "imageLib";
 
     static const char ST_ARGUMENT_FILE_LEFT[]  = "left";
@@ -361,7 +363,9 @@ void StImageViewer::saveGuiParams() {
     }
 
     mySettings->saveParam(myGUI->myImage->params.DisplayMode);
-    mySettings->saveInt32(ST_SETTING_GAMMA, stRound(100.0f * myGUI->myImage->params.Gamma->getValue()));
+    mySettings->saveInt32(ST_SETTING_GAMMA,      stRound(100.0f * myGUI->myImage->params.Gamma->getValue()));
+    mySettings->saveInt32(ST_SETTING_BRIGHTNESS, stRound(100.0f * myGUI->myImage->params.Brightness->getValue()));
+    mySettings->saveInt32(ST_SETTING_SATURATION, stRound(100.0f * myGUI->myImage->params.Saturation->getValue()));
     mySettings->saveParam(myGUI->myImage->params.ToHealAnamorphicRatio);
     mySettings->saveInt32(myGUI->myImage->params.DisplayRatio->getKey(),
                           params.ToRestoreRatio->getValue()
@@ -473,9 +477,18 @@ bool StImageViewer::createGui() {
     mySettings->loadParam (myGUI->myImage->params.DisplayRatio);
     mySettings->loadParam (myGUI->myImage->params.ToHealAnamorphicRatio);
     params.ToRestoreRatio->setValue(myGUI->myImage->params.DisplayRatio->getValue() != StGLImageRegion::RATIO_AUTO);
+
     int32_t loadedGamma = 100; // 1.0f
-        mySettings->loadInt32(ST_SETTING_GAMMA, loadedGamma);
-        myGUI->myImage->params.Gamma->setValue(0.01f * loadedGamma);
+    mySettings->loadInt32(ST_SETTING_GAMMA, loadedGamma);
+    myGUI->myImage->params.Gamma->setValue(0.01f * loadedGamma);
+
+    int32_t loadedBright = 100; // 1.0f
+    mySettings->loadInt32(ST_SETTING_BRIGHTNESS, loadedBright);
+    myGUI->myImage->params.Brightness->setValue(0.01f * loadedBright);
+
+    int32_t loadedSatur = 100; // 1.0f
+    mySettings->loadInt32(ST_SETTING_SATURATION, loadedSatur);
+    myGUI->myImage->params.Saturation->setValue(0.01f * loadedSatur);
 
     // initialize frame region early to show dedicated error description
     if(!myGUI->myImage->stglInit()) {
