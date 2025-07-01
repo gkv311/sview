@@ -453,8 +453,8 @@ inline void stMemFreeAligned(void* thePtrAligned) {
  */
 inline int stRound(const float theNumber) {
     return theNumber >= 0.0f
-         ? (int )std::floor(double(theNumber) + 0.5)
-         : (int )std::ceil (double(theNumber) + 0.5);
+         ?  int(std::floor(double(theNumber) + 0.5))
+         : -int(std::floor(double(-theNumber) + 0.5));
 }
 
 // namespaces in export-headers
