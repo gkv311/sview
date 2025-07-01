@@ -68,6 +68,9 @@ namespace {
     static const char ST_SETTING_GAMMA[]         = "viewGamma";
     static const char ST_SETTING_BRIGHTNESS[]    = "viewBrightness";
     static const char ST_SETTING_SATURATION[]    = "viewSaturation";
+    static const char ST_SETTING_SEP_DX[]        = "viewSepDX";
+    static const char ST_SETTING_SEP_DY[]        = "viewSepDY";
+    static const char ST_SETTING_SEP_ROT[]       = "viewSepRot";
 
     static const char ST_SETTING_WEBUI_CMDPORT[] = "webuiCmdPort";
 
@@ -653,6 +656,9 @@ void StMoviePlayer::saveGuiParams() {
     mySettings->saveInt32 (ST_SETTING_GAMMA,      stRound(100.0f * myGUI->myImage->params.Gamma->getValue()));
     mySettings->saveInt32 (ST_SETTING_BRIGHTNESS, stRound(100.0f * myGUI->myImage->params.Brightness->getValue()));
     mySettings->saveInt32 (ST_SETTING_SATURATION, stRound(100.0f * myGUI->myImage->params.Saturation->getValue()));
+    mySettings->saveInt32 (ST_SETTING_SEP_DX,     stRound(myGUI->myImage->params.SeparationDX->getValue()));
+    mySettings->saveInt32 (ST_SETTING_SEP_DY,     stRound(myGUI->myImage->params.SeparationDY->getValue()));
+    mySettings->saveInt32 (ST_SETTING_SEP_ROT,    stRound(100.0f * myGUI->myImage->params.SeparationRot->getValue()));
     mySettings->saveParam (myGUI->myImage->params.ToHealAnamorphicRatio);
     mySettings->saveInt32(myGUI->myImage->params.DisplayRatio->getKey(),
                           params.ToRestoreRatio->getValue()
@@ -798,6 +804,18 @@ bool StMoviePlayer::createGui(StHandle<StGLTextureQueue>& theTextureQueue,
     int32_t loadedSatur = 100; // 1.0f
     mySettings->loadInt32(ST_SETTING_SATURATION, loadedSatur);
     myGUI->myImage->params.Saturation->setValue(0.01f * loadedSatur);
+
+    int32_t loadedSepDX = 0;
+    mySettings->loadInt32(ST_SETTING_SEP_DX, loadedSepDX);
+    myGUI->myImage->params.SeparationDX->setValue(float(loadedSepDX));
+
+    int32_t loadedSepDY = 0;
+    mySettings->loadInt32(ST_SETTING_SEP_DY, loadedSepDY);
+    myGUI->myImage->params.SeparationDY->setValue(float(loadedSepDY));
+
+    int32_t loadedSepRot = 0;
+    mySettings->loadInt32(ST_SETTING_SEP_ROT, loadedSepRot);
+    myGUI->myImage->params.SeparationRot->setValue(0.01f * loadedSepRot);
 
     // initialize frame region early to show dedicated error description
     if(!myGUI->myImage->stglInit()) {

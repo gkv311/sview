@@ -138,39 +138,25 @@ namespace {
         }
 
         virtual float getValue() const ST_ATTR_OVERRIDE {
-            const StHandle<StStereoParams>& aParams = myWidget->params.stereoFile;
-            if(aParams.isNull()) {
-                return 0.0f;
-            }
-            switch(myParamId) {
-                case StereoParamId_SepDX:  return (float )aParams->getSeparationDx();
-                case StereoParamId_SepDY:  return (float )aParams->getSeparationDy();
-                case StereoParamId_SepRot: return aParams->getSepRotation();
-            }
-            return 0.0f;
+            return myValue;
         }
 
         virtual bool setValue(const float theValue) ST_ATTR_OVERRIDE {
-            const StHandle<StStereoParams>& aParams = myWidget->params.stereoFile;
-            if(aParams.isNull()) {
-                return false;
-            }
-
             switch(myParamId) {
                 case StereoParamId_SepDX: {
                     int32_t aValue = int32_t(theValue >= 0.0f ? (theValue + 0.5f) : (theValue - 0.5f));
-                    if(aParams->getSeparationDx() == aValue) {
+                    if (int32_t(myValue) == aValue) {
                         return false;
                     }
-                    aParams->setSeparationDx(aValue);
+                    myValue = float(aValue);
                     break;
                  }
                 case StereoParamId_SepDY: {
                     int32_t aValue = int32_t(theValue >= 0.0f ? (theValue + 0.5f) : (theValue - 0.5f));
-                    if(aParams->getSeparationDy() == aValue) {
+                    if (int32_t(myValue) == aValue) {
                         return false;
                     }
-                    aParams->setSeparationDy(aValue);
+                    myValue = float(aValue);
                     break;
                  }
                  case StereoParamId_SepRot: {
@@ -181,10 +167,10 @@ namespace {
                      while(aValue <= -360.0f) {
                         aValue += 360.0f;
                      }
-                     if(StFloat32Param::areEqual(aParams->getSepRotation(), aValue)) {
+                     if (StFloat32Param::areEqual(myValue, aValue)) {
                         return false;
                      }
-                     aParams->setSepRotation(aValue);
+                     myValue = float(aValue);
                  }
             }
 
@@ -720,6 +706,12 @@ void StGLImageRegion::stglDraw(unsigned int theView) {
         theView = ST_DRAW_MONO;
         aParams->setSwapLR(false);
     }
+
+    // copy value for saving image to file;
+    // it is probably better removing these duplicated fields...
+    aParams->setSeparationDx(int(params.SeparationDX->getValue()));
+    aParams->setSeparationDy(int(params.SeparationDY->getValue()));
+    aParams->setSepRotation(params.SeparationRot->getValue());
 
     switch(params.DisplayMode->getValue()) {
         case MODE_PARALLEL:
@@ -1653,10 +1645,13 @@ void StGLImageRegion::doParamsRotXDown(const double ) {
 }
 
 void StGLImageRegion::doParamsReset(const size_t ) {
+    params.SeparationDX->reset();
+    params.SeparationDY->reset();
+    params.SeparationRot->reset();
     if(!params.stereoFile.isNull()) {
         params.stereoFile->reset();
-        onParamsChanged();
     }
+    onParamsChanged();
 }
 
 void StGLImageRegion::onParamsChanged() {
