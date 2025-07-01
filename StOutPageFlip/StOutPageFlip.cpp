@@ -853,7 +853,8 @@ bool StOutPageFlip::create() {
 
     // request Quad Buffer
     StWindow::setAttribute(StWinAttr_GlQuadStereo, params.QuadBuffer->getValue() == QUADBUFFER_HARD_OPENGL);
-    if (params.QuadBuffer->getValue() == QUADBUFFER_SOFT) {
+    if (params.QuadBuffer->getValue() == QUADBUFFER_SOFT
+     || params.QuadBuffer->getValue() == QUADBUFFER_HARD_OPENGL) {
         StWindow::setAttribute(StWinAttr_ExclusiveFullScreen, true);
     }
     if(!StWindow::create()) {

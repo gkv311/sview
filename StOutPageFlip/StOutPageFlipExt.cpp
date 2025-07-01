@@ -137,7 +137,10 @@ bool StOutPageFlipExt::create() {
 }
 
 void StOutPageFlipExt::setFullScreen(const bool theFullScreen) {
-    if(StOutPageFlip::params.QuadBuffer->getValue() == QUADBUFFER_SOFT) {
+    if(StOutPageFlip::params.QuadBuffer->getValue() == QUADBUFFER_SOFT
+    || StOutPageFlip::params.QuadBuffer->getValue() == QUADBUFFER_HARD_OPENGL) {
+        // some NVIDIA OpenGL driver for non-professional cards
+        // enable Quad-Buffered stereo only within exclusive fullscreen mode
         setAttribute(StWinAttr_ExclusiveFullScreen, true);
     }
     StOutPageFlip::setFullScreen(theFullScreen);
