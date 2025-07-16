@@ -728,7 +728,8 @@ bool StImageLoader::saveImage(const StHandle<StFileNode>&     theSource,
     }
 
     StString aFileNameSrc, aNameSrc, anExtSrc;
-    StFileNode::getFolderAndFile(theSource->getPath(), anOpenInfo.Folder, aFileNameSrc);
+    // get path from the first file in case of multi-file input
+    StFileNode::getFolderAndFile(theSource->size() >= 2 ? theSource->getValue(0)->getPath() : theSource->getPath(), anOpenInfo.Folder, aFileNameSrc);
     StFileNode::getNameAndExtension(aFileNameSrc, aNameSrc, anExtSrc);
     StString aFileToSave = (!anOpenInfo.Folder.isEmpty() ? anOpenInfo.Folder : "") + ST_FILE_SPLITTER + aNameSrc;
     if(StFileNode::openFileDialog(aFileToSave, anOpenInfo, true)) {

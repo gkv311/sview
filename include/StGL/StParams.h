@@ -139,6 +139,9 @@ class StStereoParams {
         mySepDxPx = theValue - mySepDxZeroPx;
     }
 
+    /** Return neutral point. */
+    int getSeparationNeutral() const { return mySepDxZeroPx; }
+
     /**
      * Setup neutral point.
      */

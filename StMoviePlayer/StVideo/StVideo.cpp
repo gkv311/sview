@@ -1383,7 +1383,8 @@ bool StVideo::saveSnapshotAs(StImageFile::ImageType theImgType) {
     }
 
     StString fileToSave;
-    anOpenInfo.Folder = myCurrNode->getFolderPath();
+    // get path from the first file in case of multi-file input
+    anOpenInfo.Folder = myCurrNode->size() >= 2 ? myCurrNode->getValue(0)->getFolderPath() : myCurrNode->getFolderPath();
     if(StFileNode::openFileDialog(fileToSave, anOpenInfo, true)) {
         if(StFileNode::getExtension(fileToSave) != saveExt) {
             fileToSave += StString('.') + saveExt;

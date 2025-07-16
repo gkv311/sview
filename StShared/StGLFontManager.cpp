@@ -1,5 +1,5 @@
 /**
- * Copyright © 2013-2015 Kirill Gavrilov <kirill@sview.ru>
+ * Copyright © 2013-2025 Kirill Gavrilov <kirill@sview.ru>
  *
  * This code is licensed under MIT license (see docs/license-mit.txt for details).
  */
@@ -81,7 +81,7 @@ StHandle<StGLFontEntry> StGLFontManager::findCreate(const StString& theName,
 }
 
 StHandle<StGLFontEntry> StGLFontManager::findCreateFallback(unsigned int theSize) {
-    const StString aName = "ST_DejaVuSerif_ttf";
+    const StString aName = getFallbackFontName();
     StHandle<StGLFontEntry>& aFontGl = myFonts[StGLFontKey(aName, theSize)];
     if(!aFontGl.isNull()) {
         return aFontGl;
@@ -89,7 +89,7 @@ StHandle<StGLFontEntry> StGLFontManager::findCreateFallback(unsigned int theSize
 
     ST_ERROR_LOG("StGLFontManager, fallback font is used!");
     StHandle<StFTFont> aFontFt = new StFTFont(myFTLib);
-    aFontFt->loadInternal("DejaVuSerif_internal.ttf",
+    aFontFt->loadInternal(getFallbackFontPath(),
                           THE_DejaVuSerif_ttf_DATA,
                           THE_DejaVuSerif_ttf_LEN,
                           StFTFont::Style_Regular);

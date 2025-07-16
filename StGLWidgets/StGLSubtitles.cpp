@@ -1,6 +1,6 @@
 /**
  * StGLWidgets, small C++ toolkit for writing GUI using OpenGL.
- * Copyright © 2010-2020 Kirill Gavrilov <kirill@sview.ru>
+ * Copyright © 2010-2025 Kirill Gavrilov <kirill@sview.ru>
  *
  * This code is licensed under MIT license (see docs/license-mit.txt for details).
  */
@@ -176,7 +176,7 @@ StGLSubtitles::StGLSubtitles(StGLImageRegion* theParent,
                                StGLTextFormatter::ST_ALIGN_Y_BOTTOM);
 
     StHandle<StGLFont> aFontNew = new StGLFont();
-    StHandle<StFTLibrary> aLib = getRoot()->getFontManager()->getLibraty();
+    StHandle<StFTLibrary> aLib = getRoot()->getFontManager()->getLibrary();
     const FontSize     aSize       = (FontSize )(int )params.FontSize->getValue();
     const unsigned int aResolution = getRoot()->getFontManager()->getResolution();
     for(size_t anIter = 0; anIter < StFTFont::SubsetsNB; ++anIter) {
@@ -186,10 +186,16 @@ StGLSubtitles::StGLSubtitles(StGLImageRegion* theParent,
         }
 
         StHandle<StFTFont> aFontFt = new StFTFont(aLib);
-        for(int aStyleIt = 0; aStyleIt < StFTFont::StylesNB; ++aStyleIt) {
-            aFontFt->load(aFontGlSrc->getFont()->getFilePath((StFTFont::Style )aStyleIt),
-                          aFontGlSrc->getFont()->getFaceIndex((StFTFont::Style )aStyleIt),
-                          (StFTFont::Style )aStyleIt);
+        if (aFontGlSrc->getFont()->getFilePath(StFTFont::Style_Regular) == StGLFontManager::getFallbackFontPath()) {
+            // handle fallback font specifically
+            StHandle<StGLFontEntry> aFallBack = getRoot()->getFontManager()->findCreateFallback(aSize);
+            aFontFt = !aFallBack.isNull() ? aFallBack->getFont() : StHandle<StFTFont>();
+        } else {
+            for(int aStyleIt = 0; aStyleIt < StFTFont::StylesNB; ++aStyleIt) {
+                aFontFt->load(aFontGlSrc->getFont()->getFilePath((StFTFont::Style )aStyleIt),
+                              aFontGlSrc->getFont()->getFaceIndex((StFTFont::Style )aStyleIt),
+                              (StFTFont::Style )aStyleIt);
+            }
         }
         aFontFt->init(aSize, aResolution);
         aFontNew->changeFont((StFTFont::Subset )anIter) = new StGLFontEntry(aFontFt);

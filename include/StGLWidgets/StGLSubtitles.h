@@ -1,6 +1,6 @@
 /**
  * StGLWidgets, small C++ toolkit for writing GUI using OpenGL.
- * Copyright © 2010-2020 Kirill Gavrilov <kirill@sview.ru>
+ * Copyright © 2010-2025 Kirill Gavrilov <kirill@sview.ru>
  *
  * This code is licensed under MIT license (see docs/license-mit.txt for details).
  */

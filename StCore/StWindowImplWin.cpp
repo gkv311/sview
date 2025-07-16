@@ -517,7 +517,7 @@ LRESULT StWindowImpl::stWndProc(HWND theWin, UINT uMsg, WPARAM wParam, LPARAM lP
         case WM_DROPFILES: {
             HDROP aDrops = (HDROP )wParam;
             const UINT aFilesCount = DragQueryFileW(aDrops, 0xFFFFFFFF, NULL, 0);
-            stUtfWide_t aFileBuff[MAX_PATH];
+            stUtfWide_t aFileBuff[MAX_PATH] = {};
             if(aFilesCount < 1) {
                 DragFinish(aDrops);
                 break;

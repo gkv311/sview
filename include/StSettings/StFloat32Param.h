@@ -327,8 +327,8 @@ class StFloat32Param : public StParam<float> {
         float aValue = myEffMinValue + theValue * (myEffMaxValue - myEffMinValue);
         if(theToRoundToStep) {
             aValue = aValue >= 0.0
-                   ? (std::floor(aValue / myValueStep + 0.5f) * myValueStep)
-                   : (std::ceil (aValue / myValueStep + 0.5f) * myValueStep);
+                   ?  (std::floor( aValue / myValueStep + 0.5f) * myValueStep)
+                   : -(std::floor(-aValue / myValueStep + 0.5f) * myValueStep);
         }
         return setValue(aValue);
     }

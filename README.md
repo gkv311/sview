@@ -53,7 +53,6 @@ Building state of [master branch](https://github.com/gkv311/sview/actions?query=
 |----------------------|--------------|
 | Ubuntu 24.04 (amd64) | ![status](https://github.com/gkv311/sview/actions/workflows/build_ubuntu_24.04.yml/badge.svg?branch=master) |
 | Ubuntu 22.04 (amd64) | ![status](https://github.com/gkv311/sview/actions/workflows/build_ubuntu_22.04.yml/badge.svg?branch=master) |
-| Ubuntu 20.04 (amd64) | ![status](https://github.com/gkv311/sview/actions/workflows/build_ubuntu_20.04.yml/badge.svg?branch=master) |
 | macOS 13 (amd64)     | ![status](https://github.com/gkv311/sview/actions/workflows/build_macos_13.yml/badge.svg?branch=master) |
 | Android (armeabi-v7a)| ![status](https://github.com/gkv311/sview/actions/workflows/build_android.yml/badge.svg?branch=master) |
 | Windows (amd64)      | ![status](https://github.com/gkv311/sview/actions/workflows/build_msvc.yml/badge.svg?branch=master) |
