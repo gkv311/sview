@@ -241,7 +241,11 @@ void StAVImage::close() {
 void StAVImage::closeAvCtx() {
     myFrame.reset();
     if(myCodec != NULL && myCodecCtx != NULL) {
+    #if(LIBAVFORMAT_VERSION_INT < AV_VERSION_INT(59, 0, 100))
         avcodec_close(myCodecCtx); // close VIDEO codec
+    #else
+        avcodec_free_context(&myCodecCtx);
+    #endif
     }
     myCodec = NULL;
     if(myFormatCtx != NULL) {
