@@ -631,6 +631,7 @@ void StWindowImpl::updateBlockSleep() {
         myParentWin->setWakeLock(myWindowTitle, toWakeLock);
     }
 #elif defined(__linux__)
+    static const char ST_XDG_SCREENSAVER[] = "xdg-screensaver"; // "/usr/bin/xdg-screensaver"
     if(attribs.ToBlockSleepDisplay) { // || attribs.ToBlockSleepSystem
         if(myBlockSleep == BlockSleep_DISPLAY
         || myMaster.stXDisplay.isNull()
@@ -638,12 +639,16 @@ void StWindowImpl::updateBlockSleep() {
             return;
         }
 
-        StArrayList<StString> anArguments(2);
-        anArguments.add("suspend");
-        anArguments.add(StString((size_t )myMaster.hWindow));
-        if(!StProcess::execProcess("/usr/bin/xdg-screensaver", anArguments)) {
-            ST_DEBUG_LOG("/usr/bin/xdg-screensaver is not found!");
+        int aRes = -1;
+        StString anOutput;
+        if (!StProcess::execAndRead(aRes, anOutput, ST_XDG_SCREENSAVER, StString(" suspend ") + StString((size_t )myMaster.hWindow))) {
+            ST_ERROR_LOG(ST_XDG_SCREENSAVER + " is not found!");
+        } else if (aRes != 0 && !anOutput.isEmpty()) {
+            ST_ERROR_LOG(ST_XDG_SCREENSAVER + ": " + anOutput);
+        } else if (aRes != 0) {
+            ST_ERROR_LOG(ST_XDG_SCREENSAVER + " is not found!");
         }
+
         myBlockSleep = BlockSleep_DISPLAY;
     } else if(myBlockSleep != BlockSleep_OFF) {
         if(myMaster.stXDisplay.isNull()
@@ -651,11 +656,12 @@ void StWindowImpl::updateBlockSleep() {
             return;
         }
 
-        StArrayList<StString> anArguments(2);
-        anArguments.add("resume");
-        anArguments.add(StString((size_t )myMaster.hWindow));
-        if(!StProcess::execProcess("/usr/bin/xdg-screensaver", anArguments)) {
-            //ST_DEBUG_LOG("/usr/bin/xdg-screensaver is not found!");
+        int aRes = -1;
+        StString anOutput;
+        if (!StProcess::execAndRead(aRes, anOutput, ST_XDG_SCREENSAVER, StString(" resume ") + StString((size_t )myMaster.hWindow))) {
+            //
+        } else if (aRes != 0 && !anOutput.isEmpty()) {
+            ST_ERROR_LOG(ST_XDG_SCREENSAVER + ": " + anOutput);
         }
         myBlockSleep = BlockSleep_OFF;
     }

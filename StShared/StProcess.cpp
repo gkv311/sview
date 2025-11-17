@@ -293,9 +293,10 @@ StString StProcess::getStCoreFolder() {
     return StString();
 }
 
-bool StProcess::execProcess(const StString&          theExecutablePath,
-                            const StArray<StString>& theArguments) {
-    if(!StFileNode::isFileExists(theExecutablePath)) {
+bool StProcess::execProcessAny(const StString&          theExecutablePath,
+                               const StArray<StString>& theArguments,
+                               const bool               theIsAbsolute) {
+    if (theIsAbsolute && !StFileNode::isFileExists(theExecutablePath)) {
         return false;
     }
 #ifdef _WIN32
@@ -351,9 +352,40 @@ bool StProcess::execProcess(const StString&          theExecutablePath,
     }
 
     // child process
-    execv(theExecutablePath.toCString(), anArgList);
+    execvp(theExecutablePath.toCString(), anArgList);
     // fail
     _exit(1);
+#endif
+}
+
+bool StProcess::execAndRead(int& theRes,
+                            StString& theOutput,
+                            const StString& theExecutable,
+                            const StString& theArgs) {
+#ifdef _WIN32
+    (void)theRes;
+    (void)theOutput;
+    (void)theExecutable;
+    (void)theArgs;
+    return false;
+#else
+    const StString aCmd = theExecutable + theArgs;
+    //ST_DEBUG_LOG(aCmd);
+    FILE* aPipe = popen(aCmd.toCString(), "r");
+    if (aPipe == NULL) {
+        //ST_DEBUG_LOG(theExecutable + " is not found!");
+        return false;
+    }
+
+    char aBuffer[4096] = {};
+    if (fgets(aBuffer, sizeof(aBuffer), aPipe) != NULL) {
+        aBuffer[4095] = '\0';
+        theOutput = aBuffer;
+    } else {
+        theOutput.clear();
+    }
+    theRes = pclose(aPipe);
+    return true;
 #endif
 }
 
@@ -373,10 +405,12 @@ void StProcess::openURL(const StString& theUrl) {
 #elif(defined(__linux__) || defined(__linux))
     // we use nice script tool from Xdg-utils package
     // http://portland.freedesktop.org/wiki/
+    static const char ST_XDG_OPEN[] = "xdg-open"; // "/usr/bin/xdg-open"
+
     StArrayList<StString> anArguments(1);
     anArguments.add(theUrl);
-    if(!StProcess::execProcess("/usr/bin/xdg-open", anArguments)) {
-        ST_DEBUG_LOG("/usr/bin/xdg-open is not found!");
+    if(!StProcess::execProcessInPath(ST_XDG_OPEN, anArguments)) {
+        ST_ERROR_LOG(ST_XDG_OPEN + " is not found!");
     }
     // also we could use GTK function
     //gtk_show_uri(NULL, uri, gtk_get_current_event_time(), &err);

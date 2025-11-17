@@ -14,7 +14,7 @@
 #if defined(__ANDROID__)
     #include <android/log.h>
 #elif defined(__linux__)
-    static const char ST_ZENITY[] = "/usr/bin/zenity";
+    static const char ST_ZENITY[] = "zenity"; // "/usr/bin/zenity"
 #endif
 
 // we do not use st::cerr here to avoid
@@ -290,24 +290,13 @@ void StMessageBox::Info(const StString& theMessage) {
     }
 #elif defined(__linux__)
     // use Zenity
-    /*StArrayList<StString> anArgs(4);
-    anArgs.add("--info").add("--no-markup").add("--no-wrap").add(StString() + "--text=" + theMessage + "");
-    if(!StProcess::execProcess(ST_ZENITY, anArgs)) { ST_DEBUG_LOG(ST_ZENITY + " is not found!"); }*/
-
     const StString aMsg = theMessage.replace(stCString("\""), stCString("\\\""));
-    const StString aCmd = StString(ST_ZENITY) + " --info --no-markup --no-wrap --text=\"" + aMsg + "\"";
-
-    FILE* aPipe = popen(aCmd.toCString(), "r");
-    if (aPipe == NULL) {
+    int aRes = -1;
+    StString aDummy;
+    if (!StProcess::execAndRead(aRes, aDummy, ST_ZENITY, StString(" --info --no-markup --no-wrap --text=\"") + aMsg + "\"") || aRes != 0) {
         ST_DEBUG_LOG(ST_ZENITY + " is not found!");
         return;
     }
-
-    char aBuffer[4096] = {};
-    if (fgets(aBuffer, sizeof(aBuffer), aPipe) == NULL) {
-        //
-    }
-    pclose(aPipe);
 #endif
 }
 
@@ -332,24 +321,13 @@ void StMessageBox::Warn(const StString& theMessage) {
     }
 #elif defined(__linux__)
     // use Zenity
-    /*StArrayList<StString> anArgs(4);
-    anArgs.add("--warning").add("--no-markup").add("--no-wrap").add(StString() + "--text=" + theMessage + "");
-    if(!StProcess::execProcess(ST_ZENITY, anArgs)) { ST_DEBUG_LOG(ST_ZENITY + " is not found!"); }*/
-
     const StString aMsg = theMessage.replace(stCString("\""), stCString("\\\""));
-    const StString aCmd = StString(ST_ZENITY) + " --warning --no-markup --no-wrap --text=\"" + aMsg + "\"";
-
-    FILE* aPipe = popen(aCmd.toCString(), "r");
-    if (aPipe == NULL) {
+    int aRes = -1;
+    StString aDummy;
+    if (!StProcess::execAndRead(aRes, aDummy, ST_ZENITY, StString(" --warning --no-markup --no-wrap --text=\"") + aMsg + "\"") || aRes != 0) {
         ST_DEBUG_LOG(ST_ZENITY + " is not found!");
         return;
     }
-
-    char aBuffer[4096] = {};
-    if (fgets(aBuffer, sizeof(aBuffer), aPipe) == NULL) {
-        //
-    }
-    pclose(aPipe);
 #endif
 }
 
@@ -374,24 +352,13 @@ void StMessageBox::Error(const StString& theMessage) {
     }
 #elif defined(__linux__)
     // use Zenity
-    /*StArrayList<StString> anArgs(4);
-    anArgs.add("--error").add("--no-markup").add("--no-wrap").add(StString() + "--text=" + theMessage + "");
-    if(!StProcess::execProcess(ST_ZENITY, anArgs)) { ST_DEBUG_LOG(ST_ZENITY + " is not found!"); }*/
-
+    int aRes = -1;
     const StString aMsg = theMessage.replace(stCString("\""), stCString("\\\""));
-    const StString aCmd = StString(ST_ZENITY) + " --error --no-markup --no-wrap --text=\"" + aMsg + "\"";
-
-    FILE* aPipe = popen(aCmd.toCString(), "r");
-    if (aPipe == NULL) {
+    StString aDummy;
+    if (!StProcess::execAndRead(aRes, aDummy, ST_ZENITY, StString(" --error --no-markup --no-wrap --text=\"") + aMsg + "\"") || aRes != 0) {
         ST_DEBUG_LOG(ST_ZENITY + " is not found!");
         return;
     }
-
-    char aBuffer[4096] = {};
-    if (fgets(aBuffer, sizeof(aBuffer), aPipe) == NULL) {
-        //
-    }
-    pclose(aPipe);
 #endif
 }
 
@@ -417,24 +384,13 @@ bool StMessageBox::Question(const StString& theMessage) {
     return false;
 #elif defined(__linux__)
     // use Zenity
-    /*StArrayList<StString> anArgs(4);
-    anArgs.add("--question").add("--no-markup").add("--no-wrap").add(StString() + "--text=" + theMessage + "");
-    if(!StProcess::execProcess(ST_ZENITY, anArgs)) { ST_DEBUG_LOG(ST_ZENITY + " is not found!"); }*/
-
     const StString aMsg = theMessage.replace(stCString("\""), stCString("\\\""));
-    const StString aCmd = StString(ST_ZENITY) + " --question --no-markup --no-wrap --text=\"" + aMsg + "\"";
-
-    FILE* aPipe = popen(aCmd.toCString(), "r");
-    if (aPipe == NULL) {
+    int aRes = -1;
+    StString aDummy;
+    if (!StProcess::execAndRead(aRes, aDummy, ST_ZENITY, StString(" --question --no-markup --no-wrap --text=\"") + aMsg + "\"")) {
         ST_DEBUG_LOG(ST_ZENITY + " is not found!");
         return false;
     }
-
-    char aBuffer[4096] = {};
-    if (fgets(aBuffer, sizeof(aBuffer), aPipe) == NULL) {
-        //
-    }
-    int aRes = pclose(aPipe);
     return aRes == 0;
 #endif
 }

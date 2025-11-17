@@ -8,6 +8,7 @@
 
 #include <StFile/StFileNode.h>
 #include <StStrings/StLogger.h>
+#include <StThreads/StProcess.h>
 
 #ifdef _WIN32
     #include <windows.h>
@@ -173,9 +174,9 @@ bool StFileNode::openFileDialog(StString& theFilePath,
     return isFileSelected;
 #elif(__linux__)
     // use Zenity
-    static const char ST_ZENITY[] = "/usr/bin/zenity";
+    static const char ST_ZENITY[] = "zenity"; // "/usr/bin/zenity"
 
-    StString aCmd = StString(ST_ZENITY) + " --file-selection --modal";
+    StString aCmd = " --file-selection --modal";
     if (theToSave) {
         aCmd += " --save --confirm-overwrite";
     }
@@ -192,7 +193,7 @@ bool StFileNode::openFileDialog(StString& theFilePath,
         aCmd += StString(" --filename=\"") + aFolder + "\"";
     }
 
-    StString aFilterString, anAllSupportedExt, anExtraSupportedExt;
+    StString anAllSupportedExt, anExtraSupportedExt;
     for(size_t aMimeId = 0; aMimeId < theInfo.Filter.size(); ++aMimeId) {
         const StMIME& aMime = theInfo.Filter[aMimeId];
         if(aMimeId > 0) {
@@ -237,23 +238,18 @@ bool StFileNode::openFileDialog(StString& theFilePath,
     // add 'Any File'
     aCmd += " --file-filter=\"All Files (*) | *\"";
 
-    //ST_DEBUG_LOG(aCmd);
-    FILE* aPipe = popen(aCmd.toCString(), "r");
-    if (aPipe == NULL) {
-        ST_DEBUG_LOG(ST_ZENITY + " is not found!");
+    int aRes = -1;
+    StString anOutput;
+    if (!StProcess::execAndRead(aRes, anOutput, ST_ZENITY, aCmd)) {
+        return false;
+    } else if (aRes != 0) {
+        if (!StProcess::execAndRead(aRes, anOutput, ST_ZENITY, " --version") || aRes != 0) {
+            stError(StString(ST_ZENITY) + " is not found!");
+        }
         return false;
     }
 
-    char aBuffer[4096] = {};
-    if (fgets(aBuffer, sizeof(aBuffer), aPipe) == NULL) {
-        ST_DEBUG_LOG(ST_ZENITY + " calling failure");
-    }
-    int aRes = pclose(aPipe);
-    if (aRes != 0) {
-        return false;
-    }
-
-    theFilePath = aBuffer;
+    theFilePath = anOutput;
     if (theFilePath.isEndsWith('\n')) {
         if (theFilePath.getLength() == 1) {
             return false;

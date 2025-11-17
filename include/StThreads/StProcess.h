@@ -128,8 +128,29 @@ class StProcess {
      * @param theArguments      arguments list
      * @return true if executable has been launched
      */
-    ST_CPPEXPORT static bool execProcess(const StString&          theExecutablePath,
-                                         const StArray<StString>& theArguments);
+    ST_LOCAL static bool execProcess(const StString&          theExecutablePath,
+                                     const StArray<StString>& theArguments) {
+        return execProcessAny(theExecutablePath, theArguments, true);
+    }
+
+    /**
+     * Launch specified process without waiting its termination.
+     * @param theExecutableName executable name to find in PATH
+     * @param theArguments      arguments list
+     * @return true if executable has been launched
+     */
+    ST_LOCAL static bool execProcessInPath(const StString&          theExecutableName,
+                                           const StArray<StString>& theArguments) {
+        return execProcessAny(theExecutableName, theArguments, false);
+    }
+
+    /**
+     * Opens a pipe with specified executable and parameters, reads its output and closes pipe.
+     */
+    ST_CPPEXPORT static bool execAndRead(int& theRes,
+                                         StString& theOutput,
+                                         const StString& theExecutable,
+                                         const StString& theArgs);
 
     /**
      * Open specified URL using external application.
@@ -140,6 +161,18 @@ class StProcess {
      * Setup process catcher for signals like SIGSEV.
      */
     ST_CPPEXPORT static void setupProcessSignals();
+
+private:
+    /**
+     * Launch specified process without waiting its termination.
+     * @param theExecutable executable name to find in PATH
+     * @param theArguments  arguments list
+     * @param theIsAbsolute check if the given executable exists
+     * @return true if executable has been launched
+     */
+    ST_CPPEXPORT static bool execProcessAny(const StString&          theExecutable,
+                                            const StArray<StString>& theArguments,
+                                            const bool               theIsAbsolute);
 };
 
 #endif // __StProcess_h_
