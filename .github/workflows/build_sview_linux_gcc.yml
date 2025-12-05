@@ -30,18 +30,30 @@ jobs:
     - name: Compile
       run: |
         bash ./adm/ci/build_sview_linux.sh
-    - name: Extra Dependencies
+    - name: Install Dependencies for Testing
+      run: |
+        sudo apt-get install -y \
+          xvfb scrot
+    - name: Run tests
+      run: |
+        LD_LIBRARY_PATH=$PWD/build/install/lib xvfb-run --server-args="-screen 0 1920x1080x24" bash \
+          ./adm/ci/screenshot.sh ./build/sview-player-linux.png 5 \
+          ./build/install/bin/sView --windowLeft=100 --windowTop=100
+        LD_LIBRARY_PATH=$PWD/build/install/lib xvfb-run --server-args="-screen 0 1920x1080x24" bash \
+          ./adm/ci/screenshot.sh ./build/sview-viewer-linux.png 2 \
+          ./build/install/bin/sView ./share/sView/demo/demo.jps
+    - name: Upload artifacts
+      uses: actions/upload-artifact@v4
+      with:
+        name: sview-linux-screenshots
+        path: ./build/*.png
+    - name: Install Dependencies for Debian Package Helper
       run: |
         sudo apt-get install -y \
           build-essential debhelper devscripts cmake
     - name: Debian package
       run: |
         bash ./distribution/buildDebSrc.sh
-    #- name: Upload artifacts
-    #  uses: actions/upload-artifact@v4
-    #  with:
-    #    name: sview-debpackage
-    #    path: distribution/temp
 
   build-ubuntu-22-04:
     runs-on: ubuntu-22.04
