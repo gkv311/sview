@@ -10,6 +10,5 @@ Package: sview
 Architecture: any
 Depends: ${shlibs:Depends}, ${misc:Depends}, xdg-utils, zenity
 Description: stereoscopic media player sView
- .
  sView is a stereoscopic Image Viewer and Movie Player.
- Requires OpenGL2.0+ for rendering and OpenAL for sound output.
+ Relies on OpenGL for rendering and OpenAL for sound output.
