@@ -1,9 +1,0 @@
-#!/bin/bash
-
-set -e
-
-#DEBHELPER#
-
-if command -v update-menus >/dev/null; then
-  update-menus
-fi

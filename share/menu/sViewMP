@@ -1,1 +1,0 @@
-?package(sView):needs="X11" section="Applications/Viewers" title="sView - Movie Player" command="/usr/bin/sView --in=movie" icon="/usr/share/sView/icons/menu.xpm" hints="Video"
