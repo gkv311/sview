@@ -4,6 +4,6 @@ set -e
 
 #DEBHELPER#
 
-if [ -x /usr/bin/update-menus ]; then
+if command -v update-menus >/dev/null; then
   update-menus
 fi
