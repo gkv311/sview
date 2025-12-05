@@ -1,6 +1,6 @@
 Source: sview
 Section: contrib/video
-Priority: extra
+Priority: optional
 Maintainer: Kirill Gavrilov <kirill@sview.ru>
 Build-Depends: debhelper (>= 7.0.50~), g++ (>= 4.0), cmake, ninja-build, libopenal-dev, libgl-dev, libxrandr-dev, libxpm-dev, libavcodec-dev, libavdevice-dev, libavformat-dev, libavutil-dev, libswscale-dev, libconfig++-dev, libfontconfig-dev, libfreetype-dev, libxpm-dev, libopenvr-dev
 Standards-Version: 3.9.1
