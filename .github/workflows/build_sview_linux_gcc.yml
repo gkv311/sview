@@ -27,7 +27,7 @@ jobs:
           libconfig++-dev libconfig-dev \
           libxrandr-dev libxpm-dev \
           libavcodec-dev libavdevice-dev libavformat-dev libavutil-dev libswscale-dev
-    - name: Compile
+    - name: Build
       run: |
         bash ./adm/ci/build_sview_linux.sh
     - name: Install Dependencies for Testing
@@ -47,11 +47,30 @@ jobs:
       with:
         name: sview-linux-screenshots
         path: ./build/*.png
-    - name: Install Dependencies for Debian Package Helper
+
+  build-ubuntu-24-04-debpkg:
+    runs-on: ubuntu-24.04
+    steps:
+    - name: Clone Tree
+      uses: actions/checkout@v1
+      with:
+        fetch-depth: 1
+    - name: Install Dependencies
       run: |
+        sudo apt-get update
+        sudo apt-get install -y \
+          g++ ninja-build \
+          zenity \
+          libopenal-dev \
+          libopenvr-dev \
+          libgl-dev \
+          libfreetype-dev libfontconfig-dev \
+          libconfig++-dev libconfig-dev \
+          libxrandr-dev libxpm-dev \
+          libavcodec-dev libavdevice-dev libavformat-dev libavutil-dev libswscale-dev
         sudo apt-get install -y \
           build-essential debhelper devscripts cmake
-    - name: Debian package
+    - name: Build
       run: |
         bash ./distribution/buildDebSrc.sh
 
@@ -74,6 +93,6 @@ jobs:
           libconfig++-dev libconfig-dev \
           libxrandr-dev libxpm-dev \
           libavcodec-dev libavdevice-dev libavformat-dev libavutil-dev libswscale-dev
-    - name: Compile
+    - name: Build
       run: |
         ./adm/ci/build_sview_linux.sh
