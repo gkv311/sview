@@ -1,4 +1,4 @@
-name: Build (MSVC)
+name: Build (Windows/MSVC)
 on:
   push:
     branches: [ master ]

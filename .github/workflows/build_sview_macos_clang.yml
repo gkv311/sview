@@ -1,4 +1,4 @@
-name: Build (macOS 15)
+name: Build (macOS/Clang)
 on:
   push:
     branches: [ master ]
@@ -7,7 +7,7 @@ on:
   workflow_dispatch:
 
 jobs:
-  macOS:
+  build-macos-arm64:
     runs-on: macos-15
     steps:
     - name: Clone Tree

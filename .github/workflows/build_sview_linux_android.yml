@@ -1,4 +1,4 @@
-name: Build (Android)
+name: Build (Linux/Android)
 on:
   push:
     branches: [ master ]
@@ -7,7 +7,7 @@ on:
   workflow_dispatch:
 
 jobs:
-  Android:
+  build-linux-android:
     runs-on: ubuntu-22.04
     steps:
     - name: Clone Tree

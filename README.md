@@ -49,10 +49,7 @@ See the [docs/INSTALL](docs/INSTALL.md) file.
 
 Building state of [master branch](https://github.com/gkv311/sview/actions?query=branch%3Amaster) (of this git repository https://github.com/gkv311/sview.git).
 
-| Target platform      | Build Status |
-|----------------------|--------------|
-| Ubuntu 24.04 (amd64) | ![status](https://github.com/gkv311/sview/actions/workflows/build_ubuntu_24.04.yml/badge.svg?branch=master) |
-| Ubuntu 22.04 (amd64) | ![status](https://github.com/gkv311/sview/actions/workflows/build_ubuntu_22.04.yml/badge.svg?branch=master) |
-| macOS 13 (amd64)     | ![status](https://github.com/gkv311/sview/actions/workflows/build_macos_13.yml/badge.svg?branch=master) |
-| Android (armeabi-v7a)| ![status](https://github.com/gkv311/sview/actions/workflows/build_android.yml/badge.svg?branch=master) |
-| Windows (amd64)      | ![status](https://github.com/gkv311/sview/actions/workflows/build_msvc.yml/badge.svg?branch=master) |
+![status](https://github.com/gkv311/sview/actions/workflows/build_sview_linux_gcc.yml/badge.svg?branch=master)
+![status](https://github.com/gkv311/sview/actions/workflows/build_sview_macos_clang.yml/badge.svg?branch=master)
+![status](https://github.com/gkv311/sview/actions/workflows/build_sview_linux_android.yml/badge.svg?branch=master)
+![status](https://github.com/gkv311/sview/actions/workflows/build_sview_windows_msvc.yml/badge.svg?branch=master)

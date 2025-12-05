@@ -1,4 +1,4 @@
-name: Build (Ubuntu 24.04)
+name: Build (Linux/GCC)
 on:
   push:
     branches: [ master ]
@@ -7,7 +7,7 @@ on:
   workflow_dispatch:
 
 jobs:
-  Ubuntu:
+  build-ubuntu-24-04:
     runs-on: ubuntu-24.04
     steps:
     - name: Clone Tree
@@ -42,3 +42,26 @@ jobs:
     #  with:
     #    name: sview-debpackage
     #    path: distribution/temp
+
+  build-ubuntu-22-04:
+    runs-on: ubuntu-22.04
+    steps:
+    - name: Clone Tree
+      uses: actions/checkout@v1
+      with:
+        fetch-depth: 1
+    - name: Install Dependencies
+      run: |
+        sudo apt-get update
+        sudo apt-get install -y \
+          g++ ninja-build \
+          libopenal-dev \
+          libopenvr-dev \
+          libgl-dev \
+          libfreetype-dev libfontconfig-dev \
+          libconfig++-dev libconfig-dev \
+          libxrandr-dev libxpm-dev \
+          libavcodec-dev libavdevice-dev libavformat-dev libavutil-dev libswscale-dev
+    - name: Compile
+      run: |
+        ./adm/ci/build_sview_linux.sh
