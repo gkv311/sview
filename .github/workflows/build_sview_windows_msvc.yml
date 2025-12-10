@@ -36,6 +36,7 @@ jobs:
         call ..\sview-deps-wnt\unpack.bat
         cmake -T host=x64 ^
           -D BUILD_TREAT_WARNINGS_AS_ERRORS=OFF ^
+          -D CMAKE_INSTALL_PREFIX="./build/install" ^
           -D FREETYPE_DIR=../sview-deps-wnt/%ST_FREETYPE% ^
           -D FFMPEG_DIR=../sview-deps-wnt/%ST_FFMPEG% ^
           -D OPENAL_DIR=../sview-deps-wnt/%ST_OPENAL% ^
@@ -45,9 +46,10 @@ jobs:
     - name: Build project
       run: |
         cmake --build "./build" --config Release -- /m
+        cmake --build "./build" --config Release --target install
 
     - name: Upload artifacts
       uses: actions/upload-artifact@v4
       with:
         name: sview-msvc
-        path: build/Release
+        path: build/install
