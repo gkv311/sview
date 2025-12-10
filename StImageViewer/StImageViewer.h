@@ -145,6 +145,7 @@ class StImageViewer : public StApplication {
         StHandle<StBoolParamNamed>    ToShowAdjustImage;//!< display image adjustment overlay
         StHandle<StBoolParamNamed>    ToShowFps;        //!< display FPS meter
         StHandle<StFloat32Param>      SlideShowDelay;   //!< slideshow delay
+        StHandle<StBoolParamNamed>    IsShuffle;        //!< shuffle playback order
         StHandle<StBoolParamNamed>    IsMobileUI;       //!< display mobile interface (user option)
         StHandle<StBoolParam>         IsMobileUISwitch; //!< display mobile interface (actual value)
         StHandle<StBoolParamNamed>    ToHideStatusBar;  //!< hide system-provided status bar
@@ -200,6 +201,7 @@ class StImageViewer : public StApplication {
     ST_LOCAL void doChangeFlipCubeZ(const bool );
     ST_LOCAL void doShowPlayList(const bool theToShow);
     ST_LOCAL void doShowAdjustImage(const bool theToShow);
+    ST_LOCAL void doSwitchShuffle(const bool theShuffleOn);
     ST_LOCAL void doFileNext();
 
         public:

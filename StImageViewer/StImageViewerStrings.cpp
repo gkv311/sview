@@ -63,6 +63,8 @@ void loadDefaults(StLangMap& theStrings) {
                "Source stereo format");
     theStrings(MENU_MEDIA_FILE_INFO,
                "File info");
+    theStrings(MENU_MEDIA_SHUFFLE,
+               "Shuffle");
     theStrings(MENU_MEDIA_QUIT,
                "Quit");
     theStrings(MENU_MEDIA_OPEN_IMAGE_1,

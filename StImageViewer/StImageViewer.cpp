@@ -115,6 +115,7 @@ void StImageViewer::updateStrings() {
     params.ToShowTopbar->setName(stCString("Show top toolbar"));
     params.ToShowBottom->setName(stCString("Show bottom toolbar"));
     params.SlideShowDelay->setName(stCString("Slideshow delay"));
+    params.IsShuffle->setName(tr(MENU_MEDIA_SHUFFLE));
     params.IsMobileUI->setName(stCString("Mobile UI"));
     params.ToHideStatusBar->setName("Hide system status bar");
     params.ToHideNavBar   ->setName(tr(OPTION_HIDE_NAVIGATION_BAR));
@@ -191,6 +192,7 @@ StImageViewer::StImageViewer(const StHandle<StResourceManager>& theResMgr,
     params.SlideShowDelay->setStep(1.0f);
     params.SlideShowDelay->setTolerance(0.1f);
     params.SlideShowDelay->setFormat(stCString("%01.1f s"));
+    params.IsShuffle     = new StBoolParamNamed(false, stCString("shuffle"));
     params.IsMobileUI    = new StBoolParamNamed(StWindow::isMobile(), stCString("isMobileUI"));
     params.IsMobileUI->signals.onChanged = stSlot(this, &StImageViewer::doChangeMobileUI);
     params.IsMobileUISwitch = new StBoolParam(params.IsMobileUI->getValue());
@@ -229,6 +231,7 @@ StImageViewer::StImageViewer(const StHandle<StResourceManager>& theResMgr,
     myToCheckPoorOrient = !mySettings->loadParam(params.ToTrackHead);
     mySettings->loadParam (params.ToShowFps);
     mySettings->loadParam (params.SlideShowDelay);
+    mySettings->loadParam (params.IsShuffle);
     mySettings->loadParam (params.IsMobileUI);
     mySettings->loadParam (params.ToHideStatusBar);
     mySettings->loadParam (params.ToHideNavBar);
@@ -238,6 +241,8 @@ StImageViewer::StImageViewer(const StHandle<StResourceManager>& theResMgr,
     mySettings->loadParam (params.ToUseDeepColor);
     mySettings->loadParam (params.ToShowPlayList);
     mySettings->loadParam (params.ToShowAdjustImage);
+
+    params.IsShuffle->signals.onChanged.connect(this, &StImageViewer::doSwitchShuffle);
 
 #if defined(__ANDROID__)
     addRenderer(new StOutInterlace  (myResMgr, theParentWin));
@@ -1440,6 +1445,10 @@ void StImageViewer::doSlideShow(const size_t ) {
         mySlideShowTimer.restart();
         myPlayList->setLoop(true);
     }
+}
+
+void StImageViewer::doSwitchShuffle(const bool theShuffleOn) {
+    myPlayList->setShuffle(theShuffleOn);
 }
 
 void StImageViewer::doListLast(const size_t ) {

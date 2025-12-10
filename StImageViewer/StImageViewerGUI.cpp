@@ -119,6 +119,14 @@ void StImageViewerGUI::createDesktopUI(const StHandle<StPlayList>& thePlayList) 
     myPlayList->setOpacity(myPlugin->params.ToShowPlayList->getValue() ? 1.0f : 0.0f, false);
     myPlayList->signals.onOpenItem = stSlot(myPlugin, &StImageViewer::doFileNext);
 
+    aButtonMargins.extend(scale(8));
+    myBtnShuffle = new StGLCheckboxTextured(myPlayList, myPlugin->params.IsShuffle,
+                                            iconTexture(stCString("actionVideoShuffle"), anIconSize),
+                                            iconTexture(stCString("actionVideoShuffle"), anIconSize),
+                                            0, 0,
+                                            StGLCorner(ST_VCORNER_BOTTOM, ST_HCORNER_RIGHT));
+    myBtnShuffle->changeMargins() = aButtonMargins;
+
     // create Main menu
     createMainMenu();
 }
@@ -913,6 +921,16 @@ void StImageViewerGUI::createMobileUI(const StHandle<StPlayList>& thePlayList) {
     myPlayList->setOpacity(myPlugin->params.ToShowPlayList->getValue() ? 1.0f : 0.0f, false);
     myPlayList->signals.onOpenItem = stSlot(myPlugin, &StImageViewer::doFileNext);
 
+    StMarginsI aButtonMargins;
+    const IconSize anIconSize = scaleIcon(32, aButtonMargins);
+    aButtonMargins.extend(scale(12));
+    StGLCheckboxTextured* aBtnShuffle = new StGLCheckboxTextured(myPlayList, myPlugin->params.IsShuffle,
+                                                                 iconTexture(stCString("actionVideoShuffle"), anIconSize),
+                                                                 iconTexture(stCString("actionVideoShuffle"), anIconSize),
+                                                                 0, 0,
+                                                                 StGLCorner(ST_VCORNER_BOTTOM, ST_HCORNER_RIGHT));
+    aBtnShuffle->changeMargins() = aButtonMargins;
+
     if(myPlugin->params.ToShowFps->getValue()) {
         myFpsWidget = new StGLFpsLabel(this);
     }
@@ -1264,6 +1282,7 @@ StImageViewerGUI::StImageViewerGUI(StImageViewer*  thePlugin,
   myBtnPanorama(NULL),
   myBtnSrcFrmt(NULL),
   myBtnList(NULL),
+  myBtnShuffle(NULL),
   myBtnFull(NULL),
   //
   myFpsWidget(NULL),
@@ -1501,6 +1520,8 @@ void StImageViewerGUI::updateDescLabel(const StPointD_t& theCursor, StFormat the
         myDescr->setText(tr(aLngId));
     } else if (::isPointIn(myBtnList, theCursor)) {
         myDescr->setText(tr(PLAYLIST));
+    } else if (::isPointIn(myBtnShuffle, theCursor)) {
+        myDescr->setText(tr(MENU_MEDIA_SHUFFLE));
     } else if (::isPointIn(myBtnFull, theCursor)) {
         myDescr->setText(tr(FULLSCREEN));
     } else if (::isPointIn(myBtnSrcFrmt, theCursor)) {
