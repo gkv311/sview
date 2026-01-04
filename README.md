@@ -44,12 +44,3 @@ See the [docs/LICENSE](docs/LICENSE.md) file.
 ## Build and Install
 
 See the [docs/INSTALL](docs/INSTALL.md) file.
-
-## Continuous Integration
-
-Building state of [master branch](https://github.com/gkv311/sview/actions?query=branch%3Amaster) (of this git repository https://github.com/gkv311/sview.git).
-
-![status](https://github.com/gkv311/sview/actions/workflows/build_sview_linux_gcc.yml/badge.svg?branch=master)
-![status](https://github.com/gkv311/sview/actions/workflows/build_sview_macos_clang.yml/badge.svg?branch=master)
-![status](https://github.com/gkv311/sview/actions/workflows/build_sview_linux_android.yml/badge.svg?branch=master)
-![status](https://github.com/gkv311/sview/actions/workflows/build_sview_windows_msvc.yml/badge.svg?branch=master)
