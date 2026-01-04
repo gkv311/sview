@@ -1,0 +1,18 @@
+# This workflow will run other workflows
+name: Build (All)
+
+on: [push]
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  linux-gcc:
+    uses: ./.github/workflows/build_sview_linux_gcc.yml
+  linux-android:
+    uses: ./.github/workflows/build_sview_linux_android.yml
+  macos-clang:
+    uses: ./.github/workflows/build_sview_macos_clang.yml
+  windows-msvc:
+    uses: ./.github/workflows/build_sview_windows_msvc.yml

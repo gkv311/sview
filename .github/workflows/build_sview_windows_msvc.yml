@@ -1,10 +1,6 @@
 name: Build (Windows/MSVC)
 on:
-  push:
-    branches: [ master ]
-  pull_request:
-    branches: [ master ]
-  workflow_dispatch:
+  workflow_call:
 
 jobs:
   build-windows-msvc:
@@ -47,7 +43,6 @@ jobs:
       run: |
         cmake --build "./build" --config Release -- /m
         cmake --build "./build" --config Release --target install
-
     - name: Upload artifacts
       uses: actions/upload-artifact@v4
       with:

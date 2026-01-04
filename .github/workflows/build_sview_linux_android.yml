@@ -1,17 +1,13 @@
 name: Build (Linux/Android)
 on:
-  push:
-    branches: [ master ]
-  pull_request:
-    branches: [ master ]
-  workflow_dispatch:
+  workflow_call:
 
 jobs:
   build-linux-android:
     runs-on: ubuntu-22.04
     steps:
     - name: Clone Tree
-      uses: actions/checkout@v1
+      uses: actions/checkout@v6
       with:
         fetch-depth: 1
     - name: Install Dependencies

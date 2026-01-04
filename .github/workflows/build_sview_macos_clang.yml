@@ -1,17 +1,13 @@
 name: Build (macOS/Clang)
 on:
-  push:
-    branches: [ master ]
-  pull_request:
-    branches: [ master ]
-  workflow_dispatch:
+  workflow_call:
 
 jobs:
   build-macos-arm64:
     runs-on: macos-15
     steps:
     - name: Clone Tree
-      uses: actions/checkout@v1
+      uses: actions/checkout@v6
       with:
         fetch-depth: 1
     - name: Install Dependencies

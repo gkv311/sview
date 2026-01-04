@@ -1,17 +1,13 @@
 name: Build (Linux/GCC)
 on:
-  push:
-    branches: [ master ]
-  pull_request:
-    branches: [ master ]
-  workflow_dispatch:
+  workflow_call:
 
 jobs:
   build-ubuntu-24-04:
     runs-on: ubuntu-24.04
     steps:
     - name: Clone Tree
-      uses: actions/checkout@v1
+      uses: actions/checkout@v6
       with:
         fetch-depth: 1
     - name: Install Dependencies
@@ -52,7 +48,7 @@ jobs:
     runs-on: ubuntu-24.04
     steps:
     - name: Clone Tree
-      uses: actions/checkout@v1
+      uses: actions/checkout@v6
       with:
         fetch-depth: 1
     - name: Install Dependencies
@@ -75,7 +71,7 @@ jobs:
     runs-on: ubuntu-22.04
     steps:
     - name: Clone Tree
-      uses: actions/checkout@v1
+      uses: actions/checkout@v6
       with:
         fetch-depth: 1
     - name: Install Dependencies
