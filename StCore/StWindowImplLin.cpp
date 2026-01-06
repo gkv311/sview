@@ -24,17 +24,16 @@
 
 /**
  * Our own XError handle function.
- * Default handlers just show the error and exit application immediately.
- * This is very horrible for application, because many errors not critical and could be ignored.
- * The main target for this function creation - prevent sView to quit after
- * multiple BadMatch errors happens on fullscreen->windowed switching
- * (looking like a vendors OpenGL driver bug).
- * Thus, now we just show up the error description and just ignore it - hopes we will well.
- * Function behaviour could be extended in future.
+ * Default handler just shows the error and exits application immediately.
+ * This is very horrible for application, because many errors are not critical and could be ignored.
+ * The main reason for this function - it prevents sView to quit after
+ * multiple BadMatch errors happening on switching between fullscreen->windowed
+ * (looks like an OpenGL driver bug).
+ * Thus, now we just show up the error description and ignore it - hopefully without side effects.
  */
-int stXErrorHandler(Display*     theDisplay,
-                    XErrorEvent* theErrorEvent) {
-    char aBuffer[4096];
+static int stXErrorHandler(Display*     theDisplay,
+                           XErrorEvent* theErrorEvent) {
+    char aBuffer[4096] = {};
     XGetErrorText(theDisplay, theErrorEvent->error_code, aBuffer, 4096);
     ST_DEBUG_LOG("XError happend: " + aBuffer + "; ignored");
     // have no idea WHAT we should return here....
@@ -493,6 +492,16 @@ void StWindowImpl::setFullScreen(bool theFullscreen) {
         }
 
         if((Window )myParentWin != 0 || myMaster.hWindow != 0) {
+            /*XEvent anXEvent;
+            anXEvent.type = ClientMessage;
+            anXEvent.xclient.window = myMaster.hWindow;
+            anXEvent.xclient.message_type = myMaster.stXDisplay->netWmState;
+            anXEvent.xclient.format = 32;
+            anXEvent.xclient.data.l[0] = 1; // 0 = Windowed, 1 = Fullscreen
+            anXEvent.xclient.data.l[1] = myMaster.stXDisplay->netWmStateFull;
+            anXEvent.xclient.data.l[2] = myMaster.stXDisplay->netWmStateFull;
+            XSendEvent(hDisplay, myMaster.stXDisplay->getRootWindow(), False, ClientMessage, &anXEvent);*/
+
             XReparentWindow(hDisplay, myMaster.hWindowGl, myMaster.stXDisplay->getRootWindow(), 0, 0);
             XMoveResizeWindow(hDisplay, myMaster.hWindowGl,
                               aRect.left(),  aRect.top(),
@@ -519,6 +528,16 @@ void StWindowImpl::setFullScreen(bool theFullscreen) {
     } else {
         Window aParent = ((Window )myParentWin != 0) ? (Window )myParentWin : myMaster.hWindow;
         if(aParent != 0) {
+            /*XEvent anXEvent;
+            anXEvent.type = ClientMessage;
+            anXEvent.xclient.window = myMaster.hWindow;
+            anXEvent.xclient.message_type = myMaster.stXDisplay->netWmState;
+            anXEvent.xclient.format = 32;
+            anXEvent.xclient.data.l[0] = 0; // 0 = Windowed, 1 = Fullscreen
+            anXEvent.xclient.data.l[1] = myMaster.stXDisplay->netWmStateFull;
+            anXEvent.xclient.data.l[2] = myMaster.stXDisplay->netWmStateFull;
+            XSendEvent(hDisplay, myMaster.stXDisplay->getRootWindow(), False, ClientMessage, &anXEvent);*/
+
             // workaround bugs in some OpenGL drivers (Catalyst etc.) - entirely re-create window but not GL context
             XSetWindowAttributes aWinAttribsX = createDefaultAttribs(myMaster.stXDisplay);
             aWinAttribsX.override_redirect = True; // GL window always undecorated
@@ -579,7 +598,8 @@ void StWindowImpl::setFullScreen(bool theFullscreen) {
                               myRectNorm.width(), myRectNorm.height());
         }
     }
-    XSetInputFocus(hDisplay, myMaster.hWindowGl, RevertToParent, CurrentTime);
+    const Window aFocusWin = myMaster.hWindow != 0 ? myMaster.hWindow : myMaster.hWindowGl;
+    XSetInputFocus(hDisplay, aFocusWin, RevertToParent, CurrentTime);
 
     const StRectI_t& aRect = attribs.IsFullScreen ? myRectFull : myRectNorm;
     myStEvent.Size.init(getEventTime(), aRect.width(), aRect.height(), myForcedAspect);
@@ -785,7 +805,8 @@ void StWindowImpl::updateWindowPos() {
     signals.onResize->emit(myStEvent.Size);
 
     // force input focus to Master
-    XSetInputFocus(aDisplay->hDisplay, myMaster.hWindowGl, RevertToParent, CurrentTime);
+    const Window aFocusWin = myMaster.hWindow != 0 ? myMaster.hWindow : myMaster.hWindowGl;
+    XSetInputFocus(aDisplay->hDisplay, aFocusWin, RevertToParent, CurrentTime);
 
     // detect when window moved to another monitor
     if(!attribs.IsFullScreen && myMonitors.size() > 1) {
@@ -976,7 +997,8 @@ void StWindowImpl::processEvents() {
                     default: aMouseBtn = (StVirtButton )aBtnEvent->button; break;
                 }
                 // force input focus to the master window
-                XSetInputFocus(aDisplay->hDisplay, myMaster.hWindowGl, RevertToParent, CurrentTime);
+                const Window aFocusWin = myMaster.hWindow != 0 ? myMaster.hWindow : myMaster.hWindowGl;
+                XSetInputFocus(aDisplay->hDisplay, aFocusWin, RevertToParent, CurrentTime);
 
                 myStEvent.Button.Time    = getEventTime(aBtnEvent->time);
                 myStEvent.Button.Button  = aMouseBtn;
@@ -1007,7 +1029,7 @@ void StWindowImpl::processEvents() {
                         aNewRect.top()    = aCfgEvent->y;
                         aNewRect.bottom() = aCfgEvent->y + aCfgEvent->height;
                     } else {
-                        // we got psevdo x and y (~window decorations?)
+                        // we got pseudo x and y (~window decorations?)
                         // on ResizeWindow without Compiz
                         Window aChild;
                         aNewRect.left() = 0;

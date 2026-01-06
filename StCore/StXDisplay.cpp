@@ -17,6 +17,8 @@ StXDisplay::StXDisplay()
   hInputCtx(None),
   wndProtocols(None),
   wndDestroyAtom(None),
+  netWmState(None),
+  netWmStateFull(None),
   xDNDEnter(None),
   xDNDPosition(None),
   xDNDStatus(None),
@@ -99,6 +101,8 @@ void StXDisplay::close() {
 void StXDisplay::initAtoms() {
     wndDestroyAtom = XInternAtom(hDisplay, "WM_DELETE_WINDOW", True);
     wndProtocols   = XInternAtom(hDisplay, "WM_PROTOCOLS",     True);
+    netWmState     = XInternAtom(hDisplay, "_NET_WM_STATE",    True);
+    netWmStateFull = XInternAtom(hDisplay, "_NET_WM_STATE_FULLSCREEN", True);
 
     // Atoms for Xdnd
     xDNDEnter      = XInternAtom(hDisplay, "XdndEnter",        False);
@@ -122,7 +126,6 @@ void StXDisplay::initAtoms() {
     XA_COMPOUND_TEXT = XInternAtom(hDisplay, "COMPOUND_TEXT",  True);
     XA_UTF8_STRING   = XInternAtom(hDisplay, "UTF8_STRING",    True);
     XA_CLIPBOARD     = XInternAtom(hDisplay, "CLIPBOARD",      True);
-
 }
 
 Property StXDisplay::readProperty(Window hWindow, Atom property) const {

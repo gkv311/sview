@@ -46,6 +46,8 @@ class StXDisplay {
 
     Atom         wndProtocols;
     Atom         wndDestroyAtom; // Atom for close message
+    Atom         netWmState;
+    Atom         netWmStateFull;
 
     Atom         xDNDEnter; // Atoms for X drag&drop protocol
     Atom         xDNDPosition;
