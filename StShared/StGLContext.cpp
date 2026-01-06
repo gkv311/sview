@@ -205,9 +205,14 @@ void StGLContext::stglDebugCallback(unsigned int theSource,
                                     unsigned int theSeverity,
                                     int          /*theLength*/,
                                     const char*  theMessage) {
-    if(myGlVendor == GlVendor_NVIDIA) {
-        // filter too verbose messages
-        if(theId == 131185) {
+    // filter too verbose messages
+    if (myGlVendor == GlVendor_NVIDIA) {
+        if (theId == 131185) {
+            return;
+        }
+    } else if (myGlDriverVendor == GlVendor_Mesa) {
+        if (theId == 1) {
+            // tells that glBufferSubData() used for GL_STATIC_DRAW buffer
             return;
         }
     }
@@ -1578,7 +1583,8 @@ bool StGLContext::stglInit() {
     const StString aGlVendor((const char* )core11fwd->glGetString(GL_VENDOR));
     if(aGlVendor.isContains(stCString("NVIDIA"))) {
         myGlVendor = GlVendor_NVIDIA;
-    } else if(aGlVendor.isContains(stCString("ATI Technologies"))) {
+    } else if(aGlVendor.isContains(stCString("AMD"))
+           || aGlVendor.isContains(stCString("ATI Technologies"))) {
         myGlVendor = GlVendor_AMD;
     } else if(aGlVendor.isContains(stCString("Intel"))) {
         myGlVendor = GlVendor_Intel;
@@ -1604,6 +1610,12 @@ bool StGLContext::stglInit() {
         myGpuName = GPU_PowerVR;
     } else {
         myGpuName = GPU_UNKNOWN;
+    }
+
+    const StString aGlVersion((const char* )core11fwd->glGetString(GL_VERSION));
+    myGlDriverVendor = myGlVendor;
+    if (aGlVersion.isContains(stCString("Mesa"))) {
+        myGlDriverVendor = GlVendor_Mesa;
     }
 
     myWasInit = true;
