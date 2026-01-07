@@ -7,11 +7,13 @@ Not all changes are documented here - please check git log for complete list.
 sView ??.?? (in development)
 -----------------------------------------------------------------------------------------------------------------------
 
+- Image Viewer - added shuffle playlist button (the same as in Movie Player).
 - Brightness, saturation as well as stereopair separation settings are now restored on sView restart.
   Stereopair separation settings are now common for all files in playlist.
 - Fixed saving a pair of images into single one on Windows platform.
 - Windows, force exclusive fullscreen mode for hardware QuadBuffered OpenGL
   (workaround for activation of shutter glasses on some NVIDIA GeForce configurations).
+- Linux, added workaround for XWayland session with keyboard focus lost in fullscreen mode.
 
 sView 25.02 (2025-02-22)
 -----------------------------------------------------------------------------------------------------------------------
