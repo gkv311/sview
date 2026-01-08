@@ -619,11 +619,11 @@ void StWindowImpl::parseXDNDClientMsg() {
         Window aSrcWin = myXEvent.xclient.data.l[0];
         /*ST_DEBUG_LOG(
             "Xdnd: Source window = 0x" + (int )myXEvent.xclient.data.l[0] + "\n"
-            + "Supports > 3 types = " + (more_than_3) + "\n"
+            + "Supports > 3 types = " + (isMoreThan3) + "\n"
             + "Protocol version = " + myMaster.xDNDVersion + "\n"
-            + "Type 1 = " + myMaster.getAtomName(myXEvent.xclient.data.l[2]) + "\n"
-            + "Type 2 = " + myMaster.getAtomName(myXEvent.xclient.data.l[3]) + "\n"
-            + "Type 3 = " + myMaster.getAtomName(myXEvent.xclient.data.l[4]) + "\n"
+            + "Type 1 = " + aDisplay->getAtomName(myXEvent.xclient.data.l[2]) + "\n"
+            + "Type 2 = " + aDisplay->getAtomName(myXEvent.xclient.data.l[3]) + "\n"
+            + "Type 3 = " + aDisplay->getAtomName(myXEvent.xclient.data.l[4]) + "\n"
         );*/
         if(isMoreThan3) {
             Property aProperty = aDisplay->readProperty(aSrcWin, aDisplay->xDNDTypeList);
@@ -638,6 +638,10 @@ void StWindowImpl::parseXDNDClientMsg() {
                 }
             }
             XFree(aProperty.data);
+        } else if((Atom )myXEvent.xclient.data.l[2] == aDisplay->xDNDUriList
+               || (Atom )myXEvent.xclient.data.l[3] == aDisplay->xDNDUriList
+               || (Atom )myXEvent.xclient.data.l[4] == aDisplay->xDNDUriList) {
+            myMaster.xDNDRequestType = aDisplay->xDNDUriList;
         } else if((Atom )myXEvent.xclient.data.l[2] == aDisplay->xDNDPlainText
                || (Atom )myXEvent.xclient.data.l[3] == aDisplay->xDNDPlainText
                || (Atom )myXEvent.xclient.data.l[4] == aDisplay->xDNDPlainText) {

@@ -14,6 +14,7 @@ sView ??.?? (in development)
 - Windows, force exclusive fullscreen mode for hardware QuadBuffered OpenGL
   (workaround for activation of shutter glasses on some NVIDIA GeForce configurations).
 - Linux, added workaround for XWayland session with keyboard focus lost in fullscreen mode.
+- Linux, fixed accepting of Drag&Drop as `text/uri-list` from Thunar and within XWayland session.
 
 sView 25.02 (2025-02-22)
 -----------------------------------------------------------------------------------------------------------------------
