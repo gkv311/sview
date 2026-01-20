@@ -207,9 +207,14 @@ class StWindowImpl {
         } else if(attribs.IsFullScreen) {
             return myMonitors[myMonSlave.idSlave].getVRect().left();
         } else {
-            const StMonitor& aMonMaster = myMonitors[getPlacement().center()]; // detect from current location
-            return myMonSlave.xAdd * (myMonitors[myMonSlave.idSlave].getVRect().left()  + myRectNorm.left()  - aMonMaster.getVRect().left())
-                 + myMonSlave.xSub * (myMonitors[myMonSlave.idSlave].getVRect().right() - myRectNorm.right() + aMonMaster.getVRect().left());
+            const StMonitor& aMonMaster  = myMonitors[getPlacement().center()]; // detect from current location
+            const StMonitor& aMonSlave   = myMonitors[myMonSlave.idSlave];
+            const StRectI_t& aRectMaster = aMonMaster.getVRect();
+            const StRectI_t& aRectSlave  = aMonSlave.getVRect();
+            // display with half-width offset to avoid overlapping with main window
+            const int aShiftX = aMonSlave.getId() == aMonMaster.getId() ? aRectMaster.width() / 2 : 0;
+            return myMonSlave.xAdd * (aRectSlave.left()  + myRectNorm.left()  - aRectMaster.left())
+                 + myMonSlave.xSub * (aRectSlave.right() - myRectNorm.right() + aRectMaster.left()) + aShiftX;
         }
     }
 

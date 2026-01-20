@@ -362,7 +362,7 @@ bool StWindowImpl::create() {
     if(attribs.Slave != StWinSlave_slaveOff) {
 
         // request the X window to be displayed on the screen
-        if(!attribs.IsSlaveHidden && (!isSlaveIndependent() || myMonitors.size() > 1)) {
+        if(!attribs.IsSlaveHidden) {
             XMapWindow(hDisplay, mySlave.hWindowGl);
             //XIfEvent(hDisplay, &myXEvent, stXWaitMapped, (char* )mySlave.hWindowGl);
         }
@@ -458,24 +458,31 @@ void StWindowImpl::setFullScreen(bool theFullscreen) {
         StRectI_t aRect = myRectFull;
 
         // use tiled Master+Slave layout within single window if possible
-        if(attribs.Slave != StWinSlave_slaveOff && isSlaveIndependent() && myMonitors.size() > 1) {
-            StRectI_t aRectSlave;
-            aRectSlave.left()   = getSlaveLeft();
-            aRectSlave.top()    = getSlaveTop();
-            aRectSlave.right()  = aRectSlave.left() + myRectFull.width();
-            aRectSlave.bottom() = aRectSlave.top()  + myRectFull.height();
-            myTiledCfg = TiledCfg_Separate;
-            if(myRectFull.top()   == aRectSlave.top()) {
-                if(myRectFull.right() == aRectSlave.left()) {
-                    myTiledCfg = TiledCfg_MasterSlaveX;
-                } else if(myRectFull.left() == aRectSlave.right()) {
-                    myTiledCfg = TiledCfg_SlaveMasterX;
-                }
-            } else if(myRectFull.left() == aRectSlave.left()) {
-                if(myRectFull.bottom() == aRectSlave.top()) {
-                    myTiledCfg = TiledCfg_MasterSlaveY;
-                } else if(myRectFull.top() == aRectSlave.bottom()) {
-                    myTiledCfg = TiledCfg_SlaveMasterY;
+        if(attribs.Slave != StWinSlave_slaveOff && isSlaveIndependent()) {
+            const StMonitor& aMonSlave = myMonitors[myMonSlave.idSlave];
+            if (aMonSlave.getId() == stMon.getId()) {
+                myTiledCfg = TiledCfg_MasterSlaveX;
+                myRectFull.right() -= myRectFull.width() / 2;
+                aRect = myRectFull;
+            } else {
+                StRectI_t aRectSlave;
+                aRectSlave.left()   = getSlaveLeft();
+                aRectSlave.top()    = getSlaveTop();
+                aRectSlave.right()  = aRectSlave.left() + myRectFull.width();
+                aRectSlave.bottom() = aRectSlave.top()  + myRectFull.height();
+                myTiledCfg = TiledCfg_Separate;
+                if(myRectFull.top()   == aRectSlave.top()) {
+                    if(myRectFull.right() == aRectSlave.left()) {
+                        myTiledCfg = TiledCfg_MasterSlaveX;
+                    } else if(myRectFull.left() == aRectSlave.right()) {
+                        myTiledCfg = TiledCfg_SlaveMasterX;
+                    }
+                } else if(myRectFull.left() == aRectSlave.left()) {
+                    if(myRectFull.bottom() == aRectSlave.top()) {
+                        myTiledCfg = TiledCfg_MasterSlaveY;
+                    } else if(myRectFull.top() == aRectSlave.bottom()) {
+                        myTiledCfg = TiledCfg_SlaveMasterY;
+                    }
                 }
             }
         }
@@ -519,8 +526,7 @@ void StWindowImpl::setFullScreen(bool theFullscreen) {
         }
 
         if(attribs.Slave != StWinSlave_slaveOff
-        && myTiledCfg == TiledCfg_Separate
-        && (!isSlaveIndependent() || myMonitors.size() > 1)) {
+        && myTiledCfg == TiledCfg_Separate) {
             XMoveResizeWindow(hDisplay, mySlave.hWindowGl,
                               getSlaveLeft(),  getSlaveTop(),
                               getSlaveWidth(), getSlaveHeight());
@@ -581,14 +587,14 @@ void StWindowImpl::setFullScreen(bool theFullscreen) {
         } else {
             XUnmapWindow(hDisplay, myMaster.hWindowGl); // workaround for strange bugs
             XResizeWindow(hDisplay, myMaster.hWindowGl, 256, 256);
-            if(attribs.Slave != StWinSlave_slaveOff && (!isSlaveIndependent() || myMonitors.size() > 1)) {
+            if(attribs.Slave != StWinSlave_slaveOff) {
                 XUnmapWindow (hDisplay, mySlave.hWindowGl);
                 XResizeWindow(hDisplay, mySlave.hWindowGl, 256, 256);
             }
             XFlush(hDisplay);
             XMapWindow(hDisplay, myMaster.hWindowGl);
             //XIfEvent(hDisplay, &myXEvent, stXWaitMapped, (char* )myMaster.hWindowGl);
-            if(attribs.Slave != StWinSlave_slaveOff && (!isSlaveIndependent() || myMonitors.size() > 1)) {
+            if(attribs.Slave != StWinSlave_slaveOff) {
                 XMapWindow(hDisplay, mySlave.hWindowGl);
                 //XIfEvent(hDisplay, &myXEvent, stXWaitMapped, (char* )mySlave.hWindowGl);
             }
@@ -788,7 +794,7 @@ void StWindowImpl::updateWindowPos() {
                               0, 0,
                               myRectNorm.width(), myRectNorm.height());
         }
-        if(attribs.Slave != StWinSlave_slaveOff && (!isSlaveIndependent() || myMonitors.size() > 1)) {
+        if(attribs.Slave != StWinSlave_slaveOff) {
             XMoveResizeWindow(aDisplay->hDisplay, mySlave.hWindowGl,
                               getSlaveLeft(),  getSlaveTop(),
                               getSlaveWidth(), getSlaveHeight());
@@ -797,7 +803,6 @@ void StWindowImpl::updateWindowPos() {
         if(myTiledCfg != TiledCfg_Separate) {
             myTiledCfg = TiledCfg_Separate;
             if(!attribs.IsHidden
-            && myMonitors.size() > 1
             && mySlave.hWindowGl != 0) {
                 XMapWindow(aDisplay->hDisplay, mySlave.hWindowGl);
             }

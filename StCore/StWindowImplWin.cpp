@@ -212,7 +212,7 @@ bool StWindowImpl::wndCreateWindows() {
     myEventInitGl.wait();
 
     // ========= Now show up the windows =========
-    if(attribs.Slave != StWinSlave_slaveOff && !attribs.IsSlaveHidden && (!isSlaveIndependent() || myMsgMonitors.size() > 1)) {
+    if(attribs.Slave != StWinSlave_slaveOff && !attribs.IsSlaveHidden) {
         SetWindowPos(mySlave.hWindowGl,
                      HWND_NOTOPMOST,
                      getSlaveLeft(),  getSlaveTop(),
@@ -1093,23 +1093,29 @@ void StWindowImpl::setFullScreen(bool theFullscreen) {
 
         // use tiled Master+Slave layout within single window if possible
         if(attribs.Slave != StWinSlave_slaveOff && isSlaveIndependent()) {
-            StRectI_t aRectSlave;
-            aRectSlave.left()   = getSlaveLeft();
-            aRectSlave.top()    = getSlaveTop();
-            aRectSlave.right()  = aRectSlave.left() + myRectFull.width();
-            aRectSlave.bottom() = aRectSlave.top()  + myRectFull.height();
-            myTiledCfg = TiledCfg_Separate;
-            if(myRectFull.top()   == aRectSlave.top()) {
-                if(myRectFull.right() == aRectSlave.left()) {
-                    myTiledCfg = TiledCfg_MasterSlaveX;
-                } else if(myRectFull.left() == aRectSlave.right()) {
-                    myTiledCfg = TiledCfg_SlaveMasterX;
-                }
-            } else if(myRectFull.left() == aRectSlave.left()) {
-                if(myRectFull.bottom() == aRectSlave.top()) {
-                    myTiledCfg = TiledCfg_MasterSlaveY;
-                } else if(myRectFull.top() == aRectSlave.bottom()) {
-                    myTiledCfg = TiledCfg_SlaveMasterY;
+            const StMonitor& aMonSlave = myMonitors[myMonSlave.idSlave];
+            if (aMonSlave.getId() == stMon.getId()) {
+                myTiledCfg = TiledCfg_MasterSlaveX;
+                myRectFull.right() -= myRectFull.width() / 2;
+            } else {
+                StRectI_t aRectSlave;
+                aRectSlave.left()   = getSlaveLeft();
+                aRectSlave.top()    = getSlaveTop();
+                aRectSlave.right()  = aRectSlave.left() + myRectFull.width();
+                aRectSlave.bottom() = aRectSlave.top()  + myRectFull.height();
+                myTiledCfg = TiledCfg_Separate;
+                if(myRectFull.top()   == aRectSlave.top()) {
+                    if(myRectFull.right() == aRectSlave.left()) {
+                        myTiledCfg = TiledCfg_MasterSlaveX;
+                    } else if(myRectFull.left() == aRectSlave.right()) {
+                        myTiledCfg = TiledCfg_SlaveMasterX;
+                    }
+                } else if(myRectFull.left() == aRectSlave.left()) {
+                    if(myRectFull.bottom() == aRectSlave.top()) {
+                        myTiledCfg = TiledCfg_MasterSlaveY;
+                    } else if(myRectFull.top() == aRectSlave.bottom()) {
+                        myTiledCfg = TiledCfg_SlaveMasterY;
+                    }
                 }
             }
         } else if(attribs.Split == StWinSlave_splitHorizontal) {
@@ -1173,7 +1179,7 @@ void StWindowImpl::updateWindowPos() {
         return;
     }
 
-    if(attribs.Slave != StWinSlave_slaveOff && !attribs.IsSlaveHidden && (!isSlaveIndependent() || myMonitors.size() > 1)) {
+    if(attribs.Slave != StWinSlave_slaveOff && !attribs.IsSlaveHidden) {
         HWND afterHWND = myParentWin != NULL ? myParentWin : myMaster.hWindow;
         UINT aFlags    = SWP_NOACTIVATE;
         if(attribs.Slave == StWinSlave_slaveHLineTop
