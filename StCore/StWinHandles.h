@@ -58,7 +58,8 @@ class StWinGlrc {
     ST_LOCAL StWinGlrc(HDC theDC, HGLRC theRC);
 #else
     ST_LOCAL StWinGlrc(StHandle<StXDisplay>& theDisplay,
-                       const bool            theDebugCtx);
+                       const bool            theDebugCtx,
+                       const GLXContext      theShareCtx = nullptr);
 #endif
 
     /**

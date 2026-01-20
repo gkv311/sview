@@ -291,7 +291,8 @@ StWinGlrc::~StWinGlrc() {
 typedef GLXContext (*glXCreateContextAttribsARB_t)(Display* , GLXFBConfig , GLXContext , Bool , const int* );
 
 StWinGlrc::StWinGlrc(StHandle<StXDisplay>& theDisplay,
-                     const bool            theDebugCtx)
+                     const bool            theDebugCtx,
+                     const GLXContext      theShareCtx)
 : myDisplay(theDisplay->hDisplay),
   myRC(NULL) {
     const char* aGlxExts = glXQueryExtensionsString(theDisplay->hDisplay, DefaultScreen(theDisplay->hDisplay));
@@ -308,12 +309,12 @@ StWinGlrc::StWinGlrc(StHandle<StXDisplay>& theDisplay,
             None
         };
 
-        myRC = aCreateCtxFunc(theDisplay->hDisplay, theDisplay->FBCfg, 0, True, aCtxAttribs);
+        myRC = aCreateCtxFunc(theDisplay->hDisplay, theDisplay->FBCfg, theShareCtx, True, aCtxAttribs);
     }
 
     if(myRC == NULL) {
         // fallback compatibility mode
-        myRC = glXCreateContext(theDisplay->hDisplay, theDisplay->hVisInfo, None, true);
+        myRC = glXCreateContext(theDisplay->hDisplay, theDisplay->hVisInfo, theShareCtx, true);
     }
 }
 
@@ -607,10 +608,15 @@ int StWinHandles::glCreateContext(StWinHandles*    theSlave,
     ST_GL_ERROR_CHECK(hRC->isValid(),
                       STWIN_ERROR_X_GLRC_CREATE, "GLX, could not create rendering context for Master");
     if(theSlave != NULL) {
-        theSlave->hRC = hRC;
+        // It seems that glxMakeCurrent() invalidates GL_BACK contents
+        // or GLXContext reuses the same buffers when attached to another Drawable.
+        // Although the single GLXContext approach worked back in '2013, when it was introduced.
+        // Lets create a separated context with shared resources instead for compatibility.
+        //theSlave->hRC = hRC;
+        theSlave->hRC = new StWinGlrc(stXDisplay, theDebugCtx, hRC->getRenderContext());
 
         // bind the rendering context to the window
-        ST_GL_ERROR_CHECK(hRC->makeCurrent(theSlave->hWindowGl),
+        ST_GL_ERROR_CHECK(theSlave->hRC->makeCurrent(theSlave->hWindowGl),
                           STWIN_ERROR_X_GLRC_CREATE, "GLX, Can't activate Slave GL Rendering Context");
     }
 
