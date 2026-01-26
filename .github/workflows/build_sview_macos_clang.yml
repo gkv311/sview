@@ -9,6 +9,7 @@ jobs:
     - name: Clone Tree
       uses: actions/checkout@v6
       with:
+        path: sview.git
         fetch-depth: 1
     - name: Install Dependencies
       run: |
@@ -19,4 +20,4 @@ jobs:
           openal-soft
     - name: Compile
       run: |
-        ./adm/ci/build_sview_osx.sh
+        ./sview.git/adm/ci/build_sview_osx.sh

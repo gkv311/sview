@@ -9,6 +9,7 @@ jobs:
     - name: Clone Tree
       uses: actions/checkout@v6
       with:
+        path: sview.git
         fetch-depth: 1
     - name: Install Dependencies
       run: |
@@ -25,24 +26,25 @@ jobs:
           libavcodec-dev libavdevice-dev libavformat-dev libavutil-dev libswscale-dev
     - name: Build
       run: |
-        bash ./adm/ci/build_sview_linux.sh
+        bash ./sview.git/adm/ci/build_sview_linux.sh
     - name: Install Dependencies for Testing
       run: |
         sudo apt-get install -y \
           xvfb scrot
     - name: Run tests
       run: |
-        LD_LIBRARY_PATH=$PWD/build/install/lib xvfb-run --server-args="-screen 0 1920x1080x24" bash \
-          ./adm/ci/screenshot.sh ./build/sview-player-linux.png 5 \
-          ./build/install/bin/sView --windowLeft=100 --windowTop=100
-        LD_LIBRARY_PATH=$PWD/build/install/lib xvfb-run --server-args="-screen 0 1920x1080x24" bash \
-          ./adm/ci/screenshot.sh ./build/sview-viewer-linux.png 2 \
-          ./build/install/bin/sView ./share/sView/demo/demo.jps
+        export LD_LIBRARY_PATH=$PWD/sview.git/build/install/lib
+        xvfb-run --server-args="-screen 0 1920x1080x24" bash \
+          ./sview.git/adm/ci/screenshot.sh ./sview.git/build/sview-player-linux.png 5 \
+          ./sview.git/build/install/bin/sView --windowLeft=100 --windowTop=100
+        xvfb-run --server-args="-screen 0 1920x1080x24" bash \
+          ./sview.git/adm/ci/screenshot.sh ./sview.git/build/sview-viewer-linux.png 2 \
+          ./sview.git/build/install/bin/sView ./sview.git/share/sView/demo/demo.jps
     - name: Upload artifacts
       uses: actions/upload-artifact@v4
       with:
         name: sview-linux-screenshots
-        path: ./build/*.png
+        path: ./sview.git/build/*.png
 
   build-ubuntu-24-04-debpkg:
     runs-on: ubuntu-24.04
@@ -50,6 +52,7 @@ jobs:
     - name: Clone Tree
       uses: actions/checkout@v6
       with:
+        path: sview.git
         fetch-depth: 1
     - name: Install Dependencies
       run: |
@@ -65,7 +68,7 @@ jobs:
           libavcodec-dev libavdevice-dev libavformat-dev libavutil-dev libswscale-dev
     - name: Build
       run: |
-        bash ./distribution/buildDebSrc.sh
+        bash ./sview.git/distribution/buildDebSrc.sh
 
   build-ubuntu-22-04:
     runs-on: ubuntu-22.04
@@ -73,6 +76,7 @@ jobs:
     - name: Clone Tree
       uses: actions/checkout@v6
       with:
+        path: sview.git
         fetch-depth: 1
     - name: Install Dependencies
       run: |
@@ -88,4 +92,4 @@ jobs:
           libavcodec-dev libavdevice-dev libavformat-dev libavutil-dev libswscale-dev
     - name: Build
       run: |
-        ./adm/ci/build_sview_linux.sh
+        ./sview.git/adm/ci/build_sview_linux.sh

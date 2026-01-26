@@ -28,23 +28,21 @@ jobs:
     - name: Configure project
       shell: cmd
       run: |
-        mkdir "build"
         call .\sview-deps-wnt.git\unpack.bat
-        cmake -T host=x64 ^
+        cmake -S ./sview.git -B ./sview-make -T host=x64 ^
           -D BUILD_TREAT_WARNINGS_AS_ERRORS=OFF ^
-          -D CMAKE_INSTALL_PREFIX="./build/install" ^
+          -D CMAKE_INSTALL_PREFIX="%CD%/sview-install" ^
           -D FREETYPE_DIR=./sview-deps-wnt.git/%ST_FREETYPE% ^
           -D FFMPEG_DIR=./sview-deps-wnt.git/%ST_FFMPEG% ^
           -D OPENAL_DIR=./sview-deps-wnt.git/%ST_OPENAL% ^
           -D OPENVR_DIR=./sview-deps-wnt.git/%ST_OPENVR% ^
-          -D NVAPI_DIR=./sview-deps-wnt.git/%ST_NVAPI% ^
-          -S ./sview.git -B "./build"
+          -D NVAPI_DIR=./sview-deps-wnt.git/%ST_NVAPI%
     - name: Build project
       run: |
-        cmake --build "./build" --config Release -- /m
-        cmake --build "./build" --config Release --target install
+        cmake --build ./sview-make --config Release -- /m
+        cmake --build ./sview-make --config Release --target install
     - name: Upload artifacts
       uses: actions/upload-artifact@v4
       with:
         name: sview-msvc
-        path: build/install
+        path: sview-install
