@@ -80,6 +80,9 @@ target_link_libraries (${PROJECT_NAME} PRIVATE ${ST_OPENGL_LIBRARIES})
 if (APPLE)
   target_link_libraries (${PROJECT_NAME} PRIVATE "-framework CoreVideo" objc)
 endif()
+if (WIN32 AND USE_MONGOOSE)
+  target_link_libraries (${PROJECT_NAME} PRIVATE ws2_32 wsock32)
+endif()
 
 # copy web resources to build folder
 file (GLOB TEXTURE_FILES ../textures/*.svg)

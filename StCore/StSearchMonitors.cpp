@@ -31,6 +31,12 @@
     #include "StADLsdk.h"
 #endif
 
+#if defined(__GNUC__) && !defined(__INTEL_COMPILER) && !defined(__clang__)
+    #if (__GNUC__ > 8) || ((__GNUC__ == 8) && (__GNUC_MINOR__ >= 1))
+        #pragma GCC diagnostic ignored "-Wcast-function-type"
+    #endif
+#endif
+
 StSearchMonitors::StSearchMonitors()
 : StArrayList<StMonitor>(2),
   myIsUpdater(false) {
@@ -125,11 +131,9 @@ void StSearchMonitors::findMonitorsWinAPI() {
                                                  int      theDpiType, // MONITOR_DPI_TYPE
                                                  UINT*    theDpiX,
                                                  UINT*    theDpiY);
-    typedef HRESULT (WINAPI *GetScaleFactorForMonitor_t)(HMONITOR   theMon,
-                                                         int*       theScale);
-    typedef HRESULT (WINAPI *RegisterScaleChangeEvent_t)(HANDLE     theEvent,
-                                                         DWORD_PTR* theCookie);
-    typedef HRESULT (WINAPI *UnregisterScaleChangeEvent_t)(DWORD_PTR theCookie);
+    //typedef HRESULT (WINAPI *GetScaleFactorForMonitor_t)(HMONITOR theMon, int* theScale);
+    //typedef HRESULT (WINAPI *RegisterScaleChangeEvent_t)(HANDLE theEvent, DWORD_PTR* theCookie);
+    //typedef HRESULT (WINAPI *UnregisterScaleChangeEvent_t)(DWORD_PTR theCookie);
     HMODULE aShcoreLib = GetModuleHandleW(L"Shcore");
     GetDpiForMonitor_t         aMonDpiFunc   = NULL;
     //GetScaleFactorForMonitor_t aMonScaleFunc = NULL;

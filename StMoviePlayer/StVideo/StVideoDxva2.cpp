@@ -291,7 +291,7 @@ bool StDxva2Context::create(StVideoQueue& theVideo) {
     D3DDISPLAYMODE aD3dDispMode;
     UINT anAdapter = D3DADAPTER_DEFAULT;
     myD3d9->GetAdapterDisplayMode(anAdapter, &aD3dDispMode);
-    D3DPRESENT_PARAMETERS aD3dParams = {0};
+    D3DPRESENT_PARAMETERS aD3dParams = {};
     aD3dParams.Windowed         = TRUE;
     aD3dParams.BackBufferWidth  = 2;
     aD3dParams.BackBufferHeight = 2;
@@ -378,7 +378,7 @@ int StDxva2Context::getFrameBuffer(StVideoQueue& theVideo,
             anOldUnused = aSurfIter;
         }
     }
-    if(anOldUnused == -1) {
+    if(anOldUnused == uint32_t(-1)) {
         theVideo.signals.onError(stCString("StVideoQueue: No free DXVA2 surface!"));
         return AVERROR(ENOMEM);
     }
@@ -554,7 +554,7 @@ bool StDxva2Context::decoderCreate(StVideoQueue&   theVideo,
         return false;
     }
 
-    DXVA2_VideoDesc aDesc = { 0 };
+    DXVA2_VideoDesc aDesc = {};
     aDesc.SampleWidth  = theCodecCtx->coded_width;
     aDesc.SampleHeight = theCodecCtx->coded_height;
     aDesc.Format       = aTargetD3dFormat;
@@ -562,7 +562,7 @@ bool StDxva2Context::decoderCreate(StVideoQueue&   theVideo,
     uint32_t aNbConfigs = 0;
     uint32_t aBestScore = 0;
     DXVA2_ConfigPictureDecode* aCfgList = NULL;
-    DXVA2_ConfigPictureDecode  aBestCfg = {{0}};
+    DXVA2_ConfigPictureDecode  aBestCfg = {};
     if(myDecoderService->GetDecoderConfigurations(aDeviceGuid, &aDesc, NULL, &aNbConfigs, &aCfgList) != S_OK) {
         onError(stCString("StVideoQueue: Unable to retrieve DXVA2 decoder configurations"));
         decoderDestroy(theCodecCtx);

@@ -15,7 +15,7 @@
 #endif
 
 #if defined(_WIN32)
-  #include <Shlobj.h>
+  #include <shlobj.h>
 #elif defined(__ANDROID__)
 
 #include <android/asset_manager.h>

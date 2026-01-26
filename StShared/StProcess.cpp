@@ -9,7 +9,7 @@
 #include <StLibrary.h>
 
 #ifdef _WIN32
-    #include <Psapi.h>
+    #include <psapi.h>
     #include <process.h>
     #include <signal.h>
     #include <float.h>

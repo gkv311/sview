@@ -13,6 +13,25 @@
     #include <windows.h>
     #include <process.h>
 
+    #if defined(__GNUC__) && !defined(__INTEL_COMPILER) && !defined(__clang__)
+        #if (__GNUC__ > 8) || ((__GNUC__ == 8) && (__GNUC_MINOR__ >= 1))
+            #pragma GCC diagnostic ignored "-Wcast-function-type"
+        #endif
+    #endif
+
+    typedef HRESULT (WINAPI *SetThreadDescription_t)(HANDLE, PCWSTR);
+
+    /*
+     * Retrieve function pointer (requires Windows 10 1607+).
+     */
+    static SetThreadDescription_t findThreadDesc() {
+        HMODULE aKernBaseMod = GetModuleHandleW(L"kernelbase");
+        return (SetThreadDescription_t)(aKernBaseMod != NULL
+              ? GetProcAddress(aKernBaseMod, "SetThreadDescription")
+              : NULL);
+    }
+
+#ifdef _MSC_VER
     namespace {
         static const DWORD MS_VC_EXCEPTION = 0x406D1388;
     }
@@ -25,6 +44,7 @@
         DWORD  dwFlags;    //!< must be zero
     };
     #pragma pack(pop)
+#endif
 
 #else
     #include <sys/types.h>
@@ -70,17 +90,24 @@ void StThread::setName(const char* theName) {
     }
 
 #ifdef _WIN32
+#ifdef _MSC_VER
     MsWinThreadNameInfo anInfo;
     anInfo.dwType     = 0x1000;
     anInfo.szName     = theName;
     anInfo.dwThreadID = myThreadId;
     anInfo.dwFlags    = 0;
-
     __try {
         ::RaiseException(MS_VC_EXCEPTION, 0, sizeof(anInfo)/sizeof(ULONG_PTR), (ULONG_PTR* )&anInfo);
     } __except(EXCEPTION_EXECUTE_HANDLER) {
         //
     }
+#else
+    static const SetThreadDescription_t kerSetThreadDescription = findThreadDesc();
+    if (kerSetThreadDescription != NULL) {
+        StStringUtfWide aNameWide(theName);
+        kerSetThreadDescription((HANDLE )myThread, aNameWide.toCString());
+    }
+#endif
 #elif defined(__APPLE__)
     (void )theName;
 #else
@@ -95,17 +122,18 @@ void StThread::setCurrentThreadName(const char* theName) {
     }
 
 #ifdef _WIN32
+#ifdef _MSC_VER
     MsWinThreadNameInfo anInfo;
     anInfo.dwType     = 0x1000;
     anInfo.szName     = theName;
     anInfo.dwThreadID = (DWORD )-1;
     anInfo.dwFlags    = 0;
-
     __try {
         ::RaiseException(MS_VC_EXCEPTION, 0, sizeof(anInfo)/sizeof(ULONG_PTR), (ULONG_PTR* )&anInfo);
     } __except(EXCEPTION_EXECUTE_HANDLER) {
         //
     }
+#endif // _MSC_VER
 #elif defined(__APPLE__)
     pthread_setname_np(theName);
 #else
@@ -123,7 +151,7 @@ bool StThread::wait() {
         return false;
     }
     CloseHandle((HANDLE )myThread);
-    myThread = NULL;
+    myThread = 0;
 #else
     if(pthread_join(myThread, NULL) != 0) {
         return false;
@@ -143,7 +171,7 @@ bool StThread::wait(const int theTimeMilliseconds) {
         return false;
     }
     CloseHandle((HANDLE )myThread);
-    myThread = NULL;
+    myThread = 0;
 #else
     (void )theTimeMilliseconds;
     if(pthread_join(myThread, NULL) != 0) {
@@ -170,7 +198,7 @@ void StThread::detach() {
     if(isValid()) {
     #ifdef _WIN32
         CloseHandle((HANDLE )myThread);
-        myThread = NULL;
+        myThread = 0;
     #else
         pthread_detach(myThread);
         myHasHandle = false;

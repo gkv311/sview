@@ -409,10 +409,10 @@ inline void* stMemAllocAligned(const size_t& theNbBytes,
     return _aligned_malloc(theNbBytes, theAlign);
 #elif defined(__ANDROID__) || defined(__QNX__)
     return memalign(theAlign, theNbBytes);
-#elif (defined(__GNUC__) && __GNUC__ >= 4 && __GNUC_MINOR__ >= 1 && (defined(__i386) || defined(__x86_64)))
+#elif (defined(__GNUC__) && (__GNUC__ > 4 || (__GNUC__== 4 && __GNUC_MINOR__ >= 1)) && (defined(__i386) || defined(__x86_64)))
     return _mm_malloc(theNbBytes, theAlign);
 #else
-    void* aPtr;
+    void* aPtr = NULL;
     if(posix_memalign(&aPtr, theAlign, theNbBytes)) {
         return NULL;
     }
@@ -441,7 +441,7 @@ inline void stMemFreeAligned(void* thePtrAligned) {
     _aligned_free(thePtrAligned);
 #elif defined(__ANDROID__) || defined(__QNX__)
     free(thePtrAligned);
-#elif (defined(__GNUC__) && __GNUC__ >= 4 && __GNUC_MINOR__ >= 1 && (defined(__i386) || defined(__x86_64)))
+#elif (defined(__GNUC__) && (__GNUC__ > 4 || (__GNUC__== 4 && __GNUC_MINOR__ >= 1)) && (defined(__i386) || defined(__x86_64)))
     _mm_free(thePtrAligned);
 #else
     free(thePtrAligned);

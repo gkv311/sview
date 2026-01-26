@@ -15,7 +15,7 @@ StString StLibrary::DLibGetVersion(const StStringUtfWide& theLibPath) {
         return StString();
     }
     LPVOID aBlock = stMemAlloc(aFVInfoSize);
-    GetFileVersionInfoW(theLibPath.toCString(), NULL, aFVInfoSize, aBlock);
+    GetFileVersionInfoW(theLibPath.toCString(), 0, aFVInfoSize, aBlock);
     VS_FIXEDFILEINFO* aFixedInfo;
     UINT aBufferSize;
     stUtfWide_t aPathToSubBlock[] = L"\\";
