@@ -1,0 +1,338 @@
+name: Build (Linux/MinGW)
+on:
+  workflow_call:
+
+jobs:
+  build-lin-mingw-freetype:
+    runs-on: ubuntu-24.04
+    env:
+      TOOLCHAIN_PREFIX: x86_64-w64-mingw32
+    steps:
+    - name: Clone Tree
+      uses: actions/checkout@v6
+      with:
+        path: freetype.git
+        repository: freetype/freetype
+        ref: 'VER-2-14-1'
+        fetch-depth: 1
+    - name: Install Dependencies
+      run: |
+        sudo apt-get update
+        sudo apt-get install -y \
+          g++ cmake ninja-build \
+          mingw-w64-common mingw-w64-tools binutils-mingw-w64-x86-64 \
+          g++-mingw-w64-x86-64-posix gcc-mingw-w64-x86-64-posix
+        ${TOOLCHAIN_PREFIX}-g++ --version
+        cat <<EOF >> "./${TOOLCHAIN_PREFIX}.cmake"
+        set(CMAKE_SYSTEM_NAME Windows)
+        set(CMAKE_C_COMPILER   ${TOOLCHAIN_PREFIX}-gcc-posix)
+        set(CMAKE_CXX_COMPILER ${TOOLCHAIN_PREFIX}-g++-posix)
+        set(CMAKE_RC_COMPILER  ${TOOLCHAIN_PREFIX}-windres)
+        set(CMAKE_FIND_ROOT_PATH /usr/${TOOLCHAIN_PREFIX})
+        set(CMAKE_FIND_ROOT_PATH_MODE_PROGRAM NEVER)
+        set(CMAKE_FIND_ROOT_PATH_MODE_LIBRARY ONLY)
+        set(CMAKE_FIND_ROOT_PATH_MODE_INCLUDE ONLY)
+        EOF
+    - name: Configure project
+      run: |
+        cmake -S ./freetype.git -B ./freetype-make -G Ninja \
+          -D CMAKE_TOOLCHAIN_FILE="$PWD/${TOOLCHAIN_PREFIX}.cmake" \
+          -D CMAKE_BUILD_TYPE=Release \
+          -D CMAKE_INSTALL_PREFIX:PATH="$PWD/freetype-install" \
+          -D BUILD_SHARED_LIBS:BOOL=ON \
+          -D FT_WITH_ZLIB=ON      -D CMAKE_DISABLE_FIND_PACKAGE_ZLIB:BOOL=OFF \
+          -D FT_WITH_BZIP2=OFF    -D CMAKE_DISABLE_FIND_PACKAGE_BZip2:BOOL=TRUE \
+          -D FT_WITH_PNG=OFF      -D CMAKE_DISABLE_FIND_PACKAGE_PNG:BOOL=TRUE \
+          -D FT_WITH_HARFBUZZ=OFF -D CMAKE_DISABLE_FIND_PACKAGE_HarfBuzz:BOOL=TRUE \
+          -D FT_WITH_BROTLI=OFF   -D CMAKE_DISABLE_FIND_PACKAGE_BrotliDec:BOOL=TRUE
+    - name: Build project
+      run: |
+        cmake --build ./freetype-make --config Release
+    - name: Install build
+      run: |
+        cmake --build ./freetype-make --config Release --target install
+        cp -f "./freetype.git/docs/FTL.TXT"   "./freetype-install/"
+        cp -f "./freetype.git/docs/GPLv2.TXT" "./freetype-install/"
+        cp -f "./freetype.git/docs/CHANGES"   "./freetype-install/"
+        cp -f "./freetype.git/docs/README"    "./freetype-install/"
+        cp -f "./freetype.git/LICENSE.TXT"    "./freetype-install/"
+    - name: Upload build
+      uses: actions/upload-artifact@v4
+      with:
+        name: freetype-win64-mingw-msvcrt
+        path: freetype-install
+
+  build-lin-mingw-openal:
+    runs-on: ubuntu-24.04
+    env:
+      TOOLCHAIN_PREFIX: x86_64-w64-mingw32
+    steps:
+    - name: Clone Tree
+      uses: actions/checkout@v6
+      with:
+        path: openal.git
+        repository: kcat/openal-soft
+        ref: '1.25.1'
+        fetch-depth: 1
+    - name: Install Dependencies
+      run: |
+        sudo apt-get update
+        sudo apt-get install -y \
+          g++ cmake ninja-build \
+          mingw-w64-common mingw-w64-tools binutils-mingw-w64-x86-64 \
+          g++-mingw-w64-x86-64-posix gcc-mingw-w64-x86-64-posix
+        ${TOOLCHAIN_PREFIX}-g++ --version
+        cat <<EOF >> "./${TOOLCHAIN_PREFIX}.cmake"
+        set(CMAKE_SYSTEM_NAME Windows)
+        set(CMAKE_C_COMPILER   ${TOOLCHAIN_PREFIX}-gcc-posix)
+        set(CMAKE_CXX_COMPILER ${TOOLCHAIN_PREFIX}-g++-posix)
+        set(CMAKE_RC_COMPILER  ${TOOLCHAIN_PREFIX}-windres)
+        set(CMAKE_FIND_ROOT_PATH /usr/${TOOLCHAIN_PREFIX})
+        set(CMAKE_FIND_ROOT_PATH_MODE_PROGRAM NEVER)
+        set(CMAKE_FIND_ROOT_PATH_MODE_LIBRARY ONLY)
+        set(CMAKE_FIND_ROOT_PATH_MODE_INCLUDE ONLY)
+        EOF
+    - name: Configure project
+      run: |
+        cmake -S ./openal.git -B ./openal-make -G Ninja \
+          -D CMAKE_TOOLCHAIN_FILE="$PWD/${TOOLCHAIN_PREFIX}.cmake" \
+          -D CMAKE_BUILD_TYPE=Release \
+          -D CMAKE_INSTALL_PREFIX:PATH="$PWD/openal-install" \
+          -D ALSOFT_EXAMPLES:BOOL=OFF \
+          -D ALSOFT_TESTS:BOOL=OFF \
+          -D ALSOFT_UTILS:BOOL=ON \
+          -D ALSOFT_BUILD_ROUTER:BOOL=OFF \
+          -D ALSOFT_REQUIRE_WINMM:BOOL=ON \
+          -D ALSOFT_REQUIRE_DSOUND:BOOL=ON \
+          -D ALSOFT_REQUIRE_WASAPI:BOOL=ON \
+          -D ALSOFT_STATIC_LIBGCC:BOOL=ON \
+          -D ALSOFT_STATIC_STDCXX:BOOL=ON \
+          -D ALSOFT_STATIC_WINPTHREAD:BOOL=ON
+    - name: Build project
+      run: |
+        cmake --build ./openal-make --config Release
+    - name: Install build
+      run: |
+        cmake --build ./openal-make --config Release --target install
+        cp -f "./openal.git/COPYING"   "./openal-install/"
+        cp -f "./openal.git/README.md" "./openal-install/"
+    - name: Upload build
+      uses: actions/upload-artifact@v4
+      with:
+        name: openal-win64-mingw-msvcrt
+        path: openal-install
+
+  build-lin-mingw-ffmpeg:
+    runs-on: ubuntu-24.04
+    env:
+      TOOLCHAIN_PREFIX: x86_64-w64-mingw32
+    steps:
+    - name: Clone Tree
+      uses: actions/checkout@v6
+      with:
+        path: ffmpeg.git
+        repository: FFmpeg/FFmpeg
+        ref: 'n8.0.1'
+        fetch-depth: 1
+    #- name: Clone Tree
+    #  uses: actions/checkout@v6
+    #  with:
+    #    path: bzip2.git
+    #    repository: https://gitlab.com/bzip2/bzip2.git
+    #    ref: 'bzip2-1.0.8'
+    #    fetch-depth: 1
+    - name: Clone Tree
+      uses: actions/checkout@v6
+      with:
+        path: dav1d.git
+        repository: videolan/dav1d
+        ref: '1.5.3'
+        fetch-depth: 1
+    - name: Clone Tree
+      uses: actions/checkout@v6
+      with:
+        path: openjpeg.git
+        repository: uclouvain/openjpeg
+        ref: 'v2.5.4'
+        fetch-depth: 1
+    - name: Install Dependencies
+      run: |
+        sudo apt-get update
+        sudo apt-get install -y \
+          g++ cmake meson nasm libz-mingw-w64-dev \
+          mingw-w64-common mingw-w64-tools binutils-mingw-w64-x86-64 \
+          g++-mingw-w64-x86-64-posix gcc-mingw-w64-x86-64-posix
+        ${TOOLCHAIN_PREFIX}-g++ --version
+        cat <<EOF >> "./${TOOLCHAIN_PREFIX}.cmake"
+        set(CMAKE_SYSTEM_NAME Windows)
+        set(CMAKE_C_COMPILER   ${TOOLCHAIN_PREFIX}-gcc-posix)
+        set(CMAKE_CXX_COMPILER ${TOOLCHAIN_PREFIX}-g++-posix)
+        set(CMAKE_RC_COMPILER  ${TOOLCHAIN_PREFIX}-windres)
+        set(CMAKE_FIND_ROOT_PATH /usr/${TOOLCHAIN_PREFIX})
+        set(CMAKE_FIND_ROOT_PATH_MODE_PROGRAM NEVER)
+        set(CMAKE_FIND_ROOT_PATH_MODE_LIBRARY ONLY)
+        set(CMAKE_FIND_ROOT_PATH_MODE_INCLUDE ONLY)
+        EOF
+    #- name: Build bzip2
+    #  run: |
+    #    #aNbJobs="$(getconf _NPROCESSORS_ONLN)"
+    #    #pushd bzip2.git
+    #    #make libbz2.a -j$aNbJobs CC=${TOOLCHAIN_PREFIX}-gcc AR=${TOOLCHAIN_PREFIX}-ar RANLIB=${TOOLCHAIN_PREFIX}-ranlib
+    #    #cp -f "$aLibRoot/libbz2.a" "$OUTPUT_FOLDER/lib"
+    #    #popd
+    #    cmake -S ./bzip2.git -B ./bzip2-make -G Ninja \
+    #      -D CMAKE_TOOLCHAIN_FILE="$PWD/${TOOLCHAIN_PREFIX}.cmake" \
+    #      -D CMAKE_BUILD_TYPE=Release \
+    #      -D CMAKE_INSTALL_PREFIX:PATH="$PWD/bzip2-install"
+    - name: Configure openjpeg
+      run: |
+        cmake -S ./openjpeg.git -B ./openjpeg-make -G Ninja \
+          -D CMAKE_TOOLCHAIN_FILE="$PWD/${TOOLCHAIN_PREFIX}.cmake" \
+          -D CMAKE_BUILD_TYPE=Release \
+          -D BUILD_SHARED_LIBS:BOOL=OFF \
+          -D CMAKE_INSTALL_PREFIX:PATH="$PWD/openjpeg-install"
+    - name: Build openjpeg
+      run: |
+        cmake --build ./openjpeg-make --config Release
+    - name: Install openjpeg
+      run: |
+        cmake --build ./openjpeg-make --config Release --target install
+    - name: Configure dav1d
+      run: |
+        meson setup \
+          --cross-file=$PWD/dav1d.git/package/crossfiles/${TOOLCHAIN_PREFIX}.meson \
+          --prefix=$PWD/dav1d-install \
+          --default-library=static \
+          ./dav1d-make ./dav1d.git
+    - name: Build dav1d
+      run: |
+        ninja -C ./dav1d-make
+    - name: Install dav1d
+      run: |
+        ninja -C ./dav1d-make install
+    - name: Configure FFmpeg
+      run: |
+        export PKG_CONFIG_LIBDIR=
+        export PKG_CONFIG_PATH=/usr/${TOOLCHAIN_PREFIX}/lib/pkgconfig:$PWD/dav1d-install/lib/pkgconfig:$PWD/openjpeg-install/lib/pkgconfig
+        anFFmpegInstall=$PWD/ffmpeg-install
+        # redirect error state from tee
+        set -o pipefail
+        pushd ./ffmpeg.git
+        # --enable-hardcoded-tables - build fails on 8.0.1
+        # --enable-libdav1d --enable-libopenjpeg --enable-gpl --enable-avisynth
+        ./configure \
+          --prefix=$anFFmpegInstall \
+          --enable-cross-compile --target-os=mingw32 --cross-prefix=${TOOLCHAIN_PREFIX}- --arch=x86_64 \
+          --extra-ldflags=-static-libgcc \
+          --disable-debug --disable-stripping \
+          --disable-doc \
+          --extra-version=sView.ru \
+          --enable-version3 \
+          --enable-swscale --enable-avfilter \
+          --enable-shared --disable-static \
+          --enable-pthreads --disable-w32threads \
+          --enable-runtime-cpudetect \
+          --enable-libdav1d --enable-libopenjpeg \
+          2>&1 | tee -a ../ffmpeg-config.log
+        popd
+    - name: Build FFmpeg
+      run: |
+        pushd ./ffmpeg.git
+        aNbJobs="$(getconf _NPROCESSORS_ONLN)"
+        make -j $aNbJobs
+        popd
+    - name: Install FFmpeg
+      run: |
+        pushd ./ffmpeg.git
+        make install
+        popd
+        cp -f ./ffmpeg-config.log           ./ffmpeg-install/
+        cp -f ./ffmpeg.git/Changelog        ./ffmpeg-install/
+        cp -f ./ffmpeg.git/README.md        ./ffmpeg-install/
+        cp -f ./ffmpeg.git/LICENSE.md       ./ffmpeg-install/
+        cp -f ./ffmpeg.git/COPYING.LGPLv2.1 ./ffmpeg-install/
+        cp -f ./ffmpeg.git/COPYING.LGPLv3   ./ffmpeg-install/
+        # copy dependencies
+        cp -f /usr/${TOOLCHAIN_PREFIX}/lib/libwinpthread-1.dll ./ffmpeg-install/bin/
+        cp -f /usr/${TOOLCHAIN_PREFIX}/lib/zlib1.dll           ./ffmpeg-install/bin/
+    - name: Upload build
+      uses: actions/upload-artifact@v4
+      with:
+        name: ffmpeg-win64-mingw-msvcrt
+        path: ffmpeg-install
+
+  build-lin-mingw-sview:
+    runs-on: ubuntu-24.04
+    needs: [build-lin-mingw-freetype, build-lin-mingw-openal, build-lin-mingw-ffmpeg]
+    env:
+      TOOLCHAIN_PREFIX: x86_64-w64-mingw32
+    steps:
+    - name: Clone Tree
+      uses: actions/checkout@v6
+      with:
+        path: sview.git
+        fetch-depth: 1
+    - name: Install Dependencies
+      run: |
+        sudo apt-get update
+        sudo apt-get install -y \
+          g++ cmake ninja-build libz-mingw-w64-dev \
+          mingw-w64-common mingw-w64-tools binutils-mingw-w64-x86-64 \
+          g++-mingw-w64-x86-64-posix gcc-mingw-w64-x86-64-posix
+        ${TOOLCHAIN_PREFIX}-g++ --version
+        cat <<EOF >> "./${TOOLCHAIN_PREFIX}.cmake"
+        set(CMAKE_SYSTEM_NAME Windows)
+        set(CMAKE_C_COMPILER   ${TOOLCHAIN_PREFIX}-gcc-posix)
+        set(CMAKE_CXX_COMPILER ${TOOLCHAIN_PREFIX}-g++-posix)
+        set(CMAKE_RC_COMPILER  ${TOOLCHAIN_PREFIX}-windres)
+        set(CMAKE_FIND_ROOT_PATH /usr/${TOOLCHAIN_PREFIX})
+        set(CMAKE_FIND_ROOT_PATH_MODE_PROGRAM NEVER)
+        set(CMAKE_FIND_ROOT_PATH_MODE_LIBRARY ONLY)
+        set(CMAKE_FIND_ROOT_PATH_MODE_INCLUDE ONLY)
+        EOF
+    - name: Download FreeType build
+      uses: actions/download-artifact@v5
+      with:
+        name: freetype-win64-mingw-msvcrt
+        path: freetype-install
+    - name: Download OpenAL soft build
+      uses: actions/download-artifact@v5
+      with:
+        name: openal-win64-mingw-msvcrt
+        path: openal-install
+    - name: Download FFmpeg build
+      uses: actions/download-artifact@v5
+      with:
+        name: ffmpeg-win64-mingw-msvcrt
+        path: ffmpeg-install
+    - name: Configure project
+      run: |
+        ls -la freetype-install
+        ls -la freetype-install/lib/cmake/freetype
+        export PKG_CONFIG_LIBDIR=
+        export PKG_CONFIG_PATH=/usr/${TOOLCHAIN_PREFIX}/lib/pkgconfig:$PWD/ffmpeg-install/lib/pkgconfig:$PWD/freetype-install/lib/pkgconfig
+        cmake -S ./sview.git -B ./sview-make -G Ninja \
+          -D CMAKE_TOOLCHAIN_FILE="$PWD/${TOOLCHAIN_PREFIX}.cmake" \
+          -D CMAKE_BUILD_TYPE=Release \
+          -D CMAKE_INSTALL_PREFIX:PATH="$PWD/sview-install" \
+          -D USE_OPENVR:BOOL=OFF \
+          -D USE_NVAPI:BOOL=OFF -D NVAPI_DIR:PATH="" \
+          -D FREETYPE_DIR:PATH="$PWD/freetype-install" \
+          -D OPENAL_DIR:PATH="$PWD/openal-install" \
+          -D FFMPEG_DIR:PATH="$PWD/ffmpeg-install"
+    - name: Build project
+      run: |
+        cmake --build ./sview-make --config Release
+    - name: Install build
+      run: |
+        cmake --build ./sview-make --config Release --target install
+        cp -f ./freetype-install/bin/*.dll ./sview-install/
+        cp -f ./ffmpeg-install/bin/*.dll   ./sview-install/
+        cp -f ./openal-install/bin/*.dll   ./sview-install/
+        cp -f /usr/lib/gcc/${TOOLCHAIN_PREFIX}/13-posix/libstdc++-*.dll    ./sview-install/
+        cp -f /usr/lib/gcc/${TOOLCHAIN_PREFIX}/13-posix/libgcc_s_seh-*.dll ./sview-install/
+    - name: Upload artifacts
+      uses: actions/upload-artifact@v4
+      with:
+        name: sview-win64-mingw-msvcrt
+        path: ./sview-install
