@@ -2,11 +2,21 @@ name: Build (Linux/MinGW)
 on:
   workflow_call:
 
+env:
+  TOOLCHAIN_PREFIX: x86_64-w64-mingw32
+  TOOLCHAIN_TEXT: |
+    set(CMAKE_SYSTEM_NAME Windows)
+    set(CMAKE_C_COMPILER   x86_64-w64-mingw32-gcc-posix)
+    set(CMAKE_CXX_COMPILER x86_64-w64-mingw32-g++-posix)
+    set(CMAKE_RC_COMPILER  x86_64-w64-mingw32-windres)
+    set(CMAKE_FIND_ROOT_PATH /usr/x86_64-w64-mingw32)
+    set(CMAKE_FIND_ROOT_PATH_MODE_PROGRAM NEVER)
+    set(CMAKE_FIND_ROOT_PATH_MODE_LIBRARY ONLY)
+    set(CMAKE_FIND_ROOT_PATH_MODE_INCLUDE ONLY)
+
 jobs:
   build-lin-mingw-freetype:
     runs-on: ubuntu-24.04
-    env:
-      TOOLCHAIN_PREFIX: x86_64-w64-mingw32
     steps:
     - name: Clone Tree
       uses: actions/checkout@v6
@@ -23,16 +33,8 @@ jobs:
           mingw-w64-common mingw-w64-tools binutils-mingw-w64-x86-64 \
           g++-mingw-w64-x86-64-posix gcc-mingw-w64-x86-64-posix
         ${TOOLCHAIN_PREFIX}-g++ --version
-        cat <<EOF >> "./${TOOLCHAIN_PREFIX}.cmake"
-        set(CMAKE_SYSTEM_NAME Windows)
-        set(CMAKE_C_COMPILER   ${TOOLCHAIN_PREFIX}-gcc-posix)
-        set(CMAKE_CXX_COMPILER ${TOOLCHAIN_PREFIX}-g++-posix)
-        set(CMAKE_RC_COMPILER  ${TOOLCHAIN_PREFIX}-windres)
-        set(CMAKE_FIND_ROOT_PATH /usr/${TOOLCHAIN_PREFIX})
-        set(CMAKE_FIND_ROOT_PATH_MODE_PROGRAM NEVER)
-        set(CMAKE_FIND_ROOT_PATH_MODE_LIBRARY ONLY)
-        set(CMAKE_FIND_ROOT_PATH_MODE_INCLUDE ONLY)
-        EOF
+        echo "${TOOLCHAIN_TEXT}" > "./${TOOLCHAIN_PREFIX}.cmake"
+        cat "./${TOOLCHAIN_PREFIX}.cmake"
     - name: Configure project
       run: |
         cmake -S ./freetype.git -B ./freetype-make -G Ninja \
@@ -64,8 +66,6 @@ jobs:
 
   build-lin-mingw-openal:
     runs-on: ubuntu-24.04
-    env:
-      TOOLCHAIN_PREFIX: x86_64-w64-mingw32
     steps:
     - name: Clone Tree
       uses: actions/checkout@v6
@@ -82,16 +82,7 @@ jobs:
           mingw-w64-common mingw-w64-tools binutils-mingw-w64-x86-64 \
           g++-mingw-w64-x86-64-posix gcc-mingw-w64-x86-64-posix
         ${TOOLCHAIN_PREFIX}-g++ --version
-        cat <<EOF >> "./${TOOLCHAIN_PREFIX}.cmake"
-        set(CMAKE_SYSTEM_NAME Windows)
-        set(CMAKE_C_COMPILER   ${TOOLCHAIN_PREFIX}-gcc-posix)
-        set(CMAKE_CXX_COMPILER ${TOOLCHAIN_PREFIX}-g++-posix)
-        set(CMAKE_RC_COMPILER  ${TOOLCHAIN_PREFIX}-windres)
-        set(CMAKE_FIND_ROOT_PATH /usr/${TOOLCHAIN_PREFIX})
-        set(CMAKE_FIND_ROOT_PATH_MODE_PROGRAM NEVER)
-        set(CMAKE_FIND_ROOT_PATH_MODE_LIBRARY ONLY)
-        set(CMAKE_FIND_ROOT_PATH_MODE_INCLUDE ONLY)
-        EOF
+        echo "${TOOLCHAIN_TEXT}" > "./${TOOLCHAIN_PREFIX}.cmake"
     - name: Configure project
       run: |
         cmake -S ./openal.git -B ./openal-make -G Ninja \
@@ -124,8 +115,6 @@ jobs:
 
   build-lin-mingw-ffmpeg:
     runs-on: ubuntu-24.04
-    env:
-      TOOLCHAIN_PREFIX: x86_64-w64-mingw32
     steps:
     - name: Clone Tree
       uses: actions/checkout@v6
@@ -163,16 +152,7 @@ jobs:
           mingw-w64-common mingw-w64-tools binutils-mingw-w64-x86-64 \
           g++-mingw-w64-x86-64-posix gcc-mingw-w64-x86-64-posix
         ${TOOLCHAIN_PREFIX}-g++ --version
-        cat <<EOF >> "./${TOOLCHAIN_PREFIX}.cmake"
-        set(CMAKE_SYSTEM_NAME Windows)
-        set(CMAKE_C_COMPILER   ${TOOLCHAIN_PREFIX}-gcc-posix)
-        set(CMAKE_CXX_COMPILER ${TOOLCHAIN_PREFIX}-g++-posix)
-        set(CMAKE_RC_COMPILER  ${TOOLCHAIN_PREFIX}-windres)
-        set(CMAKE_FIND_ROOT_PATH /usr/${TOOLCHAIN_PREFIX})
-        set(CMAKE_FIND_ROOT_PATH_MODE_PROGRAM NEVER)
-        set(CMAKE_FIND_ROOT_PATH_MODE_LIBRARY ONLY)
-        set(CMAKE_FIND_ROOT_PATH_MODE_INCLUDE ONLY)
-        EOF
+        echo "${TOOLCHAIN_TEXT}" > "./${TOOLCHAIN_PREFIX}.cmake"
     #- name: Build bzip2
     #  run: |
     #    #aNbJobs="$(getconf _NPROCESSORS_ONLN)"
@@ -264,8 +244,6 @@ jobs:
   build-lin-mingw-sview:
     runs-on: ubuntu-24.04
     needs: [build-lin-mingw-freetype, build-lin-mingw-openal, build-lin-mingw-ffmpeg]
-    env:
-      TOOLCHAIN_PREFIX: x86_64-w64-mingw32
     steps:
     - name: Clone Tree
       uses: actions/checkout@v6
@@ -280,16 +258,7 @@ jobs:
           mingw-w64-common mingw-w64-tools binutils-mingw-w64-x86-64 \
           g++-mingw-w64-x86-64-posix gcc-mingw-w64-x86-64-posix
         ${TOOLCHAIN_PREFIX}-g++ --version
-        cat <<EOF >> "./${TOOLCHAIN_PREFIX}.cmake"
-        set(CMAKE_SYSTEM_NAME Windows)
-        set(CMAKE_C_COMPILER   ${TOOLCHAIN_PREFIX}-gcc-posix)
-        set(CMAKE_CXX_COMPILER ${TOOLCHAIN_PREFIX}-g++-posix)
-        set(CMAKE_RC_COMPILER  ${TOOLCHAIN_PREFIX}-windres)
-        set(CMAKE_FIND_ROOT_PATH /usr/${TOOLCHAIN_PREFIX})
-        set(CMAKE_FIND_ROOT_PATH_MODE_PROGRAM NEVER)
-        set(CMAKE_FIND_ROOT_PATH_MODE_LIBRARY ONLY)
-        set(CMAKE_FIND_ROOT_PATH_MODE_INCLUDE ONLY)
-        EOF
+        echo "${TOOLCHAIN_TEXT}" > "./${TOOLCHAIN_PREFIX}.cmake"
     - name: Download FreeType build
       uses: actions/download-artifact@v5
       with:
