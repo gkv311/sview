@@ -59,7 +59,7 @@ jobs:
     - name: Upload build
       uses: actions/upload-artifact@v4
       with:
-        name: freetype-win64-mingw-msvcrt
+        name: freetype-windows-x64-mingw
         path: freetype-install
 
   build-lin-mingw-openal:
@@ -119,7 +119,7 @@ jobs:
     - name: Upload build
       uses: actions/upload-artifact@v4
       with:
-        name: openal-win64-mingw-msvcrt
+        name: openal-windows-x64-mingw
         path: openal-install
 
   build-lin-mingw-ffmpeg:
@@ -258,7 +258,7 @@ jobs:
     - name: Upload build
       uses: actions/upload-artifact@v4
       with:
-        name: ffmpeg-win64-mingw-msvcrt
+        name: ffmpeg-windows-x64-mingw
         path: ffmpeg-install
 
   build-lin-mingw-sview:
@@ -293,17 +293,17 @@ jobs:
     - name: Download FreeType build
       uses: actions/download-artifact@v5
       with:
-        name: freetype-win64-mingw-msvcrt
+        name: freetype-windows-x64-mingw
         path: freetype-install
     - name: Download OpenAL soft build
       uses: actions/download-artifact@v5
       with:
-        name: openal-win64-mingw-msvcrt
+        name: openal-windows-x64-mingw
         path: openal-install
     - name: Download FFmpeg build
       uses: actions/download-artifact@v5
       with:
-        name: ffmpeg-win64-mingw-msvcrt
+        name: ffmpeg-windows-x64-mingw
         path: ffmpeg-install
     - name: Configure project
       run: |
@@ -334,5 +334,5 @@ jobs:
     - name: Upload artifacts
       uses: actions/upload-artifact@v4
       with:
-        name: sview-win64-mingw-msvcrt
+        name: sview-windows-x64-mingw
         path: ./sview-install

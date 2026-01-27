@@ -44,5 +44,5 @@ jobs:
     - name: Upload artifacts
       uses: actions/upload-artifact@v4
       with:
-        name: sview-msvc
+        name: sview-windows-x64-msvc
         path: sview-install
