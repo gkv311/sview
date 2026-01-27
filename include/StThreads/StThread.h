@@ -135,7 +135,7 @@ class StThread {
      * The function cannot be used by one thread to create a handle that can be used by other threads to refer to the first thread!
      * /
     static StThread getCurrentThread() {
-    #if (defined(_WIN32) || defined(__WIN32__))
+    #if defined(_WIN32)
         return StThread(GetCurrentThread(), GetCurrentThreadId(), true);
     #else
         return StThread(pthread_self());

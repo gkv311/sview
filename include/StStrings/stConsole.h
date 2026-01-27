@@ -14,7 +14,7 @@
 #include <string>
 
 namespace st {
-#if(defined(_WIN32) || defined(__WIN32__))
+#if defined(_WIN32)
     typedef std::wofstream ofstream;
     typedef std::wostream  ostream;
     static std::wostream& cout = std::wcout;
@@ -41,6 +41,6 @@ namespace st {
     ST_CPPEXPORT st::ostream& COLOR_FOR_BLUE    (st::ostream& theOStream);
     ST_CPPEXPORT st::ostream& COLOR_FOR_WHITE   (st::ostream& theOStream);
 
-};
+}
 
 #endif //__stConsole_h__

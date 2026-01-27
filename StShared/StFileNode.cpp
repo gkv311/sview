@@ -135,7 +135,7 @@ bool StFileNode::removeFile(const StCString& thePath) {
 
 /**bool StFileNode::copyFile(const StString& thePathFrom,
                           const StString& thePathTo) {
-#if(defined(_WIN32) || defined(__WIN32__))
+#if defined(_WIN32)
     return CopyFileW(thePathFrom.toUtfWide().toCString(),
                      thePathTo.toUtfWide().toCString(), TRUE) != 0;
 #else

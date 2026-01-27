@@ -17,7 +17,7 @@
 // to optimize static linkage (avoid unnecessary dependencies)
 StArrayList<StString> StProcess::getArguments() {
     StArrayList<StString> aList;
-#if (defined(_WIN32) || defined(__WIN32__))
+#if defined(_WIN32)
     int argc = 0;
     stUtfWide_t** argv = CommandLineToArgvW(GetCommandLineW(), &argc);
     for(int aParamId = 0; aParamId < argc; ++aParamId) {
@@ -25,7 +25,7 @@ StArrayList<StString> StProcess::getArguments() {
     }
     // free memory allocated for CommandLineToArgvW arguments.
     LocalFree(argv);
-#elif (defined(__APPLE__))
+#elif defined(__APPLE__)
     if(_NSGetArgc() == NULL || _NSGetArgv() == NULL) {
         return aList; // is it possible?
     }

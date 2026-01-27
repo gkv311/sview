@@ -36,7 +36,7 @@ class StMutexSlim {
      * Create an unlocked mutex object.
      */
     inline StMutexSlim()
-#if (defined(_WIN32) || defined(__WIN32__))
+#if defined(_WIN32)
     {
         // create the critical section with spin count 1024
         if(!InitializeCriticalSectionAndSpinCount(&myCritSection, 0x00000400)) {
@@ -51,7 +51,7 @@ class StMutexSlim {
      * Destructor.
      */
     inline ~StMutexSlim() {
-    #if (defined(_WIN32) || defined(__WIN32__))
+    #if defined(_WIN32)
         DeleteCriticalSection(&myCritSection);
     #endif
     }
@@ -60,7 +60,7 @@ class StMutexSlim {
      * Lock the mutex.
      */
     inline void lock() {
-    #if (defined(_WIN32) || defined(__WIN32__))
+    #if defined(_WIN32)
         EnterCriticalSection(&myCritSection);
     #else
         myMutex.lock();
@@ -71,7 +71,7 @@ class StMutexSlim {
      * Unlock the mutex.
      */
     inline void unlock() {
-    #if (defined(_WIN32) || defined(__WIN32__))
+    #if defined(_WIN32)
         LeaveCriticalSection(&myCritSection);
     #else
         myMutex.unlock();
@@ -80,7 +80,7 @@ class StMutexSlim {
 
         private:
 
-#if (defined(_WIN32) || defined(__WIN32__))
+#if defined(_WIN32)
     CRITICAL_SECTION myCritSection;
 #else
     StMutex myMutex;

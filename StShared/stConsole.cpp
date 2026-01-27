@@ -6,7 +6,7 @@
 
 #include <StStrings/stConsole.h>
 
-#if(defined(_WIN32) || defined(__WIN32__))
+#if defined(_WIN32)
     #include <windows.h>
     #include <conio.h>
 #else
@@ -16,7 +16,7 @@
 #endif
 
 int st::getch() {
-#if(defined(_WIN32) || defined(__WIN32__))
+#if defined(_WIN32)
     return _getch();
 #else
     struct termios oldt;
@@ -44,7 +44,7 @@ st::ostream& st::SYS_PAUSE(st::ostream& theOStream) {
 
 // console output text-color functions
 st::ostream& st::COLOR_FOR_RED(st::ostream& theOStream) {
-#if(defined(_WIN32) || defined(__WIN32__))
+#if defined(_WIN32)
     HANDLE hStdout = GetStdHandle(STD_OUTPUT_HANDLE);
     SetConsoleTextAttribute(hStdout, FOREGROUND_RED | FOREGROUND_INTENSITY);
 #else
@@ -54,7 +54,7 @@ st::ostream& st::COLOR_FOR_RED(st::ostream& theOStream) {
 }
 
 st::ostream& st::COLOR_FOR_GREEN(st::ostream& theOStream) {
-#if(defined(_WIN32) || defined(__WIN32__))
+#if defined(_WIN32)
     HANDLE hStdout = GetStdHandle(STD_OUTPUT_HANDLE);
     SetConsoleTextAttribute(hStdout, FOREGROUND_GREEN | FOREGROUND_INTENSITY);
 #else
@@ -64,7 +64,7 @@ st::ostream& st::COLOR_FOR_GREEN(st::ostream& theOStream) {
 }
 
 st::ostream& st::COLOR_FOR_YELLOW_L(st::ostream& theOStream) {
-#if(defined(_WIN32) || defined(__WIN32__))
+#if defined(_WIN32)
     HANDLE hStdout = GetStdHandle(STD_OUTPUT_HANDLE);
     SetConsoleTextAttribute(hStdout, FOREGROUND_GREEN | FOREGROUND_RED);
 #else
@@ -75,7 +75,7 @@ st::ostream& st::COLOR_FOR_YELLOW_L(st::ostream& theOStream) {
 }
 
 st::ostream& st::COLOR_FOR_YELLOW(st::ostream& theOStream) {
-#if(defined(_WIN32) || defined(__WIN32__))
+#if defined(_WIN32)
     HANDLE hStdout = GetStdHandle(STD_OUTPUT_HANDLE);
     SetConsoleTextAttribute(hStdout, FOREGROUND_GREEN | FOREGROUND_RED | FOREGROUND_INTENSITY);
 #else
@@ -85,7 +85,7 @@ st::ostream& st::COLOR_FOR_YELLOW(st::ostream& theOStream) {
 }
 
 st::ostream& st::COLOR_FOR_BLUE(st::ostream& theOStream) {
-#if(defined(_WIN32) || defined(__WIN32__))
+#if defined(_WIN32)
     HANDLE hStdout = GetStdHandle(STD_OUTPUT_HANDLE);
     SetConsoleTextAttribute(hStdout, FOREGROUND_BLUE);
 #else
@@ -95,7 +95,7 @@ st::ostream& st::COLOR_FOR_BLUE(st::ostream& theOStream) {
 }
 
 st::ostream& st::COLOR_FOR_WHITE(st::ostream& theOStream) {
-#if(defined(_WIN32) || defined(__WIN32__))
+#if defined(_WIN32)
     HANDLE hStdout = GetStdHandle(STD_OUTPUT_HANDLE);
     // no default value on Win
     SetConsoleTextAttribute(hStdout, FOREGROUND_RED | FOREGROUND_GREEN | FOREGROUND_BLUE);

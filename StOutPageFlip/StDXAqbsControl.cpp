@@ -5,7 +5,7 @@
  * This code is licensed under MIT license (see docs/license-mit.txt for details).
  */
 
-#if(defined(_WIN32) || defined(__WIN32__))
+#if defined(_WIN32)
 
 #include "StDXAqbsControl.h"
 

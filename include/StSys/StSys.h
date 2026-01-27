@@ -23,7 +23,7 @@ class ST_LOCAL StSys {
     };
 
     enum SystemVersion {
-    #if (defined(_WIN32) || defined(__WIN32__))
+    #if defined(_WIN32)
         SystemVersion_WinAncient,
         SystemVersion_XP,
         SystemVersion_Vista,

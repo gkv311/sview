@@ -10,7 +10,7 @@
 #include "StADLsdk.h"
 
 namespace {
-#if(defined(_WIN32) || defined(__WIN32__))
+#if defined(_WIN32)
     static const char LIB_NAME[]    = "atiadlxx";
     static const char LIB_NAME_Y[]  = "atiadlxy";
 #elif(defined(__linux__) || defined(__linux))
@@ -74,8 +74,7 @@ bool StADLsdk::init() {
     close();
 
     if(!myLib.load(LIB_NAME)) {
-    #if(defined(_WIN32) || defined(__WIN32__)) \
-     && !defined(WIN64) && !defined(_WIN64) && !defined(__WIN64__)
+    #if defined(_WIN32) && !defined(_WIN64)
         // library in WOW64, only for 32-bit application under 64-bit Windows
         if(!myLib.load(LIB_NAME_Y)) {
             return false;
