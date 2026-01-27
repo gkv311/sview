@@ -26,6 +26,7 @@ set (USED_INCFILES
 set (USED_MANFILES "")
 set (USED_RESFILES "")
 if (WIN32)
+  set (USED_RESFILES "StTests.rc")
   set (USED_MANFILES "../adm/cmake/dpiAware.manifest")
 endif()
 

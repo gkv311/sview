@@ -6,7 +6,6 @@
 CREATEPROCESS_MANIFEST_RESOURCE_ID RT_MANIFEST "../adm/cmake/dpiAware.manifest"
 #endif
 
-A ICON DISCARDABLE "sview.ico"
 VS_VERSION_INFO VERSIONINFO
 FILEVERSION     SVIEW_SDK_VERSION
 PRODUCTVERSION  SVIEW_SDK_VERSION
@@ -19,10 +18,10 @@ BEGIN
   BLOCK "StringFileInfo"
   BEGIN BLOCK "040904E4" // Language type = U.S English(0x0409) and Character Set = Windows, Multilingual(0x04E4)
     BEGIN
-      VALUE "FileDescription", "sView\000"
+      VALUE "FileDescription", "StMonitorsDump\000"
       VALUE "FileVersion", SVIEW_SDK_VER_STRING "\000"
-      VALUE "LegalCopyright", "\251 2007-2026 Kirill Gavrilov Tartynskih and sView developers\000"
-      VALUE "ProductName", "sView\000"
+      VALUE "LegalCopyright", "\251 2009-2026 Kirill Gavrilov Tartynskih and sView developers\000"
+      VALUE "ProductName", "StMonitorsDump\000"
       VALUE "ProductVersion", SVIEW_SDK_VER_STRING "\000"
       VALUE "OfficialSite", "www.sview.ru\000"
       VALUE "Contacts", "kirill@sview.ru\000"
