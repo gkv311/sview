@@ -12,15 +12,18 @@
 #include <sstream>
 #include <locale>
 
-#if defined(__ANDROID__)
+#if defined(_MSC_VER)
+    // special API
+#elif defined(__APPLE__)
+    #include <xlocale.h>
+#elif defined(__ANDROID__)
+    // silently ignore
     #define ST_NO_XLOCALE
-#elif !defined(_MSC_VER)
-    #if defined(_WIN32)
-        #define ST_NO_XLOCALE
-        #warning xlocale is not supported by compiler!
-    #elif !defined(__GLIBC__)
-        #include <xlocale.h>
-    #endif
+#elif defined(_GNU_SOURCE)
+    // glibc extension
+#else
+    #define ST_NO_XLOCALE
+    #warning xlocale is not supported by compiler!
 #endif
 
 /**
