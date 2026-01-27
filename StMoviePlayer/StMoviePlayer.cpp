@@ -494,141 +494,209 @@ StMoviePlayer::StMoviePlayer(const StHandle<StResourceManager>& theResMgr,
     }
 
     // create actions
-    StHandle<StAction> anAction;
-
-    anAction = new StActionIntSlot(stCString("DoQuit"), stSlot(this, &StMoviePlayer::doQuit), 0);
-    addAction(Action_Quit, anAction, 0);
-
-    anAction = new StActionBool(stCString("DoFullscreen"), params.IsFullscreen);
-    addAction(Action_Fullscreen, anAction, ST_VK_F, ST_VK_RETURN);
-
-    anAction = new StActionBool(stCString("DoShowFPS"), params.ToShowFps);
-    addAction(Action_ShowFps, anAction, ST_VK_F12);
-
-    anAction = new StActionIntSlot(stCString("DoShowGUI"), stSlot(this, &StMoviePlayer::doShowHideGUI), 0);
-    addAction(Action_ShowGUI, anAction, ST_VK_TILDE);
-
-    anAction = new StActionIntValue(stCString("DoSrcAuto"), params.SrcStereoFormat, StFormat_AUTO);
-    addAction(Action_SrcAuto, anAction, ST_VK_A);
-
-    anAction = new StActionIntValue(stCString("DoSrcMono"), params.SrcStereoFormat, StFormat_Mono);
-    addAction(Action_SrcMono, anAction, ST_VK_M);
-
-    anAction = new StActionIntValue(stCString("DoSrcOverUnder"), params.SrcStereoFormat, StFormat_TopBottom_LR);
-    addAction(Action_SrcOverUnderLR, anAction, ST_VK_O);
-
-    anAction = new StActionIntValue(stCString("DoSrcSideBySide"), params.SrcStereoFormat, StFormat_SideBySide_RL);
-    addAction(Action_SrcSideBySideRL, anAction, ST_VK_S);
-
-    anAction = new StActionIntSlot(stCString("DoFileInfo"), stSlot(this, &StMoviePlayer::doAboutFile), 0);
-    addAction(Action_FileInfo, anAction, ST_VK_I);
-
-    anAction = new StActionIntSlot(stCString("DoListFirst"), stSlot(this, &StMoviePlayer::doListFirst), 0);
-    addAction(Action_ListFirst, anAction, ST_VK_HOME);
-
-    anAction = new StActionIntSlot(stCString("DoListLast"), stSlot(this, &StMoviePlayer::doListLast), 0);
-    addAction(Action_ListLast, anAction, ST_VK_END);
-
-    anAction = new StActionIntSlot(stCString("DoListPrev"), stSlot(this, &StMoviePlayer::doListPrev), 0);
-    addAction(Action_ListPrev, anAction, ST_VK_PRIOR);
-
-    anAction = new StActionIntSlot(stCString("DoListNext"), stSlot(this, &StMoviePlayer::doListNext), 0);
-    addAction(Action_ListNext, anAction, ST_VK_NEXT);
-
-    anAction = new StActionIntSlot(stCString("DoListPrevExt"), stSlot(this, &StMoviePlayer::doListPrev), 0);
-    addAction(Action_ListPrevExt, anAction, ST_VK_MEDIA_PREV_TRACK, ST_VK_BROWSER_BACK);
-
-    anAction = new StActionIntSlot(stCString("DoListNextExt"), stSlot(this, &StMoviePlayer::doListNext), 0);
-    addAction(Action_ListNextExt, anAction, ST_VK_MEDIA_NEXT_TRACK, ST_VK_BROWSER_FORWARD);
-
-    anAction = new StActionIntSlot(stCString("DoPlayPause"), stSlot(this, &StMoviePlayer::doPlayPause), 0);
-    addAction(Action_PlayPause, anAction, ST_VK_SPACE, ST_VK_MEDIA_PLAY_PAUSE);
-
-    anAction = new StActionIntSlot(stCString("DoStop"), stSlot(this, &StMoviePlayer::doStop), 0);
-    addAction(Action_Stop, anAction, ST_VK_MEDIA_STOP);
-
-    anAction = new StActionIntSlot(stCString("DoSeekLeft"), stSlot(this, &StMoviePlayer::doSeekLeft), 0);
-    addAction(Action_SeekLeft5, anAction, ST_VK_LEFT);
-
-    anAction = new StActionIntSlot(stCString("DoSeekRight"), stSlot(this, &StMoviePlayer::doSeekRight), 0);
-    addAction(Action_SeekRight5, anAction, ST_VK_RIGHT);
-
-    anAction = new StActionIntSlot(stCString("DoOpen1File"), stSlot(this, &StMoviePlayer::doOpen1FileAction), 0);
-#ifdef __APPLE__
-    addAction(Action_Open1File, anAction, ST_VK_O | ST_VF_CONTROL, ST_VK_O | ST_VF_COMMAND);
-#else
-    addAction(Action_Open1File, anAction, ST_VK_O | ST_VF_CONTROL);
-#endif
-
-    anAction = new StActionIntSlot(stCString("DoSnapshot"), stSlot(this, &StMoviePlayer::doSnapshot), StImageFile::ST_TYPE_NONE);
-#ifdef __APPLE__
-    addAction(Action_SaveSnapshot, anAction, ST_VK_S | ST_VF_CONTROL, ST_VK_S | ST_VF_COMMAND);
-#else
-    addAction(Action_SaveSnapshot, anAction, ST_VK_S | ST_VF_CONTROL);
-#endif
-
-    anAction = new StActionIntSlot(stCString("DoDeleteFile"), stSlot(this, &StMoviePlayer::doDeleteFileBegin), 0);
-    addAction(Action_DeleteFile, anAction, ST_VK_DELETE | ST_VF_SHIFT);
-
-    anAction = new StActionBool(stCString("DoAudioMute"), params.AudioMute);
-    addAction(Action_AudioMute, anAction);
-
-    anAction = new StActionIntSlot(stCString("DoAudioDecrease"), stSlot(this, &StMoviePlayer::doAudioVolume), (size_t )-1);
-    addAction(Action_AudioDecrease, anAction, ST_VK_DOWN);
-
-    anAction = new StActionIntSlot(stCString("DoAudioIncrease"), stSlot(this, &StMoviePlayer::doAudioVolume), 1);
-    addAction(Action_AudioIncrease, anAction, ST_VK_UP);
-
-    anAction = new StActionIntSlot(stCString("DoAudioNext"), stSlot(this, &StMoviePlayer::doAudioNext), 1);
-    addAction(Action_AudioNext, anAction, ST_VK_H, ST_VK_L);
-
-    anAction = new StActionIntSlot(stCString("DoAudioPrev"), stSlot(this, &StMoviePlayer::doAudioNext), (size_t )-1);
-    addAction(Action_AudioPrev, anAction, ST_VK_H | ST_VF_SHIFT, ST_VK_L | ST_VF_SHIFT);
-
-    anAction = new StActionIntSlot(stCString("DoSubtitlesNext"), stSlot(this, &StMoviePlayer::doSubtitlesNext), 1);
-    addAction(Action_SubsNext, anAction, ST_VK_U, ST_VK_T);
-
-    anAction = new StActionIntSlot(stCString("DoSubtitlesPrev"), stSlot(this, &StMoviePlayer::doSubtitlesNext), (size_t )-1);
-    addAction(Action_SubsPrev, anAction, ST_VK_U | ST_VF_SHIFT, ST_VK_T | ST_VF_SHIFT);
-
-    anAction = new StActionIntSlot(stCString("DoSubtitlesCopy"), stSlot(this, &StMoviePlayer::doSubtitlesCopy), 0);
-#ifdef __APPLE__
-    addAction(Action_CopyToClipboard, anAction, ST_VK_C | ST_VF_CONTROL, ST_VK_C      | ST_VF_COMMAND);
-#else
-    addAction(Action_CopyToClipboard, anAction, ST_VK_C | ST_VF_CONTROL, ST_VK_INSERT | ST_VF_CONTROL);
-#endif
-
-    anAction = new StActionIntSlot(stCString("DoOpenFromClipboard"), stSlot(this, &StMoviePlayer::doFromClipboard), 0);
-#ifdef __APPLE__
-    addAction(Action_PasteFromClipboard, anAction, ST_VK_V | ST_VF_CONTROL, ST_VK_V      | ST_VF_COMMAND);
-#else
-    addAction(Action_PasteFromClipboard, anAction, ST_VK_V | ST_VF_CONTROL, ST_VK_INSERT | ST_VF_SHIFT);
-#endif
-
-    anAction = new StActionIntSlot(stCString("DoPlayListReverse"), stSlot(this, &StMoviePlayer::doPlayListReverse), 0);
-    addAction(Action_ShowList, anAction, ST_VK_L | ST_VF_CONTROL);
-
-    anAction = new StActionIntSlot(stCString("DoImageAdjustReset"), stSlot(this, &StMoviePlayer::doImageAdjustReset), 0);
-    addAction(Action_ImageAdjustReset, anAction);
-
-    anAction = new StActionIntSlot(stCString("DoPanoramaOnOff"), stSlot(this, &StMoviePlayer::doPanoramaOnOff), 0);
-    addAction(Action_PanoramaOnOff, anAction, ST_VK_P);
-
     {
-    anAction = new StActionIntSlot(stCString("DoOutStereoNormal"), stSlot(this, &StMoviePlayer::doSetStereoOutput), StGLImageRegion::MODE_STEREO);
-    addAction(Action_OutStereoNormal, anAction);
-
-    anAction = new StActionIntSlot(stCString("DoOutStereoLeftView"), stSlot(this, &StMoviePlayer::doSetStereoOutput), StGLImageRegion::MODE_ONLY_LEFT);
-    addAction(Action_OutStereoLeftView, anAction);
-
-    anAction = new StActionIntSlot(stCString("DoOutStereoRightView"), stSlot(this, &StMoviePlayer::doSetStereoOutput), StGLImageRegion::MODE_ONLY_RIGHT);
-    addAction(Action_OutStereoRightView, anAction);
-
-    anAction = new StActionIntSlot(stCString("DoOutStereoParallelPair"), stSlot(this, &StMoviePlayer::doSetStereoOutput), StGLImageRegion::MODE_PARALLEL);
-    addAction(Action_OutStereoParallelPair, anAction);
-
-    anAction = new StActionIntSlot(stCString("DoOutStereoCrossEyed"), stSlot(this, &StMoviePlayer::doSetStereoOutput), StGLImageRegion::MODE_CROSSYED);
-    addAction(Action_OutStereoCrossEyed, anAction);
+        StHandle<StActionIntSlot> anAction = new StActionIntSlot(stCString("DoQuit"), 0);
+        anAction->setSlot(stSlot(this, &StMoviePlayer::doQuit));
+        addAction(Action_Quit, anAction, 0);
+    }
+    {
+        StHandle<StAction> anAction = new StActionBool(stCString("DoFullscreen"), params.IsFullscreen);
+        addAction(Action_Fullscreen, anAction, ST_VK_F, ST_VK_RETURN);
+    }
+    {
+        StHandle<StAction> anAction = new StActionBool(stCString("DoShowFPS"), params.ToShowFps);
+        addAction(Action_ShowFps, anAction, ST_VK_F12);
+    }
+    {
+        StHandle<StActionIntSlot> anAction = new StActionIntSlot(stCString("DoShowGUI"), 0);
+        anAction->setSlot(stSlot(this, &StMoviePlayer::doShowHideGUI));
+        addAction(Action_ShowGUI, anAction, ST_VK_TILDE);
+    }
+    {
+        StHandle<StAction> anAction = new StActionIntValue(stCString("DoSrcAuto"), params.SrcStereoFormat, StFormat_AUTO);
+        addAction(Action_SrcAuto, anAction, ST_VK_A);
+    }
+    {
+        StHandle<StAction> anAction = new StActionIntValue(stCString("DoSrcMono"), params.SrcStereoFormat, StFormat_Mono);
+        addAction(Action_SrcMono, anAction, ST_VK_M);
+    }
+    {
+        StHandle<StAction> anAction = new StActionIntValue(stCString("DoSrcOverUnder"), params.SrcStereoFormat, StFormat_TopBottom_LR);
+        addAction(Action_SrcOverUnderLR, anAction, ST_VK_O);
+    }
+    {
+        StHandle<StAction> anAction = new StActionIntValue(stCString("DoSrcSideBySide"), params.SrcStereoFormat, StFormat_SideBySide_RL);
+        addAction(Action_SrcSideBySideRL, anAction, ST_VK_S);
+    }
+    {
+        StHandle<StActionIntSlot> anAction = new StActionIntSlot(stCString("DoFileInfo"), 0);
+        anAction->setSlot(stSlot(this, &StMoviePlayer::doAboutFile));
+        addAction(Action_FileInfo, anAction, ST_VK_I);
+    }
+    {
+        StHandle<StActionIntSlot> anAction = new StActionIntSlot(stCString("DoListFirst"), 0);
+        anAction->setSlot(stSlot(this, &StMoviePlayer::doListFirst));
+        addAction(Action_ListFirst, anAction, ST_VK_HOME);
+    }
+    {
+        StHandle<StActionIntSlot> anAction = new StActionIntSlot(stCString("DoListLast"), 0);
+        anAction->setSlot(stSlot(this, &StMoviePlayer::doListLast));
+        addAction(Action_ListLast, anAction, ST_VK_END);
+    }
+    {
+        StHandle<StActionIntSlot> anAction = new StActionIntSlot(stCString("DoListPrev"), 0);
+        anAction->setSlot(stSlot(this, &StMoviePlayer::doListPrev));
+        addAction(Action_ListPrev, anAction, ST_VK_PRIOR);
+    }
+    {
+        StHandle<StActionIntSlot> anAction = new StActionIntSlot(stCString("DoListNext"), 0);
+        anAction->setSlot(stSlot(this, &StMoviePlayer::doListNext));
+        addAction(Action_ListNext, anAction, ST_VK_NEXT);
+    }
+    {
+        StHandle<StActionIntSlot> anAction = new StActionIntSlot(stCString("DoListPrevExt"), 0);
+        anAction->setSlot(stSlot(this, &StMoviePlayer::doListPrev));
+        addAction(Action_ListPrevExt, anAction, ST_VK_MEDIA_PREV_TRACK, ST_VK_BROWSER_BACK);
+    }
+    {
+        StHandle<StActionIntSlot> anAction = new StActionIntSlot(stCString("DoListNextExt"), 0);
+        anAction->setSlot(stSlot(this, &StMoviePlayer::doListNext));
+        addAction(Action_ListNextExt, anAction, ST_VK_MEDIA_NEXT_TRACK, ST_VK_BROWSER_FORWARD);
+    }
+    {
+        StHandle<StActionIntSlot> anAction = new StActionIntSlot(stCString("DoPlayPause"), 0);
+        anAction->setSlot(stSlot(this, &StMoviePlayer::doPlayPause));
+        addAction(Action_PlayPause, anAction, ST_VK_SPACE, ST_VK_MEDIA_PLAY_PAUSE);
+    }
+    {
+        StHandle<StActionIntSlot> anAction = new StActionIntSlot(stCString("DoStop"), 0);
+        anAction->setSlot(stSlot(this, &StMoviePlayer::doStop));
+        addAction(Action_Stop, anAction, ST_VK_MEDIA_STOP);
+    }
+    {
+        StHandle<StActionIntSlot> anAction = new StActionIntSlot(stCString("DoSeekLeft"), 0);
+        anAction->setSlot(stSlot(this, &StMoviePlayer::doSeekLeft));
+        addAction(Action_SeekLeft5, anAction, ST_VK_LEFT);
+    }
+    {
+        StHandle<StActionIntSlot> anAction = new StActionIntSlot(stCString("DoSeekRight"), 0);
+        anAction->setSlot(stSlot(this, &StMoviePlayer::doSeekRight));
+        addAction(Action_SeekRight5, anAction, ST_VK_RIGHT);
+    }
+    {
+        StHandle<StActionIntSlot> anAction = new StActionIntSlot(stCString("DoOpen1File"), 0);
+        anAction->setSlot(stSlot(this, &StMoviePlayer::doOpen1FileAction));
+    #ifdef __APPLE__
+        addAction(Action_Open1File, anAction, ST_VK_O | ST_VF_CONTROL, ST_VK_O | ST_VF_COMMAND);
+    #else
+        addAction(Action_Open1File, anAction, ST_VK_O | ST_VF_CONTROL);
+    #endif
+    }
+    {
+        StHandle<StActionIntSlot> anAction = new StActionIntSlot(stCString("DoSnapshot"), StImageFile::ST_TYPE_NONE);
+        anAction->setSlot(stSlot(this, &StMoviePlayer::doSnapshot));
+    #ifdef __APPLE__
+        addAction(Action_SaveSnapshot, anAction, ST_VK_S | ST_VF_CONTROL, ST_VK_S | ST_VF_COMMAND);
+    #else
+        addAction(Action_SaveSnapshot, anAction, ST_VK_S | ST_VF_CONTROL);
+    #endif
+    }
+    {
+        StHandle<StActionIntSlot> anAction = new StActionIntSlot(stCString("DoDeleteFile"), 0);
+        anAction->setSlot(stSlot(this, &StMoviePlayer::doDeleteFileBegin));
+        addAction(Action_DeleteFile, anAction, ST_VK_DELETE | ST_VF_SHIFT);
+    }
+    {
+        StHandle<StAction> anAction = new StActionBool(stCString("DoAudioMute"), params.AudioMute);
+        addAction(Action_AudioMute, anAction);
+    }
+    {
+        StHandle<StActionIntSlot> anAction = new StActionIntSlot(stCString("DoAudioDecrease"), (size_t )-1);
+        anAction->setSlot(stSlot(this, &StMoviePlayer::doAudioVolume));
+        addAction(Action_AudioDecrease, anAction, ST_VK_DOWN);
+    }
+    {
+        StHandle<StActionIntSlot> anAction = new StActionIntSlot(stCString("DoAudioIncrease"), 1);
+        anAction->setSlot(stSlot(this, &StMoviePlayer::doAudioVolume));
+        addAction(Action_AudioIncrease, anAction, ST_VK_UP);
+    }
+    {
+        StHandle<StActionIntSlot> anAction = new StActionIntSlot(stCString("DoAudioNext"), 1);
+        anAction->setSlot(stSlot(this, &StMoviePlayer::doAudioNext));
+        addAction(Action_AudioNext, anAction, ST_VK_H, ST_VK_L);
+    }
+    {
+        StHandle<StActionIntSlot> anAction = new StActionIntSlot(stCString("DoAudioPrev"), (size_t )-1);
+        anAction->setSlot(stSlot(this, &StMoviePlayer::doAudioNext));
+        addAction(Action_AudioPrev, anAction, ST_VK_H | ST_VF_SHIFT, ST_VK_L | ST_VF_SHIFT);
+    }
+    {
+        StHandle<StActionIntSlot> anAction = new StActionIntSlot(stCString("DoSubtitlesNext"), 1);
+        anAction->setSlot(stSlot(this, &StMoviePlayer::doSubtitlesNext));
+        addAction(Action_SubsNext, anAction, ST_VK_U, ST_VK_T);
+    }
+    {
+        StHandle<StActionIntSlot> anAction = new StActionIntSlot(stCString("DoSubtitlesPrev"), (size_t )-1);
+        anAction->setSlot(stSlot(this, &StMoviePlayer::doSubtitlesNext));
+        addAction(Action_SubsPrev, anAction, ST_VK_U | ST_VF_SHIFT, ST_VK_T | ST_VF_SHIFT);
+    }
+    {
+        StHandle<StActionIntSlot> anAction = new StActionIntSlot(stCString("DoSubtitlesCopy"), 0);
+        anAction->setSlot(stSlot(this, &StMoviePlayer::doSubtitlesCopy));
+    #ifdef __APPLE__
+        addAction(Action_CopyToClipboard, anAction, ST_VK_C | ST_VF_CONTROL, ST_VK_C      | ST_VF_COMMAND);
+    #else
+        addAction(Action_CopyToClipboard, anAction, ST_VK_C | ST_VF_CONTROL, ST_VK_INSERT | ST_VF_CONTROL);
+    #endif
+    }
+    {
+        StHandle<StActionIntSlot> anAction = new StActionIntSlot(stCString("DoOpenFromClipboard"), 0);
+        anAction->setSlot(stSlot(this, &StMoviePlayer::doFromClipboard));
+    #ifdef __APPLE__
+        addAction(Action_PasteFromClipboard, anAction, ST_VK_V | ST_VF_CONTROL, ST_VK_V      | ST_VF_COMMAND);
+    #else
+        addAction(Action_PasteFromClipboard, anAction, ST_VK_V | ST_VF_CONTROL, ST_VK_INSERT | ST_VF_SHIFT);
+    #endif
+    }
+    {
+        StHandle<StActionIntSlot> anAction = new StActionIntSlot(stCString("DoPlayListReverse"), 0);
+        anAction->setSlot(stSlot(this, &StMoviePlayer::doPlayListReverse));
+        addAction(Action_ShowList, anAction, ST_VK_L | ST_VF_CONTROL);
+    }
+    {
+        StHandle<StActionIntSlot> anAction = new StActionIntSlot(stCString("DoImageAdjustReset"), 0);
+        anAction->setSlot(stSlot(this, &StMoviePlayer::doImageAdjustReset));
+        addAction(Action_ImageAdjustReset, anAction);
+    }
+    {
+        StHandle<StActionIntSlot> anAction = new StActionIntSlot(stCString("DoPanoramaOnOff"), 0);
+        anAction->setSlot(stSlot(this, &StMoviePlayer::doPanoramaOnOff));
+        addAction(Action_PanoramaOnOff, anAction, ST_VK_P);
+    }
+    {
+        StHandle<StActionIntSlot> anAction = new StActionIntSlot(stCString("DoOutStereoNormal"), StGLImageRegion::MODE_STEREO);
+        anAction->setSlot(stSlot(this, &StMoviePlayer::doSetStereoOutput));
+        addAction(Action_OutStereoNormal, anAction);
+    }
+    {
+        StHandle<StActionIntSlot> anAction = new StActionIntSlot(stCString("DoOutStereoLeftView"), StGLImageRegion::MODE_ONLY_LEFT);
+        anAction->setSlot(stSlot(this, &StMoviePlayer::doSetStereoOutput));
+        addAction(Action_OutStereoLeftView, anAction);
+    }
+    {
+        StHandle<StActionIntSlot> anAction = new StActionIntSlot(stCString("DoOutStereoRightView"), StGLImageRegion::MODE_ONLY_RIGHT);
+        anAction->setSlot(stSlot(this, &StMoviePlayer::doSetStereoOutput));
+        addAction(Action_OutStereoRightView, anAction);
+    }
+    {
+        StHandle<StActionIntSlot> anAction = new StActionIntSlot(stCString("DoOutStereoParallelPair"), StGLImageRegion::MODE_PARALLEL);
+        anAction->setSlot(stSlot(this, &StMoviePlayer::doSetStereoOutput));
+        addAction(Action_OutStereoParallelPair, anAction);
+    }
+    {
+        StHandle<StActionIntSlot> anAction = new StActionIntSlot(stCString("DoOutStereoCrossEyed"), StGLImageRegion::MODE_CROSSYED);
+        anAction->setSlot(stSlot(this, &StMoviePlayer::doSetStereoOutput));
+        addAction(Action_OutStereoCrossEyed, anAction);
     }
 }
 

@@ -13,7 +13,16 @@
 
 #include <sstream>
 
+StParamBase::StParamBase() {
+    //
+}
+
 StParamBase::~StParamBase() {
+    //
+}
+
+StBoolParam::StBoolParam(bool theValue)
+: StParam<bool>(theValue) {
     //
 }
 
@@ -21,7 +30,29 @@ StBoolParam::~StBoolParam() {
     //
 }
 
+StBoolParamNamed::StBoolParamNamed(const bool       theValue,
+                                   const StCString& theParamKey,
+                                   const StCString& theParamName)
+: StBoolParam(theValue),
+  myParamKey(theParamKey),
+  myParamName(theParamName) {
+    //
+}
+
+StBoolParamNamed::StBoolParamNamed(const bool       theValue,
+                                   const StCString& theParamKey)
+: StBoolParam(theValue),
+  myParamKey(theParamKey),
+  myParamName(theParamKey) {
+    //
+}
+
 StBoolParamNamed::~StBoolParamNamed() {
+    //
+}
+
+StInt32Param::StInt32Param(int32_t theValue)
+: StParam<int32_t>(theValue) {
     //
 }
 
@@ -29,12 +60,90 @@ StInt32Param::~StInt32Param() {
     //
 }
 
+StInt32ParamNamed::StInt32ParamNamed(const int32_t    theValue,
+                                     const StCString& theParamKey,
+                                     const StCString& theParamName)
+: StInt32Param(theValue),
+  myParamKey(theParamKey),
+  myParamName(theParamName)
+{
+  //
+}
+
+StInt32ParamNamed::StInt32ParamNamed(const int32_t    theValue,
+                                     const StCString& theParamKey)
+: StInt32Param(theValue),
+  myParamKey(theParamKey),
+  myParamName(theParamKey)
+{
+  //
+}
+
 StInt32ParamNamed::~StInt32ParamNamed() {
+    //
+}
+
+StFloat32Param::StFloat32Param(const float      theValue,
+                               const StCString& theParamKey)
+: StParam<float>(theValue),
+  myMinValue(-1E+37f),
+  myMaxValue( 1E+37f),
+  myEffMinValue(-1E+37f),
+  myEffMaxValue(-1E+37f),
+  myDefValue(0.0f),
+  myValueStep(1.0f),
+  myTolerance(0.0001f),
+  myParamKey (theParamKey),
+  myParamName(theParamKey) {
+    //
+}
+
+StFloat32Param::StFloat32Param(const float theValue)
+: StParam<float>(theValue),
+  myMinValue(-1E+37f),
+  myMaxValue( 1E+37f),
+  myEffMinValue(-1E+37f),
+  myEffMaxValue(-1E+37f),
+  myDefValue(0.0f),
+  myValueStep(1.0f),
+  myTolerance(0.0001f) {
+    //
+}
+
+StFloat32Param::StFloat32Param(const float theValue,
+                               const float theMinValue,
+                               const float theMaxValue,
+                               const float theDefValue,
+                               const float theStep,
+                               const float theTolerance)
+: StParam<float>(theValue),
+  myMinValue(theMinValue),
+  myMaxValue(theMaxValue),
+  myEffMinValue(theMinValue),
+  myEffMaxValue(theMaxValue),
+  myDefValue(theDefValue),
+  myValueStep(theStep),
+  myTolerance(theTolerance) {
     //
 }
 
 StFloat32Param::~StFloat32Param() {
     //
+}
+
+StEnumParam::StEnumParam(const int32_t    theValue,
+                         const StCString& theParamKey,
+                         const StCString& theParamName)
+: StInt32ParamNamed(theValue, theParamKey, theParamName)
+{
+  //
+}
+
+StEnumParam::StEnumParam(const int32_t    theValue,
+                         const StCString& theParamKey)
+: StInt32ParamNamed(theValue, theParamKey)
+{
+  //
 }
 
 StEnumParam::~StEnumParam() {

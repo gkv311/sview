@@ -18,6 +18,9 @@ class StGLResource {
 
         public:
 
+    /** Empty constructor */
+    ST_CPPEXPORT StGLResource();
+
     /**
      * Destructor - should be called after release()!
      */

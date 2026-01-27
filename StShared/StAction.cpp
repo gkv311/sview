@@ -50,7 +50,16 @@ void StActionIntSlot::doTrigger(const StEvent* ) {
     mySlot->call(myValue);
 }
 
-StActionIntSlot::~StActionIntSlot() {}
+StActionIntSlot::StActionIntSlot(const StCString& theName,
+                                 const size_t     theValue)
+: StAction(theName),
+  myValue(theValue) {
+    //
+}
+
+StActionIntSlot::~StActionIntSlot() {
+    //
+}
 
 void StActionHoldSlot::doTrigger(const StEvent* theEvent) {
     double aValue = 0.0;
@@ -64,4 +73,11 @@ void StActionHoldSlot::doTrigger(const StEvent* theEvent) {
     mySlot->call(aValue);
 }
 
-StActionHoldSlot::~StActionHoldSlot() {}
+StActionHoldSlot::StActionHoldSlot(const StCString& theName)
+: StAction(theName) {
+    myToHoldKey = true;
+}
+
+StActionHoldSlot::~StActionHoldSlot() {
+    //
+}

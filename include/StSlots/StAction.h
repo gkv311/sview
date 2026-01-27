@@ -216,15 +216,19 @@ class StActionIntSlot : public StAction {
     /**
      * Constructor.
      */
+    ST_CPPEXPORT StActionIntSlot(const StCString& theName,
+                                 const size_t     theValue);
+
+    /**
+     * Assing callback.
+     */
     template<typename class_t>
-    StActionIntSlot(const StCString& theName,
-                    const stSlotPair_t<class_t, typename StSlotMethod<class_t, void (const size_t )>::method_t>& theMethod,
-                    const size_t     theValue)
-    : StAction(theName),
-      myValue(theValue) {
+    void setSlot(const stSlotPair_t<class_t, typename StSlotMethod<class_t, void(const size_t)>::method_t>& theMethod) {
         if(theMethod.ClassPtr  != NULL
         && theMethod.MethodPtr != NULL) {
             mySlot = new StSlotMethod<class_t, void (const size_t )>(theMethod.ClassPtr, theMethod.MethodPtr);
+        } else {
+          mySlot.nullify();
         }
     }
 
@@ -259,15 +263,19 @@ class StActionHoldSlot : public StAction {
     /**
      * Constructor.
      */
+    ST_CPPEXPORT StActionHoldSlot(const StCString& theName);
+
+    /**
+     * Assing callback.
+     */
     template<typename class_t>
-    StActionHoldSlot(const StCString& theName,
-                     const stSlotPair_t<class_t, typename StSlotMethod<class_t, void (const double )>::method_t>& theMethod)
-    : StAction(theName) {
-        if(theMethod.ClassPtr  != NULL
-        && theMethod.MethodPtr != NULL) {
+    void setSlot(const stSlotPair_t<class_t, typename StSlotMethod<class_t, void(const double)>::method_t>& theMethod) {
+        if (theMethod.ClassPtr  != NULL
+         && theMethod.MethodPtr != NULL) {
             mySlot = new StSlotMethod<class_t, void (const double )>(theMethod.ClassPtr, theMethod.MethodPtr);
+        } else {
+            mySlot.nullify();
         }
-        myToHoldKey = true;
     }
 
     /**

@@ -292,6 +292,11 @@ bool StImageFile::load(const StString& theFilePath,
     return loadExtra(theFilePath, theImageType, theDataPtr, theDataSize, false);
 }
 
+StImageFileCounter::StImageFileCounter() {}
+
+StImageFileCounter::StImageFileCounter(const StHandle<StImage>& theImage)
+: myImageFile(theImage) {}
+
 StImageFileCounter::~StImageFileCounter() {}
 
 void StImageFileCounter::createReference(StHandle<StBufferCounter>& theOther) const {

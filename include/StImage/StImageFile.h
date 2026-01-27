@@ -204,12 +204,12 @@ class StImageFileCounter : public StBufferCounter {
     /**
      * Empty constructor.
      */
-    ST_LOCAL StImageFileCounter() {}
+    ST_CPPEXPORT StImageFileCounter();
 
     /**
      * Main constructor.
      */
-    ST_LOCAL StImageFileCounter(const StHandle<StImage>& theImage) : myImageFile(theImage) {}
+    ST_CPPEXPORT StImageFileCounter(const StHandle<StImage>& theImage);
 
     /**
      * Create the new reference (e.g. increment counter).

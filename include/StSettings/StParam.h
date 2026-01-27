@@ -17,6 +17,7 @@ class StParamBase {
 
       public:
 
+    ST_CPPEXPORT StParamBase();
     ST_CPPEXPORT virtual ~StParamBase();
 
 };
@@ -85,13 +86,8 @@ class StInt32Param : public StParam<int32_t> {
 
         public:
 
-    /**
-     * Main constructor.
-     */
-    inline StInt32Param(int32_t theValue)
-    : StParam<int32_t>(theValue) {
-        //
-    }
+    /** Main constructor */
+    ST_CPPEXPORT StInt32Param(int32_t theValue);
 
     /** Destructor */
     ST_CPPEXPORT virtual ~StInt32Param();
@@ -109,13 +105,8 @@ class StBoolParam : public StParam<bool> {
 
         public:
 
-    /**
-     * Main constructor.
-     */
-    inline StBoolParam(bool theValue)
-    : StParam<bool>(theValue) {
-        //
-    }
+    /** Main constructor */
+    ST_CPPEXPORT StBoolParam(bool theValue);
 
     /** Destructor */
     ST_CPPEXPORT virtual ~StBoolParam();
@@ -153,25 +144,15 @@ class StBoolParamNamed : public StBoolParam {
     /**
      * Main constructor.
      */
-    ST_LOCAL StBoolParamNamed(const bool       theValue,
-                              const StCString& theParamKey,
-                              const StCString& theParamName)
-    : StBoolParam(theValue),
-      myParamKey(theParamKey),
-      myParamName(theParamName) {
-        //
-    }
+    ST_CPPEXPORT StBoolParamNamed(const bool       theValue,
+                                  const StCString& theParamKey,
+                                  const StCString& theParamName);
 
     /**
      * Main constructor.
      */
-    ST_LOCAL StBoolParamNamed(const bool       theValue,
-                              const StCString& theParamKey)
-    : StBoolParam(theValue),
-      myParamKey(theParamKey),
-      myParamName(theParamKey) {
-        //
-    }
+    ST_CPPEXPORT StBoolParamNamed(const bool       theValue,
+                                  const StCString& theParamKey);
 
     /** Destructor */
     ST_CPPEXPORT virtual ~StBoolParamNamed();
@@ -217,25 +198,15 @@ class StInt32ParamNamed : public StInt32Param {
     /**
      * Main constructor.
      */
-    ST_LOCAL StInt32ParamNamed(const int32_t    theValue,
-                               const StCString& theParamKey,
-                               const StCString& theParamName)
-    : StInt32Param(theValue),
-      myParamKey(theParamKey),
-      myParamName(theParamName) {
-        //
-    }
+    ST_CPPEXPORT StInt32ParamNamed(const int32_t    theValue,
+                                   const StCString& theParamKey,
+                                   const StCString& theParamName);
 
     /**
      * Main constructor.
      */
-    ST_LOCAL StInt32ParamNamed(const int32_t    theValue,
-                               const StCString& theParamKey)
-    : StInt32Param(theValue),
-      myParamKey(theParamKey),
-      myParamName(theParamKey) {
-        //
-    }
+    ST_CPPEXPORT StInt32ParamNamed(const int32_t    theValue,
+                                   const StCString& theParamKey);
 
     /** Destructor */
     ST_CPPEXPORT virtual ~StInt32ParamNamed();

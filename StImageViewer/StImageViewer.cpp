@@ -270,83 +270,123 @@ StImageViewer::StImageViewer(const StHandle<StResourceManager>& theResMgr,
     }
 
     // create actions
-    StHandle<StAction> anAction;
-    anAction = new StActionBool(stCString("DoFullscreen"), params.IsFullscreen);
-    addAction(Action_Fullscreen, anAction, ST_VK_F, ST_VK_RETURN);
-
-    anAction = new StActionBool(stCString("DoShowFPS"), params.ToShowFps);
-    addAction(Action_ShowFps, anAction, ST_VK_F12);
-
-    anAction = new StActionIntSlot(stCString("DoShowGUI"), stSlot(this, &StImageViewer::doShowHideGUI), 0);
-    addAction(Action_ShowGUI, anAction, ST_VK_TILDE);
-
-    anAction = new StActionIntValue(stCString("DoSrcAuto"), params.SrcStereoFormat, StFormat_AUTO);
-    addAction(Action_SrcAuto, anAction, ST_VK_A);
-
-    anAction = new StActionIntValue(stCString("DoSrcMono"), params.SrcStereoFormat, StFormat_Mono);
-    addAction(Action_SrcMono, anAction, ST_VK_M);
-
-    anAction = new StActionIntValue(stCString("DoSrcOverUnder"), params.SrcStereoFormat, StFormat_TopBottom_LR);
-    addAction(Action_SrcOverUnderLR, anAction, ST_VK_O);
-
-    anAction = new StActionIntValue(stCString("DoSrcSideBySide"), params.SrcStereoFormat, StFormat_SideBySide_RL);
-    addAction(Action_SrcSideBySideRL, anAction, ST_VK_S);
-
-    anAction = new StActionIntSlot(stCString("DoFileInfo"), stSlot(this, &StImageViewer::doAboutImage), 0);
-    addAction(Action_FileInfo, anAction, ST_VK_I);
-
-    anAction = new StActionIntSlot(stCString("DoSaveFileInfo"), stSlot(this, &StImageViewer::doSaveImageInfoBegin), 0);
-    addAction(Action_SaveFileInfo, anAction, ST_VK_I | ST_VF_SHIFT);
-
-    anAction = new StActionIntSlot(stCString("DoListFirst"), stSlot(this, &StImageViewer::doListFirst), 0);
-    addAction(Action_ListFirst, anAction, ST_VK_HOME);
-
-    anAction = new StActionIntSlot(stCString("DoListLast"), stSlot(this, &StImageViewer::doListLast), 0);
-    addAction(Action_ListLast, anAction, ST_VK_END);
-
-    anAction = new StActionIntSlot(stCString("DoListPrev"), stSlot(this, &StImageViewer::doListPrev), 0);
-    addAction(Action_ListPrev, anAction, ST_VK_PRIOR, StWindow::isMobile() ? ST_VK_VOLUME_UP : 0);
-
-    anAction = new StActionIntSlot(stCString("DoListNext"), stSlot(this, &StImageViewer::doListNext), 0);
-    addAction(Action_ListNext, anAction, ST_VK_NEXT,  StWindow::isMobile() ? ST_VK_VOLUME_DOWN : 0);
-
-    anAction = new StActionIntSlot(stCString("DoSlideShow"), stSlot(this, &StImageViewer::doSlideShow), 0);
-    addAction(Action_SlideShow, anAction, ST_VK_SPACE);
-
-    anAction = new StActionIntSlot(stCString("DoSaveImageAsPng"), stSlot(this, &StImageViewer::doSaveImageAs), StImageFile::ST_TYPE_PNG);
-#ifdef __APPLE__
-    addAction(Action_SavePng, anAction, ST_VK_S | ST_VF_CONTROL, ST_VK_S | ST_VF_COMMAND);
-#else
-    addAction(Action_SavePng, anAction, ST_VK_S | ST_VF_CONTROL);
-#endif
-
-    anAction = new StActionIntSlot(stCString("DoSaveImageAsJpeg"), stSlot(this, &StImageViewer::doSaveImageAs), StImageFile::ST_TYPE_JPEG);
-    addAction(Action_SaveJpeg, anAction);
-
-    anAction = new StActionIntSlot(stCString("DoDeleteFile"), stSlot(this, &StImageViewer::doDeleteFileBegin), 0);
-    addAction(Action_DeleteFile, anAction, ST_VK_DELETE | ST_VF_SHIFT);
-
-    anAction = new StActionIntSlot(stCString("DoImageAdjustReset"), stSlot(this, &StImageViewer::doImageAdjustReset), 0);
-    addAction(Action_ImageAdjustReset, anAction);
-
-    anAction = new StActionIntSlot(stCString("DoPanoramaOnOff"), stSlot(this, &StImageViewer::doPanoramaOnOff), 0);
-    addAction(Action_PanoramaOnOff, anAction, ST_VK_P);
-
     {
-    anAction = new StActionIntSlot(stCString("DoOutStereoNormal"), stSlot(this, &StImageViewer::doSetStereoOutput), StGLImageRegion::MODE_STEREO);
-    addAction(Action_OutStereoNormal, anAction);
-
-    anAction = new StActionIntSlot(stCString("DoOutStereoLeftView"), stSlot(this, &StImageViewer::doSetStereoOutput), StGLImageRegion::MODE_ONLY_LEFT);
-    addAction(Action_OutStereoLeftView, anAction);
-
-    anAction = new StActionIntSlot(stCString("DoOutStereoRightView"), stSlot(this, &StImageViewer::doSetStereoOutput), StGLImageRegion::MODE_ONLY_RIGHT);
-    addAction(Action_OutStereoRightView, anAction);
-
-    anAction = new StActionIntSlot(stCString("DoOutStereoParallelPair"), stSlot(this, &StImageViewer::doSetStereoOutput), StGLImageRegion::MODE_PARALLEL);
-    addAction(Action_OutStereoParallelPair, anAction);
-
-    anAction = new StActionIntSlot(stCString("DoOutStereoCrossEyed"), stSlot(this, &StImageViewer::doSetStereoOutput), StGLImageRegion::MODE_CROSSYED);
-    addAction(Action_OutStereoCrossEyed, anAction);
+        StHandle<StAction> anAction = new StActionBool(stCString("DoFullscreen"), params.IsFullscreen);
+        addAction(Action_Fullscreen, anAction, ST_VK_F, ST_VK_RETURN);
+    }
+    {
+        StHandle<StAction> anAction = new StActionBool(stCString("DoShowFPS"), params.ToShowFps);
+        addAction(Action_ShowFps, anAction, ST_VK_F12);
+    }
+    {
+        StHandle<StActionIntSlot> anAction = new StActionIntSlot(stCString("DoShowGUI"), 0);
+        anAction->setSlot(stSlot(this, &StImageViewer::doShowHideGUI));
+        addAction(Action_ShowGUI, anAction, ST_VK_TILDE);
+    }
+    {
+        StHandle<StAction> anAction = new StActionIntValue(stCString("DoSrcAuto"), params.SrcStereoFormat, StFormat_AUTO);
+        addAction(Action_SrcAuto, anAction, ST_VK_A);
+    }
+    {
+        StHandle<StAction> anAction = new StActionIntValue(stCString("DoSrcMono"), params.SrcStereoFormat, StFormat_Mono);
+        addAction(Action_SrcMono, anAction, ST_VK_M);
+    }
+    {
+        StHandle<StAction> anAction = new StActionIntValue(stCString("DoSrcOverUnder"), params.SrcStereoFormat, StFormat_TopBottom_LR);
+        addAction(Action_SrcOverUnderLR, anAction, ST_VK_O);
+    }
+    {
+        StHandle<StAction> anAction = new StActionIntValue(stCString("DoSrcSideBySide"), params.SrcStereoFormat, StFormat_SideBySide_RL);
+        addAction(Action_SrcSideBySideRL, anAction, ST_VK_S);
+    }
+    {
+        StHandle<StActionIntSlot> anAction = new StActionIntSlot(stCString("DoFileInfo"), 0);
+        anAction->setSlot(stSlot(this, &StImageViewer::doAboutImage));
+        addAction(Action_FileInfo, anAction, ST_VK_I);
+    }
+    {
+        StHandle<StActionIntSlot> anAction = new StActionIntSlot(stCString("DoSaveFileInfo"), 0);
+        anAction->setSlot(stSlot(this, &StImageViewer::doSaveImageInfoBegin));
+        addAction(Action_SaveFileInfo, anAction, ST_VK_I | ST_VF_SHIFT);
+    }
+    {
+        StHandle<StActionIntSlot> anAction = new StActionIntSlot(stCString("DoListFirst"), 0);
+        anAction->setSlot(stSlot(this, &StImageViewer::doListFirst));
+        addAction(Action_ListFirst, anAction, ST_VK_HOME);
+    }
+    {
+        StHandle<StActionIntSlot> anAction = new StActionIntSlot(stCString("DoListLast"), 0);
+        anAction->setSlot(stSlot(this, &StImageViewer::doListLast));
+        addAction(Action_ListLast, anAction, ST_VK_END);
+    }
+    {
+        StHandle<StActionIntSlot> anAction = new StActionIntSlot(stCString("DoListPrev"), 0);
+        anAction->setSlot(stSlot(this, &StImageViewer::doListPrev));
+        addAction(Action_ListPrev, anAction, ST_VK_PRIOR, StWindow::isMobile() ? ST_VK_VOLUME_UP : 0);
+    }
+    {
+        StHandle<StActionIntSlot> anAction = new StActionIntSlot(stCString("DoListNext"), 0);
+        anAction->setSlot(stSlot(this, &StImageViewer::doListNext));
+        addAction(Action_ListNext, anAction, ST_VK_NEXT,  StWindow::isMobile() ? ST_VK_VOLUME_DOWN : 0);
+    }
+    {
+        StHandle<StActionIntSlot> anAction = new StActionIntSlot(stCString("DoSlideShow"), 0);
+        anAction->setSlot(stSlot(this, &StImageViewer::doSlideShow));
+        addAction(Action_SlideShow, anAction, ST_VK_SPACE);
+    }
+    {
+        StHandle<StActionIntSlot> anAction = new StActionIntSlot(stCString("DoSaveImageAsPng"), StImageFile::ST_TYPE_PNG);
+        anAction->setSlot(stSlot(this, &StImageViewer::doSaveImageAs));
+    #ifdef __APPLE__
+        addAction(Action_SavePng, anAction, ST_VK_S | ST_VF_CONTROL, ST_VK_S | ST_VF_COMMAND);
+    #else
+        addAction(Action_SavePng, anAction, ST_VK_S | ST_VF_CONTROL);
+    #endif
+    }
+    {
+        StHandle<StActionIntSlot> anAction = new StActionIntSlot(stCString("DoSaveImageAsJpeg"), StImageFile::ST_TYPE_JPEG);
+        anAction->setSlot(stSlot(this, &StImageViewer::doSaveImageAs));
+        addAction(Action_SaveJpeg, anAction);
+    }
+    {
+        StHandle<StActionIntSlot> anAction = new StActionIntSlot(stCString("DoDeleteFile"), 0);
+        anAction->setSlot(stSlot(this, &StImageViewer::doDeleteFileBegin));
+        addAction(Action_DeleteFile, anAction, ST_VK_DELETE | ST_VF_SHIFT);
+    }
+    {
+        StHandle<StActionIntSlot> anAction = new StActionIntSlot(stCString("DoImageAdjustReset"), 0);
+        anAction->setSlot(stSlot(this, &StImageViewer::doImageAdjustReset));
+        addAction(Action_ImageAdjustReset, anAction);
+    }
+    {
+        StHandle<StActionIntSlot> anAction = new StActionIntSlot(stCString("DoPanoramaOnOff"), 0);
+        anAction->setSlot(stSlot(this, &StImageViewer::doPanoramaOnOff));
+        addAction(Action_PanoramaOnOff, anAction, ST_VK_P);
+    }
+    {
+        StHandle<StActionIntSlot> anAction = new StActionIntSlot(stCString("DoOutStereoNormal"), StGLImageRegion::MODE_STEREO);
+        anAction->setSlot(stSlot(this, &StImageViewer::doSetStereoOutput));
+        addAction(Action_OutStereoNormal, anAction);
+    }
+    {
+        StHandle<StActionIntSlot> anAction = new StActionIntSlot(stCString("DoOutStereoLeftView"), StGLImageRegion::MODE_ONLY_LEFT);
+        anAction->setSlot(stSlot(this, &StImageViewer::doSetStereoOutput));
+        addAction(Action_OutStereoLeftView, anAction);
+    }
+    {
+        StHandle<StActionIntSlot> anAction = new StActionIntSlot(stCString("DoOutStereoRightView"), StGLImageRegion::MODE_ONLY_RIGHT);
+        anAction->setSlot(stSlot(this, &StImageViewer::doSetStereoOutput));
+        addAction(Action_OutStereoRightView, anAction);
+    }
+    {
+        StHandle<StActionIntSlot> anAction = new StActionIntSlot(stCString("DoOutStereoParallelPair"), StGLImageRegion::MODE_PARALLEL);
+        anAction->setSlot(stSlot(this, &StImageViewer::doSetStereoOutput));
+        addAction(Action_OutStereoParallelPair, anAction);
+    }
+    {
+        StHandle<StActionIntSlot> anAction = new StActionIntSlot(stCString("DoOutStereoCrossEyed"), StGLImageRegion::MODE_CROSSYED);
+        anAction->setSlot(stSlot(this, &StImageViewer::doSetStereoOutput));
+        addAction(Action_OutStereoCrossEyed, anAction);
     }
 }
 

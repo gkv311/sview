@@ -262,131 +262,180 @@ StGLImageRegion::StGLImageRegion(StGLWidget* theParent,
 #endif
 
     // create actions
-    StHandle<StAction> anAction;
-    anAction = new StActionIntSlot(stCString("DoParamsReset"), stSlot(this, &StGLImageRegion::doParamsReset), 0);
-    anAction->setDefaultHotKey1(ST_VK_BACK);
-    myActions.add(anAction);
-
-    anAction = new StActionBool(stCString("DoParamsSwapLR"), params.SwapLR);
-    anAction->setDefaultHotKey1(ST_VK_W);
-    myActions.add(anAction);
-
-    anAction = new StActionIntSlot(stCString("DoParamsGammaDec"), stSlot(this, &StGLImageRegion::doParamsGamma), (size_t )-1);
-    anAction->setDefaultHotKey1(ST_VK_G | ST_VF_CONTROL);
-    myActions.add(anAction);
-
-    anAction = new StActionIntSlot(stCString("DoParamsGammaInc"), stSlot(this, &StGLImageRegion::doParamsGamma), 1);
-    anAction->setDefaultHotKey1(ST_VK_G | ST_VF_SHIFT);
-    myActions.add(anAction);
-
-    anAction = new StActionIntSlot(stCString("DoParamsSepXDec"), stSlot(this, &StGLImageRegion::doParamsSepX), (size_t )-1);
-    anAction->setDefaultHotKey1(ST_VK_COMMA);
-    anAction->setDefaultHotKey2(ST_VK_DIVIDE);
-#ifdef ST_EXTRA_CONTROLS
-    anAction->setDefaultHotKey1(ST_VK_Q);
-#endif
-    myActions.add(anAction);
-
-    anAction = new StActionIntSlot(stCString("DoParamsSepXInc"), stSlot(this, &StGLImageRegion::doParamsSepX), 1);
-    anAction->setDefaultHotKey1(ST_VK_PERIOD);
-    anAction->setDefaultHotKey2(ST_VK_MULTIPLY);
-#ifdef ST_EXTRA_CONTROLS
-    anAction->setDefaultHotKey1(ST_VK_E);
-#endif
-    myActions.add(anAction);
-
-    anAction = new StActionIntSlot(stCString("DoParamsSepYDec"), stSlot(this, &StGLImageRegion::doParamsSepY), (size_t )-1);
-    anAction->setDefaultHotKey1(ST_VK_COMMA  | ST_VF_CONTROL);
-    anAction->setDefaultHotKey2(ST_VK_DIVIDE | ST_VF_CONTROL);
-#ifdef ST_EXTRA_CONTROLS
-    anAction->setDefaultHotKey1(ST_VK_Q      | ST_VF_CONTROL);
-#endif
-    myActions.add(anAction);
-
-    anAction = new StActionIntSlot(stCString("DoParamsSepYInc"), stSlot(this, &StGLImageRegion::doParamsSepY), 1);
-    anAction->setDefaultHotKey1(ST_VK_PERIOD   | ST_VF_CONTROL);
-    anAction->setDefaultHotKey2(ST_VK_MULTIPLY | ST_VF_CONTROL);
-#ifdef ST_EXTRA_CONTROLS
-    anAction->setDefaultHotKey1(ST_VK_E        | ST_VF_CONTROL);
-#endif
-    myActions.add(anAction);
-
-    anAction = new StActionHoldSlot(stCString("DoParamsSepRotDec"), stSlot(this, &StGLImageRegion::doParamsSepZDec));
-    anAction->setDefaultHotKey1(ST_VK_APOSTROPHE | ST_VF_CONTROL);
-    myActions.add(anAction);
-
-    anAction = new StActionHoldSlot(stCString("DoParamsSepRotInc"), stSlot(this, &StGLImageRegion::doParamsSepZInc));
-    anAction->setDefaultHotKey1(ST_VK_SEMICOLON | ST_VF_CONTROL);
-    myActions.add(anAction);
-
-    anAction = new StActionIntSlot(stCString("DoParamsRotZ90Dec"), stSlot(this, &StGLImageRegion::doParamsRotZ90), (size_t )-1);
-    anAction->setDefaultHotKey1(ST_VK_BRACKETLEFT);
-    myActions.add(anAction);
-
-    anAction = new StActionIntSlot(stCString("DoParamsRotZ90Inc"), stSlot(this, &StGLImageRegion::doParamsRotZ90), 1);
-    anAction->setDefaultHotKey1(ST_VK_BRACKETRIGHT);
-    myActions.add(anAction);
-
-    anAction = new StActionHoldSlot(stCString("DoParamsRotZDec"), stSlot(this, &StGLImageRegion::doParamsRotZLeft));
-    anAction->setDefaultHotKey1(ST_VK_BRACKETLEFT | ST_VF_CONTROL);
-    myActions.add(anAction);
-
-    anAction = new StActionHoldSlot(stCString("DoParamsRotZInc"), stSlot(this, &StGLImageRegion::doParamsRotZRight));
-    anAction->setDefaultHotKey1(ST_VK_BRACKETRIGHT | ST_VF_CONTROL);
-    myActions.add(anAction);
-
-    anAction = new StActionIntSlot(stCString("DoParamsModeNext"), stSlot(this, &StGLImageRegion::doParamsModeNext), 0);
-    myActions.add(anAction);
-
-    anAction = new StActionHoldSlot(stCString("DoParamsPanLeft"), stSlot(this, &StGLImageRegion::doParamsPanLeft));
-    anAction->setDefaultHotKey1(theUsePanningKeys ? ST_VK_LEFT : 0);
-    myActions.add(anAction);
-
-    anAction = new StActionHoldSlot(stCString("DoParamsPanRight"), stSlot(this, &StGLImageRegion::doParamsPanRight));
-    anAction->setDefaultHotKey1(theUsePanningKeys ? ST_VK_RIGHT : 0);
-    myActions.add(anAction);
-
-    anAction = new StActionHoldSlot(stCString("DoParamsPanUp"), stSlot(this, &StGLImageRegion::doParamsPanUp));
-    anAction->setDefaultHotKey1(theUsePanningKeys ? ST_VK_UP : 0);
-    myActions.add(anAction);
-
-    anAction = new StActionHoldSlot(stCString("DoParamsPanDown"), stSlot(this, &StGLImageRegion::doParamsPanDown));
-    anAction->setDefaultHotKey1(theUsePanningKeys ? ST_VK_DOWN : 0);
-    myActions.add(anAction);
-
-    anAction = new StActionHoldSlot(stCString("DoParamsScaleIn"), stSlot(this, &StGLImageRegion::doParamsScaleIn));
-    anAction->setDefaultHotKey1(ST_VK_ADD);
-    anAction->setDefaultHotKey2(ST_VK_OEM_PLUS);
-    myActions.add(anAction);
-
-    anAction = new StActionHoldSlot(stCString("DoParamsScaleOut"), stSlot(this, &StGLImageRegion::doParamsScaleOut));
-    anAction->setDefaultHotKey1(ST_VK_SUBTRACT);
-    anAction->setDefaultHotKey2(ST_VK_OEM_MINUS);
-    myActions.add(anAction);
-
-    anAction = new StActionHoldSlot(stCString("DoParamsRotYLeft"), stSlot(this, &StGLImageRegion::doParamsRotYLeft));
-#ifdef ST_EXTRA_CONTROLS
-    anAction->setDefaultHotKey1(ST_VK_LEFT);
-#endif
-    myActions.add(anAction);
-
-    anAction = new StActionHoldSlot(stCString("DoParamsRotYRight"), stSlot(this, &StGLImageRegion::doParamsRotYRight));
-#ifdef ST_EXTRA_CONTROLS
-    anAction->setDefaultHotKey1(ST_VK_RIGHT);
-#endif
-    myActions.add(anAction);
-
-    anAction = new StActionHoldSlot(stCString("DoParamsRotXUp"), stSlot(this, &StGLImageRegion::doParamsRotXUp));
-#ifdef ST_EXTRA_CONTROLS
-    anAction->setDefaultHotKey1(ST_VK_UP);
-#endif
-    myActions.add(anAction);
-
-    anAction = new StActionHoldSlot(stCString("DoParamsRotXDown"), stSlot(this, &StGLImageRegion::doParamsRotXDown));
-#ifdef ST_EXTRA_CONTROLS
-    anAction->setDefaultHotKey1(ST_VK_DOWN);
-#endif
-    myActions.add(anAction);
+    {
+        StHandle<StActionIntSlot> anAction = new StActionIntSlot(stCString("DoParamsReset"), 0);
+        anAction->setSlot(stSlot(this, &StGLImageRegion::doParamsReset));
+        anAction->setDefaultHotKey1(ST_VK_BACK);
+        myActions.add(anAction);
+    }
+    {
+        StHandle<StAction> anAction = new StActionBool(stCString("DoParamsSwapLR"), params.SwapLR);
+        anAction->setDefaultHotKey1(ST_VK_W);
+        myActions.add(anAction);
+    }
+    {
+        StHandle<StActionIntSlot> anAction = new StActionIntSlot(stCString("DoParamsGammaDec"), (size_t )-1);
+        anAction->setSlot(stSlot(this, &StGLImageRegion::doParamsGamma));
+        anAction->setDefaultHotKey1(ST_VK_G | ST_VF_CONTROL);
+        myActions.add(anAction);
+    }
+    {
+        StHandle<StActionIntSlot> anAction = new StActionIntSlot(stCString("DoParamsGammaInc"), 1);
+        anAction->setSlot(stSlot(this, &StGLImageRegion::doParamsGamma));
+        anAction->setDefaultHotKey1(ST_VK_G | ST_VF_SHIFT);
+        myActions.add(anAction);
+    }
+    {
+        StHandle<StActionIntSlot> anAction = new StActionIntSlot(stCString("DoParamsSepXDec"), (size_t )-1);
+        anAction->setSlot(stSlot(this, &StGLImageRegion::doParamsSepX));
+        anAction->setDefaultHotKey1(ST_VK_COMMA);
+        anAction->setDefaultHotKey2(ST_VK_DIVIDE);
+    #ifdef ST_EXTRA_CONTROLS
+        anAction->setDefaultHotKey1(ST_VK_Q);
+    #endif
+        myActions.add(anAction);
+    }
+    {
+        StHandle<StActionIntSlot> anAction = new StActionIntSlot(stCString("DoParamsSepXInc"), 1);
+        anAction->setSlot(stSlot(this, &StGLImageRegion::doParamsSepX));
+        anAction->setDefaultHotKey1(ST_VK_PERIOD);
+        anAction->setDefaultHotKey2(ST_VK_MULTIPLY);
+    #ifdef ST_EXTRA_CONTROLS
+        anAction->setDefaultHotKey1(ST_VK_E);
+    #endif
+        myActions.add(anAction);
+    }
+    {
+        StHandle<StActionIntSlot> anAction = new StActionIntSlot(stCString("DoParamsSepYDec"), (size_t )-1);
+        anAction->setSlot(stSlot(this, &StGLImageRegion::doParamsSepY));
+        anAction->setDefaultHotKey1(ST_VK_COMMA  | ST_VF_CONTROL);
+        anAction->setDefaultHotKey2(ST_VK_DIVIDE | ST_VF_CONTROL);
+    #ifdef ST_EXTRA_CONTROLS
+        anAction->setDefaultHotKey1(ST_VK_Q      | ST_VF_CONTROL);
+    #endif
+        myActions.add(anAction);
+    }
+    {
+        StHandle<StActionIntSlot> anAction = new StActionIntSlot(stCString("DoParamsSepYInc"), 1);
+        anAction->setSlot(stSlot(this, &StGLImageRegion::doParamsSepY));
+        anAction->setDefaultHotKey1(ST_VK_PERIOD   | ST_VF_CONTROL);
+        anAction->setDefaultHotKey2(ST_VK_MULTIPLY | ST_VF_CONTROL);
+    #ifdef ST_EXTRA_CONTROLS
+        anAction->setDefaultHotKey1(ST_VK_E        | ST_VF_CONTROL);
+    #endif
+        myActions.add(anAction);
+    }
+    {
+        StHandle<StActionHoldSlot> anAction = new StActionHoldSlot(stCString("DoParamsSepRotDec"));
+        anAction->setSlot(stSlot(this, &StGLImageRegion::doParamsSepZDec));
+        anAction->setDefaultHotKey1(ST_VK_APOSTROPHE | ST_VF_CONTROL);
+        myActions.add(anAction);
+    }
+    {
+        StHandle<StActionHoldSlot> anAction = new StActionHoldSlot(stCString("DoParamsSepRotInc"));
+        anAction->setSlot(stSlot(this, &StGLImageRegion::doParamsSepZInc));
+        anAction->setDefaultHotKey1(ST_VK_SEMICOLON | ST_VF_CONTROL);
+        myActions.add(anAction);
+    }
+    {
+        StHandle<StActionIntSlot> anAction = new StActionIntSlot(stCString("DoParamsRotZ90Dec"), (size_t )-1);
+        anAction->setSlot(stSlot(this, &StGLImageRegion::doParamsRotZ90));
+        anAction->setDefaultHotKey1(ST_VK_BRACKETLEFT);
+        myActions.add(anAction);
+    }
+    {
+        StHandle<StActionIntSlot> anAction = new StActionIntSlot(stCString("DoParamsRotZ90Inc"), 1);
+        anAction->setSlot(stSlot(this, &StGLImageRegion::doParamsRotZ90));
+        anAction->setDefaultHotKey1(ST_VK_BRACKETRIGHT);
+        myActions.add(anAction);
+    }
+    {
+        StHandle<StActionHoldSlot> anAction = new StActionHoldSlot(stCString("DoParamsRotZDec"));
+        anAction->setSlot(stSlot(this, &StGLImageRegion::doParamsRotZLeft));
+        anAction->setDefaultHotKey1(ST_VK_BRACKETLEFT | ST_VF_CONTROL);
+        myActions.add(anAction);
+    }
+    {
+        StHandle<StActionHoldSlot> anAction = new StActionHoldSlot(stCString("DoParamsRotZInc"));
+        anAction->setSlot(stSlot(this, &StGLImageRegion::doParamsRotZRight));
+        anAction->setDefaultHotKey1(ST_VK_BRACKETRIGHT | ST_VF_CONTROL);
+        myActions.add(anAction);
+    }
+    {
+        StHandle<StActionIntSlot> anAction = new StActionIntSlot(stCString("DoParamsModeNext"), 0);
+        anAction->setSlot(stSlot(this, &StGLImageRegion::doParamsModeNext));
+        myActions.add(anAction);
+    }
+    {
+        StHandle<StActionHoldSlot> anAction = new StActionHoldSlot(stCString("DoParamsPanLeft"));
+        anAction->setSlot(stSlot(this, &StGLImageRegion::doParamsPanLeft));
+        anAction->setDefaultHotKey1(theUsePanningKeys ? ST_VK_LEFT : 0);
+        myActions.add(anAction);
+    }
+    {
+        StHandle<StActionHoldSlot> anAction = new StActionHoldSlot(stCString("DoParamsPanRight"));
+        anAction->setSlot(stSlot(this, &StGLImageRegion::doParamsPanRight));
+        anAction->setDefaultHotKey1(theUsePanningKeys ? ST_VK_RIGHT : 0);
+        myActions.add(anAction);
+    }
+    {
+        StHandle<StActionHoldSlot> anAction = new StActionHoldSlot(stCString("DoParamsPanUp"));
+        anAction->setSlot(stSlot(this, &StGLImageRegion::doParamsPanUp));
+        anAction->setDefaultHotKey1(theUsePanningKeys ? ST_VK_UP : 0);
+        myActions.add(anAction);
+    }
+    {
+        StHandle<StActionHoldSlot> anAction = new StActionHoldSlot(stCString("DoParamsPanDown"));
+        anAction->setSlot(stSlot(this, &StGLImageRegion::doParamsPanDown));
+        anAction->setDefaultHotKey1(theUsePanningKeys ? ST_VK_DOWN : 0);
+        myActions.add(anAction);
+    }
+    {
+        StHandle<StActionHoldSlot> anAction = new StActionHoldSlot(stCString("DoParamsScaleIn"));
+        anAction->setSlot(stSlot(this, &StGLImageRegion::doParamsScaleIn));
+        anAction->setDefaultHotKey1(ST_VK_ADD);
+        anAction->setDefaultHotKey2(ST_VK_OEM_PLUS);
+        myActions.add(anAction);
+    }
+    {
+        StHandle<StActionHoldSlot> anAction = new StActionHoldSlot(stCString("DoParamsScaleOut"));
+        anAction->setSlot(stSlot(this, &StGLImageRegion::doParamsScaleOut));
+        anAction->setDefaultHotKey1(ST_VK_SUBTRACT);
+        anAction->setDefaultHotKey2(ST_VK_OEM_MINUS);
+        myActions.add(anAction);
+    }
+    {
+        StHandle<StActionHoldSlot> anAction = new StActionHoldSlot(stCString("DoParamsRotYLeft"));
+        anAction->setSlot(stSlot(this, &StGLImageRegion::doParamsRotYLeft));
+    #ifdef ST_EXTRA_CONTROLS
+        anAction->setDefaultHotKey1(ST_VK_LEFT);
+    #endif
+        myActions.add(anAction);
+    }
+    {
+        StHandle<StActionHoldSlot> anAction = new StActionHoldSlot(stCString("DoParamsRotYRight"));
+        anAction->setSlot(stSlot(this, &StGLImageRegion::doParamsRotYRight));
+    #ifdef ST_EXTRA_CONTROLS
+        anAction->setDefaultHotKey1(ST_VK_RIGHT);
+    #endif
+        myActions.add(anAction);
+    }
+    {
+        StHandle<StActionHoldSlot> anAction = new StActionHoldSlot(stCString("DoParamsRotXUp"));
+        anAction->setSlot(stSlot(this, &StGLImageRegion::doParamsRotXUp));
+    #ifdef ST_EXTRA_CONTROLS
+        anAction->setDefaultHotKey1(ST_VK_UP);
+    #endif
+        myActions.add(anAction);
+    }
+    {
+        StHandle<StActionHoldSlot> anAction = new StActionHoldSlot(stCString("DoParamsRotXDown"));
+        anAction->setSlot(stSlot(this, &StGLImageRegion::doParamsRotXDown));
+    #ifdef ST_EXTRA_CONTROLS
+        anAction->setDefaultHotKey1(ST_VK_DOWN);
+    #endif
+        myActions.add(anAction);
+    }
 }
 
 StGLImageRegion::~StGLImageRegion() {

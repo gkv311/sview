@@ -19,55 +19,23 @@ class StFloat32Param : public StParam<float> {
     /**
      * Main constructor.
      */
-    ST_LOCAL StFloat32Param(const float      theValue,
-                            const StCString& theParamKey)
-    : StParam<float>(theValue),
-      myMinValue(-1E+37f),
-      myMaxValue( 1E+37f),
-      myEffMinValue(-1E+37f),
-      myEffMaxValue(-1E+37f),
-      myDefValue(0.0f),
-      myValueStep(1.0f),
-      myTolerance(0.0001f),
-      myParamKey (theParamKey),
-      myParamName(theParamKey) {
-        //
-    }
+    ST_CPPEXPORT StFloat32Param(const float      theValue,
+                                const StCString& theParamKey);
 
     /**
      * Simple constructor.
      */
-    ST_LOCAL StFloat32Param(const float theValue)
-    : StParam<float>(theValue),
-      myMinValue(-1E+37f),
-      myMaxValue( 1E+37f),
-      myEffMinValue(-1E+37f),
-      myEffMaxValue(-1E+37f),
-      myDefValue(0.0f),
-      myValueStep(1.0f),
-      myTolerance(0.0001f) {
-        //
-    }
+    ST_CPPEXPORT StFloat32Param(const float theValue);
 
     /**
      * Main constructor.
      */
-    ST_LOCAL StFloat32Param(const float theValue,
-                            const float theMinValue,
-                            const float theMaxValue,
-                            const float theDefValue,
-                            const float theStep,
-                            const float theTolerance = 0.0001f)
-    : StParam<float>(theValue),
-      myMinValue(theMinValue),
-      myMaxValue(theMaxValue),
-      myEffMinValue(theMinValue),
-      myEffMaxValue(theMaxValue),
-      myDefValue(theDefValue),
-      myValueStep(theStep),
-      myTolerance(theTolerance) {
-        //
-    }
+    ST_CPPEXPORT StFloat32Param(const float theValue,
+                                const float theMinValue,
+                                const float theMaxValue,
+                                const float theDefValue,
+                                const float theStep,
+                                const float theTolerance = 0.0001f);
 
     /** Destructor */
     ST_CPPEXPORT virtual ~StFloat32Param();

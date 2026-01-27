@@ -57,15 +57,20 @@ StDiagnostics::StDiagnostics(const StHandle<StResourceManager>& theResMgr,
 #endif
 
     // create actions
-    StHandle<StAction> anAction;
-    anAction = new StActionBool(stCString("DoFullscreen"), params.IsFullscreen);
-    addAction(Action_Fullscreen, anAction, ST_VK_F, ST_VK_RETURN);
-
-    anAction = new StActionIntSlot(stCString("DoStereoModeOn"),  stSlot(this, &StDiagnostics::doStereoMode), 1);
-    addAction(Action_StereoModeOn,  anAction, ST_VK_S);
-
-    anAction = new StActionIntSlot(stCString("DoStereoModeOff"), stSlot(this, &StDiagnostics::doStereoMode), 0);
-    addAction(Action_StereoModeOff, anAction, ST_VK_M);
+    {
+        StHandle<StAction> anAction = new StActionBool(stCString("DoFullscreen"), params.IsFullscreen);
+        addAction(Action_Fullscreen, anAction, ST_VK_F, ST_VK_RETURN);
+    }
+    {
+        StHandle<StActionIntSlot> anAction = new StActionIntSlot(stCString("DoStereoModeOn"), 1);
+        anAction->setSlot(stSlot(this, &StDiagnostics::doStereoMode));
+        addAction(Action_StereoModeOn,  anAction, ST_VK_S);
+    }
+    {
+        StHandle<StActionIntSlot> anAction = new StActionIntSlot(stCString("DoStereoModeOff"), 0);
+        anAction->setSlot(stSlot(this, &StDiagnostics::doStereoMode));
+        addAction(Action_StereoModeOff, anAction, ST_VK_M);
+    }
 }
 
 StDiagnostics::~StDiagnostics() {

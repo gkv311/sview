@@ -6,6 +6,10 @@
 
 #include <StGL/StGLResource.h>
 
+StGLResource::StGLResource() {
+    //
+}
+
 StGLResource::~StGLResource() {
     //
 }
