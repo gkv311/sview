@@ -447,6 +447,12 @@ bool StVideoQueue::init(AVFormatContext*   theFormatCtx,
                 //av_spherical_tile_bounds(aSpherical, par->width, par->height, &l, &t, &r, &b);
                 break;
             }
+        #if(LIBAVUTIL_VERSION_INT >= AV_VERSION_INT(60, 7, 100))
+            case AV_SPHERICAL_PARAMETRIC_IMMERSIVE: {
+                // unsupported - something new for apples
+                break;
+            }
+        #endif
         }
         if(theNewParams->ViewingMode != StViewSurface_Plain
         && theNewParams->isZeroRotate()) {
