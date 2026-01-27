@@ -682,8 +682,13 @@ bool StVideoQueue::hwaccelInit() {
         return false;
     }
 
+    #ifndef AV_PROFILE_H264_HIGH
+    #define AV_PROFILE_H264_HIGH        FF_PROFILE_H264_HIGH
+    #define AV_PROFILE_H264_CONSTRAINED FF_PROFILE_H264_CONSTRAINED
+    #endif
+
     if(myCodecCtx->codec_id == CodecIdH264
-    && (myCodecCtx->profile & ~FF_PROFILE_H264_CONSTRAINED) > FF_PROFILE_H264_HIGH) {
+    && (myCodecCtx->profile & ~AV_PROFILE_H264_CONSTRAINED) > AV_PROFILE_H264_HIGH) {
         signals.onError(StString("StVideoQueue: Unsupported H.264 profile for DXVA2 HWAccel: ") + myCodecCtx->profile);
         return false;
     }
