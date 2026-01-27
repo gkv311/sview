@@ -498,14 +498,15 @@ int StWinHandles::glCreateContext(StWinHandles*    theSlave,
                   WGL_STENCIL_BITS_ARB,   theStencilSize,
                   0, 0,
               };
+              const size_t aPixAttribsLen = (sizeof(aPixAttribs) / sizeof(aPixAttribs[0])) / 2;
               unsigned int aFrmtsNb = 0;
               aCtx.extAll->wglChoosePixelFormatARB(hDC, aPixAttribs, NULL, 1, &aPixFrmtId, &aFrmtsNb);
               if(aPixFrmtId == 0 && theColorSize == 30) {
-                  for(size_t anAttribIter = 0; anAttribIter < sizeof(aPixAttribs) / 2; anAttribIter += 2) {
-                      if(aPixAttribs[anAttribIter] == WGL_RED_BITS_ARB
-                      || aPixAttribs[anAttribIter] == WGL_GREEN_BITS_ARB
-                      || aPixAttribs[anAttribIter] == WGL_BLUE_BITS_ARB) {
-                          aPixAttribs[anAttribIter + 1] = 8;
+                  for(size_t anAttribIter = 0; anAttribIter < aPixAttribsLen; ++anAttribIter) {
+                      if(aPixAttribs[anAttribIter * 2] == WGL_RED_BITS_ARB
+                      || aPixAttribs[anAttribIter * 2] == WGL_GREEN_BITS_ARB
+                      || aPixAttribs[anAttribIter * 2] == WGL_BLUE_BITS_ARB) {
+                          aPixAttribs[anAttribIter * 2 + 1] = 8;
                       }
                   }
                   aCtx.extAll->wglChoosePixelFormatARB(hDC, aPixAttribs, NULL, 1, &aPixFrmtId, &aFrmtsNb);

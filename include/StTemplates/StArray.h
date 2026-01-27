@@ -24,6 +24,11 @@
 template<typename Element_t>
 class StArray {
 
+        public:
+
+    //! STL-compliant typedef for value type
+    typedef Element_t value_type;
+
         protected:
 
     size_t      mySize;  //!< array size

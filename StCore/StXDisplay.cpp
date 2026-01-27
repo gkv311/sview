@@ -37,7 +37,7 @@ StXDisplay::StXDisplay()
   XA_COMPOUND_TEXT(None),
   XA_UTF8_STRING(None),
   XA_CLIPBOARD(None) {
-    stMemZero(&FBCfg, sizeof(GLXFBConfig)); // should be just a pointer
+    stMemZero(&FBCfg, sizeof(FBCfg)); // should be just a pointer
     open();
 }
 

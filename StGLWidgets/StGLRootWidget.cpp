@@ -317,7 +317,7 @@ void StGLRootWidget::stglScissorRectInternal(const StRectI_t& theRect,
     const GLint aRootHeight  = myRectPxFull.height();
     if(aRootWidth <= 0 || aRootHeight <= 0) {
         // just prevent division by zero - should never happen
-        stMemZero(&theScissorRect, sizeof(StGLBoxPx));
+        stMemZero(&theScissorRect, sizeof(theScissorRect));
         return;
     }
 
