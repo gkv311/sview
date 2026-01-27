@@ -7,8 +7,6 @@
 #include <StStrings/StLangMap.h>
 #include <StStrings/StLogger.h>
 
-#include <fstream> // file input/output
-
 namespace {
     static const StString ST_NEWLINE2            = "\\n";
     static const StString ST_NEWLINE_REPLACEMENT = " \x0A";

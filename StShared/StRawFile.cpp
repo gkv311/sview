@@ -11,7 +11,6 @@
 #include <StStrings/StLogger.h>
 
 #include <iostream>
-#include <fstream>
 #include <limits>
 
 #if defined(_WIN32)

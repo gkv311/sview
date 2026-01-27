@@ -16,7 +16,9 @@
 
 #include <StThreads/StThread.h>
 
+#if defined(__ANDROID__)
 #include <fstream>
+#endif
 
 #if !defined(_WIN32)
     #include <unistd.h>

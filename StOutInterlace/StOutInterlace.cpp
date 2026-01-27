@@ -18,7 +18,9 @@
 #include <StImage/StImagePlane.h>
 #include <StVersion.h>
 
+#if defined(__ANDROID__)
 #include <fstream>
+#endif
 
 namespace {
 
