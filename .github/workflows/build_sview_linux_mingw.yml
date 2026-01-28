@@ -75,6 +75,7 @@ jobs:
       with:
         name: freetype-windows-x64-mingw
         path: freetype-install
+        if-no-files-found: error
 
   build-lin-mingw-openal:
     runs-on: ubuntu-24.04
@@ -126,6 +127,7 @@ jobs:
       with:
         name: openal-windows-x64-mingw
         path: openal-install
+        if-no-files-found: error
 
   build-lin-mingw-openvr:
     runs-on: ubuntu-24.04
@@ -184,6 +186,7 @@ jobs:
       with:
         name: openvr-windows-x64-mingw
         path: openvr-install
+        if-no-files-found: error
 
   build-lin-mingw-ffmpeg:
     runs-on: ubuntu-24.04
@@ -314,6 +317,7 @@ jobs:
       with:
         name: ffmpeg-windows-x64-mingw
         path: ffmpeg-install
+        if-no-files-found: error
 
   build-lin-mingw-sview:
     runs-on: ubuntu-24.04
@@ -387,3 +391,4 @@ jobs:
       with:
         name: sview-windows-x64-mingw
         path: ./sview-install
+        if-no-files-found: error

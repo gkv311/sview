@@ -46,3 +46,4 @@ jobs:
       with:
         name: sview-windows-x64-msvc
         path: sview-install
+        if-no-files-found: error

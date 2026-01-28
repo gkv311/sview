@@ -23,4 +23,6 @@ jobs:
       uses: actions/upload-artifact@v4
       with:
         name: sview-apk
-        path: build/sView-Release.apk
+        path: sview.git/build/sView-Release.apk
+        if-no-files-found: error
+        compression-level: 0

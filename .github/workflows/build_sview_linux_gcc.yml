@@ -45,6 +45,7 @@ jobs:
       with:
         name: sview-linux-screenshots
         path: ./sview.git/build/*.png
+        if-no-files-found: error
 
   build-ubuntu-24-04-debpkg:
     runs-on: ubuntu-24.04
