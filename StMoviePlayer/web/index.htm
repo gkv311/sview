@@ -1,241 +1,47 @@
 <!DOCTYPE html>
 <html data-theme="auto">
-  <head>
-    <meta charset="UTF-8" />
-    <link rel="shortcut icon" href="/web/favicon.ico" type="image/x-icon" />
-    <link rel="stylesheet" href="/web/style.css">
-    <title>sView Web UI</title>
-    <script>
-var myPlayItem   = -1; // currently played item id within playlist
-var myListSerial = -1; // playlist serial number
-var myVolume     = -1; // volume
-var myList;            // playlist content
-
-function postRequest(theUrl, theFunc, theASync) {
-  var aReq = new XMLHttpRequest();
-  aReq.onreadystatechange = theFunc;
-  aReq.open("GET", theUrl, theASync);
-  aReq.send();
-}
-
-function doPlayPause()   { postRequest('play_pause',  function() {}, true); }
-function doStop()        { postRequest('stop',        function() {}, true); }
-function doListPrev()    { postRequest('prev',        function() {}, true); }
-function doListNext()    { postRequest('next',        function() {}, true); }
-function doFullWin()     { postRequest('fullscr_win', function() {}, true); }
-function doAudioMute()   { postRequest('mute',        function() {}, true); }
-function doAudioVol(vol) { postRequest('vol?'  + vol, function() {}, true); }
-function doListItem(pos) { postRequest('item?' + pos, function() {}, true); }
-
-function doUpdateTitle() {
-  postRequest('current?title', function() {
-    if(this.readyState == 4 && this.status == 200) {
-      var aCurrTitle = this.responseText;
-      document.getElementById('stTitle').innerHTML = "Current: " + aCurrTitle;
-      if(aCurrTitle.length === 0) {
-        document.title = 'sView Web UI';
-      } else {
-        document.title = aCurrTitle + ' - sView Web UI';
-      }
-
-      if(myList && myList.children.length == 0) {
-        myListSerial = -1;
-      }
-    }
-  }, true);
-}
-
-function doMakePlaylist(theList) {
-  myList = document.getElementById('playlist');
-
-  myList.innerText = "";
-  for(var anIter = 0; anIter < theList.length; ++anIter) {
-    var anItem = theList[anIter];
-    const line = document.createElement('span');
-    if(anIter == myPlayItem) line.classList.add("hl");
-    line.innerText = anItem;
-    line.dataset["index"] = anIter;
-    line.onclick = e => {
-      e.preventDefault();
-      doListItem(Number(line.dataset["index"]));
-    }
-    myList.append(line);
-  }
-
-  doUpdateTitle();
-}
-
-function doRefresh() {
-  postRequest('current?id', function() {
-    if(this.readyState != 4) return;
-    if(this.status != 200) {
-      document.getElementById("stOffline").classList.remove("hidden");
-      document.getElementById("controls").classList.add("hidden");
-      document.getElementById("playlist").classList.add("hidden");
-      myListSerial = -1;
-      return;
-    }
-    document.getElementById("stOffline").classList.add("hidden");
-    document.getElementById("controls").classList.remove("hidden");
-    document.getElementById("playlist").classList.remove("hidden");
-
-    var aCurrArr = this.responseText.split(":");
-    var aCurrListId = aCurrArr[0];
-    var aCurrItemId = aCurrArr[1];
-    var aCurrVolume = Number(aCurrArr[2]);
-    if(aCurrVolume != myVolume) {
-      update_volume_ui(aCurrVolume);
-    }
-
-    if(aCurrListId == myListSerial
-      && aCurrItemId == myPlayItem) {
-      return;
-    }
-
-    // update entire playlist
-    if(aCurrListId != myListSerial) {
-      myListSerial = aCurrListId;
-      myPlayItem   = aCurrItemId;
-      postRequest('playlist', function() {
-        if(this.readyState == 4 && this.status == 200) {
-          var aListStr = this.responseText;
-          doMakePlaylist(aListStr.split("\n").filter(s => s != ""));
-        }
-      }, true);
-      return;
-    }
-
-    if(aCurrItemId == myPlayItem) {
-      return;
-    }
-
-    // hi-light currently played item
-    if(myList) {
-      if(myPlayItem >= 0 && myPlayItem < myList.children.length) {
-        myList.children[myPlayItem].classList.remove("hl");
-      }
-      if(aCurrItemId >= 0 && aCurrItemId < myList.children.length) {
-        myList.children[aCurrItemId].classList.add("hl");
-      }
-    }
-    myPlayItem = aCurrItemId;
-    doUpdateTitle();
-  }, true);
-}
-
-window.setInterval(function() { doRefresh() }, 2000);
-
-</script>
-
-  </head>
-  <body>
-    <header>
-      <img src="/web/logo.png" />
-      <h1>
-        sView - Remote Control<br/>
-        <span id="stVer"></span>
-        <span id="stOffline">OFFLINE</span>
-      </h1>
-      <fieldset id="theme_switch">
-        <label><input type="radio" name="theme" value="auto" checked> Auto</label>
-        <label><input type="radio" name="theme" value="light"> Light</label>
-        <label><input type="radio" name="theme" value="dark"> Dark</label>
-      </fieldset>
-    </header>
-
-    <section id="controls" class="hidden">
-      <div>
-        <span id="stTitle"></span>
-      </div>
-      <div>
-        <a href="#" id="btn_PlayPause" title="Play"></a>
-        <a href="#" id="btn_ListPrev" title="Previous"></a>
-        <a href="#" id="btn_ListNext" title="Next"></a>
-        <div id="volume_icon">
-          <a href="#" id="btn_AudioMute" title="Mute"></a>
-          <div id="volume_box">
-            <span id="volume"></span>
-            <span id="volume_nb"></span>
-          </div>
-        </div>
-        <a href="#" id="btn_Fullscreen" title="Fullscreen"></a>
-      </div>
-    </section>
-
-    <nav>
-      <div id="playlist" class="hidden"></div>
-    </nav>
-
-    <script>
-    // version
-    postRequest('version', function() {
-      if(this.readyState == 4 && this.status == 200) {
-        document.getElementById('stVer').innerHTML = this.responseText;
-      }
-    }, false);
-
-    // controls
-    document.getElementById("controls").classList.remove("hidden");
-    const actions = ["PlayPause", "ListPrev", "ListNext", "Fullscreen", "AudioMute"];
-    for (const action of actions) {
-      const btn = document.getElementById("btn_" + action);
-      if (!btn) continue;
-      btn.addEventListener("click", e => {
-        e.preventDefault();
-        if (action == "PlayPause") doPlayPause();
-        else if (action == "ListPrev") doListPrev();
-        else if (action == "ListNext") doListNext();
-        else if (action == "Fullscreen") doFullWin();
-        else if (action == "AudioMute") doAudioMute();
-      });
-    }
-
-    // volume
-    document.getElementById("volume_box").onclick = e => {
-      const volume = Math.round((e.offsetX / e.target.offsetWidth) * 100);
-      doAudioVol(volume)
-      update_volume_ui(volume);
-    };
-
-    document.getElementById("volume_box").ondblclick = _ => {
-      doAudioVol(100);
-      update_volume_ui(100);
-    };
-
-    let wheel_timeout = undefined;
-    document.getElementById("volume_icon").addEventListener("wheel", e => {
-      const volume = Math.round(Math.min(Math.max(0, myVolume - (e.deltaX + e.deltaY)/2), 120));
-      update_volume_ui(volume);
-      clearTimeout(wheel_timeout);
-      wheel_timeout = setTimeout(_ => doAudioVol(volume), 200);
-    }, { passive: true });
-
-    function update_volume_ui(v) {
-      myVolume = v;
-      document.getElementById("volume_nb").innerHTML = v + "%";
-      const vol_span = document.getElementById("volume");
-      vol_span.style.width = Math.min(Math.max(0, v), 100) + "%";
-      vol_span.classList.toggle("hot", v > 100);
-    }
-
-    // theme
-    for (const r of document.querySelectorAll('input[name="theme"]')) {
-      r.onchange = _ => {
-        if (!r.checked) return;
-        const v = r.value;
-        document.documentElement.setAttribute("data-theme", v);
-        localStorage.setItem("theme", v);
-      }
-    }
-    const theme = localStorage.getItem("theme");
-    if (theme) {
-      const radio = document.querySelector(`input[name="theme"][value="${theme}"]`);
-      if (radio) radio.checked = true;
-      document.documentElement.setAttribute("data-theme", theme);
-    }
-
-    // first update
-    doRefresh();
-    </script>
-  </body>
+    <head>
+        <meta charset="UTF-8" />
+        <link rel="shortcut icon" href="/web/favicon.ico" type="image/x-icon" />
+        <link rel="stylesheet" href="/web/style.css">
+        <script type="module" src="/web/api.js"></script>
+        <script type="module" src="/web/interface.js"></script>
+        <title>sView Web UI</title>
+    </head>
+    <body>
+        <header>
+            <img src="/web/logo.png" />
+            <h1>
+                sView - Remote Control<br/>
+                <span id="stVer"></span>
+                <span id="stOffline">OFFLINE</span>
+            </h1>
+            <fieldset id="theme_switch">
+                <label><input type="radio" name="theme" value="auto" checked>Auto</label>
+                <label><input type="radio" name="theme" value="light">Light</label>
+                <label><input type="radio" name="theme" value="dark">Dark</label>
+            </fieldset>
+        </header>
+        <section id="controls" class="hidden">
+            <div>
+                <span id="stTitle"></span>
+            </div>
+            <div>
+                <a href="#" id="btn_PlayPause" title="Play"></a>
+                <a href="#" id="btn_ListPrev" title="Previous"></a>
+                <a href="#" id="btn_ListNext" title="Next"></a>
+                <div id="volume_icon">
+                    <a href="#" id="btn_AudioMute" title="Mute"></a>
+                    <div id="volume_box">
+                        <span id="volume"></span>
+                        <span id="volume_nb"></span>
+                    </div>
+                </div>
+                <a href="#" id="btn_Fullscreen" title="Fullscreen"></a>
+            </div>
+        </section>
+        <nav>
+            <div id="playlist" class="hidden"></div>
+        </nav>
+    </body>
 </html>
