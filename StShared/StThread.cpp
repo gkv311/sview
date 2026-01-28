@@ -13,39 +13,12 @@
     #include <windows.h>
     #include <process.h>
 
+    // suppress GCC function cast warnings
     #if defined(__GNUC__) && !defined(__INTEL_COMPILER) && !defined(__clang__)
-        #if (__GNUC__ > 8) || ((__GNUC__ == 8) && (__GNUC_MINOR__ >= 1))
+        #if (__GNUC__ > 8 || (__GNUC__ == 8 && __GNUC_MINOR__ >= 1))
             #pragma GCC diagnostic ignored "-Wcast-function-type"
         #endif
     #endif
-
-    typedef HRESULT (WINAPI *SetThreadDescription_t)(HANDLE, PCWSTR);
-
-    /*
-     * Retrieve function pointer (requires Windows 10 1607+).
-     */
-    static SetThreadDescription_t findThreadDesc() {
-        HMODULE aKernBaseMod = GetModuleHandleW(L"kernelbase");
-        return (SetThreadDescription_t)(aKernBaseMod != NULL
-              ? GetProcAddress(aKernBaseMod, "SetThreadDescription")
-              : NULL);
-    }
-
-#ifdef _MSC_VER
-    namespace {
-        static const DWORD MS_VC_EXCEPTION = 0x406D1388;
-    }
-
-    #pragma pack(push, 8)
-    struct MsWinThreadNameInfo {
-        DWORD  dwType;     //!< must be 0x1000
-        LPCSTR szName;     //!< pointer to name
-        DWORD  dwThreadID; //!< thread ID (-1 for caller thread)
-        DWORD  dwFlags;    //!< must be zero
-    };
-    #pragma pack(pop)
-#endif
-
 #else
     #include <sys/types.h>
 
@@ -82,6 +55,76 @@ StThread::~StThread() {
     detach();
 }
 
+#ifdef _WIN32
+// suppress GCC warnings
+#if defined(__GNUC__) && !defined(__INTEL_COMPILER) && !defined(__clang__)
+    #pragma GCC diagnostic push
+    #if (__GNUC__ > 4 || (__GNUC__ == 4 && __GNUC_MINOR__ >= 6))
+        #pragma GCC diagnostic ignored "-Warray-bounds"
+    #endif
+#endif
+
+typedef HRESULT(WINAPI *SetThreadDescription_t)(HANDLE, PCWSTR);
+
+/** Retrieve function pointer (requires Windows 10 1607+). */
+static SetThreadDescription_t findSetThreadDesc() {
+    HMODULE aKernBaseMod = GetModuleHandleW(L"kernelbase");
+    return (SetThreadDescription_t)(aKernBaseMod != NULL
+                                    ? GetProcAddress(aKernBaseMod, "SetThreadDescription")
+                                    : NULL);
+}
+
+/** Set thread name using WinAPI (requires Windows 10 1607+). */
+static void setWinApiThreadName(HANDLE theThread, const char* theName) {
+    static const SetThreadDescription_t kerSetThreadDescription = findSetThreadDesc();
+    if (kerSetThreadDescription != NULL) {
+        StStringUtfWide aNameWide(theName);
+        kerSetThreadDescription(theThread, aNameWide.toCString());
+    }
+}
+
+#include <pshpack8.h>
+struct MsWinThreadNameInfo {
+    DWORD  dwType;     //!< must be 0x1000
+    LPCSTR szName;     //!< pointer to name
+    DWORD  dwThreadID; //!< thread ID (-1 for caller thread)
+    DWORD  dwFlags;    //!< must be zero
+};
+#include <poppack.h>
+
+/** Ignore manually raised exception. */
+static EXCEPTION_DISPOSITION NTAPI msWinIgnoreHandler(EXCEPTION_RECORD*, void*, CONTEXT*, void*) {
+    return ExceptionContinueExecution;
+}
+
+/** Set thread name by raising exception for attached debugger. */
+static void setMsvcThreadName(DWORD theThreadId, const char* theName) {
+    if (!IsDebuggerPresent())
+        return;
+
+    MsWinThreadNameInfo anInfo = {};
+    anInfo.dwType = 0x1000;
+    anInfo.szName = theName;
+    anInfo.dwThreadID = theThreadId;
+
+    // use custom exception handler instead of MSVC-specific __try/__except
+    NT_TIB* anNtTib = (NT_TIB*)NtCurrentTeb();
+    EXCEPTION_REGISTRATION_RECORD anExcRec = {};
+    anExcRec.Next = anNtTib->ExceptionList;
+    anExcRec.Handler = &msWinIgnoreHandler;
+    anNtTib->ExceptionList = &anExcRec;
+
+    static const DWORD MS_VC_EXCEPTION = 0x406D1388;
+    ::RaiseException(MS_VC_EXCEPTION, 0, sizeof(anInfo) / sizeof(ULONG_PTR), (ULONG_PTR*)&anInfo);
+
+    anNtTib->ExceptionList = anNtTib->ExceptionList->Next;
+}
+
+#if defined(__GNUC__) && !defined(__INTEL_COMPILER) && !defined(__clang__)
+    #pragma GCC diagnostic pop
+#endif
+#endif
+
 void StThread::setName(const char* theName) {
     if( theName == NULL
     || *theName == '\0'
@@ -89,25 +132,9 @@ void StThread::setName(const char* theName) {
         return;
     }
 
-#ifdef _WIN32
-#ifdef _MSC_VER
-    MsWinThreadNameInfo anInfo;
-    anInfo.dwType     = 0x1000;
-    anInfo.szName     = theName;
-    anInfo.dwThreadID = myThreadId;
-    anInfo.dwFlags    = 0;
-    __try {
-        ::RaiseException(MS_VC_EXCEPTION, 0, sizeof(anInfo)/sizeof(ULONG_PTR), (ULONG_PTR* )&anInfo);
-    } __except(EXCEPTION_EXECUTE_HANDLER) {
-        //
-    }
-#else
-    static const SetThreadDescription_t kerSetThreadDescription = findThreadDesc();
-    if (kerSetThreadDescription != NULL) {
-        StStringUtfWide aNameWide(theName);
-        kerSetThreadDescription((HANDLE )myThread, aNameWide.toCString());
-    }
-#endif
+#if defined(_WIN32)
+    setWinApiThreadName((HANDLE)(UINT_PTR)myThreadId, theName);
+    setMsvcThreadName(myThreadId, theName);
 #elif defined(__APPLE__)
     (void )theName;
 #else
@@ -121,19 +148,9 @@ void StThread::setCurrentThreadName(const char* theName) {
         return;
     }
 
-#ifdef _WIN32
-#ifdef _MSC_VER
-    MsWinThreadNameInfo anInfo;
-    anInfo.dwType     = 0x1000;
-    anInfo.szName     = theName;
-    anInfo.dwThreadID = (DWORD )-1;
-    anInfo.dwFlags    = 0;
-    __try {
-        ::RaiseException(MS_VC_EXCEPTION, 0, sizeof(anInfo)/sizeof(ULONG_PTR), (ULONG_PTR* )&anInfo);
-    } __except(EXCEPTION_EXECUTE_HANDLER) {
-        //
-    }
-#endif // _MSC_VER
+#if defined(_WIN32)
+    setWinApiThreadName(GetCurrentThread(), theName);
+    setMsvcThreadName((DWORD)-1, theName);
 #elif defined(__APPLE__)
     pthread_setname_np(theName);
 #else
