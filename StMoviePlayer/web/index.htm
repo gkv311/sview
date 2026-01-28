@@ -1,18 +1,15 @@
 <!DOCTYPE html>
-<html>
-<head profile="http://www.w3.org/2005/10/profile">
-<link rel="shortcut icon" href="/web/favicon.ico" type="image/x-icon" />
-<title>sView Web UI</title>
-
-<script>
-
-var isFirefox = typeof InstallTrigger !== 'undefined';
-
+<html data-theme="auto">
+  <head>
+    <meta charset="UTF-8" />
+    <link rel="shortcut icon" href="/web/favicon.ico" type="image/x-icon" />
+    <link rel="stylesheet" href="/web/style.css">
+    <title>sView Web UI</title>
+    <script>
 var myPlayItem   = -1; // currently played item id within playlist
 var myListSerial = -1; // playlist serial number
 var myVolume     = -1; // volume
 var myList;            // playlist content
-var myOffCount   = 0;  // offline counter
 
 function postRequest(theUrl, theFunc, theASync) {
   var aReq = new XMLHttpRequest();
@@ -21,75 +18,14 @@ function postRequest(theUrl, theFunc, theASync) {
   aReq.send();
 }
 
-function doPlayPause() { postRequest('play_pause',  function() {}, true); }
-function doStop()      { postRequest('stop',        function() {}, true); }
-function doListPrev()  { postRequest('prev',        function() {}, true); }
-function doListNext()  { postRequest('next',        function() {}, true); }
-function doFullWin()   { postRequest('fullscr_win', function() {}, true); }
-function doAudioMute() { postRequest('mute',        function() {}, true); }
-function doAudioVol()  { postRequest('vol?'  + myVolume,   function() {}, true); }
-function doListItem()  { postRequest('item?' + this.myPos, function() {}, true); }
-
-function getAbsolutePosition(theElement) {
-  var aPos = { x: theElement.offsetLeft, y: theElement.offsetTop };
-  if(theElement.offsetParent) {
-    var aTmp = getAbsolutePosition(theElement.offsetParent);
-    aPos.x += aTmp.x;
-    aPos.y += aTmp.y;
-  }
-  return aPos;
-}
-
-function getRelativeCoordinates(theEvent, theReference) {
-  var x, y;
-  theEvent = theEvent || window.event;
-  var el = theEvent.target || theEvent.srcElement;
-
-  if(!window.opera && typeof theEvent.offsetX != 'undefined') {
-    // Use offset coordinates and find common offsetParent
-    var aPos = { x: theEvent.offsetX, y: theEvent.offsetY };
-
-    // Send the coordinates upwards through the offsetParent chain.
-    var e = el;
-    while(e) {
-      e.mouseX = aPos.x;
-      e.mouseY = aPos.y;
-      aPos.x += e.offsetLeft;
-      aPos.y += e.offsetTop;
-      e = e.offsetParent;
-    }
-
-    // Look for the coordinates starting from the reference element.
-    var e = theReference;
-    var anOffset = { x: 0, y: 0 }
-    while(e) {
-      if(typeof e.mouseX != 'undefined') {
-        x = e.mouseX - anOffset.x;
-        y = e.mouseY - anOffset.y;
-        break;
-      }
-      anOffset.x += e.offsetLeft;
-      anOffset.y += e.offsetTop;
-      e = e.offsetParent;
-    }
-
-    // reset stored coordinates
-    e = el;
-    while(e) {
-      e.mouseX = undefined;
-      e.mouseY = undefined;
-      e = e.offsetParent;
-    }
-  } else {
-    // absolute coordinates
-    var aPos = getAbsolutePosition(theReference);
-    x = theEvent.pageX - aPos.x;
-    y = theEvent.pageY - aPos.y;
-  }
-
-  // Subtract distance to middle
-  return { x: x, y: y };
-}
+function doPlayPause()   { postRequest('play_pause',  function() {}, true); }
+function doStop()        { postRequest('stop',        function() {}, true); }
+function doListPrev()    { postRequest('prev',        function() {}, true); }
+function doListNext()    { postRequest('next',        function() {}, true); }
+function doFullWin()     { postRequest('fullscr_win', function() {}, true); }
+function doAudioMute()   { postRequest('mute',        function() {}, true); }
+function doAudioVol(vol) { postRequest('vol?'  + vol, function() {}, true); }
+function doListItem(pos) { postRequest('item?' + pos, function() {}, true); }
 
 function doUpdateTitle() {
   postRequest('current?title', function() {
@@ -102,7 +38,7 @@ function doUpdateTitle() {
         document.title = aCurrTitle + ' - sView Web UI';
       }
 
-      if(myList && myList.rows.length == 0) {
+      if(myList && myList.children.length == 0) {
         myListSerial = -1;
       }
     }
@@ -110,149 +46,49 @@ function doUpdateTitle() {
 }
 
 function doMakePlaylist(theList) {
-  myList = document.createElement('table');
-  myList.border = '1';
-  myList.width  = '100%';
-  myList.height = '100%';
-  myList.style.borderCollapse = 'collapse';
+  myList = document.getElementById('playlist');
 
+  myList.innerText = "";
   for(var anIter = 0; anIter < theList.length; ++anIter) {
     var anItem = theList[anIter];
-
-    var aLink = document.createElement('a');
-    aLink.href = 'javascript:void(0)';
-    aLink.innerHTML = anItem;
-
-    var aRow = myList.insertRow(-1);
-    aRow.myPos = anIter;
-    aRow.onclick = doListItem;
-    aRow.myColorPassive = (anIter % 2) ? 'aliceblue' : 'white';
-    aRow.style.backgroundColor = aRow.myColorPassive;
-    aRow.onmouseover = function() {
-      this.myOldColor = this.style.backgroundColor;
-      this.style.backgroundColor = 'lightsteelblue';
-    };
-
-    aRow.onmouseout = function() {
-      this.style.backgroundColor = this.myOldColor;
-    };
-
-    if(anIter == myPlayItem) {
-      aRow.style.backgroundColor = 'silver';
-      aRow.myOldColor = 'silver';
+    const line = document.createElement('span');
+    if(anIter == myPlayItem) line.classList.add("hl");
+    line.innerText = anItem;
+    line.dataset["index"] = anIter;
+    line.onclick = e => {
+      e.preventDefault();
+      doListItem(Number(line.dataset["index"]));
     }
-
-    var aCellId = aRow.insertCell(-1);
-    aCellId.width  = '50';
-    aCellId.height = '30';
-    aCellId.style.verticalAlign = 'middle';
-    aCellId.style.textAlign     = 'center';
-    aCellId.innerHTML = anIter;
-
-    var aCellText = aRow.insertCell(-1);
-    aCellText.height = '30';
-    aCellText.style.verticalAlign = 'middle';
-    aCellText.style.textAlign     = 'left';
-    aCellText.appendChild(aLink);
+    myList.append(line);
   }
-
-  var aRoot = document.getElementById('stPlaylist');
-  aRoot.innerHTML = "";
-  aRoot.appendChild(myList);
 
   doUpdateTitle();
 }
 
-function refreshPlaylist() {
-  postRequest('playlist', function() {
-    if(this.readyState == 4 && this.status == 200) {
-      var aListStr = this.responseText;
-      doMakePlaylist(aListStr.split("\n"));
-    }
-  }, true);
-}
-
-function onVolumeClick(theEvent) {
-  var aPos = getRelativeCoordinates(theEvent, this);
-  myVolume = aPos.x > 98 ? 100 : aPos.x;
-  drawVolume();
-  doAudioVol();
-}
-
-function onVolumeWheel(theEvent) {
-  var aDelta = theEvent.detail ? -theEvent.detail : theEvent.wheelDelta / 120;
-  var aVolume = myVolume + Number((aDelta > 0) ? 1 : -1);
-  if(aVolume < 0 || aVolume > 150 || myVolume < 0) {
-    return;
-  }
-
-  myVolume = aVolume;
-  drawVolume();
-  doAudioVol();
-
-  if(theEvent.preventDefault) {
-    theEvent.preventDefault();
-  } else {
-    return false;
-  }
-}
-
-function drawVolume() {
-  var aCanvas = document.getElementById('stVolumeCanvas');
-  var aCtx    = aCanvas.getContext('2d');
-  var aWidth  = 100;
-
-  aCtx.beginPath();
-  aCtx.rect(1, 1, aWidth - 2, 18);
-  aCtx.fillStyle = 'yellow';
-  aCtx.fill();
-
-  aCtx.lineWidth = 1;
-  aCtx.strokeStyle = 'black';
-  aCtx.stroke();
-
-  var aFilled = (myVolume / 100) * (aWidth - 2);
-  aFilled = Math.max(aFilled, 0);
-  aFilled = Math.min(aFilled, aWidth - 2);
-
-  aCtx.beginPath();
-  aCtx.rect(1, 1, aFilled, 18);
-  aCtx.fillStyle = 'blue';
-  aCtx.fill();
-
-  aCtx.font = 'bold 8pt Calibri';
-  aCtx.textAlign = 'center';
-  aCtx.fillStyle = 'black';
-  aCtx.fillText(myVolume + '%', aWidth / 2 + 1, 15);
-  aCtx.fillStyle = myVolume <= 100 ? 'white' : 'red';
-  aCtx.fillText(myVolume + '%', aWidth / 2, 14);
-}
-
 function doRefresh() {
   postRequest('current?id', function() {
-    if(this.readyState != 4 || this.status != 200) {
-      if(myOffCount >= 10) {
-        document.getElementById('stOffline').innerHTML = "[offline]";
-      }
-      ++myOffCount;
+    if(this.readyState != 4) return;
+    if(this.status != 200) {
+      document.getElementById("stOffline").classList.remove("hidden");
+      document.getElementById("controls").classList.add("hidden");
+      document.getElementById("playlist").classList.add("hidden");
+      myListSerial = -1;
       return;
     }
-    if(myOffCount >= 10) {
-      document.getElementById('stOffline').innerHTML = "";
-    }
-    myOffCount = 0;
+    document.getElementById("stOffline").classList.add("hidden");
+    document.getElementById("controls").classList.remove("hidden");
+    document.getElementById("playlist").classList.remove("hidden");
 
     var aCurrArr = this.responseText.split(":");
     var aCurrListId = aCurrArr[0];
     var aCurrItemId = aCurrArr[1];
     var aCurrVolume = Number(aCurrArr[2]);
     if(aCurrVolume != myVolume) {
-      myVolume = aCurrVolume;
-      drawVolume();
+      update_volume_ui(aCurrVolume);
     }
 
     if(aCurrListId == myListSerial
-    && aCurrItemId == myPlayItem) {
+      && aCurrItemId == myPlayItem) {
       return;
     }
 
@@ -263,7 +99,7 @@ function doRefresh() {
       postRequest('playlist', function() {
         if(this.readyState == 4 && this.status == 200) {
           var aListStr = this.responseText;
-          doMakePlaylist(aListStr.split("\n"));
+          doMakePlaylist(aListStr.split("\n").filter(s => s != ""));
         }
       }, true);
       return;
@@ -275,14 +111,11 @@ function doRefresh() {
 
     // hi-light currently played item
     if(myList) {
-      if(myPlayItem >= 0 && myPlayItem < myList.rows.length) {
-        var aRowPrev = myList.rows[myPlayItem];
-        aRowPrev.style.backgroundColor = aRowPrev.myColorPassive;
+      if(myPlayItem >= 0 && myPlayItem < myList.children.length) {
+        myList.children[myPlayItem].classList.remove("hl");
       }
-      if(aCurrItemId >= 0 && aCurrItemId < myList.rows.length) {
-        var aRow = myList.rows[aCurrItemId];
-        aRow.style.backgroundColor = 'silver';
-        aRow.myOldColor = 'silver';
+      if(aCurrItemId >= 0 && aCurrItemId < myList.children.length) {
+        myList.children[aCurrItemId].classList.add("hl");
       }
     }
     myPlayItem = aCurrItemId;
@@ -294,54 +127,115 @@ window.setInterval(function() { doRefresh() }, 2000);
 
 </script>
 
-</head>
-<body>
+  </head>
+  <body>
+    <header>
+      <img src="/web/logo.png" />
+      <h1>
+        sView - Remote Control<br/>
+        <span id="stVer"></span>
+        <span id="stOffline">OFFLINE</span>
+      </h1>
+      <fieldset id="theme_switch">
+        <label><input type="radio" name="theme" value="auto" checked> Auto</label>
+        <label><input type="radio" name="theme" value="light"> Light</label>
+        <label><input type="radio" name="theme" value="dark"> Dark</label>
+      </fieldset>
+    </header>
 
-<h2>sView - Remote Control (<span id="stVer"></span>) <span id="stOffline"></span></h2>
-<script>
-  postRequest('version', function() {
-    if(this.readyState == 4 && this.status == 200) {
-      document.getElementById('stVer').innerHTML = this.responseText;
+    <section id="controls" class="hidden">
+      <div>
+        <span id="stTitle"></span>
+      </div>
+      <div>
+        <a href="#" id="btn_PlayPause" title="Play"></a>
+        <a href="#" id="btn_ListPrev" title="Previous"></a>
+        <a href="#" id="btn_ListNext" title="Next"></a>
+        <div id="volume_icon">
+          <a href="#" id="btn_AudioMute" title="Mute"></a>
+          <div id="volume_box">
+            <span id="volume"></span>
+            <span id="volume_nb"></span>
+          </div>
+        </div>
+        <a href="#" id="btn_Fullscreen" title="Fullscreen"></a>
+      </div>
+    </section>
+
+    <nav>
+      <div id="playlist" class="hidden"></div>
+    </nav>
+
+    <script>
+    // version
+    postRequest('version', function() {
+      if(this.readyState == 4 && this.status == 200) {
+        document.getElementById('stVer').innerHTML = this.responseText;
+      }
+    }, false);
+
+    // controls
+    document.getElementById("controls").classList.remove("hidden");
+    const actions = ["PlayPause", "ListPrev", "ListNext", "Fullscreen", "AudioMute"];
+    for (const action of actions) {
+      const btn = document.getElementById("btn_" + action);
+      if (!btn) continue;
+      btn.addEventListener("click", e => {
+        e.preventDefault();
+        if (action == "PlayPause") doPlayPause();
+        else if (action == "ListPrev") doListPrev();
+        else if (action == "ListNext") doListNext();
+        else if (action == "Fullscreen") doFullWin();
+        else if (action == "AudioMute") doAudioMute();
+      });
     }
-  }, false);
-</script>
 
-<table border='0' style='position: fixed; margin-top: 0px; right: 0px; opacity: 0.6' bgcolor="#AAAAAA">
-<tr align='right'><td>
-  <table>
-  <tr align='center'><td colspan='6'><div id='stTitle'></div></td></tr>
-  <tr align='center'>
-    <td><a href="javascript:void(0)" onclick="doPlayPause();return false;">
-      <svg width='64' height='64'> <image width='64' height='64' xlink:href='textures/actionVideoPlayBlue.svg'       src='textures/actionVideoPlayBlue64.png'       alt='Play/Pause' /></svg>
-    </a></td>
-    <td><a href="javascript:void(0)" onclick="doListPrev();return false;">
-      <svg width='64' height='64'> <image width='64' height='64' xlink:href='textures/actionVideoPreviousBlue.svg'   src='textures/actionVideoPreviousBlue64.png'   alt='Previous' /></svg>
-    </a></td>
-    <td><a href="javascript:void(0)" onclick="doListNext();return false;">
-      <svg width='64' height='64'> <image width='64' height='64' xlink:href='textures/actionVideoNextBlue.svg'       src='textures/actionVideoNextBlue64.png'       alt='Next' /></svg>
-    </a></td>
-    <td><a href="javascript:void(0)" onclick="doFullWin();return false;">
-      <svg width='64' height='64'> <image width='64' height='64' xlink:href='textures/actionVideoFullscreenBlue.svg' src='textures/actionVideoFullscreenBlue64.png' alt='Fullscreen/Windowed' /></svg>
-    </a></td>
-    <td><canvas id="stVolumeCanvas" width="100" height="20"></canvas></td>
-    <td><button onclick="doAudioMute()">Mute</button></td>
-  </tr></table>
-</td></tr></table>
+    // volume
+    document.getElementById("volume_box").onclick = e => {
+      const volume = Math.round((e.offsetX / e.target.offsetWidth) * 100);
+      doAudioVol(volume)
+      update_volume_ui(volume);
+    };
 
-<div id='stPlaylist'></div>
-<script>
-  // setup mouse events
-  var aVolCtrl = document.getElementById('stVolumeCanvas');
-  aVolCtrl.ondragstart = function() { return false; }; // block dragging
-  aVolCtrl.myMouseTrack = 0;
-  aVolCtrl.onmousedown  = onVolumeClick;
-  if(aVolCtrl.addEventListener) {
-    aVolCtrl.addEventListener(isFirefox ? 'DOMMouseScroll' : 'mousewheel', onVolumeWheel, false);
-  }
+    document.getElementById("volume_box").ondblclick = _ => {
+      doAudioVol(100);
+      update_volume_ui(100);
+    };
 
-  // first update
-  doRefresh();
-</script>
+    let wheel_timeout = undefined;
+    document.getElementById("volume_icon").addEventListener("wheel", e => {
+      const volume = Math.round(Math.min(Math.max(0, myVolume - (e.deltaX + e.deltaY)/2), 120));
+      update_volume_ui(volume);
+      clearTimeout(wheel_timeout);
+      wheel_timeout = setTimeout(_ => doAudioVol(volume), 200);
+    }, { passive: true });
 
-</body>
+    function update_volume_ui(v) {
+      myVolume = v;
+      document.getElementById("volume_nb").innerHTML = v + "%";
+      const vol_span = document.getElementById("volume");
+      vol_span.style.width = Math.min(Math.max(0, v), 100) + "%";
+      vol_span.classList.toggle("hot", v > 100);
+    }
+
+    // theme
+    for (const r of document.querySelectorAll('input[name="theme"]')) {
+      r.onchange = _ => {
+        if (!r.checked) return;
+        const v = r.value;
+        document.documentElement.setAttribute("data-theme", v);
+        localStorage.setItem("theme", v);
+      }
+    }
+    const theme = localStorage.getItem("theme");
+    if (theme) {
+      const radio = document.querySelector(`input[name="theme"][value="${theme}"]`);
+      if (radio) radio.checked = true;
+      document.documentElement.setAttribute("data-theme", theme);
+    }
+
+    // first update
+    doRefresh();
+    </script>
+  </body>
 </html>

@@ -94,5 +94,7 @@ foreach (aCfgIter ${CMAKE_CONFIGURATION_TYPES})
 
   file (MAKE_DIRECTORY "${CMAKE_BINARY_DIR}/${aCfgIter}${SVIEW_BUNDLE_RES}/web")
   configure_file ("web/index.htm"   "${CMAKE_BINARY_DIR}/${aCfgIter}${SVIEW_BUNDLE_RES}/web/" COPYONLY)
+  configure_file ("web/style.css"   "${CMAKE_BINARY_DIR}/${aCfgIter}${SVIEW_BUNDLE_RES}/web/" COPYONLY)
+  configure_file ("web/logo.png"    "${CMAKE_BINARY_DIR}/${aCfgIter}${SVIEW_BUNDLE_RES}/web/" COPYONLY)
   configure_file ("web/favicon.ico" "${CMAKE_BINARY_DIR}/${aCfgIter}${SVIEW_BUNDLE_RES}/web/" COPYONLY)
 endforeach()
