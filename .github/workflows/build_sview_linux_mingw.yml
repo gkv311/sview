@@ -307,7 +307,7 @@ jobs:
 
   build-lin-mingw-sview:
     runs-on: ubuntu-24.04
-    needs: [build-lin-mingw-freetype, build-lin-mingw-openal, build-lin-mingw-ffmpeg]
+    needs: [build-lin-mingw-freetype, build-lin-mingw-openal, build-lin-mingw-openvr, build-lin-mingw-ffmpeg]
     steps:
     - name: Clone Tree
       uses: actions/checkout@v6
@@ -333,6 +333,11 @@ jobs:
       with:
         name: openal-windows-x64-mingw
         path: openal-install
+    - name: Download OpenVR build
+      uses: actions/download-artifact@v5
+      with:
+        name: openvr-windows-x64-mingw
+        path: openvr-install
     - name: Download FFmpeg build
       uses: actions/download-artifact@v5
       with:
@@ -348,7 +353,7 @@ jobs:
           -D CMAKE_TOOLCHAIN_FILE="$PWD/${TOOLCHAIN_PREFIX}.cmake" \
           -D CMAKE_BUILD_TYPE=Release \
           -D CMAKE_INSTALL_PREFIX:PATH="$PWD/sview-install" \
-          -D USE_OPENVR:BOOL=OFF \
+          -D USE_OPENVR:BOOL=ON -D OPENVR_DIR:PATH="$PWD/openvr-install" \
           -D USE_NVAPI:BOOL=OFF -D NVAPI_DIR:PATH="" \
           -D FREETYPE_DIR:PATH="$PWD/freetype-install" \
           -D OPENAL_DIR:PATH="$PWD/openal-install" \
@@ -362,6 +367,7 @@ jobs:
         cp -f ./freetype-install/bin/*.dll ./sview-install/
         cp -f ./ffmpeg-install/bin/*.dll   ./sview-install/
         cp -f ./openal-install/bin/*.dll   ./sview-install/
+        #cp -f ./openvr-install/bin/*.dll   ./sview-install/
         cp -f /usr/lib/gcc/${TOOLCHAIN_PREFIX}/13-posix/libstdc++-*.dll    ./sview-install/
         cp -f /usr/lib/gcc/${TOOLCHAIN_PREFIX}/13-posix/libgcc_s_seh-*.dll ./sview-install/
     - name: Upload artifacts
