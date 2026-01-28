@@ -13,6 +13,12 @@ env:
     set(CMAKE_FIND_ROOT_PATH_MODE_PROGRAM NEVER)
     set(CMAKE_FIND_ROOT_PATH_MODE_LIBRARY ONLY)
     set(CMAKE_FIND_ROOT_PATH_MODE_INCLUDE ONLY)
+  FREETYPE_REF: 'VER-2-14-1'
+  FFMPEG_REF:   'n8.0.1'
+  OPENAL_REF:   '1.25.1'
+  OPENVR_REF:   'v2.5.1'
+  OPENJPEG_REF: 'v2.5.4'
+  DAV1_REF:     '1.5.3'
 
 jobs:
   build-lin-mingw-freetype:
@@ -23,7 +29,7 @@ jobs:
       with:
         path: freetype.git
         repository: freetype/freetype
-        ref: 'VER-2-14-1'
+        ref: ${{ env.FREETYPE_REF }}
         fetch-depth: 1
     - name: Install Dependencies
       run: |
@@ -72,7 +78,7 @@ jobs:
       with:
         path: openal.git
         repository: kcat/openal-soft
-        ref: '1.25.1'
+        ref: ${{ env.OPENAL_REF }}
         fetch-depth: 1
     - name: Install Dependencies
       run: |
@@ -121,7 +127,7 @@ jobs:
       with:
         path: openvr.git
         repository: ValveSoftware/openvr
-        ref: 'v2.5.1'
+        ref: ${{ env.OPENVR_REF }}
         fetch-depth: 1
     - name: Clone sView
       uses: actions/checkout@v6
@@ -177,7 +183,7 @@ jobs:
       with:
         path: ffmpeg.git
         repository: FFmpeg/FFmpeg
-        ref: 'n8.0.1'
+        ref: ${{ env.FFMPEG_REF }}
         fetch-depth: 1
     #- name: Clone Tree
     #  uses: actions/checkout@v6
@@ -191,14 +197,14 @@ jobs:
       with:
         path: dav1d.git
         repository: videolan/dav1d
-        ref: '1.5.3'
+        ref: ${{ env.DAV1_REF }}
         fetch-depth: 1
     - name: Clone Tree
       uses: actions/checkout@v6
       with:
         path: openjpeg.git
         repository: uclouvain/openjpeg
-        ref: 'v2.5.4'
+        ref: ${{ env.OPENJPEG_REF }}
         fetch-depth: 1
     - name: Install Dependencies
       run: |
