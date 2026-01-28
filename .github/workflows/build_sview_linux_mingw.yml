@@ -218,6 +218,8 @@ jobs:
           set(JPEGXL_ENABLE_JNI       OFF CACHE BOOL "")
           set(JPEGXL_ENABLE_VIEWERS   OFF CACHE BOOL "")
           set(JPEGXL_ENABLE_PLUGINS   OFF CACHE BOOL "")
+          set(JPEGXL_ENABLE_TOOLS     OFF CACHE BOOL "")
+          set(JPEGXL_ENABLE_DEVTOOLS  OFF CACHE BOOL "")
           set(JPEGXL_TEST_TOOLS       OFF CACHE BOOL "")
           set(BUILD_TESTING           OFF CACHE BOOL "")
           ${{ env.TOOLCHAIN_TEXT }}
@@ -241,8 +243,47 @@ jobs:
         path: libjxl-install
         if-no-files-found: error
 
+  build-lin-mingw-dav1d:
+    runs-on: ubuntu-24.04
+    steps:
+    - name: Clone Tree
+      uses: actions/checkout@v6
+      with:
+        path: dav1d.git
+        repository: videolan/dav1d
+        ref: ${{ env.DAV1_REF }}
+        fetch-depth: 1
+    - name: Install Dependencies
+      run: |
+        sudo apt-get update
+        sudo apt-get install -y \
+          g++ nasm meson ninja-build \
+          mingw-w64-common mingw-w64-tools binutils-mingw-w64-x86-64 \
+          g++-mingw-w64-x86-64-posix gcc-mingw-w64-x86-64-posix
+        ${TOOLCHAIN_PREFIX}-g++ --version
+    - name: Configure project
+      run: |
+        meson setup \
+          --cross-file=$PWD/dav1d.git/package/crossfiles/${TOOLCHAIN_PREFIX}.meson \
+          --prefix=$PWD/dav1d-install \
+          --default-library=static \
+          ./dav1d-make ./dav1d.git
+    - name: Build project
+      run: |
+        ninja -C ./dav1d-make
+    - name: Install project
+      run: |
+        ninja -C ./dav1d-make install
+    - name: Upload build
+      uses: actions/upload-artifact@v4
+      with:
+        name: dav1d-windows-x64-mingw
+        path: dav1d-install
+        if-no-files-found: error
+
   build-lin-mingw-ffmpeg:
     runs-on: ubuntu-24.04
+    needs: [build-lin-mingw-libjxl, build-lin-mingw-dav1d]
     steps:
     - name: Clone Tree
       uses: actions/checkout@v6
@@ -258,25 +299,28 @@ jobs:
     #    repository: https://gitlab.com/bzip2/bzip2.git
     #    ref: 'bzip2-1.0.8'
     #    fetch-depth: 1
-    - name: Clone Tree
-      uses: actions/checkout@v6
-      with:
-        path: dav1d.git
-        repository: videolan/dav1d
-        ref: ${{ env.DAV1_REF }}
-        fetch-depth: 1
-    - name: Clone Tree
+    - name: Clone openjpeg
       uses: actions/checkout@v6
       with:
         path: openjpeg.git
         repository: uclouvain/openjpeg
         ref: ${{ env.OPENJPEG_REF }}
         fetch-depth: 1
+    - name: Download dav1d build
+      uses: actions/download-artifact@v5
+      with:
+        name: dav1d-windows-x64-mingw
+        path: dav1d-install
+    - name: Download libjxl build
+      uses: actions/download-artifact@v5
+      with:
+        name: libjxl-windows-x64-mingw
+        path: libjxl-install
     - name: Install Dependencies
       run: |
         sudo apt-get update
         sudo apt-get install -y \
-          g++ cmake meson nasm libz-mingw-w64-dev \
+          g++ nasm cmake libz-mingw-w64-dev \
           mingw-w64-common mingw-w64-tools binutils-mingw-w64-x86-64 \
           g++-mingw-w64-x86-64-posix gcc-mingw-w64-x86-64-posix
         ${TOOLCHAIN_PREFIX}-g++ --version
@@ -307,23 +351,10 @@ jobs:
     - name: Install openjpeg
       run: |
         cmake --install ./openjpeg-make --prefix ./openjpeg-install
-    - name: Configure dav1d
-      run: |
-        meson setup \
-          --cross-file=$PWD/dav1d.git/package/crossfiles/${TOOLCHAIN_PREFIX}.meson \
-          --prefix=$PWD/dav1d-install \
-          --default-library=static \
-          ./dav1d-make ./dav1d.git
-    - name: Build dav1d
-      run: |
-        ninja -C ./dav1d-make
-    - name: Install dav1d
-      run: |
-        ninja -C ./dav1d-make install
     - name: Configure FFmpeg
       run: |
         export PKG_CONFIG_LIBDIR=
-        export PKG_CONFIG_PATH=/usr/${TOOLCHAIN_PREFIX}/lib/pkgconfig:$PWD/dav1d-install/lib/pkgconfig:$PWD/openjpeg-install/lib/pkgconfig
+        export PKG_CONFIG_PATH=/usr/${TOOLCHAIN_PREFIX}/lib/pkgconfig:$PWD/dav1d-install/lib/pkgconfig:$PWD/openjpeg-install/lib/pkgconfig:$PWD/libjxl-install/lib/pkgconfig
         anFFmpegInstall=$PWD/ffmpeg-install
         # redirect error state from tee
         set -o pipefail
@@ -342,8 +373,8 @@ jobs:
           --enable-shared --disable-static \
           --enable-pthreads --disable-w32threads \
           --enable-runtime-cpudetect \
-          --enable-libdav1d --enable-libopenjpeg \
-          2>&1 | tee -a ../ffmpeg-config.log
+          --enable-libdav1d --enable-libopenjpeg --enable-libjxl \
+          2>&1 | tee ../ffmpeg-config.log
         popd
     - name: Build FFmpeg
       run: |
@@ -363,6 +394,7 @@ jobs:
         cp -f ./ffmpeg.git/COPYING.LGPLv2.1 ./ffmpeg-install/
         cp -f ./ffmpeg.git/COPYING.LGPLv3   ./ffmpeg-install/
         # copy dependencies
+        cp -f ./libjxl-install/bin/*.dll                       ./ffmpeg-install/bin/
         cp -f /usr/${TOOLCHAIN_PREFIX}/lib/libwinpthread-1.dll ./ffmpeg-install/bin/
         cp -f /usr/${TOOLCHAIN_PREFIX}/lib/zlib1.dll           ./ffmpeg-install/bin/
     - name: Upload build
