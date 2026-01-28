@@ -76,6 +76,9 @@
 #include <stdio.h>
 
 #if defined(_WIN32) && !defined(__SYMBIAN32__) // Windows specific
+#ifdef _WIN32_WINNT
+#undef _WIN32_WINNT // compatibility with newer MinGW
+#endif
 #define _WIN32_WINNT 0x0400 // To make it link in VS2005
 #include <windows.h>
 #include <ws2tcpip.h>
@@ -136,8 +139,10 @@ typedef long off_t;
 #define mg_sleep(x) Sleep(x)
 
 #define pipe(x) _pipe(x, MG_BUF_LEN, _O_BINARY)
+#ifndef popen
 #define popen(x, y) _popen(x, y)
 #define pclose(x) _pclose(x)
+#endif
 #define close(x) _close(x)
 #define dlsym(x,y) GetProcAddress((HINSTANCE) (x), (y))
 #define RTLD_LAZY  0
