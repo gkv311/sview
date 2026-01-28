@@ -35,30 +35,36 @@ jobs:
       run: |
         sudo apt-get update
         sudo apt-get install -y \
-          g++ cmake ninja-build \
+          g++ cmake ninja-build libz-mingw-w64-dev \
           mingw-w64-common mingw-w64-tools binutils-mingw-w64-x86-64 \
           g++-mingw-w64-x86-64-posix gcc-mingw-w64-x86-64-posix
         ${TOOLCHAIN_PREFIX}-g++ --version
-        echo "${TOOLCHAIN_TEXT}" > "./${TOOLCHAIN_PREFIX}.cmake"
-        cat "./${TOOLCHAIN_PREFIX}.cmake"
     - name: Configure project
+      env:
+        FREETYPE_CONFIG: |
+          set(BUILD_SHARED_LIBS ON  CACHE BOOL "")
+          set(FT_WITH_ZLIB      ON  CACHE BOOL "")
+          set(FT_WITH_BZIP2     OFF CACHE BOOL "")
+          set(FT_WITH_PNG       OFF CACHE BOOL "")
+          set(FT_WITH_HARFBUZZ  OFF CACHE BOOL "")
+          set(FT_WITH_BROTLI    OFF CACHE BOOL "")
+          set(CMAKE_DISABLE_FIND_PACKAGE_ZLIB      OFF  CACHE BOOL "")
+          set(CMAKE_DISABLE_FIND_PACKAGE_BZip2     TRUE CACHE BOOL "")
+          set(CMAKE_DISABLE_FIND_PACKAGE_PNG       TRUE CACHE BOOL "")
+          set(CMAKE_DISABLE_FIND_PACKAGE_HarfBuzz  TRUE CACHE BOOL "")
+          set(CMAKE_DISABLE_FIND_PACKAGE_BrotliDec TRUE CACHE BOOL "")
+          ${{ env.TOOLCHAIN_TEXT }}
+          set(CMAKE_BUILD_TYPE Release)
+          set(CMAKE_INSTALL_PREFIX "${CMAKE_CURRENT_LIST_DIR}/freetype-install")
       run: |
-        cmake -S ./freetype.git -B ./freetype-make -G Ninja \
-          -D CMAKE_TOOLCHAIN_FILE="$PWD/${TOOLCHAIN_PREFIX}.cmake" \
-          -D CMAKE_BUILD_TYPE=Release \
-          -D CMAKE_INSTALL_PREFIX:PATH="$PWD/freetype-install" \
-          -D BUILD_SHARED_LIBS:BOOL=ON \
-          -D FT_WITH_ZLIB=ON      -D CMAKE_DISABLE_FIND_PACKAGE_ZLIB:BOOL=OFF \
-          -D FT_WITH_BZIP2=OFF    -D CMAKE_DISABLE_FIND_PACKAGE_BZip2:BOOL=TRUE \
-          -D FT_WITH_PNG=OFF      -D CMAKE_DISABLE_FIND_PACKAGE_PNG:BOOL=TRUE \
-          -D FT_WITH_HARFBUZZ=OFF -D CMAKE_DISABLE_FIND_PACKAGE_HarfBuzz:BOOL=TRUE \
-          -D FT_WITH_BROTLI=OFF   -D CMAKE_DISABLE_FIND_PACKAGE_BrotliDec:BOOL=TRUE
+        echo "${FREETYPE_CONFIG}" | tee ./freetype-make.cmake
+        cmake -S ./freetype.git -B ./freetype-make -G Ninja -D CMAKE_TOOLCHAIN_FILE="$PWD/freetype-make.cmake"
     - name: Build project
       run: |
-        cmake --build ./freetype-make --config Release
+        cmake --build ./freetype-make
     - name: Install build
       run: |
-        cmake --build ./freetype-make --config Release --target install
+        cmake --install ./freetype-make --prefix ./freetype-install
         cp -f "./freetype.git/docs/FTL.TXT"   "./freetype-install/"
         cp -f "./freetype.git/docs/GPLv2.TXT" "./freetype-install/"
         cp -f "./freetype.git/docs/CHANGES"   "./freetype-install/"
@@ -88,29 +94,31 @@ jobs:
           mingw-w64-common mingw-w64-tools binutils-mingw-w64-x86-64 \
           g++-mingw-w64-x86-64-posix gcc-mingw-w64-x86-64-posix
         ${TOOLCHAIN_PREFIX}-g++ --version
-        echo "${TOOLCHAIN_TEXT}" > "./${TOOLCHAIN_PREFIX}.cmake"
     - name: Configure project
+      env:
+        OPENAL_CONFIG: |
+          set(ALSOFT_EXAMPLES         OFF CACHE BOOL "")
+          set(ALSOFT_TESTS            OFF CACHE BOOL "")
+          set(ALSOFT_UTILS             ON CACHE BOOL "")
+          set(ALSOFT_BUILD_ROUTER     OFF CACHE BOOL "")
+          set(ALSOFT_REQUIRE_WINMM     ON CACHE BOOL "")
+          set(ALSOFT_REQUIRE_DSOUND    ON CACHE BOOL "")
+          set(ALSOFT_REQUIRE_WASAPI    ON CACHE BOOL "")
+          set(ALSOFT_STATIC_LIBGCC     ON CACHE BOOL "")
+          set(ALSOFT_STATIC_STDCXX     ON CACHE BOOL "")
+          set(ALSOFT_STATIC_WINPTHREAD ON CACHE BOOL "")
+          ${{ env.TOOLCHAIN_TEXT }}
+          set(CMAKE_BUILD_TYPE Release)
+          set(CMAKE_INSTALL_PREFIX "${CMAKE_CURRENT_LIST_DIR}/openal-install")
       run: |
-        cmake -S ./openal.git -B ./openal-make -G Ninja \
-          -D CMAKE_TOOLCHAIN_FILE="$PWD/${TOOLCHAIN_PREFIX}.cmake" \
-          -D CMAKE_BUILD_TYPE=Release \
-          -D CMAKE_INSTALL_PREFIX:PATH="$PWD/openal-install" \
-          -D ALSOFT_EXAMPLES:BOOL=OFF \
-          -D ALSOFT_TESTS:BOOL=OFF \
-          -D ALSOFT_UTILS:BOOL=ON \
-          -D ALSOFT_BUILD_ROUTER:BOOL=OFF \
-          -D ALSOFT_REQUIRE_WINMM:BOOL=ON \
-          -D ALSOFT_REQUIRE_DSOUND:BOOL=ON \
-          -D ALSOFT_REQUIRE_WASAPI:BOOL=ON \
-          -D ALSOFT_STATIC_LIBGCC:BOOL=ON \
-          -D ALSOFT_STATIC_STDCXX:BOOL=ON \
-          -D ALSOFT_STATIC_WINPTHREAD:BOOL=ON
+        echo "${OPENAL_CONFIG}" | tee ./openal-make.cmake
+        cmake -S ./openal.git -B ./openal-make -G Ninja -D CMAKE_TOOLCHAIN_FILE="$PWD/openal-make.cmake"
     - name: Build project
       run: |
-        cmake --build ./openal-make --config Release
+        cmake --build ./openal-make
     - name: Install build
       run: |
-        cmake --build ./openal-make --config Release --target install
+        cmake --install ./openal-make --prefix ./openal-install
         cp -f "./openal.git/COPYING"   "./openal-install/"
         cp -f "./openal.git/README.md" "./openal-install/"
     - name: Upload build
@@ -144,26 +152,26 @@ jobs:
           mingw-w64-common mingw-w64-tools binutils-mingw-w64-x86-64 \
           g++-mingw-w64-x86-64-posix gcc-mingw-w64-x86-64-posix
         ${TOOLCHAIN_PREFIX}-g++ --version
-        echo "${TOOLCHAIN_TEXT}" > "./${TOOLCHAIN_PREFIX}.cmake"
     - name: Configure project
       env:
-        # workaround for MinGW
-        CMAKE_C_FLAGS: -DWIN32
+        OPENVR_CONFIG: |
+          set(BUILD_SHARED ON  CACHE BOOL "")
+          set(USE_LIBCXX   OFF CACHE BOOL "")
+          # workaround for MinGW
+          set(CMAKE_C_FLAGS   "-DWIN32")
+          set(CMAKE_CXX_FLAGS "-DWIN32")
+          ${{ env.TOOLCHAIN_TEXT }}
+          set(CMAKE_BUILD_TYPE Release)
+          set(CMAKE_INSTALL_PREFIX "${CMAKE_CURRENT_LIST_DIR}/openvr-install" CACHE PATH "")
       run: |
-        cmake -S ./openvr.git -B ./openvr-make -G Ninja \
-          -D CMAKE_TOOLCHAIN_FILE="$PWD/${TOOLCHAIN_PREFIX}.cmake" \
-          -D CMAKE_C_FLAGS:STRING="$CMAKE_C_FLAGS" \
-          -D CMAKE_CXX_FLAGS:STRING="$CMAKE_C_FLAGS" \
-          -D CMAKE_BUILD_TYPE=Release \
-          -D CMAKE_INSTALL_PREFIX:PATH="$PWD/openvr-install" \
-          -D BUILD_SHARED:BOOL=ON \
-          -D USE_LIBCXX:BOOL=OFF
+        echo "${OPENVR_CONFIG}" | tee ./openvr-make.cmake
+        cmake -S ./openvr.git -B ./openvr-make -G Ninja -D CMAKE_TOOLCHAIN_FILE="$PWD/openvr-make.cmake"
     - name: Build project
       run: |
-        cmake --build ./openvr-make --config Release
+        cmake --build ./openvr-make
     - name: Install build
       run: |
-        cmake --build ./openvr-make --config Release --target install
+        cmake --install ./openvr-make --prefix ./openvr-install
         cp -f ./openvr.git/LICENSE   ./openvr-install/
         cp -f ./openvr.git/README.md ./openvr-install/
         mv -f ./openvr-install/include/openvr/*.h        ./openvr-install/include/
@@ -216,7 +224,6 @@ jobs:
           mingw-w64-common mingw-w64-tools binutils-mingw-w64-x86-64 \
           g++-mingw-w64-x86-64-posix gcc-mingw-w64-x86-64-posix
         ${TOOLCHAIN_PREFIX}-g++ --version
-        echo "${TOOLCHAIN_TEXT}" > "./${TOOLCHAIN_PREFIX}.cmake"
     #- name: Build bzip2
     #  run: |
     #    #aNbJobs="$(getconf _NPROCESSORS_ONLN)"
@@ -229,18 +236,21 @@ jobs:
     #      -D CMAKE_BUILD_TYPE=Release \
     #      -D CMAKE_INSTALL_PREFIX:PATH="$PWD/bzip2-install"
     - name: Configure openjpeg
+      env:
+        OPENJPEG_CONFIG: |
+          set(BUILD_SHARED_LIBS OFF CACHE BOOL "")
+          ${{ env.TOOLCHAIN_TEXT }}
+          set(CMAKE_BUILD_TYPE Release)
+          set(CMAKE_INSTALL_PREFIX "${CMAKE_CURRENT_LIST_DIR}/openjpeg-install")
       run: |
-        cmake -S ./openjpeg.git -B ./openjpeg-make -G Ninja \
-          -D CMAKE_TOOLCHAIN_FILE="$PWD/${TOOLCHAIN_PREFIX}.cmake" \
-          -D CMAKE_BUILD_TYPE=Release \
-          -D BUILD_SHARED_LIBS:BOOL=OFF \
-          -D CMAKE_INSTALL_PREFIX:PATH="$PWD/openjpeg-install"
+        echo "${OPENJPEG_CONFIG}" | tee ./openjpeg-make.cmake
+        cmake -S ./openjpeg.git -B ./openjpeg-make -G Ninja -D CMAKE_TOOLCHAIN_FILE="$PWD/openjpeg-make.cmake"
     - name: Build openjpeg
       run: |
-        cmake --build ./openjpeg-make --config Release
+        cmake --build ./openjpeg-make
     - name: Install openjpeg
       run: |
-        cmake --build ./openjpeg-make --config Release --target install
+        cmake --install ./openjpeg-make --prefix ./openjpeg-install
     - name: Configure dav1d
       run: |
         meson setup \
@@ -322,7 +332,6 @@ jobs:
           mingw-w64-common mingw-w64-tools binutils-mingw-w64-x86-64 \
           g++-mingw-w64-x86-64-posix gcc-mingw-w64-x86-64-posix
         ${TOOLCHAIN_PREFIX}-g++ --version
-        echo "${TOOLCHAIN_TEXT}" > "./${TOOLCHAIN_PREFIX}.cmake"
     - name: Download FreeType build
       uses: actions/download-artifact@v5
       with:
@@ -344,26 +353,29 @@ jobs:
         name: ffmpeg-windows-x64-mingw
         path: ffmpeg-install
     - name: Configure project
+      env:
+        SVIEW_CONFIG: |
+          set(USE_OPENVR ON  CACHE BOOL "")
+          set(USE_NVAPI  OFF CACHE BOOL "")
+          ${{ env.TOOLCHAIN_TEXT }}
+          set(CMAKE_BUILD_TYPE Release)
+          set(CMAKE_INSTALL_PREFIX "${CMAKE_CURRENT_LIST_DIR}/sview-install"    CACHE PATH "")
+          set(FREETYPE_DIR         "${CMAKE_CURRENT_LIST_DIR}/freetype-install" CACHE PATH "")
+          set(FFMPEG_DIR           "${CMAKE_CURRENT_LIST_DIR}/ffmpeg-install"   CACHE PATH "")
+          set(OPENAL_DIR           "${CMAKE_CURRENT_LIST_DIR}/openal-install"   CACHE PATH "")
+          set(OPENVR_DIR           "${CMAKE_CURRENT_LIST_DIR}/openvr-install"   CACHE PATH "")
+          set(NVAPI_DIR            "${CMAKE_CURRENT_LIST_DIR}/nvapi-install"    CACHE PATH "")
       run: |
-        ls -la freetype-install
-        ls -la freetype-install/lib/cmake/freetype
         export PKG_CONFIG_LIBDIR=
         export PKG_CONFIG_PATH=/usr/${TOOLCHAIN_PREFIX}/lib/pkgconfig:$PWD/ffmpeg-install/lib/pkgconfig:$PWD/freetype-install/lib/pkgconfig
-        cmake -S ./sview.git -B ./sview-make -G Ninja \
-          -D CMAKE_TOOLCHAIN_FILE="$PWD/${TOOLCHAIN_PREFIX}.cmake" \
-          -D CMAKE_BUILD_TYPE=Release \
-          -D CMAKE_INSTALL_PREFIX:PATH="$PWD/sview-install" \
-          -D USE_OPENVR:BOOL=ON -D OPENVR_DIR:PATH="$PWD/openvr-install" \
-          -D USE_NVAPI:BOOL=OFF -D NVAPI_DIR:PATH="" \
-          -D FREETYPE_DIR:PATH="$PWD/freetype-install" \
-          -D OPENAL_DIR:PATH="$PWD/openal-install" \
-          -D FFMPEG_DIR:PATH="$PWD/ffmpeg-install"
+        echo "${SVIEW_CONFIG}" | tee ./sview-make.cmake
+        cmake -S ./sview.git -B ./sview-make -G Ninja -D CMAKE_TOOLCHAIN_FILE="$PWD/sview-make.cmake"
     - name: Build project
       run: |
-        cmake --build ./sview-make --config Release
+        cmake --build ./sview-make
     - name: Install build
       run: |
-        cmake --build ./sview-make --config Release --target install
+        cmake --install ./sview-make --prefix ./sview-install
         cp -f ./freetype-install/bin/*.dll ./sview-install/
         cp -f ./ffmpeg-install/bin/*.dll   ./sview-install/
         cp -f ./openal-install/bin/*.dll   ./sview-install/
