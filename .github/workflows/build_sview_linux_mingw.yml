@@ -129,11 +129,13 @@ jobs:
         repository: ValveSoftware/openvr
         ref: ${{ env.OPENVR_REF }}
         fetch-depth: 1
-    - name: Clone sView
+    - name: Clone scripts
       uses: actions/checkout@v6
       with:
         path: sview.git
         fetch-depth: 1
+        sparse-checkout: '3rdparty/openvr'
+        sparse-checkout-cone-mode: false
     - name: Install Dependencies
       run: |
         sudo apt-get update
