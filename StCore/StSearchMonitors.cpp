@@ -8,28 +8,18 @@
 #include <StCore/StSearchMonitors.h>
 
 #include <StSettings/StSettings.h>
+#include <StStrings/StLogger.h>
 #include <StStrings/StStringStream.h>
 #include <StThreads/StMutex.h>
 #include <StThreads/StTimer.h>
 
 #ifdef _WIN32
     #include <setupapi.h>
-#ifdef ST_HAVE_NVAPI
-    #include <wnt/nvapi.h>
-    #ifdef _MSC_VER
-        //#pragma comment(lib, "nvapi64.lib")
-        #pragma comment(linker, "/NODEFAULTLIB:libcmt.lib")
-    #endif
-#endif
 #elif defined(__ANDROID__)
     //
 #elif defined(__linux__)
     #include "StWinHandles.h"
     #include <X11/extensions/Xrandr.h>
-#endif
-
-#if !defined(__ANDROID__)
-    #include "StADLsdk.h"
 #endif
 
 #if defined(__GNUC__) && !defined(__INTEL_COMPILER) && !defined(__clang__)
@@ -596,117 +586,6 @@ void StSearchMonitors::listEDID(StArrayList<StEDIDParser>& theEdids) {
     if (!theEdids.isEmpty())
         return;
 #endif
-
-#if !defined( __APPLE__) && !defined(__ANDROID__)
-    StADLsdk anAdlSdk;
-    if(anAdlSdk.init()) {
-        ADLsdkFunctions* aFuncs = anAdlSdk.getFunctions();
-        StArrayList<int> aDipArr;
-        ADLDisplayEDIDData anEdidData;
-        for(int anAdIter = -1; anAdIter < anAdlSdk.getAdaptersNum(); ++anAdIter) {
-            int aDisplaysNb = 0;
-            LPADLDisplayInfo anAdlDisplayInfo = NULL;
-            int anAdapterIndex = (anAdIter >= 0) ? anAdlSdk.getAdapters()[anAdIter].iAdapterIndex : -1;
-            if(aFuncs->ADL_Display_DisplayInfo_Get(anAdapterIndex, &aDisplaysNb, &anAdlDisplayInfo, 0) != ADL_OK) {
-                aDisplaysNb = 0;
-            }
-
-            for(int aDispId = 0; aDispId < aDisplaysNb; ++aDispId) {
-                const ADLDisplayInfo& aDispInfo = anAdlDisplayInfo[aDispId];
-                if((ADL_DISPLAY_DISPLAYINFO_DISPLAYCONNECTED & aDispInfo.iDisplayInfoValue) == 0 ||
-                   (ADL_DISPLAY_DISPLAYINFO_DISPLAYMAPPED    & aDispInfo.iDisplayInfoValue) == 0) {
-                    continue; // skip the not connected or non-active displays
-                }
-
-                int iDisplayIndex = aDispInfo.displayID.iDisplayLogicalIndex;
-                stMemSet(&anEdidData, 0, sizeof(ADLDisplayEDIDData));
-                anEdidData.iSize = sizeof(ADLDisplayEDIDData);
-                if(aFuncs->ADL_Display_EdidData_Get != NULL) {
-                    aFuncs->ADL_Display_EdidData_Get(aDispInfo.displayID.iDisplayLogicalAdapterIndex,
-                                                     iDisplayIndex, &anEdidData);
-                }
-
-                // notice that this API reads 256 bytes pages from EDID, not 128 blocks
-                StEDIDParser aParser((unsigned char* )anEdidData.cEDIDData, anEdidData.iEDIDSize);
-                if(aParser.getExtensionsNb() >= 2) {
-                    anEdidData.iBlockIndex = 2; // read extra blocks
-                    aFuncs->ADL_Display_EdidData_Get(aDispInfo.displayID.iDisplayLogicalAdapterIndex,
-                                                     iDisplayIndex, &anEdidData);
-                    aParser.add((unsigned char* )anEdidData.cEDIDData, anEdidData.iEDIDSize);
-                }
-
-                // filter duplicated entities
-                bool isAlreadyShown = false;
-                for(size_t aDId = 0; aDId < aDipArr.size(); ++aDId) {
-                    if(aDipArr[aDId] == aDispInfo.displayID.iDisplayPhysicalIndex) {
-                        isAlreadyShown = true;
-                        break;
-                    }
-                }
-                if(isAlreadyShown) {
-                    continue;
-                }
-                aDipArr.add(aDispInfo.displayID.iDisplayPhysicalIndex);
-
-                theEdids.add(aParser);
-
-            }
-            StADLsdk::ADL_Main_Memory_Free(anAdlDisplayInfo);
-            if(anAdapterIndex == -1 && aDisplaysNb > 0) {
-                // info for all adapters already count
-                break;
-            }
-        }
-    }
-#endif // !__APPLE__
-
-#ifdef ST_HAVE_NVAPI
-    NvAPI_Status anErrStateNv = NvAPI_Initialize();
-    if(anErrStateNv == NVAPI_OK) {
-        NvPhysicalGpuHandle nvGPUHandles[NVAPI_MAX_PHYSICAL_GPUS];
-        stMemSet(nvGPUHandles, 0, sizeof(NvPhysicalGpuHandle));
-        NvU32 nvGpuCount = 0;
-        anErrStateNv = NvAPI_EnumPhysicalGPUs(nvGPUHandles, &nvGpuCount);
-        if(anErrStateNv == NVAPI_OK && nvGpuCount > 0) {
-            // we got some NVIDIA GPUs...
-            NV_EDID anEdidNv;
-            stMemSet(&anEdidNv, 0 ,sizeof(NV_EDID));
-            anEdidNv.version = NV_EDID_VER;
-            for(size_t h = 0; h < nvGpuCount; h++) {
-                NvU32 outputsMask = 0;
-                anErrStateNv = NvAPI_GPU_GetAllOutputs(nvGPUHandles[h], &outputsMask);
-                if(anErrStateNv != NVAPI_OK) {
-                    continue;
-                }
-                int maxOutputsNum = sizeof(NvU32) * 8;
-                for(int i = 0; i < maxOutputsNum; ++i) {
-                    NvU32 dispOutId = 1 << i;
-                    if(dispOutId & outputsMask) {
-                        // got some desplay id...
-                        anErrStateNv = NvAPI_GPU_GetEDID(nvGPUHandles[h], dispOutId, &anEdidNv);
-                        if(anErrStateNv != NVAPI_OK) {
-                            NvAPI_ShortString aShortStr;
-                            NvAPI_GetErrorMessage(anErrStateNv, aShortStr);
-                            continue;
-                        }
-
-                        // notice that this API reads 256 bytes pages from EDID, not 128 blocks
-                        NvU32 aTotalSize = anEdidNv.sizeofEDID;
-                        StEDIDParser aParser((unsigned char* )anEdidNv.EDID_Data, stMin(aTotalSize, NvU32(256)));
-                        for(NvU32 anOffset = 256; (aTotalSize - anOffset) < aTotalSize; anOffset += 256) {
-                            anEdidNv.offset = anOffset;
-                            NvAPI_GPU_GetEDID(nvGPUHandles[h], dispOutId, &anEdidNv);
-                            if(anErrStateNv == NVAPI_OK) {
-                                aParser.add((unsigned char* )anEdidNv.EDID_Data, stMin(aTotalSize - anOffset, NvU32(256)));
-                            }
-                        }
-                        theEdids.add(aParser);
-                    }
-                }
-            }
-        }
-    }
-#endif // _WIN32
 }
 
 namespace {

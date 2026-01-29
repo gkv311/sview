@@ -1,7 +1,6 @@
 project (StCore)
 
 set (USED_SRCFILES
-  StADLsdk.cpp
   StAndroidGlue.cpp
   StApplication.cpp
   StKeysState.cpp
@@ -35,7 +34,6 @@ set (USED_INCFILES
   ../include/StCore/StVirtualKeys.h
   ../include/StCore/StWindow.h
   ../include/StCore/StWinErrorCodes.h
-  StADLsdk.h
   StCocoaView.h
   StCocoaWin.h
   StEventsBuffer.h
