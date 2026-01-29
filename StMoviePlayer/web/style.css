@@ -11,6 +11,8 @@
     --fg-page: var(--theme-light, #222) var(--theme-dark, #f9f9f9);
     --bg-file1: var(--theme-light, #e9e9e9) var(--theme-dark, #333);
     --bg-file2: var(--theme-light, #e3e3e3) var(--theme-dark, #393939);
+    --bg-request-pending: var(--theme-light, #fba852) var(--theme-dark, #a22300);
+    --bg-request-accepted: var(--theme-light, #6bce05) var(--theme-dark, #4f7e17);
 
     --fg-highlight1: var(--theme-light, var(--highlight1-light)) var(--theme-dark, var(--highlight1-dark));
     --fg-highlight2: var(--theme-light, var(--highlight2-light)) var(--theme-dark, var(--highlight2-dark));
@@ -198,6 +200,31 @@ nav {
         &.hl {
             background: var(--fg-highlight1);
             color: #fff;
+        }
+    }
+}
+
+#acl_requests {
+    div {
+        display: flex;
+        gap: 1rem;
+        margin: 1rem 1rem 0 1rem;
+        padding: 15px;
+        border-radius: 20px;
+        background-color: var(--bg-request-pending);
+
+        &.request_accepted { background-color: var(--bg-request-accepted); }
+
+        span { flex: 1; }
+
+        button {
+            border-radius: 20px;
+            background-color: var(--bg-page);
+            color: var(--fg-page);
+            border: 0;
+            padding: 1rem 2rem;
+            font-weight: bold;
+            height: fit-content;
         }
     }
 }

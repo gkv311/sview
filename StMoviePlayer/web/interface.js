@@ -74,6 +74,31 @@ const msgEvents = {
             api_send({ type: "hello", name: "WebUI interface" });
     },
 
+    "acl:Request": msg => {
+        const div = document.createElement('div');
+        div.innerHTML = `
+            <span>
+                <b>Name:</b> <span class="app_name"></span><br />
+                <b>Origin:</b> ${ msg.origin }
+            </span>
+            <button>Accept</button>
+            <button>Reject</button>
+        `;
+
+        div.querySelector(".app_name").innerText = msg.name ?? '<unknown>';
+        const buttons = div.querySelectorAll("button");
+        buttons[0].addEventListener("click", _ => {
+            api_send({ type: "acl:Accept", origin: msg.origin });
+            div.classList.add("request_accepted");
+            buttons[0].remove();
+        });
+        buttons[1].addEventListener("click", _ => {
+            api_send({ type: "acl:Reject", origin: msg.origin });
+            div.remove();
+        });
+        document.getElementById("acl_requests")?.append(div);
+    },
+
     "info:Version": msg => {
         document.getElementById("stVer").innerText = msg.version;
     },

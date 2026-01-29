@@ -12,6 +12,8 @@ function invokeActionURL(endpoint, on_suceess, on_error) {
 
 /* Sending messages */
 
+const waiting_peers = {};
+
 const peers = {
     [window.location.origin]: {
         obj: window,
@@ -30,6 +32,20 @@ function emit(m) {
 /* Receiving messages */
 
 const messageIn = {
+    "acl:Accept": msg => {
+        if (!(msg.origin in waiting_peers)) return;
+        peers[msg.origin] = waiting_peers[msg.origin];
+        delete waiting_peers[msg.origin];
+        for (const k of ["version", "online", "volume", "playlist_id", "file_id", "title"])
+            last[k].resend(peers[msg.origin]);
+    },
+
+    "acl:Reject": msg => {
+        delete waiting_peers[msg.origin];
+        emit_peer(peers[msg.origin], { type: "info:Online", online: false });
+        delete peers[msg.origin];
+    },
+
     "action:PlayPause": _ => invokeActionURL("play_pause"),
 
     "action:Stop": _ => invokeActionURL("stop"),
@@ -63,11 +79,9 @@ function listen_messages() {
             messageIn[a]?.(e.data);
             if (actions_triggering_update.includes(a)) update();
 
-        } else {
-            const {source, origin} = e;
-            peers[origin] = { obj: source, origin };
-            for (const k of ["version", "online", "volume", "playlist_id", "file_id", "title"])
-                last[k].resend(peers[origin]);
+        } else if (e.data.type == "hello") {
+            waiting_peers[e.origin] = { obj: e.source, origin: e.origin };
+            emit({ ...e.data, type: "acl:Request", origin: e.origin });
         }
     });
 }
