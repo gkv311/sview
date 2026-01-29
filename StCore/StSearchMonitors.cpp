@@ -13,6 +13,7 @@
 #include <StThreads/StTimer.h>
 
 #ifdef _WIN32
+    #include <setupapi.h>
 #ifdef ST_HAVE_NVAPI
     #include <wnt/nvapi.h>
     #ifdef _MSC_VER
@@ -114,7 +115,115 @@ void StSearchMonitors::findMonitorsBlind(const int rootX, const int rootY) {
 }
 
 #ifdef _WIN32
+
+namespace {
+/** Auxiliary tool to retieve monitor EDID information from Windows registry. */
+class WinMonDevInfo {
+
+        public:
+
+    /** Main constructor. */
+    WinMonDevInfo(StArrayList<StEDIDParser>& theEdids)
+    : myEdids(&theEdids), myDevInfoH(nullptr), myDevRegKeyH(nullptr) {
+        const GUID GUID_CLASS_MONITOR =
+          {0x4d36e96e, 0xe325, 0x11ce, 0xbf, 0xc1, 0x08, 0x00, 0x2b, 0xe1, 0x03, 0x18};
+        myDevInfoH = SetupDiGetClassDevsExW(&GUID_CLASS_MONITOR,
+                                            nullptr, nullptr,
+                                            DIGCF_PRESENT, // DIGCF_ALLCLASSES
+                                            nullptr, nullptr, nullptr);
+        init();
+    }
+
+    /** Destructor. */
+    ~WinMonDevInfo() {
+        closeKey();
+        destroyDevInfo();
+    }
+
+        private:
+
+    /** Destroy iterator. */
+    void destroyDevInfo() {
+        if (myDevInfoH != nullptr)
+            SetupDiDestroyDeviceInfoList(myDevInfoH);
+
+        myDevInfoH = nullptr;
+    }
+
+    /** Close HKEY. */
+    void closeKey() {
+        if (myDevRegKeyH != nullptr && myDevRegKeyH != INVALID_HANDLE_VALUE)
+            RegCloseKey(myDevRegKeyH);
+
+        myDevRegKeyH = nullptr;
+    }
+
+    /** Fill in the list. */
+    void init() {
+        for (DWORD aDevIter = 0; myDevInfoH != nullptr; ++aDevIter) {
+            if (!setupDiEnumDeviceInfo(aDevIter))
+                continue;
+
+            static const int NAME_SIZE = 128;
+            DWORD   aNameLen = NAME_SIZE;
+            wchar_t aName[NAME_SIZE] = {};
+            BYTE  anEdidData[1024] = {};
+            DWORD anEdidSize = (DWORD)sizeof(anEdidData);
+            DWORD aType = 0;
+            for (DWORD aKeyIter = 0;; ++aKeyIter) {
+                LSTATUS aStatus = RegEnumValueW(myDevRegKeyH, aKeyIter,
+                                                &aName[0], &aNameLen,
+                                                nullptr, &aType,
+                                                anEdidData, &anEdidSize);
+                if (aStatus == ERROR_NO_MORE_ITEMS) {
+                    break;
+                } else if (aStatus == ERROR_SUCCESS && StString(aName).isEquals(stCString("EDID"))) {
+                    StEDIDParser anEdid((unsigned char*)anEdidData, anEdidSize);
+                    if (!anEdid.isValid()) {
+                        ST_DEBUG_LOG("Skipped invalid EDID");
+                        break;
+                    }
+
+                    myEdids->add(anEdid);
+                    break;
+                }
+            }
+        }
+    }
+
+    /** Read device info with specified index. */
+    bool setupDiEnumDeviceInfo(DWORD theIndex) {
+        closeKey();
+        memset(&myDevInfoData, 0, sizeof(myDevInfoData));
+        myDevInfoData.cbSize = sizeof(myDevInfoData);
+        if (SetupDiEnumDeviceInfo(myDevInfoH, theIndex, &myDevInfoData)) {
+            myDevRegKeyH = SetupDiOpenDevRegKey(myDevInfoH, &myDevInfoData,
+                                                DICS_FLAG_GLOBAL, 0, DIREG_DEV, KEY_READ);
+            return myDevRegKeyH != nullptr && myDevRegKeyH != INVALID_HANDLE_VALUE;
+        }
+        if (GetLastError() == ERROR_NO_MORE_ITEMS)
+            destroyDevInfo();
+
+        return false;
+    }
+
+        private:
+
+    StArrayList<StEDIDParser>* myEdids;
+
+    HDEVINFO myDevInfoH;
+    HKEY     myDevRegKeyH;
+    SP_DEVINFO_DATA myDevInfoData;
+
+};
+}
+
 void StSearchMonitors::findMonitorsWinAPI() {
+    StArrayList<StEDIDParser> anEdidList;
+    {
+        WinMonDevInfo aWinEditReader(anEdidList);
+    }
+
     int monCount = 0;
 
     // retrieve global scale factor (deprecated since Win 8.1)
@@ -249,6 +358,13 @@ void StSearchMonitors::findMonitorsWinAPI() {
         }
         aMon.setPnPId(aPnpId);
         aMon.setGpuName(StString(dispDevice.DeviceString));
+        for (size_t anEdidIter = 0; anEdidIter < anEdidList.size(); ++anEdidIter) {
+            const StEDIDParser& anEdid = anEdidList[anEdidIter];
+            if (anEdid.getPnPId() == aPnpId) {
+                aMon.changeEdid() = anEdid;
+                break;
+            }
+        }
         add(aMon);
 
         // make primary display first in our list
@@ -475,6 +591,12 @@ void StSearchMonitors::findMonitorsXRandr() {
 
 void StSearchMonitors::listEDID(StArrayList<StEDIDParser>& theEdids) {
     theEdids.clear();
+#if defined(_WIN32)
+    WinMonDevInfo aWinEditReader(theEdids);
+    if (!theEdids.isEmpty())
+        return;
+#endif
+
 #if !defined( __APPLE__) && !defined(__ANDROID__)
     StADLsdk anAdlSdk;
     if(anAdlSdk.init()) {

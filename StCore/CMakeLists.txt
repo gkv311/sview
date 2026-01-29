@@ -80,7 +80,7 @@ endforeach()
 # external dependencies
 include_directories (../3rdparty/include)
 if (WIN32)
-  target_link_libraries (${PROJECT_NAME} PRIVATE user32 gdi32 advapi32 comdlg32 shell32 winmm)
+  target_link_libraries (${PROJECT_NAME} PRIVATE user32 gdi32 advapi32 comdlg32 shell32 winmm setupapi)
 elseif (APPLE)
   target_link_libraries (${PROJECT_NAME} PRIVATE "-framework IOKit" "-framework CoreFoundation" "-framework CoreGraphics" "-framework Appkit" objc)
 elseif (ANDROID)
