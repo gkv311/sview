@@ -133,7 +133,7 @@ void StThread::setName(const char* theName) {
     }
 
 #if defined(_WIN32)
-    setWinApiThreadName((HANDLE)(UINT_PTR)myThreadId, theName);
+    setWinApiThreadName((HANDLE)myThread, theName);
     setMsvcThreadName(myThreadId, theName);
 #elif defined(__APPLE__)
     (void )theName;
