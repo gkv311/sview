@@ -15,6 +15,11 @@ export function api_extern(url="http://localhost:8080/") {
     }
 }
 
+setInterval(_ => {
+    if (api.obj.closed)
+        msgEvents["info:Online"]?.({ type: "info:Online", online: false });
+}, 2000);
+
 /* Buttons */
 
 const actions = ["PlayPause", "ListPrev", "ListNext", "Fullscreen", "AudioMute"];
@@ -64,6 +69,11 @@ function update_volume_ui(v) {
 let last_hl = -1;
 const title0 = document.title;
 const msgEvents = {
+    "ready": msg => {
+        if ("sview" in msg)
+            api_send({ type: "hello", name: "WebUI interface" });
+    },
+
     "info:Version": msg => {
         document.getElementById("stVer").innerText = msg.version;
     },

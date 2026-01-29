@@ -12,8 +12,19 @@ function invokeActionURL(endpoint, on_suceess, on_error) {
 
 /* Sending messages */
 
+const peers = {
+    [window.location.origin]: {
+        obj: window,
+        origin: window.location.origin,
+    },
+};
+
+function emit_peer(peer, m) {
+    peer?.obj?.postMessage(m, peer.origin);
+}
+
 function emit(m) {
-    window.postMessage(m, document.location.origin);
+    Object.values(peers).forEach(p => emit_peer(p, m));
 }
 
 /* Receiving messages */
@@ -47,10 +58,16 @@ const actions_triggering_update = [
 
 function listen_messages() {
     window.addEventListener("message", e => {
-        if (e.origin == document.location.origin) {
+        if (e.origin in peers) {
             const a = e.data.type;
             messageIn[a]?.(e.data);
             if (actions_triggering_update.includes(a)) update();
+
+        } else {
+            const {source, origin} = e;
+            peers[origin] = { obj: source, origin };
+            for (const k of ["version", "online", "volume", "playlist_id", "file_id", "title"])
+                last[k].resend(peers[origin]);
         }
     });
 }
@@ -144,8 +161,8 @@ for (const k of Object.keys(last)) {
                 fct?.(v, emit, true);
             }
         },
-        resend: _ => {
-            fct?.(last[k].value, emit, false);
+        resend: peer => {
+            fct?.(last[k].value, peer ? (m => emit_peer(peer, m)) : emit, false);
         }
     };
 }
@@ -157,4 +174,5 @@ invokeActionURL("version", v => {
     last["version"].set(v);
     listen_messages();
     update();
+    window.opener && window.opener.postMessage({ type: "ready", sview: true }, "*");
 })
