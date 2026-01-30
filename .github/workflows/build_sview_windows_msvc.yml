@@ -22,9 +22,6 @@ jobs:
       uses: ilammy/msvc-dev-cmd@v1.13.0
       with:
         arch: x64
-    - name: Install dependencies
-      run: |
-        choco install cmake --no-progress --installargs 'ADD_CMAKE_TO_PATH=System' -y
     - name: Configure project
       shell: cmd
       run: |
