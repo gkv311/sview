@@ -14,7 +14,10 @@ jobs:
     uses: ./.github/workflows/build_sview_linux_android.yml
   macos-clang:
     uses: ./.github/workflows/build_sview_macos_clang.yml
+  linux-mingw-ffmpeg:
+    uses: ./.github/workflows/build_sview_linux_mingw_ffmpeg.yml
   linux-mingw:
+    needs: [linux-mingw-ffmpeg]
     uses: ./.github/workflows/build_sview_linux_mingw.yml
   windows-msvc:
     uses: ./.github/workflows/build_sview_windows_msvc.yml

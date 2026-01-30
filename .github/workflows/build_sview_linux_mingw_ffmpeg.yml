@@ -1,0 +1,268 @@
+name: Build FFmpeg (Linux/MinGW)
+on:
+  workflow_call:
+
+env:
+  TOOLCHAIN_PREFIX: x86_64-w64-mingw32
+  TOOLCHAIN_TEXT: |
+    set(CMAKE_SYSTEM_NAME Windows)
+    set(CMAKE_C_COMPILER   x86_64-w64-mingw32-gcc-posix)
+    set(CMAKE_CXX_COMPILER x86_64-w64-mingw32-g++-posix)
+    set(CMAKE_RC_COMPILER  x86_64-w64-mingw32-windres)
+    set(CMAKE_FIND_ROOT_PATH /usr/x86_64-w64-mingw32)
+    set(CMAKE_FIND_ROOT_PATH_MODE_PROGRAM NEVER)
+    set(CMAKE_FIND_ROOT_PATH_MODE_LIBRARY ONLY)
+    set(CMAKE_FIND_ROOT_PATH_MODE_INCLUDE ONLY)
+  FFMPEG_REF:   'n8.0.1'
+  OPENJPEG_REF: 'v2.5.4'
+  DAV1_REF:     '1.5.3'
+  LIBJXL_REF:   'v0.11.1'
+  CACHE_REV:    'cache1'
+
+jobs:
+  build-lin-mingw-libjxl:
+    runs-on: ubuntu-24.04
+    steps:
+    - uses: actions/cache@v5
+      id: cache
+      with:
+        path: libjxl-install
+        key: libjxl-windows-x64-mingw-${{ env.LIBJXL_REF }}-${{ env.CACHE_REV }}
+    - name: Clone Tree
+      if: steps.cache.outputs.cache-hit != 'true'
+      uses: actions/checkout@v6
+      with:
+        path: libjxl.git
+        repository: libjxl/libjxl
+        ref: ${{ env.LIBJXL_REF }}
+        fetch-depth: 1
+        submodules: 'true'
+    - name: Install Dependencies
+      if: steps.cache.outputs.cache-hit != 'true'
+      run: |
+        sudo apt-get update
+        sudo apt-get install -y \
+          g++ cmake ninja-build \
+          mingw-w64-common mingw-w64-tools binutils-mingw-w64-x86-64 \
+          g++-mingw-w64-x86-64-posix gcc-mingw-w64-x86-64-posix
+        ${TOOLCHAIN_PREFIX}-g++ --version
+    - name: Configure project
+      if: steps.cache.outputs.cache-hit != 'true'
+      env:
+        LIBJXL_CONFIG: |
+          set(JPEGXL_ENABLE_DOXYGEN   OFF CACHE BOOL "")
+          set(JPEGXL_ENABLE_MANPAGES  OFF CACHE BOOL "")
+          set(JPEGXL_ENABLE_BENCHMARK OFF CACHE BOOL "")
+          set(JPEGXL_ENABLE_EXAMPLES  OFF CACHE BOOL "")
+          set(JPEGXL_ENABLE_JNI       OFF CACHE BOOL "")
+          set(JPEGXL_ENABLE_VIEWERS   OFF CACHE BOOL "")
+          set(JPEGXL_ENABLE_PLUGINS   OFF CACHE BOOL "")
+          set(JPEGXL_ENABLE_TOOLS     OFF CACHE BOOL "")
+          set(JPEGXL_ENABLE_DEVTOOLS  OFF CACHE BOOL "")
+          set(JPEGXL_TEST_TOOLS       OFF CACHE BOOL "")
+          set(BUILD_TESTING           OFF CACHE BOOL "")
+          ${{ env.TOOLCHAIN_TEXT }}
+          set(CMAKE_BUILD_TYPE Release)
+          set(CMAKE_INSTALL_PREFIX "${CMAKE_CURRENT_LIST_DIR}/libjxl-install" CACHE PATH "")
+      run: |
+        echo "${LIBJXL_CONFIG}" | tee ./libjxl-make.cmake
+        cmake -S ./libjxl.git -B ./libjxl-make -G Ninja -D CMAKE_TOOLCHAIN_FILE="$PWD/libjxl-make.cmake"
+    - name: Build project
+      if: steps.cache.outputs.cache-hit != 'true'
+      run: cmake --build ./libjxl-make
+    - name: Install build
+      if: steps.cache.outputs.cache-hit != 'true'
+      run: |
+        cmake --install ./libjxl-make --prefix ./libjxl-install
+        cp -f "./libjxl.git/LICENSE"   "./libjxl-install/"
+        cp -f "./libjxl.git/README.md" "./libjxl-install/"
+    - name: Upload build
+      uses: actions/upload-artifact@v4
+      with:
+        name: libjxl-windows-x64-mingw
+        path: libjxl-install
+        if-no-files-found: error
+
+  build-lin-mingw-dav1d:
+    runs-on: ubuntu-24.04
+    steps:
+    - uses: actions/cache@v5
+      id: cache
+      with:
+        path: dav1d-install
+        key: dav1d-windows-x64-mingw-${{ env.DAV1_REF }}-${{ env.CACHE_REV }}
+    - name: Clone Tree
+      if: steps.cache.outputs.cache-hit != 'true'
+      uses: actions/checkout@v6
+      with:
+        path: dav1d.git
+        repository: videolan/dav1d
+        ref: ${{ env.DAV1_REF }}
+        fetch-depth: 1
+    - name: Install Dependencies
+      if: steps.cache.outputs.cache-hit != 'true'
+      run: |
+        sudo apt-get update
+        sudo apt-get install -y \
+          g++ nasm meson ninja-build \
+          mingw-w64-common mingw-w64-tools binutils-mingw-w64-x86-64 \
+          g++-mingw-w64-x86-64-posix gcc-mingw-w64-x86-64-posix
+        ${TOOLCHAIN_PREFIX}-g++ --version
+    - name: Configure project
+      if: steps.cache.outputs.cache-hit != 'true'
+      run: |
+        meson setup \
+          --cross-file=$PWD/dav1d.git/package/crossfiles/${TOOLCHAIN_PREFIX}.meson \
+          --prefix=$PWD/dav1d-install \
+          --default-library=static \
+          ./dav1d-make ./dav1d.git
+    - name: Build project
+      if: steps.cache.outputs.cache-hit != 'true'
+      run: ninja -C ./dav1d-make
+    - name: Install project
+      if: steps.cache.outputs.cache-hit != 'true'
+      run: ninja -C ./dav1d-make install
+    - name: Upload build
+      uses: actions/upload-artifact@v4
+      with:
+        name: dav1d-windows-x64-mingw
+        path: dav1d-install
+        if-no-files-found: error
+
+  build-lin-mingw-ffmpeg:
+    runs-on: ubuntu-24.04
+    needs: [build-lin-mingw-libjxl, build-lin-mingw-dav1d]
+    steps:
+    - uses: actions/cache@v5
+      id: cache
+      with:
+        path: ffmpeg-install
+        key: ffmpeg-windows-x64-mingw-${{ env.FFMPEG_REF }}-${{ env.CACHE_REV }}
+    - name: Clone Tree
+      if: steps.cache.outputs.cache-hit != 'true'
+      uses: actions/checkout@v6
+      with:
+        path: ffmpeg.git
+        repository: FFmpeg/FFmpeg
+        ref: ${{ env.FFMPEG_REF }}
+        fetch-depth: 1
+    #- name: Clone Tree
+    #  uses: actions/checkout@v6
+    #  with:
+    #    path: bzip2.git
+    #    repository: https://gitlab.com/bzip2/bzip2.git
+    #    ref: 'bzip2-1.0.8'
+    #    fetch-depth: 1
+    - name: Clone openjpeg
+      if: steps.cache.outputs.cache-hit != 'true'
+      uses: actions/checkout@v6
+      with:
+        path: openjpeg.git
+        repository: uclouvain/openjpeg
+        ref: ${{ env.OPENJPEG_REF }}
+        fetch-depth: 1
+    - name: Download dav1d build
+      if: steps.cache.outputs.cache-hit != 'true'
+      uses: actions/download-artifact@v5
+      with:
+        name: dav1d-windows-x64-mingw
+        path: dav1d-install
+    - name: Download libjxl build
+      if: steps.cache.outputs.cache-hit != 'true'
+      uses: actions/download-artifact@v5
+      with:
+        name: libjxl-windows-x64-mingw
+        path: libjxl-install
+    - name: Install Dependencies
+      if: steps.cache.outputs.cache-hit != 'true'
+      run: |
+        sudo apt-get update
+        sudo apt-get install -y \
+          g++ nasm cmake libz-mingw-w64-dev \
+          mingw-w64-common mingw-w64-tools binutils-mingw-w64-x86-64 \
+          g++-mingw-w64-x86-64-posix gcc-mingw-w64-x86-64-posix
+        ${TOOLCHAIN_PREFIX}-g++ --version
+    #- name: Build bzip2
+    #  if: steps.cache.outputs.cache-hit != 'true'
+    #  run: |
+    #    #aNbJobs="$(getconf _NPROCESSORS_ONLN)"
+    #    #pushd bzip2.git
+    #    #make libbz2.a -j$aNbJobs CC=${TOOLCHAIN_PREFIX}-gcc AR=${TOOLCHAIN_PREFIX}-ar RANLIB=${TOOLCHAIN_PREFIX}-ranlib
+    #    #cp -f "$aLibRoot/libbz2.a" "$OUTPUT_FOLDER/lib"
+    #    #popd
+    #    cmake -S ./bzip2.git -B ./bzip2-make -G Ninja \
+    #      -D CMAKE_TOOLCHAIN_FILE="$PWD/${TOOLCHAIN_PREFIX}.cmake" \
+    #      -D CMAKE_BUILD_TYPE=Release \
+    #      -D CMAKE_INSTALL_PREFIX:PATH="$PWD/bzip2-install"
+    - name: Configure openjpeg
+      if: steps.cache.outputs.cache-hit != 'true'
+      env:
+        OPENJPEG_CONFIG: |
+          set(BUILD_SHARED_LIBS OFF CACHE BOOL "")
+          ${{ env.TOOLCHAIN_TEXT }}
+          set(CMAKE_BUILD_TYPE Release)
+          set(CMAKE_INSTALL_PREFIX "${CMAKE_CURRENT_LIST_DIR}/openjpeg-install" CACHE PATH "")
+      run: |
+        echo "${OPENJPEG_CONFIG}" | tee ./openjpeg-make.cmake
+        cmake -S ./openjpeg.git -B ./openjpeg-make -G Ninja -D CMAKE_TOOLCHAIN_FILE="$PWD/openjpeg-make.cmake"
+    - name: Build openjpeg
+      if: steps.cache.outputs.cache-hit != 'true'
+      run: cmake --build ./openjpeg-make
+    - name: Install openjpeg
+      if: steps.cache.outputs.cache-hit != 'true'
+      run: cmake --install ./openjpeg-make --prefix ./openjpeg-install
+    - name: Configure FFmpeg
+      if: steps.cache.outputs.cache-hit != 'true'
+      run: |
+        export PKG_CONFIG_LIBDIR=
+        export PKG_CONFIG_PATH=/usr/${TOOLCHAIN_PREFIX}/lib/pkgconfig:$PWD/dav1d-install/lib/pkgconfig:$PWD/openjpeg-install/lib/pkgconfig:$PWD/libjxl-install/lib/pkgconfig
+        anFFmpegInstall=$PWD/ffmpeg-install
+        # redirect error state from tee
+        set -o pipefail
+        pushd ./ffmpeg.git
+        # --enable-hardcoded-tables - build fails on 8.0.1
+        # --enable-libdav1d --enable-libopenjpeg --enable-gpl --enable-avisynth
+        ./configure \
+          --prefix=$anFFmpegInstall \
+          --enable-cross-compile --target-os=mingw32 --cross-prefix=${TOOLCHAIN_PREFIX}- --arch=x86_64 \
+          --extra-ldflags=-static-libgcc \
+          --disable-debug --disable-stripping \
+          --disable-doc \
+          --extra-version=sView.ru \
+          --enable-version3 \
+          --enable-swscale --enable-avfilter \
+          --enable-shared --disable-static \
+          --enable-pthreads --disable-w32threads \
+          --enable-runtime-cpudetect \
+          --enable-libdav1d --enable-libopenjpeg --enable-libjxl \
+          2>&1 | tee ../ffmpeg-config.log
+        popd
+    - name: Build FFmpeg
+      if: steps.cache.outputs.cache-hit != 'true'
+      run: |
+        pushd ./ffmpeg.git
+        aNbJobs="$(getconf _NPROCESSORS_ONLN)"
+        make -j $aNbJobs
+        popd
+    - name: Install FFmpeg
+      if: steps.cache.outputs.cache-hit != 'true'
+      run: |
+        pushd ./ffmpeg.git
+        make install
+        popd
+        cp -f ./ffmpeg-config.log           ./ffmpeg-install/
+        cp -f ./ffmpeg.git/Changelog        ./ffmpeg-install/
+        cp -f ./ffmpeg.git/README.md        ./ffmpeg-install/
+        cp -f ./ffmpeg.git/LICENSE.md       ./ffmpeg-install/
+        cp -f ./ffmpeg.git/COPYING.LGPLv2.1 ./ffmpeg-install/
+        cp -f ./ffmpeg.git/COPYING.LGPLv3   ./ffmpeg-install/
+        # copy dependencies
+        cp -f ./libjxl-install/bin/*.dll                       ./ffmpeg-install/bin/
+        cp -f /usr/${TOOLCHAIN_PREFIX}/lib/libwinpthread-1.dll ./ffmpeg-install/bin/
+        cp -f /usr/${TOOLCHAIN_PREFIX}/lib/zlib1.dll           ./ffmpeg-install/bin/
+    - name: Upload build
+      uses: actions/upload-artifact@v4
+      with:
+        name: ffmpeg-windows-x64-mingw
+        path: ffmpeg-install
+        if-no-files-found: error
