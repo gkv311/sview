@@ -20,4 +20,5 @@ jobs:
     needs: [linux-mingw-ffmpeg]
     uses: ./.github/workflows/build_sview_linux_mingw.yml
   windows-msvc:
+    needs: [linux-mingw-ffmpeg]
     uses: ./.github/workflows/build_sview_windows_msvc.yml

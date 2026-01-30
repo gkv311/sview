@@ -2,41 +2,271 @@ name: Build (Windows/MSVC)
 on:
   workflow_call:
 
+env:
+  FREETYPE_REF: 'VER-2-14-1'
+  OPENAL_REF:   '1.25.1'
+  OPENVR_REF:   'v2.5.1'
+  CACHE_REV:    'cache3'
+
 jobs:
-  build-windows-msvc:
+  build-msvc-msvc-freetype:
     runs-on: windows-latest
+    steps:
+    - uses: actions/cache@v5
+      id: cache
+      with:
+        path: freetype-install
+        key: freetype-windows-x64-msvc-${{ env.FREETYPE_REF }}-${{ env.CACHE_REV }}
+    - name: Clone Tree
+      if: steps.cache.outputs.cache-hit != 'true'
+      uses: actions/checkout@v6
+      with:
+        path: freetype.git
+        repository: freetype/freetype
+        ref: ${{ env.FREETYPE_REF }}
+        fetch-depth: 1
+    - name: Setup MSVC
+      if: steps.cache.outputs.cache-hit != 'true'
+      uses: ilammy/msvc-dev-cmd@v1.13.0
+      with:
+        arch: x64
+    - name: Generate config options
+      if: steps.cache.outputs.cache-hit != 'true'
+      env:
+        FREETYPE_CONFIG: |
+          set(BUILD_SHARED_LIBS ON  CACHE BOOL "")
+          set(FT_WITH_ZLIB      ON  CACHE BOOL "")
+          set(FT_WITH_BZIP2     OFF CACHE BOOL "")
+          set(FT_WITH_PNG       OFF CACHE BOOL "")
+          set(FT_WITH_HARFBUZZ  OFF CACHE BOOL "")
+          set(FT_WITH_BROTLI    OFF CACHE BOOL "")
+          set(CMAKE_DISABLE_FIND_PACKAGE_ZLIB      TRUE CACHE BOOL "")
+          set(CMAKE_DISABLE_FIND_PACKAGE_BZip2     TRUE CACHE BOOL "")
+          set(CMAKE_DISABLE_FIND_PACKAGE_PNG       TRUE CACHE BOOL "")
+          set(CMAKE_DISABLE_FIND_PACKAGE_HarfBuzz  TRUE CACHE BOOL "")
+          set(CMAKE_DISABLE_FIND_PACKAGE_BrotliDec TRUE CACHE BOOL "")
+          set(CMAKE_INSTALL_PREFIX "${CMAKE_CURRENT_LIST_DIR}/freetype-install" CACHE PATH "")
+      shell: bash
+      run: |
+        echo "${FREETYPE_CONFIG}" | tee ./freetype-make.cmake
+    - name: Configure project
+      if: steps.cache.outputs.cache-hit != 'true'
+      shell: cmd
+      run: |
+        cmake -S ./freetype.git -B ./freetype-make -T host=x64 -D CMAKE_TOOLCHAIN_FILE="%CD%/freetype-make.cmake"
+    - name: Build project
+      if: steps.cache.outputs.cache-hit != 'true'
+      run: |
+        cmake --build ./freetype-make --config Release -- /m
+    - name: Install build
+      if: steps.cache.outputs.cache-hit != 'true'
+      run: |
+        cmake --install ./freetype-make --prefix ./freetype-install --config Release
+    - name: Install extras
+      if: steps.cache.outputs.cache-hit != 'true'
+      shell: bash
+      run: |
+        cp -f "./freetype.git/docs/FTL.TXT"   "./freetype-install/"
+        cp -f "./freetype.git/docs/GPLv2.TXT" "./freetype-install/"
+        cp -f "./freetype.git/docs/CHANGES"   "./freetype-install/"
+        cp -f "./freetype.git/docs/README"    "./freetype-install/"
+        cp -f "./freetype.git/LICENSE.TXT"    "./freetype-install/"
+    - name: Upload build
+      uses: actions/upload-artifact@v4
+      with:
+        name: freetype-windows-x64-msvc
+        path: freetype-install
+        if-no-files-found: error
+
+  build-msvc-msvc-openal:
+    runs-on: windows-latest
+    steps:
+    - uses: actions/cache@v5
+      id: cache
+      with:
+        path: openal-install
+        key: openal-windows-x64-msvc-${{ env.OPENAL_REF }}-${{ env.CACHE_REV }}
+    - name: Clone Tree
+      if: steps.cache.outputs.cache-hit != 'true'
+      uses: actions/checkout@v6
+      with:
+        path: openal.git
+        repository: kcat/openal-soft
+        ref: ${{ env.OPENAL_REF }}
+        fetch-depth: 1
+    - name: Setup MSVC
+      if: steps.cache.outputs.cache-hit != 'true'
+      uses: ilammy/msvc-dev-cmd@v1.13.0
+      with:
+        arch: x64
+    - name: Generate config options
+      if: steps.cache.outputs.cache-hit != 'true'
+      env:
+        OPENAL_CONFIG: |
+          set(ALSOFT_EXAMPLES         OFF CACHE BOOL "")
+          set(ALSOFT_TESTS            OFF CACHE BOOL "")
+          set(ALSOFT_UTILS             ON CACHE BOOL "")
+          set(ALSOFT_BUILD_ROUTER     OFF CACHE BOOL "")
+          set(ALSOFT_REQUIRE_WINMM     ON CACHE BOOL "")
+          set(ALSOFT_REQUIRE_DSOUND    ON CACHE BOOL "")
+          set(ALSOFT_REQUIRE_WASAPI    ON CACHE BOOL "")
+          set(ALSOFT_STATIC_LIBGCC     ON CACHE BOOL "")
+          set(ALSOFT_STATIC_STDCXX     ON CACHE BOOL "")
+          set(ALSOFT_STATIC_WINPTHREAD ON CACHE BOOL "")
+          set(CMAKE_INSTALL_PREFIX "${CMAKE_CURRENT_LIST_DIR}/openal-install" CACHE PATH "")
+      shell: bash
+      run: |
+        echo "${OPENAL_CONFIG}" | tee ./openal-make.cmake
+    - name: Configure project
+      if: steps.cache.outputs.cache-hit != 'true'
+      shell: cmd
+      run: |
+        cmake -S ./openal.git -B ./openal-make -T host=x64 -D CMAKE_TOOLCHAIN_FILE="%CD%/openal-make.cmake"
+    - name: Build project
+      if: steps.cache.outputs.cache-hit != 'true'
+      run: |
+        cmake --build ./openal-make --config Release -- /m
+    - name: Install build
+      if: steps.cache.outputs.cache-hit != 'true'
+      run: |
+        cmake --install ./openal-make --prefix ./openal-install --config Release
+    - name: Install extras
+      if: steps.cache.outputs.cache-hit != 'true'
+      shell: bash
+      run: |
+        cp -f "./openal.git/COPYING"   "./openal-install/"
+        cp -f "./openal.git/README.md" "./openal-install/"
+    - name: Upload build
+      uses: actions/upload-artifact@v4
+      with:
+        name: openal-windows-x64-msvc
+        path: openal-install
+        if-no-files-found: error
+
+  build-msvc-msvc-openvr:
+    runs-on: windows-latest
+    steps:
+    - uses: actions/cache@v5
+      id: cache
+      with:
+        path: openvr-install
+        key: openvr-windows-x64-msvc-${{ env.OPENVR_REF }}-${{ env.CACHE_REV }}
+    - name: Clone Tree
+      if: steps.cache.outputs.cache-hit != 'true'
+      uses: actions/checkout@v6
+      with:
+        path: openvr.git
+        repository: ValveSoftware/openvr
+        ref: ${{ env.OPENVR_REF }}
+        fetch-depth: 1
+    - name: Setup MSVC
+      if: steps.cache.outputs.cache-hit != 'true'
+      uses: ilammy/msvc-dev-cmd@v1.13.0
+      with:
+        arch: x64
+    - name: Generate config options
+      if: steps.cache.outputs.cache-hit != 'true'
+      env:
+        OPENVR_CONFIG: |
+          set(BUILD_SHARED ON  CACHE BOOL "")
+          set(USE_LIBCXX   OFF CACHE BOOL "")
+          set(CMAKE_INSTALL_PREFIX "${CMAKE_CURRENT_LIST_DIR}/openvr-install" CACHE PATH "")
+      shell: bash
+      run: |
+        echo "${OPENVR_CONFIG}" | tee ./openvr-make.cmake
+    - name: Configure project
+      if: steps.cache.outputs.cache-hit != 'true'
+      shell: cmd
+      run: |
+        cmake -S ./openvr.git -B ./openvr-make -T host=x64 -D CMAKE_TOOLCHAIN_FILE="%CD%/openvr-make.cmake"
+    - name: Build project
+      if: steps.cache.outputs.cache-hit != 'true'
+      run: |
+        cmake --build ./openvr-make --config Release -- /m
+    - name: Install build
+      if: steps.cache.outputs.cache-hit != 'true'
+      run: |
+        cmake --install ./openvr-make --prefix ./openvr-install --config Release
+    - name: Install extras
+      if: steps.cache.outputs.cache-hit != 'true'
+      shell: bash
+      run: |
+        cp -f ./openvr.git/LICENSE   ./openvr-install/
+        cp -f ./openvr.git/README.md ./openvr-install/
+        mv -f ./openvr-install/include/openvr/*.h   ./openvr-install/include/
+        cp -f ./openvr-install/lib/openvr_api64.lib ./openvr-install/lib/openvr_api.lib
+        mkdir -p "./openvr-install/bin"
+        mv -f ./openvr-install/lib/openvr_api64.dll ./openvr-install/bin/
+    - name: Upload build
+      uses: actions/upload-artifact@v4
+      with:
+        name: openvr-windows-x64-msvc
+        path: openvr-install
+        if-no-files-found: error
+
+  build-msvc-msvc-sview:
+    runs-on: windows-latest
+    needs: [build-msvc-msvc-freetype, build-msvc-msvc-openal, build-msvc-msvc-openvr]
     steps:
     - name: Clone source tree
       uses: actions/checkout@v6
       with:
         path: sview.git
         fetch-depth: 1
-    - name: Clone 3rdparty libraries
-      uses: actions/checkout@v6
-      with:
-        repository: gkv311/sview-deps-wnt
-        ref: 'master'
-        path: sview-deps-wnt.git
-        fetch-depth: 1
     - name: Setup MSVC
       uses: ilammy/msvc-dev-cmd@v1.13.0
       with:
         arch: x64
+    - name: Download FreeType build
+      uses: actions/download-artifact@v5
+      with:
+        name: freetype-windows-x64-msvc
+        path: freetype-install
+    - name: Download OpenAL soft build
+      uses: actions/download-artifact@v5
+      with:
+        name: openal-windows-x64-msvc
+        path: openal-install
+    - name: Download OpenVR build
+      uses: actions/download-artifact@v5
+      with:
+        name: openvr-windows-x64-msvc
+        path: openvr-install
+    - name: Download FFmpeg build
+      uses: actions/download-artifact@v5
+      with:
+        name: ffmpeg-windows-x64-mingw
+        path: ffmpeg-install
+    - name: Prepare FFmpeg
+      shell: bash
+      run: |
+        cp -f ./ffmpeg-install/bin/*.lib ./ffmpeg-install/lib/
+    - name: Generate config options
+      if: steps.cache.outputs.cache-hit != 'true'
+      env:
+        SVIEW_CONFIG: |
+          set(USE_OPENVR   ON CACHE BOOL "")
+          set(USE_MONGOOSE ON CACHE BOOL "")
+          set(USE_UPDATER OFF CACHE BOOL "")
+          set(BUILD_TREAT_WARNINGS_AS_ERRORS ON CACHE BOOL "")
+          set(CMAKE_INSTALL_PREFIX "${CMAKE_CURRENT_LIST_DIR}/sview-install"    CACHE PATH "")
+          set(FREETYPE_DIR         "${CMAKE_CURRENT_LIST_DIR}/freetype-install" CACHE PATH "")
+          set(FFMPEG_DIR           "${CMAKE_CURRENT_LIST_DIR}/ffmpeg-install"   CACHE PATH "")
+          set(OPENAL_DIR           "${CMAKE_CURRENT_LIST_DIR}/openal-install"   CACHE PATH "")
+          set(OPENVR_DIR           "${CMAKE_CURRENT_LIST_DIR}/openvr-install"   CACHE PATH "")
+      shell: bash
+      run: |
+        echo "${SVIEW_CONFIG}" | tee ./sview-make.cmake
     - name: Configure project
       shell: cmd
       run: |
-        call .\sview-deps-wnt.git\unpack.bat
-        cmake -S ./sview.git -B ./sview-make -T host=x64 ^
-          -D BUILD_TREAT_WARNINGS_AS_ERRORS=OFF ^
-          -D CMAKE_INSTALL_PREFIX="%CD%/sview-install" ^
-          -D FREETYPE_DIR=./sview-deps-wnt.git/%ST_FREETYPE% ^
-          -D FFMPEG_DIR=./sview-deps-wnt.git/%ST_FFMPEG% ^
-          -D OPENAL_DIR=./sview-deps-wnt.git/%ST_OPENAL% ^
-          -D OPENVR_DIR=./sview-deps-wnt.git/%ST_OPENVR%
+        cmake -S ./sview.git -B ./sview-make -T host=x64 -D CMAKE_TOOLCHAIN_FILE="%CD%/sview-make.cmake"
     - name: Build project
       run: |
         cmake --build ./sview-make --config Release -- /m
-        cmake --build ./sview-make --config Release --target install
+    - name: Install build
+      run: |
+        cmake --install ./sview-make --prefix ./sview-install --config Release
     - name: Upload artifacts
       uses: actions/upload-artifact@v4
       with:

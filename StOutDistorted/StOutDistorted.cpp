@@ -27,10 +27,6 @@
 
 #ifdef ST_HAVE_OPENVR
     #include <openvr.h>
-
-    #ifdef _MSC_VER
-        #pragma comment(lib, "openvr_api.lib")
-    #endif
 #endif
 
 namespace {
