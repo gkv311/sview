@@ -16,8 +16,8 @@
     // special API
 #elif defined(__APPLE__)
     #include <xlocale.h>
-#elif defined(__ANDROID__)
-    // silently ignore
+#elif defined(__ANDROID__) || defined(__MINGW32__) || defined(__MINGW64__)
+    // these platforms always use C locale and do not allow changing it
     #define ST_NO_XLOCALE
 #elif defined(_GNU_SOURCE)
     // glibc extension
