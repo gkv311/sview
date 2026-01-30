@@ -10,4 +10,4 @@ Icon=sview
 Terminal=false
 Type=Application
 Categories=AudioVideo;Player;
-MimeType=image/x-jps;image/x-pns;image/x-mpo;image/jpg;image/jpeg;image/png;
+MimeType=image/x-jps;image/x-pns;image/x-mpo;image/jpg;image/jpeg;image/png;image/jxl;

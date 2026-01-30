@@ -570,6 +570,18 @@
 		<dict>
 			<key>CFBundleTypeExtensions</key>
 			<array>
+				<string>jxl</string>
+			</array>
+			<key>CFBundleTypeIconFile</key>
+			<string>sView_Media.icns</string>
+			<key>CFBundleTypeName</key>
+			<string>JPEG XL image</string>
+			<key>CFBundleTypeRole</key>
+			<string>Viewer</string>
+		</dict>
+		<dict>
+			<key>CFBundleTypeExtensions</key>
+			<array>
 				<string>tga</string>
 			</array>
 			<key>CFBundleTypeIconFile</key>

@@ -289,6 +289,7 @@ Root: HKCR; SubKey: .jpeg;                                     ValueType: string
 Root: HKCR; SubKey: .jpe;                                      ValueType: string; ValueData: sView Image;                   Tasks: flagAssocImages;       Flags: uninsdeletekey
 Root: HKCR; SubKey: .j2k;                                      ValueType: string; ValueData: sView Image;                   Tasks: flagAssocImages;       Flags: uninsdeletekey
 Root: HKCR; SubKey: .jp2;                                      ValueType: string; ValueData: sView Image;                   Tasks: flagAssocImages;       Flags: uninsdeletekey
+Root: HKCR; SubKey: .jxl;                                      ValueType: string; ValueData: sView Image;                   Tasks: flagAssocImages;       Flags: uninsdeletekey
 Root: HKCR; SubKey: .tga;                                      ValueType: string; ValueData: sView Image;                   Tasks: flagAssocImages;       Flags: uninsdeletekey
 Root: HKCR; SubKey: .png;                                      ValueType: string; ValueData: sView Image;                   Tasks: flagAssocImages;       Flags: uninsdeletekey
 Root: HKCR; SubKey: .exr;                                      ValueType: string; ValueData: sView Image;                   Tasks: flagAssocImages;       Flags: uninsdeletekey
