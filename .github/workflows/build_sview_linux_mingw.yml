@@ -256,7 +256,7 @@ jobs:
         SVIEW_CONFIG: |
           set(USE_OPENVR   ON CACHE BOOL "")
           set(USE_MONGOOSE ON CACHE BOOL "")
-          set(USE_UPDATER OFF CACHE BOOL "")
+          set(USE_UPDATER  ON CACHE BOOL "")
           set(BUILD_TREAT_WARNINGS_AS_ERRORS ON CACHE BOOL "")
           ${{ env.TOOLCHAIN_TEXT }}
           set(CMAKE_BUILD_TYPE Release)

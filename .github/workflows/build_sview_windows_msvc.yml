@@ -247,7 +247,7 @@ jobs:
         SVIEW_CONFIG: |
           set(USE_OPENVR   ON CACHE BOOL "")
           set(USE_MONGOOSE ON CACHE BOOL "")
-          set(USE_UPDATER OFF CACHE BOOL "")
+          set(USE_UPDATER  ON CACHE BOOL "")
           set(BUILD_TREAT_WARNINGS_AS_ERRORS ON CACHE BOOL "")
           set(CMAKE_INSTALL_PREFIX "${CMAKE_CURRENT_LIST_DIR}/sview-install"    CACHE PATH "")
           set(FREETYPE_DIR         "${CMAKE_CURRENT_LIST_DIR}/freetype-install" CACHE PATH "")
