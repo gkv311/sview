@@ -69,7 +69,8 @@ jobs:
         cmake -S ./libjxl.git -B ./libjxl-make -G Ninja --toolchain "$PWD/libjxl-make.cmake"
     - name: Build project
       if: steps.cache.outputs.cache-hit != 'true'
-      run: cmake --build ./libjxl-make
+      run: |
+        cmake --build ./libjxl-make
     - name: Install build
       if: steps.cache.outputs.cache-hit != 'true'
       run: |
@@ -122,10 +123,12 @@ jobs:
           ./dav1d-make ./dav1d.git
     - name: Build project
       if: steps.cache.outputs.cache-hit != 'true'
-      run: ninja -C ./dav1d-make
+      run: |
+        ninja -C ./dav1d-make
     - name: Install project
       if: steps.cache.outputs.cache-hit != 'true'
-      run: ninja -C ./dav1d-make install
+      run: |
+        ninja -C ./dav1d-make install
     - name: Upload build
       uses: actions/upload-artifact@v4
       with:
@@ -208,10 +211,12 @@ jobs:
         cmake -S ./openjpeg.git -B ./openjpeg-make -G Ninja --toolchain "$PWD/openjpeg-make.cmake"
     - name: Build openjpeg
       if: steps.cache.outputs.cache-hit != 'true'
-      run: cmake --build ./openjpeg-make
+      run: |
+        cmake --build ./openjpeg-make
     - name: Install openjpeg
       if: steps.cache.outputs.cache-hit != 'true'
-      run: cmake --install ./openjpeg-make --prefix ./openjpeg-install
+      run: |
+        cmake --install ./openjpeg-make --prefix ./openjpeg-install
     - name: Configure FFmpeg
       if: steps.cache.outputs.cache-hit != 'true'
       run: |

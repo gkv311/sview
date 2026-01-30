@@ -17,7 +17,7 @@ env:
   FREETYPE_REF: 'VER-2-14-1'
   OPENAL_REF:   '1.25.1'
   OPENVR_REF:   'v2.5.1'
-  CACHE_REV:    'cache2'
+  CACHE_REV:    'cache3'
 
 jobs:
   build-lin-mingw-freetype:

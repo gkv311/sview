@@ -6,7 +6,7 @@ env:
   FREETYPE_REF: 'VER-2-14-1'
   OPENAL_REF:   '1.25.1'
   OPENVR_REF:   'v2.5.1'
-  CACHE_REV:    'cache3'
+  CACHE_REV:    'cache4'
 
 jobs:
   build-msvc-msvc-freetype:
@@ -45,6 +45,7 @@ jobs:
           set(CMAKE_DISABLE_FIND_PACKAGE_PNG       TRUE CACHE BOOL "")
           set(CMAKE_DISABLE_FIND_PACKAGE_HarfBuzz  TRUE CACHE BOOL "")
           set(CMAKE_DISABLE_FIND_PACKAGE_BrotliDec TRUE CACHE BOOL "")
+          set(CMAKE_BUILD_TYPE      Release)
           set(CMAKE_INSTALL_PREFIX "${CMAKE_CURRENT_LIST_DIR}/freetype-install" CACHE PATH "")
       shell: bash
       run: |
@@ -53,15 +54,15 @@ jobs:
       if: steps.cache.outputs.cache-hit != 'true'
       shell: cmd
       run: |
-        cmake -S ./freetype.git -B ./freetype-make -T host=x64 -D CMAKE_TOOLCHAIN_FILE="%CD%/freetype-make.cmake"
+        cmake -S ./freetype.git -B ./freetype-make -G Ninja --toolchain "%CD%/freetype-make.cmake"
     - name: Build project
       if: steps.cache.outputs.cache-hit != 'true'
       run: |
-        cmake --build ./freetype-make --config Release -- /m
+        cmake --build ./freetype-make
     - name: Install build
       if: steps.cache.outputs.cache-hit != 'true'
       run: |
-        cmake --install ./freetype-make --prefix ./freetype-install --config Release
+        cmake --install ./freetype-make --prefix ./freetype-install
     - name: Install extras
       if: steps.cache.outputs.cache-hit != 'true'
       shell: bash
@@ -113,6 +114,7 @@ jobs:
           set(ALSOFT_STATIC_LIBGCC     ON CACHE BOOL "")
           set(ALSOFT_STATIC_STDCXX     ON CACHE BOOL "")
           set(ALSOFT_STATIC_WINPTHREAD ON CACHE BOOL "")
+          set(CMAKE_BUILD_TYPE      Release)
           set(CMAKE_INSTALL_PREFIX "${CMAKE_CURRENT_LIST_DIR}/openal-install" CACHE PATH "")
       shell: bash
       run: |
@@ -121,15 +123,15 @@ jobs:
       if: steps.cache.outputs.cache-hit != 'true'
       shell: cmd
       run: |
-        cmake -S ./openal.git -B ./openal-make -T host=x64 -D CMAKE_TOOLCHAIN_FILE="%CD%/openal-make.cmake"
+        cmake -S ./openal.git -B ./openal-make -G Ninja --toolchain "%CD%/openal-make.cmake"
     - name: Build project
       if: steps.cache.outputs.cache-hit != 'true'
       run: |
-        cmake --build ./openal-make --config Release -- /m
+        cmake --build ./openal-make
     - name: Install build
       if: steps.cache.outputs.cache-hit != 'true'
       run: |
-        cmake --install ./openal-make --prefix ./openal-install --config Release
+        cmake --install ./openal-make --prefix ./openal-install
     - name: Install extras
       if: steps.cache.outputs.cache-hit != 'true'
       shell: bash
@@ -170,6 +172,7 @@ jobs:
         OPENVR_CONFIG: |
           set(BUILD_SHARED ON  CACHE BOOL "")
           set(USE_LIBCXX   OFF CACHE BOOL "")
+          set(CMAKE_BUILD_TYPE     Release)
           set(CMAKE_INSTALL_PREFIX "${CMAKE_CURRENT_LIST_DIR}/openvr-install" CACHE PATH "")
       shell: bash
       run: |
@@ -178,15 +181,15 @@ jobs:
       if: steps.cache.outputs.cache-hit != 'true'
       shell: cmd
       run: |
-        cmake -S ./openvr.git -B ./openvr-make -T host=x64 -D CMAKE_TOOLCHAIN_FILE="%CD%/openvr-make.cmake"
+        cmake -S ./openvr.git -B ./openvr-make -G Ninja --toolchain "%CD%/openvr-make.cmake"
     - name: Build project
       if: steps.cache.outputs.cache-hit != 'true'
       run: |
-        cmake --build ./openvr-make --config Release -- /m
+        cmake --build ./openvr-make
     - name: Install build
       if: steps.cache.outputs.cache-hit != 'true'
       run: |
-        cmake --install ./openvr-make --prefix ./openvr-install --config Release
+        cmake --install ./openvr-make --prefix ./openvr-install
     - name: Install extras
       if: steps.cache.outputs.cache-hit != 'true'
       shell: bash
@@ -249,6 +252,7 @@ jobs:
           set(USE_MONGOOSE ON CACHE BOOL "")
           set(USE_UPDATER  ON CACHE BOOL "")
           set(BUILD_TREAT_WARNINGS_AS_ERRORS ON CACHE BOOL "")
+          set(CMAKE_BUILD_TYPE     Release)
           set(CMAKE_INSTALL_PREFIX "${CMAKE_CURRENT_LIST_DIR}/sview-install"    CACHE PATH "")
           set(FREETYPE_DIR         "${CMAKE_CURRENT_LIST_DIR}/freetype-install" CACHE PATH "")
           set(FFMPEG_DIR           "${CMAKE_CURRENT_LIST_DIR}/ffmpeg-install"   CACHE PATH "")
@@ -260,13 +264,13 @@ jobs:
     - name: Configure project
       shell: cmd
       run: |
-        cmake -S ./sview.git -B ./sview-make -T host=x64 -D CMAKE_TOOLCHAIN_FILE="%CD%/sview-make.cmake"
+        cmake -S ./sview.git -B ./sview-make -G Ninja --toolchain "%CD%/sview-make.cmake"
     - name: Build project
       run: |
-        cmake --build ./sview-make --config Release -- /m
+        cmake --build ./sview-make
     - name: Install build
       run: |
-        cmake --install ./sview-make --prefix ./sview-install --config Release
+        cmake --install ./sview-make --prefix ./sview-install
     - name: Upload artifacts
       uses: actions/upload-artifact@v4
       with:
