@@ -64,7 +64,7 @@ jobs:
           set(CMAKE_INSTALL_PREFIX "${CMAKE_CURRENT_LIST_DIR}/freetype-install" CACHE PATH "")
       run: |
         echo "${FREETYPE_CONFIG}" | tee ./freetype-make.cmake
-        cmake -S ./freetype.git -B ./freetype-make -G Ninja -D CMAKE_TOOLCHAIN_FILE="$PWD/freetype-make.cmake"
+        cmake -S ./freetype.git -B ./freetype-make -G Ninja --toolchain "$PWD/freetype-make.cmake"
     - name: Build project
       if: steps.cache.outputs.cache-hit != 'true'
       run: cmake --build ./freetype-make
@@ -127,7 +127,7 @@ jobs:
           set(CMAKE_INSTALL_PREFIX "${CMAKE_CURRENT_LIST_DIR}/openal-install" CACHE PATH "")
       run: |
         echo "${OPENAL_CONFIG}" | tee ./openal-make.cmake
-        cmake -S ./openal.git -B ./openal-make -G Ninja -D CMAKE_TOOLCHAIN_FILE="$PWD/openal-make.cmake"
+        cmake -S ./openal.git -B ./openal-make -G Ninja --toolchain "$PWD/openal-make.cmake"
     - name: Build project
       if: steps.cache.outputs.cache-hit != 'true'
       run: cmake --build ./openal-make
@@ -190,7 +190,7 @@ jobs:
           set(CMAKE_INSTALL_PREFIX "${CMAKE_CURRENT_LIST_DIR}/openvr-install" CACHE PATH "")
       run: |
         echo "${OPENVR_CONFIG}" | tee ./openvr-make.cmake
-        cmake -S ./openvr.git -B ./openvr-make -G Ninja -D CMAKE_TOOLCHAIN_FILE="$PWD/openvr-make.cmake"
+        cmake -S ./openvr.git -B ./openvr-make -G Ninja --toolchain "$PWD/openvr-make.cmake"
     - name: Build project
       if: steps.cache.outputs.cache-hit != 'true'
       run: cmake --build ./openvr-make
@@ -266,7 +266,7 @@ jobs:
         export PKG_CONFIG_LIBDIR=
         export PKG_CONFIG_PATH=/usr/${TOOLCHAIN_PREFIX}/lib/pkgconfig:$PWD/ffmpeg-install/lib/pkgconfig:$PWD/freetype-install/lib/pkgconfig
         echo "${SVIEW_CONFIG}" | tee ./sview-make.cmake
-        cmake -S ./sview.git -B ./sview-make -G Ninja -D CMAKE_TOOLCHAIN_FILE="$PWD/sview-make.cmake"
+        cmake -S ./sview.git -B ./sview-make -G Ninja --toolchain "$PWD/sview-make.cmake"
     - name: Build project
       run: cmake --build ./sview-make
     - name: Install build

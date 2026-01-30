@@ -66,7 +66,7 @@ jobs:
           set(CMAKE_INSTALL_PREFIX "${CMAKE_CURRENT_LIST_DIR}/libjxl-install" CACHE PATH "")
       run: |
         echo "${LIBJXL_CONFIG}" | tee ./libjxl-make.cmake
-        cmake -S ./libjxl.git -B ./libjxl-make -G Ninja -D CMAKE_TOOLCHAIN_FILE="$PWD/libjxl-make.cmake"
+        cmake -S ./libjxl.git -B ./libjxl-make -G Ninja --toolchain "$PWD/libjxl-make.cmake"
     - name: Build project
       if: steps.cache.outputs.cache-hit != 'true'
       run: cmake --build ./libjxl-make
@@ -194,9 +194,7 @@ jobs:
     #    #make libbz2.a -j$aNbJobs CC=${TOOLCHAIN_PREFIX}-gcc AR=${TOOLCHAIN_PREFIX}-ar RANLIB=${TOOLCHAIN_PREFIX}-ranlib
     #    #cp -f "$aLibRoot/libbz2.a" "$OUTPUT_FOLDER/lib"
     #    #popd
-    #    cmake -S ./bzip2.git -B ./bzip2-make -G Ninja \
-    #      -D CMAKE_TOOLCHAIN_FILE="$PWD/${TOOLCHAIN_PREFIX}.cmake" \
-    #      -D CMAKE_BUILD_TYPE=Release \
+    #    cmake -S ./bzip2.git -B ./bzip2-make -G Ninja --toolchain "$PWD/${TOOLCHAIN_PREFIX}.cmake" \
     #      -D CMAKE_INSTALL_PREFIX:PATH="$PWD/bzip2-install"
     - name: Configure openjpeg
       if: steps.cache.outputs.cache-hit != 'true'
@@ -207,7 +205,7 @@ jobs:
           set(CMAKE_INSTALL_PREFIX "${CMAKE_CURRENT_LIST_DIR}/openjpeg-install" CACHE PATH "")
       run: |
         echo "${OPENJPEG_CONFIG}" | tee ./openjpeg-make.cmake
-        cmake -S ./openjpeg.git -B ./openjpeg-make -G Ninja -D CMAKE_TOOLCHAIN_FILE="$PWD/openjpeg-make.cmake"
+        cmake -S ./openjpeg.git -B ./openjpeg-make -G Ninja --toolchain "$PWD/openjpeg-make.cmake"
     - name: Build openjpeg
       if: steps.cache.outputs.cache-hit != 'true'
       run: cmake --build ./openjpeg-make
