@@ -77,8 +77,9 @@ jobs:
         cp -f "./libjxl.git/LICENSE"   "./libjxl-install/"
         cp -f "./libjxl.git/README.md" "./libjxl-install/"
         cp -f /usr/${TOOLCHAIN_PREFIX}/lib/libwinpthread-1.dll             ./libjxl-install/bin/
-        cp -f /usr/lib/gcc/${TOOLCHAIN_PREFIX}/13-posix/libstdc++-*.dll    ./libjxl-install/bin/
-        cp -f /usr/lib/gcc/${TOOLCHAIN_PREFIX}/13-posix/libgcc_s_seh-*.dll ./libjxl-install/bin/
+        cp -f /usr/lib/gcc/${TOOLCHAIN_PREFIX}/13-posix/libstdc++-6.dll    ./libjxl-install/bin/
+        cp -f /usr/lib/gcc/${TOOLCHAIN_PREFIX}/13-posix/libgcc_s_seh-1.dll ./libjxl-install/bin/
+        /usr/${TOOLCHAIN_PREFIX}/bin/strip ./libjxl-install/bin/libstdc++-6.dll --strip-unneeded
     - name: Upload build
       uses: actions/upload-artifact@v4
       with:

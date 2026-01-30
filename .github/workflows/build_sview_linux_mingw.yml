@@ -279,8 +279,9 @@ jobs:
         cp -f ./ffmpeg-install/bin/*.dll   ./sview-install/
         cp -f ./openal-install/bin/*.dll   ./sview-install/
         #cp -f ./openvr-install/bin/*.dll   ./sview-install/
-        cp -f /usr/lib/gcc/${TOOLCHAIN_PREFIX}/13-posix/libstdc++-*.dll    ./sview-install/
-        cp -f /usr/lib/gcc/${TOOLCHAIN_PREFIX}/13-posix/libgcc_s_seh-*.dll ./sview-install/
+        cp -f /usr/lib/gcc/${TOOLCHAIN_PREFIX}/13-posix/libstdc++-6.dll    ./sview-install/
+        cp -f /usr/lib/gcc/${TOOLCHAIN_PREFIX}/13-posix/libgcc_s_seh-1.dll ./sview-install/
+        /usr/${TOOLCHAIN_PREFIX}/bin/strip ./sview-install/libstdc++-6.dll --strip-unneeded
     - name: Upload artifacts
       uses: actions/upload-artifact@v4
       with:
