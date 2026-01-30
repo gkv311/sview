@@ -20,12 +20,19 @@ env:
   OPENJPEG_REF: 'v2.5.4'
   DAV1_REF:     '1.5.3'
   LIBJXL_REF:   'v0.11.1'
+  CACHE_REV:    'cache1'
 
 jobs:
   build-lin-mingw-freetype:
     runs-on: ubuntu-24.04
     steps:
+    - uses: actions/cache@v5
+      id: cache
+      with:
+        path: freetype-install
+        key: freetype-windows-x64-mingw-${{ env.FREETYPE_REF }}-${{ env.CACHE_REV }}
     - name: Clone Tree
+      if: steps.cache.outputs.cache-hit != 'true'
       uses: actions/checkout@v6
       with:
         path: freetype.git
@@ -33,6 +40,7 @@ jobs:
         ref: ${{ env.FREETYPE_REF }}
         fetch-depth: 1
     - name: Install Dependencies
+      if: steps.cache.outputs.cache-hit != 'true'
       run: |
         sudo apt-get update
         sudo apt-get install -y \
@@ -41,6 +49,7 @@ jobs:
           g++-mingw-w64-x86-64-posix gcc-mingw-w64-x86-64-posix
         ${TOOLCHAIN_PREFIX}-g++ --version
     - name: Configure project
+      if: steps.cache.outputs.cache-hit != 'true'
       env:
         FREETYPE_CONFIG: |
           set(BUILD_SHARED_LIBS ON  CACHE BOOL "")
@@ -61,9 +70,10 @@ jobs:
         echo "${FREETYPE_CONFIG}" | tee ./freetype-make.cmake
         cmake -S ./freetype.git -B ./freetype-make -G Ninja -D CMAKE_TOOLCHAIN_FILE="$PWD/freetype-make.cmake"
     - name: Build project
-      run: |
-        cmake --build ./freetype-make
+      if: steps.cache.outputs.cache-hit != 'true'
+      run: cmake --build ./freetype-make
     - name: Install build
+      if: steps.cache.outputs.cache-hit != 'true'
       run: |
         cmake --install ./freetype-make --prefix ./freetype-install
         cp -f "./freetype.git/docs/FTL.TXT"   "./freetype-install/"
@@ -81,7 +91,13 @@ jobs:
   build-lin-mingw-openal:
     runs-on: ubuntu-24.04
     steps:
+    - uses: actions/cache@v5
+      id: cache
+      with:
+        path: openal-install
+        key: openal-windows-x64-mingw-${{ env.OPENAL_REF }}-${{ env.CACHE_REV }}
     - name: Clone Tree
+      if: steps.cache.outputs.cache-hit != 'true'
       uses: actions/checkout@v6
       with:
         path: openal.git
@@ -89,6 +105,7 @@ jobs:
         ref: ${{ env.OPENAL_REF }}
         fetch-depth: 1
     - name: Install Dependencies
+      if: steps.cache.outputs.cache-hit != 'true'
       run: |
         sudo apt-get update
         sudo apt-get install -y \
@@ -97,6 +114,7 @@ jobs:
           g++-mingw-w64-x86-64-posix gcc-mingw-w64-x86-64-posix
         ${TOOLCHAIN_PREFIX}-g++ --version
     - name: Configure project
+      if: steps.cache.outputs.cache-hit != 'true'
       env:
         OPENAL_CONFIG: |
           set(ALSOFT_EXAMPLES         OFF CACHE BOOL "")
@@ -116,9 +134,10 @@ jobs:
         echo "${OPENAL_CONFIG}" | tee ./openal-make.cmake
         cmake -S ./openal.git -B ./openal-make -G Ninja -D CMAKE_TOOLCHAIN_FILE="$PWD/openal-make.cmake"
     - name: Build project
-      run: |
-        cmake --build ./openal-make
+      if: steps.cache.outputs.cache-hit != 'true'
+      run: cmake --build ./openal-make
     - name: Install build
+      if: steps.cache.outputs.cache-hit != 'true'
       run: |
         cmake --install ./openal-make --prefix ./openal-install
         cp -f "./openal.git/COPYING"   "./openal-install/"
@@ -133,7 +152,13 @@ jobs:
   build-lin-mingw-openvr:
     runs-on: ubuntu-24.04
     steps:
+    - uses: actions/cache@v5
+      id: cache
+      with:
+        path: openvr-install
+        key: openvr-windows-x64-mingw-${{ env.OPENVR_REF }}-${{ env.CACHE_REV }}
     - name: Clone Tree
+      if: steps.cache.outputs.cache-hit != 'true'
       uses: actions/checkout@v6
       with:
         path: openvr.git
@@ -141,6 +166,7 @@ jobs:
         ref: ${{ env.OPENVR_REF }}
         fetch-depth: 1
     - name: Clone scripts
+      if: steps.cache.outputs.cache-hit != 'true'
       uses: actions/checkout@v6
       with:
         path: sview.git
@@ -148,6 +174,7 @@ jobs:
         sparse-checkout: '3rdparty/openvr'
         sparse-checkout-cone-mode: false
     - name: Install Dependencies
+      if: steps.cache.outputs.cache-hit != 'true'
       run: |
         sudo apt-get update
         sudo apt-get install -y \
@@ -156,6 +183,7 @@ jobs:
           g++-mingw-w64-x86-64-posix gcc-mingw-w64-x86-64-posix
         ${TOOLCHAIN_PREFIX}-g++ --version
     - name: Configure project
+      if: steps.cache.outputs.cache-hit != 'true'
       env:
         OPENVR_CONFIG: |
           set(BUILD_SHARED ON  CACHE BOOL "")
@@ -170,9 +198,10 @@ jobs:
         echo "${OPENVR_CONFIG}" | tee ./openvr-make.cmake
         cmake -S ./openvr.git -B ./openvr-make -G Ninja -D CMAKE_TOOLCHAIN_FILE="$PWD/openvr-make.cmake"
     - name: Build project
-      run: |
-        cmake --build ./openvr-make
+      if: steps.cache.outputs.cache-hit != 'true'
+      run: cmake --build ./openvr-make
     - name: Install build
+      if: steps.cache.outputs.cache-hit != 'true'
       run: |
         cmake --install ./openvr-make --prefix ./openvr-install
         cp -f ./openvr.git/LICENSE   ./openvr-install/
@@ -192,7 +221,13 @@ jobs:
   build-lin-mingw-libjxl:
     runs-on: ubuntu-24.04
     steps:
+    - uses: actions/cache@v5
+      id: cache
+      with:
+        path: libjxl-install
+        key: libjxl-windows-x64-mingw-${{ env.LIBJXL_REF }}-${{ env.CACHE_REV }}
     - name: Clone Tree
+      if: steps.cache.outputs.cache-hit != 'true'
       uses: actions/checkout@v6
       with:
         path: libjxl.git
@@ -201,6 +236,7 @@ jobs:
         fetch-depth: 1
         submodules: 'true'
     - name: Install Dependencies
+      if: steps.cache.outputs.cache-hit != 'true'
       run: |
         sudo apt-get update
         sudo apt-get install -y \
@@ -209,6 +245,7 @@ jobs:
           g++-mingw-w64-x86-64-posix gcc-mingw-w64-x86-64-posix
         ${TOOLCHAIN_PREFIX}-g++ --version
     - name: Configure project
+      if: steps.cache.outputs.cache-hit != 'true'
       env:
         LIBJXL_CONFIG: |
           set(JPEGXL_ENABLE_DOXYGEN   OFF CACHE BOOL "")
@@ -229,9 +266,10 @@ jobs:
         echo "${LIBJXL_CONFIG}" | tee ./libjxl-make.cmake
         cmake -S ./libjxl.git -B ./libjxl-make -G Ninja -D CMAKE_TOOLCHAIN_FILE="$PWD/libjxl-make.cmake"
     - name: Build project
-      run: |
-        cmake --build ./libjxl-make
+      if: steps.cache.outputs.cache-hit != 'true'
+      run: cmake --build ./libjxl-make
     - name: Install build
+      if: steps.cache.outputs.cache-hit != 'true'
       run: |
         cmake --install ./libjxl-make --prefix ./libjxl-install
         cp -f "./libjxl.git/LICENSE"   "./libjxl-install/"
@@ -246,7 +284,13 @@ jobs:
   build-lin-mingw-dav1d:
     runs-on: ubuntu-24.04
     steps:
+    - uses: actions/cache@v5
+      id: cache
+      with:
+        path: dav1d-install
+        key: dav1d-windows-x64-mingw-${{ env.DAV1_REF }}-${{ env.CACHE_REV }}
     - name: Clone Tree
+      if: steps.cache.outputs.cache-hit != 'true'
       uses: actions/checkout@v6
       with:
         path: dav1d.git
@@ -254,6 +298,7 @@ jobs:
         ref: ${{ env.DAV1_REF }}
         fetch-depth: 1
     - name: Install Dependencies
+      if: steps.cache.outputs.cache-hit != 'true'
       run: |
         sudo apt-get update
         sudo apt-get install -y \
@@ -262,6 +307,7 @@ jobs:
           g++-mingw-w64-x86-64-posix gcc-mingw-w64-x86-64-posix
         ${TOOLCHAIN_PREFIX}-g++ --version
     - name: Configure project
+      if: steps.cache.outputs.cache-hit != 'true'
       run: |
         meson setup \
           --cross-file=$PWD/dav1d.git/package/crossfiles/${TOOLCHAIN_PREFIX}.meson \
@@ -269,11 +315,11 @@ jobs:
           --default-library=static \
           ./dav1d-make ./dav1d.git
     - name: Build project
-      run: |
-        ninja -C ./dav1d-make
+      if: steps.cache.outputs.cache-hit != 'true'
+      run: ninja -C ./dav1d-make
     - name: Install project
-      run: |
-        ninja -C ./dav1d-make install
+      if: steps.cache.outputs.cache-hit != 'true'
+      run: ninja -C ./dav1d-make install
     - name: Upload build
       uses: actions/upload-artifact@v4
       with:
@@ -285,7 +331,13 @@ jobs:
     runs-on: ubuntu-24.04
     needs: [build-lin-mingw-libjxl, build-lin-mingw-dav1d]
     steps:
+    - uses: actions/cache@v5
+      id: cache
+      with:
+        path: ffmpeg-install
+        key: ffmpeg-windows-x64-mingw-${{ env.FFMPEG_REF }}-${{ env.CACHE_REV }}
     - name: Clone Tree
+      if: steps.cache.outputs.cache-hit != 'true'
       uses: actions/checkout@v6
       with:
         path: ffmpeg.git
@@ -300,6 +352,7 @@ jobs:
     #    ref: 'bzip2-1.0.8'
     #    fetch-depth: 1
     - name: Clone openjpeg
+      if: steps.cache.outputs.cache-hit != 'true'
       uses: actions/checkout@v6
       with:
         path: openjpeg.git
@@ -307,16 +360,19 @@ jobs:
         ref: ${{ env.OPENJPEG_REF }}
         fetch-depth: 1
     - name: Download dav1d build
+      if: steps.cache.outputs.cache-hit != 'true'
       uses: actions/download-artifact@v5
       with:
         name: dav1d-windows-x64-mingw
         path: dav1d-install
     - name: Download libjxl build
+      if: steps.cache.outputs.cache-hit != 'true'
       uses: actions/download-artifact@v5
       with:
         name: libjxl-windows-x64-mingw
         path: libjxl-install
     - name: Install Dependencies
+      if: steps.cache.outputs.cache-hit != 'true'
       run: |
         sudo apt-get update
         sudo apt-get install -y \
@@ -325,6 +381,7 @@ jobs:
           g++-mingw-w64-x86-64-posix gcc-mingw-w64-x86-64-posix
         ${TOOLCHAIN_PREFIX}-g++ --version
     #- name: Build bzip2
+    #  if: steps.cache.outputs.cache-hit != 'true'
     #  run: |
     #    #aNbJobs="$(getconf _NPROCESSORS_ONLN)"
     #    #pushd bzip2.git
@@ -336,6 +393,7 @@ jobs:
     #      -D CMAKE_BUILD_TYPE=Release \
     #      -D CMAKE_INSTALL_PREFIX:PATH="$PWD/bzip2-install"
     - name: Configure openjpeg
+      if: steps.cache.outputs.cache-hit != 'true'
       env:
         OPENJPEG_CONFIG: |
           set(BUILD_SHARED_LIBS OFF CACHE BOOL "")
@@ -346,12 +404,13 @@ jobs:
         echo "${OPENJPEG_CONFIG}" | tee ./openjpeg-make.cmake
         cmake -S ./openjpeg.git -B ./openjpeg-make -G Ninja -D CMAKE_TOOLCHAIN_FILE="$PWD/openjpeg-make.cmake"
     - name: Build openjpeg
-      run: |
-        cmake --build ./openjpeg-make
+      if: steps.cache.outputs.cache-hit != 'true'
+      run: cmake --build ./openjpeg-make
     - name: Install openjpeg
-      run: |
-        cmake --install ./openjpeg-make --prefix ./openjpeg-install
+      if: steps.cache.outputs.cache-hit != 'true'
+      run: cmake --install ./openjpeg-make --prefix ./openjpeg-install
     - name: Configure FFmpeg
+      if: steps.cache.outputs.cache-hit != 'true'
       run: |
         export PKG_CONFIG_LIBDIR=
         export PKG_CONFIG_PATH=/usr/${TOOLCHAIN_PREFIX}/lib/pkgconfig:$PWD/dav1d-install/lib/pkgconfig:$PWD/openjpeg-install/lib/pkgconfig:$PWD/libjxl-install/lib/pkgconfig
@@ -377,12 +436,14 @@ jobs:
           2>&1 | tee ../ffmpeg-config.log
         popd
     - name: Build FFmpeg
+      if: steps.cache.outputs.cache-hit != 'true'
       run: |
         pushd ./ffmpeg.git
         aNbJobs="$(getconf _NPROCESSORS_ONLN)"
         make -j $aNbJobs
         popd
     - name: Install FFmpeg
+      if: steps.cache.outputs.cache-hit != 'true'
       run: |
         pushd ./ffmpeg.git
         make install
@@ -458,8 +519,7 @@ jobs:
         echo "${SVIEW_CONFIG}" | tee ./sview-make.cmake
         cmake -S ./sview.git -B ./sview-make -G Ninja -D CMAKE_TOOLCHAIN_FILE="$PWD/sview-make.cmake"
     - name: Build project
-      run: |
-        cmake --build ./sview-make
+      run: cmake --build ./sview-make
     - name: Install build
       run: |
         cmake --install ./sview-make --prefix ./sview-install
