@@ -36,7 +36,7 @@ const messageIn = {
         if (!(msg.origin in waiting_peers)) return;
         peers[msg.origin] = waiting_peers[msg.origin];
         delete waiting_peers[msg.origin];
-        for (const k of ["version", "online", "volume", "playlist_id", "file_id", "title"])
+        for (const k of ["version", "online", "volume", "playing", "muted", "playlist_id", "file_id", "title"])
             last[k].resend(peers[msg.origin]);
     },
 
@@ -66,8 +66,11 @@ const messageIn = {
 }
 
 const actions_triggering_update = [
+    "action:PlayPause",
+    "action:Stop",
     "action:ListPrev",
     "action:ListNext",
+    "action:AudioMute",
     "op:PlaylistPlay",
     "op:SetVolume",
 ]
@@ -92,11 +95,13 @@ function auto_update() {
     invokeActionURL(
         "current?id",
         t => {
-            const [playlist_id, file_id, volume] = t.split(':');
+            const [playlist_id, file_id, volume, muted, playing] = t.split(':');
             last["online"].set(true);
             last["playlist_id"].set(Number(playlist_id));
             last["file_id"].set(Number(file_id));
             last["volume"].set(Number(volume));
+            last["muted"].set(muted == 1);
+            last["playing"].set(playing == 1);
         },
         _ => {
             last["online"].set(false);
@@ -163,6 +168,10 @@ const last = {
     "title": (v, s, _n) => s({ type: "info:Title", title: v }),
 
     "volume": (v, s, _n) => s({ type: "info:Volume", volume: v }),
+
+    "muted": (v, s, _n) => s({ type: "info:Muted", muted: v }),
+
+    "playing": (v, s, _n) => s({ type: "info:Playing", playing: v }),
 }
 
 for (const k of Object.keys(last)) {

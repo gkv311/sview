@@ -2465,9 +2465,14 @@ int StMoviePlayer::beginRequest(mg_connection*         theConnection,
         aContent = "switch fullscreen/windowed...";
     } else if(anURI.isEquals(stCString("/current"))) {
         if(aQuery.isEquals(stCString("id"))) {
+          double aDuration = 0.0, aPts = 0.0;
+          bool isVideoPlayed = false, isAudioPlayed = false;
+          const bool isPlaying = myVideo->getPlaybackState(aDuration, aPts, isVideoPlayed, isAudioPlayed);
             aContent = StString(myPlayList->getSerial())
                      + ":" + myPlayList->getCurrentId()
-                     + ":" + int(gainToVolume(params.AudioGain) * 100.0f);
+                     + ":" + int(gainToVolume(params.AudioGain) * 100.0f)
+                     + ":" + int(params.AudioMute->getValue())
+                     + ":" + int(isPlaying);
         } else if(aQuery.isEquals(stCString("title"))) {
             aContent = myPlayList->getCurrentTitle();
         }

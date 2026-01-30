@@ -144,6 +144,10 @@ const msgEvents = {
     },
 
     "info:Volume": msg => update_volume_ui(msg.volume),
+
+    "info:Muted": msg => document.getElementById("btn_AudioMute")?.classList.toggle("muted", !!msg.muted),
+
+    "info:Playing": msg => document.getElementById("btn_PlayPause")?.classList.toggle("paused", !msg.playing),
 }
 
 window.addEventListener("message", e => {

@@ -124,15 +124,22 @@ header {
     a:hover {
         animation: wave 1.5s infinite ease-in-out;
         background: var(--fg-highlight1);
+        opacity: 1;
     }
 
     a:active { background: var(--fg-highlight2); }
 }
 
-#btn_PlayPause { mask-image: linear-gradient(#fff, #fff), url("/textures/actionVideoPlay128.png"); }
+#btn_PlayPause {
+    mask-image: linear-gradient(#fff, #fff), url("/textures/actionVideoPause128.png");
+    &.paused { mask-image: linear-gradient(#fff, #fff), url("/textures/actionVideoPlay128.png"); }
+}
 #btn_ListPrev { mask-image: linear-gradient(#fff, #fff), url("/textures/actionVideoPrevious128.png"); }
 #btn_ListNext { mask-image: linear-gradient(#fff, #fff), url("/textures/actionVideoNext128.png"); }
-#btn_AudioMute { mask-image: linear-gradient(#fff, #fff), url("/textures/actionVolumeOff128.png"); }
+#btn_AudioMute {
+    mask-image: linear-gradient(#fff, #fff), url("/textures/actionVolume128.png");
+    &.muted { mask-image: linear-gradient(#fff, #fff), url("/textures/actionVolumeOff128.png"); opacity: 0.2; }
+}
 #btn_Fullscreen { mask-image: linear-gradient(#fff, #fff), url("/textures/actionVideoFullscreenOff128.png"); }
 
 #volume_icon {
