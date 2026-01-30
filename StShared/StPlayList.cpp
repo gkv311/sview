@@ -165,7 +165,7 @@ StPlayList::StPlayList(const int  theRecursionDeep,
   myIsLoopFlag(theIsLoop),
   myRecentLimit(10),
   myIsNewRecent(false),
-  myWasCleared(false) {
+  myWasCleared(true) {
     //
 }
 
@@ -225,7 +225,6 @@ void StPlayList::clear() {
     StMutexAuto anAutoLock(myMutex);
     if(myFirst != NULL) {
         myWasCleared = true;
-        mySerial.increment();
     }
 
     if(!myPlsFile.isNull()
