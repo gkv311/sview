@@ -13,10 +13,11 @@ env:
     set(CMAKE_FIND_ROOT_PATH_MODE_PROGRAM NEVER)
     set(CMAKE_FIND_ROOT_PATH_MODE_LIBRARY ONLY)
     set(CMAKE_FIND_ROOT_PATH_MODE_INCLUDE ONLY)
+    set(CMAKE_BUILD_TYPE Release)
   FREETYPE_REF: 'VER-2-14-1'
   OPENAL_REF:   '1.25.1'
   OPENVR_REF:   'v2.5.1'
-  CACHE_REV:    'cache1'
+  CACHE_REV:    'cache2'
 
 jobs:
   build-lin-mingw-freetype:
@@ -60,7 +61,6 @@ jobs:
           set(CMAKE_DISABLE_FIND_PACKAGE_HarfBuzz  TRUE CACHE BOOL "")
           set(CMAKE_DISABLE_FIND_PACKAGE_BrotliDec TRUE CACHE BOOL "")
           ${{ env.TOOLCHAIN_TEXT }}
-          set(CMAKE_BUILD_TYPE Release)
           set(CMAKE_INSTALL_PREFIX "${CMAKE_CURRENT_LIST_DIR}/freetype-install" CACHE PATH "")
       run: |
         echo "${FREETYPE_CONFIG}" | tee ./freetype-make.cmake
@@ -124,7 +124,6 @@ jobs:
           set(ALSOFT_STATIC_STDCXX     ON CACHE BOOL "")
           set(ALSOFT_STATIC_WINPTHREAD ON CACHE BOOL "")
           ${{ env.TOOLCHAIN_TEXT }}
-          set(CMAKE_BUILD_TYPE Release)
           set(CMAKE_INSTALL_PREFIX "${CMAKE_CURRENT_LIST_DIR}/openal-install" CACHE PATH "")
       run: |
         echo "${OPENAL_CONFIG}" | tee ./openal-make.cmake
@@ -188,7 +187,6 @@ jobs:
           set(CMAKE_C_FLAGS   "-DWIN32")
           set(CMAKE_CXX_FLAGS "-DWIN32")
           ${{ env.TOOLCHAIN_TEXT }}
-          set(CMAKE_BUILD_TYPE Release)
           set(CMAKE_INSTALL_PREFIX "${CMAKE_CURRENT_LIST_DIR}/openvr-install" CACHE PATH "")
       run: |
         echo "${OPENVR_CONFIG}" | tee ./openvr-make.cmake
@@ -259,7 +257,6 @@ jobs:
           set(USE_UPDATER  ON CACHE BOOL "")
           set(BUILD_TREAT_WARNINGS_AS_ERRORS ON CACHE BOOL "")
           ${{ env.TOOLCHAIN_TEXT }}
-          set(CMAKE_BUILD_TYPE Release)
           set(CMAKE_INSTALL_PREFIX "${CMAKE_CURRENT_LIST_DIR}/sview-install"    CACHE PATH "")
           set(FREETYPE_DIR         "${CMAKE_CURRENT_LIST_DIR}/freetype-install" CACHE PATH "")
           set(FFMPEG_DIR           "${CMAKE_CURRENT_LIST_DIR}/ffmpeg-install"   CACHE PATH "")
