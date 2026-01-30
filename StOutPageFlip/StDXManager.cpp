@@ -11,16 +11,9 @@
 #include "StDXAqbsControl.h"
 
 #include <StCore/StMonitor.h>
+#include <StLibrary.h>
 #include <StThreads/StCondition.h>
 #include <StThreads/StThread.h>
-
-#ifdef ST_HAVE_NVAPI
-#include <wnt/nvapi.h>
-#ifdef _MSC_VER
-    //#pragma comment(lib, "nvapi64.lib")
-    #pragma comment(linker, "/NODEFAULTLIB:libcmt.lib")
-#endif
-#endif
 
 namespace {
     static const DWORD ST_D3D_DEVICE_FLAGS = D3DCREATE_HARDWARE_VERTEXPROCESSING; // sets the graphic card to do the hardware vertexprocessing
@@ -61,6 +54,99 @@ namespace {
     }
 #endif // ST_DEBUG
 
+}
+
+//! Check NVIDIA Stereo enabled state.
+static void check_NvApi_Stereo(StDXInfo& theInfo) {
+    //NVAPI_STEREO_NOT_INITIALIZED  = -140
+    //NVAPI_STEREO_VERSION_MISMATCH = -219
+    typedef enum { NVAPI_OK = 0, NVAPI_ERROR = -1 } NvAPI_Status;
+    typedef unsigned char NvU8;
+    #define NVAPI_SHORT_STRING_MAX 64
+    typedef char NvAPI_ShortString[NVAPI_SHORT_STRING_MAX];
+
+    typedef void* (__cdecl *nvapi_QueryInterface_t)(unsigned int);
+    nvapi_QueryInterface_t nvapi_QueryInterface = nullptr;
+
+    static const unsigned int NvAPI_Initialize_ID = 0x150E828;
+    typedef NvAPI_Status(__cdecl *NvAPI_Initialize_t)();
+    NvAPI_Initialize_t NvAPI_Initialize = 0;
+
+    //static const unsigned int NvAPI_Unload_ID = 0xD22BDD7E;
+    //typedef NvAPI_Status(__cdecl *NvAPI_Unload_t)();
+    //NvAPI_Unload_t NvAPI_Unload = 0;
+
+    static const unsigned int NvAPI_GetErrorMessage_ID = 0x6C2D048C;
+    typedef NvAPI_Status(__cdecl *NvAPI_GetErrorMessage_t)(NvAPI_Status nr, NvAPI_ShortString szDesc);
+    NvAPI_GetErrorMessage_t NvAPI_GetErrorMessage = 0;
+
+    static const unsigned int NvAPI_GetInterfaceVersionString_ID = 0x1053FA5;
+    typedef NvAPI_Status(__cdecl *NvAPI_GetInterfaceVersionString_t)(NvAPI_ShortString szDesc);
+    NvAPI_GetInterfaceVersionString_t NvAPI_GetInterfaceVersionString = 0;
+
+    static const unsigned int NvAPI_Stereo_IsEnabled_ID = 0x348FF8E1;
+    typedef NvAPI_Status(__cdecl *NvAPI_Stereo_IsEnabled_t)(NvU8* pIsStereoEnabled);
+    NvAPI_Stereo_IsEnabled_t NvAPI_Stereo_IsEnabled = 0;
+
+    static const unsigned int NvAPI_Stereo_IsWindowedModeSupported_ID = 0x40C8ED5E;
+    typedef NvAPI_Status(__cdecl *NvAPI_Stereo_IsWindowedModeSupported_t)(NvU8* bSupported);
+    NvAPI_Stereo_IsWindowedModeSupported_t NvAPI_Stereo_IsWindowedModeSupported = 0;
+
+    //static const unsigned int NvAPI_Stereo_GetStereoSupport_ID = 0x296C434D;
+    //typedef NvAPI_Status(__cdecl *NvAPI_Stereo_GetStereoSupport_t)
+    //  (NvMonitorHandle hMonitor, NVAPI_STEREO_CAPS* pCaps);
+
+  #ifdef _WIN64
+    static const char NVAPI_LIB_NAME[] = "nvapi64";
+  #else
+    static const char NVAPI_LIB_NAME[] = "nvapi";
+  #endif
+    StLibrary aLib;
+    if (!aLib.load(NVAPI_LIB_NAME)) {
+        return;
+    } else if (!aLib("nvapi_QueryInterface", nvapi_QueryInterface)) {
+        ST_ERROR_LOG("NVAPI: unable to locate 'nvapi_QueryInterface'");
+        return;
+    }
+
+    NvAPI_Initialize =
+      (NvAPI_Initialize_t)nvapi_QueryInterface(NvAPI_Initialize_ID);
+    NvAPI_GetErrorMessage =
+      (NvAPI_GetErrorMessage_t)nvapi_QueryInterface(NvAPI_GetErrorMessage_ID);
+    NvAPI_GetInterfaceVersionString =
+      (NvAPI_GetInterfaceVersionString_t)nvapi_QueryInterface(NvAPI_GetInterfaceVersionString_ID);
+    NvAPI_Stereo_IsEnabled =
+      (NvAPI_Stereo_IsEnabled_t)nvapi_QueryInterface(NvAPI_Stereo_IsEnabled_ID);
+    NvAPI_Stereo_IsWindowedModeSupported =
+      (NvAPI_Stereo_IsWindowedModeSupported_t)nvapi_QueryInterface(NvAPI_Stereo_IsWindowedModeSupported_ID);
+    if (NvAPI_Initialize == NULL
+     || NvAPI_GetErrorMessage == NULL
+     || NvAPI_GetInterfaceVersionString == NULL
+     || NvAPI_Stereo_IsEnabled == NULL) {
+        ST_ERROR_LOG("NVAPI: unable to load functions");
+        return;
+    }
+
+    if (NvAPI_Initialize() != NVAPI_OK) {
+        ST_ERROR_LOG("NVAPI: initialization failed");
+        return;
+    }
+
+    NvAPI_ShortString aVer = {};
+    NvAPI_Status aStatus = NvAPI_GetInterfaceVersionString(aVer);
+    (void)aStatus;
+
+    NvU8 isStereoEnabled = FALSE;
+    aStatus = NvAPI_Stereo_IsEnabled(&isStereoEnabled);
+    theInfo.hasNvStereoSupport = isStereoEnabled == TRUE;
+    if (NvAPI_Stereo_IsWindowedModeSupported != 0) {
+        NvU8 isWindowed = FALSE;
+        aStatus = NvAPI_Stereo_IsWindowedModeSupported(&isWindowed);
+        theInfo.hasNvStereoWindowed = isWindowed == TRUE;
+    }
+    ST_DEBUG_LOG("NVAPI: '" + aVer + "', Stereo: "
+      + theInfo.hasNvStereoSupport
+      + ", Windowed: " + theInfo.hasNvStereoWindowed);
 }
 
 StString StDXManager::printErrorDesc(HRESULT theErrCode) {
@@ -506,13 +592,7 @@ bool StDXManager::getInfo(StDXInfo&  theInfo,
     UnregisterClassW(AQBS_TEST_CLASS.toCString(), anAppInst);
 
     // check NVIDIA Stereo enabled state
-#ifdef ST_HAVE_NVAPI
-    if(NvAPI_Initialize() == NVAPI_OK) {
-        NvU8 isStereoEnabled = FALSE;
-        NvAPI_Stereo_IsEnabled(&isStereoEnabled);
-        theInfo.hasNvStereoSupport = isStereoEnabled == TRUE;
-    }
-#endif
+    check_NvApi_Stereo(theInfo);
 
     //ST_DEBUG_LOG("DXInfo, AMD(" + int(theInfo.hasAmdAdapter) + "), AQBS(" + int(theInfo.hasAqbsSupport)
     //           + "); NVIDIA(" + int(theInfo.hasNvAdapter) + "), NvStereo(" + int(theInfo.hasNvStereoSupport) + ")");

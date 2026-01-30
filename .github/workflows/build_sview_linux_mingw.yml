@@ -445,7 +445,6 @@ jobs:
       env:
         SVIEW_CONFIG: |
           set(USE_OPENVR ON  CACHE BOOL "")
-          set(USE_NVAPI  OFF CACHE BOOL "")
           ${{ env.TOOLCHAIN_TEXT }}
           set(CMAKE_BUILD_TYPE Release)
           set(CMAKE_INSTALL_PREFIX "${CMAKE_CURRENT_LIST_DIR}/sview-install"    CACHE PATH "")
@@ -453,7 +452,6 @@ jobs:
           set(FFMPEG_DIR           "${CMAKE_CURRENT_LIST_DIR}/ffmpeg-install"   CACHE PATH "")
           set(OPENAL_DIR           "${CMAKE_CURRENT_LIST_DIR}/openal-install"   CACHE PATH "")
           set(OPENVR_DIR           "${CMAKE_CURRENT_LIST_DIR}/openvr-install"   CACHE PATH "")
-          set(NVAPI_DIR            "${CMAKE_CURRENT_LIST_DIR}/nvapi-install"    CACHE PATH "")
       run: |
         export PKG_CONFIG_LIBDIR=
         export PKG_CONFIG_PATH=/usr/${TOOLCHAIN_PREFIX}/lib/pkgconfig:$PWD/ffmpeg-install/lib/pkgconfig:$PWD/freetype-install/lib/pkgconfig

@@ -14,12 +14,15 @@ struct StDXInfo {
     bool hasAmdAdapter;
     bool hasAqbsSupport;
     bool hasNvStereoSupport;
+    bool hasNvStereoWindowed;
 
     StDXInfo()
     : hasNvAdapter(false),
       hasAmdAdapter(false),
       hasAqbsSupport(false),
-      hasNvStereoSupport(false) {}
+      hasNvStereoSupport(false),
+      hasNvStereoWindowed(false)
+    {}
 
 };
 

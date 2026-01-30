@@ -3,7 +3,6 @@ set "aCmakeBin=c:\Storage\Develop\DEVsoft\CMake\bin"
 set "aParties=C:\Storage\Develop\sView\sview-deps-wnt.git"
 set "aFreeType=%aParties%\freetype-2.5.5-vc10-64"
 set "anFFmpeg=%aParties%\ffmpeg-4.1.1-x86_64-w64-mingw32-lgpl"
-set "anNVAPI=%aParties%\nvapi-vc10-64"
 set "anOpenAL=%aParties%\openal-soft-1.17.0-vc10-64"
 set "anOpenVR=%aParties%\openvr-1.0.5-64"
 

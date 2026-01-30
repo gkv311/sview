@@ -6,7 +6,6 @@ set "aCmakeBin="
 set "aVsVars="
 set "aFreeType="
 set "anFFmpeg="
-set "anNVAPI="
 set "anOpenAL="
 set "anOpenVR="
 set "anMsvcr="
@@ -157,7 +156,6 @@ cmake -G "Ninja" ^
  -D USE_UPDATER:BOOL="%USE_UPDATER%" ^
  -D FREETYPE_DIR:PATH="%aFreeType%" ^
  -D FFMPEG_DIR:PATH="%anFFmpeg%" ^
- -D NVAPI_DIR:PATH="%anNVAPI%" ^
  -D OPENAL_DIR:PATH="%anOpenAL%" ^
  -D USE_OPENVR:BOOL="%USE_OPENVR%" ^
  -D OPENVR_DIR:PATH="%anOpenVR%" ^

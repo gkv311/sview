@@ -35,8 +35,7 @@ jobs:
           -D FREETYPE_DIR=./sview-deps-wnt.git/%ST_FREETYPE% ^
           -D FFMPEG_DIR=./sview-deps-wnt.git/%ST_FFMPEG% ^
           -D OPENAL_DIR=./sview-deps-wnt.git/%ST_OPENAL% ^
-          -D OPENVR_DIR=./sview-deps-wnt.git/%ST_OPENVR% ^
-          -D NVAPI_DIR=./sview-deps-wnt.git/%ST_NVAPI%
+          -D OPENVR_DIR=./sview-deps-wnt.git/%ST_OPENVR%
     - name: Build project
       run: |
         cmake --build ./sview-make --config Release -- /m

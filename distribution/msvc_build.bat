@@ -14,7 +14,6 @@ set "aVsVars="
 set "aCmakeGen=Visual Studio 14 2015 Win64"
 set "aFreeType="
 set "anFFmpeg="
-set "anNVAPI="
 set "anOpenAL="
 set "anOpenVR="
 set "anMsvcr="
@@ -127,7 +126,6 @@ if ["%toCMake%"] == ["1"] (
  -D BUILD_FORCE_RelWithDebInfo:BOOL="ON" ^
  -D FREETYPE_DIR:PATH="%aFreeType%" ^
  -D FFMPEG_DIR:PATH="%anFFmpeg%" ^
- -D NVAPI_DIR:PATH="%anNVAPI%" ^
  -D OPENAL_DIR:PATH="%anOpenAL%" ^
  -D USE_OPENVR:BOOL="%USE_OPENVR%" ^
  -D OPENVR_DIR:PATH="%anOpenVR%" ^
