@@ -126,17 +126,7 @@ const last = {
 
     "online": (v, s, _n) => s({ type: "info:Online", online: v }),
 
-    "playlist_id": (v, s, n) => {
-        if (v < 0) {
-            if (last_playlist.length > 0) {
-                s({
-                    type: "info:Playlist",
-                    titles: [],
-                });
-                last_playlist = [];
-            }
-            return;
-        }
+    "playlist_id": (_v, s, n) => {
         if (n) {
             invokeActionURL("playlist", files => {
                 const titles = files.split("\n").filter(str => str !== "");
@@ -144,7 +134,6 @@ const last = {
                     type: "info:Playlist",
                     titles,
                 });
-                if (titles.length == 0) last['playlist_id'].set(-1);
                 last_playlist = titles;
             });
         } else {
