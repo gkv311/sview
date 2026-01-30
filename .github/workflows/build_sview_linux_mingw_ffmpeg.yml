@@ -17,7 +17,7 @@ env:
   OPENJPEG_REF: 'v2.5.4'
   DAV1_REF:     '1.5.3'
   LIBJXL_REF:   'v0.11.1'
-  CACHE_REV:    'cache1'
+  CACHE_REV:    'cache2'
 
 jobs:
   build-lin-mingw-libjxl:
@@ -76,6 +76,9 @@ jobs:
         cmake --install ./libjxl-make --prefix ./libjxl-install
         cp -f "./libjxl.git/LICENSE"   "./libjxl-install/"
         cp -f "./libjxl.git/README.md" "./libjxl-install/"
+        cp -f /usr/${TOOLCHAIN_PREFIX}/lib/libwinpthread-1.dll             ./libjxl-install/bin/
+        cp -f /usr/lib/gcc/${TOOLCHAIN_PREFIX}/13-posix/libstdc++-*.dll    ./libjxl-install/bin/
+        cp -f /usr/lib/gcc/${TOOLCHAIN_PREFIX}/13-posix/libgcc_s_seh-*.dll ./libjxl-install/bin/
     - name: Upload build
       uses: actions/upload-artifact@v4
       with:
