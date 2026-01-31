@@ -241,11 +241,7 @@ bool StFileNode::openFileDialog(StString& theFilePath,
     int aRes = -1;
     StString anOutput;
     if (!StProcess::execAndRead(aRes, anOutput, ST_ZENITY, aCmd)) {
-        return false;
-    } else if (aRes != 0) {
-        if (!StProcess::execAndRead(aRes, anOutput, ST_ZENITY, " --version") || aRes != 0) {
-            stError(StString(ST_ZENITY) + " is not found!");
-        }
+        stError(StString(ST_ZENITY) + " is not found!");
         return false;
     }
 

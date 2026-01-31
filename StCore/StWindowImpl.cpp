@@ -645,8 +645,6 @@ void StWindowImpl::updateBlockSleep() {
             ST_ERROR_LOG(ST_XDG_SCREENSAVER + " is not found!");
         } else if (aRes != 0 && !anOutput.isEmpty()) {
             ST_ERROR_LOG(ST_XDG_SCREENSAVER + ": " + anOutput);
-        } else if (aRes != 0) {
-            ST_ERROR_LOG(ST_XDG_SCREENSAVER + " is not found!");
         }
 
         myBlockSleep = BlockSleep_DISPLAY;

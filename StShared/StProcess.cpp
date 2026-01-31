@@ -15,6 +15,7 @@
     #include <float.h>
 #else
     #include <unistd.h>
+    #include <sys/wait.h>
 #endif
 
 #if defined(__APPLE__)
@@ -373,8 +374,7 @@ bool StProcess::execAndRead(int& theRes,
     //ST_DEBUG_LOG(aCmd);
     FILE* aPipe = popen(aCmd.toCString(), "r");
     if (aPipe == NULL) {
-        //ST_DEBUG_LOG(theExecutable + " is not found!");
-        return false;
+        return false; // this should normally never happen
     }
 
     char aBuffer[4096] = {};
@@ -385,6 +385,13 @@ bool StProcess::execAndRead(int& theRes,
         theOutput.clear();
     }
     theRes = pclose(aPipe);
+    if (WEXITSTATUS(theRes) == 127) {
+        // 127 is returned by shell if command is not found or cannot be executed
+        //ST_DEBUG_LOG(theExecutable + " is not found");
+        return false;
+    } else if (theRes == -1 && errno == ECHILD) {
+        //ST_DEBUG_LOG("pclose() is unable to get exit status of a child process '" + theExecutable + "'");
+    }
     return true;
 #endif
 }

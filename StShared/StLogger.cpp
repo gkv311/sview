@@ -293,7 +293,7 @@ void StMessageBox::Info(const StString& theMessage) {
     const StString aMsg = theMessage.replace(stCString("\""), stCString("\\\""));
     int aRes = -1;
     StString aDummy;
-    if (!StProcess::execAndRead(aRes, aDummy, ST_ZENITY, StString(" --info --no-markup --no-wrap --text=\"") + aMsg + "\"") || aRes != 0) {
+    if (!StProcess::execAndRead(aRes, aDummy, ST_ZENITY, StString(" --info --no-markup --no-wrap --text=\"") + aMsg + "\"")) {
         ST_DEBUG_LOG(ST_ZENITY + " is not found!");
         return;
     }
@@ -324,7 +324,7 @@ void StMessageBox::Warn(const StString& theMessage) {
     const StString aMsg = theMessage.replace(stCString("\""), stCString("\\\""));
     int aRes = -1;
     StString aDummy;
-    if (!StProcess::execAndRead(aRes, aDummy, ST_ZENITY, StString(" --warning --no-markup --no-wrap --text=\"") + aMsg + "\"") || aRes != 0) {
+    if (!StProcess::execAndRead(aRes, aDummy, ST_ZENITY, StString(" --warning --no-markup --no-wrap --text=\"") + aMsg + "\"")) {
         ST_DEBUG_LOG(ST_ZENITY + " is not found!");
         return;
     }
@@ -355,7 +355,7 @@ void StMessageBox::Error(const StString& theMessage) {
     int aRes = -1;
     const StString aMsg = theMessage.replace(stCString("\""), stCString("\\\""));
     StString aDummy;
-    if (!StProcess::execAndRead(aRes, aDummy, ST_ZENITY, StString(" --error --no-markup --no-wrap --text=\"") + aMsg + "\"") || aRes != 0) {
+    if (!StProcess::execAndRead(aRes, aDummy, ST_ZENITY, StString(" --error --no-markup --no-wrap --text=\"") + aMsg + "\"")) {
         ST_DEBUG_LOG(ST_ZENITY + " is not found!");
         return;
     }
@@ -390,6 +390,14 @@ bool StMessageBox::Question(const StString& theMessage) {
     if (!StProcess::execAndRead(aRes, aDummy, ST_ZENITY, StString(" --question --no-markup --no-wrap --text=\"") + aMsg + "\"")) {
         ST_DEBUG_LOG(ST_ZENITY + " is not found!");
         return false;
+    }
+    if (aRes == -1) {
+        // pclose() returns -1 with errno=ECHILD if there are some other calls to wait() or similar.
+        // zenity doesn't print any output for --question, so that exit code is the only way to get result.
+        // The workaround could be something like:
+        // `if ((zenity --question --title \"Alert\" --text \"Message\")); then echo '0'; else echo '1'; fi`
+        // and parsing output for '0' and '1'
+        ST_DEBUG_LOG("Unable to get exit status of a child process");
     }
     return aRes == 0;
 #endif
