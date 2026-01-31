@@ -4,17 +4,21 @@ This document describes changes between tagged sView versions.
 
 Not all changes are documented here - please check git log for complete list.
 
-sView ??.?? (in development)
+sView 26.01 (2026-01-31)
 -----------------------------------------------------------------------------------------------------------------------
 
 - Image Viewer - added shuffle playlist button (the same as in Movie Player).
 - Brightness, saturation as well as stereopair separation settings are now restored on sView restart.
   Stereopair separation settings are now common for all files in playlist.
+- Improved WebGUI interface.
 - Fixed saving a pair of images into single one on Windows platform.
 - Windows, force exclusive fullscreen mode for hardware QuadBuffered OpenGL
   (workaround for activation of shutter glasses on some NVIDIA GeForce configurations).
+- Windows, updated dependencies (FFmpeg 8.0.1).
+- Windows releases have been switched from MSVC to MinGW toolchain.
 - Linux, added workaround for XWayland session with keyboard focus lost in fullscreen mode.
 - Linux, fixed accepting of Drag&Drop as `text/uri-list` from Thunar and within XWayland session.
+- Linux, fixed Dual Output displaying black screen.
 
 sView 25.02 (2025-02-22)
 -----------------------------------------------------------------------------------------------------------------------

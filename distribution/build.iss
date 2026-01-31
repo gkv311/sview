@@ -11,6 +11,7 @@
 #define SVIEW_PUBLISHER "Kirill Gavrilov"
 #define SVIEW_URL "http://www.sview.ru"
 #define SVIEW_EXE_NAME "sView.exe"
+#define LIB_PREFIX "lib"
 
 [Setup]
 ; AppId could be optionally changed in scripts for major releases of product if we want to implement
@@ -178,60 +179,67 @@ Source: {#SVIEW_DISTR_PATH}\lang\Czech\language.lng;    DestDir: {app}\lang\Czec
 Source: {#SVIEW_DISTR_PATH}\lang\Korean\language.lng;   DestDir: {app}\lang\Korean;   Flags: ignoreversion; Components: StCore
 Source: {#SVIEW_DISTR_PATH}\lang\ChineseS\language.lng; DestDir: {app}\lang\ChineseS; Flags: ignoreversion; Components: StCore
 
-Source: {#SVIEW_DISTR_PATH}\*.exe;                    DestDir: {app};  Flags: 64bit ignoreversion; Components: StCore
-Source: {#SVIEW_DISTR_PATH}\StShared.dll;             DestDir: {app};  Flags: 64bit ignoreversion; Components: StCore
-Source: {#SVIEW_DISTR_PATH}\StGLWidgets.dll;          DestDir: {app};  Flags: 64bit ignoreversion; Components: StCore
-Source: {#SVIEW_DISTR_PATH}\StCore.dll;               DestDir: {app};  Flags: 64bit ignoreversion; Components: StCore
-Source: {#SVIEW_DISTR_PATH}\StDiagnostics.dll;        DestDir: {app};  Flags: 64bit ignoreversion; Components: StCore
+Source: {#SVIEW_DISTR_PATH}\*.exe;                          DestDir: {app};  Flags: 64bit ignoreversion; Components: StCore
+Source: {#SVIEW_DISTR_PATH}\{#LIB_PREFIX}StShared.dll;      DestDir: {app};  Flags: 64bit ignoreversion; Components: StCore
+Source: {#SVIEW_DISTR_PATH}\{#LIB_PREFIX}StGLWidgets.dll;   DestDir: {app};  Flags: 64bit ignoreversion; Components: StCore
+Source: {#SVIEW_DISTR_PATH}\{#LIB_PREFIX}StCore.dll;        DestDir: {app};  Flags: 64bit ignoreversion; Components: StCore
+Source: {#SVIEW_DISTR_PATH}\{#LIB_PREFIX}StDiagnostics.dll; DestDir: {app};  Flags: 64bit ignoreversion; Components: StCore
 ; MSVC C-Runtime libraries (mask compatible for vc100)
-Source: {#SVIEW_DISTR_PATH}\msvc*.dll;                DestDir: {app};  Flags: 64bit ignoreversion; Components: StCore
+;Source: {#SVIEW_DISTR_PATH}\msvc*.dll;                DestDir: {app};  Flags: 64bit ignoreversion; Components: StCore
+; GCC C++-runtime libraries
+Source: {#SVIEW_DISTR_PATH}\libstdc++-6.dll;           DestDir: {app};  Flags: 64bit ignoreversion; Components: StCore
+Source: {#SVIEW_DISTR_PATH}\libgcc_s_seh-1.dll;        DestDir: {app};  Flags: 64bit ignoreversion; Components: StCore
+Source: {#SVIEW_DISTR_PATH}\libwinpthread-1.dll;       DestDir: {app};  Flags: 64bit ignoreversion; Components: StCore
 ; FreeType2 library commonly used
-Source: {#SVIEW_DISTR_PATH}\freetype.dll;             DestDir: {app};  Flags: 64bit ignoreversion; Components: StCore
+Source: {#SVIEW_DISTR_PATH}\{#LIB_PREFIX}freetype.dll; DestDir: {app};  Flags: 64bit ignoreversion; Components: StCore
 ; FFmpeg libraries are commonly used
-Source: {#SVIEW_DISTR_PATH}\av*.dll;                  DestDir: {app};  Flags: 64bit ignoreversion; Components: StCore
-Source: {#SVIEW_DISTR_PATH}\sw*.dll;                  DestDir: {app};  Flags: 64bit ignoreversion; Components: StCore
+Source: {#SVIEW_DISTR_PATH}\av*.dll;                   DestDir: {app};  Flags: 64bit ignoreversion; Components: StCore
+Source: {#SVIEW_DISTR_PATH}\sw*.dll;                   DestDir: {app};  Flags: 64bit ignoreversion; Components: StCore
+Source: {#SVIEW_DISTR_PATH}\zlib1.dll;                 DestDir: {app};  Flags: 64bit ignoreversion; Components: StCore
+Source: {#SVIEW_DISTR_PATH}\libbrotli*.dll;            DestDir: {app};  Flags: 64bit ignoreversion; Components: StCore
+Source: {#SVIEW_DISTR_PATH}\libjx*.dll;                DestDir: {app};  Flags: 64bit ignoreversion; Components: StCore
 
 ; StRenderers -> StOutAnaglyph
-Source: {#SVIEW_DISTR_PATH}\lang\*StOutAnaglyph.lng;  DestDir: {app}\lang;                   Flags: ignoreversion recursesubdirs;       Components: StRenderers\StOutAnaglyph
-Source: {#SVIEW_DISTR_PATH}\shaders\StOutAnaglyph\*;  DestDir: {app}\shaders\StOutAnaglyph;  Flags: ignoreversion recursesubdirs;       Components: StRenderers\StOutAnaglyph
-Source: {#SVIEW_DISTR_PATH}\StOutAnaglyph.dll;        DestDir: {app};                        Flags: 64bit ignoreversion;                Components: StRenderers\StOutAnaglyph
+Source: {#SVIEW_DISTR_PATH}\lang\*StOutAnaglyph.lng;         DestDir: {app}\lang;                   Flags: ignoreversion recursesubdirs;       Components: StRenderers\StOutAnaglyph
+Source: {#SVIEW_DISTR_PATH}\shaders\StOutAnaglyph\*;         DestDir: {app}\shaders\StOutAnaglyph;  Flags: ignoreversion recursesubdirs;       Components: StRenderers\StOutAnaglyph
+Source: {#SVIEW_DISTR_PATH}\{#LIB_PREFIX}StOutAnaglyph.dll;  DestDir: {app};                        Flags: 64bit ignoreversion;                Components: StRenderers\StOutAnaglyph
 ; StRenderers -> StOutDual
-Source: {#SVIEW_DISTR_PATH}\lang\*StOutDual.lng;      DestDir: {app}\lang;                   Flags: ignoreversion recursesubdirs;       Components: StRenderers\StOutDual
-Source: {#SVIEW_DISTR_PATH}\StOutDual.dll;            DestDir: {app};                        Flags: 64bit ignoreversion;                Components: StRenderers\StOutDual
+Source: {#SVIEW_DISTR_PATH}\lang\*StOutDual.lng;             DestDir: {app}\lang;                   Flags: ignoreversion recursesubdirs;       Components: StRenderers\StOutDual
+Source: {#SVIEW_DISTR_PATH}\{#LIB_PREFIX}StOutDual.dll;      DestDir: {app};                        Flags: 64bit ignoreversion;                Components: StRenderers\StOutDual
 ; StRenderers -> StOutInterlace
-Source: {#SVIEW_DISTR_PATH}\lang\*StOutInterlace.lng; DestDir: {app}\lang;                   Flags: ignoreversion recursesubdirs;       Components: StRenderers\StOutInterlace
-Source: {#SVIEW_DISTR_PATH}\shaders\StOutInterlace\*; DestDir: {app}\shaders\StOutInterlace; Flags: 64bit ignoreversion recursesubdirs; Components: StRenderers\StOutInterlace
-Source: {#SVIEW_DISTR_PATH}\StOutInterlace.dll;       DestDir: {app};                        Flags: 64bit ignoreversion;                Components: StRenderers\StOutInterlace
+Source: {#SVIEW_DISTR_PATH}\lang\*StOutInterlace.lng;        DestDir: {app}\lang;                   Flags: ignoreversion recursesubdirs;       Components: StRenderers\StOutInterlace
+Source: {#SVIEW_DISTR_PATH}\shaders\StOutInterlace\*;        DestDir: {app}\shaders\StOutInterlace; Flags: 64bit ignoreversion recursesubdirs; Components: StRenderers\StOutInterlace
+Source: {#SVIEW_DISTR_PATH}\{#LIB_PREFIX}StOutInterlace.dll; DestDir: {app};                        Flags: 64bit ignoreversion;                Components: StRenderers\StOutInterlace
 ; StRenderers -> StOutIZ3D
-Source: {#SVIEW_DISTR_PATH}\lang\*StOutIZ3D.lng;      DestDir: {app}\lang;                   Flags: ignoreversion recursesubdirs;       Components: StRenderers\StOutIZ3D
-Source: {#SVIEW_DISTR_PATH}\shaders\StOutIZ3D\*;      DestDir: {app}\shaders\StOutIZ3D;      Flags: 64bit ignoreversion recursesubdirs; Components: StRenderers\StOutIZ3D
-Source: {#SVIEW_DISTR_PATH}\StOutIZ3D.dll;            DestDir: {app};                        Flags: 64bit ignoreversion;                Components: StRenderers\StOutIZ3D
+Source: {#SVIEW_DISTR_PATH}\lang\*StOutIZ3D.lng;             DestDir: {app}\lang;                   Flags: ignoreversion recursesubdirs;       Components: StRenderers\StOutIZ3D
+Source: {#SVIEW_DISTR_PATH}\shaders\StOutIZ3D\*;             DestDir: {app}\shaders\StOutIZ3D;      Flags: 64bit ignoreversion recursesubdirs; Components: StRenderers\StOutIZ3D
+Source: {#SVIEW_DISTR_PATH}\{#LIB_PREFIX}StOutIZ3D.dll;      DestDir: {app};                        Flags: 64bit ignoreversion;                Components: StRenderers\StOutIZ3D
 ; StRenderers -> StOutPageFlip
-Source: {#SVIEW_DISTR_PATH}\lang\*StOutPageFlip.lng;  DestDir: {app}\lang;                   Flags: ignoreversion recursesubdirs;       Components: StRenderers\StOutPageFlip
-Source: {#SVIEW_DISTR_PATH}\StOutPageFlip.dll;        DestDir: {app};                        Flags: 64bit ignoreversion;                Components: StRenderers\StOutPageFlip
+Source: {#SVIEW_DISTR_PATH}\lang\*StOutPageFlip.lng;         DestDir: {app}\lang;                   Flags: ignoreversion recursesubdirs;       Components: StRenderers\StOutPageFlip
+Source: {#SVIEW_DISTR_PATH}\{#LIB_PREFIX}StOutPageFlip.dll;  DestDir: {app};                        Flags: 64bit ignoreversion;                Components: StRenderers\StOutPageFlip
 ; StRenderers -> StOutDistorted
-Source: {#SVIEW_DISTR_PATH}\lang\*StOutDistorted.lng; DestDir: {app}\lang;                   Flags: ignoreversion recursesubdirs;       Components: StRenderers\StOutDistorted
-Source: {#SVIEW_DISTR_PATH}\StOutDistorted.dll;       DestDir: {app};                        Flags: 64bit ignoreversion;                Components: StRenderers\StOutDistorted
-Source: {#SVIEW_DISTR_PATH}\openvr_api.dll;           DestDir: {app};                        Flags: 64bit ignoreversion;                Components: StRenderers\StOutDistorted
+Source: {#SVIEW_DISTR_PATH}\lang\*StOutDistorted.lng;        DestDir: {app}\lang;                   Flags: ignoreversion recursesubdirs;       Components: StRenderers\StOutDistorted
+Source: {#SVIEW_DISTR_PATH}\{#LIB_PREFIX}StOutDistorted.dll; DestDir: {app};                        Flags: 64bit ignoreversion;                Components: StRenderers\StOutDistorted
+Source: {#SVIEW_DISTR_PATH}\{#LIB_PREFIX}openvr_api64.dll;   DestDir: {app};                        Flags: 64bit ignoreversion;                Components: StRenderers\StOutDistorted
 
 ; StDrawers
-Source: {#SVIEW_DISTR_PATH}\textures\*;               DestDir: {app}\textures;               Flags: ignoreversion;         Components: StDrawers\StImageViewer or StDrawers\StMoviePlayer
-Source: {#SVIEW_DISTR_PATH}\icons\sView_Media.ico;    DestDir: {app}\icons;                  Flags: ignoreversion;         Components: StDrawers\StImageViewer or StDrawers\StMoviePlayer
+Source: {#SVIEW_DISTR_PATH}\textures\*;                      DestDir: {app}\textures;               Flags: ignoreversion;         Components: StDrawers\StImageViewer or StDrawers\StMoviePlayer
+Source: {#SVIEW_DISTR_PATH}\icons\sView_Media.ico;           DestDir: {app}\icons;                  Flags: ignoreversion;         Components: StDrawers\StImageViewer or StDrawers\StMoviePlayer
 ; StDrawers -> Image Viewer
-Source: {#SVIEW_DISTR_PATH}\lang\*StImageViewer.lng;  DestDir: {app}\lang;                   Flags: ignoreversion recursesubdirs; Components: StCore
-Source: {#SVIEW_DISTR_PATH}\icons\sView_JPS.ico;      DestDir: {app}\icons;                  Flags: ignoreversion;         Components: StDrawers\StImageViewer
-Source: {#SVIEW_DISTR_PATH}\icons\sView_PNS.ico;      DestDir: {app}\icons;                  Flags: ignoreversion;         Components: StDrawers\StImageViewer
-Source: {#SVIEW_DISTR_PATH}\demo.jps;                 DestDir: {app};                        Flags: ignoreversion;         Components: StDrawers\StImageViewer
-Source: {#SVIEW_DISTR_PATH}\demo_robot.jps;           DestDir: {app};                        Flags: ignoreversion;         Components: StDrawers\StImageViewer
-Source: {#SVIEW_DISTR_PATH}\StImageViewer.dll;        DestDir: {app};                        Flags: 64bit ignoreversion;   Components: StCore
+Source: {#SVIEW_DISTR_PATH}\lang\*StImageViewer.lng;         DestDir: {app}\lang;                   Flags: ignoreversion recursesubdirs; Components: StCore
+Source: {#SVIEW_DISTR_PATH}\icons\sView_JPS.ico;             DestDir: {app}\icons;                  Flags: ignoreversion;         Components: StDrawers\StImageViewer
+Source: {#SVIEW_DISTR_PATH}\icons\sView_PNS.ico;             DestDir: {app}\icons;                  Flags: ignoreversion;         Components: StDrawers\StImageViewer
+Source: {#SVIEW_DISTR_PATH}\demo.jps;                        DestDir: {app};                        Flags: ignoreversion;         Components: StDrawers\StImageViewer
+Source: {#SVIEW_DISTR_PATH}\demo_robot.jps;                  DestDir: {app};                        Flags: ignoreversion;         Components: StDrawers\StImageViewer
+Source: {#SVIEW_DISTR_PATH}\{#LIB_PREFIX}StImageViewer.dll;  DestDir: {app};                        Flags: 64bit ignoreversion;   Components: StCore
 
 ; StDrawers -> Movie Player
-Source: {#SVIEW_DISTR_PATH}\lang\*StMoviePlayer.lng;  DestDir: {app}\lang;                   Flags: ignoreversion recursesubdirs; Components: StCore
-Source: {#SVIEW_DISTR_PATH}\web\*.htm;                DestDir: {app}\web;                    Flags: ignoreversion recursesubdirs; Components: StDrawers\StMoviePlayer
-Source: alsoft51.ini;                                 DestDir: {userappdata}; DestName: "alsoft.ini"; Tasks: flagOpenAL51; Components: StCore
-Source: openal\hrtf\*;                                DestDir: {commonappdata}\openal\hrtf;                                Components: StCore
-Source: {#SVIEW_DISTR_PATH}\StMoviePlayer.dll;        DestDir: {app};                        Flags: 64bit ignoreversion;   Components: StCore
-Source: {#SVIEW_DISTR_PATH}\OpenAL32.dll;             DestDir: {app};                        Flags: 64bit ignoreversion;   Components: StCore
+Source: {#SVIEW_DISTR_PATH}\lang\*StMoviePlayer.lng;         DestDir: {app}\lang;                   Flags: ignoreversion recursesubdirs; Components: StCore
+Source: {#SVIEW_DISTR_PATH}\web\*.htm;                       DestDir: {app}\web;                    Flags: ignoreversion recursesubdirs; Components: StDrawers\StMoviePlayer
+Source: alsoft51.ini;                                        DestDir: {userappdata}; DestName: "alsoft.ini"; Tasks: flagOpenAL51; Components: StCore
+Source: openal\hrtf\*;                                       DestDir: {commonappdata}\openal\hrtf;                                Components: StCore
+Source: {#SVIEW_DISTR_PATH}\{#LIB_PREFIX}StMoviePlayer.dll;  DestDir: {app};                        Flags: 64bit ignoreversion;   Components: StCore
+Source: {#SVIEW_DISTR_PATH}\OpenAL32.dll;                    DestDir: {app};                        Flags: 64bit ignoreversion;   Components: StCore
 
 ; StDrawers -> Tiny CAD viewer
 ;Source: {#SVIEW_DISTR_PATH}\StCADViewer.exe; DestDir: {app}; Flags: 64bit ignoreversion; Components: StCore
