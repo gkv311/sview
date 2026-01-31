@@ -21,7 +21,7 @@
         #define SVIEW_SDK_VER_STATUS ST_RELEASE
     #endif
     #ifndef SVIEW_SDK_VERSION_AUTO
-        #define SVIEW_SDK_VERSION_AUTO
+        //#define SVIEW_SDK_VERSION_AUTO
     #endif
 #endif
 
@@ -44,7 +44,8 @@
 // just empty version here
 // should be redefined in stconfig.conf
 #ifndef SVIEW_SDK_VERSION
-    #define SVIEW_SDK_VERSION 10, 1, 0, 0
+    //#define SVIEW_SDK_VERSION 10, 1, 0, 0
+    #define SVIEW_SDK_VERSION 26, 2, ST_RELEASE, 7
 #endif
 
 #ifndef SVIEW_SDK_VER_STRING
@@ -221,9 +222,9 @@ class ST_LOCAL StVersionInfo {
      * Return string representation of the version.
      */
     StString toString() const {
-        const int aYear  =  __YEAR__;
-        const int aMonth = (__MONTH__) + 1;
-        const int aDay   =  __DAY__;
+        const int aYear  = 2026; // __YEAR__;
+        const int aMonth = 2;    //(__MONTH__) + 1;
+        const int aDay   = 7;    //  __DAY__;
 
         StString aState;
         switch(myVer.rStatus) {
