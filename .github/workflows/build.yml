@@ -10,6 +10,8 @@ concurrency:
 jobs:
   linux-gcc:
     uses: ./.github/workflows/build_sview_linux_gcc.yml
+  linux-android-ffmpeg:
+    uses: ./.github/workflows/build_sview_linux_android_ffmpeg.yml
   linux-android:
     uses: ./.github/workflows/build_sview_linux_android.yml
   macos-clang:

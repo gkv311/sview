@@ -40,7 +40,7 @@ jobs:
       run: |
         sudo apt-get update
         sudo apt-get install -y \
-          g++ cmake ninja-build
+          cmake ninja-build
     - name: Configure project
       if: steps.cache.outputs.cache-hit != 'true'
       env:
@@ -102,7 +102,7 @@ jobs:
       run: |
         sudo apt-get update
         sudo apt-get install -y \
-          g++ cmake ninja-build
+          cmake ninja-build
     - name: Configure project
       if: steps.cache.outputs.cache-hit != 'true'
       env:
@@ -208,7 +208,7 @@ jobs:
       run: |
         sudo apt-get update
         sudo apt-get install -y \
-          g++ ninja-build
+          ninja-build
     - name: Compile
       run: |
         ./sview.git/adm/ci/build_sview_android.sh

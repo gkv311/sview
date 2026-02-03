@@ -1,0 +1,337 @@
+name: Build FFmpeg (Linux/Android)
+on:
+  workflow_call:
+
+env:
+  TOOLCHAIN_PREFIX: aarch64-android
+  TOOLCHAIN_TEXT: |
+    set(CMAKE_SYSTEM_NAME      "Android")
+    set(CMAKE_SYSTEM_VERSION   "21")
+    set(CMAKE_ANDROID_NDK      "$ENV{ANDROID_NDK}")
+    set(CMAKE_ANDROID_ARCH_ABI "arm64-v8a")
+    set(CMAKE_ANDROID_STL_TYPE "c++_shared")
+    set(CMAKE_BUILD_TYPE "Release")
+  FFMPEG_REF:   'n8.0.1'
+  OPENJPEG_REF: 'v2.5.4'
+  DAV1_REF:     '1.5.3'
+  LIBJXL_REF:   'v0.11.1'
+  #MBEDTLS_REF:  'v4.0.0'
+  MBEDTLS_REF:  'v3.6.5'
+  CACHE_REV:    'cache1'
+
+jobs:
+  build-lin-android-mbedtls:
+    runs-on: ubuntu-24.04
+    steps:
+    - uses: actions/cache@v5
+      id: cache
+      with:
+        path: mbedtls-install
+        key: mbedtls-android-arm64-${{ env.MBEDTLS_REF }}-${{ env.CACHE_REV }}
+    - name: Clone Tree
+      if: steps.cache.outputs.cache-hit != 'true'
+      uses: actions/checkout@v6
+      with:
+        path: mbedtls.git
+        repository: Mbed-TLS/mbedtls
+        ref: ${{ env.MBEDTLS_REF }}
+        fetch-depth: 1
+        submodules: 'true'
+    - name: Install Dependencies
+      if: steps.cache.outputs.cache-hit != 'true'
+      run: |
+        sudo apt-get update
+        sudo apt-get install -y \
+          cmake ninja-build
+    - name: Configure project
+      if: steps.cache.outputs.cache-hit != 'true'
+      env:
+        MBEDTLS_CONFIG: |
+          set(USE_SHARED_MBEDTLS_LIBRARY OFF CACHE BOOL "")
+          set(USE_STATIC_MBEDTLS_LIBRARY  ON CACHE BOOL "")
+          set(ENABLE_TESTING             OFF CACHE BOOL "")
+          set(ENABLE_PROGRAMS            OFF CACHE BOOL "")
+          ${{ env.TOOLCHAIN_TEXT }}
+          #set(LIBRARY_OUTPUT_PATH "${CMAKE_CURRENT_LIST_DIR}/mbedtls-install/lib" CACHE PATH "")
+          set(CMAKE_INSTALL_PREFIX "${CMAKE_CURRENT_LIST_DIR}/mbedtls-install" CACHE PATH "")
+      run: |
+        echo "ANDROID_NDK=$ANDROID_NDK"
+        echo "${MBEDTLS_CONFIG}" | tee ./mbedtls-make.cmake
+        cmake -S ./mbedtls.git -B ./mbedtls-make -G Ninja --toolchain "$PWD/mbedtls-make.cmake"
+    - name: Build project
+      if: steps.cache.outputs.cache-hit != 'true'
+      run: cmake --build ./mbedtls-make
+    - name: Install build
+      if: steps.cache.outputs.cache-hit != 'true'
+      run: |
+        cmake --install ./mbedtls-make --prefix ./mbedtls-install
+        cp -f "./mbedtls.git/LICENSE"   "./mbedtls-install/"
+        cp -f "./mbedtls.git/README.md" "./mbedtls-install/"
+        cp -f "./mbedtls.git/ChangeLog" "./mbedtls-install/"
+    - name: Upload build
+      uses: actions/upload-artifact@v4
+      with:
+        name: mbedtls-android-arm64
+        path: mbedtls-install
+        if-no-files-found: error
+
+  build-lin-android-libjxl:
+    runs-on: ubuntu-24.04
+    steps:
+    - uses: actions/cache@v5
+      id: cache
+      with:
+        path: libjxl-install
+        key: libjxl-android-arm64-${{ env.LIBJXL_REF }}-${{ env.CACHE_REV }}
+    - name: Clone Tree
+      if: steps.cache.outputs.cache-hit != 'true'
+      uses: actions/checkout@v6
+      with:
+        path: libjxl.git
+        repository: libjxl/libjxl
+        ref: ${{ env.LIBJXL_REF }}
+        fetch-depth: 1
+        submodules: 'true'
+    - name: Install Dependencies
+      if: steps.cache.outputs.cache-hit != 'true'
+      run: |
+        sudo apt-get update
+        sudo apt-get install -y \
+          cmake ninja-build
+    - name: Configure project
+      if: steps.cache.outputs.cache-hit != 'true'
+      env:
+        LIBJXL_CONFIG: |
+          set(JPEGXL_ENABLE_DOXYGEN   OFF CACHE BOOL "")
+          set(JPEGXL_ENABLE_MANPAGES  OFF CACHE BOOL "")
+          set(JPEGXL_ENABLE_BENCHMARK OFF CACHE BOOL "")
+          set(JPEGXL_ENABLE_EXAMPLES  OFF CACHE BOOL "")
+          set(JPEGXL_ENABLE_JNI       OFF CACHE BOOL "")
+          set(JPEGXL_ENABLE_VIEWERS   OFF CACHE BOOL "")
+          set(JPEGXL_ENABLE_PLUGINS   OFF CACHE BOOL "")
+          set(JPEGXL_ENABLE_TOOLS     OFF CACHE BOOL "")
+          set(JPEGXL_ENABLE_DEVTOOLS  OFF CACHE BOOL "")
+          set(JPEGXL_TEST_TOOLS       OFF CACHE BOOL "")
+          set(BUILD_TESTING           OFF CACHE BOOL "")
+          ${{ env.TOOLCHAIN_TEXT }}
+          # workaround bogus 'third_party/sjpeg/cmake/cpu.cmake'
+          set(SJPEG_ANDROID_NDK_PATH "$ENV{ANDROID_NDK}" CACHE PATH "")
+          set(ANDROID_ABI "${CMAKE_ANDROID_ARCH_ABI}"  CACHE STRING "")
+          set(CMAKE_INSTALL_PREFIX "${CMAKE_CURRENT_LIST_DIR}/libjxl-install" CACHE PATH "")
+      run: |
+        echo "ANDROID_NDK=$ANDROID_NDK"
+        echo "${LIBJXL_CONFIG}" | tee ./libjxl-make.cmake
+        cmake -S ./libjxl.git -B ./libjxl-make -G Ninja --toolchain "$PWD/libjxl-make.cmake" -Wno-deprecated
+    - name: Build project
+      if: steps.cache.outputs.cache-hit != 'true'
+      run: |
+        cmake --build ./libjxl-make
+    - name: Install build
+      if: steps.cache.outputs.cache-hit != 'true'
+      run: |
+        cmake --install ./libjxl-make --prefix ./libjxl-install
+        cp -f "./libjxl.git/LICENSE"   "./libjxl-install/"
+        cp -f "./libjxl.git/README.md" "./libjxl-install/"
+    - name: Upload build
+      uses: actions/upload-artifact@v4
+      with:
+        name: libjxl-android-arm64
+        path: libjxl-install
+        if-no-files-found: error
+
+  build-lin-android-dav1d:
+    runs-on: ubuntu-24.04
+    steps:
+    - uses: actions/cache@v5
+      id: cache
+      with:
+        path: dav1d-install
+        key: dav1d-android-arm64-${{ env.DAV1_REF }}-${{ env.CACHE_REV }}
+    - name: Clone Tree
+      if: steps.cache.outputs.cache-hit != 'true'
+      uses: actions/checkout@v6
+      with:
+        path: dav1d.git
+        repository: videolan/dav1d
+        ref: ${{ env.DAV1_REF }}
+        fetch-depth: 1
+    - name: Install Dependencies
+      if: steps.cache.outputs.cache-hit != 'true'
+      run: |
+        sudo apt-get update
+        sudo apt-get install -y \
+          nasm meson ninja-build
+    - name: Configure project
+      if: steps.cache.outputs.cache-hit != 'true'
+      run: |
+        echo "ANDROID_NDK=$ANDROID_NDK"
+        PATH=$ANDROID_NDK/toolchains/llvm/prebuilt/linux-x86_64/bin:$PATH
+        meson setup \
+          --cross-file=$PWD/dav1d.git/package/crossfiles/${TOOLCHAIN_PREFIX}.meson \
+          --prefix=$PWD/dav1d-install \
+          --default-library=static \
+          ./dav1d-make ./dav1d.git
+    - name: Build project
+      if: steps.cache.outputs.cache-hit != 'true'
+      run: |
+        PATH=$ANDROID_NDK/toolchains/llvm/prebuilt/linux-x86_64/bin:$PATH
+        ninja -C ./dav1d-make
+    - name: Install project
+      if: steps.cache.outputs.cache-hit != 'true'
+      run: |
+        ninja -C ./dav1d-make install
+    - name: Upload build
+      uses: actions/upload-artifact@v4
+      with:
+        name: dav1d-android-arm64
+        path: dav1d-install
+        if-no-files-found: error
+
+  build-lin-android-ffmpeg:
+    runs-on: ubuntu-24.04
+    needs: [build-lin-android-libjxl, build-lin-android-dav1d, build-lin-android-mbedtls]
+    steps:
+    - uses: actions/cache@v5
+      id: cache
+      with:
+        path: ffmpeg-install
+        key: ffmpeg-android-arm64-${{ env.FFMPEG_REF }}-${{ env.CACHE_REV }}
+    - name: Clone Tree
+      if: steps.cache.outputs.cache-hit != 'true'
+      uses: actions/checkout@v6
+      with:
+        path: ffmpeg.git
+        repository: FFmpeg/FFmpeg
+        ref: ${{ env.FFMPEG_REF }}
+        fetch-depth: 1
+    #- name: Clone Tree
+    #  uses: actions/checkout@v6
+    #  with:
+    #    path: bzip2.git
+    #    repository: https://gitlab.com/bzip2/bzip2.git
+    #    ref: 'bzip2-1.0.8'
+    #    fetch-depth: 1
+    - name: Clone openjpeg
+      if: steps.cache.outputs.cache-hit != 'true'
+      uses: actions/checkout@v6
+      with:
+        path: openjpeg.git
+        repository: uclouvain/openjpeg
+        ref: ${{ env.OPENJPEG_REF }}
+        fetch-depth: 1
+    - name: Download mbedtls build
+      if: steps.cache.outputs.cache-hit != 'true'
+      uses: actions/download-artifact@v5
+      with:
+        name: mbedtls-android-arm64
+        path: mbedtls-install
+    - name: Download dav1d build
+      if: steps.cache.outputs.cache-hit != 'true'
+      uses: actions/download-artifact@v5
+      with:
+        name: dav1d-android-arm64
+        path: dav1d-install
+    - name: Download libjxl build
+      if: steps.cache.outputs.cache-hit != 'true'
+      uses: actions/download-artifact@v5
+      with:
+        name: libjxl-android-arm64
+        path: libjxl-install
+    - name: Install Dependencies
+      if: steps.cache.outputs.cache-hit != 'true'
+      run: |
+        sudo apt-get update
+        sudo apt-get install -y \
+          nasm cmake
+    #- name: Build bzip2
+    #  if: steps.cache.outputs.cache-hit != 'true'
+    #  run: |
+    #    #aNbJobs="$(getconf _NPROCESSORS_ONLN)"
+    #    #pushd bzip2.git
+    #    #make libbz2.a -j$aNbJobs CC=${TOOLCHAIN_PREFIX}-gcc AR=${TOOLCHAIN_PREFIX}-ar RANLIB=${TOOLCHAIN_PREFIX}-ranlib
+    #    #cp -f "$aLibRoot/libbz2.a" "$OUTPUT_FOLDER/lib"
+    #    #popd
+    #    cmake -S ./bzip2.git -B ./bzip2-make -G Ninja --toolchain "$PWD/${TOOLCHAIN_PREFIX}.cmake" \
+    #      -D CMAKE_INSTALL_PREFIX:PATH="$PWD/bzip2-install"
+    - name: Configure openjpeg
+      if: steps.cache.outputs.cache-hit != 'true'
+      env:
+        OPENJPEG_CONFIG: |
+          set(BUILD_SHARED_LIBS OFF CACHE BOOL "")
+          ${{ env.TOOLCHAIN_TEXT }}
+          set(CMAKE_INSTALL_PREFIX "${CMAKE_CURRENT_LIST_DIR}/openjpeg-install" CACHE PATH "")
+      run: |
+        echo "ANDROID_NDK=$ANDROID_NDK"
+        echo "${OPENJPEG_CONFIG}" | tee ./openjpeg-make.cmake
+        cmake -S ./openjpeg.git -B ./openjpeg-make -G Ninja --toolchain "$PWD/openjpeg-make.cmake"
+    - name: Build openjpeg
+      if: steps.cache.outputs.cache-hit != 'true'
+      run: |
+        cmake --build ./openjpeg-make
+    - name: Install openjpeg
+      if: steps.cache.outputs.cache-hit != 'true'
+      run: |
+        cmake --install ./openjpeg-make --prefix ./openjpeg-install
+    - name: Configure FFmpeg
+      if: steps.cache.outputs.cache-hit != 'true'
+      run: |
+        # some checks through pkg-config do not work in ffmpeg configure, so we pass -I and -L flags directly
+        export PKG_CONFIG_LIBDIR=
+        export PKG_CONFIG_PATH=$PWD/dav1d-install/lib/pkgconfig:$PWD/openjpeg-install/lib/pkgconfig:$PWD/libjxl-install/lib/pkgconfig:$PWD/mbedtls-install/lib/pkgconfig
+        #export PKG_CONFIG_PATH=$PWD/dav1d-install/lib/pkgconfig:$PWD/openjpeg-install/lib/pkgconfig:$PWD/libjxl-install/lib/pkgconfig:$PWD/mbedtls-install/lib/pkgconfig
+        #export PKG_CONFIG_PATH=$PWD/dav1d-install/lib/pkgconfig:$PWD/libjxl-install/lib/pkgconfig
+        aBuildRoot=$PWD
+        anFFmpegInstall=$aBuildRoot/ffmpeg-install
+        aToolchainRoot="${ANDROID_NDK}/toolchains/llvm/prebuilt/linux-x86_64"
+        # redirect error state from tee
+        set -o pipefail
+        pushd ./ffmpeg.git
+        # --enable-hardcoded-tables - build fails on 8.0.1
+        # --enable-libdav1d --enable-libopenjpeg --enable-gpl
+        ./configure \
+          --prefix="$aBuildRoot/ffmpeg-install" \
+          --enable-cross-compile --target-os=android --pkg-config=pkg-config \
+          --cross-prefix="${aToolchainRoot}/bin/aarch64-linux-android21-" \
+          --sysroot="${aToolchainRoot}/sysroot" --arch=aarch64 \
+          --strip="${aToolchainRoot}/bin/llvm-strip" --nm="${aToolchainRoot}/bin/llvm-nm" \
+          --disable-debug --disable-stripping \
+          --disable-doc \
+          --extra-version=sView.ru \
+          --enable-version3 \
+          --enable-swscale --enable-avfilter \
+          --enable-shared --disable-static \
+          --enable-pthreads \
+          --enable-runtime-cpudetect \
+          --enable-libdav1d --enable-libjxl \
+          --enable-jni --enable-mediacodec --enable-mbedtls \
+          --extra-cflags="-march=armv8-a -I$aBuildRoot/dav1d-install/include -I$aBuildRoot/openjpeg-install/include -I$aBuildRoot/libjxl-install/include -I$aBuildRoot/mbedtls-install/include" \
+          --extra-ldflags="-L$aBuildRoot/dav1d-install/lib -L$aBuildRoot/openjpeg-install/lib -L$aBuildRoot/libjxl-install/lib -L$aBuildRoot/mbedtls-install/lib" \
+          2>&1 | tee ../ffmpeg-config.log
+        popd
+    - name: Build FFmpeg
+      if: steps.cache.outputs.cache-hit != 'true'
+      run: |
+        pushd ./ffmpeg.git
+        aNbJobs="$(getconf _NPROCESSORS_ONLN)"
+        make -j $aNbJobs
+        popd
+    - name: Install FFmpeg
+      if: steps.cache.outputs.cache-hit != 'true'
+      run: |
+        pushd ./ffmpeg.git
+        make install
+        popd
+        cp -f ./ffmpeg-config.log           ./ffmpeg-install/
+        cp -f ./ffmpeg.git/Changelog        ./ffmpeg-install/
+        cp -f ./ffmpeg.git/README.md        ./ffmpeg-install/
+        cp -f ./ffmpeg.git/LICENSE.md       ./ffmpeg-install/
+        cp -f ./ffmpeg.git/COPYING.LGPLv2.1 ./ffmpeg-install/
+        cp -f ./ffmpeg.git/COPYING.LGPLv3   ./ffmpeg-install/
+        # copy dependencies
+        cp -f ./libjxl-install/lib/*.so ./ffmpeg-install/lib/
+    - name: Upload build
+      uses: actions/upload-artifact@v4
+      with:
+        name: ffmpeg-android-arm64
+        path: ffmpeg-install
+        if-no-files-found: error
