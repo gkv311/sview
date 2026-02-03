@@ -13,6 +13,7 @@ jobs:
   linux-android-ffmpeg:
     uses: ./.github/workflows/build_sview_linux_android_ffmpeg.yml
   linux-android:
+    needs: [linux-android-ffmpeg]
     uses: ./.github/workflows/build_sview_linux_android.yml
   macos-clang:
     uses: ./.github/workflows/build_sview_macos_clang.yml
