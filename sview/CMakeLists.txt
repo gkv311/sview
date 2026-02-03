@@ -176,9 +176,15 @@ elseif (ANDROID)
   add_custom_command (TARGET ${PROJECT_NAME} POST_BUILD
     COMMAND cp -R -f "${OPENAL_LIBRARY_DIR}/libopenal.so" "$<TARGET_FILE_DIR:${PROJECT_NAME}>/")
 
-  foreach (aLibIter ${FFMPEG_TKLIST})
+  # there could be also dependencies like libjxl
+  #foreach (aLibIter ${FFMPEG_TKLIST})
+  #  add_custom_command (TARGET ${PROJECT_NAME} POST_BUILD
+  #    COMMAND cp -R -f "${FFMPEG_LIBRARY_DIR}/lib${aLibIter}.so" "$<TARGET_FILE_DIR:${PROJECT_NAME}>/")
+  #endforeach()
+  file (GLOB_RECURSE FFMPEG_DLLS ${FFMPEG_LIBRARY_DIR}/*.so)
+  foreach (aLibIter ${FFMPEG_DLLS})
     add_custom_command (TARGET ${PROJECT_NAME} POST_BUILD
-      COMMAND cp -R -f "${FFMPEG_LIBRARY_DIR}/lib${aLibIter}.so" "$<TARGET_FILE_DIR:${PROJECT_NAME}>/")
+      COMMAND cp -R -f "${aLibIter}" "$<TARGET_FILE_DIR:${PROJECT_NAME}>/")
   endforeach()
 
   set (aSysRootArch "${CMAKE_ANDROID_ARCH_ABI}-linux-android")
