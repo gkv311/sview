@@ -2,8 +2,201 @@ name: Build (Linux/Android)
 on:
   workflow_call:
 
+env:
+  TOOLCHAIN_TEXT: |
+    set(CMAKE_SYSTEM_NAME      "Android")
+    set(CMAKE_SYSTEM_VERSION   "21")
+    set(CMAKE_ANDROID_NDK      "$ENV{ANDROID_NDK}")
+    set(CMAKE_ANDROID_ARCH_ABI "arm64-v8a")
+    set(CMAKE_ANDROID_STL_TYPE "c++_shared")
+    set(CMAKE_BUILD_TYPE "Release")
+  FREETYPE_REF: 'VER-2-14-1'
+  #OPENAL_REF:   '1.25.1'
+  OPENAL_REF:   '1.24.2'
+  OPENVR_REF:   'v2.5.1'
+  #LIBCONFIG_REF: 'v1.8.2'
+  LIBCONFIG_REF: 'v1.7.3'
+  CACHE_REV:    'cache1'
+
 jobs:
-  build-linux-android:
+  build-lin-android-freetype:
+    runs-on: ubuntu-24.04
+    steps:
+    - uses: actions/cache@v5
+      id: cache
+      with:
+        path: freetype-install
+        key: freetype-android-arm64-${{ env.FREETYPE_REF }}-${{ env.CACHE_REV }}
+    - name: Clone Tree
+      if: steps.cache.outputs.cache-hit != 'true'
+      uses: actions/checkout@v6
+      with:
+        path: freetype.git
+        repository: freetype/freetype
+        ref: ${{ env.FREETYPE_REF }}
+        fetch-depth: 1
+    - name: Install Dependencies
+      if: steps.cache.outputs.cache-hit != 'true'
+      run: |
+        sudo apt-get update
+        sudo apt-get install -y \
+          g++ cmake ninja-build
+    - name: Configure project
+      if: steps.cache.outputs.cache-hit != 'true'
+      env:
+        FREETYPE_CONFIG: |
+          set(BUILD_SHARED_LIBS ON  CACHE BOOL "")
+          set(FT_WITH_ZLIB      ON  CACHE BOOL "")
+          set(FT_WITH_BZIP2     OFF CACHE BOOL "")
+          set(FT_WITH_PNG       OFF CACHE BOOL "")
+          set(FT_WITH_HARFBUZZ  OFF CACHE BOOL "")
+          set(FT_WITH_BROTLI    OFF CACHE BOOL "")
+          set(CMAKE_DISABLE_FIND_PACKAGE_ZLIB      OFF  CACHE BOOL "")
+          set(CMAKE_DISABLE_FIND_PACKAGE_BZip2     TRUE CACHE BOOL "")
+          set(CMAKE_DISABLE_FIND_PACKAGE_PNG       TRUE CACHE BOOL "")
+          set(CMAKE_DISABLE_FIND_PACKAGE_HarfBuzz  TRUE CACHE BOOL "")
+          set(CMAKE_DISABLE_FIND_PACKAGE_BrotliDec TRUE CACHE BOOL "")
+          ${{ env.TOOLCHAIN_TEXT }}
+          set(CMAKE_INSTALL_PREFIX "${CMAKE_CURRENT_LIST_DIR}/freetype-install" CACHE PATH "")
+      run: |
+        echo "ANDROID_NDK=$ANDROID_NDK"
+        echo "${FREETYPE_CONFIG}" | tee ./freetype-make.cmake
+        cmake -S ./freetype.git -B ./freetype-make -G Ninja --toolchain "$PWD/freetype-make.cmake"
+    - name: Build project
+      if: steps.cache.outputs.cache-hit != 'true'
+      run: cmake --build ./freetype-make
+    - name: Install build
+      if: steps.cache.outputs.cache-hit != 'true'
+      run: |
+        cmake --install ./freetype-make --prefix ./freetype-install
+        cp -f "./freetype.git/docs/FTL.TXT"   "./freetype-install/"
+        cp -f "./freetype.git/docs/GPLv2.TXT" "./freetype-install/"
+        cp -f "./freetype.git/docs/CHANGES"   "./freetype-install/"
+        cp -f "./freetype.git/docs/README"    "./freetype-install/"
+        cp -f "./freetype.git/LICENSE.TXT"    "./freetype-install/"
+    - name: Upload build
+      uses: actions/upload-artifact@v4
+      with:
+        name: freetype-android-arm64
+        path: freetype-install
+        if-no-files-found: error
+
+  build-lin-android-libconfig:
+    runs-on: ubuntu-24.04
+    steps:
+    - uses: actions/cache@v5
+      id: cache
+      with:
+        path: libconfig-install
+        key: libconfig-android-arm64-${{ env.LIBCONFIG_REF }}-${{ env.CACHE_REV }}
+    - name: Clone Tree
+      if: steps.cache.outputs.cache-hit != 'true'
+      uses: actions/checkout@v6
+      with:
+        path: libconfig.git
+        repository: hyperrealm/libconfig
+        ref: ${{ env.LIBCONFIG_REF }}
+        fetch-depth: 1
+    - name: Install Dependencies
+      if: steps.cache.outputs.cache-hit != 'true'
+      run: |
+        sudo apt-get update
+        sudo apt-get install -y \
+          g++ cmake ninja-build
+    - name: Configure project
+      if: steps.cache.outputs.cache-hit != 'true'
+      env:
+        LIBCONFIG_CONFIG: |
+          set(BUILD_SHARED_LIBS OFF CACHE BOOL "")
+          set(BUILD_EXAMPLES    OFF CACHE BOOL "")
+          set(BUILD_TESTS       OFF CACHE BOOL "")
+          ${{ env.TOOLCHAIN_TEXT }}
+          set(CMAKE_INSTALL_PREFIX "${CMAKE_CURRENT_LIST_DIR}/libconfig-install" CACHE PATH "")
+      run: |
+        echo "ANDROID_NDK=$ANDROID_NDK"
+        echo "${LIBCONFIG_CONFIG}" | tee ./libconfig-make.cmake
+        cmake -S ./libconfig.git -B ./libconfig-make -G Ninja --toolchain "$PWD/libconfig-make.cmake"
+    - name: Build project
+      if: steps.cache.outputs.cache-hit != 'true'
+      run: cmake --build ./libconfig-make
+    - name: Install build
+      if: steps.cache.outputs.cache-hit != 'true'
+      run: |
+        cmake --install ./libconfig-make --prefix ./libconfig-install
+        cp -f "./libconfig.git/LICENSE" "./libconfig-install/"
+        cp -f "./libconfig.git/README"  "./libconfig-install/"
+    - name: Upload build
+      uses: actions/upload-artifact@v4
+      with:
+        name: libconfig-android-arm64
+        path: libconfig-install
+        if-no-files-found: error
+
+  build-lin-android-openal:
+    runs-on: ubuntu-24.04
+    steps:
+    - uses: actions/cache@v5
+      id: cache
+      with:
+        path: openal-install
+        key: openal-android-arm64-${{ env.OPENAL_REF }}-${{ env.CACHE_REV }}
+    - name: Clone Tree
+      if: steps.cache.outputs.cache-hit != 'true'
+      uses: actions/checkout@v6
+      with:
+        path: openal.git
+        repository: kcat/openal-soft
+        ref: ${{ env.OPENAL_REF }}
+        fetch-depth: 1
+    - name: Install Dependencies
+      if: steps.cache.outputs.cache-hit != 'true'
+      run: |
+        sudo apt-get update
+        sudo apt-get install -y \
+          cmake ninja-build
+        #sudo apt-get install -y \
+        #  ninja-build
+    - name: Configure project
+      if: steps.cache.outputs.cache-hit != 'true'
+      env:
+        OPENAL_CONFIG: |
+          set(ALSOFT_ENABLE_MODULES   OFF CACHE BOOL "")
+          set(ALSOFT_EXAMPLES         OFF CACHE BOOL "")
+          set(ALSOFT_TESTS            OFF CACHE BOOL "")
+          set(ALSOFT_UTILS            OFF CACHE BOOL "")
+          set(ALSOFT_NO_CONFIG_UTIL    ON CACHE BOOL "")
+          set(ALSOFT_BUILD_ROUTER     OFF CACHE BOOL "")
+          set(ALSOFT_REQUIRE_WINMM    OFF CACHE BOOL "")
+          set(ALSOFT_REQUIRE_DSOUND   OFF CACHE BOOL "")
+          set(ALSOFT_REQUIRE_WASAPI   OFF CACHE BOOL "")
+          set(ALSOFT_REQUIRE_OPENSL    ON CACHE BOOL "")
+          set(ALSOFT_BACKEND_OPENSL    ON CACHE BOOL "")
+          set(ALSOFT_BACKEND_WAVE     OFF CACHE BOOL "")
+          set(BUILD_SHARED_LIBS        ON CACHE BOOL "")
+          ${{ env.TOOLCHAIN_TEXT }}
+          set(CMAKE_INSTALL_PREFIX "${CMAKE_CURRENT_LIST_DIR}/openal-install" CACHE PATH "")
+      run: |
+        echo "ANDROID_NDK=$ANDROID_NDK"
+        cmake --version
+        echo "${OPENAL_CONFIG}" | tee ./openal-make.cmake
+        cmake -S ./openal.git -B ./openal-make -G Ninja --toolchain "$PWD/openal-make.cmake"
+    - name: Build project
+      if: steps.cache.outputs.cache-hit != 'true'
+      run: cmake --build ./openal-make
+    - name: Install build
+      if: steps.cache.outputs.cache-hit != 'true'
+      run: |
+        cmake --install ./openal-make --prefix ./openal-install
+        cp -f "./openal.git/COPYING"   "./openal-install/"
+        cp -f "./openal.git/README.md" "./openal-install/"
+    - name: Upload build
+      uses: actions/upload-artifact@v4
+      with:
+        name: openal-android-arm64
+        path: openal-install
+        if-no-files-found: error
+
+  build-lin-android:
     runs-on: ubuntu-22.04
     steps:
     - name: Clone Tree
