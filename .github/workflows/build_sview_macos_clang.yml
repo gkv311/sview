@@ -13,7 +13,7 @@ env:
   FREETYPE_REF: 'VER-2-14-1'
   OPENAL_REF:   '1.25.1'
   #OPENVR_REF:   'v2.5.1'
-  CACHE_REV:    'cache3'
+  CACHE_REV:    'cache4'
 
 jobs:
   build-macos-freetype:
@@ -65,11 +65,16 @@ jobs:
         cp -f "./freetype.git/docs/README"    "./freetype-install/"
         cp -f "./freetype.git/LICENSE.TXT"    "./freetype-install/"
         otool -l "./freetype-install/lib/libfreetype.dylib"
+    - name: Pack install
+      run: |
+        pushd ./freetype-install
+        tar -cf ../freetype-install.tar *
+        popd
     - name: Upload build
       uses: actions/upload-artifact@v4
       with:
         name: freetype-macos-arm64
-        path: freetype-install
+        path: freetype-install.tar
         if-no-files-found: error
 
   build-macos-openal:
@@ -123,14 +128,80 @@ jobs:
         cp -f "./openal.git/COPYING"   "./openal-install/"
         cp -f "./openal.git/README.md" "./openal-install/"
         otool -l "./openal-install/lib/libopenal.dylib"
+    - name: Pack install
+      run: |
+        pushd ./openal-install
+        tar -cf ../openal-install.tar *
+        popd
     - name: Upload build
       uses: actions/upload-artifact@v4
       with:
         name: openal-macos-arm64
-        path: openal-install
+        path: openal-install.tar
         if-no-files-found: error
 
-  build-macos-arm64:
+  build-macos-sview:
+    runs-on: macos-15
+    needs: [build-macos-freetype, build-macos-openal]
+    steps:
+    - name: Clone Tree
+      uses: actions/checkout@v6
+      with:
+        path: sview.git
+        fetch-depth: 1
+    - name: Download FreeType build
+      uses: actions/download-artifact@v5
+      with:
+        name: freetype-macos-arm64
+        path: freetype-install
+    - name: Unpack freetype build
+      run: |
+        pushd ./freetype-install
+        tar -xvf ./freetype-install.tar
+        popd
+    - name: Download OpenAL soft build
+      uses: actions/download-artifact@v5
+      with:
+        name: openal-macos-arm64
+        path: openal-install
+    - name: Unpack OpenAL soft build
+      run: |
+        pushd ./openal-install
+        tar -xvf ./openal-install.tar
+        popd
+    - name: Download FFmpeg build
+      uses: actions/download-artifact@v5
+      with:
+        name: ffmpeg-macos-arm64
+        path: ffmpeg-install
+    - name: Unpack ffmpeg build
+      run: |
+        pushd ./ffmpeg-install
+        tar -xvf ./ffmpeg-install.tar
+        popd
+    - name: Configure project
+      env:
+        SVIEW_CONFIG: |
+          set(USE_OPENVR   OFF CACHE BOOL "")
+          set(USE_MONGOOSE  ON CACHE BOOL "")
+          set(USE_UPDATER  OFF CACHE BOOL "")
+          set(USE_STCONFIG OFF CACHE BOOL "")
+          set(BUILD_TREAT_WARNINGS_AS_ERRORS ON CACHE BOOL "")
+          ${{ env.TOOLCHAIN_TEXT }}
+          set(CMAKE_INSTALL_PREFIX "${CMAKE_CURRENT_LIST_DIR}/sview-install"     CACHE PATH "")
+          set(FREETYPE_DIR         "${CMAKE_CURRENT_LIST_DIR}/freetype-install"  CACHE PATH "")
+          set(FFMPEG_DIR           "${CMAKE_CURRENT_LIST_DIR}/ffmpeg-install"    CACHE PATH "")
+          set(OPENAL_DIR           "${CMAKE_CURRENT_LIST_DIR}/openal-install"    CACHE PATH "")
+      run: |
+        export PKG_CONFIG_LIBDIR=
+        export PKG_CONFIG_PATH=$PWD/ffmpeg-install/lib/pkgconfig:$PWD/freetype-install/lib/pkgconfig
+        echo "${SVIEW_CONFIG}" | tee ./sview-make.cmake
+        cmake -S ./sview.git -B ./sview-make -G Ninja --toolchain "$PWD/sview-make.cmake"
+    - name: Build project
+      run: |
+        cmake --build ./sview-make
+
+  build-macos-sview-brew:
     runs-on: macos-15
     steps:
     - name: Clone Tree

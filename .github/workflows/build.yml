@@ -18,6 +18,7 @@ jobs:
   macos-clang-ffmpeg:
     uses: ./.github/workflows/build_sview_macos_clang_ffmpeg.yml
   macos-clang:
+    needs: [macos-clang-ffmpeg]
     uses: ./.github/workflows/build_sview_macos_clang.yml
   linux-mingw-ffmpeg:
     uses: ./.github/workflows/build_sview_linux_mingw_ffmpeg.yml
