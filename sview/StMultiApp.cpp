@@ -123,10 +123,14 @@ StHandle<StApplication> StMultiApp::getInstance(const StHandle<StResourceManager
             anAction = "action?DoQuit";
         } else if(anActLow == "mono") {
             anAction = "action?DoSrcMono";
-        } else if(anActLow == "overunder") {
-            anAction = "action?DoSrcOverUnder";
-        } else if(anActLow == "sidebyside") {
-            anAction = "action?DoSrcSideBySide";
+        } else if(anActLow == "overunder" || anActLow == "overunderlr") {
+            anAction = "action?DoSrcOverUnderLR";
+        } else if(anActLow == "overunderrl") {
+            anAction = "action?DoSrcOverUnderRL";
+        } else if(anActLow == "sidebyside" || anActLow == "sidebysiderl") {
+            anAction = "action?DoSrcSideBySideRL";
+        } else if(anActLow == "sidebysidelr") {
+            anAction = "action?DoSrcSideBySideLR";
         } else if(anActLow == "fullscreen") {
             anAction = "action?DoFullscreen";
         } else {

@@ -501,11 +501,17 @@ void loadDefaults(StLangMap& theStrings) {
               "DoSrcMono",
               "Stereo format - Mono");
     addAction(theStrings, StMoviePlayer::Action_SrcOverUnderLR,
-              "DoSrcOverUnder",
-              "Stereo format - Over/Under");
+              "DoSrcOverUnderLR",
+              "Stereo format - Over/Under (LR)");
+    addAction(theStrings, StMoviePlayer::Action_SrcOverUnderRL,
+              "DoSrcOverUnderRL",
+              "Stereo format - Over/Under (RL)");
+    addAction(theStrings, StMoviePlayer::Action_SrcSideBySideLR,
+              "DoSrcSideBySideLR",
+              "Stereo format - Side by side (LR)");
     addAction(theStrings, StMoviePlayer::Action_SrcSideBySideRL,
-              "DoSrcSideBySide",
-              "Stereo format - Side by side");
+              "DoSrcSideBySideRL",
+              "Stereo format - Side by side (RL)");
     addAction(theStrings, StMoviePlayer::Action_FileInfo,
               "DoFileInfo",
               "Show file info");

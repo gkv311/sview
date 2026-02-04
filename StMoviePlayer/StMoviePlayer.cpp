@@ -523,12 +523,20 @@ StMoviePlayer::StMoviePlayer(const StHandle<StResourceManager>& theResMgr,
         addAction(Action_SrcMono, anAction, ST_VK_M);
     }
     {
-        StHandle<StAction> anAction = new StActionIntValue(stCString("DoSrcOverUnder"), params.SrcStereoFormat, StFormat_TopBottom_LR);
+        StHandle<StAction> anAction = new StActionIntValue(stCString("DoSrcOverUnderLR"), params.SrcStereoFormat, StFormat_TopBottom_LR);
         addAction(Action_SrcOverUnderLR, anAction, ST_VK_O);
     }
     {
-        StHandle<StAction> anAction = new StActionIntValue(stCString("DoSrcSideBySide"), params.SrcStereoFormat, StFormat_SideBySide_RL);
-        addAction(Action_SrcSideBySideRL, anAction, ST_VK_S);
+        StHandle<StAction> anAction = new StActionIntValue(stCString("DoSrcOverUnderRL"), params.SrcStereoFormat, StFormat_TopBottom_RL);
+        addAction(Action_SrcOverUnderRL, anAction, ST_VK_O | ST_VF_SHIFT, ST_VK_U);
+    }
+    {
+        StHandle<StAction> anAction = new StActionIntValue(stCString("DoSrcSideBySideLR"), params.SrcStereoFormat, StFormat_SideBySide_LR);
+        addAction(Action_SrcSideBySideLR, anAction, ST_VK_S);
+    }
+    {
+        StHandle<StAction> anAction = new StActionIntValue(stCString("DoSrcSideBySideRL"), params.SrcStereoFormat, StFormat_SideBySide_RL);
+        addAction(Action_SrcSideBySideRL, anAction, ST_VK_S | ST_VF_SHIFT, ST_VK_R);
     }
     {
         StHandle<StActionIntSlot> anAction = new StActionIntSlot(stCString("DoFileInfo"), 0);

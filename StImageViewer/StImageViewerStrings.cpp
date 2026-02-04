@@ -349,11 +349,17 @@ void loadDefaults(StLangMap& theStrings) {
               "DoSrcMono",
               "Stereo format - Mono");
     addAction(theStrings, StImageViewer::Action_SrcOverUnderLR,
-              "DoSrcOverUnder",
-              "Stereo format - Over/Under");
+              "DoSrcOverUnderLR",
+              "Stereo format - Over/Under (LR)");
+    addAction(theStrings, StImageViewer::Action_SrcOverUnderRL,
+              "DoSrcOverUnderRL",
+              "Stereo format - Over/Under (RL)");
+    addAction(theStrings, StImageViewer::Action_SrcSideBySideLR,
+              "DoSrcSideBySideLR",
+              "Stereo format - Side by side (LR)");
     addAction(theStrings, StImageViewer::Action_SrcSideBySideRL,
-              "DoSrcSideBySide",
-              "Stereo format - Side by side");
+              "DoSrcSideBySideRL",
+              "Stereo format - Side by side (RL)");
     addAction(theStrings, StImageViewer::Action_FileInfo,
               "DoFileInfo",
               "Show file info");

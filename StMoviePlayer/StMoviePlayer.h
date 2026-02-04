@@ -350,6 +350,8 @@ class StMoviePlayer : public StApplication {
         Action_SrcAuto,
         Action_SrcMono,
         Action_SrcOverUnderLR,
+        Action_SrcOverUnderRL,
+        Action_SrcSideBySideLR,
         Action_SrcSideBySideRL,
         Action_FileInfo,
         Action_ListFirst,
