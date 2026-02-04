@@ -9,16 +9,18 @@ env:
     set(CMAKE_ANDROID_NDK      "$ENV{ANDROID_NDK}")
     set(CMAKE_ANDROID_ARCH_ABI "arm64-v8a")
     set(CMAKE_ANDROID_STL_TYPE "c++_shared")
+    set(CMAKE_BUILD_TYPE "Release")
+    # workaround for libconfig
     set(CMAKE_C_FLAGS          "-fPIC")
     set(CMAKE_CXX_FLAGS        "-fPIC")
-    set(CMAKE_BUILD_TYPE "Release")
   ANDROID_PLATFORM:    'android-26.jar'
   ANDROID_BUILD_TOOLS: 'android-build-tools-26.0.3'
   FREETYPE_REF: 'VER-2-14-1'
+  # latest tag fails building with CMAKE_CXX_COMPILER_CLANG_SCAN_DEPS-NOTFOUND
   #OPENAL_REF:   '1.25.1'
   OPENAL_REF:   '1.24.2'
   OPENVR_REF:   'v2.5.1'
-  #LIBCONFIG_REF: 'v1.8.2'
+  #LIBCONFIG_REF: 'v1.8.2' untested
   LIBCONFIG_REF: 'v1.7.3'
   CACHE_REV:    'cache2'
 
