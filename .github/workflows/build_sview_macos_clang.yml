@@ -2,7 +2,134 @@ name: Build (macOS/Clang)
 on:
   workflow_call:
 
+env:
+  MACOSX_DEPLOYMENT_TARGET: '10.10'
+  CMAKE_OSX_ARCHITECTURES:  'arm64'
+  TOOLCHAIN_TEXT: |
+    set(CMAKE_OSX_DEPLOYMENT    "10.10")
+    set(CMAKE_OSX_ARCHITECTURES "arm64")
+    set(CMAKE_INSTALL_NAME_DIR  "@executable_path/../Frameworks")
+    set(CMAKE_BUILD_TYPE "Release")
+  FREETYPE_REF: 'VER-2-14-1'
+  OPENAL_REF:   '1.25.1'
+  #OPENVR_REF:   'v2.5.1'
+  CACHE_REV:    'cache3'
+
 jobs:
+  build-macos-freetype:
+    runs-on: macos-15
+    steps:
+    - uses: actions/cache@v5
+      id: cache
+      with:
+        path: freetype-install
+        key: freetype-macos-arm64-${{ env.FREETYPE_REF }}-${{ env.CACHE_REV }}
+    - name: Clone Tree
+      if: steps.cache.outputs.cache-hit != 'true'
+      uses: actions/checkout@v6
+      with:
+        path: freetype.git
+        repository: freetype/freetype
+        ref: ${{ env.FREETYPE_REF }}
+        fetch-depth: 1
+    - name: Configure project
+      if: steps.cache.outputs.cache-hit != 'true'
+      env:
+        FREETYPE_CONFIG: |
+          set(BUILD_SHARED_LIBS ON  CACHE BOOL "")
+          set(FT_WITH_ZLIB      ON  CACHE BOOL "")
+          set(FT_WITH_BZIP2     OFF CACHE BOOL "")
+          set(FT_WITH_PNG       OFF CACHE BOOL "")
+          set(FT_WITH_HARFBUZZ  OFF CACHE BOOL "")
+          set(FT_WITH_BROTLI    OFF CACHE BOOL "")
+          set(CMAKE_DISABLE_FIND_PACKAGE_ZLIB      OFF  CACHE BOOL "")
+          set(CMAKE_DISABLE_FIND_PACKAGE_BZip2     TRUE CACHE BOOL "")
+          set(CMAKE_DISABLE_FIND_PACKAGE_PNG       TRUE CACHE BOOL "")
+          set(CMAKE_DISABLE_FIND_PACKAGE_HarfBuzz  TRUE CACHE BOOL "")
+          set(CMAKE_DISABLE_FIND_PACKAGE_BrotliDec TRUE CACHE BOOL "")
+          ${{ env.TOOLCHAIN_TEXT }}
+          set(CMAKE_INSTALL_PREFIX "${CMAKE_CURRENT_LIST_DIR}/freetype-install" CACHE PATH "")
+      run: |
+        echo "${FREETYPE_CONFIG}" | tee ./freetype-make.cmake
+        cmake -S ./freetype.git -B ./freetype-make -G Ninja --toolchain "$PWD/freetype-make.cmake"
+    - name: Build project
+      if: steps.cache.outputs.cache-hit != 'true'
+      run: cmake --build ./freetype-make
+    - name: Install build
+      if: steps.cache.outputs.cache-hit != 'true'
+      run: |
+        cmake --install ./freetype-make --prefix ./freetype-install
+        cp -f "./freetype.git/docs/FTL.TXT"   "./freetype-install/"
+        cp -f "./freetype.git/docs/GPLv2.TXT" "./freetype-install/"
+        cp -f "./freetype.git/docs/CHANGES"   "./freetype-install/"
+        cp -f "./freetype.git/docs/README"    "./freetype-install/"
+        cp -f "./freetype.git/LICENSE.TXT"    "./freetype-install/"
+        otool -l "./freetype-install/lib/libfreetype.dylib"
+    - name: Upload build
+      uses: actions/upload-artifact@v4
+      with:
+        name: freetype-macos-arm64
+        path: freetype-install
+        if-no-files-found: error
+
+  build-macos-openal:
+    runs-on: macos-15
+    steps:
+    - uses: actions/cache@v5
+      id: cache
+      with:
+        path: openal-install
+        key: openal-macos-arm64-${{ env.OPENAL_REF }}-${{ env.CACHE_REV }}
+    - name: Clone Tree
+      if: steps.cache.outputs.cache-hit != 'true'
+      uses: actions/checkout@v6
+      with:
+        path: openal.git
+        repository: kcat/openal-soft
+        ref: ${{ env.OPENAL_REF }}
+        fetch-depth: 1
+    - name: Configure project
+      if: steps.cache.outputs.cache-hit != 'true'
+      env:
+        OPENAL_CONFIG: |
+          set(ALSOFT_ENABLE_MODULES   OFF CACHE BOOL "")
+          set(ALSOFT_EXAMPLES         OFF CACHE BOOL "")
+          set(ALSOFT_TESTS            OFF CACHE BOOL "")
+          set(ALSOFT_UTILS             ON CACHE BOOL "")
+          set(ALSOFT_NO_CONFIG_UTIL    ON CACHE BOOL "")
+          set(ALSOFT_BUILD_ROUTER     OFF CACHE BOOL "")
+          set(ALSOFT_REQUIRE_WINMM    OFF CACHE BOOL "")
+          set(ALSOFT_REQUIRE_DSOUND   OFF CACHE BOOL "")
+          set(ALSOFT_REQUIRE_WASAPI   OFF CACHE BOOL "")
+          set(ALSOFT_REQUIRE_OPENSL   OFF CACHE BOOL "")
+          set(ALSOFT_BACKEND_OPENSL   OFF CACHE BOOL "")
+          set(ALSOFT_BACKEND_WAVE     OFF CACHE BOOL "")
+          set(ALSOFT_BACKEND_COREAUDIO ON CACHE BOOL "")
+          set(ALSOFT_REQUIRE_COREAUDIO ON CACHE BOOL "")
+          set(BUILD_SHARED_LIBS        ON CACHE BOOL "")
+          ${{ env.TOOLCHAIN_TEXT }}
+          set(CMAKE_INSTALL_PREFIX "${CMAKE_CURRENT_LIST_DIR}/openal-install" CACHE PATH "")
+      run: |
+        cmake --version
+        echo "${OPENAL_CONFIG}" | tee ./openal-make.cmake
+        cmake -S ./openal.git -B ./openal-make -G Ninja --toolchain "$PWD/openal-make.cmake"
+    - name: Build project
+      if: steps.cache.outputs.cache-hit != 'true'
+      run: cmake --build ./openal-make
+    - name: Install build
+      if: steps.cache.outputs.cache-hit != 'true'
+      run: |
+        cmake --install ./openal-make --prefix ./openal-install
+        cp -f "./openal.git/COPYING"   "./openal-install/"
+        cp -f "./openal.git/README.md" "./openal-install/"
+        otool -l "./openal-install/lib/libopenal.dylib"
+    - name: Upload build
+      uses: actions/upload-artifact@v4
+      with:
+        name: openal-macos-arm64
+        path: openal-install
+        if-no-files-found: error
+
   build-macos-arm64:
     runs-on: macos-15
     steps:
