@@ -102,7 +102,7 @@ namespace {
         "varying vec2 fTexCoord;\n"
         "void main(void) {\n"
         "    vec2 aTexCoord = fTexCoord;\n",
-        "\n",
+        ("\n"),
         "    gl_FragColor = texture2D(uTexture, aTexCoord);\n"
         "}\n"
     };

@@ -53,7 +53,7 @@ class StCLocale {
     #ifdef _MSC_VER
         _free_locale(myCLocale);
     #elif defined(ST_NO_XLOCALE)
-        //
+        (void)myCLocale;
     #else
         freelocale(myCLocale);
     #endif

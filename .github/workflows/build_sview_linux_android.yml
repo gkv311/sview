@@ -252,7 +252,7 @@ jobs:
           set(USE_MONGOOSE OFF CACHE BOOL "")
           set(USE_UPDATER  OFF CACHE BOOL "")
           set(USE_STCONFIG OFF CACHE BOOL "")
-          set(BUILD_TREAT_WARNINGS_AS_ERRORS OFF CACHE BOOL "")
+          set(BUILD_TREAT_WARNINGS_AS_ERRORS ON CACHE BOOL "")
           ${{ env.TOOLCHAIN_TEXT }}
           set(CMAKE_INSTALL_PREFIX "${CMAKE_CURRENT_LIST_DIR}/sview-install"     CACHE PATH "")
           set(LIBCONFIGCPP_DIR     "${CMAKE_CURRENT_LIST_DIR}/libconfig-install" CACHE PATH "")

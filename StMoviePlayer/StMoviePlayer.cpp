@@ -72,7 +72,9 @@ namespace {
     static const char ST_SETTING_SEP_DY[]        = "viewSepDY";
     static const char ST_SETTING_SEP_ROT[]       = "viewSepRot";
 
+#ifdef ST_HAVE_MONGOOSE
     static const char ST_SETTING_WEBUI_CMDPORT[] = "webuiCmdPort";
+#endif
 
     static const char ST_ARGUMENT_FILE_LEFT[]  = "left";
     static const char ST_ARGUMENT_FILE_RIGHT[] = "right";
@@ -997,7 +999,6 @@ void StMoviePlayer::doStartWebUI() {
 }
 
 void StMoviePlayer::doSwitchWebUI(const int32_t theValue) {
-#ifdef ST_HAVE_MONGOOSE
     switch(theValue) {
         case WEBUI_ONCE:
         case WEBUI_AUTO: {
@@ -1010,7 +1011,6 @@ void StMoviePlayer::doSwitchWebUI(const int32_t theValue) {
             break;
         }
     }
-#endif
 }
 
 bool StMoviePlayer::init() {
@@ -2525,6 +2525,8 @@ int StMoviePlayer::beginRequest(mg_connection*         theConnection,
 
     // send HTTP reply to the client
     mg_write(theConnection, anAnswer.toCString(), anAnswer.getSize());
+#else
+    (void)theConnection, (void)theRequestInfo;
 #endif
     // returning non-zero tells mongoose that our function has replied to
     // the client, and mongoose should not send client any more data.
@@ -2537,6 +2539,7 @@ int StMoviePlayer::beginRequestHandler(mg_connection* theConnection) {
     StMoviePlayer* aPlugin = (StMoviePlayer* )aRequestInfo->user_data;
     return aPlugin->beginRequest(theConnection, *aRequestInfo);
 #else
+    (void)theConnection;
     return 0;
 #endif
 }
