@@ -200,6 +200,26 @@ jobs:
     - name: Build project
       run: |
         cmake --build ./sview-make
+    - name: Install project
+      run: |
+        mkdir ./sview-install
+        mv ./sview-make/Release.app ./sview-install/sView.app
+        # copy dependencies
+        mkdir -p ./sview-install/sView.app/Contents/Frameworks
+        cp -rf -P ./ffmpeg-install/lib/*.dylib   ./sview-install/sView.app/Contents/Frameworks/
+        cp -rf -P ./openal-install/lib/*.dylib   ./sview-install/sView.app/Contents/Frameworks/
+        cp -rf -P ./freetype-install/lib/*.dylib ./sview-install/sView.app/Contents/Frameworks/
+    - name: Pack install
+      run: |
+        pushd ./sview-install
+        tar -cf ../sview-macos-arm64.tar *
+        popd
+    - name: Upload build
+      uses: actions/upload-artifact@v4
+      with:
+        name: sview-macos-arm64
+        path: sview-macos-arm64.tar
+        if-no-files-found: error
 
   build-macos-sview-brew:
     runs-on: macos-15
