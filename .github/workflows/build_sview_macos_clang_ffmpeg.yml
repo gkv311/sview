@@ -1,0 +1,278 @@
+name: Build FFmpeg (macOS/Clang)
+on:
+  workflow_call:
+
+env:
+  MACOSX_DEPLOYMENT_TARGET: '10.10'
+  CMAKE_OSX_ARCHITECTURES:  'arm64'
+  TOOLCHAIN_TEXT: |
+    set(CMAKE_OSX_DEPLOYMENT    "10.10")
+    set(CMAKE_OSX_ARCHITECTURES "arm64")
+    set(CMAKE_INSTALL_NAME_DIR  "@executable_path/../Frameworks")
+    set(CMAKE_BUILD_TYPE "Release")
+  FFMPEG_REF:   'n8.0.1'
+  OPENJPEG_REF: 'v2.5.4'
+  DAV1_REF:     '1.5.3'
+  LIBJXL_REF:   'v0.11.1'
+  CACHE_REV:    'cache3'
+
+jobs:
+  build-macos-libjxl:
+    runs-on: macos-15
+    steps:
+    - uses: actions/cache@v5
+      id: cache
+      with:
+        path: libjxl-install
+        key: libjxl-macos-arm64-${{ env.LIBJXL_REF }}-${{ env.CACHE_REV }}
+    - name: Clone Tree
+      if: steps.cache.outputs.cache-hit != 'true'
+      uses: actions/checkout@v6
+      with:
+        path: libjxl.git
+        repository: libjxl/libjxl
+        ref: ${{ env.LIBJXL_REF }}
+        fetch-depth: 1
+        submodules: 'true'
+    - name: Configure project
+      if: steps.cache.outputs.cache-hit != 'true'
+      env:
+        LIBJXL_CONFIG: |
+          set(JPEGXL_ENABLE_DOXYGEN   OFF CACHE BOOL "")
+          set(JPEGXL_ENABLE_MANPAGES  OFF CACHE BOOL "")
+          set(JPEGXL_ENABLE_BENCHMARK OFF CACHE BOOL "")
+          set(JPEGXL_ENABLE_EXAMPLES  OFF CACHE BOOL "")
+          set(JPEGXL_ENABLE_JNI       OFF CACHE BOOL "")
+          set(JPEGXL_ENABLE_VIEWERS   OFF CACHE BOOL "")
+          set(JPEGXL_ENABLE_PLUGINS   OFF CACHE BOOL "")
+          set(JPEGXL_ENABLE_TOOLS     OFF CACHE BOOL "")
+          set(JPEGXL_ENABLE_DEVTOOLS  OFF CACHE BOOL "")
+          set(JPEGXL_TEST_TOOLS       OFF CACHE BOOL "")
+          set(BUILD_TESTING           OFF CACHE BOOL "")
+          ${{ env.TOOLCHAIN_TEXT }}
+          set(CMAKE_INSTALL_PREFIX "${CMAKE_CURRENT_LIST_DIR}/libjxl-install" CACHE PATH "")
+      run: |
+        echo "${LIBJXL_CONFIG}" | tee ./libjxl-make.cmake
+        cmake -S ./libjxl.git -B ./libjxl-make -G Ninja --toolchain "$PWD/libjxl-make.cmake" \
+          -Wno-deprecated -DCMAKE_POLICY_VERSION_MINIMUM=3.5
+    - name: Build project
+      if: steps.cache.outputs.cache-hit != 'true'
+      run: |
+        cmake --build ./libjxl-make
+    - name: Install build
+      if: steps.cache.outputs.cache-hit != 'true'
+      run: |
+        cmake --install ./libjxl-make --prefix ./libjxl-install
+        cp -f "./libjxl.git/LICENSE"   "./libjxl-install/"
+        cp -f "./libjxl.git/README.md" "./libjxl-install/"
+        otool -l "./libjxl-install/lib/libjxl.dylib"
+    - name: Pack install
+      run: |
+        pushd ./libjxl-install
+        tar -cf ../libjxl-install.tar *
+        popd
+    - name: Upload build
+      uses: actions/upload-artifact@v4
+      with:
+        name: libjxl-macos-arm64
+        path: libjxl-install.tar
+        if-no-files-found: error
+
+  build-macos-dav1d:
+    runs-on: macos-15
+    steps:
+    - uses: actions/cache@v5
+      id: cache
+      with:
+        path: dav1d-install
+        key: dav1d-macos-arm64-${{ env.DAV1_REF }}-${{ env.CACHE_REV }}
+    - name: Clone Tree
+      if: steps.cache.outputs.cache-hit != 'true'
+      uses: actions/checkout@v6
+      with:
+        path: dav1d.git
+        repository: videolan/dav1d
+        ref: ${{ env.DAV1_REF }}
+        fetch-depth: 1
+    - name: Install Dependencies
+      if: steps.cache.outputs.cache-hit != 'true'
+      run: |
+        brew update
+        brew install \
+          meson
+    - name: Configure project
+      if: steps.cache.outputs.cache-hit != 'true'
+      env:
+        LDFLAGS:  '-mmacosx-version-min=${{ env.MACOSX_DEPLOYMENT_TARGET }}'
+        CFLAGS:   '-mmacosx-version-min=${{ env.MACOSX_DEPLOYMENT_TARGET }}'
+        CXXFLAGS: '-mmacosx-version-min=${{ env.MACOSX_DEPLOYMENT_TARGET }}'
+      run: |
+        unset MACOSX_DEPLOYMENT_TARGET
+        meson setup \
+          --prefix=$PWD/dav1d-install \
+          --default-library=static \
+          ./dav1d-make ./dav1d.git
+    - name: Build project
+      if: steps.cache.outputs.cache-hit != 'true'
+      run: |
+        PATH=$ANDROID_NDK/toolchains/llvm/prebuilt/linux-x86_64/bin:$PATH
+        ninja -C ./dav1d-make
+    - name: Install project
+      if: steps.cache.outputs.cache-hit != 'true'
+      run: |
+        ninja -C ./dav1d-make install        
+    - name: Upload build
+      uses: actions/upload-artifact@v4
+      with:
+        name: dav1d-macos-arm64
+        path: dav1d-install
+        if-no-files-found: error
+
+  build-macos-ffmpeg:
+    runs-on: macos-15
+    needs: [build-macos-libjxl, build-macos-dav1d]
+    steps:
+    - uses: actions/cache@v5
+      id: cache
+      with:
+        path: ffmpeg-install
+        key: ffmpeg-macos-arm64-${{ env.FFMPEG_REF }}-${{ env.CACHE_REV }}
+    - name: Clone Tree
+      if: steps.cache.outputs.cache-hit != 'true'
+      uses: actions/checkout@v6
+      with:
+        path: ffmpeg.git
+        repository: FFmpeg/FFmpeg
+        ref: ${{ env.FFMPEG_REF }}
+        fetch-depth: 1
+    #- name: Clone Tree
+    #  uses: actions/checkout@v6
+    #  with:
+    #    path: bzip2.git
+    #    repository: https://gitlab.com/bzip2/bzip2.git
+    #    ref: 'bzip2-1.0.8'
+    #    fetch-depth: 1
+    - name: Clone openjpeg
+      if: steps.cache.outputs.cache-hit != 'true'
+      uses: actions/checkout@v6
+      with:
+        path: openjpeg.git
+        repository: uclouvain/openjpeg
+        ref: ${{ env.OPENJPEG_REF }}
+        fetch-depth: 1
+    - name: Download dav1d build
+      if: steps.cache.outputs.cache-hit != 'true'
+      uses: actions/download-artifact@v5
+      with:
+        name: dav1d-macos-arm64
+        path: dav1d-install
+    - name: Download libjxl build
+      if: steps.cache.outputs.cache-hit != 'true'
+      uses: actions/download-artifact@v5
+      with:
+        name: libjxl-macos-arm64
+        path: libjxl-install
+    - name: Unpack libjxl build
+      if: steps.cache.outputs.cache-hit != 'true'
+      run: |
+        pushd ./libjxl-install
+        tar -xvf ./libjxl-install.tar
+        popd
+    #- name: Build bzip2
+    #  if: steps.cache.outputs.cache-hit != 'true'
+    #  run: |
+    #    #aNbJobs="$(getconf _NPROCESSORS_ONLN)"
+    #    #pushd bzip2.git
+    #    #make libbz2.a -j$aNbJobs CC=${TOOLCHAIN_PREFIX}-gcc AR=${TOOLCHAIN_PREFIX}-ar RANLIB=${TOOLCHAIN_PREFIX}-ranlib
+    #    #cp -f "$aLibRoot/libbz2.a" "$OUTPUT_FOLDER/lib"
+    #    #popd
+    #    cmake -S ./bzip2.git -B ./bzip2-make -G Ninja --toolchain "$PWD/${TOOLCHAIN_PREFIX}.cmake" \
+    #      -D CMAKE_INSTALL_PREFIX:PATH="$PWD/bzip2-install"
+    - name: Configure openjpeg
+      if: steps.cache.outputs.cache-hit != 'true'
+      env:
+        OPENJPEG_CONFIG: |
+          set(BUILD_SHARED_LIBS OFF CACHE BOOL "")
+          set(BUILD_CODEC       OFF CACHE BOOL "")
+          #set(BUILD_THIRDPARTY   ON CACHE BOOL "")
+          ${{ env.TOOLCHAIN_TEXT }}
+          set(CMAKE_INSTALL_PREFIX "${CMAKE_CURRENT_LIST_DIR}/openjpeg-install" CACHE PATH "")
+      run: |
+        echo "${OPENJPEG_CONFIG}" | tee ./openjpeg-make.cmake
+        export PKG_CONFIG_LIBDIR=
+        export PKG_CONFIG_PATH=
+        cmake -S ./openjpeg.git -B ./openjpeg-make -G Ninja --toolchain "$PWD/openjpeg-make.cmake"
+    - name: Build openjpeg
+      if: steps.cache.outputs.cache-hit != 'true'
+      run: |
+        cmake --build ./openjpeg-make
+    - name: Install openjpeg
+      if: steps.cache.outputs.cache-hit != 'true'
+      run: |
+        cmake --install ./openjpeg-make --prefix ./openjpeg-install
+    - name: Configure FFmpeg
+      if: steps.cache.outputs.cache-hit != 'true'
+      run: |
+        # --enable-libopenjpeg
+        export PKG_CONFIG_LIBDIR=
+        export PKG_CONFIG_PATH=$PWD/dav1d-install/lib/pkgconfig:$PWD/openjpeg-install/lib/pkgconfig:$PWD/libjxl-install/lib/pkgconfig:$PWD/mbedtls-install/lib/pkgconfig
+        aBuildRoot=$PWD
+        # redirect error state from tee
+        set -o pipefail
+        pushd ./ffmpeg.git
+        ./configure \
+          --prefix="$aBuildRoot/ffmpeg-install" \
+          --disable-debug --disable-stripping \
+          --disable-doc \
+          --extra-version=sView.ru \
+          --enable-version3 \
+          --enable-swscale --enable-avfilter \
+          --enable-shared --disable-static \
+          --enable-pthreads \
+          --enable-runtime-cpudetect \
+          --enable-libdav1d --enable-libjxl --enable-libopenjpeg \
+          --disable-audiotoolbox \
+          --extra-cflags="-mmacosx-version-min=$MACOSX_DEPLOYMENT_TARGET -arch arm64" \
+          --extra-ldflags="-mmacosx-version-min=$MACOSX_DEPLOYMENT_TARGET" \
+          --install-name-dir="@executable_path/../Frameworks" \
+          2>&1 | tee ../ffmpeg-config.log
+        popd
+    - name: Build FFmpeg
+      if: steps.cache.outputs.cache-hit != 'true'
+      run: |
+        pushd ./ffmpeg.git
+        aNbJobs="$(getconf _NPROCESSORS_ONLN)"
+        make -j $aNbJobs
+        popd
+    - name: Install FFmpeg
+      if: steps.cache.outputs.cache-hit != 'true'
+      run: |
+        pushd ./ffmpeg.git
+        make install
+        popd
+    - name: Post-install FFmpeg
+      if: steps.cache.outputs.cache-hit != 'true'
+      run: |
+        ls -la ./ffmpeg-install/lib/
+        cp -f ./ffmpeg-config.log           ./ffmpeg-install/
+        cp -f ./ffmpeg.git/Changelog        ./ffmpeg-install/
+        cp -f ./ffmpeg.git/README.md        ./ffmpeg-install/
+        cp -f ./ffmpeg.git/LICENSE.md       ./ffmpeg-install/
+        cp -f ./ffmpeg.git/COPYING.LGPLv2.1 ./ffmpeg-install/
+        cp -f ./ffmpeg.git/COPYING.LGPLv3   ./ffmpeg-install/
+        # copy dependencies
+        cp -f -P ./libjxl-install/lib/*.dylib ./ffmpeg-install/lib/
+        otool -l "./ffmpeg-install/bin/ffmpeg"
+        #otool -l "./ffmpeg-install/lib/libavcodec.dylib"
+        DYLD_LIBRARY_PATH=$PWD/ffmpeg-install/lib ./ffmpeg-install/bin/ffmpeg -version
+    - name: Pack install
+      run: |
+        pushd ./ffmpeg-install
+        tar -cf ../ffmpeg-install.tar *
+        popd
+    - name: Upload build
+      uses: actions/upload-artifact@v4
+      with:
+        name: ffmpeg-macos-arm64
+        path: ffmpeg-install.tar
+        if-no-files-found: error
