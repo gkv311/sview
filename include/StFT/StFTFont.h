@@ -92,8 +92,12 @@ class StFTFont {
             || (theUChar >= 0x0F900 && theUChar <= 0x0FAFF)
             || (theUChar >= 0x20000 && theUChar <= 0x2A6DF)
             || (theUChar >= 0x2F800 && theUChar <= 0x2FA1F)
-            //
-            || (theUChar >= 0x030A0 && theUChar <= 0x030FF); // Katakana (Japanese) is NOT part of CJK, but CJK fonts usually include these symbols
+            // CJK Symbols and Punctuation +
+            // Halfwidth and Fullwidth Forms
+            || (theUChar >= 0x03000 && theUChar <= 0x0303F)
+            || (theUChar >= 0x0FF00 && theUChar <= 0x0FFEF)
+            // Katakana (Japanese) is NOT part of CJK, but CJK fonts usually include these symbols
+            || (theUChar >= 0x030A0 && theUChar <= 0x030FF);
     }
 
     /**
