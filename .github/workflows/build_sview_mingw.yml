@@ -3,6 +3,8 @@ on:
   workflow_call:
 
 env:
+  ARCH: 'x64'
+  SYSTEM: 'windows'
   TOOLCHAIN_PREFIX: x86_64-w64-mingw32
   TOOLCHAIN_TEXT: |
     set(CMAKE_SYSTEM_NAME Windows)
@@ -27,7 +29,7 @@ jobs:
       id: cache
       with:
         path: freetype-install
-        key: freetype-windows-x64-mingw-${{ env.FREETYPE_REF }}-${{ env.CACHE_REV }}
+        key: freetype-${{ env.SYSTEM }}-${{ env.ARCH }}-mingw-${{ env.FREETYPE_REF }}-${{ env.CACHE_REV }}
     - name: Clone Tree
       if: steps.cache.outputs.cache-hit != 'true'
       uses: actions/checkout@v6
@@ -80,7 +82,7 @@ jobs:
     - name: Upload build
       uses: actions/upload-artifact@v4
       with:
-        name: freetype-windows-x64-mingw
+        name: freetype-${{ env.SYSTEM }}-${{ env.ARCH }}-mingw
         path: freetype-install
         if-no-files-found: error
         retention-days: 1
@@ -92,7 +94,7 @@ jobs:
       id: cache
       with:
         path: openal-install
-        key: openal-windows-x64-mingw-${{ env.OPENAL_REF }}-${{ env.CACHE_REV }}
+        key: openal-${{ env.SYSTEM }}-${{ env.ARCH }}-mingw-${{ env.OPENAL_REF }}-${{ env.CACHE_REV }}
     - name: Clone Tree
       if: steps.cache.outputs.cache-hit != 'true'
       uses: actions/checkout@v6
@@ -141,7 +143,7 @@ jobs:
     - name: Upload build
       uses: actions/upload-artifact@v4
       with:
-        name: openal-windows-x64-mingw
+        name: openal-${{ env.SYSTEM }}-${{ env.ARCH }}-mingw
         path: openal-install
         if-no-files-found: error
         retention-days: 1
@@ -153,7 +155,7 @@ jobs:
       id: cache
       with:
         path: openvr-install
-        key: openvr-windows-x64-mingw-${{ env.OPENVR_REF }}-${{ env.CACHE_REV }}
+        key: openvr-${{ env.SYSTEM }}-${{ env.ARCH }}-mingw-${{ env.OPENVR_REF }}-${{ env.CACHE_REV }}
     - name: Clone Tree
       if: steps.cache.outputs.cache-hit != 'true'
       uses: actions/checkout@v6
@@ -210,7 +212,7 @@ jobs:
     - name: Upload build
       uses: actions/upload-artifact@v4
       with:
-        name: openvr-windows-x64-mingw
+        name: openvr-${{ env.SYSTEM }}-${{ env.ARCH }}-mingw
         path: openvr-install
         if-no-files-found: error
         retention-days: 1
@@ -235,22 +237,22 @@ jobs:
     - name: Download FreeType build
       uses: actions/download-artifact@v5
       with:
-        name: freetype-windows-x64-mingw
+        name: freetype-${{ env.SYSTEM }}-${{ env.ARCH }}-mingw
         path: freetype-install
     - name: Download OpenAL soft build
       uses: actions/download-artifact@v5
       with:
-        name: openal-windows-x64-mingw
+        name: openal-${{ env.SYSTEM }}-${{ env.ARCH }}-mingw
         path: openal-install
     - name: Download OpenVR build
       uses: actions/download-artifact@v5
       with:
-        name: openvr-windows-x64-mingw
+        name: openvr-${{ env.SYSTEM }}-${{ env.ARCH }}-mingw
         path: openvr-install
     - name: Download FFmpeg build
       uses: actions/download-artifact@v5
       with:
-        name: ffmpeg-windows-x64-mingw
+        name: ffmpeg-${{ env.SYSTEM }}-${{ env.ARCH }}-mingw
         path: ffmpeg-install
     - name: Configure project
       env:
@@ -286,6 +288,6 @@ jobs:
     - name: Upload artifacts
       uses: actions/upload-artifact@v4
       with:
-        name: sview-windows-x64-mingw
+        name: sview-${{ env.SYSTEM }}-${{ env.ARCH }}-mingw
         path: ./sview-install
         if-no-files-found: error

@@ -3,6 +3,8 @@ on:
   workflow_call:
 
 env:
+  ARCH: 'arm64'
+  SYSTEM: 'macos'
   MACOSX_DEPLOYMENT_TARGET: '10.10'
   CMAKE_OSX_ARCHITECTURES:  'arm64'
   TOOLCHAIN_TEXT: |
@@ -24,7 +26,7 @@ jobs:
       id: cache
       with:
         path: libjxl-install
-        key: libjxl-macos-arm64-${{ env.LIBJXL_REF }}-${{ env.CACHE_REV }}
+        key: libjxl-${{ env.SYSTEM }}-${{ env.ARCH }}-${{ env.LIBJXL_REF }}-${{ env.CACHE_REV }}
     - name: Clone Tree
       if: steps.cache.outputs.cache-hit != 'true'
       uses: actions/checkout@v6
@@ -74,7 +76,7 @@ jobs:
     - name: Upload build
       uses: actions/upload-artifact@v4
       with:
-        name: libjxl-macos-arm64
+        name: libjxl-${{ env.SYSTEM }}-${{ env.ARCH }}
         path: libjxl-install.tar
         if-no-files-found: error
         retention-days: 1
@@ -86,7 +88,7 @@ jobs:
       id: cache
       with:
         path: dav1d-install
-        key: dav1d-macos-arm64-${{ env.DAV1_REF }}-${{ env.CACHE_REV }}
+        key: dav1d-${{ env.SYSTEM }}-${{ env.ARCH }}-${{ env.DAV1_REF }}-${{ env.CACHE_REV }}
     - name: Clone Tree
       if: steps.cache.outputs.cache-hit != 'true'
       uses: actions/checkout@v6
@@ -125,7 +127,7 @@ jobs:
     - name: Upload build
       uses: actions/upload-artifact@v4
       with:
-        name: dav1d-macos-arm64
+        name: dav1d-${{ env.SYSTEM }}-${{ env.ARCH }}
         path: dav1d-install
         if-no-files-found: error
         retention-days: 1
@@ -138,7 +140,7 @@ jobs:
       id: cache
       with:
         path: ffmpeg-install
-        key: ffmpeg-macos-arm64-${{ env.FFMPEG_REF }}-${{ env.CACHE_REV }}
+        key: ffmpeg-${{ env.SYSTEM }}-${{ env.ARCH }}-${{ env.FFMPEG_REF }}-${{ env.CACHE_REV }}
     - name: Clone Tree
       if: steps.cache.outputs.cache-hit != 'true'
       uses: actions/checkout@v6
@@ -166,13 +168,13 @@ jobs:
       if: steps.cache.outputs.cache-hit != 'true'
       uses: actions/download-artifact@v5
       with:
-        name: dav1d-macos-arm64
+        name: dav1d-${{ env.SYSTEM }}-${{ env.ARCH }}
         path: dav1d-install
     - name: Download libjxl build
       if: steps.cache.outputs.cache-hit != 'true'
       uses: actions/download-artifact@v5
       with:
-        name: libjxl-macos-arm64
+        name: libjxl-${{ env.SYSTEM }}-${{ env.ARCH }}
         path: libjxl-install
     - name: Unpack libjxl build
       if: steps.cache.outputs.cache-hit != 'true'
@@ -275,7 +277,7 @@ jobs:
     - name: Upload build
       uses: actions/upload-artifact@v4
       with:
-        name: ffmpeg-macos-arm64
+        name: ffmpeg-${{ env.SYSTEM }}-${{ env.ARCH }}
         path: ffmpeg-install.tar
         if-no-files-found: error
         retention-days: 1

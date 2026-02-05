@@ -3,6 +3,8 @@ on:
   workflow_call:
 
 env:
+  ARCH: 'arm64'
+  SYSTEM: 'android'
   TOOLCHAIN_TEXT: |
     set(CMAKE_SYSTEM_NAME      "Android")
     set(CMAKE_SYSTEM_VERSION   "21")
@@ -32,7 +34,7 @@ jobs:
       id: cache
       with:
         path: freetype-install
-        key: freetype-android-arm64-${{ env.FREETYPE_REF }}-${{ env.CACHE_REV }}
+        key: freetype-${{ env.SYSTEM }}-${{ env.ARCH }}-${{ env.FREETYPE_REF }}-${{ env.CACHE_REV }}
     - name: Clone Tree
       if: steps.cache.outputs.cache-hit != 'true'
       uses: actions/checkout@v6
@@ -83,7 +85,7 @@ jobs:
     - name: Upload build
       uses: actions/upload-artifact@v4
       with:
-        name: freetype-android-arm64
+        name: freetype-${{ env.SYSTEM }}-${{ env.ARCH }}
         path: freetype-install
         if-no-files-found: error
         retention-days: 1
@@ -95,7 +97,7 @@ jobs:
       id: cache
       with:
         path: libconfig-install
-        key: libconfig-android-arm64-${{ env.LIBCONFIG_REF }}-${{ env.CACHE_REV }}
+        key: libconfig-${{ env.SYSTEM }}-${{ env.ARCH }}-${{ env.LIBCONFIG_REF }}-${{ env.CACHE_REV }}
     - name: Clone Tree
       if: steps.cache.outputs.cache-hit != 'true'
       uses: actions/checkout@v6
@@ -135,7 +137,7 @@ jobs:
     - name: Upload build
       uses: actions/upload-artifact@v4
       with:
-        name: libconfig-android-arm64
+        name: libconfig-${{ env.SYSTEM }}-${{ env.ARCH }}
         path: libconfig-install
         if-no-files-found: error
         retention-days: 1
@@ -147,7 +149,7 @@ jobs:
       id: cache
       with:
         path: openal-install
-        key: openal-android-arm64-${{ env.OPENAL_REF }}-${{ env.CACHE_REV }}
+        key: openal-${{ env.SYSTEM }}-${{ env.ARCH }}-${{ env.OPENAL_REF }}-${{ env.CACHE_REV }}
     - name: Clone Tree
       if: steps.cache.outputs.cache-hit != 'true'
       uses: actions/checkout@v6
@@ -177,6 +179,7 @@ jobs:
           set(ALSOFT_REQUIRE_WINMM    OFF CACHE BOOL "")
           set(ALSOFT_REQUIRE_DSOUND   OFF CACHE BOOL "")
           set(ALSOFT_REQUIRE_WASAPI   OFF CACHE BOOL "")
+          # enable only OpenSL backen for Android
           set(ALSOFT_REQUIRE_OPENSL    ON CACHE BOOL "")
           set(ALSOFT_BACKEND_OPENSL    ON CACHE BOOL "")
           set(ALSOFT_BACKEND_WAVE     OFF CACHE BOOL "")
@@ -200,7 +203,7 @@ jobs:
     - name: Upload build
       uses: actions/upload-artifact@v4
       with:
-        name: openal-android-arm64
+        name: openal-${{ env.SYSTEM }}-${{ env.ARCH }}
         path: openal-install
         if-no-files-found: error
         retention-days: 1
@@ -233,22 +236,22 @@ jobs:
     - name: Download libconfig build
       uses: actions/download-artifact@v5
       with:
-        name: libconfig-android-arm64
+        name: libconfig-${{ env.SYSTEM }}-${{ env.ARCH }}
         path: libconfig-install
     - name: Download FreeType build
       uses: actions/download-artifact@v5
       with:
-        name: freetype-android-arm64
+        name: freetype-${{ env.SYSTEM }}-${{ env.ARCH }}
         path: freetype-install
     - name: Download OpenAL soft build
       uses: actions/download-artifact@v5
       with:
-        name: openal-android-arm64
+        name: openal-${{ env.SYSTEM }}-${{ env.ARCH }}
         path: openal-install
     - name: Download FFmpeg build
       uses: actions/download-artifact@v5
       with:
-        name: ffmpeg-android-arm64
+        name: ffmpeg-${{ env.SYSTEM }}-${{ env.ARCH }}
         path: ffmpeg-install
     - name: Configure project
       env:
@@ -281,7 +284,7 @@ jobs:
     - name: Upload artifacts
       uses: actions/upload-artifact@v4
       with:
-        name: sview-android-arm64
+        name: sview-${{ env.SYSTEM }}-${{ env.ARCH }}
         path: sview-make/sView-Release.apk
         if-no-files-found: error
         compression-level: 0

@@ -3,6 +3,8 @@ on:
   workflow_call:
 
 env:
+  ARCH: 'arm64'
+  SYSTEM: 'macos'
   MACOSX_DEPLOYMENT_TARGET: '10.10'
   CMAKE_OSX_ARCHITECTURES:  'arm64'
   TOOLCHAIN_TEXT: |
@@ -23,7 +25,7 @@ jobs:
       id: cache
       with:
         path: freetype-install
-        key: freetype-macos-arm64-${{ env.FREETYPE_REF }}-${{ env.CACHE_REV }}
+        key: freetype-${{ env.SYSTEM }}-${{ env.ARCH }}-${{ env.FREETYPE_REF }}-${{ env.CACHE_REV }}
     - name: Clone Tree
       if: steps.cache.outputs.cache-hit != 'true'
       uses: actions/checkout@v6
@@ -73,7 +75,7 @@ jobs:
     - name: Upload build
       uses: actions/upload-artifact@v4
       with:
-        name: freetype-macos-arm64
+        name: freetype-${{ env.SYSTEM }}-${{ env.ARCH }}
         path: freetype-install.tar
         if-no-files-found: error
         retention-days: 1
@@ -85,7 +87,7 @@ jobs:
       id: cache
       with:
         path: openal-install
-        key: openal-macos-arm64-${{ env.OPENAL_REF }}-${{ env.CACHE_REV }}
+        key: openal-${{ env.SYSTEM }}-${{ env.ARCH }}-${{ env.OPENAL_REF }}-${{ env.CACHE_REV }}
     - name: Clone Tree
       if: steps.cache.outputs.cache-hit != 'true'
       uses: actions/checkout@v6
@@ -137,7 +139,7 @@ jobs:
     - name: Upload build
       uses: actions/upload-artifact@v4
       with:
-        name: openal-macos-arm64
+        name: openal-${{ env.SYSTEM }}-${{ env.ARCH }}
         path: openal-install.tar
         if-no-files-found: error
         retention-days: 1
@@ -154,7 +156,7 @@ jobs:
     - name: Download FreeType build
       uses: actions/download-artifact@v5
       with:
-        name: freetype-macos-arm64
+        name: freetype-${{ env.SYSTEM }}-${{ env.ARCH }}
         path: freetype-install
     - name: Unpack freetype build
       run: |
@@ -164,7 +166,7 @@ jobs:
     - name: Download OpenAL soft build
       uses: actions/download-artifact@v5
       with:
-        name: openal-macos-arm64
+        name: openal-${{ env.SYSTEM }}-${{ env.ARCH }}
         path: openal-install
     - name: Unpack OpenAL soft build
       run: |
@@ -174,7 +176,7 @@ jobs:
     - name: Download FFmpeg build
       uses: actions/download-artifact@v5
       with:
-        name: ffmpeg-macos-arm64
+        name: ffmpeg-${{ env.SYSTEM }}-${{ env.ARCH }}
         path: ffmpeg-install
     - name: Unpack ffmpeg build
       run: |
@@ -214,11 +216,11 @@ jobs:
     - name: Pack install
       run: |
         pushd ./sview-install
-        tar -cf ../sview-macos-arm64.tar *
+        tar -cf ../sview-${{ env.SYSTEM }}-${{ env.ARCH }}.tar *
         popd
     - name: Upload build
       uses: actions/upload-artifact@v4
       with:
-        name: sview-macos-arm64
-        path: sview-macos-arm64.tar
+        name: sview-${{ env.SYSTEM }}-${{ env.ARCH }}
+        path: sview-${{ env.SYSTEM }}-${{ env.ARCH }}.tar
         if-no-files-found: error

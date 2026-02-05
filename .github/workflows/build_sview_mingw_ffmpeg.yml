@@ -3,6 +3,8 @@ on:
   workflow_call:
 
 env:
+  ARCH: 'x64'
+  SYSTEM: 'windows'
   TOOLCHAIN_PREFIX: x86_64-w64-mingw32
   TOOLCHAIN_TEXT: |
     set(CMAKE_SYSTEM_NAME Windows)
@@ -28,7 +30,7 @@ jobs:
       id: cache
       with:
         path: libjxl-install
-        key: libjxl-windows-x64-mingw-${{ env.LIBJXL_REF }}-${{ env.CACHE_REV }}
+        key: libjxl-${{ env.SYSTEM }}-${{ env.ARCH }}-mingw-${{ env.LIBJXL_REF }}-${{ env.CACHE_REV }}
     - name: Clone Tree
       if: steps.cache.outputs.cache-hit != 'true'
       uses: actions/checkout@v6
@@ -84,7 +86,7 @@ jobs:
     - name: Upload build
       uses: actions/upload-artifact@v4
       with:
-        name: libjxl-windows-x64-mingw
+        name: libjxl-${{ env.SYSTEM }}-${{ env.ARCH }}-mingw
         path: libjxl-install
         if-no-files-found: error
         retention-days: 1
@@ -96,7 +98,7 @@ jobs:
       id: cache
       with:
         path: dav1d-install
-        key: dav1d-windows-x64-mingw-${{ env.DAV1_REF }}-${{ env.CACHE_REV }}
+        key: dav1d-${{ env.SYSTEM }}-${{ env.ARCH }}-mingw-${{ env.DAV1_REF }}-${{ env.CACHE_REV }}
     - name: Clone Tree
       if: steps.cache.outputs.cache-hit != 'true'
       uses: actions/checkout@v6
@@ -133,7 +135,7 @@ jobs:
     - name: Upload build
       uses: actions/upload-artifact@v4
       with:
-        name: dav1d-windows-x64-mingw
+        name: dav1d-${{ env.SYSTEM }}-${{ env.ARCH }}-mingw
         path: dav1d-install
         if-no-files-found: error
         retention-days: 1
@@ -146,7 +148,7 @@ jobs:
       id: cache
       with:
         path: ffmpeg-install
-        key: ffmpeg-windows-x64-mingw-${{ env.FFMPEG_REF }}-${{ env.CACHE_REV }}
+        key: ffmpeg-${{ env.SYSTEM }}-${{ env.ARCH }}-mingw-${{ env.FFMPEG_REF }}-${{ env.CACHE_REV }}
     - name: Clone Tree
       if: steps.cache.outputs.cache-hit != 'true'
       uses: actions/checkout@v6
@@ -174,13 +176,13 @@ jobs:
       if: steps.cache.outputs.cache-hit != 'true'
       uses: actions/download-artifact@v5
       with:
-        name: dav1d-windows-x64-mingw
+        name: dav1d-${{ env.SYSTEM }}-${{ env.ARCH }}-mingw
         path: dav1d-install
     - name: Download libjxl build
       if: steps.cache.outputs.cache-hit != 'true'
       uses: actions/download-artifact@v5
       with:
-        name: libjxl-windows-x64-mingw
+        name: libjxl-${{ env.SYSTEM }}-${{ env.ARCH }}-mingw
         path: libjxl-install
     - name: Install Dependencies
       if: steps.cache.outputs.cache-hit != 'true'
@@ -271,7 +273,7 @@ jobs:
     - name: Upload build
       uses: actions/upload-artifact@v4
       with:
-        name: ffmpeg-windows-x64-mingw
+        name: ffmpeg-${{ env.SYSTEM }}-${{ env.ARCH }}-mingw
         path: ffmpeg-install
         if-no-files-found: error
         retention-days: 1

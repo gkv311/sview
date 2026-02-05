@@ -3,6 +3,8 @@ on:
   workflow_call:
 
 env:
+  ARCH: 'arm64'
+  SYSTEM: 'android'
   TOOLCHAIN_PREFIX: aarch64-android
   TOOLCHAIN_TEXT: |
     set(CMAKE_SYSTEM_NAME      "Android")
@@ -27,7 +29,7 @@ jobs:
       id: cache
       with:
         path: mbedtls-install
-        key: mbedtls-android-arm64-${{ env.MBEDTLS_REF }}-${{ env.CACHE_REV }}
+        key: mbedtls-${{ env.SYSTEM }}-${{ env.ARCH }}-${{ env.MBEDTLS_REF }}-${{ env.CACHE_REV }}
     - name: Clone Tree
       if: steps.cache.outputs.cache-hit != 'true'
       uses: actions/checkout@v6
@@ -71,7 +73,7 @@ jobs:
     - name: Upload build
       uses: actions/upload-artifact@v4
       with:
-        name: mbedtls-android-arm64
+        name: mbedtls-${{ env.SYSTEM }}-${{ env.ARCH }}
         path: mbedtls-install
         if-no-files-found: error
         retention-days: 1
@@ -83,7 +85,7 @@ jobs:
       id: cache
       with:
         path: libjxl-install
-        key: libjxl-android-arm64-${{ env.LIBJXL_REF }}-${{ env.CACHE_REV }}
+        key: libjxl-${{ env.SYSTEM }}-${{ env.ARCH }}-${{ env.LIBJXL_REF }}-${{ env.CACHE_REV }}
     - name: Clone Tree
       if: steps.cache.outputs.cache-hit != 'true'
       uses: actions/checkout@v6
@@ -136,7 +138,7 @@ jobs:
     - name: Upload build
       uses: actions/upload-artifact@v4
       with:
-        name: libjxl-android-arm64
+        name: libjxl-${{ env.SYSTEM }}-${{ env.ARCH }}
         path: libjxl-install
         if-no-files-found: error
         retention-days: 1
@@ -148,7 +150,7 @@ jobs:
       id: cache
       with:
         path: dav1d-install
-        key: dav1d-android-arm64-${{ env.DAV1_REF }}-${{ env.CACHE_REV }}
+        key: dav1d-${{ env.SYSTEM }}-${{ env.ARCH }}-${{ env.DAV1_REF }}-${{ env.CACHE_REV }}
     - name: Clone Tree
       if: steps.cache.outputs.cache-hit != 'true'
       uses: actions/checkout@v6
@@ -185,7 +187,7 @@ jobs:
     - name: Upload build
       uses: actions/upload-artifact@v4
       with:
-        name: dav1d-android-arm64
+        name: dav1d-${{ env.SYSTEM }}-${{ env.ARCH }}
         path: dav1d-install
         if-no-files-found: error
         retention-days: 1
@@ -198,7 +200,7 @@ jobs:
       id: cache
       with:
         path: ffmpeg-install
-        key: ffmpeg-android-arm64-${{ env.FFMPEG_REF }}-${{ env.CACHE_REV }}
+        key: ffmpeg-${{ env.SYSTEM }}-${{ env.ARCH }}-${{ env.FFMPEG_REF }}-${{ env.CACHE_REV }}
     - name: Clone Tree
       if: steps.cache.outputs.cache-hit != 'true'
       uses: actions/checkout@v6
@@ -226,19 +228,19 @@ jobs:
       if: steps.cache.outputs.cache-hit != 'true'
       uses: actions/download-artifact@v5
       with:
-        name: mbedtls-android-arm64
+        name: mbedtls-${{ env.SYSTEM }}-${{ env.ARCH }}
         path: mbedtls-install
     - name: Download dav1d build
       if: steps.cache.outputs.cache-hit != 'true'
       uses: actions/download-artifact@v5
       with:
-        name: dav1d-android-arm64
+        name: dav1d-${{ env.SYSTEM }}-${{ env.ARCH }}
         path: dav1d-install
     - name: Download libjxl build
       if: steps.cache.outputs.cache-hit != 'true'
       uses: actions/download-artifact@v5
       with:
-        name: libjxl-android-arm64
+        name: libjxl-${{ env.SYSTEM }}-${{ env.ARCH }}
         path: libjxl-install
     - name: Install Dependencies
       if: steps.cache.outputs.cache-hit != 'true'
@@ -332,7 +334,7 @@ jobs:
     - name: Upload build
       uses: actions/upload-artifact@v4
       with:
-        name: ffmpeg-android-arm64
+        name: ffmpeg-${{ env.SYSTEM }}-${{ env.ARCH }}
         path: ffmpeg-install
         if-no-files-found: error
         retention-days: 1
