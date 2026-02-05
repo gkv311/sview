@@ -1,4 +1,4 @@
-name: Build FFmpeg (macOS/Clang)
+name: Build FFmpeg (macOS)
 on:
   workflow_call:
 
@@ -77,6 +77,7 @@ jobs:
         name: libjxl-macos-arm64
         path: libjxl-install.tar
         if-no-files-found: error
+        retention-days: 1
 
   build-dav1d:
     runs-on: macos-15
@@ -127,6 +128,7 @@ jobs:
         name: dav1d-macos-arm64
         path: dav1d-install
         if-no-files-found: error
+        retention-days: 1
 
   build-ffmpeg:
     runs-on: macos-15
@@ -276,3 +278,4 @@ jobs:
         name: ffmpeg-macos-arm64
         path: ffmpeg-install.tar
         if-no-files-found: error
+        retention-days: 1

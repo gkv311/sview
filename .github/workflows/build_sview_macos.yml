@@ -1,4 +1,4 @@
-name: Build (macOS/Clang)
+name: Build (macOS)
 on:
   workflow_call:
 
@@ -76,6 +76,7 @@ jobs:
         name: freetype-macos-arm64
         path: freetype-install.tar
         if-no-files-found: error
+        retention-days: 1
 
   build-openal:
     runs-on: macos-15
@@ -139,6 +140,7 @@ jobs:
         name: openal-macos-arm64
         path: openal-install.tar
         if-no-files-found: error
+        retention-days: 1
 
   build-sview:
     runs-on: macos-15

@@ -1,4 +1,4 @@
-name: Build FFmpeg (Linux/Android)
+name: Build FFmpeg (Android)
 on:
   workflow_call:
 
@@ -74,6 +74,7 @@ jobs:
         name: mbedtls-android-arm64
         path: mbedtls-install
         if-no-files-found: error
+        retention-days: 1
 
   build-libjxl:
     runs-on: ubuntu-24.04
@@ -138,6 +139,7 @@ jobs:
         name: libjxl-android-arm64
         path: libjxl-install
         if-no-files-found: error
+        retention-days: 1
 
   build-dav1d:
     runs-on: ubuntu-24.04
@@ -186,6 +188,7 @@ jobs:
         name: dav1d-android-arm64
         path: dav1d-install
         if-no-files-found: error
+        retention-days: 1
 
   build-ffmpeg:
     runs-on: ubuntu-24.04
@@ -332,3 +335,4 @@ jobs:
         name: ffmpeg-android-arm64
         path: ffmpeg-install
         if-no-files-found: error
+        retention-days: 1

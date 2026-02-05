@@ -1,4 +1,4 @@
-name: Build (Linux/Android)
+name: Build (Android)
 on:
   workflow_call:
 
@@ -86,6 +86,7 @@ jobs:
         name: freetype-android-arm64
         path: freetype-install
         if-no-files-found: error
+        retention-days: 1
 
   build-libconfig:
     runs-on: ubuntu-24.04
@@ -137,6 +138,7 @@ jobs:
         name: libconfig-android-arm64
         path: libconfig-install
         if-no-files-found: error
+        retention-days: 1
 
   build-openal:
     runs-on: ubuntu-24.04
@@ -201,6 +203,7 @@ jobs:
         name: openal-android-arm64
         path: openal-install
         if-no-files-found: error
+        retention-days: 1
 
   build-sview:
     runs-on: ubuntu-24.04

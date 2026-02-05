@@ -78,6 +78,7 @@ jobs:
         name: freetype-windows-x64-msvc
         path: freetype-install
         if-no-files-found: error
+        retention-days: 1
 
   build-openal:
     runs-on: windows-latest
@@ -144,6 +145,7 @@ jobs:
         name: openal-windows-x64-msvc
         path: openal-install
         if-no-files-found: error
+        retention-days: 1
 
   build-openvr:
     runs-on: windows-latest
@@ -206,6 +208,7 @@ jobs:
         name: openvr-windows-x64-msvc
         path: openvr-install
         if-no-files-found: error
+        retention-days: 1
 
   build-sview:
     runs-on: windows-latest

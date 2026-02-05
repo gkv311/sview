@@ -1,4 +1,4 @@
-name: Build (Linux/MinGW)
+name: Build (MinGW)
 on:
   workflow_call:
 
@@ -83,6 +83,7 @@ jobs:
         name: freetype-windows-x64-mingw
         path: freetype-install
         if-no-files-found: error
+        retention-days: 1
 
   build-openal:
     runs-on: ubuntu-24.04
@@ -143,6 +144,7 @@ jobs:
         name: openal-windows-x64-mingw
         path: openal-install
         if-no-files-found: error
+        retention-days: 1
 
   build-openvr:
     runs-on: ubuntu-24.04
@@ -211,6 +213,7 @@ jobs:
         name: openvr-windows-x64-mingw
         path: openvr-install
         if-no-files-found: error
+        retention-days: 1
 
   build-sview:
     runs-on: ubuntu-24.04

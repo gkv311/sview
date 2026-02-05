@@ -1,4 +1,4 @@
-name: Build FFmpeg (Linux/MinGW)
+name: Build FFmpeg (MinGW)
 on:
   workflow_call:
 
@@ -87,6 +87,7 @@ jobs:
         name: libjxl-windows-x64-mingw
         path: libjxl-install
         if-no-files-found: error
+        retention-days: 1
 
   build-dav1d:
     runs-on: ubuntu-24.04
@@ -135,6 +136,7 @@ jobs:
         name: dav1d-windows-x64-mingw
         path: dav1d-install
         if-no-files-found: error
+        retention-days: 1
 
   build-ffmpeg:
     runs-on: ubuntu-24.04
@@ -272,3 +274,4 @@ jobs:
         name: ffmpeg-windows-x64-mingw
         path: ffmpeg-install
         if-no-files-found: error
+        retention-days: 1
