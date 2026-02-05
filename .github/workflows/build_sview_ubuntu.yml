@@ -3,8 +3,12 @@ on:
   workflow_call:
 
 jobs:
-  build-ubuntu-24-04:
-    runs-on: ubuntu-24.04
+  # build sView on Linux using standard toolchain (e.g. gcc)
+  build:
+    strategy:
+      matrix:
+        os: [ubuntu-24.04, ubuntu-22.04]
+    runs-on: ${{ matrix.os }}
     steps:
     - name: Clone Tree
       uses: actions/checkout@v6
@@ -24,31 +28,50 @@ jobs:
           libconfig++-dev libconfig-dev \
           libxrandr-dev libxpm-dev \
           libavcodec-dev libavdevice-dev libavformat-dev libavutil-dev libswscale-dev
-    - name: Build
+    - name: Configure project
+      env:
+        SVIEW_CONFIG: |
+          set(USE_OPENVR    ON CACHE BOOL "")
+          set(USE_MONGOOSE  ON CACHE BOOL "")
+          set(USE_UPDATER  OFF CACHE BOOL "")
+          set(USE_STCONFIG OFF CACHE BOOL "")
+          set(BUILD_TREAT_WARNINGS_AS_ERRORS ON CACHE BOOL "")
+          set(CMAKE_INSTALL_PREFIX "${CMAKE_CURRENT_LIST_DIR}/sview-install" CACHE PATH "")
       run: |
-        bash ./sview.git/adm/ci/build_sview_linux.sh
+        echo "${SVIEW_CONFIG}" | tee ./sview-make.cmake
+        cmake -S ./sview.git -B ./sview-make -G Ninja --toolchain "$PWD/sview-make.cmake"
+    - name: Build project
+      run: |
+        cmake --build ./sview-make
+    - name: Install project
+      run: |
+        cmake --install ./sview-make --prefix ./sview-install
     - name: Install Dependencies for Testing
       run: |
         sudo apt-get install -y \
           xvfb scrot
     - name: Run tests
       run: |
-        export LD_LIBRARY_PATH=$PWD/sview.git/build/install/lib
+        export LD_LIBRARY_PATH=$PWD/sview-install/lib
         xvfb-run --server-args="-screen 0 1920x1080x24" bash \
-          ./sview.git/adm/ci/screenshot.sh ./sview.git/build/sview-player-linux.png 5 \
-          ./sview.git/build/install/bin/sView --windowLeft=100 --windowTop=100
+          ./sview.git/adm/ci/screenshot.sh ./sview-install/sview-player-linux.png 5 \
+          ./sview-install/bin/sView --windowLeft=100 --windowTop=100
         xvfb-run --server-args="-screen 0 1920x1080x24" bash \
-          ./sview.git/adm/ci/screenshot.sh ./sview.git/build/sview-viewer-linux.png 2 \
-          ./sview.git/build/install/bin/sView ./sview.git/share/sView/demo/demo.jps
+          ./sview.git/adm/ci/screenshot.sh ./sview-install/sview-viewer-linux.png 2 \
+          ./sview-install/bin/sView ./sview.git/share/sView/demo/demo.jps
     - name: Upload artifacts
       uses: actions/upload-artifact@v4
       with:
-        name: sview-linux-screenshots
-        path: ./sview.git/build/*.png
+        name: sview-${{ matrix.os }}-screenshots
+        path: ./sview-install/*.png
         if-no-files-found: error
 
-  build-ubuntu-24-04-debpkg:
-    runs-on: ubuntu-24.04
+  # build source package in Debian format for Ubuntu
+  debpkg:
+    strategy:
+      matrix:
+        os: [ubuntu-24.04]
+    runs-on: ${{ matrix.os }}
     steps:
     - name: Clone Tree
       uses: actions/checkout@v6
@@ -70,27 +93,3 @@ jobs:
     - name: Build
       run: |
         bash ./sview.git/distribution/buildDebSrc.sh
-
-  build-ubuntu-22-04:
-    runs-on: ubuntu-22.04
-    steps:
-    - name: Clone Tree
-      uses: actions/checkout@v6
-      with:
-        path: sview.git
-        fetch-depth: 1
-    - name: Install Dependencies
-      run: |
-        sudo apt-get update
-        sudo apt-get install -y \
-          g++ ninja-build \
-          libopenal-dev \
-          libopenvr-dev \
-          libgl-dev \
-          libfreetype-dev libfontconfig-dev \
-          libconfig++-dev libconfig-dev \
-          libxrandr-dev libxpm-dev \
-          libavcodec-dev libavdevice-dev libavformat-dev libavutil-dev libswscale-dev
-    - name: Build
-      run: |
-        ./sview.git/adm/ci/build_sview_linux.sh
