@@ -391,6 +391,14 @@ ST_WAV_MIME_STRING ";" \
 #define ST_SRT_MIME_STRING ST_SRT_MIME ":" ST_SRT_EXT ":" ST_SRT_DESC
 
 /**
+ *.vtt
+ */
+#define ST_VTT_MIME "text/vtt"
+#define ST_VTT_EXT  "vtt"
+#define ST_VTT_DESC "VTT - WebVTT caption files"
+#define ST_VTT_MIME_STRING ST_VTT_MIME ":" ST_VTT_EXT ":" ST_VTT_DESC
+
+/**
  *.smi
  */
 #define ST_SMI_MIME "subtitles/x-smi"
@@ -410,6 +418,7 @@ ST_WAV_MIME_STRING ";" \
  * Define Subtitles MIME list.
  */
 #define ST_VIDEO_PLUGIN_SUBTIT_MIME_CHAR ST_SRT_MIME_STRING ";" \
+ST_VTT_MIME_STRING ";" \
 ST_SMI_MIME_STRING ";" \
 ST_SUB_MIME_STRING ";" \
 "\000"

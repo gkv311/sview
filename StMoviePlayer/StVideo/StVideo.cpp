@@ -798,15 +798,19 @@ void StVideo::doSeekContext(AVFormatContext* theFormatCtx,
     } else if(myAudio->isInContext(theFormatCtx)) {
         //
     } else if(mySubtitles1->isInContext(theFormatCtx)) {
-        if(mySubtitles1->getFileName().isEndsWithIgnoreCase(stCString(".srt"))) {
-            // workaround SRT seeking issues - make a heavy seek (usual size of SRT file is not greater than 200 KiB)
+        if (mySubtitles1->getFileName().isEndsWithIgnoreCase(stCString(".srt"))
+         || mySubtitles1->getFileName().isEndsWithIgnoreCase(stCString(".vtt"))) {
+            // workaround SRT seeking issues - make a heavy seek
+            // (usual size of SRT file is not greater than 200 KiB)
             isSeekDone = doSeekStream(theFormatCtx, mySubtitles1->getId(), 0.0, true);
         } else {
             isSeekDone = doSeekStream(theFormatCtx, mySubtitles1->getId(), theSeekPts, toSeekBack);
         }
     } else if(mySubtitles2->isInContext(theFormatCtx)) {
-        if(mySubtitles2->getFileName().isEndsWithIgnoreCase(stCString(".srt"))) {
-            // workaround SRT seeking issues - make a heavy seek (usual size of SRT file is not greater than 200 KiB)
+        if (mySubtitles2->getFileName().isEndsWithIgnoreCase(stCString(".srt"))
+         || mySubtitles2->getFileName().isEndsWithIgnoreCase(stCString(".vtt"))) {
+            // workaround SRT seeking issues - make a heavy seek
+            // (usual size of SRT file is not greater than 200 KiB)
             isSeekDone = doSeekStream(theFormatCtx, mySubtitles2->getId(), 0.0, true);
         } else {
             isSeekDone = doSeekStream(theFormatCtx, mySubtitles2->getId(), theSeekPts, toSeekBack);
