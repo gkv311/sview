@@ -21,7 +21,7 @@ env:
   CACHE_REV:    'cache3'
 
 jobs:
-  build-lin-mingw-libjxl:
+  build-libjxl:
     runs-on: ubuntu-24.04
     steps:
     - uses: actions/cache@v5
@@ -88,7 +88,7 @@ jobs:
         path: libjxl-install
         if-no-files-found: error
 
-  build-lin-mingw-dav1d:
+  build-dav1d:
     runs-on: ubuntu-24.04
     steps:
     - uses: actions/cache@v5
@@ -136,9 +136,9 @@ jobs:
         path: dav1d-install
         if-no-files-found: error
 
-  build-lin-mingw-ffmpeg:
+  build-ffmpeg:
     runs-on: ubuntu-24.04
-    needs: [build-lin-mingw-libjxl, build-lin-mingw-dav1d]
+    needs: [build-libjxl, build-dav1d]
     steps:
     - uses: actions/cache@v5
       id: cache

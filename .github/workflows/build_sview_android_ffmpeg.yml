@@ -20,7 +20,7 @@ env:
   CACHE_REV:    'cache1'
 
 jobs:
-  build-lin-android-mbedtls:
+  build-mbedtls:
     runs-on: ubuntu-24.04
     steps:
     - uses: actions/cache@v5
@@ -75,7 +75,7 @@ jobs:
         path: mbedtls-install
         if-no-files-found: error
 
-  build-lin-android-libjxl:
+  build-libjxl:
     runs-on: ubuntu-24.04
     steps:
     - uses: actions/cache@v5
@@ -139,7 +139,7 @@ jobs:
         path: libjxl-install
         if-no-files-found: error
 
-  build-lin-android-dav1d:
+  build-dav1d:
     runs-on: ubuntu-24.04
     steps:
     - uses: actions/cache@v5
@@ -187,9 +187,9 @@ jobs:
         path: dav1d-install
         if-no-files-found: error
 
-  build-lin-android-ffmpeg:
+  build-ffmpeg:
     runs-on: ubuntu-24.04
-    needs: [build-lin-android-libjxl, build-lin-android-dav1d, build-lin-android-mbedtls]
+    needs: [build-libjxl, build-dav1d, build-mbedtls]
     steps:
     - uses: actions/cache@v5
       id: cache

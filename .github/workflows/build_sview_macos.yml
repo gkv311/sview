@@ -16,7 +16,7 @@ env:
   CACHE_REV:    'cache4'
 
 jobs:
-  build-macos-freetype:
+  build-freetype:
     runs-on: macos-15
     steps:
     - uses: actions/cache@v5
@@ -77,7 +77,7 @@ jobs:
         path: freetype-install.tar
         if-no-files-found: error
 
-  build-macos-openal:
+  build-openal:
     runs-on: macos-15
     steps:
     - uses: actions/cache@v5
@@ -140,9 +140,9 @@ jobs:
         path: openal-install.tar
         if-no-files-found: error
 
-  build-macos-sview:
+  build-sview:
     runs-on: macos-15
-    needs: [build-macos-freetype, build-macos-openal]
+    needs: [build-freetype, build-openal]
     steps:
     - name: Clone Tree
       uses: actions/checkout@v6
@@ -221,7 +221,7 @@ jobs:
         path: sview-macos-arm64.tar
         if-no-files-found: error
 
-  build-macos-sview-brew:
+  build-sview-brew:
     runs-on: macos-15
     steps:
     - name: Clone Tree

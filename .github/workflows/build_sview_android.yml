@@ -25,7 +25,7 @@ env:
   CACHE_REV:    'cache2'
 
 jobs:
-  build-lin-android-freetype:
+  build-freetype:
     runs-on: ubuntu-24.04
     steps:
     - uses: actions/cache@v5
@@ -87,7 +87,7 @@ jobs:
         path: freetype-install
         if-no-files-found: error
 
-  build-lin-android-libconfig:
+  build-libconfig:
     runs-on: ubuntu-24.04
     steps:
     - uses: actions/cache@v5
@@ -138,7 +138,7 @@ jobs:
         path: libconfig-install
         if-no-files-found: error
 
-  build-lin-android-openal:
+  build-openal:
     runs-on: ubuntu-24.04
     steps:
     - uses: actions/cache@v5
@@ -202,9 +202,9 @@ jobs:
         path: openal-install
         if-no-files-found: error
 
-  build-lin-android-sview:
+  build-sview:
     runs-on: ubuntu-24.04
-    needs: [build-lin-android-freetype, build-lin-android-openal, build-lin-android-libconfig]
+    needs: [build-freetype, build-openal, build-libconfig]
     steps:
     - name: Clone Tree
       uses: actions/checkout@v6
@@ -284,7 +284,7 @@ jobs:
         compression-level: 0
 
   # the job performing build using old dependencies
-  build-lin-android-old:
+  build-old:
     runs-on: ubuntu-22.04
     steps:
     - name: Clone Tree

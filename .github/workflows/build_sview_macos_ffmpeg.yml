@@ -17,7 +17,7 @@ env:
   CACHE_REV:    'cache3'
 
 jobs:
-  build-macos-libjxl:
+  build-libjxl:
     runs-on: macos-15
     steps:
     - uses: actions/cache@v5
@@ -78,7 +78,7 @@ jobs:
         path: libjxl-install.tar
         if-no-files-found: error
 
-  build-macos-dav1d:
+  build-dav1d:
     runs-on: macos-15
     steps:
     - uses: actions/cache@v5
@@ -128,9 +128,9 @@ jobs:
         path: dav1d-install
         if-no-files-found: error
 
-  build-macos-ffmpeg:
+  build-ffmpeg:
     runs-on: macos-15
-    needs: [build-macos-libjxl, build-macos-dav1d]
+    needs: [build-libjxl, build-dav1d]
     steps:
     - uses: actions/cache@v5
       id: cache
