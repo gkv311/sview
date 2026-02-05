@@ -220,22 +220,3 @@ jobs:
         name: sview-macos-arm64
         path: sview-macos-arm64.tar
         if-no-files-found: error
-
-  build-sview-brew:
-    runs-on: macos-15
-    steps:
-    - name: Clone Tree
-      uses: actions/checkout@v6
-      with:
-        path: sview.git
-        fetch-depth: 1
-    - name: Install Dependencies
-      run: |
-        brew update
-        brew install \
-          freetype \
-          ffmpeg \
-          openal-soft
-    - name: Compile
-      run: |
-        ./sview.git/adm/ci/build_sview_osx.sh

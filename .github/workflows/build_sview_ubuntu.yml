@@ -53,10 +53,10 @@ jobs:
     - name: Run tests
       run: |
         export LD_LIBRARY_PATH=$PWD/sview-install/lib
-        xvfb-run --server-args="-screen 0 1920x1080x24" bash \
+        xvfb-run -a --server-args="-screen 0 1920x1080x24" bash \
           ./sview.git/adm/ci/screenshot.sh ./sview-install/sview-player-linux.png 5 \
           ./sview-install/bin/sView --windowLeft=100 --windowTop=100
-        xvfb-run --server-args="-screen 0 1920x1080x24" bash \
+        xvfb-run -a --server-args="-screen 0 1920x1080x24" bash \
           ./sview.git/adm/ci/screenshot.sh ./sview-install/sview-viewer-linux.png 2 \
           ./sview-install/bin/sView ./sview.git/share/sView/demo/demo.jps
     - name: Upload artifacts
@@ -93,3 +93,48 @@ jobs:
     - name: Build
       run: |
         bash ./sview.git/distribution/buildDebSrc.sh
+
+  # the job performing build for Android using old dependencies
+  build-android-fastcheck:
+    runs-on: ubuntu-24.04
+    steps:
+    - name: Clone Tree
+      uses: actions/checkout@v6
+      with:
+        path: sview.git
+        fetch-depth: 1
+    - name: Install Dependencies
+      run: |
+        sudo apt-get update
+        sudo apt-get install -y \
+          ninja-build
+    - name: Compile
+      run: |
+        ./sview.git/adm/ci/build_sview_android.sh
+    #- name: Upload artifacts
+    #  uses: actions/upload-artifact@v4
+    #  with:
+    #    name: sview-apk-old
+    #    path: sview.git/build/sView-Release.apk
+    #    if-no-files-found: error
+    #    compression-level: 0
+
+  # the job performing build for macOS using Homebrew dependencies
+  build-macos-brew:
+    runs-on: macos-15
+    steps:
+    - name: Clone Tree
+      uses: actions/checkout@v6
+      with:
+        path: sview.git
+        fetch-depth: 1
+    - name: Install Dependencies
+      run: |
+        brew update
+        brew install \
+          freetype \
+          ffmpeg \
+          openal-soft
+    - name: Compile
+      run: |
+        ./sview.git/adm/ci/build_sview_osx.sh
