@@ -8,23 +8,23 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
-  linux-gcc:
-    uses: ./.github/workflows/build_sview_linux_gcc.yml
-  linux-android-ffmpeg:
-    uses: ./.github/workflows/build_sview_linux_android_ffmpeg.yml
-  linux-android:
-    needs: [linux-android-ffmpeg]
-    uses: ./.github/workflows/build_sview_linux_android.yml
-  macos-clang-ffmpeg:
-    uses: ./.github/workflows/build_sview_macos_clang_ffmpeg.yml
-  macos-clang:
-    needs: [macos-clang-ffmpeg]
-    uses: ./.github/workflows/build_sview_macos_clang.yml
-  linux-mingw-ffmpeg:
-    uses: ./.github/workflows/build_sview_linux_mingw_ffmpeg.yml
-  linux-mingw:
-    needs: [linux-mingw-ffmpeg]
-    uses: ./.github/workflows/build_sview_linux_mingw.yml
-  windows-msvc:
-    needs: [linux-mingw-ffmpeg]
-    uses: ./.github/workflows/build_sview_windows_msvc.yml
+  ubuntu:
+    uses: ./.github/workflows/build_sview_ubuntu.yml
+  android-ffmpeg:
+    uses: ./.github/workflows/build_sview_android_ffmpeg.yml
+  android:
+    needs: [android-ffmpeg]
+    uses: ./.github/workflows/build_sview_android.yml
+  macos-ffmpeg:
+    uses: ./.github/workflows/build_sview_macos_ffmpeg.yml
+  macos:
+    needs: [macos-ffmpeg]
+    uses: ./.github/workflows/build_sview_macos.yml
+  mingw-ffmpeg:
+    uses: ./.github/workflows/build_sview_mingw_ffmpeg.yml
+  mingw:
+    needs: [mingw-ffmpeg]
+    uses: ./.github/workflows/build_sview_mingw.yml
+  windows:
+    needs: [mingw-ffmpeg]
+    uses: ./.github/workflows/build_sview_windows.yml
