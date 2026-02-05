@@ -100,21 +100,22 @@ jobs:
       if: steps.cache.outputs.cache-hit != 'true'
       env:
         OPENAL_CONFIG: |
-          set(ALSOFT_ENABLE_MODULES   OFF CACHE BOOL "")
-          set(ALSOFT_EXAMPLES         OFF CACHE BOOL "")
-          set(ALSOFT_TESTS            OFF CACHE BOOL "")
-          set(ALSOFT_UTILS             ON CACHE BOOL "")
-          set(ALSOFT_NO_CONFIG_UTIL    ON CACHE BOOL "")
-          set(ALSOFT_BUILD_ROUTER     OFF CACHE BOOL "")
-          set(ALSOFT_REQUIRE_WINMM    OFF CACHE BOOL "")
-          set(ALSOFT_REQUIRE_DSOUND   OFF CACHE BOOL "")
-          set(ALSOFT_REQUIRE_WASAPI   OFF CACHE BOOL "")
-          set(ALSOFT_REQUIRE_OPENSL   OFF CACHE BOOL "")
-          set(ALSOFT_BACKEND_OPENSL   OFF CACHE BOOL "")
-          set(ALSOFT_BACKEND_WAVE     OFF CACHE BOOL "")
-          set(ALSOFT_BACKEND_COREAUDIO ON CACHE BOOL "")
-          set(ALSOFT_REQUIRE_COREAUDIO ON CACHE BOOL "")
-          set(BUILD_SHARED_LIBS        ON CACHE BOOL "")
+          set(ALSOFT_UTILS           ON CACHE BOOL "")
+          set(ALSOFT_NO_CONFIG_UTIL  ON CACHE BOOL "")
+          set(ALSOFT_ENABLE_MODULES OFF CACHE BOOL "")
+          set(ALSOFT_EXAMPLES       OFF CACHE BOOL "")
+          set(ALSOFT_TESTS          OFF CACHE BOOL "")
+          set(ALSOFT_BUILD_ROUTER   OFF CACHE BOOL "")
+          # enable CoreAudio backend for macOS
+          set(ALSOFT_REQUIRE_WINMM     OFF CACHE BOOL "")
+          set(ALSOFT_REQUIRE_DSOUND    OFF CACHE BOOL "")
+          set(ALSOFT_REQUIRE_WASAPI    OFF CACHE BOOL "")
+          set(ALSOFT_BACKEND_OPENSL    OFF CACHE BOOL "")
+          set(ALSOFT_REQUIRE_OPENSL    OFF CACHE BOOL "")
+          set(ALSOFT_BACKEND_WAVE      OFF CACHE BOOL "")
+          set(ALSOFT_BACKEND_COREAUDIO  ON CACHE BOOL "")
+          set(ALSOFT_REQUIRE_COREAUDIO  ON CACHE BOOL "")
+          set(BUILD_SHARED_LIBS ON CACHE BOOL "")
           ${{ env.TOOLCHAIN_TEXT }}
           set(CMAKE_INSTALL_PREFIX "${CMAKE_CURRENT_LIST_DIR}/openal-install" CACHE PATH "")
       run: |
