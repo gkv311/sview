@@ -186,6 +186,9 @@ int main(int , char** ) {
 #endif
 
     const StString ARGUMENT_ANY        = "--";
+    const StString ARGUMENT_PAUSE      = "pause";
+    const StString ARGUMENT_NOOPEN     = "noopen";
+    const StString ARGUMENT_NOHTML     = "nohtml";
     const StString ARGUMENT_SET_PNPID  = "setPnPid";
     const StString ARGUMENT_SET_PNPID2 = "setId";
     const StString ARGUMENT_IN_EDID    = "in";
@@ -196,6 +199,9 @@ int main(int , char** ) {
 
     StString aPnPIdReplace, anOutEdidFilename, anOutInfFilename;
     StEDIDParser anInputEdid;
+    bool toCreateHtml = true;
+    bool toOpenHtml = true;
+    bool toPause = false;
 
     StArrayList<StString> anArgs = StProcess::getArguments();
     for(size_t aParamIter = 1; aParamIter < anArgs.size(); ++aParamIter) {
@@ -238,13 +244,21 @@ int main(int , char** ) {
                 return -1;
             }
             anOutInfFilename = anArg.getValue();
+        } else if(anArg.getKey().isEqualsIgnoreCase(ARGUMENT_NOHTML)) {
+            toCreateHtml = false;
+        } else if(anArg.getKey().isEqualsIgnoreCase(ARGUMENT_NOOPEN)) {
+            toOpenHtml = false;
+        } else if(anArg.getKey().isEqualsIgnoreCase(ARGUMENT_PAUSE)) {
+            toPause = true;
         } else if(anArg.getKey().isEqualsIgnoreCase(ARGUMENT_HELP)) {
             st::cout << stostream_text("Usage:\n")
                      << stostream_text("  --help          Show this help\n")
                      << stostream_text("  --setId=AAA0000 New PnPID to override with\n")
                      << stostream_text("  --in=file       Filename for binary EDID dump to read\n")
                      << stostream_text("  --out=file      Filename for binary EDID dump to write\n")
-                     << stostream_text("  --genInf=file   Filename for generation of driver INF file\n");
+                     << stostream_text("  --genInf=file   Filename for generation of driver INF file\n")
+                     << stostream_text("  --nohtml        Do not create HTML report\n")
+                     << stostream_text("  --noopen        Do not open generated HTML report\n");
             return 0;
         }
     }
@@ -327,6 +341,9 @@ int main(int , char** ) {
     }
     st::cout << aDumpStr;
     st::cout << stostream_text("\n\n");
+    if (!toCreateHtml) {
+        return 0;
+    }
 
     std::ofstream aFileOut;
     bool isTmpFile = false;
@@ -338,9 +355,11 @@ int main(int , char** ) {
         aFileOut.open(aFileName.toCString());
         if(aFileOut.fail()) {
             st::cout << st::COLOR_FOR_RED << stostream_text("Couldn't open file \"stMonitorsDump.htm\"!\n") << st::COLOR_FOR_WHITE;
-        #if !defined(__APPLE__)
-            st::cout << stostream_text("Press any key to exit...") << st::SYS_PAUSE_EMPTY;
-        #endif
+            if (toPause) {
+            #if defined(_WIN32)
+                st::cout << stostream_text("Press any key to exit...") << st::SYS_PAUSE_EMPTY;
+            #endif
+            }
             return -1;
         }
     }
@@ -351,11 +370,15 @@ int main(int , char** ) {
 
     st::cout << st::COLOR_FOR_GREEN << stostream_text("Dump stored to file \"stMonitorsDump.htm\"\n") << st::COLOR_FOR_WHITE;
 
-    StProcess::openURL(aFileName);
-#if !defined(__APPLE__)
-    st::cout << stostream_text("Press any key to exit...") << st::SYS_PAUSE_EMPTY;
-#endif
-    if(isTmpFile) {
+    if (toOpenHtml) {
+        StProcess::openURL(aFileName);
+    }
+    if (toPause) {
+    #if defined(_WIN32)
+        st::cout << stostream_text("Press any key to exit...") << st::SYS_PAUSE_EMPTY;
+    #endif
+    }
+    if (isTmpFile) {
         StFileNode::removeFile(aFileName);
     }
     return 0;
