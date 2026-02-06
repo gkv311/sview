@@ -16,7 +16,7 @@ env:
   OPENJPEG_REF: 'v2.5.4'
   DAV1_REF:     '1.5.3'
   LIBJXL_REF:   'v0.11.1'
-  CACHE_REV:    'cache3'
+  CACHE_REV:    'cache10'
 
 jobs:
   build-libjxl:
@@ -36,6 +36,12 @@ jobs:
         ref: ${{ env.LIBJXL_REF }}
         fetch-depth: 1
         submodules: 'true'
+    - name: Clone sView Tree
+      if: steps.cache.outputs.cache-hit != 'true'
+      uses: actions/checkout@v6
+      with:
+        path: sview.git
+        fetch-depth: 1
     - name: Configure project
       if: steps.cache.outputs.cache-hit != 'true'
       env:
@@ -49,8 +55,11 @@ jobs:
           set(JPEGXL_ENABLE_PLUGINS   OFF CACHE BOOL "")
           set(JPEGXL_ENABLE_TOOLS     OFF CACHE BOOL "")
           set(JPEGXL_ENABLE_DEVTOOLS  OFF CACHE BOOL "")
+          set(JPEGXL_ENABLE_SJPEG     OFF CACHE BOOL "")
+          set(JPEGXL_ENABLE_OPENEXR   OFF CACHE BOOL "")
           set(JPEGXL_TEST_TOOLS       OFF CACHE BOOL "")
           set(BUILD_TESTING           OFF CACHE BOOL "")
+          set(BUILD_SHARED_LIBS       OFF CACHE BOOL "")
           ${{ env.TOOLCHAIN_TEXT }}
           set(CMAKE_INSTALL_PREFIX "${CMAKE_CURRENT_LIST_DIR}/libjxl-install" CACHE PATH "")
       run: |
@@ -65,9 +74,15 @@ jobs:
       if: steps.cache.outputs.cache-hit != 'true'
       run: |
         cmake --install ./libjxl-make --prefix ./libjxl-install
-        cp -f "./libjxl.git/LICENSE"   "./libjxl-install/"
-        cp -f "./libjxl.git/README.md" "./libjxl-install/"
-        otool -l "./libjxl-install/lib/libjxl.dylib"
+    - name: Post install
+      if: steps.cache.outputs.cache-hit != 'true'
+      run: |
+        cp -f ./libjxl.git/LICENSE   ./libjxl-install/
+        cp -f ./libjxl.git/README.md ./libjxl-install/
+        # check shared library
+        #otool -l ./libjxl-install/lib/libjxl.dylib
+        # fix broken dependencies for static build (marked as 'private')
+        patch -d ./libjxl-install/lib -s -p0 < ./sview.git/3rdparty/FFmpeg/libjxl-static/libjxl-pkgconfig-static-clang.patch
     - name: Pack install
       run: |
         pushd ./libjxl-install
@@ -216,16 +231,13 @@ jobs:
         cmake --install ./openjpeg-make --prefix ./openjpeg-install
     - name: Configure FFmpeg
       if: steps.cache.outputs.cache-hit != 'true'
+      id: configure
       run: |
-        # --enable-libopenjpeg
         export PKG_CONFIG_LIBDIR=
         export PKG_CONFIG_PATH=$PWD/dav1d-install/lib/pkgconfig:$PWD/openjpeg-install/lib/pkgconfig:$PWD/libjxl-install/lib/pkgconfig:$PWD/mbedtls-install/lib/pkgconfig
-        aBuildRoot=$PWD
-        # redirect error state from tee
         set -o pipefail
         pushd ./ffmpeg.git
-        ./configure \
-          --prefix="$aBuildRoot/ffmpeg-install" \
+        if ./configure \
           --disable-debug --disable-stripping \
           --disable-doc \
           --extra-version=sView.ru \
@@ -236,11 +248,30 @@ jobs:
           --enable-runtime-cpudetect \
           --enable-libdav1d --enable-libjxl --enable-libopenjpeg \
           --disable-audiotoolbox \
+          --install-name-dir="@executable_path/../Frameworks" \
           --extra-cflags="-mmacosx-version-min=$MACOSX_DEPLOYMENT_TARGET -arch arm64" \
           --extra-ldflags="-mmacosx-version-min=$MACOSX_DEPLOYMENT_TARGET" \
-          --install-name-dir="@executable_path/../Frameworks" \
-          2>&1 | tee ../ffmpeg-config.log
+            2>&1 | tee ../ffmpeg-config.log; then
+          echo "status=true" >> $GITHUB_OUTPUT
+        else
+          echo "status=false" >> $GITHUB_OUTPUT
+        fi
         popd
+    - name: Upload FFmpeg configure log
+      if: steps.cache.outputs.cache-hit != 'true'
+      uses: actions/upload-artifact@v4
+      with:
+        name: ffmpeg-${{ env.SYSTEM }}-${{ env.ARCH }}-config.log
+        path: ffmpeg.git/ffbuild/config.log
+        if-no-files-found: error
+        retention-days: 1
+    - name: Check FFmpeg configure status
+      if: steps.cache.outputs.cache-hit != 'true'
+      run: |
+        if [ "${{ steps.configure.outputs.status }}" != "true" ]; then
+          echo "Error: configuration failed, check logs"
+          exit 1
+        fi
     - name: Build FFmpeg
       if: steps.cache.outputs.cache-hit != 'true'
       run: |
@@ -251,12 +282,15 @@ jobs:
     - name: Install FFmpeg
       if: steps.cache.outputs.cache-hit != 'true'
       run: |
+        export DESTDIR="$PWD/ffmpeg-install-tmp"
         pushd ./ffmpeg.git
         make install
         popd
-    - name: Post-install FFmpeg
+    - name: Post Install FFmpeg
       if: steps.cache.outputs.cache-hit != 'true'
       run: |
+        mkdir -p ./ffmpeg-install
+        mv ./ffmpeg-install-tmp/usr/local/* ./ffmpeg-install/
         ls -la ./ffmpeg-install/lib/
         cp -f ./ffmpeg-config.log           ./ffmpeg-install/
         cp -f ./ffmpeg.git/Changelog        ./ffmpeg-install/
@@ -265,9 +299,8 @@ jobs:
         cp -f ./ffmpeg.git/COPYING.LGPLv2.1 ./ffmpeg-install/
         cp -f ./ffmpeg.git/COPYING.LGPLv3   ./ffmpeg-install/
         # copy dependencies
-        cp -f -P ./libjxl-install/lib/*.dylib ./ffmpeg-install/lib/
+        #cp -f -P ./libjxl-install/lib/*.dylib ./ffmpeg-install/lib/
         otool -l "./ffmpeg-install/bin/ffmpeg"
-        #otool -l "./ffmpeg-install/lib/libavcodec.dylib"
         DYLD_LIBRARY_PATH=$PWD/ffmpeg-install/lib ./ffmpeg-install/bin/ffmpeg -version
     - name: Pack install
       run: |

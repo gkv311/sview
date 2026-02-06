@@ -287,6 +287,9 @@ jobs:
     - name: Run StMonitorsDump
       run: |
         ./sview-install/StMonitorsDump.exe --nohtml
+    #- name: Run FFmpeg
+    #  run: |
+    #    ./sview-install/ffmpeg.exe -version
     - name: Upload artifacts
       uses: actions/upload-artifact@v4
       with:

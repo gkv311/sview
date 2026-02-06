@@ -285,11 +285,13 @@ jobs:
       run: cmake --build ./sview-make
     - name: Install build
       run: |
-        cmake --install ./sview-make --prefix ./sview-install
-        cp -f ./freetype-install/bin/*.dll ./sview-install/
-        cp -f ./ffmpeg-install/bin/*.dll   ./sview-install/
-        cp -f ./openal-install/bin/*.dll   ./sview-install/
-        #cp -f ./openvr-install/bin/*.dll   ./sview-install/
+        cmake --install ./sview-make --prefix  ./sview-install
+        cp -f ./freetype-install/bin/*.dll     ./sview-install/
+        cp -f ./ffmpeg-install/bin/*.dll       ./sview-install/
+        cp -f ./ffmpeg-install/bin/ffmpeg.exe  ./sview-install/
+        cp -f ./ffmpeg-install/bin/ffprobe.exe ./sview-install/
+        cp -f ./openal-install/bin/*.dll       ./sview-install/
+        #cp -f ./openvr-install/bin/*.dll      ./sview-install/
         cp -f /usr/lib/gcc/${TOOLCHAIN_PREFIX}/13-posix/libstdc++-6.dll    ./sview-install/
         cp -f /usr/lib/gcc/${TOOLCHAIN_PREFIX}/13-posix/libgcc_s_seh-1.dll ./sview-install/
         /usr/${TOOLCHAIN_PREFIX}/bin/strip ./sview-install/libstdc++-6.dll --strip-unneeded
@@ -301,6 +303,10 @@ jobs:
       run: |
         xvfb-run -a --server-args="-screen 0 1920x1080x24" wine \
           ./sview-install/StMonitorsDump.exe --nohtml
+    - name: Run FFmpeg
+      run: |
+        xvfb-run -a --server-args="-screen 0 1920x1080x24" wine \
+          ./sview-install/ffmpeg.exe -version
     - name: Upload artifacts
       uses: actions/upload-artifact@v4
       with:
