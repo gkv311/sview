@@ -50,12 +50,20 @@ jobs:
       run: |
         sudo apt-get install -y \
           xvfb scrot
-    - name: Run tests
+    - name: Run StMonitorsDump
+      run: |
+        export LD_LIBRARY_PATH=$PWD/sview-install/lib
+        xvfb-run -a --server-args="-screen 0 1920x1080x24" \
+          ./sview-install/bin/StMonitorsDump --nohtml
+    - name: Run StMoviePlayer
       run: |
         export LD_LIBRARY_PATH=$PWD/sview-install/lib
         xvfb-run -a --server-args="-screen 0 1920x1080x24" bash \
           ./sview.git/adm/ci/screenshot.sh ./sview-install/sview-player-linux.png 5 \
           ./sview-install/bin/sView --windowLeft=100 --windowTop=100
+    - name: Run StImageViewer
+      run: |
+        export LD_LIBRARY_PATH=$PWD/sview-install/lib
         xvfb-run -a --server-args="-screen 0 1920x1080x24" bash \
           ./sview.git/adm/ci/screenshot.sh ./sview-install/sview-viewer-linux.png 2 \
           ./sview-install/bin/sView ./sview.git/share/sView/demo/demo.jps
@@ -138,3 +146,6 @@ jobs:
     - name: Compile
       run: |
         ./sview.git/adm/ci/build_sview_osx.sh
+    - name: Run StMonitorsDump
+      run: |
+        ./sview.git/build/Release.app/Contents/MacOS/StMonitorsDump --nohtml

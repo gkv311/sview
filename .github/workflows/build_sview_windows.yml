@@ -284,6 +284,9 @@ jobs:
     - name: Install build
       run: |
         cmake --install ./sview-make --prefix ./sview-install
+    - name: Run StMonitorsDump
+      run: |
+        ./sview-install/StMonitorsDump.exe --nohtml
     - name: Upload artifacts
       uses: actions/upload-artifact@v4
       with:

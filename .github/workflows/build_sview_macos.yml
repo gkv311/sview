@@ -214,6 +214,9 @@ jobs:
         cp -rf -P ./ffmpeg-install/lib/*.dylib   ./sview-install/sView.app/Contents/Frameworks/
         cp -rf -P ./openal-install/lib/*.dylib   ./sview-install/sView.app/Contents/Frameworks/
         cp -rf -P ./freetype-install/lib/*.dylib ./sview-install/sView.app/Contents/Frameworks/
+    - name: Run StMonitorsDump
+      run: |
+        ./sview-install/sView.app/Contents/MacOS/StMonitorsDump --nohtml
     - name: Pack install
       run: |
         pushd ./sview-install
