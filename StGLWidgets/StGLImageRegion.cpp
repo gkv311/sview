@@ -1566,7 +1566,11 @@ bool StGLImageRegion::doGesture(const StGestureEvent& theEvent) {
             return false;
         }
         case stEvent_Gesture1DoubleTap: {
-            doParamsReset(0);
+            bool isChanged = resetParams();
+            if (!params.IsFullscreen.isNull() && !isChanged) {
+                /// TODO add option
+                params.IsFullscreen->reverse();
+            }
             //aParams->ScaleFactor = 1.0f;
             return true;
         }
@@ -1693,14 +1697,18 @@ void StGLImageRegion::doParamsRotXDown(const double ) {
     params.stereoFile->setXRotate(anXRotate);
 }
 
-void StGLImageRegion::doParamsReset(const size_t ) {
-    params.SeparationDX->reset();
-    params.SeparationDY->reset();
-    params.SeparationRot->reset();
+bool StGLImageRegion::resetParams() {
+    bool hasChanges = false;
+    hasChanges = params.SeparationDX->reset() || hasChanges;
+    hasChanges = params.SeparationDY->reset() || hasChanges;
+    hasChanges = params.SeparationRot->reset() || hasChanges;
     if(!params.stereoFile.isNull()) {
-        params.stereoFile->reset();
+        hasChanges = params.stereoFile->reset() || hasChanges;
     }
-    onParamsChanged();
+    if (hasChanges) {
+        onParamsChanged();
+    }
+    return hasChanges;
 }
 
 void StGLImageRegion::onParamsChanged() {

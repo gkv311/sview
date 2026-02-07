@@ -402,7 +402,22 @@ class StStereoParams {
     /**
      * Reset parameters.
      */
-    void reset() {
+    bool reset() {
+        if (mySepDxPx == 0
+            && mySepDyPx == 0
+            && mySepRotDegrees == 0.0f
+            && myXRotateDegrees == 0.0f
+            && myYRotateDegrees == 0.0f
+            && myZRotateDegrees == 0.0f
+            && PanCenter.x() == 0.0f
+            && PanCenter.y() == 0.0f
+            && myPanPitch == 0.0f
+            && myPanYaw == 0.0f
+            && ScaleFactor == 1.0f
+            && !ToSwapLR) {
+            return false;
+        }
+
         mySepDxPx = mySepDyPx = 0;
         mySepRotDegrees  = 0.0f;
         myXRotateDegrees = 0.0f;
@@ -414,6 +429,7 @@ class StStereoParams {
         myPanYaw      = 0.0f;
         ScaleFactor   = 1.0f;
         ToSwapLR      = false;
+        return true;
     }
 
         public:

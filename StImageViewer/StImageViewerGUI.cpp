@@ -1307,6 +1307,7 @@ StImageViewerGUI::StImageViewerGUI(StImageViewer*  thePlugin,
     myImage->changeIconNext()->setDrawShadow(true);
     myImage->signals.onOpenItem = stSlot(myPlugin, &StImageViewer::doFileNext);
     myImage->setPlayList(thePlayList);
+    myImage->params.IsFullscreen = myPlugin->params.IsFullscreen;
     myImage->params.DisplayMode->setName(tr(MENU_VIEW_DISPLAY_MODE));
     myImage->params.DisplayMode->changeValues()[StGLImageRegion::MODE_STEREO]     = tr(MENU_VIEW_DISPLAY_MODE_STEREO);
     myImage->params.DisplayMode->changeValues()[StGLImageRegion::MODE_ONLY_LEFT]  = tr(MENU_VIEW_DISPLAY_MODE_LEFT);

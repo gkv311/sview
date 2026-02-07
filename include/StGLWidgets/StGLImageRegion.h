@@ -201,6 +201,7 @@ class StGLImageRegion : public StGLWidget {
         public: //! @name Properties
 
     struct {
+        StHandle<StBoolParamNamed>    IsFullscreen;          //!< fullscreen state
 
         StHandle<StEnumParam>         DisplayMode;           //!< StGLImageRegion::DisplayMode    - display mode
         StHandle<StEnumParam>         DisplayRatio;          //!< StGLImageRegion::DisplayRatio   - display ratio
@@ -236,7 +237,7 @@ class StGLImageRegion : public StGLWidget {
      */
     ST_LOCAL void onParamsChanged();
 
-    ST_LOCAL void doParamsReset(const size_t );
+    ST_LOCAL void doParamsReset(const size_t ) { resetParams(); }
 
     ST_LOCAL void doParamsGamma(const size_t theDir) {
         if(!params.stereoFile.isNull()) {
@@ -333,7 +334,6 @@ class StGLImageRegion : public StGLWidget {
 
         private: //! @name private methods
 
-
     ST_LOCAL StGLVec2 getMouseMoveFlat(const StPointD_t& theCursorZoFrom,
                                        const StPointD_t& theCursorZoTo) const;
     ST_LOCAL StGLVec2 getMouseMoveSphere(const StPointD_t& theCursorZoFrom,
@@ -348,6 +348,8 @@ class StGLImageRegion : public StGLWidget {
     ST_LOCAL bool stglInitCube(const StGLVec4& theClampUV = StGLVec4(0.0f, 0.0f, 1.0f, 1.0f),
                                const StPanorama thePano = StPanorama_OFF);
     ST_LOCAL void stglDrawView(unsigned int theView);
+
+    ST_LOCAL bool resetParams();
 
         private: //! @name private fields
 

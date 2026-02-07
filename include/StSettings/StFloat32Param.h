@@ -238,8 +238,8 @@ class StFloat32Param : public StParam<float> {
     /**
      * Reset value to default.
      */
-    ST_LOCAL void reset() {
-        setValue(myDefValue);
+    ST_LOCAL bool reset() {
+        return setValue(myDefValue);
     }
 
     /**
