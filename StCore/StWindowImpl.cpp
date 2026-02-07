@@ -1452,6 +1452,38 @@ void StWindowImpl::doTouch(const StTouchEvent& theTouches) {
     }
 }
 
+void StWindowImpl::checkDoubleClick(const StEvent& theEvent) {
+    if (theEvent.Type != stEvent_MouseDown
+     && theEvent.Type == stEvent_MouseCancel) {
+        return;
+    }
+
+    if (theEvent.Button.Button != ST_MOUSE_LEFT
+     || theEvent.Type == stEvent_MouseCancel) {
+        myDoubleClickTimer.stop();
+        return;
+    }
+
+    // check double click
+    const StRectI_t& aWinRect = attribs.IsFullScreen ? myRectFull : myRectNorm;
+    const StPointD_t aNewPnt(theEvent.Button.PointX, theEvent.Button.PointY);
+    const StPointD_t aDeltaPx = (myDoubleClickPnt - aNewPnt) * StPointD_t(aWinRect.width(), aWinRect.height());
+    if (myDoubleClickTimer.isOn()
+     && myDoubleClickTimer.getElapsedTime() < 0.4
+     && aDeltaPx.cwiseAbs().maxComp() < 3) {
+        myStEvent2.Type = stEvent_Gesture1DoubleTap;
+        myStEvent2.Gesture.clearGesture();
+        myStEvent2.Gesture.Time = theEvent.Button.Time;
+        myStEvent2.Gesture.Point1X = (float )theEvent.Button.PointX;
+        myStEvent2.Gesture.Point1Y = (float )theEvent.Button.PointY;
+        myDoubleClickTimer.stop();
+        signals.onGesture->emit(myStEvent2.Gesture);
+    } else {
+        myDoubleClickTimer.restart();
+    }
+    myDoubleClickPnt = aNewPnt;
+}
+
 void StWindowImpl::swapEventsBuffers() {
     myEventsBuffer.swapBuffers();
     for(size_t anEventIter = 0; anEventIter < myEventsBuffer.getSize(); ++anEventIter) {
@@ -1491,30 +1523,7 @@ void StWindowImpl::swapEventsBuffers() {
             case stEvent_MouseCancel:
             case stEvent_MouseUp: {
                 signals.onMouseUp->emit(anEvent.Button);
-                if(anEvent.Button.Button != ST_MOUSE_LEFT
-                || anEvent.Type == stEvent_MouseCancel) {
-                    myDoubleClickTimer.stop();
-                    break;
-                }
-
-                // check double click
-                const StRectI_t& aWinRect = attribs.IsFullScreen ? myRectFull : myRectNorm;
-                const StPointD_t aNewPnt(anEvent.Button.PointX, anEvent.Button.PointY);
-                const StPointD_t aDeltaPx = (myDoubleClickPnt - aNewPnt) * StPointD_t(aWinRect.width(), aWinRect.height());
-                if(myDoubleClickTimer.isOn()
-                && myDoubleClickTimer.getElapsedTime() < 0.4
-                && aDeltaPx.cwiseAbs().maxComp() < 3) {
-                    myStEvent2.Type = stEvent_Gesture1DoubleTap;
-                    myStEvent2.Gesture.clearGesture();
-                    myStEvent2.Gesture.Time = anEvent.Button.Time;
-                    myStEvent2.Gesture.Point1X = (float )anEvent.Button.PointX;
-                    myStEvent2.Gesture.Point1Y = (float )anEvent.Button.PointY;
-                    myDoubleClickTimer.stop();
-                    signals.onGesture->emit(myStEvent2.Gesture);
-                } else {
-                    myDoubleClickTimer.restart();
-                }
-                myDoubleClickPnt = aNewPnt;
+                checkDoubleClick(anEvent);
                 break;
             }
             case stEvent_TouchDown:

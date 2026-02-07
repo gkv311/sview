@@ -1021,6 +1021,11 @@ void StWindowImpl::processEvents() {
                     myStEvent.Type = stEvent_MouseUp;
                     signals.onMouseUp->emit(myStEvent.Button);
                 }
+
+                // check double click
+                if (myStEvent.Type == stEvent_MouseUp) {
+                    checkDoubleClick(myStEvent);
+                }
                 break;
             }
             //case ResizeRequest:

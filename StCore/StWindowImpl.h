@@ -130,6 +130,11 @@ class StWindowImpl {
     ST_LOCAL void swapEventsBuffers();
 
     /**
+     * Check stEvent_MouseUp event and generate stEvent_Gesture1DoubleTap event.
+     */
+    ST_LOCAL void checkDoubleClick(const StEvent& theEvent);
+
+    /**
      * @return uptime in seconds for event
      */
     ST_LOCAL double getEventTime() const;
