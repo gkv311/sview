@@ -270,6 +270,7 @@ jobs:
       run: |
         if [ "${{ steps.configure.outputs.status }}" != "true" ]; then
           echo "Error: configuration failed, check logs"
+          tail -15 ./ffmpeg.git/ffbuild/config.log
           exit 1
         fi
     - name: Build FFmpeg

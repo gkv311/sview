@@ -19,7 +19,7 @@ env:
   LIBJXL_REF:   'v0.11.1'
   #MBEDTLS_REF:  'v4.0.0' untested
   MBEDTLS_REF:  'v3.6.5'
-  CACHE_REV:    'cache4'
+  CACHE_REV:    'cache5'
 
 jobs:
   build-mbedtls:
@@ -293,6 +293,14 @@ jobs:
       if: steps.cache.outputs.cache-hit != 'true'
       run: |
         cmake --install ./openjpeg-make --prefix ./openjpeg-install
+        # move -lm dependency from Libs.private to Libs for static build
+        pushd ./openjpeg-install/lib/pkgconfig
+        echo "=== Original libopenjp2.pc ==="
+        cat ./libopenjp2.pc
+        echo "=== Patched libopenjp2.pc ==="
+        sed -i -e 's/^Libs:.*/Libs: -L${libdir} -lopenjp2 -lm -pthread/g' ./libopenjp2.pc
+        cat ./libopenjp2.pc
+        pod
     - name: Configure FFmpeg
       if: steps.cache.outputs.cache-hit != 'true'
       id: configure
@@ -320,10 +328,10 @@ jobs:
           --enable-shared --disable-static \
           --enable-pthreads \
           --enable-runtime-cpudetect \
-          --enable-libdav1d --enable-libjxl \
+          --enable-libdav1d --enable-libjxl --enable-libopenjpeg \
           --enable-jni --enable-mediacodec --enable-mbedtls \
-          --extra-cflags="-march=armv8-a -I$aBuildRoot/dav1d-install/include -I$aBuildRoot/openjpeg-install/include -I$aBuildRoot/mbedtls-install/include" \
-          --extra-ldflags="-L$aBuildRoot/dav1d-install/lib -L$aBuildRoot/openjpeg-install/lib -L$aBuildRoot/mbedtls-install/lib" \
+          --extra-cflags="-march=armv8-a -I$aBuildRoot/dav1d-install/include -I$aBuildRoot/mbedtls-install/include" \
+          --extra-ldflags="-L$aBuildRoot/dav1d-install/lib -L$aBuildRoot/mbedtls-install/lib" \
             2>&1 | tee ../ffmpeg-config.log; then
           echo "status=true" >> $GITHUB_OUTPUT
         else
@@ -343,6 +351,7 @@ jobs:
       run: |
         if [ "${{ steps.configure.outputs.status }}" != "true" ]; then
           echo "Error: configuration failed, check logs"
+          tail -15 ./ffmpeg.git/ffbuild/config.log
           exit 1
         fi
     - name: Build FFmpeg
