@@ -19,7 +19,7 @@ env:
   LIBJXL_REF:   'v0.11.1'
   #MBEDTLS_REF:  'v4.0.0' untested
   MBEDTLS_REF:  'v3.6.5'
-  CACHE_REV:    'cache5'
+  CACHE_REV:    'cache8'
 
 jobs:
   build-mbedtls:
@@ -149,8 +149,28 @@ jobs:
         cp -f ./libjxl.git/README.md ./libjxl-install/
         # check shared library
         #otool -l ./libjxl-install/lib/libjxl.dylib
-        # fix broken dependencies for static build (marked as 'private')
-        patch -d ./libjxl-install/lib -s -p0 < ./sview.git/3rdparty/FFmpeg/libjxl-static/libjxl-pkgconfig-static-android.patch
+        # move dependencies from Libs.private to Libs for static build
+        pushd ./libjxl-install/lib/pkgconfig
+        echo "=== Original libjxl.pc ==="
+        cat ./libjxl.pc
+        echo "=== Patched libjxl.pc ==="
+        sed -i -e 's/^Requires:.*/Requires: libjxl_cms/g' ./libjxl.pc
+        sed -i -e 's/^Libs:.*/Libs: -L${libdir} -ljxl -lhwy -lbrotlidec -lbrotlienc -lbrotlicommon -lm -lc++ -llog/g' ./libjxl.pc
+        sed -i -e 's/^Cflags:.*/Cflags: -I${includedir} -DJXL_STATIC_DEFINE/g' ./libjxl.pc
+        cat ./libjxl.pc
+        echo "=== Original libjxl_cms.pc ==="
+        cat ./libjxl_cms.pc
+        echo "=== Patched libjxl_cms.pc ==="
+        sed -i -e 's/^Libs:.*/Libs: -L${libdir} -ljxl_cms -lm -lc++ -llog/g' ./libjxl_cms.pc
+        sed -i -e 's/^Cflags:.*/Cflags: -I${includedir} -DJXL_CMS_STATIC_DEFINE/g' ./libjxl_cms.pc
+        cat ./libjxl_cms.pc
+        echo "=== Original libjxl_threads.pc ==="
+        cat ./libjxl_threads.pc
+        echo "=== Patched libjxl_threads.pc ==="
+        sed -i -e 's/^Libs:.*/Libs: -L${libdir} -ljxl_threads -lm -lc++ -llog/g' ./libjxl_threads.pc
+        sed -i -e 's/^Cflags:.*/Cflags: -I${includedir} -DJXL_THREADS_STATIC_DEFINE/g' ./libjxl_threads.pc
+        cat ./libjxl_threads.pc
+        popd
     - name: Upload build
       uses: actions/upload-artifact@v4
       with:
@@ -300,14 +320,15 @@ jobs:
         echo "=== Patched libopenjp2.pc ==="
         sed -i -e 's/^Libs:.*/Libs: -L${libdir} -lopenjp2 -lm -pthread/g' ./libopenjp2.pc
         cat ./libopenjp2.pc
-        pod
+        popd
     - name: Configure FFmpeg
       if: steps.cache.outputs.cache-hit != 'true'
       id: configure
       run: |
+        # Many libraries generate broken pkgconfig configuration for static build,
+        # and have to be patched for using with FFmpeg.
         # --enable-mbedtls cannot be found by ffmpeg configure via pkg-config,
         # so we pass -I and -L flags directly via --extra-cflags and --extra-ldflags.
-        # --enable-libopenjpeg cannot be found by ffmpeg configure anyhow, so removed for now.
         export PKG_CONFIG_LIBDIR=
         export PKG_CONFIG_PATH=$PWD/dav1d-install/lib/pkgconfig:$PWD/openjpeg-install/lib/pkgconfig:$PWD/libjxl-install/lib/pkgconfig:$PWD/mbedtls-install/lib/pkgconfig
         aBuildRoot=$PWD
