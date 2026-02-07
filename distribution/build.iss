@@ -196,8 +196,8 @@ Source: {#SVIEW_DISTR_PATH}\{#LIB_PREFIX}freetype.dll; DestDir: {app};  Flags: 6
 Source: {#SVIEW_DISTR_PATH}\av*.dll;                   DestDir: {app};  Flags: 64bit ignoreversion; Components: StCore
 Source: {#SVIEW_DISTR_PATH}\sw*.dll;                   DestDir: {app};  Flags: 64bit ignoreversion; Components: StCore
 Source: {#SVIEW_DISTR_PATH}\zlib1.dll;                 DestDir: {app};  Flags: 64bit ignoreversion; Components: StCore
-Source: {#SVIEW_DISTR_PATH}\libbrotli*.dll;            DestDir: {app};  Flags: 64bit ignoreversion; Components: StCore
-Source: {#SVIEW_DISTR_PATH}\libjx*.dll;                DestDir: {app};  Flags: 64bit ignoreversion; Components: StCore
+;Source: {#SVIEW_DISTR_PATH}\libbrotli*.dll;            DestDir: {app};  Flags: 64bit ignoreversion; Components: StCore
+;Source: {#SVIEW_DISTR_PATH}\libjx*.dll;                DestDir: {app};  Flags: 64bit ignoreversion; Components: StCore
 
 ; StRenderers -> StOutAnaglyph
 Source: {#SVIEW_DISTR_PATH}\lang\*StOutAnaglyph.lng;         DestDir: {app}\lang;                   Flags: ignoreversion recursesubdirs;       Components: StRenderers\StOutAnaglyph
