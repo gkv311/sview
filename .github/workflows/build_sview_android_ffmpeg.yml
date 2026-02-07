@@ -351,8 +351,8 @@ jobs:
           --enable-runtime-cpudetect \
           --enable-libdav1d --enable-libjxl --enable-libopenjpeg \
           --enable-jni --enable-mediacodec --enable-mbedtls \
-          --extra-cflags="-march=armv8-a -I$aBuildRoot/dav1d-install/include -I$aBuildRoot/mbedtls-install/include" \
-          --extra-ldflags="-L$aBuildRoot/dav1d-install/lib -L$aBuildRoot/mbedtls-install/lib" \
+          --extra-cflags="-march=armv8-a -I$aBuildRoot/mbedtls-install/include" \
+          --extra-ldflags="-L$aBuildRoot/mbedtls-install/lib" \
             2>&1 | tee ../ffmpeg-config.log; then
           echo "status=true" >> $GITHUB_OUTPUT
         else
