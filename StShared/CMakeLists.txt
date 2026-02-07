@@ -84,7 +84,7 @@ set (USED_MMFILES
   StFileNode.ObjC.mm
   StLogger.ObjC.mm
   StPListImpl.mm
-  StSocket.ObjC.mm
+  StProcess.ObjC.mm
   StStringUnicode.ObjC.mm
 )
 
