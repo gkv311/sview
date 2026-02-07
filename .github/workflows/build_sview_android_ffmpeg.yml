@@ -19,7 +19,7 @@ env:
   LIBJXL_REF:   'v0.11.1'
   #MBEDTLS_REF:  'v4.0.0' untested
   MBEDTLS_REF:  'v3.6.5'
-  CACHE_REV:    'cache8'
+  CACHE_REV:    'cache9'
 
 jobs:
   build-mbedtls:
@@ -67,9 +67,20 @@ jobs:
       if: steps.cache.outputs.cache-hit != 'true'
       run: |
         cmake --install ./mbedtls-make --prefix ./mbedtls-install
+    - name: Post install
+      if: steps.cache.outputs.cache-hit != 'true'
+      run: |
         cp -f "./mbedtls.git/LICENSE"   "./mbedtls-install/"
         cp -f "./mbedtls.git/README.md" "./mbedtls-install/"
         cp -f "./mbedtls.git/ChangeLog" "./mbedtls-install/"
+        # move dependencies from Requires.private to Libs for static build
+        pushd ./mbedtls-install/lib/pkgconfig
+        echo "=== Original mbedtls.pc ==="
+        cat ./mbedtls.pc
+        echo "=== Patched mbedtls.pc ==="
+        sed -i -e 's/^Libs:.*/Libs: -L${libdir} -lmbedtls -lmbedx509 -lmbedcrypto/g' ./mbedtls.pc
+        cat ./mbedtls.pc
+        popd
     - name: Upload build
       uses: actions/upload-artifact@v4
       with:
@@ -327,8 +338,6 @@ jobs:
       run: |
         # Many libraries generate broken pkgconfig configuration for static build,
         # and have to be patched for using with FFmpeg.
-        # --enable-mbedtls cannot be found by ffmpeg configure via pkg-config,
-        # so we pass -I and -L flags directly via --extra-cflags and --extra-ldflags.
         export PKG_CONFIG_LIBDIR=
         export PKG_CONFIG_PATH=$PWD/dav1d-install/lib/pkgconfig:$PWD/openjpeg-install/lib/pkgconfig:$PWD/libjxl-install/lib/pkgconfig:$PWD/mbedtls-install/lib/pkgconfig
         aBuildRoot=$PWD
@@ -351,8 +360,7 @@ jobs:
           --enable-runtime-cpudetect \
           --enable-libdav1d --enable-libjxl --enable-libopenjpeg \
           --enable-jni --enable-mediacodec --enable-mbedtls \
-          --extra-cflags="-march=armv8-a -I$aBuildRoot/mbedtls-install/include" \
-          --extra-ldflags="-L$aBuildRoot/mbedtls-install/lib" \
+          --extra-cflags="-march=armv8-a" \
             2>&1 | tee ../ffmpeg-config.log; then
           echo "status=true" >> $GITHUB_OUTPUT
         else
