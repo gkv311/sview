@@ -19,7 +19,7 @@ env:
   FREETYPE_REF: 'VER-2-14-1'
   OPENAL_REF:   '1.25.1'
   OPENVR_REF:   'v2.5.1'
-  CACHE_REV:    'cache3'
+  CACHE_REV:    'cache4'
 
 jobs:
   build-freetype:
@@ -131,9 +131,9 @@ jobs:
           set(ALSOFT_BACKEND_WAVE      OFF CACHE BOOL "")
           set(ALSOFT_BACKEND_COREAUDIO OFF CACHE BOOL "")
           set(ALSOFT_REQUIRE_COREAUDIO OFF CACHE BOOL "")
-          set(ALSOFT_STATIC_LIBGCC      ON CACHE BOOL "")
-          set(ALSOFT_STATIC_STDCXX      ON CACHE BOOL "")
-          set(ALSOFT_STATIC_WINPTHREAD  ON CACHE BOOL "")
+          set(ALSOFT_STATIC_LIBGCC     OFF CACHE BOOL "")
+          set(ALSOFT_STATIC_STDCXX     OFF CACHE BOOL "")
+          set(ALSOFT_STATIC_WINPTHREAD OFF CACHE BOOL "")
           ${{ env.TOOLCHAIN_TEXT }}
           set(CMAKE_INSTALL_PREFIX "${CMAKE_CURRENT_LIST_DIR}/openal-install" CACHE PATH "")
       run: |
@@ -146,8 +146,15 @@ jobs:
       if: steps.cache.outputs.cache-hit != 'true'
       run: |
         cmake --install ./openal-make --prefix ./openal-install
+    - name: Post build
+      if: steps.cache.outputs.cache-hit != 'true'
+      run: |
         cp -f "./openal.git/COPYING"   "./openal-install/"
         cp -f "./openal.git/README.md" "./openal-install/"
+        #cp -f /usr/${TOOLCHAIN_PREFIX}/lib/libwinpthread-1.dll             ./openal-install/bin/
+        #cp -f /usr/lib/gcc/${TOOLCHAIN_PREFIX}/13-posix/libstdc++-6.dll    ./openal-install/bin/
+        #cp -f /usr/lib/gcc/${TOOLCHAIN_PREFIX}/13-posix/libgcc_s_seh-1.dll ./openal-install/bin/
+        #/usr/${TOOLCHAIN_PREFIX}/bin/strip ./openal-install/bin/libstdc++-6.dll --strip-unneeded
     - name: Upload build
       uses: actions/upload-artifact@v4
       with:
@@ -216,6 +223,7 @@ jobs:
         cp -f ./openvr-install/lib/libopenvr_api64.dll.a ./openvr-install/lib/libopenvr_api.dll.a
         mkdir -p "./openvr-install/bin"
         mv -f ./openvr-install/lib/libopenvr_api64.dll   ./openvr-install/bin/
+        # generate header that could be used to link by MSVC
         python ./sview.git/3rdparty/openvr/cxx_header_generator.py -d ./openvr-install/include/
     - name: Upload build
       uses: actions/upload-artifact@v4
