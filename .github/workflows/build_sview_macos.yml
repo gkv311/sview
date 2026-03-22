@@ -73,7 +73,7 @@ jobs:
         tar -cf ../freetype-install.tar *
         popd
     - name: Upload build
-      uses: actions/upload-artifact@v4
+      uses: actions/upload-artifact@v6
       with:
         name: freetype-${{ env.SYSTEM }}-${{ env.ARCH }}
         path: freetype-install.tar
@@ -138,7 +138,7 @@ jobs:
         tar -cf ../openal-install.tar *
         popd
     - name: Upload build
-      uses: actions/upload-artifact@v4
+      uses: actions/upload-artifact@v6
       with:
         name: openal-${{ env.SYSTEM }}-${{ env.ARCH }}
         path: openal-install.tar
@@ -155,7 +155,7 @@ jobs:
         path: sview.git
         fetch-depth: 1
     - name: Download FreeType build
-      uses: actions/download-artifact@v5
+      uses: actions/download-artifact@v8
       with:
         name: freetype-${{ env.SYSTEM }}-${{ env.ARCH }}
         path: freetype-install
@@ -165,7 +165,7 @@ jobs:
         tar -xvf ./freetype-install.tar
         popd
     - name: Download OpenAL soft build
-      uses: actions/download-artifact@v5
+      uses: actions/download-artifact@v8
       with:
         name: openal-${{ env.SYSTEM }}-${{ env.ARCH }}
         path: openal-install
@@ -175,7 +175,7 @@ jobs:
         tar -xvf ./openal-install.tar
         popd
     - name: Download FFmpeg build
-      uses: actions/download-artifact@v5
+      uses: actions/download-artifact@v8
       with:
         name: ffmpeg-${{ env.SYSTEM }}-${{ env.ARCH }}
         path: ffmpeg-install
@@ -225,7 +225,7 @@ jobs:
         tar -cf ../sview-${{ env.SYSTEM }}-${{ env.ARCH }}.tar *
         popd
     - name: Upload build
-      uses: actions/upload-artifact@v4
+      uses: actions/upload-artifact@v6
       with:
         name: sview-${{ env.SYSTEM }}-${{ env.ARCH }}
         path: sview-${{ env.SYSTEM }}-${{ env.ARCH }}.tar

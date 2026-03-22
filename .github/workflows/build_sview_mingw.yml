@@ -80,7 +80,7 @@ jobs:
         cp -f "./freetype.git/docs/README"    "./freetype-install/"
         cp -f "./freetype.git/LICENSE.TXT"    "./freetype-install/"
     - name: Upload build
-      uses: actions/upload-artifact@v4
+      uses: actions/upload-artifact@v6
       with:
         name: freetype-${{ env.SYSTEM }}-${{ env.ARCH }}-mingw
         path: freetype-install
@@ -156,7 +156,7 @@ jobs:
         #cp -f /usr/lib/gcc/${TOOLCHAIN_PREFIX}/13-posix/libgcc_s_seh-1.dll ./openal-install/bin/
         #/usr/${TOOLCHAIN_PREFIX}/bin/strip ./openal-install/bin/libstdc++-6.dll --strip-unneeded
     - name: Upload build
-      uses: actions/upload-artifact@v4
+      uses: actions/upload-artifact@v6
       with:
         name: openal-${{ env.SYSTEM }}-${{ env.ARCH }}-mingw
         path: openal-install
@@ -226,7 +226,7 @@ jobs:
         # generate header that could be used to link by MSVC
         python ./sview.git/3rdparty/openvr/cxx_header_generator.py -d ./openvr-install/include/
     - name: Upload build
-      uses: actions/upload-artifact@v4
+      uses: actions/upload-artifact@v6
       with:
         name: openvr-${{ env.SYSTEM }}-${{ env.ARCH }}-mingw
         path: openvr-install
@@ -251,22 +251,22 @@ jobs:
           g++-mingw-w64-x86-64-posix gcc-mingw-w64-x86-64-posix
         ${TOOLCHAIN_PREFIX}-g++ --version
     - name: Download FreeType build
-      uses: actions/download-artifact@v5
+      uses: actions/download-artifact@v8
       with:
         name: freetype-${{ env.SYSTEM }}-${{ env.ARCH }}-mingw
         path: freetype-install
     - name: Download OpenAL soft build
-      uses: actions/download-artifact@v5
+      uses: actions/download-artifact@v8
       with:
         name: openal-${{ env.SYSTEM }}-${{ env.ARCH }}-mingw
         path: openal-install
     - name: Download OpenVR build
-      uses: actions/download-artifact@v5
+      uses: actions/download-artifact@v8
       with:
         name: openvr-${{ env.SYSTEM }}-${{ env.ARCH }}-mingw
         path: openvr-install
     - name: Download FFmpeg build
-      uses: actions/download-artifact@v5
+      uses: actions/download-artifact@v8
       with:
         name: ffmpeg-${{ env.SYSTEM }}-${{ env.ARCH }}-mingw
         path: ffmpeg-install
@@ -316,7 +316,7 @@ jobs:
         xvfb-run -a --server-args="-screen 0 1920x1080x24" wine \
           ./sview-install/ffmpeg.exe -version
     - name: Upload artifacts
-      uses: actions/upload-artifact@v4
+      uses: actions/upload-artifact@v6
       with:
         name: sview-${{ env.SYSTEM }}-${{ env.ARCH }}-mingw
         path: ./sview-install

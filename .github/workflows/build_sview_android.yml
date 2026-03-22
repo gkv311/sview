@@ -83,7 +83,7 @@ jobs:
         cp -f "./freetype.git/docs/README"    "./freetype-install/"
         cp -f "./freetype.git/LICENSE.TXT"    "./freetype-install/"
     - name: Upload build
-      uses: actions/upload-artifact@v4
+      uses: actions/upload-artifact@v6
       with:
         name: freetype-${{ env.SYSTEM }}-${{ env.ARCH }}
         path: freetype-install
@@ -135,7 +135,7 @@ jobs:
         cp -f "./libconfig.git/LICENSE" "./libconfig-install/"
         cp -f "./libconfig.git/README"  "./libconfig-install/"
     - name: Upload build
-      uses: actions/upload-artifact@v4
+      uses: actions/upload-artifact@v6
       with:
         name: libconfig-${{ env.SYSTEM }}-${{ env.ARCH }}
         path: libconfig-install
@@ -203,7 +203,7 @@ jobs:
         cp -f "./openal.git/COPYING"   "./openal-install/"
         cp -f "./openal.git/README.md" "./openal-install/"
     - name: Upload build
-      uses: actions/upload-artifact@v4
+      uses: actions/upload-artifact@v6
       with:
         name: openal-${{ env.SYSTEM }}-${{ env.ARCH }}
         path: openal-install
@@ -236,22 +236,22 @@ jobs:
         sudo apt-get install -y \
           g++ cmake ninja-build
     - name: Download libconfig build
-      uses: actions/download-artifact@v5
+      uses: actions/download-artifact@v8
       with:
         name: libconfig-${{ env.SYSTEM }}-${{ env.ARCH }}
         path: libconfig-install
     - name: Download FreeType build
-      uses: actions/download-artifact@v5
+      uses: actions/download-artifact@v8
       with:
         name: freetype-${{ env.SYSTEM }}-${{ env.ARCH }}
         path: freetype-install
     - name: Download OpenAL soft build
-      uses: actions/download-artifact@v5
+      uses: actions/download-artifact@v8
       with:
         name: openal-${{ env.SYSTEM }}-${{ env.ARCH }}
         path: openal-install
     - name: Download FFmpeg build
-      uses: actions/download-artifact@v5
+      uses: actions/download-artifact@v8
       with:
         name: ffmpeg-${{ env.SYSTEM }}-${{ env.ARCH }}
         path: ffmpeg-install
@@ -284,7 +284,7 @@ jobs:
       run: |
         cmake --build ./sview-make
     - name: Upload artifacts
-      uses: actions/upload-artifact@v4
+      uses: actions/upload-artifact@v6
       with:
         name: sview-${{ env.SYSTEM }}-${{ env.ARCH }}
         path: sview-make/sView-Release.apk

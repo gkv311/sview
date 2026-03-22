@@ -68,7 +68,7 @@ jobs:
           ./sview.git/adm/ci/screenshot.sh ./sview-install/sview-viewer-linux.png 2 \
           ./sview-install/bin/sView ./sview.git/share/sView/demo/demo.jps
     - name: Upload artifacts
-      uses: actions/upload-artifact@v4
+      uses: actions/upload-artifact@v6
       with:
         name: sview-${{ matrix.os }}-screenshots
         path: ./sview-install/*.png
@@ -120,7 +120,7 @@ jobs:
       run: |
         ./sview.git/adm/ci/build_sview_android.sh
     #- name: Upload artifacts
-    #  uses: actions/upload-artifact@v4
+    #  uses: actions/upload-artifact@v6
     #  with:
     #    name: sview-apk-old
     #    path: sview.git/build/sView-Release.apk

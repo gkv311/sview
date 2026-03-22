@@ -116,7 +116,7 @@ jobs:
         cat ./libjxl_threads.pc
         popd
     - name: Upload build
-      uses: actions/upload-artifact@v4
+      uses: actions/upload-artifact@v6
       with:
         name: libjxl-${{ env.SYSTEM }}-${{ env.ARCH }}-mingw
         path: libjxl-install
@@ -165,7 +165,7 @@ jobs:
       run: |
         ninja -C ./dav1d-make install
     - name: Upload build
-      uses: actions/upload-artifact@v4
+      uses: actions/upload-artifact@v6
       with:
         name: dav1d-${{ env.SYSTEM }}-${{ env.ARCH }}-mingw
         path: dav1d-install
@@ -206,13 +206,13 @@ jobs:
         fetch-depth: 1
     - name: Download dav1d build
       if: steps.cache.outputs.cache-hit != 'true'
-      uses: actions/download-artifact@v5
+      uses: actions/download-artifact@v8
       with:
         name: dav1d-${{ env.SYSTEM }}-${{ env.ARCH }}-mingw
         path: dav1d-install
     - name: Download libjxl build
       if: steps.cache.outputs.cache-hit != 'true'
-      uses: actions/download-artifact@v5
+      uses: actions/download-artifact@v8
       with:
         name: libjxl-${{ env.SYSTEM }}-${{ env.ARCH }}-mingw
         path: libjxl-install
@@ -283,7 +283,7 @@ jobs:
         popd
     - name: Upload FFmpeg configure log
       if: steps.cache.outputs.cache-hit != 'true'
-      uses: actions/upload-artifact@v4
+      uses: actions/upload-artifact@v6
       with:
         name: ffmpeg-${{ env.SYSTEM }}-${{ env.ARCH }}-config.log
         path: ffmpeg.git/ffbuild/config.log
@@ -327,7 +327,7 @@ jobs:
         cp -f /usr/${TOOLCHAIN_PREFIX}/lib/libwinpthread-1.dll ./ffmpeg-install/bin/
         cp -f /usr/${TOOLCHAIN_PREFIX}/lib/zlib1.dll           ./ffmpeg-install/bin/
     - name: Upload build
-      uses: actions/upload-artifact@v4
+      uses: actions/upload-artifact@v6
       with:
         name: ffmpeg-${{ env.SYSTEM }}-${{ env.ARCH }}-mingw
         path: ffmpeg-install

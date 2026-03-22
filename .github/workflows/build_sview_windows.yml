@@ -75,7 +75,7 @@ jobs:
         cp -f "./freetype.git/docs/README"    "./freetype-install/"
         cp -f "./freetype.git/LICENSE.TXT"    "./freetype-install/"
     - name: Upload build
-      uses: actions/upload-artifact@v4
+      uses: actions/upload-artifact@v6
       with:
         name: freetype-${{ env.SYSTEM }}-${{ env.ARCH }}-msvc
         path: freetype-install
@@ -150,7 +150,7 @@ jobs:
         cp -f "./openal.git/COPYING"   "./openal-install/"
         cp -f "./openal.git/README.md" "./openal-install/"
     - name: Upload build
-      uses: actions/upload-artifact@v4
+      uses: actions/upload-artifact@v6
       with:
         name: openal-${{ env.SYSTEM }}-${{ env.ARCH }}-msvc
         path: openal-install
@@ -213,7 +213,7 @@ jobs:
         mkdir -p "./openvr-install/bin"
         mv -f ./openvr-install/lib/openvr_api64.dll ./openvr-install/bin/
     - name: Upload build
-      uses: actions/upload-artifact@v4
+      uses: actions/upload-artifact@v6
       with:
         name: openvr-${{ env.SYSTEM }}-${{ env.ARCH }}-msvc
         path: openvr-install
@@ -234,22 +234,22 @@ jobs:
       with:
         arch: x64
     - name: Download FreeType build
-      uses: actions/download-artifact@v5
+      uses: actions/download-artifact@v8
       with:
         name: freetype-${{ env.SYSTEM }}-${{ env.ARCH }}-msvc
         path: freetype-install
     - name: Download OpenAL soft build
-      uses: actions/download-artifact@v5
+      uses: actions/download-artifact@v8
       with:
         name: openal-${{ env.SYSTEM }}-${{ env.ARCH }}-msvc
         path: openal-install
     - name: Download OpenVR build
-      uses: actions/download-artifact@v5
+      uses: actions/download-artifact@v8
       with:
         name: openvr-${{ env.SYSTEM }}-${{ env.ARCH }}-msvc
         path: openvr-install
     - name: Download FFmpeg build
-      uses: actions/download-artifact@v5
+      uses: actions/download-artifact@v8
       with:
         name: ffmpeg-${{ env.SYSTEM }}-${{ env.ARCH }}-mingw
         path: ffmpeg-install
@@ -291,7 +291,7 @@ jobs:
     #  run: |
     #    ./sview-install/ffmpeg.exe -version
     - name: Upload artifacts
-      uses: actions/upload-artifact@v4
+      uses: actions/upload-artifact@v6
       with:
         name: sview-${{ env.SYSTEM }}-${{ env.ARCH }}-msvc
         path: sview-install
