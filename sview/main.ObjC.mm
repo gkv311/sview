@@ -67,7 +67,10 @@ namespace {
         }
         myStApp.nullify();
         myTimer = NULL;
-        myIsThreaded = true;
+
+        // latest macOS versions cause sView crashes with background OpenGL thread
+        myIsThreaded = false;
+
         myIsStarted = false;
         return self;
     }
