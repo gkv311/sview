@@ -475,6 +475,9 @@ void loadDefaults(StLangMap& theStrings) {
     addAction(theStrings, StImageViewer::Action_PanoramaOnOff,
               "DoPanoramaOnOff",
               "Enable/disable panorama mode");
+    addAction(theStrings, StImageViewer::Action_TheaterOnOff,
+              "DoTheaterOnOff",
+              "Enable/disable theater mode");
     addAction(theStrings, StImageViewer::Action_ShowGUI,
               "DoShowGUI",
               "Show/hide GUI");

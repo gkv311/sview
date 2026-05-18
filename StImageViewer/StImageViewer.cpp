@@ -372,6 +372,11 @@ StImageViewer::StImageViewer(const StHandle<StResourceManager>& theResMgr,
         addAction(Action_PanoramaOnOff, anAction, ST_VK_P);
     }
     {
+        StHandle<StActionIntSlot> anAction = new StActionIntSlot(stCString("DoTheaterOnOff"), 0);
+        anAction->setSlot(stSlot(this, &StImageViewer::doTheaterOnOff));
+        addAction(Action_TheaterOnOff, anAction, ST_VK_P | ST_VF_CONTROL, ST_VK_T);
+    }
+    {
         StHandle<StActionIntSlot> anAction = new StActionIntSlot(stCString("DoOutStereoNormal"), StGLImageRegion::MODE_STEREO);
         anAction->setSlot(stSlot(this, &StImageViewer::doSetStereoOutput));
         addAction(Action_OutStereoNormal, anAction);
@@ -1319,6 +1324,17 @@ void StImageViewer::doSetStereoOutput(const size_t theMode) {
         return;
     }
     myGUI->myImage->params.DisplayMode->setValue((int32_t )theMode);
+}
+
+void StImageViewer::doTheaterOnOff(const size_t ) {
+    if(myLoader.isNull()) {
+        return;
+    }
+
+    myLoader->setTheaterMode(!myLoader->isTheaterMode());
+    if (!myPlayList->isEmpty()) {
+        myLoader->doLoadNext();
+    }
 }
 
 void StImageViewer::doPanoramaOnOff(const size_t ) {

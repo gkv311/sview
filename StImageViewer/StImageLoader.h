@@ -136,6 +136,11 @@ class StImageLoader {
     ST_LOCAL void setCompressMemory(const bool theToCompress);
 
     /**
+     * Get theater mode.
+     */
+    ST_LOCAL bool isTheaterMode() const { return myIsTheaterMode; }
+
+    /**
      * Set theater mode.
      */
     ST_LOCAL void setTheaterMode(bool theIsTheater) {
