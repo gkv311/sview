@@ -164,7 +164,7 @@ if (APPLE)
   add_custom_command (TARGET ${PROJECT_NAME} POST_BUILD
     COMMAND cp -R -f "${FREETYPE_LIBRARY_DIR}/libfreetype*.dylib" "$<TARGET_FILE_DIR:${PROJECT_NAME}>/../Frameworks")
   add_custom_command (TARGET ${PROJECT_NAME} POST_BUILD
-    COMMAND cp -R -f "${OPENAL_LIBRARY_DIR}/libopenal*.dylib" "$<TARGET_FILE_DIR:${PROJECT_NAME}>/../Frameworks")
+    COMMAND cp -R -f "${OPENAL_LIBRARY_DIR}/OpenAL.framework" "$<TARGET_FILE_DIR:${PROJECT_NAME}>/../Frameworks")
 
   foreach (aLibIter ${FFMPEG_TKLIST})
     add_custom_command (TARGET ${PROJECT_NAME} POST_BUILD
