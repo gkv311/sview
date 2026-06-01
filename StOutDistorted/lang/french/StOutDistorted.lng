@@ -13,6 +13,7 @@
 1120=Distortion
 1121=None
 1123=Show Mono in Stereo
+?1124=Mirror VR to window
 2000=sView - Distorted Output module
 2001=version
 2002=© {0} Kirill Gavrilov Tartynskih <{1}>\nSite Officiel: {2}

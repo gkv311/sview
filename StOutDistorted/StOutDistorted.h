@@ -268,6 +268,7 @@ class StOutDistorted : public StWindow {
 
         StHandle<StEnumParam>      Layout;   //!< pair layout
         StHandle<StBoolParamNamed> MonoClone;//!< display mono in stereo
+        StHandle<StBoolParamNamed> MirrorWindow;//!< mirror VR fullscreen content to window
 
     } params;
 

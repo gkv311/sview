@@ -56,6 +56,7 @@ namespace {
         STTR_PARAMETER_DISTORTION = 1120,
         STTR_PARAMETER_DISTORTION_OFF    = 1121,
         STTR_PARAMETER_MONOCLONE         = 1123,
+        STTR_PARAMETER_MIRROR_WINDOW     = 1124,
 
         // about info
         STTR_PLUGIN_TITLE       = 2000,
@@ -170,11 +171,13 @@ void StOutDistorted::getDevices(StOutDevicesList& theList) const {
 }
 
 void StOutDistorted::getOptions(StParamsList& theList) const {
-    if(myDevice != DEVICE_HMD
-    && myDevice != DEVICE_S3DV) {
+    if (myDevice != DEVICE_HMD
+     && myDevice != DEVICE_S3DV) {
         theList.add(params.Layout);
     }
-    if(myDevice != DEVICE_HMD) {
+    if (myDevice == DEVICE_HMD) {
+        theList.add(params.MirrorWindow);
+    } else {
         theList.add(params.MonoClone);
     }
 }
@@ -192,6 +195,7 @@ void StOutDistorted::updateStrings() {
     }
 
     params.MonoClone->setName(aLangMap.changeValueId(STTR_PARAMETER_MONOCLONE, "Show Mono in Stereo"));
+    params.MirrorWindow->setName(aLangMap.changeValueId(STTR_PARAMETER_MIRROR_WINDOW, "Mirror VR to window"));
 
     params.Layout->setName(aLangMap.changeValueId(STTR_PARAMETER_LAYOUT, "Layout"));
     params.Layout->defineOption(LAYOUT_SIDE_BY_SIDE_ANAMORPH, aLangMap.changeValueId(STTR_PARAMETER_LAYOUT_SBS_ANAMORPH,       "Side-by-Side (Anamorph)"));
@@ -321,6 +325,7 @@ StOutDistorted::StOutDistorted(const StHandle<StResourceManager>& theResMgr,
 
     // Distortion parameters
     params.MonoClone = new StBoolParamNamed(false, stCString("monoClone"), stCString("monoClone"));
+    params.MirrorWindow = new StBoolParamNamed(false, stCString("mirrorWindow"), stCString("mirrorWindow"));
     // Layout option
     params.Layout = new StEnumParam(myCanHdmiPack ? LAYOUT_OVER_UNDER : LAYOUT_SIDE_BY_SIDE_ANAMORPH, stCString("layout"), stCString("layout"));
     updateStrings();
@@ -334,6 +339,7 @@ StOutDistorted::StOutDistorted(const StHandle<StResourceManager>& theResMgr,
         StWindow::setPlacement(aRect, true);
     }
     mySettings->loadParam(params.MonoClone);
+    mySettings->loadParam(params.MirrorWindow);
     mySettings->loadParam(params.Layout);
     checkHdmiPack();
     StWindow::setTitle("sView - Distorted Renderer");
@@ -380,6 +386,7 @@ void StOutDistorted::beforeClose() {
 
     mySettings->saveParam(params.Layout);
     mySettings->saveParam(params.MonoClone);
+    mySettings->saveParam(params.MirrorWindow);
     mySettings->saveFloatVec4(ST_SETTING_WARP_COEF, myBarrelCoef);
     mySettings->saveFloatVec4(ST_SETTING_CHROME_AB, myChromAb);
     if(myWasUsed) {
@@ -898,7 +905,27 @@ void StOutDistorted::stglDrawVR() {
     // real screen buffer
     myContext->stglBindFramebuffer(StGLFrameBuffer::NO_FRAMEBUFFER);
 
-    if(hasComposError || myVrToDrawMsg || myVrMsgTimer.getElapsedTimeInSec() > 2.0) {
+    if (!hasComposError && params.MirrorWindow->getValue()) {
+        // the rendering into window in parallel of VR is undesired,
+        // as it might add some lags...
+        myContext->stglResizeViewport(aVPBoth);
+        myContext->stglResetScissorRect();
+        myContext->core20fwd->glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
+        myFrBuffer->bindTexture(*myContext);
+        myProgramFlat->use(*myContext);
+        myFrVertsBuf.bindVertexAttrib(*myContext, myProgramFlat->getVVertexLoc());
+        myFrTCrdsBuf.bindVertexAttrib(*myContext, myProgramFlat->getVTexCoordLoc());
+
+        myContext->core20fwd->glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
+
+        myFrTCrdsBuf.unBindVertexAttrib(*myContext, myProgramFlat->getVTexCoordLoc());
+        myFrVertsBuf.unBindVertexAttrib(*myContext, myProgramFlat->getVVertexLoc());
+        myProgramFlat->unuse(*myContext);
+        myFrBuffer->unbindTexture(*myContext);
+
+        StWindow::stglSwap(ST_WIN_ALL);
+    } else if (hasComposError || myVrToDrawMsg || myVrMsgTimer.getElapsedTimeInSec() > 2.0) {
         myContext->stglResizeViewport(aVPBoth);
         myContext->stglResetScissorRect();
         myContext->core20fwd->glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
