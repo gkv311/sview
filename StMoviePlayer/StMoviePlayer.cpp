@@ -684,6 +684,11 @@ StMoviePlayer::StMoviePlayer(const StHandle<StResourceManager>& theResMgr,
         addAction(Action_PanoramaOnOff, anAction, ST_VK_P);
     }
     {
+        StHandle<StActionIntSlot> anAction = new StActionIntSlot(stCString("DoTheaterOnOff"), 0);
+        anAction->setSlot(stSlot(this, &StMoviePlayer::doTheaterOnOff));
+        addAction(Action_TheaterOnOff, anAction, ST_VK_P | ST_VF_CONTROL);
+    }
+    {
         StHandle<StActionIntSlot> anAction = new StActionIntSlot(stCString("DoOutStereoNormal"), StGLImageRegion::MODE_STEREO);
         anAction->setSlot(stSlot(this, &StMoviePlayer::doSetStereoOutput));
         addAction(Action_OutStereoNormal, anAction);
@@ -2097,6 +2102,14 @@ void StMoviePlayer::doSwitchViewMode(const int32_t theMode) {
     }
 
     myVideo->setTheaterMode(theMode == StViewSurface_Theater);
+}
+
+void StMoviePlayer::doTheaterOnOff(const size_t ) {
+    if(myVideo.isNull()) {
+        return;
+    }
+
+    myVideo->setTheaterMode(!myVideo->isTheaterMode());
 }
 
 void StMoviePlayer::doPanoramaOnOff(const size_t ) {

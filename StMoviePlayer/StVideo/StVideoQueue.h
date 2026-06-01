@@ -194,6 +194,11 @@ class StVideoQueue : public StAVPacketQueue {
     }
 
     /**
+     * Get theater mode.
+     */
+    ST_LOCAL bool isTheaterMode() const { return myIsTheaterMode; }
+
+    /**
      * Set theater mode.
      */
     ST_LOCAL void setTheaterMode(bool theIsTheater) {

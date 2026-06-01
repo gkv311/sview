@@ -164,6 +164,11 @@ class StVideo {
     ST_LOCAL void setStereoFormat(const StFormat theSrcFormat) { myVideoMaster->setStereoFormatByUser(theSrcFormat); }
 
     /**
+     * Get theater mode.
+     */
+    ST_LOCAL bool isTheaterMode() const { return myVideoMaster->isTheaterMode(); }
+
+    /**
      * Set theater mode.
      */
     ST_LOCAL void setTheaterMode(bool theIsTheater) { myVideoMaster->setTheaterMode(theIsTheater); }

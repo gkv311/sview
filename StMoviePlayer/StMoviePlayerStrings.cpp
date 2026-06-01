@@ -669,6 +669,9 @@ void loadDefaults(StLangMap& theStrings) {
     addAction(theStrings, StMoviePlayer::Action_PanoramaOnOff,
               "DoPanoramaOnOff",
               "Enable/disable panorama mode");
+    addAction(theStrings, StMoviePlayer::Action_TheaterOnOff,
+              "DoTheaterOnOff",
+              "Enable/disable theater mode");
     addAction(theStrings, StMoviePlayer::Action_ShowGUI,
               "DoShowGUI",
               "Show/hide GUI");

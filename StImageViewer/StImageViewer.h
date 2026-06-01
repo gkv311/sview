@@ -233,8 +233,8 @@ class StImageViewer : public StApplication {
         Action_StereoParamsBegin,
         Action_StereoParamsEnd = Action_StereoParamsBegin + StGLImageRegion::ActionsNb - 1,
         Action_PanoramaOnOff,
-        Action_ShowGUI,
         Action_TheaterOnOff,
+        Action_ShowGUI,
         // aliases
         Action_OutStereoNormal,
         Action_OutStereoLeftView,

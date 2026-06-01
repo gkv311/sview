@@ -325,6 +325,7 @@ class StMoviePlayer : public StApplication {
     ST_LOCAL void doSetStereoOutput(const size_t theMode);
     ST_LOCAL void doSwitchViewMode(const int32_t theMode);
     ST_LOCAL void doPanoramaOnOff(const size_t );
+    ST_LOCAL void doTheaterOnOff(const size_t );
     ST_LOCAL void doChangeStickPano360(const bool );
     ST_LOCAL void doChangeSwapJPS(const bool );
     ST_LOCAL void doSwitchAudioStream(const int32_t theStreamId);
@@ -381,7 +382,9 @@ class StMoviePlayer : public StApplication {
         Action_StereoParamsBegin,
         Action_StereoParamsEnd = Action_StereoParamsBegin + StGLImageRegion::ActionsNb - 1,
         Action_PanoramaOnOff,
+        Action_TheaterOnOff,
         Action_ShowGUI,
+        // aliases
         Action_OutStereoNormal,
         Action_OutStereoLeftView,
         Action_OutStereoRightView,
