@@ -912,6 +912,15 @@ void StOutDistorted::stglDrawVR() {
         myContext->stglResetScissorRect();
         myContext->core20fwd->glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
+        const GLfloat aDX = GLfloat(myFrBuffer->getVPSizeX()) / GLfloat(myFrBuffer->getSizeX());
+        const GLfloat aDY = GLfloat(myFrBuffer->getVPSizeY()) / GLfloat(myFrBuffer->getSizeY());
+        StArray<StGLVec2> aTCoords(4);
+        aTCoords[0] = StGLVec2(aDX, 0.0f);
+        aTCoords[1] = StGLVec2(aDX, aDY);
+        aTCoords[2] = StGLVec2(0.0f, 0.0f);
+        aTCoords[3] = StGLVec2(0.0f, aDY);
+        myFrTCrdsBuf.init(*myContext, aTCoords);
+
         myFrBuffer->bindTexture(*myContext);
         myProgramFlat->use(*myContext);
         myFrVertsBuf.bindVertexAttrib(*myContext, myProgramFlat->getVVertexLoc());
