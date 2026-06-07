@@ -96,8 +96,19 @@ class StFTFont {
             // Halfwidth and Fullwidth Forms
             || (theUChar >= 0x03000 && theUChar <= 0x0303F)
             || (theUChar >= 0x0FF00 && theUChar <= 0x0FFEF)
-            // Katakana (Japanese) is NOT part of CJK, but CJK fonts usually include these symbols
-            || (theUChar >= 0x030A0 && theUChar <= 0x030FF);
+            // Hiragana and Katakana (Japanese) are NOT part of CJK, but CJK fonts usually include these symbols
+            || isHiragana(theUChar)
+            || isKatakana(theUChar);
+    }
+
+    /** @return true if specified character is within subset of Hiragana (Japanese). */
+    ST_LOCAL static bool isHiragana(const stUtf32_t theUChar) {
+        return (theUChar >= 0x03040 && theUChar <= 0x0309F);
+    }
+
+    /** @return true if specified character is within subset of Katakana (Japanese). */
+    ST_LOCAL static bool isKatakana(const stUtf32_t theUChar) {
+        return (theUChar >= 0x030A0 && theUChar <= 0x030FF);
     }
 
     /**
