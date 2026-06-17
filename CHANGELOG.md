@@ -4,6 +4,17 @@ This document describes changes between tagged sView versions.
 
 Not all changes are documented here - please check git log for complete list.
 
+sView ??.?? (in development)
+-----------------------------------------------------------------------------------------------------------------------
+
+- Double click is now handled to switch window fullscreen mode
+  (when image/video region is not dragged, otherwise image region is reset as before).
+- Fixed displaying of Hiragana symbols in Japanese text.
+- VR output, added 'Mirror VR to window' option.
+- Linux, fixed handling of double-click.
+- macOS, the threaded OpenGL mode is now disabled by default, since it leads to crashes on newest macOS versions.
+- macOS, fixed hidden cursor on newest macOS.
+
 sView 26.02 (2026-02-07)
 -----------------------------------------------------------------------------------------------------------------------
 
