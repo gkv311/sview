@@ -46,9 +46,11 @@ distribution/build-*
 3rdparty/include/OVR*
 3rdparty/include/Extras/OVR*
 3rdparty/include/rapidjson
+.qtcreator/
 build/
 bin/
 lib/
+work/
 StShared/obj/
 StGLWidgets/obj/
 StCore/obj/
