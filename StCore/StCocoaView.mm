@@ -139,6 +139,8 @@ typedef NSUInteger NSEventPhase;
             myStWin->myEventsBuffer.append(myStEvent);
         } else {
             myStWin->signals.onMouseUp->emit(myStEvent.Button);
+            // handle double mouse click (in addition to double tap on a touchpad)
+            myStWin->checkDoubleClick(myStEvent);
         }
     }
 
@@ -175,6 +177,7 @@ typedef NSUInteger NSEventPhase;
             myStWin->myEventsBuffer.append(myStEvent);
         } else {
             myStWin->signals.onMouseUp->emit(myStEvent.Button);
+            myStWin->checkDoubleClick(myStEvent); // reset timer
         }
     }
 
@@ -222,6 +225,7 @@ typedef NSUInteger NSEventPhase;
                 myStWin->myEventsBuffer.append(myStEvent);
             } else {
                 myStWin->signals.onMouseUp->emit(myStEvent.Button);
+                myStWin->checkDoubleClick(myStEvent); // reset timer
             }
         }
     }
