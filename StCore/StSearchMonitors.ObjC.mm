@@ -61,7 +61,9 @@ namespace {
             [aDevInfo release];
         }
 
-        ST_ERROR_LOG("StSearchMonitors, no match between NS and CF display");
+        // unfortunately, on Apple ARM processors this API doesn't work anymore,
+        // hense report a warning, and not an error message
+        ST_DEBUG_LOG("StSearchMonitors, no match between NS and CF display");
         IOObjectRelease(anIter);
         return NULL;
     }

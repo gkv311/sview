@@ -9,6 +9,7 @@
 #include "StAppResponder.h"
 
 #include "StMultiApp.h"
+#include <StCore/StSearchMonitors.h>
 #include <StCocoa/StCocoaLocalPool.h>
 #include <StVersion.h>
 
@@ -243,6 +244,15 @@ namespace {
             myStApp.nullify();
             return false;
         }
+
+        if(!myStApp->getMainWindow().isNull()) {
+            // just debug output Monitors' configuration - for consistency with StApplication::exec()
+            const StSearchMonitors& aMonitors = myStApp->getMainWindow()->getMonitors();
+            for(size_t aMonIter = 0; aMonIter < aMonitors.size(); ++aMonIter) {
+                ST_DEBUG_LOG(aMonitors[aMonIter].toString());
+            }
+        }
+
         return true;
     }
 
