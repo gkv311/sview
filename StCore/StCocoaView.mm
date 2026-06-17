@@ -601,8 +601,13 @@ typedef NSUInteger NSEventPhase;
     }
 
     - (void ) resetCursorRects {
+        [super resetCursorRects];
         if(myToHideCursor) {
             [self addCursorRect: [self visibleRect] cursor: myBlankCursor];
+        } else {
+            // required on newest macOS with all events hanlded in GUI thread
+            // (probably could be fixed somewhere else...)
+            [self addCursorRect: [self visibleRect] cursor: [NSCursor arrowCursor]];
         }
     }
 
