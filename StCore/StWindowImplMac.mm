@@ -202,6 +202,13 @@ void StWindowImpl::doCreateWindows(NSOpenGLContext* theGLContextMaster,
     StCocoaString aTitle(myWindowTitle);
     [myMaster.hWindow setTitle: aTitle.toStringNs()];
 
+    // adjust resize increments to keep size aligned...
+    // doesn't look practically useful (the window movement is more important), but anyhow
+    if (attribs.ToAlignEven) {
+        NSSize anIncr = { 2.0f, 2.0f };
+        [myMaster.hWindow setResizeIncrements: anIncr];
+    }
+
     // create the view in Master window
     myMaster.hViewGl = [[StCocoaView alloc] initWithStWin: this
                                                     nsWin: myMaster.hWindow];
