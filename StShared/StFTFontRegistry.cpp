@@ -70,7 +70,8 @@ StFTFontRegistry::StFTFontRegistry() {
     myFilesMajor.add(stCString("Trebuchet MS Bold Italic.ttf"));
     myFilesMajor.add(stCString("Tahoma.ttf"));
     myFilesMajor.add(stCString("Tahoma Bold.ttf"));
-    myFilesMajor.add(stCString("Monaco.dfont"));
+    myFilesMinor.add(stCString("Monaco.dfont")); // old macOS
+    myFilesMajor.add(stCString("Monaco.ttf"));
     // korean
     //myFilesMajor.add(stCString("AppleMyungjo.ttf"));
     myFilesMajor.add(stCString("AppleGothic.ttf"));
