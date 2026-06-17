@@ -262,6 +262,8 @@ void StWindowImpl::doCreateWindows(NSOpenGLContext* theGLContextMaster,
     }
 
     [myMaster.hWindow makeKeyAndOrderFront: NSApp];
+    // required for macOS Catalina+ to make application focused
+    [NSApp activateIgnoringOtherApps: YES];
 }
 
 bool StWindowImpl::create() {
