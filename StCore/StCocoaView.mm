@@ -107,36 +107,25 @@ typedef NSUInteger NSEventPhase;
     }
 
     /**
-     * Left mouse button - down.
+     * (Any) mouse button event handler.
      */
-    - (void ) mouseDown: (NSEvent* ) theEvent {
+    - (void ) mouseChange: (NSEvent* ) theEvent
+                   button: (StVirtButton) theButton
+                     type: (StEventType) theType {
         const StPointD_t aPnt    = myStWin->getMousePos();
-        myStEvent.Type           = stEvent_MouseDown;
+        myStEvent.Type           = theType;
         myStEvent.Button.Time    = [theEvent timestamp];
-        myStEvent.Button.Button  = ST_MOUSE_LEFT;
+        myStEvent.Button.Button  = theButton;
         myStEvent.Button.Buttons = 0;
         myStEvent.Button.PointX  = aPnt.x();
         myStEvent.Button.PointY  = aPnt.y();
         if(myStWin->myEventsThreaded) {
             myStWin->myEventsBuffer.append(myStEvent);
-        } else {
-            myStWin->signals.onMouseDown->emit(myStEvent.Button);
+            return;
         }
-    }
 
-    /**
-     * Left mouse button - up.
-     */
-    - (void ) mouseUp: (NSEvent* ) theEvent {
-        const StPointD_t aPnt    = myStWin->getMousePos();
-        myStEvent.Type           = stEvent_MouseUp;
-        myStEvent.Button.Time    = [theEvent timestamp];
-        myStEvent.Button.Button  = ST_MOUSE_LEFT;
-        myStEvent.Button.Buttons = 0;
-        myStEvent.Button.PointX  = aPnt.x();
-        myStEvent.Button.PointY  = aPnt.y();
-        if(myStWin->myEventsThreaded) {
-            myStWin->myEventsBuffer.append(myStEvent);
+        if (myStEvent.Type == stEvent_MouseDown) {
+            myStWin->signals.onMouseDown->emit(myStEvent.Button);
         } else {
             myStWin->signals.onMouseUp->emit(myStEvent.Button);
             // handle double mouse click (in addition to double tap on a touchpad)
@@ -145,63 +134,39 @@ typedef NSUInteger NSEventPhase;
     }
 
     /**
+     * Left mouse button - down.
+     */
+    - (void ) mouseDown: (NSEvent* ) theEvent {
+        [self mouseChange: theEvent button: ST_MOUSE_LEFT type: stEvent_MouseDown];
+    }
+
+    /**
+     * Left mouse button - up.
+     */
+    - (void ) mouseUp: (NSEvent* ) theEvent {
+        [self mouseChange: theEvent button: ST_MOUSE_LEFT type: stEvent_MouseUp];
+    }
+
+    /**
      * Right mouse button - down.
      */
     - (void ) rightMouseDown: (NSEvent* ) theEvent {
-        const StPointD_t aPnt    = myStWin->getMousePos();
-        myStEvent.Type           = stEvent_MouseDown;
-        myStEvent.Button.Time    = [theEvent timestamp];
-        myStEvent.Button.Button  = ST_MOUSE_RIGHT;
-        myStEvent.Button.Buttons = 0;
-        myStEvent.Button.PointX  = aPnt.x();
-        myStEvent.Button.PointY  = aPnt.y();
-        if(myStWin->myEventsThreaded) {
-            myStWin->myEventsBuffer.append(myStEvent);
-        } else {
-            myStWin->signals.onMouseDown->emit(myStEvent.Button);
-        }
+        [self mouseChange: theEvent button: ST_MOUSE_RIGHT type: stEvent_MouseDown];
     }
 
     /**
      * Right mouse button - up.
      */
     - (void ) rightMouseUp: (NSEvent* ) theEvent {
-        const StPointD_t aPnt    = myStWin->getMousePos();
-        myStEvent.Type           = stEvent_MouseUp;
-        myStEvent.Button.Time    = [theEvent timestamp];
-        myStEvent.Button.Button  = ST_MOUSE_RIGHT;
-        myStEvent.Button.Buttons = 0;
-        myStEvent.Button.PointX  = aPnt.x();
-        myStEvent.Button.PointY  = aPnt.y();
-        if(myStWin->myEventsThreaded) {
-            myStWin->myEventsBuffer.append(myStEvent);
-        } else {
-            myStWin->signals.onMouseUp->emit(myStEvent.Button);
-            myStWin->checkDoubleClick(myStEvent); // reset timer
-        }
+        [self mouseChange: theEvent button: ST_MOUSE_RIGHT type: stEvent_MouseUp];
     }
 
     /**
      * Another (nor left nor right) mouse button - down.
      */
     - (void ) otherMouseDown: (NSEvent* ) theEvent {
-        StVirtButton aBtnId = ST_NOMOUSE;
         if([theEvent buttonNumber] == 2) {
-            aBtnId = ST_MOUSE_MIDDLE;
-        }
-        if(aBtnId != ST_NOMOUSE) {
-            const StPointD_t aPnt    = myStWin->getMousePos();
-            myStEvent.Type           = stEvent_MouseDown;
-            myStEvent.Button.Time    = [theEvent timestamp];
-            myStEvent.Button.Button  = aBtnId;
-            myStEvent.Button.Buttons = 0;
-            myStEvent.Button.PointX  = aPnt.x();
-            myStEvent.Button.PointY  = aPnt.y();
-            if(myStWin->myEventsThreaded) {
-                myStWin->myEventsBuffer.append(myStEvent);
-            } else {
-                myStWin->signals.onMouseDown->emit(myStEvent.Button);
-            }
+            [self mouseChange: theEvent button: ST_MOUSE_MIDDLE type: stEvent_MouseDown];
         }
     }
 
@@ -209,24 +174,8 @@ typedef NSUInteger NSEventPhase;
      * Another (nor left nor right) mouse button - up.
      */
     - (void ) otherMouseUp: (NSEvent* ) theEvent {
-        StVirtButton aBtnId = ST_NOMOUSE;
         if([theEvent buttonNumber] == 2) {
-            aBtnId = ST_MOUSE_MIDDLE;
-        }
-        if(aBtnId != ST_NOMOUSE) {
-            const StPointD_t aPnt    = myStWin->getMousePos();
-            myStEvent.Type           = stEvent_MouseUp;
-            myStEvent.Button.Time    = [theEvent timestamp];
-            myStEvent.Button.Button  = aBtnId;
-            myStEvent.Button.Buttons = 0;
-            myStEvent.Button.PointX  = aPnt.x();
-            myStEvent.Button.PointY  = aPnt.y();
-            if(myStWin->myEventsThreaded) {
-                myStWin->myEventsBuffer.append(myStEvent);
-            } else {
-                myStWin->signals.onMouseUp->emit(myStEvent.Button);
-                myStWin->checkDoubleClick(myStEvent); // reset timer
-            }
+            [self mouseChange: theEvent button: ST_MOUSE_MIDDLE type: stEvent_MouseUp];
         }
     }
 
