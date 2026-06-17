@@ -163,8 +163,13 @@ endif()
 if (APPLE)
   add_custom_command (TARGET ${PROJECT_NAME} POST_BUILD
     COMMAND cp -R -f "${FREETYPE_LIBRARY_DIR}/libfreetype*.dylib" "$<TARGET_FILE_DIR:${PROJECT_NAME}>/../Frameworks")
-  add_custom_command (TARGET ${PROJECT_NAME} POST_BUILD
-    COMMAND cp -R -f "${OPENAL_LIBRARY_DIR}/libopenal*.dylib" "$<TARGET_FILE_DIR:${PROJECT_NAME}>/../Frameworks")
+
+  if (OPENAL_LIBRARY_DIR MATCHES ".*/System/Library/Frameworks")
+    message (STATUS "Hint: consider using OpenAL Soft instead of system-provided OpenAL.framework for better experience")
+  else()
+    add_custom_command (TARGET ${PROJECT_NAME} POST_BUILD
+      COMMAND cp -R -f "${OPENAL_LIBRARY_DIR}/libopenal*.dylib" "$<TARGET_FILE_DIR:${PROJECT_NAME}>/../Frameworks")
+  endif()
 
   foreach (aLibIter ${FFMPEG_TKLIST})
     add_custom_command (TARGET ${PROJECT_NAME} POST_BUILD
