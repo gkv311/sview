@@ -218,7 +218,7 @@ namespace {
         if(myIsThreaded) {
             // start StApplication instance in dedicated thread
             ST_DEBUG_LOG("StAppResponder, application started in dedicated thread");
-            myThread = new StThread(anAppThreadFunc, self);
+            myThread = new StThread(anAppThreadFunc, self, "StApplication");
         } else {
             // process StApplication rendering iterations by timer
             ST_DEBUG_LOG("StAppResponder, application started in main thread!");
@@ -355,6 +355,7 @@ int main(int , char** ) {
     #endif
     StProcess::setEnv(ST_ENV_NAME_STCORE_PATH, StProcess::getProcessFolder());
 #endif
+    StThread::setCurrentThreadName("main");
 
     // autorelease pool is required for Cocoa
     StCocoaLocalPool aPool;
