@@ -46,6 +46,42 @@ StThread::StThread(threadFunction_t theThreadFunc,
 #ifdef _WIN32
     myThread = _beginthreadex(NULL, 0, theThreadFunc, theThreadParam, 0, &myThreadId);
 #else
+    if(theThreadName != nullptr && *theThreadName != '\0') {
+#if defined(__APPLE__)
+        // the macOS allows to set name only to the current thread
+        class NamedThreadProxy {
+
+                public:
+
+            NamedThreadProxy(threadFunction_t theFunc,
+                             void*            theParam,
+                             const char*      theName)
+            : myFunc(theFunc), myParam(theParam), myName(theName) {}
+
+            static void* create(void* theSelf) {
+                const NamedThreadProxy* aProxy = (NamedThreadProxy*)theSelf;
+                pthread_setname_np(aProxy->myName);
+                void* aRes = aProxy->myFunc(aProxy->myParam);
+                delete aProxy;
+                return aRes;
+            }
+
+                private:
+
+            threadFunction_t myFunc = nullptr;
+            void*            myParam = nullptr;
+            const char*      myName = nullptr;
+        };
+
+        NamedThreadProxy* aProxy = new NamedThreadProxy(theThreadFunc, theThreadParam, theThreadName);
+
+        myHasHandle = (pthread_create(&myThread, (pthread_attr_t* )nullptr, &NamedThreadProxy::create, aProxy) == 0);
+        if (!myHasHandle) {
+            delete aProxy;
+        }
+        return;
+#endif
+    }
     myHasHandle = (pthread_create(&myThread, (pthread_attr_t* )NULL, theThreadFunc, theThreadParam) == 0);
 #endif
     setName(theThreadName);
