@@ -119,6 +119,16 @@ class StMonitor {
     }
 
     /**
+     * Return TRUE if display supports (some) wide gamut output.
+     */
+    ST_LOCAL bool isWideGamut() const { return myIsWideGamut; }
+
+    /**
+     * Set if display supports (some) wide gamut output.
+     */
+    ST_LOCAL void setWideGamut(bool theFlag) { myIsWideGamut = theFlag; }
+
+    /**
      * @return current vertical refresh rate
      */
     ST_LOCAL float getFreq() const { return myFreq; }
@@ -186,7 +196,7 @@ class StMonitor {
     ST_CPPEXPORT StString toString() const;
 
     ST_LOCAL bool operator==(const StMonitor& compare) const {
-        if(&compare == this) {
+        if (&compare == this) {
             return true;
         }
         return compare.mySysId == mySysId
@@ -221,11 +231,15 @@ class StMonitor {
     StString     myGpuName; //!< attached to this GPU
     StEDIDParser myEdid;    //!< EDID data block if available
     StRectI_t    myRect;    //!< virtual space (rectangle)
-    int          mySysId;   //!< monitor id
-    float        myFreq;    //!< frequency in Hertz
-    float        myFreqMax; //!< maximum frequency in Hertz
-    float        myScale;   //!< hight pixel density scale factor
-    Orientation  myOrient;  //!< monitor orientation
+
+    int   mySysId   = 0;    //!< monitor id
+    float myFreq    = 0;    //!< frequency in Hertz
+    float myFreqMax = 0;    //!< maximum frequency in Hertz
+    float myScale   = 1.0f; //!< hight pixel density scale factor
+
+    Orientation myOrient = Orientation_Landscape; //!< monitor orientation
+
+    bool myIsWideGamut = false; //!< wide gamut support
 
 };
 

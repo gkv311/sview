@@ -6,12 +6,9 @@
 
 #include <StCore/StMonitor.h>
 
-StMonitor::StMonitor()
-: mySysId(0),
-  myFreq(0),
-  myFreqMax(0),
-  myScale(1.0f),
-  myOrient(Orientation_Landscape) {
+#include <sstream>
+
+StMonitor::StMonitor() {
     //
 }
 
@@ -25,7 +22,8 @@ StMonitor::StMonitor(const StMonitor& theCopy)
   myFreq(theCopy.myFreq),
   myFreqMax(theCopy.myFreqMax),
   myScale(theCopy.myScale),
-  myOrient(theCopy.myOrient) {
+  myOrient(theCopy.myOrient),
+  myIsWideGamut(theCopy.myIsWideGamut) {
     //
 }
 
@@ -40,6 +38,7 @@ StMonitor& StMonitor::operator=(const StMonitor& theCopy) {
     myFreqMax = theCopy.myFreqMax;
     myScale = theCopy.myScale;
     myOrient = theCopy.myOrient;
+    myIsWideGamut = theCopy.myIsWideGamut;
     return *this;
 }
 
@@ -48,11 +47,35 @@ bool StMonitor::isValid() const {
 }
 
 StString StMonitor::toString() const {
-    StString aStereoType = myEdid.isValid() ? (StString(", stereo type: ") + myEdid.getStereoString()) : StString();
-    return StString()
-        + "Monitor #" + mySysId + ", PnP ID: " + myPnpId + " (" + myName + ")"
-        + (myOrient == Orientation_Portrait ? ", portrait" : "") + aStereoType + '\n'
-        + "Connected to " + myGpuName + '\n'
-        + "freq= " + myFreq + "Hz / freqMax= " + myFreqMax + "Hz / scale= " + myScale + "\n"
-        + myRect.toString();
+    std::stringstream aStr;
+    aStr << "Monitor #" << mySysId;
+
+    if (!myPnpId.isEmpty())
+        aStr << ", PnP ID: " << myPnpId;
+
+    aStr << ", scale: " << myScale;
+
+    if (myEdid.isValid())
+        aStr << ", stereo type: " << myEdid.getStereoString();
+
+    if (myIsWideGamut)
+        aStr << ", wide gamut";
+
+    if (myFreq > 0)
+        aStr << " | freq: " << myFreq << "Hz";
+
+    if (myFreqMax > 0)
+        aStr << " (max: " << myFreqMax << "Hz)";
+
+    if (!myName.isEmpty())
+        aStr << ", name: '" << myName << "'";
+
+    if (myOrient == Orientation_Portrait)
+        aStr << ", portrait";
+
+    if (!myGpuName.isEmpty())
+        aStr << "\nConnected to " << myGpuName;
+
+    aStr << "\n" << myRect.toString();
+    return aStr.str().c_str();
 }
