@@ -272,7 +272,7 @@ bool StWindowImpl::create() {
     myInitState = STWIN_INITNOTSTART;
     updateChildRect();
 
-    if(NSApp == NULL) {
+    if (NSApp == nullptr) {
         stError("Cocoa, main application doesn't exists");
         myInitState = STWIN_ERROR_COCOA_NO_APP;
         return false;
@@ -280,49 +280,67 @@ bool StWindowImpl::create() {
 
     StCocoaLocalPool aLocalPool;
 
-    const bool isNoAccel = false;
-ST_DISABLE_DEPRECATION_WARNINGS
-    const NSOpenGLPixelFormatAttribute aDummyAttrib = NSOpenGLPFACompliant;
-ST_ENABLE_DEPRECATION_WARNINGS
-    NSOpenGLPixelFormatAttribute anAttribs[] = {
-        attribs.IsGlStereo ? NSOpenGLPFAStereo : aDummyAttrib,
-        //NSOpenGLPFAColorSize,   32,
-        //NSOpenGLPFADepthSize,   0,
-        //NSOpenGLPFAStencilSize, 0,
-        NSOpenGLPFADoubleBuffer,
-        isNoAccel ? NSOpenGLPFARendererID : NSOpenGLPFAAccelerated,
-        isNoAccel ? kCGLRendererGenericFloatID : 0,
-        0
+    const auto fillAttribs = [this](std::vector<NSOpenGLPixelFormatAttribute>& theAttribs,
+                                    const bool theIsStereo) {
+        const bool isNoAccel = false;
+        theAttribs.clear();
+        theAttribs.push_back(NSOpenGLPFADoubleBuffer);
+        if (isNoAccel) {
+            theAttribs.push_back(NSOpenGLPFARendererID);
+            theAttribs.push_back(kCGLRendererGenericFloatID);
+        } else {
+            theAttribs.push_back(NSOpenGLPFAAccelerated);
+        }
+        if (theIsStereo) {
+            theAttribs.push_back(NSOpenGLPFAStereo);
+        }
+        if (attribs.GlColorSize == 30) {
+            theAttribs.push_back(NSOpenGLPFAColorSize);
+            theAttribs.push_back(30);
+            theAttribs.push_back(NSOpenGLPFAAlphaSize);
+            theAttribs.push_back(2);
+        }
+        if (attribs.GlDepthSize != 0) {
+            theAttribs.push_back(NSOpenGLPFADepthSize);
+            theAttribs.push_back(attribs.GlDepthSize);
+        }
+        if (attribs.GlStencilSize != 0) {
+            theAttribs.push_back(NSOpenGLPFAStencilSize);
+            theAttribs.push_back(attribs.GlStencilSize);
+        }
+        theAttribs.push_back(0);
     };
+
+    std::vector<NSOpenGLPixelFormatAttribute> anAttribs;
+    fillAttribs(anAttribs, attribs.IsGlStereo);
 
     // create the Master GL context
     ///NSOpenGLPixelFormat* aGlFormatMaster = [[[NSOpenGLView class] defaultPixelFormat] retain];
-    NSOpenGLPixelFormat* aGLFormat    = NULL;
-    NSOpenGLContext* aGLContextMaster = NULL;
-    NSOpenGLContext* aGLContextSlave  = NULL;
+    NSOpenGLPixelFormat* aGLFormat    = nullptr;
+    NSOpenGLContext* aGLContextMaster = nullptr;
+    NSOpenGLContext* aGLContextSlave  = nullptr;
 
-    aGLFormat = [[[NSOpenGLPixelFormat alloc] initWithAttributes: anAttribs] autorelease];
+    aGLFormat = [[[NSOpenGLPixelFormat alloc] initWithAttributes: anAttribs.data()] autorelease];
     aGLContextMaster = [[[NSOpenGLContext alloc] initWithFormat: aGLFormat
-                                                   shareContext: NULL] autorelease];
-    if(aGLContextMaster == NULL
-    && attribs.IsGlStereo) {
+                                                   shareContext: nullptr] autorelease];
+    if (aGLContextMaster == nullptr && attribs.IsGlStereo) {
         ST_ERROR_LOG("Cocoa, fail to create Quad Buffered OpenGL context");
-        anAttribs[0] = aDummyAttrib;
-        aGLFormat = [[[NSOpenGLPixelFormat alloc] initWithAttributes: anAttribs] autorelease];
+        fillAttribs(anAttribs, false);
+        aGLFormat = [[[NSOpenGLPixelFormat alloc] initWithAttributes: anAttribs.data()] autorelease];
         aGLContextMaster = [[[NSOpenGLContext alloc] initWithFormat: aGLFormat
-                                                       shareContext: NULL] autorelease];
+                                                       shareContext: nullptr] autorelease];
     }
-    if(aGLContextMaster == NULL) {
+    if (aGLContextMaster == nullptr) {
         stError("Cocoa, fail to create Double Buffered OpenGL context");
         myInitState = STWIN_ERROR_COCOA_NO_GL;
         return false;
     }
 
     // create the Slave GL context
-    if(attribs.Slave != StWinSlave_slaveOff) {
+    if (attribs.Slave != StWinSlave_slaveOff) {
         aGLContextSlave = [[[NSOpenGLContext alloc] initWithFormat: aGLFormat
                                                       shareContext: aGLContextMaster] autorelease];
-        if(aGLContextSlave == NULL) {
+        if (aGLContextSlave == NULL) {
             stError("Cocoa, fail to create Slave OpenGL context");
             myInitState = STWIN_ERROR_COCOA_NO_GL;
             return false;
@@ -333,27 +351,27 @@ ST_ENABLE_DEPRECATION_WARNINGS
     StWinInitInfo* aWinInit = [[StWinInitInfo alloc] init: this
                                                    master: aGLContextMaster
                                                     slave: aGLContextSlave];
-    if(aWinInit == NULL) {
+    if (aWinInit == nullptr) {
         myInitState = STWIN_ERROR_COCOA_CREATEWIN;
         return false;
     }
 
-    if([NSThread isMainThread]) {
-        [aWinInit doCreateWindows: NULL];
+    if ([NSThread isMainThread]) {
+        [aWinInit doCreateWindows: nullptr];
     } else {
         [aWinInit performSelectorOnMainThread: @selector(doCreateWindows:)
-                                   withObject: NULL
+                                   withObject: nullptr
                                 waitUntilDone: YES];
     }
     [aWinInit release];
 
-    if(myInitState != STWIN_INITNOTSTART) {
+    if (myInitState != STWIN_INITNOTSTART) {
         return false;
     }
 
     myMaster.glMakeCurrent();
     myGlContext = new StGLContext(myResMgr);
-    if(!myGlContext->stglInit()) {
+    if (!myGlContext->stglInit()) {
         stError("Critical error - broken GL context!\nInvalid OpenGL driver?");
         myInitState = STWIN_ERROR_COCOA_NO_GL;
         return false;
