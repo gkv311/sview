@@ -50,6 +50,7 @@ class StImageFile : public StImage {
         ST_DEVIL,
         ST_FREEIMAGE,
         ST_STB,
+        ST_WIC, // WinCodec
     } ImageClass;
 
     /** Structure for passing parameters to image saving. */

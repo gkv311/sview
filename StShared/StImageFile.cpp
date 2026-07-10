@@ -9,6 +9,7 @@
 #include <StImage/StDevILImage.h>
 #include <StImage/StFreeImage.h>
 #include <StImage/StStbImage.h>
+#include <StImage/StWicImage.h>
 #include <StAV/StAVImage.h>
 #include <StFile/StFileNode.h>
 #include <StFile/StMIME.h>
@@ -84,6 +85,10 @@ StImageFile::ImageClass StImageFile::imgLibFromString(const StString& thePreferr
         aPreferred = ST_DEVIL;
     } else if(thePreferred.isEqualsIgnoreCase(stCString("stb"))) {
         aPreferred = ST_STB;
+    } else if(thePreferred.isEqualsIgnoreCase(stCString("WIC")) ||
+              thePreferred.isEqualsIgnoreCase(stCString("WinCodec")) ||
+              thePreferred.isEqualsIgnoreCase(stCString("StWicImage"))) {
+        aPreferred = ST_WIC;
     }
     return aPreferred;
 }
@@ -93,6 +98,7 @@ StString StImageFile::imgLibToString(const ImageClass thePreferred) {
         case ST_FREEIMAGE: return "FreeImage";
         case ST_DEVIL:     return "DevIL";
         case ST_STB:       return "stb";
+        case ST_WIC:       return "WIC";
         default:
         case ST_LIBAV:     return "FFmpeg";
     }
@@ -168,6 +174,12 @@ StHandle<StImageFile> StImageFile::create(StImageFile::ImageClass thePreferred,
         case ST_STB: {
             if(StStbImage::init()) {
                 return new StStbImage();
+            }
+            break;
+        }
+        case ST_WIC: {
+            if(StWicImage::init()) {
+                return new StWicImage();
             }
             break;
         }

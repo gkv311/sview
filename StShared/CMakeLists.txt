@@ -74,6 +74,7 @@ set (USED_SRCFILES
   StThread.cpp
   StTranslations.cpp
   StVirtualKeys.cpp
+  StWicImage.cpp
   stAV.cpp
   stConsole.cpp
   stUtfTools.cpp
@@ -182,6 +183,7 @@ set (USED_INCFILES
   ../include/StImage/StJpegParser.h
   ../include/StImage/StPixelRGB.h
   ../include/StImage/StStbImage.h
+  ../include/StImage/StWicImage.h
   ../include/StSettings/StEnumParam.h
   ../include/StSettings/StFloat32Param.h  
   ../include/StSettings/StParam.h
