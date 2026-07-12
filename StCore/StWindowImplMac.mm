@@ -187,12 +187,21 @@ void StWindowImpl::doCreateWindows(NSOpenGLContext* theGLContextMaster,
                                    NSOpenGLContext* theGLContextSlave) {
     StCocoaLocalPool aLocalPool;
 
+    const int aMainWinModId = myMonitors[myRectNorm.center()].getId();
+
+    NSScreen* aScreen = nullptr;
+    NSArray* aScreens = [NSScreen screens];
+    if (aScreens != nullptr && aMainWinModId < [aScreens count]) {
+        aScreen = (NSScreen* )[aScreens objectAtIndex: aMainWinModId];
+    }
+
     // create the Master window
     NSUInteger aWinStyle = attribs.IsNoDecor
                          ? NSBorderlessWindowMask
                          : NSTitledWindowMask | NSClosableWindowMask | NSResizableWindowMask;
     myMaster.hWindow = [[StCocoaWin alloc] initWithStWin: this
                                                     rect: myRectNorm
+                                                  screen: aScreen
                                                styleMask: aWinStyle];
     if(myMaster.hWindow == NULL) {
         stError("Cocoa, Master Window Creation Error");
@@ -227,8 +236,14 @@ void StWindowImpl::doCreateWindows(NSOpenGLContext* theGLContextMaster,
         // create the Slave window
         StRectI_t aRectSlave(getSlaveTop(),  getSlaveTop() + getSlaveHeight(),
                              getSlaveLeft(), getSlaveLeft() + getSlaveWidth());
+        const int aSlaveWinModId = myMonitors[aRectSlave.center()].getId();
+        if (aScreens != nullptr && aSlaveWinModId < [aScreens count]) {
+            aScreen = (NSScreen* )[aScreens objectAtIndex: aSlaveWinModId];
+        }
+
         mySlave.hWindow = [[StCocoaWin alloc] initWithStWin: this
                                                        rect: aRectSlave
+                                                     screen: aScreen
                                                   styleMask: NSBorderlessWindowMask];
         if(mySlave.hWindow == NULL) {
             myMaster.close();

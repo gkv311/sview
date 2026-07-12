@@ -45,9 +45,7 @@ class StCocoaCoords {
 
         private:
 
-    CGFloat myScreenBottom;
-    CGFloat myScale;
-    CGFloat myUnScale;
+    CGFloat myScreenBottom = 0;
 
 };
 

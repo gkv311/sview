@@ -14,12 +14,21 @@
 
     - (id ) initWithStWin: (StWindowImpl* ) theStWin
                      rect: (StRectI_t )     theRect
+                   screen: (NSScreen* )     theScreen
                 styleMask: (NSUInteger )    theWinStyle {
+
         NSRect aRectNs = theStWin->myCocoaCoords.normalToCocoa(theRect);
+        if (theScreen != nullptr) {
+            NSRect aScreenRect = [theScreen frame];
+            aRectNs.origin.x  -= aScreenRect.origin.x;
+            aRectNs.origin.y  -= aScreenRect.origin.y;
+        }
+
         self = [super initWithContentRect: aRectNs
                                 styleMask: theWinStyle
                                   backing: NSBackingStoreBuffered
-                                    defer: NO];
+                                    defer: NO
+                                   screen: theScreen];
         if(self == NULL) {
             return NULL;
         }

@@ -26,11 +26,13 @@
          * Main constructor.
          * @param theStWin (StWindowImpl* ) - StWindowImpl instance to send events;
          * @param theRect (StRectI_t )      - window content placement, in normal units;
+         * @param theScreen (NSScreen* )    - screen to display window on;
          * @param theWinStyle (NSUInteger ) - window style;
          * @return initialized instance on success or NULL otherwise.
          */
         - (id ) initWithStWin: (StWindowImpl* ) theStWin
                          rect: (StRectI_t )     theRect
+                       screen: (NSScreen* )     theScreen
                     styleMask: (NSUInteger )    theWinStyle;
 
         /**

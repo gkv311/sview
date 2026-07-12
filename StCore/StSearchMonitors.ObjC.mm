@@ -8,16 +8,11 @@
 #include <StCore/StSearchMonitors.h>
 
 #include <StStrings/StLogger.h>
+#include <StCocoa/StCocoaCoords.h>
 #include <StCocoa/StCocoaLocalPool.h>
 
 #import <Cocoa/Cocoa.h>
 #import <IOKit/graphics/IOGraphicsLib.h>
-
-#if !defined(MAC_OS_X_VERSION_10_7) || (MAC_OS_X_VERSION_MAX_ALLOWED < MAC_OS_X_VERSION_10_7)
-@interface NSScreen (LionAPI)
-    - (CGFloat )backingScaleFactor;
-@end
-#endif
 
 namespace {
 
@@ -76,10 +71,11 @@ void StSearchMonitors::findMonitorsCocoa() {
 
     StCocoaLocalPool aLocalPool;
     NSArray* aScreens = [NSScreen screens];
-    if (aScreens == nullptr) {
+    if (aScreens == nullptr || [aScreens count] == 0) {
         return;
     }
 
+    StCocoaCoords aConverter;
     for (NSUInteger aScrId = 0; aScrId < [aScreens count]; ++aScrId) {
         StMonitor aStMon;
         aStMon.setId(aScrId);
@@ -87,37 +83,26 @@ void StSearchMonitors::findMonitorsCocoa() {
         NSScreen* aScreen = (NSScreen* )[aScreens objectAtIndex: aScrId];
         NSDictionary* aDict = [aScreen deviceDescription];
         NSNumber* aNumber = [aDict objectForKey: @"NSScreenNumber"];
-        if(aNumber == nullptr
+        if (aNumber == nullptr
         || [aNumber isKindOfClass: [NSNumber class]] == NO) {
             ST_DEBUG_LOG("StSearchMonitors, invalid Cocoa screen #" + aScrId);
             continue;
         }
 
-        CGDirectDisplayID aDispId = [aNumber unsignedIntValue];
-        CGRect aRectCg = CGDisplayBounds(aDispId);
-
-        GLfloat aScale = 1.0f;
         if ([aScreen respondsToSelector: @selector(backingScaleFactor)]) {
-            aScale = [aScreen backingScaleFactor];
+            aStMon.setScale([aScreen backingScaleFactor]);
         }
-    #if MAC_OS_X_VERSION_MIN_REQUIRED < 1070
-        else {
-            aScale = [aScreen userSpaceScaleFactor];
-        }
-    #endif
-        aStMon.setScale(aScale);
 
-        aStMon.setVRect(StRectI_t(aRectCg.origin.y, aRectCg.origin.y + aRectCg.size.height,
-                                  aRectCg.origin.x, aRectCg.origin.x + aRectCg.size.width));
+        const NSRect    aRectCg = [aScreen frame];
+        const StRectI_t aRectI  = aConverter.cocoaToNormal(aRectCg);
+        aStMon.setVRect(aRectI);
 
         if (@available(macOS 10.15, *)) {
             aStMon.setName(StString([[aScreen localizedName] UTF8String]));
         }
         aStMon.setWideGamut([aScreen canRepresentDisplayGamut: NSDisplayGamutP3]);
 
-        //boolean_t isActive   = CGDisplayIsActive(aDispId);
-        //boolean_t isStereoOn = CGDisplayIsStereo(aDispId);
-        //double CGDisplayModeGetRefreshRate(CGDisplayModeRef mode);
+        const CGDirectDisplayID aDispId = [aNumber unsignedIntValue];
 
         // retrieve low-level information about device
         NSDictionary* aDevInfo = (NSDictionary* )findDispInfo(aDispId);

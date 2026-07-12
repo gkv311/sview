@@ -67,7 +67,7 @@ bool StSettings::loadInt32(const StString& theParamPath,
     StCocoaString aPath(theParamPath);
     NSObject* anObj = [myDict objectForKey: aPath.toStringNs()];
     if(anObj == nil || [anObj isKindOfClass: [NSNumber class]] == NO) {
-        ST_DEBUG_LOG("StConfig, parameter \"" + theParamPath + "\" not found");
+        ST_DEBUG_LOG("StConfig, parameter \"" + theParamPath + "\" not found in '" + myFilePath + "'");
         return false;
     }
     NSNumber* aValue = (NSNumber* )anObj;
@@ -91,7 +91,7 @@ bool StSettings::loadString(const StString& theParamPath,
     StCocoaString aPath(theParamPath);
     NSObject* anObj = [myDict objectForKey: aPath.toStringNs()];
     if(anObj == nil || [anObj isKindOfClass: [NSString class]] == NO) {
-        ST_DEBUG_LOG("StConfig, parameter \"" + theParamPath + "\" not found");
+        ST_DEBUG_LOG("StConfig, parameter \"" + theParamPath + "\" not found in '" + myFilePath + "'");
         return false;
     }
     NSString* aValue = (NSString* )anObj;
