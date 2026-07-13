@@ -10,8 +10,8 @@ project (sView)
 set (APP_VERSION_MAJOR 1)
 set (APP_VERSION_MINOR 0)
 # Android APK version
-set (SVIEW_APK_VERSIONCODE "52")
-set (SVIEW_APK_VERSIONNAME "26.2")
+set (SVIEW_APK_VERSIONCODE "54")
+set (SVIEW_APK_VERSIONNAME "26.7")
 
 if (MSVC)
   set (BUILD_FORCE_RelWithDebInfo ON CACHE BOOL "Build release target with debug symbols")

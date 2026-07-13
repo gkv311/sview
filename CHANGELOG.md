@@ -4,7 +4,7 @@ This document describes changes between tagged sView versions.
 
 Not all changes are documented here - please check git log for complete list.
 
-sView ??.?? (in development)
+sView 26.07 (2026-07-13)
 -----------------------------------------------------------------------------------------------------------------------
 
 - Double click is now handled to switch window fullscreen mode
@@ -14,6 +14,10 @@ sView ??.?? (in development)
 - Linux, fixed handling of double-click.
 - macOS, the threaded OpenGL mode is now disabled by default, since it leads to crashes on newest macOS versions.
 - macOS, fixed hidden cursor on newest macOS.
+- macOS, fixed no application focus at startup on newest macOS.
+- macOS, fixed restoring of window position on second screen.
+- macOS, added handling of double mouse click (in addition to double tap on a touchpad).
+- macOS, respect DeepColor option (create r10g10b10a2 pixel format).
 
 sView 26.02 (2026-02-07)
 -----------------------------------------------------------------------------------------------------------------------
