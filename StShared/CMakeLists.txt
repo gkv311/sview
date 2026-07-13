@@ -48,6 +48,7 @@ set (USED_SRCFILES
   StImage/StImageFile.cpp
   StImage/StImagePlane.cpp
   StImage/StJpegParser.cpp
+  StImage/StNsImage.cpp
   StImage/StStbImage.cpp
   StImage/StWicImage.cpp
   StSettings/StConfigImpl.cpp
@@ -81,6 +82,7 @@ set (USED_SRCFILES
 )
 set (USED_MMFILES
   StFile/StFileNode.ObjC.mm
+  StImage/StNsImage.ObjC.mm
   StSettings/StPListImpl.mm
   StStrings/StLogger.ObjC.mm
   StStrings/StStringUnicode.ObjC.mm
@@ -181,6 +183,7 @@ set (USED_INCFILES
   ../include/StImage/StImageFile.h
   ../include/StImage/StImagePlane.h
   ../include/StImage/StJpegParser.h
+  ../include/StImage/StNsImage.h
   ../include/StImage/StPixelRGB.h
   ../include/StImage/StStbImage.h
   ../include/StImage/StWicImage.h

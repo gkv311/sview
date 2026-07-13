@@ -50,7 +50,8 @@ class StImageFile : public StImage {
         ST_DEVIL,
         ST_FREEIMAGE,
         ST_STB,
-        ST_WIC, // WinCodec
+        ST_WIC, // WinCodec (Windows)
+        ST_NSIMAGE, // NSImage from AppKit (macOS)
     } ImageClass;
 
     /** Structure for passing parameters to image saving. */
