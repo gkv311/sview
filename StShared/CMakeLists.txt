@@ -1,63 +1,73 @@
 project (StShared)
 
 set (USED_SRCFILES
-  StAVFrame.cpp
-  StAVImage.cpp
-  StAVIOContext.cpp
-  StAVIOFileContext.cpp
-  StAVIOJniHttpContext.cpp
-  StAVIOMemContext.cpp
-  StAVPacket.cpp
-  StAVVideoMuxer.cpp
+  StAV/stAV.cpp
+  StAV/StAVFrame.cpp
+  StAV/StAVImage.cpp
+  StAV/StAVIOContext.cpp
+  StAV/StAVIOFileContext.cpp
+  StAV/StAVIOJniHttpContext.cpp
+  StAV/StAVIOMemContext.cpp
+  StAV/StAVPacket.cpp
+  StAV/StAVVideoMuxer.cpp
+  StFile/StFileNode.cpp
+  StFile/StFileNode2.cpp
+  StFile/StFolder.cpp
+  StFile/StRawFile.cpp
+  StFT/StFTFont.cpp
+  StFT/StFTFontRegistry.cpp
+  StFT/StFTLibrary.cpp
+  StGL/StGLCircle.cpp
+  StGL/StGLContext.cpp
+  StGL/StGLFont.cpp
+  StGL/StGLFontEntry.cpp
+  StGL/StGLFontManager.cpp
+  StGL/StGLFrameBuffer.cpp
+  StGL/StGLMatrix.cpp
+  StGL/StGLMesh.cpp
+  StGL/StGLPrism.cpp
+  StGL/StGLProgram.cpp
+  StGL/StGLProjCamera.cpp
+  StGL/StGLQuadTexture.cpp
+  StGL/StGLQuads.cpp
+  StGL/StGLResource.cpp
+  StGL/StGLShader.cpp
+  StGL/StGLStereoFrameBuffer.cpp
+  StGL/StGLTextFormatter.cpp
+  StGL/StGLTexture.cpp
+  StGL/StGLTextureData.cpp
+  StGL/StGLTextureQueue.cpp
+  StGL/StGLUVCylinder.cpp
+  StGL/StGLUVSphere.cpp
+  StGL/StGLVertexBuffer.cpp
+  StImage/StDevILImage.cpp
+  StImage/StExifDir.cpp
+  StImage/StExifTags.cpp
+  StImage/StFreeImage.cpp
+  StImage/StImage.cpp
+  StImage/StImageFile.cpp
+  StImage/StImagePlane.cpp
+  StImage/StJpegParser.cpp
+  StImage/StStbImage.cpp
+  StImage/StWicImage.cpp
+  StSettings/StConfigImpl.cpp
+  StSettings/StRegisterImpl.cpp
+  StSettings/StSettings.cpp
+  StSettings/StTranslations.cpp
+  StStrings/stConsole.cpp
+  StStrings/StDictionary.cpp
+  StStrings/StLangMap.cpp
+  StStrings/StLogger.cpp
+  StStrings/stUtfTools.cpp
   StAction.cpp
   StBndBox.cpp
   StBndCameraBox.cpp
   StBndSphere.cpp
   StCondition.cpp
-  StConfigImpl.cpp
-  StDevILImage.cpp
   StEDIDParser.cpp
-  StExifDir.cpp
-  StExifTags.cpp
-  StFTFont.cpp
-  StFTFontRegistry.cpp
-  StFTLibrary.cpp
-  StFileNode.cpp
-  StFileNode2.cpp
-  StFolder.cpp
   StFormatEnum.cpp
-  StFreeImage.cpp
-  StGLCircle.cpp
-  StGLContext.cpp
-  StGLFont.cpp
-  StGLFontEntry.cpp
-  StGLFontManager.cpp
-  StGLFrameBuffer.cpp
-  StGLMatrix.cpp
-  StGLMesh.cpp
-  StGLPrism.cpp
-  StGLProgram.cpp
-  StGLProjCamera.cpp
-  StGLQuadTexture.cpp
-  StGLQuads.cpp
-  StGLResource.cpp
-  StGLShader.cpp
-  StGLStereoFrameBuffer.cpp
-  StGLTextFormatter.cpp
-  StGLTexture.cpp
-  StGLTextureData.cpp
-  StGLTextureQueue.cpp
-  StGLUVCylinder.cpp
-  StGLUVSphere.cpp
-  StGLVertexBuffer.cpp
-  StImage.cpp
-  StImageFile.cpp
-  StImagePlane.cpp
   StJNIEnv.cpp
-  StJpegParser.cpp
-  StLangMap.cpp
   StLibrary.cpp
-  StLogger.cpp
   StMinGen.cpp
   StMonitor.cpp
   StMsgQueue.cpp
@@ -65,28 +75,18 @@ set (USED_SRCFILES
   StPlayList.cpp
   StProcess.cpp
   StProcess2.cpp
-  StRawFile.cpp
-  StRegisterImpl.cpp
   StResourceManager.cpp
-  StSettings.cpp
-  StStbImage.cpp
-  StDictionary.cpp
   StThread.cpp
-  StTranslations.cpp
   StVirtualKeys.cpp
-  StWicImage.cpp
-  stAV.cpp
-  stConsole.cpp
-  stUtfTools.cpp
 )
 set (USED_MMFILES
+  StFile/StFileNode.ObjC.mm
+  StSettings/StPListImpl.mm
+  StStrings/StLogger.ObjC.mm
+  StStrings/StStringUnicode.ObjC.mm
   StCocoaCoords.mm
   StCocoaLocalPool.mm
-  StFileNode.ObjC.mm
-  StLogger.ObjC.mm
-  StPListImpl.mm
   StProcess.ObjC.mm
-  StStringUnicode.ObjC.mm
 )
 
 set (USED_INCFILES
