@@ -31,11 +31,12 @@ To get up-to-date sources please clone official git repository:
 
 ## Documentation
 
-Read the documentation in the **docs/** directory in `git`.
-See the [CHANGELOG](CHANGELOG.md) for the list of modifications per sView release.
+Read the documentation in the **docs/** directory in `git`:
+- [User Tips](docs/usertips.md)
+- [Stereoscopic Formats](docs/stereoformats.md)
+- [Frequently Asked Questions](docs/faq.md)
 
-Online help is available on official site:<br/>
-https://www.sview.ru/en/sview/usertips/
+See the [CHANGELOG](CHANGELOG.md) for the list of modifications per sView release.
 
 ## Licensing
 
