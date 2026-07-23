@@ -193,7 +193,7 @@ jobs:
       if: steps.cache.outputs.cache-hit != 'true'
       shell: cmd
       run: |
-        cmake -S ./openvr.git -B ./openvr-make -G Ninja --toolchain "%CD%/openvr-make.cmake"
+        cmake -S ./openvr.git -B ./openvr-make -G Ninja -DCMAKE_POLICY_VERSION_MINIMUM=3.5 --toolchain "%CD%/openvr-make.cmake"
     - name: Build project
       if: steps.cache.outputs.cache-hit != 'true'
       run: |
