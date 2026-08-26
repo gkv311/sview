@@ -228,8 +228,6 @@ namespace {
         const char* name;
     };
 
-    static const StCString THE_ROTATE_KEY       = stCString("rotate");
-
     static const StCString THE_SRC_MODE_KEY     = stCString("STEREO_MODE");
     static const StCString THE_SRC_MODE_KEY_WMV = stCString("StereoscopicLayout");
 

@@ -46,7 +46,7 @@ class StUtfIterator {
 
     const Type* myPosition;  //!< buffer position of the first element in the current character
     const Type* myPosNext;   //!< buffer position of the first element in the next character
-    size_t      myCharIndex; //!< index displacement from iterator intialization
+    size_t      myCharIndex; //!< index displacement from iterator initialization
     stUtf32_t   myCharUtf32; //!< character stored at the current buffer position
 
         public:
@@ -64,7 +64,7 @@ class StUtfIterator {
             ++(*this);
             myCharIndex = 0;
         }
-    };
+    }
 
     /**
      * Initialize iterator within specified string.

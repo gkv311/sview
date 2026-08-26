@@ -56,7 +56,7 @@ struct StConstStringUnicode {
 
     /**
      * Returns NULL-terminated Unicode string.
-     * Should not be modifed or deleted!
+     * Should not be modified or deleted!
      * @return pointer to the string
      */
     inline const Type* toCString() const {
@@ -81,20 +81,49 @@ struct StConstStringUnicode {
     bool isEqualsIgnoreCase(const StConstStringUnicode& theCompare) const;
 
     bool isStartsWith(const StConstStringUnicode& theStartString) const;
+    bool isStartsWith(const StConstStringUnicode& theStartString, const StUtfIterator<Type>& theFrom) const;
     bool isEndsWith  (const StConstStringUnicode& theEndString)   const;
 
     bool isStartsWith(const Type theStartChar) const;
     bool isEndsWith  (const Type theEndChar)   const;
 
     /**
+     * Returns first occurrence of requested Unicode symbol or NULL if not found.
+     */
+    StUtfIterator<Type> findFirst(const stUtf32_t theSubChar) const {
+        return findFrom(theSubChar, StUtfIterator<Type>(this->String));
+    }
+
+    /**
+     * Returns first occurrence of requested Unicode symbol or NULL if not found.
+     */
+    StUtfIterator<Type> findFirst(const StConstStringUnicode& theSubString) const {
+        return findFrom(theSubString, StUtfIterator<Type>(this->String));
+    }
+
+    /**
+     * Returns next occurrence of requested Unicode symbol or NULL if not found.
+     */
+    StUtfIterator<Type> findFrom(const stUtf32_t theSubChar, const StUtfIterator<Type>& theFrom) const;
+
+    /**
+     * Returns next occurrence of requested Unicode symbol or NULL if not found.
+     */
+    StUtfIterator<Type> findFrom(const StConstStringUnicode& theSubString, const StUtfIterator<Type>& theFrom) const;
+
+    /**
      * Returns true if string contains requested Unicode symbol.
      */
-    bool isContains(const stUtf32_t theSubChar) const;
+    bool isContains(const stUtf32_t theSubChar) const {
+        return *findFirst(theSubChar) != 0;
+    }
 
     /**
      * Returns true if string contains requested substring.
      */
-    bool isContains(const StConstStringUnicode& theSubString) const;
+    bool isContains(const StConstStringUnicode& theSubString) const {
+        return theSubString.isEmpty() || *findFirst(theSubString) != 0;
+    }
 
         protected:
 
@@ -126,18 +155,19 @@ typedef StConstStringUnicode<stUtfWide_t> StCStringUtfWide;
  * External constructor for StConstStringUnicode POD structure.
  */
 template<typename Type>
-inline const StConstStringUnicode<Type> stStringExtConstr(const Type*  theString,
-                                                          const size_t theSize,
-                                                          const size_t theLength) {
-    const StConstStringUnicode<Type> aStr = {theString, theSize, theLength};
-    return aStr;
+constexpr const StConstStringUnicode<Type> stStringExtConstr(const Type*  theString,
+                                                             const size_t theSize,
+                                                             const size_t theLength) {
+    return StConstStringUnicode<Type>{theString, theSize, theLength};
 }
 
 /**
  * Initialize constant string without Unicode symbols (only ASCII).
  */
-#define stCString(theString) stStringExtConstr(theString, sizeof(theString) - sizeof(*theString), sizeof(theString) / sizeof(*theString) - 1)
-//#define stCString(theString) {theString, sizeof(theString) - sizeof(*theString), sizeof(theString) / sizeof(*theString) - 1}
+template<typename Type, int N>
+constexpr const StConstStringUnicode<Type> stCString(const Type (&theString)[N]) {
+     return StConstStringUnicode<Type>{theString, (N - 1) * sizeof(Type), N - 1};
+}
 
 //static_assert(std::is_pod<StCStringUtf8>::value,
 //              "StCStringUtf8 is not POD structure!");
@@ -176,9 +206,20 @@ class StStringUnicode : public StConstStringUnicode<Type> {
     StStringUnicode(const StStringUnicode& theCopy);
 
     /**
+     * Move constructor.
+     * @param theCopy string to move
+     */
+    StStringUnicode(StStringUnicode&& theCopy);
+
+    /**
      * Copy constructor.
      */
     StStringUnicode(const StConstStringUnicode<Type>& theCopy);
+
+    /**
+     * Move constructor.
+     */
+    StStringUnicode(StConstStringUnicode<Type>&& theCopy);
 
     /**
      * Copy constructor from NULL-terminated UTF-8 string.
@@ -427,6 +468,21 @@ class StStringUnicode : public StConstStringUnicode<Type> {
      * Copy from another string.
      */
     const StStringUnicode& operator=(const StStringUnicode& theOther);
+
+    /**
+     * Move from another string.
+     */
+    const StStringUnicode& operator=(StStringUnicode&& theOther);
+
+    /**
+     * Copy from another string.
+     */
+    const StStringUnicode& operator=(const StConstStringUnicode<Type>& theOther);
+
+    /**
+     * Move from another string.
+     */
+    const StStringUnicode& operator=(StConstStringUnicode<Type>&& theOther);
 
     /**
      * Copy from UTF-8 NULL-terminated string.
