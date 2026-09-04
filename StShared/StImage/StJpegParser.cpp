@@ -10,6 +10,7 @@
 #include <StImage/StExifTags.h>
 
 #include <StStrings/StLogger.h>
+#include <StStrings/StStringStream.h>
 
 /**
  * JPEG markers consist of one or more 0xFF bytes, followed by a marker
@@ -135,6 +136,36 @@ namespace {
             default:      return StString(theMarker) + "  ";
         }
     }
+}
+
+static constexpr StCStringUtf8 GPANO_ProjectionType = stCString("GPano:ProjectionType");
+static constexpr StCStringUtf8 GPANO_FullPanoWidth  = stCString("GPano:FullPanoWidthPixels");
+static constexpr StCStringUtf8 GPANO_CropPanoWidth  = stCString("GPano:CroppedAreaImageWidthPixels");
+
+/**
+ * Find properties in forms '<GPano:ProjectionType>equirectangular</GPano:ProjectionType>'
+ * or 'GPano:ProjectionType="equirectangular"'
+ */
+static StString findXmlProp(const StString& theXml, const StCStringUtf8& theName) {
+    StUtf8Iter aStart = theXml.findFirst(theName);
+    if (*aStart == 0)
+        return StString();
+
+    aStart += int(theName.Length);
+
+    if (*aStart == '>') {
+        const StUtf8Iter anEnd = theXml.findFrom('<', ++aStart);
+        return *anEnd != 0 ? StString(aStart.getBufferHere(), anEnd.getIndex() - aStart.getIndex()) : StString();
+    }
+
+    if (*aStart == '=') {
+        ++aStart;
+        if (*aStart == '\"') {
+            const StUtf8Iter anEnd = theXml.findFrom('\"', ++aStart);
+            return *anEnd != 0 ? StString(aStart.getBufferHere(), anEnd.getIndex() - aStart.getIndex()) : StString();
+        }
+    }
+    return StString();
 }
 
 StJpegParser::StJpegParser(const StCString& theFilePath)
@@ -395,22 +426,32 @@ StHandle<StJpegParser::Image> StJpegParser::parseImage(const int      theImgCoun
                     if(!aSubDir->parseExif(anImg->Exif, aData + 6, anItemLen - 6)) {
                         //
                     }
-                } else if(stAreEqual(aData + 2, "http:", 5)) {
+                } else if (stAreEqual(aData + 2, "http:", 5)) {
                     //ST_DEBUG_LOG("Image cotains XMP section");
-                    if(stAreEqual(aData + 2, "http://ns.adobe.com/xap/1.0/", 28)) { // XMP basic namespace
-                        myXMP = StString((char* )aData + 31, anItemLen - 31);
-                        {
-                          // GPano http://ns.google.com/photos/1.0/panorama/ namespace metadata.
-                          // Note possible cropped panorama parameters are ignored by sView.
-                          if(myXMP.isContains(stCString("<GPano:ProjectionType>equirectangular</GPano:ProjectionType>"))
-                          || myXMP.isContains(stCString("GPano:ProjectionType=\"equirectangular\""))) {
-                              // Google currently supports only equirectangular format
-                              myPanorama = StPanorama_Sphere;
-                          } else if(myXMP.isContains(stCString("<GPano:ProjectionType>cubemap</GPano:ProjectionType>"))
-                                 || myXMP.isContains(stCString("GPano:ProjectionType=\"cubemap\""))) {
-                              // this one doesn't yet exist, but try to support it
-                              toDetectCubemap = true;
-                          }
+                    if (stAreEqual(aData + 2, "http://ns.adobe.com/xap/1.0/", 28)) { // XMP basic namespace
+                        myXMP = StString((char* )aData + 31, anItemLen - 31); // TODO fix string concatenation range
+                        if (myXMP.isContains(stCString("xmlns:GPano"))) {
+                             // GPano http://ns.google.com/photos/1.0/panorama/ namespace metadata.
+                            // Note possible cropped panorama parameters are ignored by sView.
+                            const StString aProjType = findXmlProp(myXMP, GPANO_ProjectionType);
+                            if (aProjType.isEquals(stCString("equirectangular"))) {
+                                // Google currently supports only equirectangular format
+                                myPanorama = StPanorama_Sphere;
+                            } else if (aProjType.isEquals(stCString("cubemap"))) {
+                                // this one doesn't yet exist, but try to support it
+                                toDetectCubemap = true;
+                            }
+
+                            // try detecting VR180 cropped panorama
+                            const StString aPanoWidthFullStr = findXmlProp(myXMP, GPANO_FullPanoWidth);
+                            const StString aPanoWidthCropStr = findXmlProp(myXMP, GPANO_CropPanoWidth);
+
+                            StCLocale aCLocale;
+                            const int aPanoWidthFull = (int )stStringToLong(aPanoWidthFullStr.toCString(), 10, aCLocale);
+                            const int aPanoWidthCrop = (int )stStringToLong(aPanoWidthCropStr.toCString(), 10, aCLocale);
+                            if (aPanoWidthFull != 0 && aPanoWidthCrop == aPanoWidthFull / 2) {
+                                myPanorama = StPanorama_Hemisphere;
+                            }
                         }
                         myXMP.clear();
                     }
