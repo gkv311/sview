@@ -607,8 +607,8 @@ typedef StStringUnicode<stUtf32_t>   StStringUtf32;
 typedef StStringUnicode<stUtfWide_t> StStringUtfWide;
 
 // make sure StStringUnicode could be casted to StConstStringUnicode
-//static_assert(std::is_standard_layout<StStringUtf8>::value,
-//              "StStringUtf8 is not standard layout class!");
+static_assert(std::is_standard_layout<StStringUtf8>::value,
+              "StStringUtf8 is not standard layout class!");
 
 // template implementation (inline methods)
 #include <StStrings/StStringUnicode.inl>

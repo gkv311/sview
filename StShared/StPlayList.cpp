@@ -909,7 +909,8 @@ const StHandle<StPlayList::StRecentItem>& StPlayList::addRecentFile(const StFile
     }
 
     StHandle<StRecentItem> aNewRecent = new StRecentItem();
-    if(StFileNode::isContentProtocolPath(theFile.getPath())) {
+    const StString aPath = theFile.getPath();
+    if (StFileNode::isContentProtocolPath(aPath)) {
         // ignore temporary URLs
         aNewRecent->File = new StFileNode();
     } else {
