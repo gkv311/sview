@@ -53,14 +53,14 @@ class StUtfIterator {
 
     /**
      * Constructor.
-     * @param theString (const Type* ) - buffer to iterate.
+     * @param[in] theString buffer to iterate
      */
-    inline StUtfIterator(const Type* theString)
+    StUtfIterator(const Type* theString)
     : myPosition(theString),
       myPosNext(theString),
       myCharIndex(0),
       myCharUtf32(0) {
-        if(theString != NULL) {
+        if (theString != nullptr) {
             ++(*this);
             myCharIndex = 0;
         }
@@ -69,11 +69,11 @@ class StUtfIterator {
     /**
      * Initialize iterator within specified string.
      */
-    inline void init(const Type* theString) {
+    void init(const Type* theString) {
         myPosition  = theString;
         myPosNext   = theString;
         myCharUtf32 = 0;
-        if(theString != NULL) {
+        if (theString != nullptr) {
             ++(*this);
         }
         myCharIndex = 0;
@@ -83,10 +83,10 @@ class StUtfIterator {
      * Pre-increment operator. Reads the next unicode character.
      * Note - not protected against overruns.
      */
-    inline StUtfIterator& operator++() {
+    StUtfIterator& operator++() {
         myPosition = myPosNext;
         ++myCharIndex;
-        switch(sizeof(Type)) {
+        switch (sizeof(Type)) {
             case 1: readUTF8();  break;
             case 2: readUTF16(); break;
             case 4: // UTF-32
@@ -100,7 +100,7 @@ class StUtfIterator {
      * Post-increment operator.
      * Note - not protected against overruns.
      */
-    inline StUtfIterator operator++(int ) {
+    StUtfIterator operator++(int ) {
         StUtfIterator aCopy = *this;
         ++*this;
         return aCopy;
@@ -109,8 +109,8 @@ class StUtfIterator {
     /**
      * Several characters forward.
      */
-    inline StUtfIterator& operator+=(int theIncrement) {
-        for(; theIncrement > 0; --theIncrement) {
+    StUtfIterator& operator+=(int theIncrement) {
+        for (; theIncrement > 0; --theIncrement) {
             ++*this;
         }
         return *this;
@@ -119,7 +119,7 @@ class StUtfIterator {
     /**
      * Equality operator.
      */
-    inline bool operator==(const StUtfIterator& theRight) const {
+    bool operator==(const StUtfIterator& theRight) const {
         return myPosition == theRight.myPosition;
     }
 
@@ -127,31 +127,27 @@ class StUtfIterator {
      * Dereference operator.
      * @return the UTF-32 codepoint of the character currently pointed by iterator.
      */
-    inline stUtf32_t operator*() const {
-        return myCharUtf32;
-    }
+    stUtf32_t operator*() const { return myCharUtf32; }
 
     /**
      * Buffer-fetching getter.
      */
-    inline const Type* getBufferHere() const { return myPosition; }
+    const Type* getBufferHere() const { return myPosition; }
 
     /**
      * Buffer-fetching getter. Dangerous! Iterator should be reinitialized on buffer change.
      */
-    inline Type* changeBufferHere() { return (Type* )myPosition; }
+    Type* changeBufferHere() { return (Type* )myPosition; }
 
     /**
      * Buffer-fetching getter.
      */
-    inline const Type* getBufferNext() const { return myPosNext; }
+    const Type* getBufferNext() const { return myPosNext; }
 
     /**
      * Return the index displacement from iterator initialization.
      */
-    inline size_t getIndex() const {
-        return myCharIndex;
-    }
+    size_t getIndex() const { return myCharIndex; }
 
     /**
      * @return the advance in bytes to store current symbol in UTF-8.
@@ -172,9 +168,7 @@ class StUtfIterator {
      * @return the advance in bytes to store current symbol in UTF-32.
      * Always 4 bytes (method for consistency).
      */
-    inline size_t getAdvanceBytesUtf32() const {
-        return sizeof(stUtf32_t);
-    }
+    size_t getAdvanceBytesUtf32() const { return sizeof(stUtf32_t); }
 
     /**
      * Fill the UTF-8 buffer within current Unicode symbol.
@@ -230,22 +224,50 @@ class StUtfIterator {
      */
     void readUTF16();
 
-        private: //!< unicode magic numbers
+        private: //! @name unicode magic numbers
 
-    static const unsigned char UTF8_BYTES_MINUS_ONE[256];
-    static const unsigned long offsetsFromUTF8[6];
-    static const unsigned char UTF8_FIRST_BYTE_MARK[7];
-    static const unsigned long UTF8_BYTE_MASK;
-    static const unsigned long UTF8_BYTE_MARK;
-    static const unsigned long UTF16_SURROGATE_HIGH_START;
-    static const unsigned long UTF16_SURROGATE_HIGH_END;
-    static const unsigned long UTF16_SURROGATE_LOW_START;
-    static const unsigned long UTF16_SURROGATE_LOW_END;
-    static const unsigned long UTF16_SURROGATE_HIGH_SHIFT;
-    static const unsigned long UTF16_SURROGATE_LOW_BASE;
-    static const unsigned long UTF16_SURROGATE_LOW_MASK;
-    static const unsigned long UTF32_MAX_BMP;
-    static const unsigned long UTF32_MAX_LEGAL;
+    /**
+     * The first character in a UTF-8 sequence indicates how many bytes
+     * to read (among other things).
+     */
+    static constexpr unsigned char UTF8_BYTES_MINUS_ONE[256] = {
+        0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0, 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+        0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0, 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+        0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0, 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+        0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0, 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+        0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0, 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+        0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0, 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+        1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1, 1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,
+        2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2, 3,3,3,3,3,3,3,3,4,4,4,4,5,5,5,5
+    };
+
+    /**
+     * Magic values subtracted from a buffer value during UTF-8 conversion.
+     * This table contains as many values as there might be trailing bytes
+     * in a UTF-8 sequence.
+     */
+    static constexpr stUtf32_t offsetsFromUTF8[6] = {
+        0x00000000UL, 0x00003080UL, 0x000E2080UL,
+        0x03C82080UL, 0xFA082080UL, 0x82082080UL
+    };
+
+    /**
+     * The first character in a UTF-8 sequence indicates how many bytes to read.
+     */
+    static constexpr unsigned char UTF8_FIRST_BYTE_MARK[7] = { 0x00, 0x00, 0xC0, 0xE0, 0xF0, 0xF8, 0xFC };
+
+    // magic numbers
+    static constexpr stUtf32_t UTF8_BYTE_MASK = 0xBF;
+    static constexpr stUtf32_t UTF8_BYTE_MARK = 0x80;
+    static constexpr stUtf32_t UTF16_SURROGATE_HIGH_START = 0xD800;
+    static constexpr stUtf32_t UTF16_SURROGATE_HIGH_END   = 0xDBFF;
+    static constexpr stUtf32_t UTF16_SURROGATE_LOW_START  = 0xDC00;
+    static constexpr stUtf32_t UTF16_SURROGATE_LOW_END    = 0xDFFF;
+    static constexpr stUtf32_t UTF16_SURROGATE_HIGH_SHIFT = 10;
+    static constexpr stUtf32_t UTF16_SURROGATE_LOW_BASE   = 0x0010000UL;
+    static constexpr stUtf32_t UTF16_SURROGATE_LOW_MASK   = 0x3FFUL;
+    static constexpr stUtf32_t UTF32_MAX_BMP   = 0x0000FFFFUL;
+    static constexpr stUtf32_t UTF32_MAX_LEGAL = 0x0010FFFFUL;
 
 };
 
@@ -255,6 +277,196 @@ typedef StUtfIterator<stUtf32_t>   StUtf32Iter;
 typedef StUtfIterator<stUtfWide_t> StUtfWideIter;
 
 // template implementation
-#include "StUtfIterator.inl"
+
+template<typename Type>
+constexpr unsigned char StUtfIterator<Type>::UTF8_BYTES_MINUS_ONE[256];
+
+template<typename Type>
+constexpr stUtf32_t StUtfIterator<Type>::offsetsFromUTF8[6];
+
+/**
+ * Get a UTF-8 character; leave the tracking pointer at the start of the next character.
+ * Not protected against invalid UTF-8.
+ */
+template<typename Type>
+inline void StUtfIterator<Type>::readUTF8() {
+    // unsigned arithmetic used
+    stUtf8u_t* aPos = (stUtf8u_t* )myPosNext;
+    const unsigned char aBytesToRead = UTF8_BYTES_MINUS_ONE[*aPos];
+    myCharUtf32 = 0;
+    switch (aBytesToRead) {
+        case 5:
+            myCharUtf32 += *aPos++;
+            myCharUtf32 <<= 6; // remember, illegal UTF-8
+            ST_FALLTHROUGH
+        case 4:
+            myCharUtf32 += *aPos++;
+            myCharUtf32 <<= 6; // remember, illegal UTF-8
+            ST_FALLTHROUGH
+        case 3:
+            myCharUtf32 += *aPos++;
+            myCharUtf32 <<= 6;
+            ST_FALLTHROUGH
+        case 2:
+            myCharUtf32 += *aPos++;
+            myCharUtf32 <<= 6;
+            ST_FALLTHROUGH
+        case 1:
+            myCharUtf32 += *aPos++;
+            myCharUtf32 <<= 6;
+            ST_FALLTHROUGH
+        case 0:
+            myCharUtf32 += *aPos++;
+            break;
+    }
+    myCharUtf32 -= offsetsFromUTF8[aBytesToRead];
+    myPosNext = (Type* )aPos;
+}
+
+template<typename Type> inline
+void StUtfIterator<Type>::readUTF16() {
+    stUtf32_t aChar = *myPosNext++;
+    // if we have the first half of the surrogate pair
+    if (aChar >= UTF16_SURROGATE_HIGH_START
+     && aChar <= UTF16_SURROGATE_HIGH_END) {
+        const stUtf32_t aChar2 = *myPosNext;
+        // complete the surrogate pair
+        if (aChar2 >= UTF16_SURROGATE_LOW_START
+         && aChar2 <= UTF16_SURROGATE_LOW_END) {
+            aChar = ((aChar - UTF16_SURROGATE_HIGH_START) << UTF16_SURROGATE_HIGH_SHIFT)
+                  + (aChar2 - UTF16_SURROGATE_LOW_START)   + UTF16_SURROGATE_LOW_BASE;
+            ++myPosNext;
+        }
+    }
+    myCharUtf32 = aChar;
+}
+
+template<typename Type> inline
+size_t StUtfIterator<Type>::getAdvanceBytesUtf8() const {
+    if (myCharUtf32 >= UTF16_SURROGATE_HIGH_START
+     && myCharUtf32 <= UTF16_SURROGATE_LOW_END) {
+        // UTF-16 surrogate values are illegal in UTF-32
+        return 0;
+    } else if (myCharUtf32 < stUtf32_t(0x80)) {
+        return 1;
+    } else if (myCharUtf32 < stUtf32_t(0x800)) {
+        return 2;
+    } else if (myCharUtf32 < stUtf32_t(0x10000)) {
+        return 3;
+    } else if (myCharUtf32 <= UTF32_MAX_LEGAL) {
+        return 4;
+    } else {
+        // illegal
+        return 0;
+    }
+}
+
+template<typename Type> inline
+stUtf8_t* StUtfIterator<Type>::getUtf8(stUtf8_t* theBuffer) const {
+    // unsigned arithmetic used
+    return (stUtf8_t* )getUtf8((stUtf8u_t* )theBuffer);
+}
+
+template<typename Type> inline
+stUtf8u_t* StUtfIterator<Type>::getUtf8(stUtf8u_t* theBuffer) const {
+    stUtf32_t aChar = myCharUtf32;
+    if (myCharUtf32 >= UTF16_SURROGATE_HIGH_START
+     && myCharUtf32 <= UTF16_SURROGATE_LOW_END) {
+        // UTF-16 surrogate values are illegal in UTF-32
+        return theBuffer;
+    } else if (myCharUtf32 < stUtf32_t(0x80)) {
+        *theBuffer++ = stUtf8u_t (aChar | UTF8_FIRST_BYTE_MARK[1]);
+        return theBuffer;
+    } else if (myCharUtf32 < stUtf32_t(0x800)) {
+        *++theBuffer = stUtf8u_t((aChar | UTF8_BYTE_MARK) & UTF8_BYTE_MASK); aChar >>= 6;
+        *--theBuffer = stUtf8u_t (aChar | UTF8_FIRST_BYTE_MARK[2]);
+        return theBuffer + 2;
+    } else if (myCharUtf32 < stUtf32_t(0x10000)) {
+        theBuffer += 3;
+        *--theBuffer = stUtf8u_t((aChar | UTF8_BYTE_MARK) & UTF8_BYTE_MASK); aChar >>= 6;
+        *--theBuffer = stUtf8u_t((aChar | UTF8_BYTE_MARK) & UTF8_BYTE_MASK); aChar >>= 6;
+        *--theBuffer = stUtf8u_t (aChar | UTF8_FIRST_BYTE_MARK[3]);
+        return theBuffer + 3;
+    } else if (myCharUtf32 <= UTF32_MAX_LEGAL) {
+        theBuffer += 4;
+        *--theBuffer = stUtf8u_t((aChar | UTF8_BYTE_MARK) & UTF8_BYTE_MASK); aChar >>= 6;
+        *--theBuffer = stUtf8u_t((aChar | UTF8_BYTE_MARK) & UTF8_BYTE_MASK); aChar >>= 6;
+        *--theBuffer = stUtf8u_t((aChar | UTF8_BYTE_MARK) & UTF8_BYTE_MASK); aChar >>= 6;
+        *--theBuffer = stUtf8u_t (aChar | UTF8_FIRST_BYTE_MARK[4]);
+        return theBuffer + 4;
+    } else {
+        // illegal
+        return theBuffer;
+    }
+}
+
+template<typename Type> inline
+size_t StUtfIterator<Type>::getAdvanceBytesUtf16() const {
+    if (myCharUtf32 <= UTF32_MAX_BMP) { // target is a character <= 0xFFFF
+        // UTF-16 surrogate values are illegal in UTF-32; 0xffff or 0xfffe are both reserved values
+        if (myCharUtf32 >= UTF16_SURROGATE_HIGH_START
+         && myCharUtf32 <= UTF16_SURROGATE_LOW_END) {
+            return 0;
+        } else {
+            return sizeof(stUtf16_t);
+        }
+    } else if (myCharUtf32 > UTF32_MAX_LEGAL) {
+        // illegal
+        return 0;
+    } else {
+        // target is a character in range 0xFFFF - 0x10FFFF
+        // surrogate pair
+        return sizeof(stUtf16_t) * 2;
+    }
+}
+
+template<typename Type> inline
+stUtf16_t* StUtfIterator<Type>::getUtf16(stUtf16_t* theBuffer) const {
+    if (myCharUtf32 <= UTF32_MAX_BMP) { // target is a character <= 0xFFFF
+        // UTF-16 surrogate values are illegal in UTF-32; 0xffff or 0xfffe are both reserved values
+        if (myCharUtf32 >= UTF16_SURROGATE_HIGH_START
+         && myCharUtf32 <= UTF16_SURROGATE_LOW_END) {
+            return theBuffer;
+        } else {
+            *theBuffer++ = stUtf16_t(myCharUtf32);
+            return theBuffer;
+        }
+    } else if (myCharUtf32 > UTF32_MAX_LEGAL) {
+        // illegal
+        return theBuffer;
+    } else {
+        // surrogate pair
+        stUtf32_t aChar = myCharUtf32 - UTF16_SURROGATE_LOW_BASE;
+        *theBuffer++ = stUtf16_t((aChar >> UTF16_SURROGATE_HIGH_SHIFT) + UTF16_SURROGATE_HIGH_START);
+        *theBuffer++ = stUtf16_t((aChar &  UTF16_SURROGATE_LOW_MASK)   + UTF16_SURROGATE_LOW_START);
+        return theBuffer;
+    }
+}
+
+template<typename Type> inline
+stUtf32_t* StUtfIterator<Type>::getUtf32(stUtf32_t* theBuffer) const {
+    *theBuffer++ = myCharUtf32;
+    return theBuffer;
+}
+
+template<typename Type> template<typename TypeWrite> inline
+size_t StUtfIterator<Type>::getAdvanceBytesUtf() const {
+    switch (sizeof(TypeWrite)) {
+        case sizeof(stUtf8_t):  return getAdvanceBytesUtf8();
+        case sizeof(stUtf16_t): return getAdvanceBytesUtf16();
+        case sizeof(stUtf32_t): return getAdvanceBytesUtf32();
+        default:                return 0; // invalid case
+    }
+}
+
+template<typename Type> template<typename TypeWrite> inline
+TypeWrite* StUtfIterator<Type>::getUtf(TypeWrite* theBuffer) const {
+    switch (sizeof(TypeWrite)) {
+        case sizeof(stUtf8_t):  return (TypeWrite* )getUtf8 ((stUtf8u_t* )theBuffer);
+        case sizeof(stUtf16_t): return (TypeWrite* )getUtf16((stUtf16_t* )theBuffer);
+        case sizeof(stUtf32_t): return (TypeWrite* )getUtf32((stUtf32_t* )theBuffer);
+        default:                return nullptr; // invalid case
+    }
+}
 
 #endif //__StUtfIterator_h_

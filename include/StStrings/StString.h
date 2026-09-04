@@ -7,7 +7,7 @@
 #ifndef __StString_h__
 #define __StString_h__
 
-#include <stTypes.h>
+#include <StStrings/StStringUnicode.h>
 
 #ifdef _WIN32
     static const stUtf8_t SYS_FS_SPLITTER = '\\';
@@ -17,21 +17,6 @@
     #define ST_FILE_SPLITTER "/"
 #endif
 
-#ifndef ST_DEBUG
-    #define ST_DEBUG_ASSERT(expression);
-#else
-    #include <assert.h>
-    #define ST_DEBUG_ASSERT(expression); assert(expression);
-#endif
-
-// template used in StString class method, so - we declare it
-// before template implementation #include
-template<typename Element_Type>
-class StArrayList;
-
-#include <StStrings/StStringUnicode.h>
-typedef StStringUtf8  StString;  // dynamically allocated string class
-typedef StCStringUtf8 StCString; // POD structure for constant string
 
 #if defined(__APPLE__)
 /**

@@ -212,8 +212,6 @@ set (USED_INCFILES
   ../include/StStrings/StStringUnicode.h
   ../include/StStrings/StUtfIterator.h
   ../include/StStrings/stUtfTools.h
-  ../include/StStrings/StStringUnicode.inl
-  ../include/StStrings/StUtfIterator.inl
   ../include/StSys/StSys.h
   ../include/StTemplates/StArray.h
   ../include/StTemplates/StArrayList.h
