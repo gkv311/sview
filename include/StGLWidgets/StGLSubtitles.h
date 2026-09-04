@@ -14,10 +14,6 @@
 #include <StSettings/StEnumParam.h>
 #include <StSettings/StFloat32Param.h>
 
-// dummy
-template<>
-inline void StArray<StHandle <StSubItem> >::sort() {}
-
 class StGLImageRegion;
 
 /**

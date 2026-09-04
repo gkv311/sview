@@ -10,8 +10,7 @@
 #include <stTypes.h>
 
 /**
- * This is copy of the template StQuickSort
- * but assume array of pointers to objects with defined compare operators.
+ * Perform sorting of plain array of pointers to objects using QuickSort algorithm.
  * Example of use:
  *    MyObject* anArray[128];
  *    StQuickPointersSort<>::perform(anArray, 0, 128 - 1);

@@ -22,7 +22,6 @@ class StParamBase {
 
 };
 
-template<> inline void StArray< StHandle<StParamBase> >::sort() {}
 typedef StArrayList< StHandle<StParamBase> > StParamsList;
 
 /**

@@ -8,7 +8,6 @@
 #define __StArray_H__
 
 #include <StStrings/StString.h>
-#include <StTemplates/StQuickSort.h>
 
 /**
  * This template declare Array class.
@@ -183,15 +182,6 @@ class StArray {
         }
         myArray[theIndex] = theElement;
         return (*this);
-    }
-
-    /**
-     * Do array sort, from minimum to maximum element value.
-     */
-    virtual void sort() {
-        if(mySize > 0) {
-            StQuickSort<Element_t>::perform(myArray, 0, mySize - 1);
-        }
     }
 
     /**

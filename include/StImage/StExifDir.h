@@ -146,7 +146,4 @@ class StExifDir {
 
 };
 
-template<>
-inline void StArray< StHandle<StExifDir> >::sort() {}
-
 #endif // __StExifDir_h_

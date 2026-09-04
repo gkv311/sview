@@ -165,7 +165,4 @@ class StGLFragmentShader : public StGLShader {
 
 };
 
-template<> inline void StArray< StHandle<StGLVertexShader>   >::sort() {}
-template<> inline void StArray< StHandle<StGLFragmentShader> >::sort() {}
-
 #endif // __StGLShader_h_

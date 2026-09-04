@@ -13,9 +13,6 @@
 
 class StGLVertexBuffer;
 
-template<> inline void StArray< StHandle <StArrayList <StGLVec2> > >::sort() {}
-template<> inline void StArray< StHandle <StGLVertexBuffer> >::sort() {}
-
 /**
  * This class intended to prepare formatted text.
  */

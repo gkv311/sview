@@ -53,9 +53,6 @@ struct StMovieInfo {
 
 };
 
-template<> inline void StArray< StHandle<StFileNode> >::sort() {}
-template<> inline void StArray< StHandle<StAVIOContext> >::sort() {}
-
 /**
  * Auxiliary structure.
  */

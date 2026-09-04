@@ -220,7 +220,6 @@ set (USED_INCFILES
   ../include/StTemplates/StHandle.h
   ../include/StTemplates/StQuaternion.h
   ../include/StTemplates/StQuickPointersSort.h
-  ../include/StTemplates/StQuickSort.h
   ../include/StTemplates/StRect.h
   ../include/StTemplates/StVec2.h
   ../include/StTemplates/StVec3.h

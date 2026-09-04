@@ -14,7 +14,6 @@
 #include <StGL/StGLTexture.h>
 #include <StThreads/StResourceManager.h>
 
-template<> inline void StArray<StGLNamedTexture>::sort() {}
 typedef StArray<StGLNamedTexture> StGLTextureArray;
 class StGLMenuProgram;
 class StGLMessageBox;

@@ -34,11 +34,6 @@ struct StGLTile {
 
 };
 
-template<> inline void StArray< StHandle<StGLTexture> >::sort() {}
-template<> inline void StArray< StHandle<StGLFrameBuffer> >::sort() {}
-template<> inline void StArray<StGLTile>::sort() {}
-template<> inline void StArray<StGLRect>::sort() {}
-
 /**
  * Texture font.
  */

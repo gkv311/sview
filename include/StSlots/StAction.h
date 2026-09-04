@@ -138,8 +138,6 @@ class StAction {
 
 };
 
-template<> inline void StArray< StHandle<StAction> >::sort() {}
-
 /**
  * Reverse boolean parameter value when triggered.
  */

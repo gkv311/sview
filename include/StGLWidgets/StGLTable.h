@@ -54,10 +54,6 @@ class StGLTableItem : public StGLWidget {
 
 };
 
-// dummy
-template<> inline void StArray<             StGLTableItem*  >::sort() {}
-template<> inline void StArray< StArrayList<StGLTableItem*> >::sort() {}
-
 class StDictionary;
 
 /**

@@ -52,7 +52,6 @@ struct StOutDevice {
 
 };
 typedef StArrayList< StHandle<StOutDevice> > StOutDevicesList;
-template<> inline void StArray< StHandle<StOutDevice> >::sort() {}
 
 /**
  * Slave configuration.
@@ -641,6 +640,5 @@ class StWindow {
     ST_LOCAL const StWindow& operator=(const StWindow& );
 
 };
-template<> inline void StArray< StHandle<StWindow> >::sort() {}
 
 #endif // __StWindow_h_

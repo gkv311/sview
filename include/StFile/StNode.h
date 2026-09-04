@@ -12,13 +12,6 @@
 
 class StNode;
 
-template<>
-inline void StArray<StNode*>::sort() {
-    if(mySize > 0) {
-        StQuickPointersSort<StNode*>::perform(myArray, 0, mySize - 1);
-    }
-}
-
 class StNode : public StArrayList<StNode*> {
 
         public:
@@ -138,6 +131,15 @@ class StNode : public StArrayList<StNode*> {
     }
 
     //virtual StString toString() const { return getPath(); }
+
+    /**
+     * Do array sort, from minimum to maximum element value.
+     */
+    void sort() {
+        if (mySize > 0) {
+            StQuickPointersSort<StNode*>::perform(myArray, 0, mySize - 1);
+        }
+    }
 
         private:
 
