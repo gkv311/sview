@@ -153,8 +153,8 @@
 
 #ifdef __cplusplus
     typedef bool stBool_t;
-    static const stBool_t ST_TRUE  = true;
-    static const stBool_t ST_FALSE = false;
+    constexpr stBool_t ST_TRUE  = true;
+    constexpr stBool_t ST_FALSE = false;
 #else
     // C-consistent bool type (C doesn't have true 'bool' type)
     typedef unsigned char stBool_t;
@@ -606,8 +606,6 @@ namespace st {
     }
 }
 
-#include <StTemplates/StTemplates.h> // include commonly-used templates
-
 /**
  * Convert degrees to radians.
  */
@@ -622,6 +620,85 @@ inline Type stToRadians(const Type theDegrees) {
 template<typename Type>
 inline Type stToDegrees(const Type theRadians) {
     return Type(180.0) * theRadians / Type(3.14159265358979323846);
+}
+
+/**
+ * Redefine memory allocation functions as templates
+ * (just to improve readability).
+ */
+template<typename TypePtr>
+inline TypePtr stMemAlloc(const size_t& bytesCount) {
+    return (TypePtr )::stMemAlloc(bytesCount);
+}
+
+template<typename TypePtr>
+inline TypePtr stMemRealloc(TypePtr thePtr,
+                            const size_t& bytesCount) {
+    return (TypePtr )::stMemRealloc(thePtr, bytesCount);
+}
+
+template<typename TypePtr>
+inline TypePtr stMemAllocAligned(const size_t& bytesCount,
+                                 const size_t& align = ST_ALIGNMENT) {
+    return (TypePtr )::stMemAllocAligned(bytesCount, align);
+}
+
+template<typename TypePtr>
+inline TypePtr stMemAllocZeroAligned(const size_t& bytesCount,
+                                     const size_t& align = ST_ALIGNMENT) {
+    return (TypePtr )::stMemAllocZeroAligned(bytesCount, align);
+}
+
+/**
+ * Auxiliary functions.
+ */
+template<typename Type>
+void stSwap(Type& x, Type& y) {
+    Type temp = x;
+    x = y;
+    y = temp;
+}
+
+template<typename Type>
+inline Type stMin(const Type value1, const Type value2) {
+    return (value1 < value2) ? value1 : value2;
+}
+
+template<typename Type>
+inline Type stMin(const Type value1, const Type value2, const Type value3) {
+    return stMin(stMin(value1, value2), value3);
+}
+
+template<typename Type>
+inline Type stMax(const Type value1, const Type value2) {
+    return (value1 > value2) ? value1 : value2;
+}
+
+template<typename Type>
+inline Type stMax(const Type value1, const Type value2, const Type value3) {
+    return stMax(stMax(value1, value2), value3);
+}
+
+template<typename Type>
+inline Type stClamp(const Type theValue,
+                    const Type theMin,
+                    const Type theMax) {
+    if(theValue < theMin) {
+        return theMin;
+    } else if(theValue > theMax) {
+        return theMax;
+    }
+    return theValue;
+}
+
+/**
+ * Compute linear interpolation between two values.
+ * @param theT interpolation coefficient 0..1
+ * @return interpolation result
+ */
+template<typename Type, typename ElemType>
+inline Type stLerp(const Type& theFrom, const Type& theTo, const ElemType theT) {
+    return theFrom * (ElemType(1) - theT) + theTo * theT;
 }
 
 #endif //__stTypes_h_

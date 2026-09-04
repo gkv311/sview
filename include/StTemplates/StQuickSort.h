@@ -7,7 +7,7 @@
 #ifndef __StQuickSort_H__
 #define __StQuickSort_H__
 
-#include <StTemplates/StTemplates.h>
+#include <stTypes.h>
 
 /**
  * Perform sorting of plain array with QuickSort algorithm.

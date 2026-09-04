@@ -7,6 +7,8 @@
 #ifndef __StSlotProxy_h_
 #define __StSlotProxy_h_
 
+#include <StTemplates/StHandle.h>
+
 #include "StSlotTypes.h"
 #include "StSlot.h"
 

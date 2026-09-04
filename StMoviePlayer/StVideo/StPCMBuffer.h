@@ -21,7 +21,7 @@
 
 #include <stTypes.h>
 
-#define ST_AUDIO_CHANNELS_MAX 8
+constexpr unsigned int ST_AUDIO_CHANNELS_MAX = 8;
 
 /**
  * All sample formats are in native-endian

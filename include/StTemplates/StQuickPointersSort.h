@@ -7,7 +7,7 @@
 #ifndef __StQuickPointersSort_H__
 #define __StQuickPointersSort_H__
 
-#include <StTemplates/StTemplates.h>
+#include <stTypes.h>
 
 /**
  * This is copy of the template StQuickSort

@@ -16,8 +16,8 @@
  * This is lookup array to convert Android NDK key codes to ST_VKEY codes.
  * Notice, this array useless for text input!
  */
-#define ST_ANDROID2ST_VK_SIZE 256
-static const unsigned int ST_ANDROID2ST_VK[ST_ANDROID2ST_VK_SIZE] = {
+constexpr int ST_ANDROID2ST_VK_SIZE = 256;
+static constexpr unsigned int ST_ANDROID2ST_VK[ST_ANDROID2ST_VK_SIZE] = {
     0,            // AKEYCODE_UNKNOWN         = 0,
     0,            // AKEYCODE_SOFT_LEFT       = 1,
     0,            // AKEYCODE_SOFT_RIGHT      = 2,

@@ -10,10 +10,10 @@
 #include <StStrings/StStringUnicode.h>
 
 #ifdef _WIN32
-    static const stUtf8_t SYS_FS_SPLITTER = '\\';
+    constexpr stUtf8_t SYS_FS_SPLITTER = '\\';
     #define ST_FILE_SPLITTER "\\"
 #else
-    static const stUtf8_t SYS_FS_SPLITTER = '/';
+    constexpr stUtf8_t SYS_FS_SPLITTER = '/';
     #define ST_FILE_SPLITTER "/"
 #endif
 

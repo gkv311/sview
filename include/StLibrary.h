@@ -11,18 +11,18 @@
 #include "StVersion.h" // header for version structure
 #if defined(_WIN32)
     #include <windows.h> // needed for mingw
-    static const stUtf8_t ST_DLIB_SUFFIX[]   = ".dll";
-    static const stUtf8_t ST_DLIB_EXTENSION[] = "dll";
+    constexpr stUtf8_t ST_DLIB_SUFFIX[]   = ".dll";
+    constexpr stUtf8_t ST_DLIB_EXTENSION[] = "dll";
 #elif defined(__APPLE__)
     #include <dlfcn.h>
     #define HMODULE void*
-    static const stUtf8_t ST_DLIB_SUFFIX[]   = ".dylib";
-    static const stUtf8_t ST_DLIB_EXTENSION[] = "dylib";
+    constexpr stUtf8_t ST_DLIB_SUFFIX[]   = ".dylib";
+    constexpr stUtf8_t ST_DLIB_EXTENSION[] = "dylib";
 #else
     #include <dlfcn.h>
     #define HMODULE void*
-    static const stUtf8_t ST_DLIB_SUFFIX[]   = ".so";
-    static const stUtf8_t ST_DLIB_EXTENSION[] = "so";
+    constexpr stUtf8_t ST_DLIB_SUFFIX[]   = ".so";
+    constexpr stUtf8_t ST_DLIB_EXTENSION[] = "so";
 #endif
 
 // std error code, returned by sView libraries
@@ -34,12 +34,12 @@ enum {
     STERROR_LIBFUNCTIONNOTFOUND = -100,
 };
 
-static const stUtf8_t STERROR_LIBNOERROR_STR[]              = "No library errors";
-static const stUtf8_t STERROR_LIBLOADFAILED_STR[]           = "Library not found";
-static const stUtf8_t STERROR_LIBFUNCTIONNOTFOUND_VER_STR[] = "Library testVersion function not found (bad library?)";
-static const stUtf8_t STERROR_LIBVERSIONMISSMATCH_STR[]     = "Library version check failed";
-static const stUtf8_t STERROR_LIBFUNCTIONNOTFOUND_STR[]     = "Library functions not found (maybe internal library error)!";
-static const stUtf8_t STERROR_LIBUNKNOWN_STR[]              = "Library error not recognized (reserved?)";
+constexpr stUtf8_t STERROR_LIBNOERROR_STR[]              = "No library errors";
+constexpr stUtf8_t STERROR_LIBLOADFAILED_STR[]           = "Library not found";
+constexpr stUtf8_t STERROR_LIBFUNCTIONNOTFOUND_VER_STR[] = "Library testVersion function not found (bad library?)";
+constexpr stUtf8_t STERROR_LIBVERSIONMISSMATCH_STR[]     = "Library version check failed";
+constexpr stUtf8_t STERROR_LIBFUNCTIONNOTFOUND_STR[]     = "Library functions not found (maybe internal library error)!";
+constexpr stUtf8_t STERROR_LIBUNKNOWN_STR[]              = "Library error not recognized (reserved?)";
 
 /**
  * Function return error description.

@@ -22,23 +22,19 @@ class StRect {
 
         public:
 
-    StRect() {
-        top()    = 0;
-        bottom() = 0;
-        left()   = 0;
-        right()  = 0;
+    constexpr StRect() noexcept : tblr{} {
+        //
     }
 
-    StRect(const Element_t theTop,  const Element_t theBottom,
-           const Element_t theLeft, const Element_t theRight) {
-        top()    = theTop;
-        bottom() = theBottom;
-        left()   = theLeft;
-        right()  = theRight;
+    constexpr StRect(const Element_t theTop,  const Element_t theBottom,
+                     const Element_t theLeft, const Element_t theRight) noexcept
+    : tblr{theTop, theBottom, theLeft, theRight} {
+        //
     }
 
-    StRect(const StRect& theCopy) {
-        stMemCpy(tblr, theCopy.tblr, sizeof(tblr));
+    constexpr StRect(const StRect& theCopy) noexcept
+    : tblr{theCopy.tblr[0], theCopy.tblr[1], theCopy.tblr[2], theCopy.tblr[3]} {
+        //
     }
 
     const StRect& operator=(const StRect& theCopy) {
@@ -54,10 +50,10 @@ class StRect {
         right()  = theRight;
     }
 
-    Element_t top()    const { return tblr[0]; }
-    Element_t bottom() const { return tblr[1]; }
-    Element_t left()   const { return tblr[2]; }
-    Element_t right()  const { return tblr[3]; }
+    constexpr Element_t top()    const noexcept { return tblr[0]; }
+    constexpr Element_t bottom() const noexcept { return tblr[1]; }
+    constexpr Element_t left()   const noexcept { return tblr[2]; }
+    constexpr Element_t right()  const noexcept { return tblr[3]; }
 
     Element_t& top()    { return tblr[0]; }
     Element_t& bottom() { return tblr[1]; }
@@ -67,28 +63,28 @@ class StRect {
     /**
      * @return 2D vector with top-left rectangle corner coordinates.
      */
-    StVec2<Element_t> topLeft() const {
+    constexpr StVec2<Element_t> topLeft() const noexcept {
         return StVec2<Element_t>(left(), top());
     }
 
     /**
      * @return 2D vector with top-right rectangle corner coordinates.
      */
-    StVec2<Element_t> topRight() const {
+    constexpr StVec2<Element_t> topRight() const noexcept {
         return StVec2<Element_t>(right(), top());
     }
 
     /**
      * @return 2D vector with bottom-left rectangle corner coordinates.
      */
-    StVec2<Element_t> bottomLeft() const {
+    constexpr StVec2<Element_t> bottomLeft() const noexcept {
         return StVec2<Element_t>(left(), bottom());
     }
 
     /**
      * @return 2D vector with bottom-right rectangle corner coordinates.
      */
-    StVec2<Element_t> bottomRight() const {
+    constexpr StVec2<Element_t> bottomRight() const noexcept {
         return StVec2<Element_t>(right(), bottom());
     }
 
@@ -306,7 +302,7 @@ struct StMarginsI {
     /**
      * Setup zero-margin.
      */
-    StMarginsI() : left(0), right(0), top(0), bottom(0) {}
+    constexpr StMarginsI() noexcept : left(0), right(0), top(0), bottom(0) {}
 
     /**
      * Setup margin to specified value for all boundaries.

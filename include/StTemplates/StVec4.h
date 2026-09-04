@@ -25,57 +25,58 @@ class StVec4 {
 
         public:
 
-    static size_t length() {
+    static constexpr size_t length() noexcept {
         return 4;
     }
 
     /**
      * Empty constructor. Construct the zero vector.
      */
-    StVec4() {
-        stMemSet(this, 0, sizeof(StVec4));
+    constexpr StVec4() noexcept : v{} {
+        //
     }
 
     /**
      * Initialize ALL components of vector within specified value.
      */
-    explicit StVec4(Element_t xyzw) {
-        v[0] = v[1] = v[2] = v[3] = xyzw;
+    explicit constexpr StVec4(Element_t xyzw) noexcept : v{xyzw, xyzw, xyzw, xyzw} {
+        //
     }
 
     /**
      * Per-component constructor.
      */
-    explicit StVec4(Element_t x, Element_t y, Element_t z, Element_t w) {
-        v[0] = x; v[1] = y; v[2] = z; v[3] = w;
+    explicit constexpr StVec4(Element_t x, Element_t y, Element_t z, Element_t w) noexcept : v{x, y, z, w} {
+        //
     }
 
     /**
      * Constructor from 2-components vector.
      */
-    explicit StVec4(const StVec2<Element_t>& vec2) {
-        v[0] = vec2[0]; v[1] = vec2[1]; v[2] = v[3] = 0.0f;
+    explicit constexpr StVec4(const StVec2<Element_t>& vec2) noexcept : v{vec2.x(), vec2.y(), Element_t(), Element_t()} {
+        //
     }
 
     /**
      * Constructor from 3-components vector.
      */
-    explicit StVec4(const StVec3<Element_t>& vec3) {
-        stMemCpy(this, &vec3, sizeof(StVec3<Element_t>)); v[3] = 0.0f;
+    explicit constexpr StVec4(const StVec3<Element_t>& vec3) noexcept : v{vec3.x(), vec3.y(), vec3.z(), Element_t()} {
+        //
     }
 
     /**
      * Constructor from 3-components vector + alpha value.
      */
-    explicit StVec4(const StVec3<Element_t>& vec3, const Element_t alpha) {
-        stMemCpy(this, &vec3, sizeof(StVec3<Element_t>)); v[3] = alpha;
+    explicit constexpr StVec4(const StVec3<Element_t>& vec3, const Element_t alpha) noexcept
+    : v{vec3.x(), vec3.y(), vec3.z(), alpha}  {
+        //
     }
 
     /**
      * Copy constructor.
      */
-    StVec4(const StVec4& vec4) {
-        stMemCpy(this, &vec4, sizeof(StVec4));
+    constexpr StVec4(const StVec4& vec4) noexcept : v{vec4.v[0], vec4.v[1], vec4.v[2], vec4.v[3]} {
+        //
     }
 
     /**
@@ -86,17 +87,17 @@ class StVec4 {
         return *this;
     }
 
-    Element_t x() const { return v[0]; }
-    Element_t r() const { return v[0]; } // Red color
+    constexpr Element_t x() const noexcept { return v[0]; }
+    constexpr Element_t r() const noexcept { return v[0]; } // Red color
 
-    Element_t y() const { return v[1]; }
-    Element_t g() const { return v[1]; } // Green color
+    constexpr Element_t y() const noexcept { return v[1]; }
+    constexpr Element_t g() const noexcept { return v[1]; } // Green color
 
-    Element_t z() const { return v[2]; }
-    Element_t b() const { return v[2]; } // Blue color
+    constexpr Element_t z() const noexcept { return v[2]; }
+    constexpr Element_t b() const noexcept { return v[2]; } // Blue color
 
-    Element_t w() const { return v[3]; }
-    Element_t a() const { return v[3]; } // Alpha color
+    constexpr Element_t w() const noexcept { return v[3]; }
+    constexpr Element_t a() const noexcept { return v[3]; } // Alpha color
 
     ST_VEC_COMPONENTS_2D(x, y);
     ST_VEC_COMPONENTS_2D(x, z);
@@ -131,12 +132,21 @@ class StVec4 {
     StVec3<Element_t>& yzw() { return *((StVec3<Element_t>* )&v[1]); }
     StVec3<Element_t>& rgb() { return *((StVec3<Element_t>* )&v[0]); }
 
+
+#if defined(_MSC_VER) && (_MSC_VER < 1930)
+    //! Access element by index within [0,3] range - workaround for old msvc.
+    const Element_t& operator[](int theIndex) const { return v[theIndex]; }
+          Element_t& operator[](int theIndex)       { return v[theIndex]; }
+#endif
+
+    typedef Element_t CArray_t[4];
+
     /**
-     * Row access to the data (for OpenGL exchange).
+     * Row access to the data (to simplify OpenGL exchange).
      */
-    const Element_t* getData() const { return v; }
-    operator const Element_t*() const { return v; }
-    operator Element_t*() { return v; }
+    const CArray_t&  getData() const { return v; }
+    operator const CArray_t&() const { return v; }
+    operator       CArray_t&()       { return v; }
 
     /**
      * Check this vector with another vector for equality (without tolerance!).

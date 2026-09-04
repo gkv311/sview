@@ -16,8 +16,8 @@
  * This is lookup array to convert Carbon key codes to ST_VKEY codes.
  * Notice, this array useless for text input!
  */
-#define ST_CARBON2ST_VK_SIZE 128
-static const unsigned int ST_CARBON2ST_VK[ST_CARBON2ST_VK_SIZE] = {
+constexpr size_t ST_CARBON2ST_VK_SIZE = 128;
+static constexpr unsigned int ST_CARBON2ST_VK[ST_CARBON2ST_VK_SIZE] = {
     ST_VK_A,
     ST_VK_S,
     ST_VK_D,

@@ -14,6 +14,10 @@
 
 #include <vector>
 
+template<> inline void StArray<StGLVec2>::sort() {}
+template<> inline void StArray<StGLVec3>::sort() {}
+template<> inline void StArray<StGLVec4>::sort() {}
+
 /**
  * Enumeration indicates the data stored in VBO.
  */

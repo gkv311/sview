@@ -12,8 +12,8 @@
 #ifdef __cplusplus
 
 #define ST_VEC_COMPONENTS_2D(theX, theY) \
-    const StVec2<Element_t> theX##theY() const { return StVec2<Element_t>(theX(), theY()); } \
-    const StVec2<Element_t> theY##theX() const { return StVec2<Element_t>(theY(), theX()); }
+    constexpr const StVec2<Element_t> theX##theY() const noexcept { return StVec2<Element_t>(theX(), theY()); } \
+    constexpr const StVec2<Element_t> theY##theX() const noexcept { return StVec2<Element_t>(theY(), theX()); }
 
 /**
  * Defines the 2D-vector template.
@@ -30,36 +30,36 @@ class StVec2 {
     /**
      * Returns the number of components.
      */
-    static size_t length() {
+    static constexpr size_t length() noexcept {
         return 2;
     }
 
     /**
      * Empty constructor. Construct the zero vector.
      */
-    StVec2() {
-        v[0] = v[1] = Element_t(0);
+    constexpr StVec2() noexcept : v{} {
+        //
     }
 
     /**
      * Initialize ALL components of vector within specified value.
      */
-    explicit StVec2(Element_t xy) {
-        v[0] = v[1] = xy;
+    explicit constexpr StVec2(Element_t xy) noexcept : v{xy, xy} {
+        //
     }
 
     /**
      * Per-component constructor.
      */
-    explicit StVec2(Element_t x, Element_t y) {
-        v[0] = x; v[1] = y;
+    explicit constexpr StVec2(Element_t x, Element_t y) noexcept : v{x, y} {
+        //
     }
 
     /**
      * Copy constructor.
      */
-    StVec2(const StVec2& vec2) {
-        v[0] = vec2[0]; v[1] = vec2[1];
+    constexpr StVec2(const StVec2& vec2) noexcept : v{vec2.v[0], vec2.v[1]} {
+        //
     }
 
     /**
@@ -73,8 +73,8 @@ class StVec2 {
     /**
      * Per-component access.
      */
-    Element_t x() const { return v[0]; }
-    Element_t y() const { return v[1]; }
+    constexpr Element_t x() const noexcept { return v[0]; }
+    constexpr Element_t y() const noexcept { return v[1]; }
 
     ST_VEC_COMPONENTS_2D(x, y);
 
@@ -84,12 +84,20 @@ class StVec2 {
     Element_t& x() { return v[0]; }
     Element_t& y() { return v[1]; }
 
+#if defined(_MSC_VER) && (_MSC_VER < 1930)
+    //! Access element by index within [0,1] range - workaround for old msvc.
+    const Element_t& operator[](int theIndex) const { return v[theIndex]; }
+          Element_t& operator[](int theIndex)       { return v[theIndex]; }
+#endif
+
+    typedef Element_t CArray_t[2];
+
     /**
      * Row access to the data (to simplify OpenGL exchange).
      */
-    const Element_t* getData() const { return v; }
-    operator const Element_t*() const { return v; }
-    operator Element_t*() { return v; }
+    const CArray_t&  getData() const { return v; }
+    operator const CArray_t&() const { return v; }
+    operator       CArray_t&()       { return v; }
 
     /**
      * Check this vector with another vector for equality (without tolerance!).
@@ -258,14 +266,14 @@ class StVec2 {
     /**
      * Compute maximum component of the vector.
      */
-    Element_t maxComp() const {
+    constexpr Element_t maxComp() const noexcept {
         return v[0] > v[1] ? v[0] : v[1];
     }
 
     /**
      * Compute minimum component of the vector.
      */
-    Element_t minComp() const {
+    constexpr Element_t minComp() const noexcept {
         return v[0] < v[1] ? v[0] : v[1];
     }
 

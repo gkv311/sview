@@ -17,12 +17,12 @@ class StQuaternion {
     /**
      * Construct identity quaternion.
      */
-    StQuaternion() : myV((Element_t )0, (Element_t )0, (Element_t )0, (Element_t )1) {}
+    constexpr StQuaternion() noexcept : myV((Element_t )0, (Element_t )0, (Element_t )0, (Element_t )1) {}
 
     /**
      * Construct quaternion from component values.
      */
-    StQuaternion(const Element_t theX, const Element_t theY, const Element_t theZ, const Element_t theW)
+    constexpr StQuaternion(const Element_t theX, const Element_t theY, const Element_t theZ, const Element_t theW) noexcept
     : myV(theX, theY, theZ, theW) {}
 
     /**
@@ -55,22 +55,22 @@ class StQuaternion {
     /**
      * Get x component.
      */
-    Element_t x() const { return myV.x(); }
+    constexpr Element_t x() const noexcept { return myV.x(); }
 
     /**
      * Get y component.
      */
-    Element_t y() const { return myV.y(); }
+    constexpr Element_t y() const noexcept { return myV.y(); }
 
     /**
      * Get z component.
      */
-    Element_t z() const { return myV.z(); }
+    constexpr Element_t z() const noexcept { return myV.z(); }
 
     /**
      * Get w component.
      */
-    Element_t w() const { return myV.w(); }
+    constexpr Element_t w() const noexcept { return myV.w(); }
 
     /**
      * Rotate vector by quaternion as rotation operator.

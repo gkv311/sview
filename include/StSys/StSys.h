@@ -11,6 +11,8 @@
     #include <windows.h>
 #endif
 
+#include <stTypes.h>
+
 class ST_LOCAL StSys {
 
         public:

@@ -24,7 +24,7 @@
 /**
  * 1 second of 48khz 32bit audio (old AVCODEC_MAX_AUDIO_FRAME_SIZE).
  */
-#define ST_MAX_AUDIO_FRAME_SIZE 192000
+constexpr size_t ST_MAX_AUDIO_FRAME_SIZE = 192000;
 
 StChannelMap::StChannelMap(const StChannelMap::Channels   theChannels,
                            const StChannelMap::OrderRules theRules)

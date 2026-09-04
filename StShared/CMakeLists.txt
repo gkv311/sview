@@ -222,7 +222,6 @@ set (USED_INCFILES
   ../include/StTemplates/StQuickPointersSort.h
   ../include/StTemplates/StQuickSort.h
   ../include/StTemplates/StRect.h
-  ../include/StTemplates/StTemplates.h
   ../include/StTemplates/StVec2.h
   ../include/StTemplates/StVec3.h
   ../include/StTemplates/StVec4.h

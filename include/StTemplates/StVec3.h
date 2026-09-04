@@ -14,12 +14,12 @@
  * Access to the components as vector methods.
  */
 #define ST_VEC_COMPONENTS_3D(theX, theY, theZ) \
-    const StVec3<Element_t> theX##theY##theZ() const { return StVec3<Element_t>(theX(), theY(), theZ()); } \
-    const StVec3<Element_t> theX##theZ##theY() const { return StVec3<Element_t>(theX(), theZ(), theY()); } \
-    const StVec3<Element_t> theY##theX##theZ() const { return StVec3<Element_t>(theY(), theX(), theZ()); } \
-    const StVec3<Element_t> theY##theZ##theX() const { return StVec3<Element_t>(theY(), theZ(), theX()); } \
-    const StVec3<Element_t> theZ##theY##theX() const { return StVec3<Element_t>(theZ(), theY(), theX()); } \
-    const StVec3<Element_t> theZ##theX##theY() const { return StVec3<Element_t>(theZ(), theX(), theY()); }
+    constexpr const StVec3<Element_t> theX##theY##theZ() const noexcept { return StVec3<Element_t>(theX(), theY(), theZ()); } \
+    constexpr const StVec3<Element_t> theX##theZ##theY() const noexcept { return StVec3<Element_t>(theX(), theZ(), theY()); } \
+    constexpr const StVec3<Element_t> theY##theX##theZ() const noexcept { return StVec3<Element_t>(theY(), theX(), theZ()); } \
+    constexpr const StVec3<Element_t> theY##theZ##theX() const noexcept { return StVec3<Element_t>(theY(), theZ(), theX()); } \
+    constexpr const StVec3<Element_t> theZ##theY##theX() const noexcept { return StVec3<Element_t>(theZ(), theY(), theX()); } \
+    constexpr const StVec3<Element_t> theZ##theX##theY() const noexcept { return StVec3<Element_t>(theZ(), theX(), theY()); }
 
 /**
  * Generic 3-components vector.
@@ -37,43 +37,43 @@ class StVec3 {
     /**
      * Returns the number of components.
      */
-    static size_t length() {
+    static constexpr size_t length() noexcept {
         return 3;
     }
 
     /**
      * Empty constructor. Construct the zero vector.
      */
-    StVec3() {
-        stMemSet(this, 0, sizeof(StVec3));
+    constexpr StVec3() noexcept : v{} {
+        //
     }
 
     /**
      * Initialize ALL components of vector within specified value.
      */
-    explicit StVec3(Element_t xyz) {
-        v[0] = v[1] = v[2] = xyz;
+    explicit constexpr StVec3(Element_t xyz) noexcept : v{xyz, xyz, xyz} {
+        //
     }
 
     /**
      * Per-component constructor.
      */
-    explicit StVec3(Element_t x, Element_t y, Element_t z) {
-        v[0] = x; v[1] = y; v[2] = z;
+    explicit constexpr StVec3(Element_t x, Element_t y, Element_t z) noexcept : v{x, y, z} {
+        //
     }
 
     /**
      * Constructor from 2-components vector.
      */
-    explicit StVec3(const StVec2<Element_t>& vec2) {
-        v[0] = vec2[0]; v[1] = vec2[1]; v[2] = 0.0f;
+    explicit constexpr StVec3(const StVec2<Element_t>& vec2) noexcept : v{vec2.x(), vec2.y(), Element_t()} {
+        //
     }
 
     /**
      * Copy constructor.
      */
-    StVec3(const StVec3& vec3) {
-        stMemCpy(this, &vec3, sizeof(StVec3));
+    constexpr StVec3(const StVec3& vec3) noexcept : v{vec3.v[0], vec3.v[1], vec3.v[2]} {
+        //
     }
 
     /**
@@ -84,14 +84,14 @@ class StVec3 {
         return *this;
     }
 
-    Element_t x() const { return v[0]; }
-    Element_t r() const { return v[0]; } // Red color
+    constexpr Element_t x() const noexcept { return v[0]; }
+    constexpr Element_t r() const noexcept { return v[0]; } // Red color
 
-    Element_t y() const { return v[1]; }
-    Element_t g() const { return v[1]; } // Green color
+    constexpr Element_t y() const noexcept { return v[1]; }
+    constexpr Element_t g() const noexcept { return v[1]; } // Green color
 
-    Element_t z() const { return v[2]; }
-    Element_t b() const { return v[2]; } // Blue color
+    constexpr Element_t z() const noexcept { return v[2]; }
+    constexpr Element_t b() const noexcept { return v[2]; } // Blue color
 
     ST_VEC_COMPONENTS_2D(x, y);
     ST_VEC_COMPONENTS_2D(x, z);
@@ -109,12 +109,20 @@ class StVec3 {
     Element_t& z() { return v[2]; }
     Element_t& b() { return v[2]; } // Blue color
 
+#if defined(_MSC_VER) && (_MSC_VER < 1930)
+    //! Access element by index within [0,2] range - workaround for old msvc.
+    const Element_t& operator[](int theIndex) const { return v[theIndex]; }
+          Element_t& operator[](int theIndex)       { return v[theIndex]; }
+#endif
+
+    typedef Element_t CArray_t[3];
+
     /**
-     * Row access to the data (for OpenGL exchange).
+     * Row access to the data (to simplify OpenGL exchange).
      */
-    const Element_t* getData() const { return v; }
-    operator const Element_t*() const { return v; }
-    operator Element_t*() { return v; }
+    const CArray_t&  getData() const { return v; }
+    operator const CArray_t&() const { return v; }
+    operator       CArray_t&()       { return v; }
 
     /**
      * Check this vector with another vector for equality (without tolerance!).

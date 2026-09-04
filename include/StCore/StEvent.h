@@ -13,8 +13,8 @@
 #include <StThreads/StTimer.h>
 #include "StVirtualKeys.h"
 
-#define ST_MAX_TOUCHES 10
-#define ST_TOUCH_INVALID_ID (size_t(-1))
+constexpr int ST_MAX_TOUCHES = 10;
+constexpr size_t ST_TOUCH_INVALID_ID = size_t(-1);
 
 /**
  * Touch state.

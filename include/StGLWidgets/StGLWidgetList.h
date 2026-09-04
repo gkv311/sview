@@ -8,6 +8,8 @@
 #ifndef __StGLWidgetList_h_
 #define __StGLWidgetList_h_
 
+#include "stTypes.h"
+
 class StGLWidget;
 
 /**
