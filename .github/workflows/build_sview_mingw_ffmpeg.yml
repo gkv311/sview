@@ -16,11 +16,11 @@ env:
     set(CMAKE_FIND_ROOT_PATH_MODE_LIBRARY ONLY)
     set(CMAKE_FIND_ROOT_PATH_MODE_INCLUDE ONLY)
     set(CMAKE_BUILD_TYPE Release)
-  FFMPEG_REF:   'n8.0.1'
+  FFMPEG_REF:   'n8.0.3'
   OPENJPEG_REF: 'v2.5.4'
   DAV1_REF:     '1.5.3'
   LIBJXL_REF:   'v0.11.1'
-  CACHE_REV:    'cache8'
+  CACHE_REV:    'cache1'
 
 jobs:
   build-libjxl:
