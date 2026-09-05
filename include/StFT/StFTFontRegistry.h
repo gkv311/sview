@@ -11,6 +11,7 @@
 #include <StFile/StFolder.h>
 
 #include <map>
+#include <vector>
 
 /**
  * Class to manage the list of available fonts in the system.
@@ -59,7 +60,7 @@ class StFTFontRegistry {
     /**
      * Search the specified font files.
      */
-    void searchFiles(const StArrayList<StString>& theNames,
+    void searchFiles(const std::vector<StString>& theNames,
                      const bool                   theIsMajor);
 
     /**
@@ -70,9 +71,9 @@ class StFTFontRegistry {
         private:
 
     StArrayList<StString> myExtensions;  //!< list of supported font file extensions
-    StArrayList<StString> myFolders;     //!< font search paths
-    StArrayList<StString> myFilesMajor;  //!< major font file names which should present in the system
-    StArrayList<StString> myFilesMinor;  //!< minor font file names
+    std::vector<StString> myFolders;     //!< font search paths
+    std::vector<StString> myFilesMajor;  //!< major font file names which should present in the system
+    std::vector<StString> myFilesMinor;  //!< minor font file names
 
     StFolder              myFoldersRoot; //!< files tree
     StHandle<StFTLibrary> myFTLib;       //!< handle to the FT library object

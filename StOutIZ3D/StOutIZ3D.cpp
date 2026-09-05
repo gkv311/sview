@@ -90,12 +90,12 @@ const char* StOutIZ3D::getDeviceId() const {
 
 void StOutIZ3D::getDevices(StOutDevicesList& theList) const {
     for(size_t anIter = 0; anIter < myDevices.size(); ++anIter) {
-        theList.add(myDevices[anIter]);
+        theList.push_back(myDevices[anIter]);
     }
 }
 
 void StOutIZ3D::getOptions(StParamsList& theList) const {
-    theList.add(params.Glasses);
+    theList.push_back(params.Glasses);
 }
 
 void StOutIZ3D::updateStrings() {
@@ -147,7 +147,7 @@ StOutIZ3D::StOutIZ3D(const StHandle<StResourceManager>& theResMgr,
     aDevice->DeviceId = stCString("iZ3D");
     aDevice->Priority = aSupportLevel;
     aDevice->Name     = stCString("IZ3D Display");
-    myDevices.add(aDevice);
+    myDevices.push_back(aDevice);
 
     // shader switch option
     params.Glasses = new StEnumParam(myShaders.getMode(), stCString("tableId"), stCString("tableId"));

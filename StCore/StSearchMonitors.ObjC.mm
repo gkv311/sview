@@ -140,6 +140,6 @@ void StSearchMonitors::findMonitorsCocoa() {
         //aStMon.setFreq();
         //aStMon.setFreqMax();
         //aStMon.setGpuName();
-        add(aStMon);
+        myMonitors.push_back(aStMon);
     }
 }

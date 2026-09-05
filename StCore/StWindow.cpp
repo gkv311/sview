@@ -12,9 +12,9 @@
 
 void StWindow::copySignals() {
     params.VSyncMode = new StEnumParam(0, stCString("vsyncMode"), stCString("VSync mode"));
-    params.VSyncMode->changeValues().add("Off");
-    params.VSyncMode->changeValues().add("On");
-    params.VSyncMode->changeValues().add("Mixed");
+    params.VSyncMode->changeValues().push_back("Off");
+    params.VSyncMode->changeValues().push_back("On");
+    params.VSyncMode->changeValues().push_back("Mixed");
 
     myWin->signals.onClose     = &signals.onClose;
     myWin->signals.onPause     = &signals.onPause;

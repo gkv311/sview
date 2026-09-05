@@ -139,7 +139,7 @@ class StOutInterlace : public StWindow {
     /**
      * Look for interlaced monitors within the given list.
      */
-    ST_LOCAL static StHandle<StMonitor> getInterlacedMonitor(const StArrayList<StMonitor>& theMonitors,
+    ST_LOCAL static StHandle<StMonitor> getInterlacedMonitor(const StSearchMonitors& theMonitors,
                                                              bool& theIsReversed,
                                                              bool& theIsRowInterlaced);
 

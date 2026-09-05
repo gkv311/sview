@@ -10,6 +10,8 @@
 #include <StStrings/StString.h>
 #include <StFile/StRawFile.h>
 
+#include <vector>
+
 #if defined(__ANDROID__)
 struct AAssetManager;
 #endif
@@ -177,7 +179,7 @@ class StResourceManager {
      * Read content of specified folder.
      */
     ST_CPPEXPORT void listSubFolders(const StString&        theFolder,
-                                     StArrayList<StString>& theSubFolder) const;
+                                     std::vector<StString>& theSubFolder) const;
 
     /**
      * Access resource with specified name.

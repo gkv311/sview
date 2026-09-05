@@ -29,9 +29,8 @@
 #endif
 
 StSearchMonitors::StSearchMonitors()
-: StArrayList<StMonitor>(2),
-  myIsUpdater(false) {
-    //
+: myIsUpdater(false) {
+    myMonitors.reserve(2);
 }
 
 StSearchMonitors::~StSearchMonitors() {
@@ -41,21 +40,21 @@ StSearchMonitors::~StSearchMonitors() {
 }
 
 StMonitor& StSearchMonitors::operator[](const StPointI_t& thePoint) {
-    for(size_t id = 0; id < size(); ++id) {
-        if(getValue(id).getVRect().isPointIn(thePoint)) {
-            return changeValue(id);
+    for (size_t id = 0; id < myMonitors.size(); ++id) {
+        if (myMonitors[id].getVRect().isPointIn(thePoint)) {
+            return myMonitors[id];
         }
     }
-    return changeValue(0); // return first anyway...
+    return myMonitors[0]; // return first anyway...
 }
 
 const StMonitor& StSearchMonitors::operator[](const StPointI_t& thePoint) const {
-    for(size_t id = 0; id < size(); ++id) {
-        if(getValue(id).getVRect().isPointIn(thePoint)) {
-            return getValue(id);
+    for (size_t id = 0; id < myMonitors.size(); ++id) {
+        if (myMonitors[id].getVRect().isPointIn(thePoint)) {
+            return myMonitors[id];
         }
     }
-    return getValue(0); // return first anyway...
+    return myMonitors[0]; // return first anyway...
 }
 
 /**
@@ -92,15 +91,15 @@ void StSearchMonitors::findMonitorsBlind(const int rootX, const int rootY) {
         StMonitor stMon2;
         stMon1.setVRect(rect0); stMon1.setId(0);
         stMon2.setVRect(rect1); stMon2.setId(1);
-        add(stMon1);
-        add(stMon2);
+        myMonitors.push_back(stMon1);
+        myMonitors.push_back(stMon2);
     } else {
         // setup just one display
         StMonitor stMon;
         rect0.setValues(0, rootY, 0, rootX);
         stMon.setVRect(rect0);
         stMon.setId(0);
-        add(stMon);
+        myMonitors.push_back(stMon);
     }
 }
 
@@ -113,7 +112,7 @@ class WinMonDevInfo {
         public:
 
     /** Main constructor. */
-    WinMonDevInfo(StArrayList<StEDIDParser>& theEdids)
+    WinMonDevInfo(std::vector<StEDIDParser>& theEdids)
     : myEdids(&theEdids), myDevInfoH(nullptr), myDevRegKeyH(nullptr) {
         const GUID GUID_CLASS_MONITOR =
           {0x4d36e96e, 0xe325, 0x11ce, 0xbf, 0xc1, 0x08, 0x00, 0x2b, 0xe1, 0x03, 0x18};
@@ -174,7 +173,7 @@ class WinMonDevInfo {
                         break;
                     }
 
-                    myEdids->add(anEdid);
+                    myEdids->push_back(anEdid);
                     break;
                 }
             }
@@ -199,7 +198,7 @@ class WinMonDevInfo {
 
         private:
 
-    StArrayList<StEDIDParser>* myEdids;
+    std::vector<StEDIDParser>* myEdids;
 
     HDEVINFO myDevInfoH;
     HKEY     myDevRegKeyH;
@@ -209,7 +208,7 @@ class WinMonDevInfo {
 }
 
 void StSearchMonitors::findMonitorsWinAPI() {
-    StArrayList<StEDIDParser> anEdidList;
+    std::vector<StEDIDParser> anEdidList;
     {
         WinMonDevInfo aWinEditReader(anEdidList);
     }
@@ -218,10 +217,10 @@ void StSearchMonitors::findMonitorsWinAPI() {
 
     // retrieve global scale factor (deprecated since Win 8.1)
     float aScale = 1.0f;
-    HDC aDeskCtx = GetDC(NULL);
-    if(aDeskCtx != NULL) {
+    HDC aDeskCtx = GetDC(nullptr);
+    if (aDeskCtx != nullptr) {
         const int aDpiX = GetDeviceCaps(aDeskCtx, LOGPIXELSX);
-        ReleaseDC(NULL, aDeskCtx);
+        ReleaseDC(nullptr, aDeskCtx);
         aScale = float(aDpiX) / 96.0f; // 96 is 100% in Windows
     }
 
@@ -234,9 +233,9 @@ void StSearchMonitors::findMonitorsWinAPI() {
     //typedef HRESULT (WINAPI *RegisterScaleChangeEvent_t)(HANDLE theEvent, DWORD_PTR* theCookie);
     //typedef HRESULT (WINAPI *UnregisterScaleChangeEvent_t)(DWORD_PTR theCookie);
     HMODULE aShcoreLib = GetModuleHandleW(L"Shcore");
-    GetDpiForMonitor_t         aMonDpiFunc   = NULL;
-    //GetScaleFactorForMonitor_t aMonScaleFunc = NULL;
-    if(aShcoreLib != NULL) {
+    GetDpiForMonitor_t         aMonDpiFunc   = nullptr;
+    //GetScaleFactorForMonitor_t aMonScaleFunc = nullptr;
+    if (aShcoreLib != nullptr) {
         aMonDpiFunc   = (GetDpiForMonitor_t         )GetProcAddress(aShcoreLib, "GetDpiForMonitor");
         //aMonScaleFunc = (GetScaleFactorForMonitor_t )GetProcAddress(aShcoreLib, "GetScaleFactorForMonitor");
     }
@@ -245,7 +244,7 @@ void StSearchMonitors::findMonitorsWinAPI() {
     DISPLAY_DEVICEW dispDevice; dispDevice.cb = sizeof(dispDevice);
     DWORD dev = 0;  // device index
     int monId = 1;  // monitor number, as used by Display Properties > Settings
-    for(; EnumDisplayDevicesW(NULL, dev, &dispDevice, 0); ++dev, ++monId) {
+    for(; EnumDisplayDevicesW(nullptr, dev, &dispDevice, 0); ++dev, ++monId) {
         if((dispDevice.StateFlags & DISPLAY_DEVICE_MIRRORING_DRIVER)) {
             // ignore virtual mirror displays
             continue;
@@ -279,23 +278,23 @@ void StSearchMonitors::findMonitorsWinAPI() {
         }
 
         // get the monitor handle and workspace
-        HMONITOR hMonitor = NULL;
+        HMONITOR hMonitor = nullptr;
         MONITORINFO monInfo; ZeroMemory(&monInfo, sizeof(monInfo)); monInfo.cbSize = sizeof(monInfo);
         if(dispDevice.StateFlags & DISPLAY_DEVICE_ATTACHED_TO_DESKTOP) {
             // display is enabled, only enabled displays have a monitor handle
             POINT pt = {dm.dmPosition.x, dm.dmPosition.y};
             hMonitor = MonitorFromPoint(pt, MONITOR_DEFAULTTONULL);
-            if(hMonitor != NULL) {
+            if (hMonitor != nullptr) {
                 GetMonitorInfo(hMonitor, &monInfo);
             }
         }
 
-        if(hMonitor == NULL) {
+        if (hMonitor == nullptr) {
             continue;
         }
         StMonitor aMon;
 
-        if(aMonDpiFunc != NULL) {
+        if (aMonDpiFunc != nullptr) {
             // theDpiType = MDT_Default = MDT_Effective_DPI = 0
             UINT aDpiX = 96;
             UINT aDpiY = 96;
@@ -331,10 +330,10 @@ void StSearchMonitors::findMonitorsWinAPI() {
 
         // NOTE: we get wrong id here for second monitor on WinXP x64
         StString aPnpId;
-        const stUtfWide_t* aStart = NULL;
-        for(StUtfWideIter anIter = StUtfWideIter(ddMon.DeviceID); *anIter != 0; ++anIter) {
+        const stUtfWide_t* aStart = nullptr;
+        for (StUtfWideIter anIter = StUtfWideIter(ddMon.DeviceID); *anIter != 0; ++anIter) {
             if(*anIter == stUtf32_t('\\')) {
-                if(aStart == NULL) {
+                if (aStart == nullptr) {
                     aStart = anIter.getBufferNext();
                 } else {
                     // PnPId is always ASCII chars
@@ -343,7 +342,7 @@ void StSearchMonitors::findMonitorsWinAPI() {
                 }
             }
         }
-        if(aPnpId.isEmpty()) {
+        if (aPnpId.isEmpty()) {
             aPnpId = StString(ddMon.DeviceID);
         }
         aMon.setPnPId(aPnpId);
@@ -355,29 +354,29 @@ void StSearchMonitors::findMonitorsWinAPI() {
                 break;
             }
         }
-        add(aMon);
+        myMonitors.push_back(aMon);
 
         // make primary display first in our list
-        if(isPrimary && monCount != 0) {
-            StMonitor aCopy = getFirst();
-            changeFirst() = getLast();
-            changeFirst().setId(0);
-            changeLast()  = aCopy;
-            changeLast().setId(monCount);
+        if (isPrimary && monCount != 0) {
+            const StMonitor aCopy = myMonitors.front();
+            myMonitors.front() = myMonitors.back();
+            myMonitors.front().setId(0);
+            myMonitors.back()  = aCopy;
+            myMonitors.back().setId(monCount);
         }
         ++monCount;
     }
 
     // group monitors by GPU
-    for(size_t m = 1; m < size(); ++m) {
-        if(getValue(m).getGpuName() != getFirst().getGpuName()) {
-            for(size_t mm = m + 1; mm < size(); ++mm) {
-                if(getValue(mm).getGpuName() == getFirst().getGpuName()) {
-                    StMonitor aCopy = getValue(m);
-                    changeValue(m) = getValue(mm);
-                    changeValue(m) .setId((int )m);
-                    changeValue(mm) = aCopy;
-                    changeValue(mm).setId((int )mm);
+    for (size_t m = 1; m < myMonitors.size(); ++m) {
+        if (myMonitors[m].getGpuName() != myMonitors.front().getGpuName()) {
+            for (size_t mm = m + 1; mm < myMonitors.size(); ++mm) {
+                if (myMonitors[mm].getGpuName() == myMonitors.front().getGpuName()) {
+                    const StMonitor aCopy = myMonitors[m];
+                    myMonitors[m] = myMonitors[mm];
+                    myMonitors[m] .setId((int )m);
+                    myMonitors[mm] = aCopy;
+                    myMonitors[mm].setId((int )mm);
                 }
             }
         }
@@ -387,8 +386,8 @@ void StSearchMonitors::findMonitorsWinAPI() {
 
 #if defined(__linux__) && !defined(__ANDROID__)
 bool StSearchMonitors::getXRootSize(int& theSizeX, int& theSizeY) {
-    Display* aDisplay = XOpenDisplay(NULL); // get first display on server from DISPLAY in env
-    if(aDisplay == NULL) {
+    Display* aDisplay = XOpenDisplay(nullptr); // get first display on server from DISPLAY in env
+    if (aDisplay == nullptr) {
         ST_ERROR_LOG("StSearchMonitors, X: could not open display");
         return false;
     }
@@ -408,7 +407,7 @@ namespace {
     static StEDIDParser readXPropertyEDID(Display* theDisplay,
                                           RROutput theOutput,
                                           Atom     theAtom) {
-        unsigned char* aPropData      = NULL;
+        unsigned char* aPropData      = nullptr;
         int            anActualFormat = 0;
         unsigned long  anItemsNb      = 0;
         unsigned long  aBytesAfter    = 0;
@@ -429,8 +428,8 @@ namespace {
         return anEDID;
     }
 
-    static const int THE_XLIB_DEF_DPI = 96;
-    static const StCString THE_XFTDPI = stCString("Xft.dpi:");
+    static constexpr int THE_XLIB_DEF_DPI = 96;
+    static constexpr StCString THE_XFTDPI = stCString("Xft.dpi:");
 
     /**
      * Auxiliary function to retrieve Xft.dpi propetry.
@@ -438,15 +437,15 @@ namespace {
     static int readXftDpi(Display* theDisplay) {
 
         char* aXResMgr = XResourceManagerString(theDisplay);
-        if(aXResMgr == NULL) {
+        if (aXResMgr == nullptr) {
             return THE_XLIB_DEF_DPI;
         }
 
         const StString aFullStr(aXResMgr);
         const StHandle <StArrayList<StString> > aList = aFullStr.split(stUtf32_t('\n'));
-        for(size_t anIter = 0; anIter < aList->size(); ++anIter) {
+        for (size_t anIter = 0; anIter < aList->size(); ++anIter) {
             const StString& anEntry = aList->getValue(anIter);
-            if(!anEntry.isStartsWith(THE_XFTDPI)) {
+            if (!anEntry.isStartsWith(THE_XFTDPI)) {
                 continue;
             }
 
@@ -458,11 +457,11 @@ namespace {
         return THE_XLIB_DEF_DPI;
     }
 
-};
+}
 
 void StSearchMonitors::findMonitorsXRandr() {
-    Display* aDisplay = XOpenDisplay(NULL); // get first display on server from DISPLAY in env
-    if(aDisplay == NULL) {
+    Display* aDisplay = XOpenDisplay(nullptr); // get first display on server from DISPLAY in env
+    if (aDisplay == nullptr) {
         ST_ERROR_LOG("StSearchMonitors, X: could not open display");
         return;
     }
@@ -477,17 +476,17 @@ void StSearchMonitors::findMonitorsXRandr() {
         XCloseDisplay(aDisplay);
         return;
     }
-    ///X11DRV_expect_error(aDisplay, XRandRErrorHandler, NULL); // TODO
+    ///X11DRV_expect_error(aDisplay, XRandRErrorHandler, nullptr); // TODO
     isOK = XRRQueryVersion(aDisplay, &anXRandrMajor, &anXRandrMinor);
     ///if (X11DRV_check_error()) { isOK = false; }
-    if(!isOK || anXRandrMajor < 1 || (anXRandrMajor == 1 && anXRandrMinor < 2)) {
+    if (!isOK || anXRandrMajor < 1 || (anXRandrMajor == 1 && anXRandrMinor < 2)) {
         XCloseDisplay(aDisplay);
         return;
     }
 
     Window aRootWin = RootWindow(aDisplay, 0);
-    XRRScreenResources* aScrResources = NULL;
-    if(anXRandrMajor > 1 || (anXRandrMajor == 1 && anXRandrMinor >= 3)) {
+    XRRScreenResources* aScrResources = nullptr;
+    if (anXRandrMajor > 1 || (anXRandrMajor == 1 && anXRandrMinor >= 3)) {
         // for XRandr 1.3+; works much faster
         aScrResources = XRRGetScreenResourcesCurrent(aDisplay, aRootWin);
     } else {
@@ -505,11 +504,11 @@ void StSearchMonitors::findMonitorsXRandr() {
         0
     };
 
-    for(int aCrtcId = 0; aCrtcId < aScrResources->ncrtc; ++aCrtcId) {
+    for (int aCrtcId = 0; aCrtcId < aScrResources->ncrtc; ++aCrtcId) {
         StMonitor aMonitor;
         // CRTC is a CRT Controller (this is X terminology)
         XRRCrtcInfo* aCrtcInfo = XRRGetCrtcInfo(aDisplay, aScrResources, aScrResources->crtcs[aCrtcId]);
-        if(aCrtcInfo->noutput == 0) {
+        if (aCrtcInfo->noutput == 0) {
             XRRFreeCrtcInfo(aCrtcInfo);
             continue;
         }
@@ -522,11 +521,11 @@ void StSearchMonitors::findMonitorsXRandr() {
         aMonitor.setScale(aScale);
 
         // detect active refresh rate
-        for(int aModeIter = 0; aModeIter < aScrResources->nmode; ++aModeIter) {
+        for (int aModeIter = 0; aModeIter < aScrResources->nmode; ++aModeIter) {
             const XRRModeInfo& aMode = aScrResources->modes[aModeIter];
-            if(aMode.id != aCrtcInfo->mode) {
+            if (aMode.id != aCrtcInfo->mode) {
                 continue;
-            } else if(aMode.hTotal == 0 || aMode.vTotal == 0) {
+            } else if (aMode.hTotal == 0 || aMode.vTotal == 0) {
                 break;
             }
             double aRate = std::floor(double(aMode.dotClock) / (double(aMode.hTotal) * double(aMode.vTotal)) + 0.5);
@@ -538,14 +537,14 @@ void StSearchMonitors::findMonitorsXRandr() {
         XRROutputInfo* anOutputInfo = XRRGetOutputInfo(aDisplay, aScrResources, anOutput);
 
         // read EDID
-        for(size_t anIter = 0; anAtomsEdid[anIter] != 0; ++anIter) {
+        for (size_t anIter = 0; anAtomsEdid[anIter] != 0; ++anIter) {
             aMonitor.changeEdid() = readXPropertyEDID(aDisplay, anOutput, anAtomsEdid[anIter]);
-            if(aMonitor.getEdid().isValid()) {
+            if (aMonitor.getEdid().isValid()) {
                 break;
             }
         }
 
-        if(aMonitor.getEdid().isValid()) {
+        if (aMonitor.getEdid().isValid()) {
             aMonitor.setPnPId(aMonitor.getEdid().getPnPId());
             aMonitor.setName(aMonitor.getEdid().getName());
         } else {
@@ -556,11 +555,11 @@ void StSearchMonitors::findMonitorsXRandr() {
         // detect max refresh rate
         double aMaxRate = 0.0;
         double aRate = 0.0;
-        for(int aModeInOutputIter = 0; aModeInOutputIter < anOutputInfo->nmode; ++aModeInOutputIter) {
+        for (int aModeInOutputIter = 0; aModeInOutputIter < anOutputInfo->nmode; ++aModeInOutputIter) {
             RRMode aModeId = anOutputInfo->modes[aModeInOutputIter];
-            for(int aModeIter = 0; aModeIter < aScrResources->nmode; ++aModeIter) {
+            for (int aModeIter = 0; aModeIter < aScrResources->nmode; ++aModeIter) {
                 const XRRModeInfo& aMode = aScrResources->modes[aModeIter];
-                if(aMode.id != aModeId) {
+                if (aMode.id != aModeId) {
                     continue;
                 }
                 aRate = std::floor(double(aMode.dotClock) / (double(aMode.hTotal) * double(aMode.vTotal)) + 0.5);
@@ -571,7 +570,7 @@ void StSearchMonitors::findMonitorsXRandr() {
         XRRFreeOutputInfo(anOutputInfo);
 
         XRRFreeCrtcInfo(aCrtcInfo);
-        add(aMonitor);
+        myMonitors.push_back(aMonitor);
     }
 
     XRRFreeScreenResources(aScrResources);
@@ -579,11 +578,11 @@ void StSearchMonitors::findMonitorsXRandr() {
 }
 #endif // __linux__
 
-void StSearchMonitors::listEDID(StArrayList<StEDIDParser>& theEdids) {
+void StSearchMonitors::listEDID(std::vector<StEDIDParser>& theEdids) {
     theEdids.clear();
 #if defined(_WIN32)
     WinMonDevInfo aWinEditReader(theEdids);
-    if (!theEdids.isEmpty())
+    if (!theEdids.empty())
         return;
 #endif
 }
@@ -601,7 +600,7 @@ namespace {
 }
 
 void StSearchMonitors::initGlobal() {
-    clear();
+    myMonitors.clear();
     initFromSystem();
 #if !defined(__ANDROID__)
     initFromConfig();
@@ -611,8 +610,8 @@ void StSearchMonitors::initGlobal() {
 #if defined(__ANDROID__)
 void StSearchMonitors::setupGlobalDisplay(const StMonitor& theDisplay) {
     StMutexAuto aLock(THE_MON_MUTEX);
-    THE_MONS_CACHED.clear();
-    THE_MONS_CACHED.add(theDisplay);
+    THE_MONS_CACHED.myMonitors.clear();
+    THE_MONS_CACHED.myMonitors.push_back(theDisplay);
 }
 #endif
 
@@ -633,7 +632,7 @@ void StSearchMonitors::registerUpdater(const bool theIsUpdater) {
 }
 
 void StSearchMonitors::init(const bool theForced) {
-    clear();
+    myMonitors.clear();
     StMutexAuto aLock(THE_MON_MUTEX);
 #if !defined(__ANDROID__)
     bool toUpdate = THE_MON_IS_FIRST_CALL;
@@ -656,9 +655,7 @@ void StSearchMonitors::init(const bool theForced) {
     (void)theForced;
 #endif
 
-    for(size_t aMonIter = 0; aMonIter < THE_MONS_CACHED.size(); ++aMonIter) {
-        add(THE_MONS_CACHED.getValue(aMonIter));
-    }
+    myMonitors = THE_MONS_CACHED.myMonitors;
 }
 
 static void readMonitor(const StString& thePrefix,
@@ -681,12 +678,12 @@ void StSearchMonitors::initFromConfig() {
 
     StSettings aGlobalSettings(new StResourceManager(), ST_GLOBAL_SETTINGS_GROUP);
     StMonitor aMonDummy;
-    for(size_t aParamIter = 0; aParamIter < 256; ++aParamIter) {
+    for (size_t aParamIter = 0; aParamIter < 256; ++aParamIter) {
         const StString aPrefix     = ST_GLOBAL_SETTINGS_MONITORS + stCString(".") + aParamIter;
         const StString anActiveKey = aPrefix + stCString(".active");
         bool isActive = false;
         aGlobalSettings.loadBool(anActiveKey, isActive);
-        if(!isActive) {
+        if (!isActive) {
             break;
         }
 
@@ -697,26 +694,26 @@ void StSearchMonitors::initFromConfig() {
         StString aPnpId;
         aGlobalSettings.loadInt32 (anIdKey,   aMonId);
         aGlobalSettings.loadString(aPnpIdKey, aPnpId);
-        if(aPnpId.getLength() == 7) {
-            for(size_t aMonIter = 0; aMonIter < size(); ++aMonIter) {
-                StMonitor& aMon = changeValue(aMonIter);
-                if(aMon.getPnPId() == aPnpId) {
+        if (aPnpId.getLength() == 7) {
+            for (size_t aMonIter = 0; aMonIter < myMonitors.size(); ++aMonIter) {
+                StMonitor& aMon = myMonitors[aMonIter];
+                if (aMon.getPnPId() == aPnpId) {
                     readMonitor(aPrefix, aGlobalSettings, aMon);
                 }
             }
-        } else if(aMonId >= 0) {
-            for(int aMonAddIter = (int )size(); aMonAddIter <= aMonId; ++aMonAddIter) {
+        } else if (aMonId >= 0) {
+            for (int aMonAddIter = (int )myMonitors.size(); aMonAddIter <= aMonId; ++aMonAddIter) {
                 aMonDummy.setId(aMonAddIter);
-                add(aMonDummy);
+                myMonitors.push_back(aMonDummy);
             }
-            readMonitor(aPrefix, aGlobalSettings, changeValue((size_t )aMonId));
+            readMonitor(aPrefix, aGlobalSettings, myMonitors[(size_t )aMonId]);
         }
     }
 
     // save sample configuration to simplify manual edition
     const StString anActiveKey = ST_GLOBAL_SETTINGS_MONITORS + stCString(".999.active");
     bool isActive = false;
-    if(aGlobalSettings.loadBool(anActiveKey, isActive)) {
+    if (aGlobalSettings.loadBool(anActiveKey, isActive)) {
         return;
     }
 
@@ -728,7 +725,7 @@ void StSearchMonitors::initFromConfig() {
 }
 
 void StSearchMonitors::initFromSystem() {
-    clear();
+    myMonitors.clear();
 #ifdef _WIN32
     findMonitorsWinAPI();
 #elif defined(__APPLE__)
@@ -737,9 +734,9 @@ void StSearchMonitors::initFromSystem() {
     findMonitorsBlind(1280, 720);
 #elif defined(__linux__)
     findMonitorsXRandr();
-    if(isEmpty()) {
+    if (myMonitors.empty()) {
         int aRootX(0), aRootY(0);
-        if(!getXRootSize(aRootX, aRootY)) {
+        if (!getXRootSize(aRootX, aRootY)) {
             ST_DEBUG_ASSERT(aRootX > 0 && aRootY > 0);
             aRootX = aRootY = 800;
         }

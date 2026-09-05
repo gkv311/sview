@@ -51,7 +51,7 @@ class StEnumParam : public StInt32ParamNamed {
      * Returns title for active value.
      */
     ST_LOCAL StString getActiveValue() const {
-        if(myList.isEmpty()) {
+        if (myList.empty()) {
             return "";
         }
         const int32_t anActive = getValue();
@@ -61,14 +61,14 @@ class StEnumParam : public StInt32ParamNamed {
     /**
      * Return the list of available options.
      */
-    ST_LOCAL const StArrayList<StString>& getValues() const {
+    ST_LOCAL const std::vector<StString>& getValues() const {
         return myList;
     }
 
     /**
      * Modify the list of available options.
      */
-    ST_LOCAL StArrayList<StString>& changeValues() {
+    ST_LOCAL std::vector<StString>& changeValues() {
         return myList;
     }
 
@@ -76,7 +76,7 @@ class StEnumParam : public StInt32ParamNamed {
      * Return option label.
      */
     ST_LOCAL const StString& getOptionLabel(const int32_t theValue) const {
-        return myList.getValue(theValue);
+        return myList.at(theValue);
     }
 
     /**
@@ -89,14 +89,14 @@ class StEnumParam : public StInt32ParamNamed {
         }
 
         while(myList.size() <= (size_t )theValue) {
-            myList.add(stCString(""));
+            myList.push_back(stCString(""));
         }
-        myList.changeValue(theValue) = theName;
+        myList[theValue] = theName;
     }
 
         protected:
 
-    StArrayList<StString> myList;
+    std::vector<StString> myList;
 
 };
 

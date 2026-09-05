@@ -25,10 +25,10 @@ namespace stAV
 
 namespace {
 
-    static const StCString ST_SETTING_RENDERER_AUTO = stCString("rendererPluginAuto");
-    static const StCString ST_SETTING_RENDERER      = stCString("rendererPlugin");
-    static const StCString ST_SETTING_AUTO_VALUE    = stCString("Auto");
-    static const StCString ST_SETTING_DEF_DRAWER    = stCString("defaultDrawer");
+    static constexpr StCString ST_SETTING_RENDERER_AUTO = stCString("rendererPluginAuto");
+    static constexpr StCString ST_SETTING_RENDERER      = stCString("rendererPlugin");
+    static constexpr StCString ST_SETTING_AUTO_VALUE    = stCString("Auto");
+    static constexpr StCString ST_SETTING_DEF_DRAWER    = stCString("defaultDrawer");
 
     /**
      * Auxiliary parameter.
@@ -111,9 +111,9 @@ void StApplication::stApplicationInit(const StHandle<StOpenInfo>& theOpenInfo) {
     params.ActiveDevice->signals.onChanged.connect(this, &StApplication::doChangeDevice);
 
     params.VSyncMode = new StEnumParam(0, stCString("vsyncMode"), stCString("VSync mode"));
-    params.VSyncMode->changeValues().add("Off");
-    params.VSyncMode->changeValues().add("On");
-    params.VSyncMode->changeValues().add("Mixed");
+    params.VSyncMode->changeValues().push_back("Off");
+    params.VSyncMode->changeValues().push_back("On");
+    params.VSyncMode->changeValues().push_back("Mixed");
 
     bool isOutModeAuto = true; // AUTO by default
     aGlobalSettings.loadBool(ST_SETTING_RENDERER_AUTO, isOutModeAuto);
@@ -183,7 +183,7 @@ bool StApplication::open() {
         aGlobalSettings.saveString(ST_SETTING_RENDERER,      myRendId);
         aGlobalSettings.saveBool  (ST_SETTING_RENDERER_AUTO, false);
     } else {
-        if(myRenderers.isEmpty()) {
+        if (myRenderers.empty()) {
             myWindow = new StWindow(myResMgr, myWinParent);
             myWindow->setMessagesQueue(myMsgQueue);
             myWindow->params.VSyncMode = params.VSyncMode;
@@ -211,7 +211,7 @@ bool StApplication::open() {
                 aGlobalSettings.saveString(ST_SETTING_RENDERER,      ST_SETTING_AUTO_VALUE);
                 aGlobalSettings.saveBool  (ST_SETTING_RENDERER_AUTO, isAuto);
                 myWindow = myRenderers[0];
-                if(!myDevices.isEmpty()) {
+                if (!myDevices.empty()) {
                     StHandle<StOutDevice> aBestDev = myDevices[0];
                     for(size_t aDevIter = 0; aDevIter < myDevices.size(); ++aDevIter) {
                         const StHandle<StOutDevice>& aDev = myDevices[aDevIter];
@@ -283,11 +283,11 @@ void StApplication::addRenderer(const StHandle<StWindow>& theRenderer) {
     StHandle<StWindow> aRenderer = theRenderer;
     aRenderer->params.VSyncMode = params.VSyncMode; // share VSync mode between renderers
     aRenderer->setMessagesQueue(myMsgQueue);
-    myRenderers.add(aRenderer);
+    myRenderers.push_back(aRenderer);
     size_t aDevIter = myDevices.size();
     aRenderer->getDevices(myDevices);
     for(; aDevIter < myDevices.size(); ++aDevIter) {
-        params.ActiveDevice->changeValues().add(myDevices[aDevIter]->Name);
+        params.ActiveDevice->changeValues().push_back(myDevices[aDevIter]->Name);
     }
 }
 
@@ -535,7 +535,7 @@ void StApplication::processEvents() {
 StHandle<StOpenInfo> StApplication::parseProcessArguments() {
     StHandle<StOpenInfo> anInfo = new StOpenInfo();
 
-    StArrayList<StString> anArguments = StProcess::getArguments();
+    std::vector<StString> anArguments = StProcess::getArguments();
     StArgumentsMap anOpenFileArgs;
     size_t aFilesCount = 0;
     bool isFilesSection = false;

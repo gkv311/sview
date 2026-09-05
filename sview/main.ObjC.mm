@@ -150,15 +150,13 @@ namespace {
             return YES;
         }
 
-        StArrayList<StString> anArguments(2);
-        anArguments.add("-");
-        anArguments.add(aFilePath);
+        std::vector<StString> anArguments = { "-", aFilePath };
         StProcess::execProcess(StProcess::getProcessFullPath(), anArguments);
         return YES;
     }
 
     - (void ) applicationDidFinishLaunching: (NSNotification* ) theNotification {
-        StArrayList<StString> anArgs = StProcess::getArguments();
+        std::vector<StString> anArgs = StProcess::getArguments();
         size_t anArgsNb = anArgs.size();
         // open path set by Cocoa mechanisms
         const StString aCocoaOpenPath = TheOpenInfo->getPath();
@@ -296,8 +294,7 @@ namespace {
             return;
         }
 
-        StArrayList<StString> anArguments(1);
-        anArguments.add("--in=image");
+        std::vector<StString> anArguments = { "--in=image" };
         StProcess::execProcess(StProcess::getProcessFullPath(), anArguments);
     }
 
@@ -311,8 +308,7 @@ namespace {
             return;
         }
 
-        StArrayList<StString> anArguments(1);
-        anArguments.add("--in=video");
+        std::vector<StString> anArguments = { "--in=video" };
         StProcess::execProcess(StProcess::getProcessFullPath(), anArguments);
     }
 
@@ -326,8 +322,7 @@ namespace {
             return;
         }
 
-        StArrayList<StString> anArguments(1);
-        anArguments.add("--in=StDiagnostics");
+        std::vector<StString> anArguments = { "--in=StDiagnostics" };
         StProcess::execProcess(StProcess::getProcessFullPath(), anArguments);
     }
 

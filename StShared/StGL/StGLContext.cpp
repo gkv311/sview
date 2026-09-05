@@ -175,8 +175,8 @@ static void APIENTRY debugCallbackWrap(unsigned int theSource,
     ((StGLContext* )theUserParam)->stglDebugCallback(theSource, theType, theId, theSeverity, theLength, theMessage);
 }
 
-static const StCString THE_DBGMSG_SOURCE_UNKNOWN = stCString("UNKNOWN");
-static const StCString THE_DBGMSG_SOURCES[] = {
+static constexpr StCString THE_DBGMSG_SOURCE_UNKNOWN = stCString("UNKNOWN");
+static constexpr StCString THE_DBGMSG_SOURCES[] = {
     stCString("OpenGL"),          // GL_DEBUG_SOURCE_API
     stCString("Window System"),   // GL_DEBUG_SOURCE_WINDOW_SYSTEM
     stCString("Shader Compiler"), // GL_DEBUG_SOURCE_SHADER_COMPILER
@@ -185,8 +185,8 @@ static const StCString THE_DBGMSG_SOURCES[] = {
     stCString("Other"),           // GL_DEBUG_SOURCE_OTHER
 };
 
-static const StCString THE_DBGMSG_TYPE_UNKNOWN = stCString("UNKNOWN");
-static const StCString THE_DBGMSG_TYPES[] = {
+static constexpr StCString THE_DBGMSG_TYPE_UNKNOWN = stCString("UNKNOWN");
+static constexpr StCString THE_DBGMSG_TYPES[] = {
     stCString("Error"),              // GL_DEBUG_TYPE_ERROR
     stCString("Deprecated"),         // GL_DEBUG_TYPE_DEPRECATED_BEHAVIOR
     stCString("Undefined behavior"), // GL_DEBUG_TYPE_UNDEFINED_BEHAVIOR
@@ -195,9 +195,9 @@ static const StCString THE_DBGMSG_TYPES[] = {
     stCString("Other"),              // GL_DEBUG_TYPE_OTHER
 };
 
-static const StCString THE_DBGMSG_SEV_HIGH   = stCString("High");   // GL_DEBUG_SEVERITY_HIGH
-static const StCString THE_DBGMSG_SEV_MEDIUM = stCString("Medium"); // GL_DEBUG_SEVERITY_MEDIUM
-static const StCString THE_DBGMSG_SEV_LOW    = stCString("Low");    // GL_DEBUG_SEVERITY_LOW
+static constexpr StCString THE_DBGMSG_SEV_HIGH   = stCString("High");   // GL_DEBUG_SEVERITY_HIGH
+static constexpr StCString THE_DBGMSG_SEV_MEDIUM = stCString("Medium"); // GL_DEBUG_SEVERITY_MEDIUM
+static constexpr StCString THE_DBGMSG_SEV_LOW    = stCString("Low");    // GL_DEBUG_SEVERITY_LOW
 
 void StGLContext::stglDebugCallback(unsigned int theSource,
                                     unsigned int theType,

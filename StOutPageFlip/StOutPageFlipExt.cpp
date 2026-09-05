@@ -44,7 +44,7 @@ void StOutPageFlipExt::doSetDeviceControl(const int32_t theValue) {
 void StOutPageFlipExt::getOptions(StParamsList& theList) const {
     StOutPageFlip::getOptions(theList);
     if(StOutPageFlip::params.ToShowExtra->getValue()) {
-        theList.add(params.ControlCode);
+        theList.push_back(params.ControlCode);
     }
 }
 

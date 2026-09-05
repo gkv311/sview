@@ -9,7 +9,8 @@
 
 #include <StGLStereo/StFormatEnum.h>
 #include <StSlots/StSignal.h>
-#include <StTemplates/StArrayList.h>
+
+#include <vector>
 
 struct AVFormatContext;
 struct AVCodecContext;
@@ -27,7 +28,7 @@ class StAVVideoMuxer {
     struct StRemuxContext {
         AVFormatContext*          Context;
         bool                      State;
-        StArrayList<unsigned int> Streams;
+        std::vector<unsigned int> Streams;
 
         StRemuxContext() : Context(NULL), State(true) {}
     };
@@ -92,7 +93,7 @@ class StAVVideoMuxer {
 
         private:
 
-    StArrayList<AVFormatContext*> myCtxListSrc;
+    std::vector<AVFormatContext*> myCtxListSrc;
     StFormat                      myStereoFormat;
 
 };

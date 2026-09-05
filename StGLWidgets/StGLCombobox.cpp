@@ -122,7 +122,7 @@ void StGLCombobox::doShowList(const size_t ) {
     myParam->signals.onChanged += stSlot(this, &StGLCombobox::doValueChanged);
 
     ListBuilder aBuilder(this);
-    const StArrayList<StString>& aValues = myParam->getValues();
+    const std::vector<StString>& aValues = myParam->getValues();
     for(size_t aValIter = 0; aValIter < aValues.size(); ++aValIter) {
         aBuilder.getMenu()->addItem(aValues[aValIter], myParam, int32_t(aValIter));
     }

@@ -203,7 +203,7 @@ int main(int , char** ) {
     bool toOpenHtml = true;
     bool toPause = false;
 
-    StArrayList<StString> anArgs = StProcess::getArguments();
+    std::vector<StString> anArgs = StProcess::getArguments();
     for(size_t aParamIter = 1; aParamIter < anArgs.size(); ++aParamIter) {
         StString aParam = anArgs[aParamIter];
         if(!aParam.isStartsWith(ARGUMENT_ANY)) {
@@ -305,13 +305,13 @@ int main(int , char** ) {
     StString aDumpStr = dump(aMonitors);
     aDumpStr += '\n';
 
-    StArrayList<StEDIDParser> anEdids;
+    std::vector<StEDIDParser> anEdids;
     for(size_t aMonIter = 0; aMonIter < aMonitors.size(); ++aMonIter) {
         if(aMonitors[aMonIter].getEdid().isValid()) {
-            anEdids.add(aMonitors[aMonIter].getEdid());
+            anEdids.push_back(aMonitors[aMonIter].getEdid());
         }
     }
-    if(anEdids.isEmpty()) {
+    if (anEdids.empty()) {
         StSearchMonitors::listEDID(anEdids);
     }
 

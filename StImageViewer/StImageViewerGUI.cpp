@@ -366,7 +366,7 @@ StGLMenu* StImageViewerGUI::createViewMenu() {
  */
 StGLMenu* StImageViewerGUI::createDisplayModeMenu() {
     StGLMenu* aMenu = new StGLMenu(this, 0, 0, StGLMenu::MENU_VERTICAL);
-    const StArrayList<StString>& aValuesList = myImage->params.DisplayMode->getValues();
+    const std::vector<StString>& aValuesList = myImage->params.DisplayMode->getValues();
     for(size_t aValIter = 0; aValIter < aValuesList.size(); ++aValIter) {
         aMenu->addItem(aValuesList[aValIter], myImage->params.DisplayMode, int32_t(aValIter));
     }
@@ -527,7 +527,7 @@ StGLMenu* StImageViewerGUI::createOutputMenu() {
     StGLMenu* aMenuChangeDevice = new StGLMenu(this, 0, 0, StGLMenu::MENU_VERTICAL);
 
     const StHandle<StEnumParam>& aDevicesEnum = myPlugin->StApplication::params.ActiveDevice;
-    const StArrayList<StString>& aValuesList  = aDevicesEnum->getValues();
+    const std::vector<StString>& aValuesList  = aDevicesEnum->getValues();
     for(size_t aValIter = 0; aValIter < aValuesList.size(); ++aValIter) {
         aMenuChangeDevice->addItem(aValuesList[aValIter], aDevicesEnum, int32_t(aValIter));
     }
@@ -550,7 +550,7 @@ StGLMenu* StImageViewerGUI::createOutputMenu() {
             aMenu->addItem(aBool->getName(), aBool);
         } else if(anEnum.downcastFrom(aParam)) {
             StGLMenu* aChildMenu = new StGLMenu(this, 0, 0, StGLMenu::MENU_VERTICAL);
-            const StArrayList<StString>& aValues = anEnum->getValues();
+            const std::vector<StString>& aValues = anEnum->getValues();
             for(size_t aValIter = 0; aValIter < aValues.size(); ++aValIter) {
                 aChildMenu->addItem(aValues[aValIter], anEnum, int32_t(aValIter));
             }
@@ -754,12 +754,12 @@ void StImageViewerGUI::doResetHotKeys(const size_t ) {
 void StImageViewerGUI::doListHotKeys(const size_t ) {
     const StHandle<StWindow>& aRend = myPlugin->getMainWindow();
     StParamsList aParams;
-    aParams.add(myPlugin->StApplication::params.ActiveDevice);
-    aParams.add(myImage->params.DisplayMode);
+    aParams.push_back(myPlugin->StApplication::params.ActiveDevice);
+    aParams.push_back(myImage->params.DisplayMode);
     aRend->getOptions(aParams);
-    aParams.add(myPlugin->params.ToShowFps);
-    aParams.add(myLangMap->params.language);
-    aParams.add(myPlugin->params.IsMobileUI);
+    aParams.push_back(myPlugin->params.ToShowFps);
+    aParams.push_back(myLangMap->params.language);
+    aParams.push_back(myPlugin->params.IsMobileUI);
 
     const StString aTitle  = tr(MENU_HELP_HOTKEYS);
     StInfoDialog*  aDialog = new StInfoDialog(myPlugin, this, aTitle, scale(650), scale(300));
@@ -797,36 +797,36 @@ void StImageViewerGUI::doChangeHotKey2(const size_t theId) {
 void StImageViewerGUI::doMobileSettings(const size_t ) {
     const StHandle<StWindow>& aRend = myPlugin->getMainWindow();
     StParamsList aParams;
-    aParams.add(myPlugin->StApplication::params.ActiveDevice);
-    aParams.add(myImage->params.DisplayMode);
+    aParams.push_back(myPlugin->StApplication::params.ActiveDevice);
+    aParams.push_back(myImage->params.DisplayMode);
     aRend->getOptions(aParams);
-    aParams.add(myPlugin->params.ToStickPanorama);
-    aParams.add(myPlugin->params.ToFlipCubeZ6x1);
-    aParams.add(myPlugin->params.ToFlipCubeZ3x2);
-    aParams.add(myPlugin->params.ToSwapJPS);
-    aParams.add(myPlugin->params.ToShowFps);
-    aParams.add(myPlugin->params.SlideShowDelay);
-    aParams.add(myLangMap->params.language);
-    aParams.add(myPlugin->params.IsMobileUI);
+    aParams.push_back(myPlugin->params.ToStickPanorama);
+    aParams.push_back(myPlugin->params.ToFlipCubeZ6x1);
+    aParams.push_back(myPlugin->params.ToFlipCubeZ3x2);
+    aParams.push_back(myPlugin->params.ToSwapJPS);
+    aParams.push_back(myPlugin->params.ToShowFps);
+    aParams.push_back(myPlugin->params.SlideShowDelay);
+    aParams.push_back(myLangMap->params.language);
+    aParams.push_back(myPlugin->params.IsMobileUI);
 #if defined(_WIN32) || defined(__APPLE__) // implemented only on Windows and macOS
-    aParams.add(myPlugin->params.IsExclusiveFullScreen);
+    aParams.push_back(myPlugin->params.IsExclusiveFullScreen);
 #endif
-    aParams.add(myPlugin->params.ToUseDeepColor);
+    aParams.push_back(myPlugin->params.ToUseDeepColor);
     if(isMobile()) {
-        //aParams.add(myPlugin->params.ToHideStatusBar);
-        aParams.add(myPlugin->params.ToHideNavBar);
+        //aParams.push_back(myPlugin->params.ToHideStatusBar);
+        aParams.push_back(myPlugin->params.ToHideNavBar);
     } else {
-        aParams.add(myPlugin->params.ToOpenLast);
+        aParams.push_back(myPlugin->params.ToOpenLast);
     }
-    aParams.add(myPlugin->params.ExitOnEscape);
+    aParams.push_back(myPlugin->params.ExitOnEscape);
 #if defined(ST_UPDATES_CHECK)
-    aParams.add(myPlugin->params.CheckUpdatesDays);
+    aParams.push_back(myPlugin->params.CheckUpdatesDays);
 #endif
 
     if(!myWindow->isMobile()) {
         StHandle<StBoolParamNamed> aDefDrawerParam = myPlugin->createDefaultDrawerParam(stCString("StImageViewer"),
                                                                                         stCString("sView launcher starts Image Viewer"));
-        aParams.add(aDefDrawerParam);
+        aParams.push_back(aDefDrawerParam);
     }
 
     StInfoDialog* aDialog = new StInfoDialog(myPlugin, this, tr(MENU_HELP_SETTINGS), scale(768), scale(300));

@@ -51,7 +51,7 @@ struct StOutDevice {
     int      Priority; //!< device   priority (ST_DEVICE_SUPPORT_ enumeration)
 
 };
-typedef StArrayList< StHandle<StOutDevice> > StOutDevicesList;
+typedef std::vector< StHandle<StOutDevice> > StOutDevicesList;
 
 /**
  * Slave configuration.

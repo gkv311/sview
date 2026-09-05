@@ -156,13 +156,13 @@ bool StOutDual::setDevice(const StString& theDevice) {
 
 void StOutDual::getDevices(StOutDevicesList& theList) const {
     for(size_t anIter = 0; anIter < myDevices.size(); ++anIter) {
-        theList.add(myDevices[anIter]);
+        theList.push_back(myDevices[anIter]);
     }
 }
 
 void StOutDual::getOptions(StParamsList& theList) const {
-    theList.add(params.SlaveMonId);
-    theList.add(params.MonoClone);
+    theList.push_back(params.SlaveMonId);
+    theList.push_back(params.MonoClone);
 }
 
 void StOutDual::updateStrings() {
@@ -214,14 +214,14 @@ StOutDual::StOutDual(const StHandle<StResourceManager>& theResMgr,
     aDevDual->DeviceId = stCString("Dual");
     aDevDual->Priority = aSupportLevel;
     aDevDual->Name     = stCString("Dual Output");
-    myDevices.add(aDevDual);
+    myDevices.push_back(aDevDual);
 
     StHandle<StOutDevice> aDevMirr = new StOutDevice();
     aDevMirr->PluginId = ST_OUT_PLUGIN_NAME;
     aDevMirr->DeviceId = stCString("Mirror");
     aDevMirr->Priority = aSupportLevel;
     aDevMirr->Name     = stCString("Mirror Output");
-    myDevices.add(aDevMirr);
+    myDevices.push_back(aDevMirr);
 
     // Slave Monitor option
     params.SlaveMonId = new StEnumParam(1, stCString("slaveId"), stCString("slaveId"));
@@ -234,7 +234,7 @@ StOutDual::StOutDual(const StHandle<StResourceManager>& theResMgr,
         } else {
             aName += " (disconnected)";
         }
-        params.SlaveMonId->changeValues().add(aName);
+        params.SlaveMonId->changeValues().push_back(aName);
     }
     params.SlaveMonId->signals.onChanged.connect(this, &StOutDual::doSlaveMon);
 

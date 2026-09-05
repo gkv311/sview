@@ -10,7 +10,7 @@
 
 #include <StCore/StMonitor.h>
 
-#include <StTemplates/StArrayList.h>
+#include <vector>
 
 /**
  * This class provides:
@@ -18,7 +18,7 @@
  *  - methods to initialize list within current system configuration
  *  - methods to find monitor within specified point
  */
-class StSearchMonitors : public StArrayList<StMonitor> {
+class StSearchMonitors {
 
         public:
 
@@ -48,12 +48,16 @@ class StSearchMonitors : public StArrayList<StMonitor> {
      */
     ST_CPPEXPORT void initFromSystem();
 
-    ST_LOCAL inline StMonitor& operator[](const size_t theId) {
-        return changeValue((theId < size()) ? theId : 0);
+    ST_LOCAL bool empty() const { return myMonitors.empty(); }
+
+    ST_LOCAL size_t size() const { return myMonitors.size(); }
+
+    ST_LOCAL StMonitor& operator[](const size_t theId) {
+        return myMonitors.at((theId < myMonitors.size()) ? theId : 0);
     }
 
-    ST_LOCAL inline const StMonitor& operator[](const size_t theId) const {
-        return getValue((theId < size()) ? theId : 0);
+    ST_LOCAL const StMonitor& operator[](const size_t theId) const {
+        return myMonitors.at((theId < myMonitors.size()) ? theId : 0);
     }
 
     /**
@@ -100,7 +104,7 @@ class StSearchMonitors : public StArrayList<StMonitor> {
 
         public:
 
-    ST_CPPEXPORT static void listEDID(StArrayList<StEDIDParser>& theEdids);
+    ST_CPPEXPORT static void listEDID(std::vector<StEDIDParser>& theEdids);
 
     /**
      * Register this instance as updater of global state
@@ -110,6 +114,7 @@ class StSearchMonitors : public StArrayList<StMonitor> {
 
         protected:
 
+    std::vector<StMonitor> myMonitors;
     bool myIsUpdater; //!< flag indicating updating listener
 
 };

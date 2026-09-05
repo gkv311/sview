@@ -9,15 +9,15 @@
 #include <StFile/StFileNode.h>
 
 namespace {
-    static const StCString StFormat_AUTO_STRING          = stCString("auto");
-    static const StCString StFormat_SideBySide_RL_STRING = stCString("crossEyed");
-    static const StCString StFormat_SideBySide_LR_STRING = stCString("parallelPair");
-    static const StCString StFormat_TopBottom_RL_STRING  = stCString("overUnderRL");
-    static const StCString StFormat_TopBottom_LR_STRING  = stCString("overUnderLR");
-    static const StCString StFormat_Rows_STRING          = stCString("interlaceRow");
-    static const StCString StFormat_FrameSequence_STRING = stCString("frameSequential");
-    static const StCString StFormat_Mono_STRING          = stCString("mono");
-};
+    static constexpr StCString StFormat_AUTO_STRING          = stCString("auto");
+    static constexpr StCString StFormat_SideBySide_RL_STRING = stCString("crossEyed");
+    static constexpr StCString StFormat_SideBySide_LR_STRING = stCString("parallelPair");
+    static constexpr StCString StFormat_TopBottom_RL_STRING  = stCString("overUnderRL");
+    static constexpr StCString StFormat_TopBottom_LR_STRING  = stCString("overUnderLR");
+    static constexpr StCString StFormat_Rows_STRING          = stCString("interlaceRow");
+    static constexpr StCString StFormat_FrameSequence_STRING = stCString("frameSequential");
+    static constexpr StCString StFormat_Mono_STRING          = stCString("mono");
+}
 
 StString st::formatToString(StFormat theFormatEnum) {
     switch(theFormatEnum) {

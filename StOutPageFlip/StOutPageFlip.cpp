@@ -356,14 +356,14 @@ class StOutPageFlip::StGLDXFrameBuffer {
 static StMonitor getHigestFreqMonitor(const StSearchMonitors& theMonitors) {
     size_t hfreqMon = 0;
     float hfreqMax = 0;
-    for(size_t aMonIter = 0; aMonIter < theMonitors.size(); ++aMonIter) {
+    for (size_t aMonIter = 0; aMonIter < theMonitors.size(); ++aMonIter) {
         const StMonitor& aMon = theMonitors[aMonIter];
-        if(aMon.getFreqMax() > hfreqMax) {
+        if (aMon.getFreqMax() > hfreqMax) {
             hfreqMax = aMon.getFreqMax();
             hfreqMon = aMonIter;
         }
     }
-    return !theMonitors.isEmpty() ? theMonitors[hfreqMon] : StMonitor();
+    return !theMonitors.empty() ? theMonitors[hfreqMon] : StMonitor();
 }
 
 StString StOutPageFlip::getRendererAbout() const {
@@ -398,13 +398,13 @@ bool StOutPageFlip::setDevice(const StString& theDevice) {
 
 void StOutPageFlip::getDevices(StOutDevicesList& theList) const {
     for(size_t anIter = 0; anIter < myDevices.size(); ++anIter) {
-        theList.add(myDevices[anIter]);
+        theList.push_back(myDevices[anIter]);
     }
 }
 
 void StOutPageFlip::getOptions(StParamsList& theList) const {
-    theList.add(params.QuadBuffer);
-    theList.add(params.ToShowExtra);
+    theList.push_back(params.QuadBuffer);
+    theList.push_back(params.ToShowExtra);
 }
 
 namespace {
@@ -531,14 +531,14 @@ StOutPageFlip::StOutPageFlip(const StHandle<StResourceManager>& theResMgr,
     aDevShutters->DeviceId = stCString("Shutters");
     aDevShutters->Priority = aSupportLevelShutters;
     aDevShutters->Name     = stCString("Shutter glasses");
-    myDevices.add(aDevShutters);
+    myDevices.push_back(aDevShutters);
 
     StHandle<StOutDevice> aDevVuzix = new StOutDevice();
     aDevVuzix->PluginId = ST_OUT_PLUGIN_NAME;
     aDevVuzix->DeviceId = stCString("Vuzix");
     aDevVuzix->Priority = aSupportLevelVuzix;
     aDevVuzix->Name     = stCString("Vuzix HMD");
-    myDevices.add(aDevVuzix);
+    myDevices.push_back(aDevVuzix);
 
     // load window position
     if(isMovable()) {
@@ -1276,7 +1276,8 @@ void StOutPageFlip::doShowExtra(const bool theValue) {
     if(theValue) {
         params.QuadBuffer->defineOption(QUADBUFFER_SOFT, myLangMap.changeValueId(STTR_PARAMETER_QB_EMULATED, "OpenGL Emulated"));
     } else {
-        params.QuadBuffer->changeValues().remove(params.QuadBuffer->getValues().size() - 1);
+        params.QuadBuffer->changeValues().erase(std::next(params.QuadBuffer->changeValues().begin(),
+                                                          params.QuadBuffer->getValues().size() - 1));
         if(params.QuadBuffer->getValue() == QUADBUFFER_SOFT) {
             params.QuadBuffer->setValue(QUADBUFFER_HARD_OPENGL);
         }

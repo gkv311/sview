@@ -59,7 +59,7 @@ bool StAVVideoMuxer::addFile(const StString& theFileToLoad) {
     av_dump_format(aFormatCtx, 0, theFileToLoad.toCString(), false);
 #endif
 
-    myCtxListSrc.add(aFormatCtx);
+    myCtxListSrc.push_back(aFormatCtx);
     return true;
 }
 
@@ -174,8 +174,8 @@ bool StAVVideoMuxer::addStream(AVFormatContext* theContext,
 }
 
 bool StAVVideoMuxer::save(const StString& theFile) {
-    if(myCtxListSrc.isEmpty()
-    || theFile.isEmpty()) {
+    if (myCtxListSrc.empty()
+     || theFile.isEmpty()) {
         return false;
     }
 
@@ -203,7 +203,7 @@ bool StAVVideoMuxer::save(const StString& theFile) {
             av_dict_set(&aCtxOut.Context->metadata, "STEREO_MODE", aFormatStr, 0);
         }
         for(unsigned int aStreamId = 0; aStreamId < aCtxSrc.Context->nb_streams; ++aStreamId) {
-            aCtxSrc.Streams.add((unsigned int )-1);
+            aCtxSrc.Streams.push_back((unsigned int )-1);
             AVStream* aStreamSrc = aCtxSrc.Context->streams[aStreamId];
             if(stAV::getCodecType(aStreamSrc) == AVMEDIA_TYPE_VIDEO) {
                 if(addStream(aCtxOut.Context, aStreamSrc)) {

@@ -191,7 +191,7 @@ void StGLTable::fillFromParams(const StParamsList& theParams,
             aButton->setHeight(myRoot->scale(24));
 
             aCol2Width = stMax(aCol2Width, aButton->getRectPx().width());
-            const StArrayList<StString>& aValues = anEnum->getValues();
+            const std::vector<StString>& aValues = anEnum->getValues();
             for(size_t aValIter = 0; aValIter < aValues.size(); ++aValIter) {
                 aCol2Width = stMax(aCol2Width, aButton->computeWidth(aValues[aValIter]));
             }

@@ -28,97 +28,97 @@ StFTFontRegistry::StFTFontRegistry() {
 
     const StString aCustFontDir = StProcess::getStShareFolder() + "fonts" + SYS_FS_SPLITTER;
     if(StFolder::isFolder(aCustFontDir)) {
-        myFolders.add(aCustFontDir);
+        myFolders.push_back(aCustFontDir);
     }
 #ifdef _WIN32
-    myFolders.add(StProcess::getWindowsFolder() + "fonts");
+    myFolders.push_back(StProcess::getWindowsFolder() + "fonts");
 
     // western
-    myFilesMajor.add(stCString("times.ttf"));
-    myFilesMajor.add(stCString("timesbd.ttf"));
-    myFilesMajor.add(stCString("timesi.ttf"));
-    myFilesMajor.add(stCString("timesbi.ttf"));
-    myFilesMajor.add(stCString("trebuc.ttf"));
-    myFilesMajor.add(stCString("trebucbd.ttf"));
-    myFilesMajor.add(stCString("trebucit.ttf"));
-    myFilesMajor.add(stCString("trebucbi.ttf"));
-    myFilesMajor.add(stCString("tahoma.ttf"));
-    myFilesMajor.add(stCString("tahomabd.ttf"));
-    myFilesMajor.add(stCString("micross.ttf"));
+    myFilesMajor.push_back(stCString("times.ttf"));
+    myFilesMajor.push_back(stCString("timesbd.ttf"));
+    myFilesMajor.push_back(stCString("timesi.ttf"));
+    myFilesMajor.push_back(stCString("timesbi.ttf"));
+    myFilesMajor.push_back(stCString("trebuc.ttf"));
+    myFilesMajor.push_back(stCString("trebucbd.ttf"));
+    myFilesMajor.push_back(stCString("trebucit.ttf"));
+    myFilesMajor.push_back(stCString("trebucbi.ttf"));
+    myFilesMajor.push_back(stCString("tahoma.ttf"));
+    myFilesMajor.push_back(stCString("tahomabd.ttf"));
+    myFilesMajor.push_back(stCString("micross.ttf"));
     // korean
-    myFilesMajor.add(stCString("malgun.ttf"));
-    myFilesMajor.add(stCString("malgunbd.ttf"));
-    myFilesMinor.add(stCString("gulim.ttc")); // Win XP
-    myFilesMinor.add(stCString("gulim.ttf"));
+    myFilesMajor.push_back(stCString("malgun.ttf"));
+    myFilesMajor.push_back(stCString("malgunbd.ttf"));
+    myFilesMinor.push_back(stCString("gulim.ttc")); // Win XP
+    myFilesMinor.push_back(stCString("gulim.ttf"));
     // chinese
-    myFilesMajor.add(stCString("simsun.ttc"));
+    myFilesMajor.push_back(stCString("simsun.ttc"));
 #elif defined(__APPLE__)
     myExtensions.add("dfont");
-    myFolders.add(stCString("/System/Library/Fonts"));
-    myFolders.add(stCString("/Library/Fonts"));
+    myFolders.push_back(stCString("/System/Library/Fonts"));
+    myFolders.push_back(stCString("/Library/Fonts"));
 
     // western
-    myFilesMinor.add(stCString("Times.dfont")); // old macOS
-    myFilesMajor.add(stCString("Times.ttc"));
-    myFilesMajor.add(stCString("Times New Roman.ttf"));
-    myFilesMajor.add(stCString("Times New Roman Bold.ttf"));
-    myFilesMajor.add(stCString("Times New Roman Italic.ttf"));
-    myFilesMajor.add(stCString("Times New Roman Bold Italic.ttf"));
-    myFilesMajor.add(stCString("Trebuchet MS.ttf"));
-    myFilesMajor.add(stCString("Trebuchet MS Bold.ttf"));
-    myFilesMajor.add(stCString("Trebuchet MS Italic.ttf"));
-    myFilesMajor.add(stCString("Trebuchet MS Bold Italic.ttf"));
-    myFilesMajor.add(stCString("Tahoma.ttf"));
-    myFilesMajor.add(stCString("Tahoma Bold.ttf"));
-    myFilesMinor.add(stCString("Monaco.dfont")); // old macOS
-    myFilesMajor.add(stCString("Monaco.ttf"));
+    myFilesMinor.push_back(stCString("Times.dfont")); // old macOS
+    myFilesMajor.push_back(stCString("Times.ttc"));
+    myFilesMajor.push_back(stCString("Times New Roman.ttf"));
+    myFilesMajor.push_back(stCString("Times New Roman Bold.ttf"));
+    myFilesMajor.push_back(stCString("Times New Roman Italic.ttf"));
+    myFilesMajor.push_back(stCString("Times New Roman Bold Italic.ttf"));
+    myFilesMajor.push_back(stCString("Trebuchet MS.ttf"));
+    myFilesMajor.push_back(stCString("Trebuchet MS Bold.ttf"));
+    myFilesMajor.push_back(stCString("Trebuchet MS Italic.ttf"));
+    myFilesMajor.push_back(stCString("Trebuchet MS Bold Italic.ttf"));
+    myFilesMajor.push_back(stCString("Tahoma.ttf"));
+    myFilesMajor.push_back(stCString("Tahoma Bold.ttf"));
+    myFilesMinor.push_back(stCString("Monaco.dfont")); // old macOS
+    myFilesMajor.push_back(stCString("Monaco.ttf"));
     // korean
-    //myFilesMajor.add(stCString("AppleMyungjo.ttf"));
-    myFilesMajor.add(stCString("AppleGothic.ttf"));
+    //myFilesMajor.push_back(stCString("AppleMyungjo.ttf"));
+    myFilesMajor.push_back(stCString("AppleGothic.ttf"));
     // chinese
-    myFilesMinor.add(stCString("华文仿宋.ttf")); // old macOS
-    myFilesMajor.add(stCString("Songti.ttc"));
+    myFilesMinor.push_back(stCString("华文仿宋.ttf")); // old macOS
+    myFilesMajor.push_back(stCString("Songti.ttc"));
 #elif defined(__ANDROID__)
-    myFolders.add(stCString("/system/fonts"));
+    myFolders.push_back(stCString("/system/fonts"));
 
     // western
 
     // Android 6
-    myFilesMajor.add(stCString("NotoSerif-Regular.ttf"));
-    myFilesMajor.add(stCString("NotoSerif-Bold.ttf"));
-    myFilesMajor.add(stCString("NotoSerif-Italic.ttf"));
-    myFilesMajor.add(stCString("NotoSerif-BoldItalic.ttf"));
+    myFilesMajor.push_back(stCString("NotoSerif-Regular.ttf"));
+    myFilesMajor.push_back(stCString("NotoSerif-Bold.ttf"));
+    myFilesMajor.push_back(stCString("NotoSerif-Italic.ttf"));
+    myFilesMajor.push_back(stCString("NotoSerif-BoldItalic.ttf"));
 
     // Android 4
-    myFilesMinor.add(stCString("DroidSerif-Regular.ttf"));
-    myFilesMinor.add(stCString("DroidSerif-Bold.ttf"));
-    myFilesMinor.add(stCString("DroidSerif-Italic.ttf"));
-    myFilesMinor.add(stCString("DroidSerif-BoldItalic.ttf"));
+    myFilesMinor.push_back(stCString("DroidSerif-Regular.ttf"));
+    myFilesMinor.push_back(stCString("DroidSerif-Bold.ttf"));
+    myFilesMinor.push_back(stCString("DroidSerif-Italic.ttf"));
+    myFilesMinor.push_back(stCString("DroidSerif-BoldItalic.ttf"));
 
-    myFilesMajor.add(stCString("DroidSans.ttf"));
-    myFilesMajor.add(stCString("DroidSans-Bold.ttf"));
-    myFilesMajor.add(stCString("DroidSansMono.ttf"));
+    myFilesMajor.push_back(stCString("DroidSans.ttf"));
+    myFilesMajor.push_back(stCString("DroidSans-Bold.ttf"));
+    myFilesMajor.push_back(stCString("DroidSansMono.ttf"));
 
     // not all phones have the following fonts
-    myFilesMinor.add(stCString("NotoSansCJK-Regular.ttc"));
+    myFilesMinor.push_back(stCString("NotoSansCJK-Regular.ttc"));
 
     // Korean
-    myFilesMinor.add(stCString("NanumGothic.ttf"));
-    myFilesMinor.add(stCString("NotoSansKR-Regular.otf"));
+    myFilesMinor.push_back(stCString("NanumGothic.ttf"));
+    myFilesMinor.push_back(stCString("NotoSansKR-Regular.otf"));
 
     // Simplified Chinese
-    myFilesMinor.add(stCString("DroidSansFallback.ttf"));
-    myFilesMinor.add(stCString("NotoSansSC-Regular.otf"));
+    myFilesMinor.push_back(stCString("DroidSansFallback.ttf"));
+    myFilesMinor.push_back(stCString("NotoSansSC-Regular.otf"));
 
     // Traditional Chinese
-    //myFilesMinor.add(stCString("NotoSansTC-Regular.otf"));
+    //myFilesMinor.push_back(stCString("NotoSansTC-Regular.otf"));
 
     // Japanese
-    //myFilesMinor.add(stCString("NotoSansJP-Regular.otf"));
+    //myFilesMinor.push_back(stCString("NotoSansJP-Regular.otf"));
 
     // Arabic
-    myFilesMinor.add(stCString("NotoNaskhArabic-Regular.ttf"));
-    //myFilesMinor.add(stCString("NotoNaskhArabic-Bold.ttf"));
+    myFilesMinor.push_back(stCString("NotoNaskhArabic-Regular.ttf"));
+    //myFilesMinor.push_back(stCString("NotoNaskhArabic-Bold.ttf"));
 #else
 
 #if !defined(__EMSCRIPTEN__)
@@ -130,51 +130,51 @@ StFTFontRegistry::StFTFontRegistry() {
                     break;
                 }
 
-                myFolders.add(StString((const char* )aFcFolder));
+                myFolders.push_back(StString((const char* )aFcFolder));
             }
             FcStrListDone(aFcFontDir);
         }
         FcConfigDestroy(aFcCfg);
     }
 #endif
-    if(myFolders.isEmpty()) {
+    if (myFolders.empty()) {
     #ifdef APP_PREFIX
-        if(!StString(stCString(APP_PREFIX)).isEquals(stCString("/usr"))) {
-            myFolders.add(stCString(APP_PREFIX"/share/fonts"));
-            myFolders.add(stCString(APP_PREFIX"/local/share/fonts"));
+        if (!StString(stCString(APP_PREFIX)).isEquals(stCString("/usr"))) {
+            myFolders.push_back(stCString(APP_PREFIX"/share/fonts"));
+            myFolders.push_back(stCString(APP_PREFIX"/local/share/fonts"));
         }
     #endif
-        myFolders.add(stCString("/usr/share/fonts"));
-        myFolders.add(stCString("/usr/local/share/fonts"));
+        myFolders.push_back(stCString("/usr/share/fonts"));
+        myFolders.push_back(stCString("/usr/local/share/fonts"));
     }
 
     // western
-    myFilesMajor.add(stCString("DejaVuSerif.ttf"));
-    myFilesMajor.add(stCString("DejaVuSerif-Bold.ttf"));
-    myFilesMajor.add(stCString("DejaVuSans.ttf"));
-    myFilesMajor.add(stCString("DejaVuSans-Bold.ttf"));
-    myFilesMajor.add(stCString("DejaVuSansMono.ttf"));
-    myFilesMajor.add(stCString("DejaVuSansMono-Bold.ttf"));
+    myFilesMajor.push_back(stCString("DejaVuSerif.ttf"));
+    myFilesMajor.push_back(stCString("DejaVuSerif-Bold.ttf"));
+    myFilesMajor.push_back(stCString("DejaVuSans.ttf"));
+    myFilesMajor.push_back(stCString("DejaVuSans-Bold.ttf"));
+    myFilesMajor.push_back(stCString("DejaVuSansMono.ttf"));
+    myFilesMajor.push_back(stCString("DejaVuSansMono-Bold.ttf"));
 
-    myFilesMajor.add(stCString("FreeSerif.ttf"));
-    myFilesMajor.add(stCString("FreeSerifBold.ttf"));
-    myFilesMajor.add(stCString("FreeSerifItalic.ttf"));
-    myFilesMajor.add(stCString("FreeSerifBoldItalic.ttf"));
-    myFilesMajor.add(stCString("FreeSans.ttf"));
-    myFilesMajor.add(stCString("FreeSansBold.ttf"));
-    myFilesMajor.add(stCString("FreeSansOblique.ttf"));
-    myFilesMajor.add(stCString("FreeSansBoldOblique.ttf"));
+    myFilesMajor.push_back(stCString("FreeSerif.ttf"));
+    myFilesMajor.push_back(stCString("FreeSerifBold.ttf"));
+    myFilesMajor.push_back(stCString("FreeSerifItalic.ttf"));
+    myFilesMajor.push_back(stCString("FreeSerifBoldItalic.ttf"));
+    myFilesMajor.push_back(stCString("FreeSans.ttf"));
+    myFilesMajor.push_back(stCString("FreeSansBold.ttf"));
+    myFilesMajor.push_back(stCString("FreeSansOblique.ttf"));
+    myFilesMajor.push_back(stCString("FreeSansBoldOblique.ttf"));
 
     // korean
-    myFilesMajor.add(stCString("NanumMyeongjo.ttf"));
-    myFilesMajor.add(stCString("NanumMyeongjoBold.ttf"));
-    myFilesMajor.add(stCString("NanumGothic.ttf"));
-    myFilesMajor.add(stCString("NanumGothicBold.ttf"));
-    myFilesMinor.add(stCString("NotoSerifCJK-Regular.ttc"));
+    myFilesMajor.push_back(stCString("NanumMyeongjo.ttf"));
+    myFilesMajor.push_back(stCString("NanumMyeongjoBold.ttf"));
+    myFilesMajor.push_back(stCString("NanumGothic.ttf"));
+    myFilesMajor.push_back(stCString("NanumGothicBold.ttf"));
+    myFilesMinor.push_back(stCString("NotoSerifCJK-Regular.ttc"));
 
     // chinese
-    //myFilesMajor.add(stCString("DroidSansJapanese.ttf"));
-    myFilesMajor.add(stCString("DroidSansFallbackFull.ttf"));
+    //myFilesMajor.push_back(stCString("DroidSansJapanese.ttf"));
+    myFilesMajor.push_back(stCString("DroidSansFallbackFull.ttf"));
 #endif
 }
 
@@ -183,26 +183,26 @@ StFTFontRegistry::~StFTFontRegistry() {
 }
 
 void StFTFontRegistry::appendSearchPath(const StString& theFolder) {
-    myFolders.add(theFolder);
+    myFolders.push_back(theFolder);
 }
 
 bool StFTFontRegistry::registerFamily(const StString& theFontPath, int theFaceId) {
     const FT_Long aFaceId = theFaceId != -1 ? theFaceId : 0;
-    FT_Face aFace = NULL;
+    FT_Face aFace = nullptr;
     if(FT_New_Face(myFTLib->getInstance(), theFontPath.toCString(), aFaceId, &aFace) != 0) {
         if(aFace != NULL) {
             FT_Done_Face(aFace);
         }
         return false;
     }
-    if(aFace->family_name == NULL // skip broken fonts (error in FreeType?)
+    if(aFace->family_name == nullptr // skip broken fonts (error in FreeType?)
     || FT_Select_Charmap(aFace, ft_encoding_unicode) != 0) { // handle only UNICODE fonts
         FT_Done_Face(aFace);
         return false;
     }
 
     // generate font family name
-    StString aStyle(aFace->style_name != NULL ? aFace->style_name : "");
+    StString aStyle(aFace->style_name != nullptr ? aFace->style_name : "");
     {
         // remove standard style combinations reflected by style_flags
         // and keep only extra styles like Light, Condensed and similar
@@ -278,10 +278,9 @@ bool StFTFontRegistry::registerFamily(const StString& theFontPath, int theFaceId
     return true;
 }
 
-void StFTFontRegistry::searchFiles(const StArrayList<StString>& theNames,
+void StFTFontRegistry::searchFiles(const std::vector<StString>& theNames,
                                    const bool                   theIsMajor) {
-    for(size_t aNameIter = 0; aNameIter < theNames.size(); ++aNameIter) {
-        const StString& aName = theNames.getValue(aNameIter);
+    for (const StString& aName : theNames) {
         StString aPath;
         if(StFileNode::isAbsolutePath(aName)) {
             aPath = aName;
@@ -311,8 +310,8 @@ void StFTFontRegistry::searchFiles(const StArrayList<StString>& theNames,
 void StFTFontRegistry::init(const bool theToSearchAll) {
     myFoldersRoot.clear();
     myFonts.clear();
-    for(size_t aFolderIter = 0; aFolderIter < myFolders.size(); ++aFolderIter) {
-        StFolder* aSubFolder = new StFolder(myFolders.getValue(aFolderIter), &myFoldersRoot);
+    for (const StString& aFolderIter : myFolders) {
+        StFolder* aSubFolder = new StFolder(aFolderIter, &myFoldersRoot);
         aSubFolder->init(myExtensions, 4);
         myFoldersRoot.add(aSubFolder);
     }

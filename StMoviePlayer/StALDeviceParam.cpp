@@ -59,7 +59,7 @@ void StALDeviceParam::initList() {
     #else
         aName.fromUnicode(aDefDevice);
     #endif
-        myDevicesUtf.add(aName);
+        myDevicesUtf.push_back(aName);
         myDevicesLoc.push_back(std::string(aDefDevice));
         return;
     }
@@ -80,13 +80,13 @@ void StALDeviceParam::initList() {
             aName = aName.subString(0, anEnd);
         }
 
-        myDevicesUtf.add(aName);
+        myDevicesUtf.push_back(aName);
         myDevicesLoc.push_back(aCName);
         aDevicesNames += aCName.length() + 1;
     }
-    if(myDevicesUtf.isEmpty()) {
+    if (myDevicesUtf.empty()) {
         // append dummy device
-        myDevicesUtf.add("None");
+        myDevicesUtf.push_back("None");
         myDevicesLoc.push_back("");
     }
 }
@@ -108,7 +108,7 @@ bool StALDeviceParam::init(const StString& theActive) {
 }
 
 StString StALDeviceParam::getUtfTitle() const {
-    if(myDevicesUtf.isEmpty()) {
+    if (myDevicesUtf.empty()) {
         return StString();
     }
 
@@ -117,7 +117,7 @@ StString StALDeviceParam::getUtfTitle() const {
 }
 
 std::string StALDeviceParam::getCTitle() const {
-    if(myDevicesUtf.isEmpty()) {
+    if (myDevicesUtf.empty()) {
         return std::string();
     }
 

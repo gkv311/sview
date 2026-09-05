@@ -228,10 +228,10 @@ namespace {
         const char* name;
     };
 
-    static const StCString THE_SRC_MODE_KEY     = stCString("STEREO_MODE");
-    static const StCString THE_SRC_MODE_KEY_WMV = stCString("StereoscopicLayout");
+    static constexpr StCString THE_SRC_MODE_KEY     = stCString("STEREO_MODE");
+    static constexpr StCString THE_SRC_MODE_KEY_WMV = stCString("StereoscopicLayout");
 
-    static const StFFmpegStereoFormat STEREOFLAGS[] = {
+    static constexpr StFFmpegStereoFormat STEREOFLAGS[] = {
         // MKV stereoscopic mode decoded by FFmpeg into STEREO_MODE metadata tag
         {StFormat_Mono,                 "mono"},
         {StFormat_SideBySide_RL,        "right_left"},
@@ -252,7 +252,7 @@ namespace {
         {StFormat_TopBottom_LR,         "OverUnderLT"},  // Left Top
         {StFormat_TopBottom_RL,         "OverUnderRT"},
         // NULL-terminate array
-        {StFormat_AUTO, NULL}
+        {StFormat_AUTO, nullptr}
     };
 
 }

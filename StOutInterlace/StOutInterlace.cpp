@@ -171,7 +171,7 @@ bool StProgramFB::link(StGLContext& theCtx) {
 
 StAtomic<int32_t> StOutInterlace::myInstancesNb(0);
 
-StHandle<StMonitor> StOutInterlace::getInterlacedMonitor(const StArrayList<StMonitor>& theMonitors,
+StHandle<StMonitor> StOutInterlace::getInterlacedMonitor(const StSearchMonitors& theMonitors,
                                                          bool& theIsReversed,
                                                          bool& theIsRowInterlaced) {
     for(size_t aMonIter = 0; aMonIter < theMonitors.size(); ++aMonIter) {
@@ -222,17 +222,17 @@ void StOutInterlace::getDevices(StOutDevicesList& theList) const {
         if(myDevices[anIter]->Priority == ST_DEVICE_SUPPORT_IGNORE) {
             continue;
         }
-        theList.add(myDevices[anIter]);
+        theList.push_back(myDevices[anIter]);
     }
 }
 
 void StOutInterlace::getOptions(StParamsList& theList) const {
-    theList.add(params.ToReverse);
-    theList.add(params.ToSmooth);
+    theList.push_back(params.ToReverse);
+    theList.push_back(params.ToSmooth);
 #if !defined(__ANDROID__)
-    theList.add(params.BindToMon);
+    theList.push_back(params.BindToMon);
 #endif
-    theList.add(params.ToUseMask);
+    theList.push_back(params.ToUseMask);
 }
 
 void StOutInterlace::updateStrings() {
@@ -316,14 +316,14 @@ StOutInterlace::StOutInterlace(const StHandle<StResourceManager>& theResMgr,
     aDevRow->DeviceId = stCString("Row");
     aDevRow->Priority = ST_DEVICE_SUPPORT_NONE;
     aDevRow->Name     = stCString("Row Interlaced");
-    myDevices.add(aDevRow);
+    myDevices.push_back(aDevRow);
 
     StHandle<StOutDevice> aDevCol = new StOutDevice();
     aDevCol->PluginId = ST_OUT_PLUGIN_NAME;
     aDevCol->DeviceId = stCString("Col");
     aDevCol->Priority = ST_DEVICE_SUPPORT_NONE;
     aDevCol->Name     = stCString("Column Interlaced");
-    myDevices.add(aDevCol);
+    myDevices.push_back(aDevCol);
 
     StHandle<StOutDevice> aDevChess = new StOutDevice();
     aDevChess->PluginId = ST_OUT_PLUGIN_NAME;
@@ -334,7 +334,7 @@ StOutInterlace::StOutInterlace(const StHandle<StResourceManager>& theResMgr,
     aDevChess->Priority = ST_DEVICE_SUPPORT_NONE;
 #endif
     aDevChess->Name     = stCString("DLP TV (chessboard)");
-    myDevices.add(aDevChess);
+    myDevices.push_back(aDevChess);
 
     StHandle<StOutDevice> aDevED = new StOutDevice();
     aDevED->PluginId = ST_OUT_PLUGIN_NAME;
@@ -345,7 +345,7 @@ StOutInterlace::StOutInterlace(const StHandle<StResourceManager>& theResMgr,
     aDevED->Priority = ST_DEVICE_SUPPORT_NONE;
 #endif
     aDevED->Name     = stCString("Interlaced ED");
-    myDevices.add(aDevED);
+    myDevices.push_back(aDevED);
 
     StHandle<StOutDevice> aDevMI3D = new StOutDevice();
     aDevMI3D->PluginId = ST_OUT_PLUGIN_NAME;
@@ -363,7 +363,7 @@ StOutInterlace::StOutInterlace(const StHandle<StResourceManager>& theResMgr,
     }
 #endif
     aDevMI3D->Name = stCString("Interlaced [MI3D]");
-    myDevices.add(aDevMI3D);
+    myDevices.push_back(aDevMI3D);
 
     // detect connected displays
     bool isDummyReversed = false;
@@ -560,7 +560,7 @@ bool StOutInterlace::create() {
     StWindow::params.VSyncMode->signals.onChanged += stSlot(this, &StOutInterlace::doSwitchVSync);
 
     // INIT shaders
-    StCString aShadersError = stCString("Interlace output - critical error:\nShaders initialization failed!");
+    constexpr StCString aShadersError = stCString("Interlace output - critical error:\nShaders initialization failed!");
     StGLVertexShader aVertexShader("Interlace"); // common vertex shader
     StGLAutoRelease aTmp1(*myContext, aVertexShader);
     if(!aVertexShader.init(*myContext,

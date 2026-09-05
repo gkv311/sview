@@ -56,14 +56,14 @@ class StALDeviceParam : public StInt32ParamNamed {
     /**
      * Return list of available translations.
      */
-    ST_LOCAL const StArrayList<StString>& getList() const {
+    ST_LOCAL const std::vector<StString>& getList() const {
         return myDevicesUtf;
     }
 
         private:
 
     std::vector<std::string> myDevicesLoc;
-    StArrayList<StString>    myDevicesUtf;
+    std::vector<StString>    myDevicesUtf;
 
 };
 

@@ -49,7 +49,7 @@ int main(int , char** ) { // force console output
 
     st::cout << stostream_text("This application performs some synthetic tests\n");
 
-    StArrayList<StString> anArgs = StProcess::getArguments();
+    std::vector<StString> anArgs = StProcess::getArguments();
     const StString ST_TEST_MUTICES = "mutex";
     const StString ST_TEST_GLBAND  = "glband";
     const StString ST_TEST_GLHANG  = "glhang";

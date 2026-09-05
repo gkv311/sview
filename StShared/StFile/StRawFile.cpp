@@ -10,8 +10,8 @@
 #include <StAV/stAV.h>
 #include <StStrings/StLogger.h>
 
-#include <iostream>
 #include <limits>
+#include <vector>
 
 #if defined(_WIN32)
     #define ftell64(a)     _ftelli64(a)
@@ -190,7 +190,7 @@ bool StRawFile::readFile(const StCString& theFilePath,
         }
 
         // stream of unknown size - read until first error
-        StArrayList<stUByte_t*> aChunks;
+        std::vector<stUByte_t*> aChunks;
         aFileLen = 0;
         const size_t aChunkLimit = 4096;
         bool isOk = true;
@@ -213,7 +213,7 @@ bool StRawFile::readFile(const StCString& theFilePath,
             }
 
             aFileLen += aReadBytes;
-            aChunks.add(aChunk);
+            aChunks.push_back(aChunk);
             if(theReadMax != 0
             && aReadLen >= uint64_t(theReadMax)) {
                 break;
@@ -230,7 +230,7 @@ bool StRawFile::readFile(const StCString& theFilePath,
         stUByte_t* aBufferIter = myBuffer;
         size_t     aBytesLeft  = myBuffSize;
         for(size_t aChunkIter = 0; aChunkIter < aChunks.size(); ++aChunkIter) {
-            stUByte_t*   aChunk       = aChunks.changeValue(aChunkIter);
+            stUByte_t*   aChunk       = aChunks[aChunkIter];
             const size_t aBytesToCopy = stMin(aBytesLeft, aChunkLimit);
             if(aBufferIter != NULL) {
                 stMemCpy(aBufferIter, aChunk, aBytesToCopy);

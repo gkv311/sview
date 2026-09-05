@@ -335,7 +335,7 @@ class StApplication {
 
         protected: //! @name protected fields
 
-    StArrayList< StHandle<StWindow> > myRenderers; //!< list of registered renderers
+    std::vector< StHandle<StWindow> > myRenderers; //!< list of registered renderers
     StHandle<StResourceManager>       myResMgr;    //!< resources manager
     StHandle<StTranslations>          myLangMap;   //!< translated strings map
     StHandle<StMsgQueue>  myMsgQueue;              //!< messages queue

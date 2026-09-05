@@ -76,14 +76,14 @@ const char* StOutAnaglyph::getDeviceId() const {
 
 void StOutAnaglyph::getDevices(StOutDevicesList& theList) const {
     for(size_t anIter = 0; anIter < myDevices.size(); ++anIter) {
-        theList.add(myDevices[anIter]);
+        theList.push_back(myDevices[anIter]);
     }
 }
 
 void StOutAnaglyph::getOptions(StParamsList& theList) const {
-    theList.add(params.Glasses);
-    theList.add(params.RedCyan);
-    theList.add(params.AmberBlue);
+    theList.push_back(params.Glasses);
+    theList.push_back(params.RedCyan);
+    theList.push_back(params.AmberBlue);
 }
 
 void StOutAnaglyph::updateStrings() {
@@ -139,7 +139,7 @@ StOutAnaglyph::StOutAnaglyph(const StHandle<StResourceManager>& theResMgr,
     aDevice->DeviceId = stCString("Anaglyph");
     aDevice->Priority = ST_DEVICE_SUPPORT_LOW; // anaglyph could be run on every display...
     aDevice->Name     = stCString("Anaglyph glasses");
-    myDevices.add(aDevice);
+    myDevices.push_back(aDevice);
 
     // Glasses switch option
     params.Glasses = new StEnumParam(GLASSES_TYPE_REDCYAN, stCString("glasses"), stCString("glasses"));

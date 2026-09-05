@@ -8,7 +8,9 @@
 #define __StParam_h_
 
 #include <StSlots/StSignal.h>
-#include <StTemplates/StArrayList.h>
+#include <StStrings/StString.h>
+
+#include <vector>
 
 /**
  * Base class for all parameters.
@@ -22,7 +24,7 @@ class StParamBase {
 
 };
 
-typedef StArrayList< StHandle<StParamBase> > StParamsList;
+typedef std::vector< StHandle<StParamBase> > StParamsList;
 
 /**
  * This is a special template class that represent wrapped primitive parameter.

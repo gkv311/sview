@@ -156,7 +156,7 @@ StString StProcess::getTempFolder() {
 }
 
 StString StProcess::getAbsolutePath(const StString& thePath) {
-    static const StCString ST_FILE_PROTOCOL = stCString("file://");
+    static constexpr StCString ST_FILE_PROTOCOL = stCString("file://");
 
     StString aPath;
     if(thePath.isStartsWith(ST_FILE_PROTOCOL)) {
@@ -202,14 +202,14 @@ bool loadStringFromRegister(const StString& theRegisterPath, const StString& the
 
 /** Verify location of shared resources by searching for a texture. */
 static bool isValidStSharePath(const StString& thePath) {
-    static const char TEST_TEXTURE[] = "textures/actionBack16.png";
+    static constexpr StCString TEST_TEXTURE = stCString("textures/actionBack16.png");
     return !thePath.isEmpty()
         && StFileNode::isFileExists(thePath + TEST_TEXTURE);
 }
 
 /** Find location of shared resources. */
 static StString initStShareFolder() {
-    static const StCString ST_ENV_NAME_STSHARE = stCString("StShare");
+    static constexpr StCString ST_ENV_NAME_STSHARE = stCString("StShare");
 
     StString aShareEnvValue = StProcess::getEnv(ST_ENV_NAME_STSHARE);
 #ifdef _WIN32
@@ -263,9 +263,9 @@ static bool isValidStCorePath(const StString& thePath) {
 
 StString StProcess::getStCoreFolder() {
 #if defined(_WIN64) || defined(_LP64) || defined(__LP64__)
-    static const StCString ST_ENV_NAME_STCORE_PATH = stCString("StCore64");
+    static constexpr StCString ST_ENV_NAME_STCORE_PATH = stCString("StCore64");
 #else
-    static const StCString ST_ENV_NAME_STCORE_PATH = stCString("StCore32");
+    static constexpr StCString ST_ENV_NAME_STCORE_PATH = stCString("StCore32");
 #endif
 
     StString aCoreEnvValue = getEnv(ST_ENV_NAME_STCORE_PATH);
@@ -294,16 +294,15 @@ StString StProcess::getStCoreFolder() {
     return StString();
 }
 
-bool StProcess::execProcessAny(const StString&          theExecutablePath,
-                               const StArray<StString>& theArguments,
-                               const bool               theIsAbsolute) {
+bool StProcess::execProcessAny(const StString& theExecutablePath,
+                               const std::vector<StString>& theArguments,
+                               const bool theIsAbsolute) {
     if (theIsAbsolute && !StFileNode::isFileExists(theExecutablePath)) {
         return false;
     }
 #ifdef _WIN32
     // convert to wide strings
     StStringUtfWide anExecutablePathW = theExecutablePath.toUtfWide();
-    StArrayList<StStringUtfWide> anArgumentsW(theArguments.size());
     StStringUtfWide aSplitter = ' ';
     StStringUtfWide aCmdLineW = StStringUtfWide('\"') + anExecutablePathW + StStringUtfWide("\" ");
     for(size_t anElem = 0;;) {
@@ -336,9 +335,9 @@ bool StProcess::execProcessAny(const StString&          theExecutablePath,
     char** anArgList = new char*[theArguments.size() + 2];
     anArgList[0] = (char* )theExecutablePath.toCString();
     for(size_t anArgId = 0; anArgId < theArguments.size(); ++anArgId) {
-        anArgList[anArgId + 1] = (char* )theArguments.getValue(anArgId).toCString();
+        anArgList[anArgId + 1] = (char* )theArguments[anArgId].toCString();
     }
-    anArgList[theArguments.size() + 1] = NULL;
+    anArgList[theArguments.size() + 1] = nullptr;
 
     pid_t aChildPid = vfork();
     if(aChildPid == -1) {
@@ -414,8 +413,7 @@ void StProcess::openURL(const StString& theUrl) {
     // http://portland.freedesktop.org/wiki/
     static const char ST_XDG_OPEN[] = "xdg-open"; // "/usr/bin/xdg-open"
 
-    StArrayList<StString> anArguments(1);
-    anArguments.add(theUrl);
+    std::vector<StString> anArguments = { theUrl };
     if(!StProcess::execProcessInPath(ST_XDG_OPEN, anArguments)) {
         ST_ERROR_LOG(ST_XDG_OPEN + " is not found!");
     }

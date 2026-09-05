@@ -9,7 +9,7 @@
 
 #include <StStrings/StDictionary.h>
 
-#include "StMutex.h"
+#include <vector>
 
 // compatibility with old definitions
 typedef StDictEntry  StArgument;
@@ -69,7 +69,7 @@ class StProcess {
     /**
      * @return command line arguments as flat list
      */
-    ST_CPPEXPORT static StArrayList<StString> getArguments();
+    ST_CPPEXPORT static std::vector<StString> getArguments();
 
     /**
      * @return command line arguments list as map of key+value
@@ -128,8 +128,8 @@ class StProcess {
      * @param theArguments      arguments list
      * @return true if executable has been launched
      */
-    ST_LOCAL static bool execProcess(const StString&          theExecutablePath,
-                                     const StArray<StString>& theArguments) {
+    ST_LOCAL static bool execProcess(const StString&              theExecutablePath,
+                                     const std::vector<StString>& theArguments) {
         return execProcessAny(theExecutablePath, theArguments, true);
     }
 
@@ -139,8 +139,8 @@ class StProcess {
      * @param theArguments      arguments list
      * @return true if executable has been launched
      */
-    ST_LOCAL static bool execProcessInPath(const StString&          theExecutableName,
-                                           const StArray<StString>& theArguments) {
+    ST_LOCAL static bool execProcessInPath(const StString&              theExecutableName,
+                                           const std::vector<StString>& theArguments) {
         return execProcessAny(theExecutableName, theArguments, false);
     }
 
@@ -170,9 +170,9 @@ private:
      * @param theIsAbsolute check if the given executable exists
      * @return true if executable has been launched
      */
-    ST_CPPEXPORT static bool execProcessAny(const StString&          theExecutable,
-                                            const StArray<StString>& theArguments,
-                                            const bool               theIsAbsolute);
+    ST_CPPEXPORT static bool execProcessAny(const StString& theExecutable,
+                                            const std::vector<StString>& theArguments,
+                                            const bool theIsAbsolute);
 };
 
 #endif // __StProcess_h_

@@ -53,7 +53,7 @@ class StTranslations : public StLangMap {
     /**
      * Return list of available translations.
      */
-    const StArrayList<StString>& getLanguagesList() const {
+    const std::vector<StString>& getLanguagesList() const {
         return params.language->getValues();
     }
 
@@ -92,15 +92,10 @@ class StTranslations : public StLangMap {
 
         private:
 
-    ST_LOCAL static const StString DEFAULT_EXTENSION;
-    ST_LOCAL static const StString DEFAULT_SUFFIX;
-
-        private:
-
     StHandle<StResourceManager>
                           myResMgr;         //!< file resource manager
     StString              myModuleName;     //!< module name like 'StImageViewer'
-    StArrayList<StString> myLangFolderList; //!< translation files
+    std::vector<StString> myLangFolderList; //!< translation files
     StString              myLangCode;       //!< active language code
     bool                  myWasReloaded;    //!< flag indicates that translation was reloaded
 

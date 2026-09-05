@@ -166,19 +166,19 @@ bool StOutDistorted::setDevice(const StString& theDevice) {
 
 void StOutDistorted::getDevices(StOutDevicesList& theList) const {
     for(size_t anIter = 0; anIter < myDevices.size(); ++anIter) {
-        theList.add(myDevices[anIter]);
+        theList.push_back(myDevices[anIter]);
     }
 }
 
 void StOutDistorted::getOptions(StParamsList& theList) const {
     if (myDevice != DEVICE_HMD
      && myDevice != DEVICE_S3DV) {
-        theList.add(params.Layout);
+        theList.push_back(params.Layout);
     }
     if (myDevice == DEVICE_HMD) {
-        theList.add(params.MirrorWindow);
+        theList.push_back(params.MirrorWindow);
     } else {
-        theList.add(params.MonoClone);
+        theList.push_back(params.MonoClone);
     }
 }
 
@@ -296,14 +296,14 @@ StOutDistorted::StOutDistorted(const StHandle<StResourceManager>& theResMgr,
     aDevDistorted->DeviceId = stCString("Distorted");
     aDevDistorted->Priority = aSupportParallel;
     aDevDistorted->Name     = stCString("TV (parallel pair)");
-    myDevices.add(aDevDistorted);
+    myDevices.push_back(aDevDistorted);
 
     StHandle<StOutDevice> aDevVR = new StOutDevice();
     aDevVR->PluginId = ST_OUT_PLUGIN_NAME;
     aDevVR->DeviceId = stCString("OpenVR");
     aDevVR->Priority = aSupportOpenVr;
     aDevVR->Name     = stCString("OpenVR");
-    myDevices.add(aDevVR);
+    myDevices.push_back(aDevVR);
 
     if(aSupportS3DV != ST_DEVICE_SUPPORT_NONE) {
         StHandle<StOutDevice> aDevS3dv = new StOutDevice();
@@ -311,7 +311,7 @@ StOutDistorted::StOutDistorted(const StHandle<StResourceManager>& theResMgr,
         aDevS3dv->DeviceId = stCString("S3DV");
         aDevS3dv->Priority = aSupportS3DV;
         aDevS3dv->Name     = stCString("S3DV");
-        myDevices.add(aDevS3dv);
+        myDevices.push_back(aDevS3dv);
     }
 
     // load device settings
