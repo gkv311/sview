@@ -1,24 +1,40 @@
 /**
  * Copyright © 2008 Daniel Remenak <dtremenak@users.sourceforge.net>
- * Copyright © 2001-2004 Unicode, Inc.
+ * Copyright © 1991-2026 Unicode, Inc.
  *
- * Disclaimer
+ * NOTICE TO USER: Carefully read the following legal agreement. BY
+ * DOWNLOADING, INSTALLING, COPYING OR OTHERWISE USING DATA FILES, AND/OR
+ * SOFTWARE, YOU UNEQUIVOCALLY ACCEPT, AND AGREE TO BE BOUND BY, ALL OF THE
+ * TERMS AND CONDITIONS OF THIS AGREEMENT. IF YOU DO NOT AGREE, DO NOT
+ * DOWNLOAD, INSTALL, COPY, DISTRIBUTE OR USE THE DATA FILES OR SOFTWARE.
  *
- * This source code is provided as is by Unicode, Inc. No claims are
- * made as to fitness for any particular purpose. No warranties of any
- * kind are expressed or implied. The recipient agrees to determine
- * applicability of information provided. If this file has been
- * purchased on magnetic or optical media from Unicode, Inc., the
- * sole remedy for any claim will be exchange of defective media
- * within 90 days of receipt.
+ * Permission is hereby granted, free of charge, to any person obtaining a
+ * copy of data files and any associated documentation (the "Data Files") or
+ * software and any associated documentation (the "Software") to deal in the
+ * Data Files or Software without restriction, including without limitation
+ * the rights to use, copy, modify, merge, publish, distribute, and/or sell
+ * copies of the Data Files or Software, and to permit persons to whom the
+ * Data Files or Software are furnished to do so, provided that either (a)
+ * this copyright and permission notice appear with all copies of the Data
+ * Files or Software, or (b) this copyright and permission notice appear in
+ * associated Documentation.
  *
- * Limitations on Rights to Redistribute This Code
+ * THE DATA FILES AND SOFTWARE ARE PROVIDED "AS IS", WITHOUT WARRANTY OF ANY
+ * KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
+ * MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT OF
+ * THIRD PARTY RIGHTS.
  *
- * Unicode, Inc. hereby grants the right to freely use the information
- * supplied in this file in the creation of products supporting the
- * Unicode Standard, and to make copies of this file in any form
- * for internal or external distribution as long as this notice
- * remains attached.
+ * IN NO EVENT SHALL THE COPYRIGHT HOLDER OR HOLDERS INCLUDED IN THIS NOTICE
+ * BE LIABLE FOR ANY CLAIM, OR ANY SPECIAL INDIRECT OR CONSEQUENTIAL DAMAGES,
+ * OR ANY DAMAGES WHATSOEVER RESULTING FROM LOSS OF USE, DATA OR PROFITS,
+ * WHETHER IN AN ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION,
+ * ARISING OUT OF OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THE DATA
+ * FILES OR SOFTWARE.
+ *
+ * Except as contained in this notice, the name of a copyright holder shall
+ * not be used in advertising or otherwise to promote the sale, use or other
+ * dealings in these Data Files or Software without prior written
+ * authorization of the copyright holder.
  *
  * Copyright © 2009-2014 Kirill Gavrilov <kirill@sview.ru>
  *
