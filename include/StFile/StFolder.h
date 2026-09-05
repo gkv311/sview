@@ -49,13 +49,13 @@ class StFolder : public StFileNode {
      * @param theExtensions Extensions filter
      * @param theDeep       Recursion level to read subfolders
      */
-    ST_CPPEXPORT void init(const StArrayList<StString>& theExtensions,
+    ST_CPPEXPORT void init(const std::vector<StString>& theExtensions,
                            const int                    theDeep = 1,
                            const bool                   theToAddEmptyFolders = false);
 
         private:
 
-    ST_LOCAL void addItem(const StArrayList<StString>& theExtensions,
+    ST_LOCAL void addItem(const std::vector<StString>& theExtensions,
                           int             theDeep,
                           const StString& theSearchFolderPath,
                           const StString& theCurrentItemName,

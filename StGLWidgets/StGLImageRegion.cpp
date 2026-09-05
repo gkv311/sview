@@ -262,28 +262,29 @@ StGLImageRegion::StGLImageRegion(StGLWidget* theParent,
 #endif
 
     // create actions
+    myActions.reserve(25);
     {
         StHandle<StActionIntSlot> anAction = new StActionIntSlot(stCString("DoParamsReset"), 0);
         anAction->setSlot(stSlot(this, &StGLImageRegion::doParamsReset));
         anAction->setDefaultHotKey1(ST_VK_BACK);
-        myActions.add(anAction);
+        myActions.push_back(anAction);
     }
     {
         StHandle<StAction> anAction = new StActionBool(stCString("DoParamsSwapLR"), params.SwapLR);
         anAction->setDefaultHotKey1(ST_VK_W);
-        myActions.add(anAction);
+        myActions.push_back(anAction);
     }
     {
         StHandle<StActionIntSlot> anAction = new StActionIntSlot(stCString("DoParamsGammaDec"), (size_t )-1);
         anAction->setSlot(stSlot(this, &StGLImageRegion::doParamsGamma));
         anAction->setDefaultHotKey1(ST_VK_G | ST_VF_CONTROL);
-        myActions.add(anAction);
+        myActions.push_back(anAction);
     }
     {
         StHandle<StActionIntSlot> anAction = new StActionIntSlot(stCString("DoParamsGammaInc"), 1);
         anAction->setSlot(stSlot(this, &StGLImageRegion::doParamsGamma));
         anAction->setDefaultHotKey1(ST_VK_G | ST_VF_SHIFT);
-        myActions.add(anAction);
+        myActions.push_back(anAction);
     }
     {
         StHandle<StActionIntSlot> anAction = new StActionIntSlot(stCString("DoParamsSepXDec"), (size_t )-1);
@@ -293,7 +294,7 @@ StGLImageRegion::StGLImageRegion(StGLWidget* theParent,
     #ifdef ST_EXTRA_CONTROLS
         anAction->setDefaultHotKey1(ST_VK_Q);
     #endif
-        myActions.add(anAction);
+        myActions.push_back(anAction);
     }
     {
         StHandle<StActionIntSlot> anAction = new StActionIntSlot(stCString("DoParamsSepXInc"), 1);
@@ -303,7 +304,7 @@ StGLImageRegion::StGLImageRegion(StGLWidget* theParent,
     #ifdef ST_EXTRA_CONTROLS
         anAction->setDefaultHotKey1(ST_VK_E);
     #endif
-        myActions.add(anAction);
+        myActions.push_back(anAction);
     }
     {
         StHandle<StActionIntSlot> anAction = new StActionIntSlot(stCString("DoParamsSepYDec"), (size_t )-1);
@@ -313,7 +314,7 @@ StGLImageRegion::StGLImageRegion(StGLWidget* theParent,
     #ifdef ST_EXTRA_CONTROLS
         anAction->setDefaultHotKey1(ST_VK_Q      | ST_VF_CONTROL);
     #endif
-        myActions.add(anAction);
+        myActions.push_back(anAction);
     }
     {
         StHandle<StActionIntSlot> anAction = new StActionIntSlot(stCString("DoParamsSepYInc"), 1);
@@ -323,86 +324,86 @@ StGLImageRegion::StGLImageRegion(StGLWidget* theParent,
     #ifdef ST_EXTRA_CONTROLS
         anAction->setDefaultHotKey1(ST_VK_E        | ST_VF_CONTROL);
     #endif
-        myActions.add(anAction);
+        myActions.push_back(anAction);
     }
     {
         StHandle<StActionHoldSlot> anAction = new StActionHoldSlot(stCString("DoParamsSepRotDec"));
         anAction->setSlot(stSlot(this, &StGLImageRegion::doParamsSepZDec));
         anAction->setDefaultHotKey1(ST_VK_APOSTROPHE | ST_VF_CONTROL);
-        myActions.add(anAction);
+        myActions.push_back(anAction);
     }
     {
         StHandle<StActionHoldSlot> anAction = new StActionHoldSlot(stCString("DoParamsSepRotInc"));
         anAction->setSlot(stSlot(this, &StGLImageRegion::doParamsSepZInc));
         anAction->setDefaultHotKey1(ST_VK_SEMICOLON | ST_VF_CONTROL);
-        myActions.add(anAction);
+        myActions.push_back(anAction);
     }
     {
         StHandle<StActionIntSlot> anAction = new StActionIntSlot(stCString("DoParamsRotZ90Dec"), (size_t )-1);
         anAction->setSlot(stSlot(this, &StGLImageRegion::doParamsRotZ90));
         anAction->setDefaultHotKey1(ST_VK_BRACKETLEFT);
-        myActions.add(anAction);
+        myActions.push_back(anAction);
     }
     {
         StHandle<StActionIntSlot> anAction = new StActionIntSlot(stCString("DoParamsRotZ90Inc"), 1);
         anAction->setSlot(stSlot(this, &StGLImageRegion::doParamsRotZ90));
         anAction->setDefaultHotKey1(ST_VK_BRACKETRIGHT);
-        myActions.add(anAction);
+        myActions.push_back(anAction);
     }
     {
         StHandle<StActionHoldSlot> anAction = new StActionHoldSlot(stCString("DoParamsRotZDec"));
         anAction->setSlot(stSlot(this, &StGLImageRegion::doParamsRotZLeft));
         anAction->setDefaultHotKey1(ST_VK_BRACKETLEFT | ST_VF_CONTROL);
-        myActions.add(anAction);
+        myActions.push_back(anAction);
     }
     {
         StHandle<StActionHoldSlot> anAction = new StActionHoldSlot(stCString("DoParamsRotZInc"));
         anAction->setSlot(stSlot(this, &StGLImageRegion::doParamsRotZRight));
         anAction->setDefaultHotKey1(ST_VK_BRACKETRIGHT | ST_VF_CONTROL);
-        myActions.add(anAction);
+        myActions.push_back(anAction);
     }
     {
         StHandle<StActionIntSlot> anAction = new StActionIntSlot(stCString("DoParamsModeNext"), 0);
         anAction->setSlot(stSlot(this, &StGLImageRegion::doParamsModeNext));
-        myActions.add(anAction);
+        myActions.push_back(anAction);
     }
     {
         StHandle<StActionHoldSlot> anAction = new StActionHoldSlot(stCString("DoParamsPanLeft"));
         anAction->setSlot(stSlot(this, &StGLImageRegion::doParamsPanLeft));
         anAction->setDefaultHotKey1(theUsePanningKeys ? ST_VK_LEFT : 0);
-        myActions.add(anAction);
+        myActions.push_back(anAction);
     }
     {
         StHandle<StActionHoldSlot> anAction = new StActionHoldSlot(stCString("DoParamsPanRight"));
         anAction->setSlot(stSlot(this, &StGLImageRegion::doParamsPanRight));
         anAction->setDefaultHotKey1(theUsePanningKeys ? ST_VK_RIGHT : 0);
-        myActions.add(anAction);
+        myActions.push_back(anAction);
     }
     {
         StHandle<StActionHoldSlot> anAction = new StActionHoldSlot(stCString("DoParamsPanUp"));
         anAction->setSlot(stSlot(this, &StGLImageRegion::doParamsPanUp));
         anAction->setDefaultHotKey1(theUsePanningKeys ? ST_VK_UP : 0);
-        myActions.add(anAction);
+        myActions.push_back(anAction);
     }
     {
         StHandle<StActionHoldSlot> anAction = new StActionHoldSlot(stCString("DoParamsPanDown"));
         anAction->setSlot(stSlot(this, &StGLImageRegion::doParamsPanDown));
         anAction->setDefaultHotKey1(theUsePanningKeys ? ST_VK_DOWN : 0);
-        myActions.add(anAction);
+        myActions.push_back(anAction);
     }
     {
         StHandle<StActionHoldSlot> anAction = new StActionHoldSlot(stCString("DoParamsScaleIn"));
         anAction->setSlot(stSlot(this, &StGLImageRegion::doParamsScaleIn));
         anAction->setDefaultHotKey1(ST_VK_ADD);
         anAction->setDefaultHotKey2(ST_VK_OEM_PLUS);
-        myActions.add(anAction);
+        myActions.push_back(anAction);
     }
     {
         StHandle<StActionHoldSlot> anAction = new StActionHoldSlot(stCString("DoParamsScaleOut"));
         anAction->setSlot(stSlot(this, &StGLImageRegion::doParamsScaleOut));
         anAction->setDefaultHotKey1(ST_VK_SUBTRACT);
         anAction->setDefaultHotKey2(ST_VK_OEM_MINUS);
-        myActions.add(anAction);
+        myActions.push_back(anAction);
     }
     {
         StHandle<StActionHoldSlot> anAction = new StActionHoldSlot(stCString("DoParamsRotYLeft"));
@@ -410,7 +411,7 @@ StGLImageRegion::StGLImageRegion(StGLWidget* theParent,
     #ifdef ST_EXTRA_CONTROLS
         anAction->setDefaultHotKey1(ST_VK_LEFT);
     #endif
-        myActions.add(anAction);
+        myActions.push_back(anAction);
     }
     {
         StHandle<StActionHoldSlot> anAction = new StActionHoldSlot(stCString("DoParamsRotYRight"));
@@ -418,7 +419,7 @@ StGLImageRegion::StGLImageRegion(StGLWidget* theParent,
     #ifdef ST_EXTRA_CONTROLS
         anAction->setDefaultHotKey1(ST_VK_RIGHT);
     #endif
-        myActions.add(anAction);
+        myActions.push_back(anAction);
     }
     {
         StHandle<StActionHoldSlot> anAction = new StActionHoldSlot(stCString("DoParamsRotXUp"));
@@ -426,7 +427,7 @@ StGLImageRegion::StGLImageRegion(StGLWidget* theParent,
     #ifdef ST_EXTRA_CONTROLS
         anAction->setDefaultHotKey1(ST_VK_UP);
     #endif
-        myActions.add(anAction);
+        myActions.push_back(anAction);
     }
     {
         StHandle<StActionHoldSlot> anAction = new StActionHoldSlot(stCString("DoParamsRotXDown"));
@@ -434,7 +435,7 @@ StGLImageRegion::StGLImageRegion(StGLWidget* theParent,
     #ifdef ST_EXTRA_CONTROLS
         anAction->setDefaultHotKey1(ST_VK_DOWN);
     #endif
-        myActions.add(anAction);
+        myActions.push_back(anAction);
     }
 }
 
@@ -532,7 +533,7 @@ bool StGLImageRegion::stglInitCube(const StGLVec4& theClamp,
     myCubePano = thePano;
 
     // a unit cube for cubemap rendering
-    const StGLVec3 THE_VERTS[8] = {
+    constexpr StGLVec3 THE_VERTS[8] = {
         StGLVec3(-1.0f,-1.0f, 1.0f),
         StGLVec3( 1.0f,-1.0f, 1.0f),
         StGLVec3(-1.0f, 1.0f, 1.0f),
@@ -543,7 +544,7 @@ bool StGLImageRegion::stglInitCube(const StGLVec4& theClamp,
         StGLVec3( 1.0f, 1.0f,-1.0f)
     };
 
-    const StIVec4 THE_SIDES[6] = {
+    constexpr StIVec4 THE_SIDES[6] = {
         StIVec4(3, 7, 5, 1), // px
         StIVec4(6, 2, 0, 4), // nx
         StIVec4(2, 3, 7, 6), // py
@@ -552,12 +553,12 @@ bool StGLImageRegion::stglInitCube(const StGLVec4& theClamp,
         StIVec4(5, 4, 6, 7), // nz
     };
 
-    StArrayList<StGLVec3>& aVertArr  = myCube.changeVertices();
-    StArrayList<StGLVec3>& aCoordArr = myCube.changeNormals();
-    StArrayList<StGLVec4>& aClampArr = myCube.changeColors();
-    aVertArr.initArray(6 * 6);
-    aCoordArr.initArray(aVertArr.size());
-    aClampArr.initArray(aVertArr.size());
+    std::vector<StGLVec3>& aVertArr  = myCube.changeVertices();
+    std::vector<StGLVec3>& aCoordArr = myCube.changeNormals();
+    std::vector<StGLVec4>& aClampArr = myCube.changeColors();
+    aVertArr.resize(6 * 6);
+    aCoordArr.resize(aVertArr.size());
+    aClampArr.resize(aVertArr.size());
     int aVert = 0;
     for(int aSideIter = 0; aSideIter < 6; ++aSideIter, aVert += 6) {
         StIVec4 aSide = THE_SIDES[aSideIter];
@@ -651,13 +652,13 @@ bool StGLImageRegion::stglInitCube(const StGLVec4& theClamp,
     }
 
     // triangle strip initialization
-    /*aCubeVerts.initArray(8);
+    /*aCubeVerts.resize(8);
     for(int aVertIter = 0; aVertIter < 8; ++aVertIter) {
       aCubeVerts[aVertIter] = THE_VERTS[aVertIter];
     }
     const GLuint THE_BOX_TRISTRIP[14] = { 0, 1, 2, 3, 7, 1, 5, 4, 7, 6, 2, 4, 0, 1 };
-    StArrayList<GLuint>& aCubeInd = myCube.changeIndices();
-    aCubeInd.initArray(14);
+    std::vector<GLuint>& aCubeInd = myCube.changeIndices();
+    aCubeInd.resize(14);
     for(unsigned int aVertIter = 0; aVertIter < 14; ++aVertIter) {
         aCubeInd[aVertIter] = THE_BOX_TRISTRIP[aVertIter];
     }*/

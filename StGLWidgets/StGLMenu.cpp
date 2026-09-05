@@ -90,7 +90,8 @@ void StGLMenu::stglResize() {
 
     StGLContext& aCtx = getContext();
 
-    StArray<StGLVec2> aVertices(4);
+    std::vector<StGLVec2> aVertices;
+    aVertices.resize(4);
     getRectGl(aVertices);
     myVertexBuf.init(aCtx, aVertices);
 

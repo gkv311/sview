@@ -9,7 +9,7 @@
 #define __glPif 3.1415926535897932384626433832795f
 
 namespace {
-    static const GLfloat ST_IDENT_MAT[16] = {
+    static constexpr GLfloat ST_IDENT_MAT[16] = {
         1.0f, 0.0f, 0.0f, 0.0f,
         0.0f, 1.0f, 0.0f, 0.0f,
         0.0f, 0.0f, 1.0f, 0.0f,

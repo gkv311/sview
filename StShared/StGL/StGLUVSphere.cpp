@@ -11,9 +11,9 @@
 #include <StGL/StGLContext.h>
 
 namespace {
-    static const GLfloat ST_PI     = 3.1415926535897932384626433832795f;
-    static const GLfloat ST_TWOPI  = 6.2831853071795864769252867665590f;
-    static const GLfloat ST_PIDIV2 = 1.5707963267948966192313216916397f;
+    static constexpr GLfloat ST_PI     = 3.1415926535897932384626433832795f;
+    static constexpr GLfloat ST_TWOPI  = 6.2831853071795864769252867665590f;
+    static constexpr GLfloat ST_PIDIV2 = 1.5707963267948966192313216916397f;
 }
 
 StGLUVSphere::StGLUVSphere(const StGLVec3& theCenter,
@@ -57,15 +57,13 @@ bool StGLUVSphere::computeMesh() {
     size_t pointPerRing = myRings;
 
     const size_t aVerticesCount = (aRingsCount + 1) * (pointPerRing + 1);
-    myVertices.initArray(aVerticesCount);
-    myNormals.initArray(aVerticesCount);
-    myTCoords.initArray(aVerticesCount);
+    myVertices.resize(aVerticesCount);
+    myNormals.resize(aVerticesCount);
+    myTCoords.resize(aVerticesCount);
 
     GLfloat theta = 0.0f;
     GLfloat phi = 0.0f;
 
-    StGLVec3* aNorm = NULL;
-    StGLVec3* aVert = NULL;
     StGLVec2 tcrd(0.0f, 0.0f);
 
     for(size_t ringId = 0; ringId <= aRingsCount; ++ringId) {
@@ -81,34 +79,34 @@ bool StGLUVSphere::computeMesh() {
 
             tcrd.x() = GLfloat(pointId) / GLfloat(pointPerRing);
 
-            aNorm = &myNormals [(pointPerRing + 1) * ringId + pointId];
-            aVert = &myVertices[(pointPerRing + 1) * ringId + pointId];
+            StGLVec3& aNorm = myNormals [(pointPerRing + 1) * ringId + pointId];
+            StGLVec3& aVert = myVertices[(pointPerRing + 1) * ringId + pointId];
 
-            aNorm->x() = cosf(theta) * cosf(phi);
-            aNorm->y() = sinf(theta);
-            aNorm->z() = cosf(theta) * sinf(phi);
-            aVert->x() = myCenter.x() + myRadius * aNorm->x();
-            aVert->y() = myCenter.y() + myRadius * aNorm->y();
-            aVert->z() = myCenter.z() + myRadius * aNorm->z();
+            aNorm.x() = cosf(theta) * cosf(phi);
+            aNorm.y() = sinf(theta);
+            aNorm.z() = cosf(theta) * sinf(phi);
+            aVert.x() = myCenter.x() + myRadius * aNorm.x();
+            aVert.y() = myCenter.y() + myRadius * aNorm.y();
+            aVert.z() = myCenter.z() + myRadius * aNorm.z();
 
             myTCoords[(pointPerRing + 1) * ringId + pointId] = tcrd;
         }
     }
 
     // create the indices arrays
-    size_t inicesCount = 2 * (pointPerRing + 1) * aRingsCount;
-    myIndices.initList(inicesCount);
+    const size_t inicesCount = 2 * (pointPerRing + 1) * aRingsCount;
+    myIndices.reserve(inicesCount);
 
-    myPrimCounts.initList(aRingsCount);
-    myIndPointers.initList(aRingsCount);
+    myPrimCounts.reserve(aRingsCount);
+    myIndPointers.reserve(aRingsCount);
 
-    GLsizei primCount = 2 * GLsizei(pointPerRing + 1);
-    for(size_t ringId = 0; ringId < aRingsCount; ++ringId) {
-        myIndPointers.add((GLvoid* )(ringId * primCount * sizeof(GLuint))); // pointer diff
-        myPrimCounts.add(primCount);
-        for(size_t pointId = 0; pointId <= pointPerRing; ++pointId) {
-            myIndices.add(GLuint((pointPerRing + 1) * (ringId + 1) + pointId));
-            myIndices.add(GLuint((pointPerRing + 1) * ringId + pointId));
+    const GLsizei primCount = 2 * GLsizei(pointPerRing + 1);
+    for (size_t ringId = 0; ringId < aRingsCount; ++ringId) {
+        myIndPointers.push_back((GLvoid* )(ringId * primCount * sizeof(GLuint))); // pointer diff
+        myPrimCounts.push_back(primCount);
+        for (size_t pointId = 0; pointId <= pointPerRing; ++pointId) {
+            myIndices.push_back(GLuint((pointPerRing + 1) * (ringId + 1) + pointId));
+            myIndices.push_back(GLuint((pointPerRing + 1) * ringId + pointId));
         }
     }
 
@@ -120,9 +118,9 @@ bool StGLUVSphere::computeMesh() {
 void StGLUVSphere::drawKernel(StGLContext& theCtx) const {
     myIndexBuf.bind(theCtx);
     theCtx.core20fwd->glMultiDrawElements(GL_TRIANGLE_STRIP,
-                                           (GLsizei* )&myPrimCounts.getFirst(), // pointer will be used for iteration - data will not be changed
-                                           myIndexBuf.getDataType(),
-                                           (const GLvoid** )&myIndPointers.getFirst(),
-                                           GLsizei(myIndPointers.size()));
+                                          myPrimCounts.data(), // pointer will be used for iteration - data will not be changed
+                                          myIndexBuf.getDataType(),
+                                          myIndPointers.data(),
+                                          GLsizei(myIndPointers.size()));
     myIndexBuf.unbind(theCtx);
 }

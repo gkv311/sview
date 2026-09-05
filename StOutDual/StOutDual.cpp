@@ -442,13 +442,14 @@ void StOutDual::stglDraw() {
         }
 
         // reduce viewport to avoid additional aliasing of narrow lines
-        GLfloat aDX = GLfloat(myFrBuffer->getVPSizeX()) / GLfloat(myFrBuffer->getSizeX());
-        GLfloat aDY = GLfloat(myFrBuffer->getVPSizeY()) / GLfloat(myFrBuffer->getSizeY());
-        StArray<StGLVec2> aTCoords(4);
-        aTCoords[0] = StGLVec2(aDX,  0.0f);
-        aTCoords[1] = StGLVec2(aDX,  aDY);
-        aTCoords[2] = StGLVec2(0.0f, 0.0f);
-        aTCoords[3] = StGLVec2(0.0f, aDY);
+        const GLfloat aDX = GLfloat(myFrBuffer->getVPSizeX()) / GLfloat(myFrBuffer->getSizeX());
+        const GLfloat aDY = GLfloat(myFrBuffer->getVPSizeY()) / GLfloat(myFrBuffer->getSizeY());
+        const std::vector<StGLVec2> aTCoords = {
+            StGLVec2(aDX,  0.0f),
+            StGLVec2(aDX,  aDY),
+            StGLVec2(0.0f, 0.0f),
+            StGLVec2(0.0f, aDY)
+        };
         myTexCoordBuf.init(*myContext, aTCoords);
 
         // draw Left View into virtual frame buffer

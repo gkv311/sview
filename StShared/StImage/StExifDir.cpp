@@ -149,7 +149,7 @@ bool StExifDir::readDirectory(StExifDir::List& theParentList,
     }
 
     // add all entries
-    Entries.initList((size_t )anEntriesNb); // reserve space for the list
+    Entries.reserve((size_t )anEntriesNb); // reserve space for the list
     StExifEntry anEntry;
     for(uint16_t anEntryId = 0; anEntryId < anEntriesNb; ++anEntryId) {
         if(!readEntry(getEntryAddress(anEntryId),
@@ -157,7 +157,7 @@ bool StExifDir::readDirectory(StExifDir::List& theParentList,
                       anEntry)) {
             continue;
         }
-        Entries.add(anEntry);
+        Entries.push_back(anEntry);
 
         switch(anEntry.Tag) {
             case TAG_EXIF_OFFSET:
@@ -167,11 +167,11 @@ bool StExifDir::readDirectory(StExifDir::List& theParentList,
                 || aSubdirStart > theOffsetBase + theExifLength) {
                     ST_DEBUG_LOG("StExifDir, Illegal EXIF or interop offset directory link");
                 } else {
-                    StHandle<StExifDir> aSubDir = new StExifDir();
+                    std::shared_ptr<StExifDir> aSubDir = std::make_shared<StExifDir>();
                     aSubDir->IsFileBE    = IsFileBE;
                     aSubDir->CameraMaker = CameraMaker;
                     aSubDir->CameraModel = CameraModel;
-                    SubDirs.add(aSubDir);
+                    SubDirs.push_back(aSubDir);
                     if(!aSubDir->readDirectory(SubDirs,
                                                aSubdirStart, theOffsetBase,
                                                theExifLength, theNestingLevel + 1)) {
@@ -202,10 +202,10 @@ bool StExifDir::readDirectory(StExifDir::List& theParentList,
                 stUByte_t* aSubdirStart  = anEntry.ValuePtr;
                 stUByte_t* anOffsetBase  = theOffsetBase;
                 size_t     anOffsetLimit = theExifLength;
-                StHandle<StExifDir> aSubDir;
+                std::shared_ptr<StExifDir> aSubDir;
                 if(CameraMaker.isEquals(stCString("FUJIFILM"))) {
                     // the Fujifilm maker note appears to be in little endian byte order regardless of the rest of the file
-                    aSubDir = new StExifDir();
+                    aSubDir = std::make_shared<StExifDir>();
                     aSubDir->IsFileBE = false;
                     aSubDir->Type     = DType_MakerFuji;
                     // it seems that Fujifilm maker notes start with an ID string,
@@ -217,7 +217,7 @@ bool StExifDir::readDirectory(StExifDir::List& theParentList,
                         anOffsetLimit = theOffsetBase + theExifLength - anOffsetBase;
                     }
                 } else if(CameraMaker.isStartsWith(stCString("OLYMP"))) {
-                    aSubDir = new StExifDir();
+                    aSubDir = std::make_shared<StExifDir>();
                     aSubDir->IsFileBE = IsFileBE;
                     aSubDir->Type     = DType_MakerOlypm;
                     // it seems that Olympus maker notes start with an ID string
@@ -227,15 +227,15 @@ bool StExifDir::readDirectory(StExifDir::List& theParentList,
                     }
                 } else if(CameraMaker.isStartsWith(stCString("Canon"))) {
                     // it seems that Canon maker notes is always little endian
-                    aSubDir = new StExifDir();
+                    aSubDir = std::make_shared<StExifDir>();
                     aSubDir->IsFileBE = false;
                     aSubDir->Type     = DType_MakerCanon;
                 } else if(CameraMaker.isStartsWith(stCString("Kandao"))) {
-                    aSubDir = new StExifDir();
+                    aSubDir = std::make_shared<StExifDir>();
                     aSubDir->IsFileBE = IsFileBE;
                     aSubDir->Type     = DType_MakerKandao;
                 }
-                if(!aSubDir.isNull()) {
+                if (aSubDir.get() != nullptr) {
                     ST_DEBUG_LOG("StExifDir, reading " + CameraMaker + " maker notes");
                     aSubDir->CameraMaker = CameraMaker;
                     aSubDir->CameraModel = CameraModel;
@@ -243,7 +243,7 @@ bool StExifDir::readDirectory(StExifDir::List& theParentList,
                     || aSubdirStart > theOffsetBase + theExifLength) {
                         ST_DEBUG_LOG("StExifDir, illegal maker notes offset directory link");
                     } else {
-                        SubDirs.add(aSubDir);
+                        SubDirs.push_back(aSubDir);
                         if(!aSubDir->readDirectory(SubDirs,
                                                    aSubdirStart, anOffsetBase,
                                                    anOffsetLimit, theNestingLevel + 1)) {
@@ -296,12 +296,12 @@ bool StExifDir::readDirectory(StExifDir::List& theParentList,
             } else {
                 if(aSubdirStart <= theOffsetBase + theExifLength) {
                     // continued directory
-                    StHandle<StExifDir> aSubDir = new StExifDir();
+                    std::shared_ptr<StExifDir> aSubDir = std::make_shared<StExifDir>();
                     aSubDir->Type        = Type;
                     aSubDir->IsFileBE    = IsFileBE;
                     aSubDir->CameraMaker = CameraMaker;
                     aSubDir->CameraModel = CameraModel;
-                    theParentList.add(aSubDir);
+                    theParentList.push_back(aSubDir);
                     if(!aSubDir->readDirectory(theParentList,
                                                aSubdirStart, theOffsetBase,
                                                theExifLength, theNestingLevel)) {
@@ -473,8 +473,8 @@ void StExifDir::fillDictionary(StDictionary& theDict,
     }
 
     for(size_t aDirId = 0; aDirId < SubDirs.size(); ++aDirId) {
-        const StHandle<StExifDir>& aDir = SubDirs[aDirId];
-        if(!aDir.isNull()) {
+        const std::shared_ptr<StExifDir>& aDir = SubDirs[aDirId];
+        if (aDir.get() != nullptr) {
             aDir->fillDictionary(theDict, theToShowUnknown);
         }
     }
@@ -484,8 +484,8 @@ bool StExifDir::findEntry(const StExifDir::List& theList,
                           StExifDir::Query&      theQuery) {
     // search in subfolders
     for(size_t aDirId = 0; aDirId < theList.size(); ++aDirId) {
-        const StHandle<StExifDir>& aDir = theList[aDirId];
-        if(aDir.isNull()) {
+        const std::shared_ptr<StExifDir>& aDir = theList[aDirId];
+        if (aDir.get() == nullptr) {
             continue;
         }
 
@@ -495,7 +495,7 @@ bool StExifDir::findEntry(const StExifDir::List& theList,
                 if(anEntry.Tag == theQuery.Entry.Tag
                 && (anEntry.Format == theQuery.Entry.Format || theQuery.Entry.Format == 0)) {
                     theQuery.Entry  = anEntry;
-                    theQuery.Folder = aDir.access();
+                    theQuery.Folder = aDir.get();
                     return true;
                 }
             }

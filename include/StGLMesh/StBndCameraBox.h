@@ -35,12 +35,12 @@ class StBndCameraBox : public StBndBox {
     /**
      * Input point is in global coordinates and will be transformed.
      */
-    ST_CPPEXPORT virtual void enlarge(const StGLVec3& theNewPnt);
+    ST_CPPEXPORT virtual void enlarge(const StGLVec3& theNewPnt) override;
 
     /**
      * Input points set is in global coordinates and will be transformed.
      */
-    ST_CPPEXPORT virtual void enlarge(const StArray<StGLVec3>& thePoints);
+    ST_CPPEXPORT virtual void enlarge(const std::vector<StGLVec3>& thePoints) override;
 
     /**
      * Returns the boundary box center in global coordinates

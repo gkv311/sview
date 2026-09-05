@@ -186,18 +186,20 @@ bool StGLStereoFrameBuffer::init(StGLContext&  theCtx,
     ST_DEBUG_LOG("OpenGL, created StFrameBuffer(WxH= " + getSizeX() + 'x' + getSizeY() + ')');
 
     // create vertices buffers to draw simple textured quad
-    StArray<StGLVec4> aQuad(4);
-    aQuad[0] = StGLVec4( 1.0f, -1.0f, 0.0f, 1.0f); // top-right
-    aQuad[1] = StGLVec4( 1.0f,  1.0f, 0.0f, 1.0f); // bottom-right
-    aQuad[2] = StGLVec4(-1.0f, -1.0f, 0.0f, 1.0f); // top-left
-    aQuad[3] = StGLVec4(-1.0f,  1.0f, 0.0f, 1.0f); // bottom-left
+    const std::vector<StGLVec4> aQuad = {
+        StGLVec4( 1.0f, -1.0f, 0.0f, 1.0f), // top-right
+        StGLVec4( 1.0f,  1.0f, 0.0f, 1.0f), // bottom-right
+        StGLVec4(-1.0f, -1.0f, 0.0f, 1.0f), // top-left
+        StGLVec4(-1.0f,  1.0f, 0.0f, 1.0f)  // bottom-left
+    };
     myVerticesBuf.init(theCtx, aQuad);
 
-    StArray<StGLVec2> aQuadTC(4);
-    aQuadTC[0] = StGLVec2(1.0f, 0.0f);
-    aQuadTC[1] = StGLVec2(1.0f, 1.0f);
-    aQuadTC[2] = StGLVec2(0.0f, 0.0f);
-    aQuadTC[3] = StGLVec2(0.0f, 1.0f);
+    const std::vector<StGLVec2> aQuadTC = {
+        StGLVec2(1.0f, 0.0f),
+        StGLVec2(1.0f, 1.0f),
+        StGLVec2(0.0f, 0.0f),
+        StGLVec2(0.0f, 1.0f)
+    };
     myTexCoordBuf.init(theCtx, aQuadTC);
 
     myViewPortX = theTextureSizeX;
@@ -242,17 +244,18 @@ bool StGLStereoFrameBuffer::initLazy(StGLContext&  theCtx,
 void StGLStereoFrameBuffer::setVPDimensions(StGLContext&  theCtx,
                                             const GLsizei theSizeX,
                                             const GLsizei theSizeY) {
-    GLsizei aVPSizeX = stMin(theSizeX, getSizeX());
-    GLsizei aVPSizeY = stMin(theSizeY, getSizeY());
+    const GLsizei aVPSizeX = stMin(theSizeX, getSizeX());
+    const GLsizei aVPSizeY = stMin(theSizeY, getSizeY());
     if(aVPSizeX != myViewPortX
     || aVPSizeY != myViewPortY) {
-        GLfloat aDX = GLfloat(aVPSizeX) / GLfloat(getSizeX());
-        GLfloat aDY = GLfloat(aVPSizeY) / GLfloat(getSizeY());
-        StArray<StGLVec2> aTCoords(4);
-        aTCoords[0] = StGLVec2(aDX,  0.0f);
-        aTCoords[1] = StGLVec2(aDX,  aDY);
-        aTCoords[2] = StGLVec2(0.0f, 0.0f);
-        aTCoords[3] = StGLVec2(0.0f, aDY);
+        const GLfloat aDX = GLfloat(aVPSizeX) / GLfloat(getSizeX());
+        const GLfloat aDY = GLfloat(aVPSizeY) / GLfloat(getSizeY());
+        const std::vector<StGLVec2> aTCoords = {
+            StGLVec2(aDX,  0.0f),
+            StGLVec2(aDX,  aDY),
+            StGLVec2(0.0f, 0.0f),
+            StGLVec2(0.0f, aDY)
+        };
         myTexCoordBuf.init(theCtx, aTCoords);
         myViewPortX = aVPSizeX;
         myViewPortY = aVPSizeY;

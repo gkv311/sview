@@ -205,7 +205,7 @@ class StImageLoader {
     /**
      * Fill metadata map from EXIF.
      */
-    ST_LOCAL void metadataFromExif(const StHandle<StExifDir>& theDir,
+    ST_LOCAL void metadataFromExif(const std::shared_ptr<StExifDir>& theDir,
                                    StHandle<StImageInfo>&     theInfo);
 
     ST_LOCAL const StString& tr(const size_t theId) const {

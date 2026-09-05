@@ -50,7 +50,7 @@ class StGLVertexBuffer : public StGLResource {
     /**
      * @return true if this VBO has valid ID (was created but not necessary initialized with valid data!).
      */
-    inline bool isValid() const {
+    ST_LOCAL bool isValid() const {
         return myBufferId != 0;
     }
 
@@ -90,21 +90,6 @@ class StGLVertexBuffer : public StGLResource {
                               GLsizeiptr     theElemsCount,
                               const GLubyte* theData);
 
-    inline bool init(StGLContext&             theCtx,
-                     const StArray<StGLVec2>& theArray) {
-        return init(theCtx, 2, GLsizeiptr(theArray.size()), theArray.getFirst().getData());
-    }
-
-    inline bool init(StGLContext&             theCtx,
-                     const StArray<StGLVec3>& theArray) {
-        return init(theCtx, 3, GLsizeiptr(theArray.size()), theArray.getFirst().getData());
-    }
-
-    inline bool init(StGLContext&             theCtx,
-                     const StArray<StGLVec4>& theArray) {
-        return init(theCtx, 4, GLsizeiptr(theArray.size()), theArray.getFirst().getData());
-    }
-
     ST_LOCAL bool init(StGLContext& theCtx,
                        const std::vector<StGLVec2>& theArray) {
         return init(theCtx, 2, GLsizeiptr(theArray.size()), theArray.front().getData());
@@ -138,18 +123,18 @@ class StGLVertexBuffer : public StGLResource {
     /**
      * @return elemSize (GLsizeiptr ) - specifies the number of components per generic vertex attribute. Must be 1, 2, 3, or 4;
      */
-    inline GLsizeiptr getElemSize() const {
+    ST_LOCAL GLsizeiptr getElemSize() const {
         return myElemSize;
     }
 
-    inline GLsizeiptr getElemsCount() const {
+    ST_LOCAL GLsizeiptr getElemsCount() const {
         return myElemsCount;
     }
 
     /**
      * @return the data type of each component in the array.
      */
-    inline GLenum getDataType() const {
+    ST_LOCAL GLenum getDataType() const {
         return myDataType;
     }
 
@@ -161,35 +146,35 @@ class StGLVertexBuffer : public StGLResource {
     ST_CPPEXPORT void unBindVertexAttrib(StGLContext&    theCtx,
                                          StGLVarLocation theAttribLoc) const;
 
-    inline StString toString() const {
+    ST_LOCAL StString toString() const {
         return StString("OpenGL buffer #") + myBufferId;
     }
 
         public:
 
-    inline bool operator==(const StGLVertexBuffer& compare) const {
+    ST_LOCAL bool operator==(const StGLVertexBuffer& compare) const {
         return myBufferId == compare.myBufferId &&
                getTarget() == compare.getTarget();
     }
 
-    inline bool operator!=(const StGLVertexBuffer& compare) const {
+    ST_LOCAL bool operator!=(const StGLVertexBuffer& compare) const {
         return myBufferId != compare.myBufferId ||
                getTarget() != compare.getTarget();
     }
 
-    inline bool operator>(const StGLVertexBuffer& compare) const {
+    ST_LOCAL bool operator>(const StGLVertexBuffer& compare) const {
         return myBufferId > compare.myBufferId;
     }
 
-    inline bool operator<(const StGLVertexBuffer& compare) const {
+    ST_LOCAL bool operator<(const StGLVertexBuffer& compare) const {
         return myBufferId < compare.myBufferId;
     }
 
-    inline bool operator>=(const StGLVertexBuffer& compare) const {
+    ST_LOCAL bool operator>=(const StGLVertexBuffer& compare) const {
         return myBufferId >= compare.myBufferId;
     }
 
-    inline bool operator<=(const StGLVertexBuffer& compare) const {
+    ST_LOCAL bool operator<=(const StGLVertexBuffer& compare) const {
         return myBufferId <= compare.myBufferId;
     }
 
@@ -210,9 +195,9 @@ class StGLIndexBuffer : public StGLVertexBuffer {
 
     ST_CPPEXPORT virtual GLenum getTarget() const ST_ATTR_OVERRIDE;
 
-    inline bool init(StGLContext&           theCtx,
-                     const StArray<GLuint>& theArray) {
-        return StGLVertexBuffer::init(theCtx, GLsizeiptr(1), GLsizeiptr(theArray.size()), &theArray.getFirst());
+    ST_LOCAL bool init(StGLContext&               theCtx,
+                       const std::vector<GLuint>& theArray) {
+        return StGLVertexBuffer::init(theCtx, GLsizeiptr(1), GLsizeiptr(theArray.size()), theArray.data());
     }
 
 };

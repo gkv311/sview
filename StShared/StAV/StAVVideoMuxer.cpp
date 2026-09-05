@@ -183,7 +183,6 @@ bool StAVVideoMuxer::save(const StString& theFile) {
     const char* aFormatStr = formatToMetadata(myStereoFormat);
 
     std::vector<StRemuxContext> aSrcCtxList;
-    //StArrayList<StRemuxContext> aSrcCtxList;
     unsigned int aStreamCount = 0;
 
     StAVOutContext aCtxOut;

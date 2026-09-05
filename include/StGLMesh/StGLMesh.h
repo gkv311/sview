@@ -128,7 +128,7 @@ class StGLMesh : public StGLResource {
     /**
      * Access to VBO buffer using its enumeration id.
      */
-    inline StGLVertexBuffer* changeVBO(StGLVBOType theVBOType) {
+    ST_LOCAL StGLVertexBuffer* changeVBO(StGLVBOType theVBOType) {
         switch(theVBOType) {
             case ST_VBO_VERTEX: return &myVertexBuf;
             case ST_VBO_NORMAL: return &myNormalBuf;
@@ -163,7 +163,7 @@ class StGLMesh : public StGLResource {
     /**
      * Minimal bounding sphere computed for mesh.
      */
-    inline const StBndSphere& getBndSphere() const {
+    ST_LOCAL const StBndSphere& getBndSphere() const {
         return myBndSphere;
     }
 
@@ -173,11 +173,11 @@ class StGLMesh : public StGLResource {
      * Notice that this buffer may be empty even for non empty mesh if you force clean up memory
      * after VBO creation to eliminate RAM usage.
      */
-    inline const StArrayList<StGLVec3>& getVertices() const {
+    ST_LOCAL const std::vector<StGLVec3>& getVertices() const {
         return myVertices;
     }
 
-    inline StArrayList<StGLVec3>& changeVertices() {
+    ST_LOCAL std::vector<StGLVec3>& changeVertices() {
         return myVertices;
     }
 
@@ -187,17 +187,17 @@ class StGLMesh : public StGLResource {
      * Notice that this buffer may be empty even for non empty mesh if you force clean up memory
      * after VBO creation to eliminate RAM usage.
      */
-    inline const StArrayList<StGLVec3>& getNormals() const {
+    ST_LOCAL const std::vector<StGLVec3>& getNormals() const {
         return myNormals;
     }
 
-    inline StArrayList<StGLVec3>& changeNormals() {
+    ST_LOCAL std::vector<StGLVec3>& changeNormals() {
         return myNormals;
     }
 
-    ST_LOCAL StArrayList<StGLVec4>& changeColors() { return myColors; }
+    ST_LOCAL std::vector<StGLVec4>& changeColors() { return myColors; }
 
-    inline StArrayList<GLuint>& changeIndices() {
+    ST_LOCAL std::vector<GLuint>& changeIndices() {
         return myIndices;
     }
 
@@ -260,11 +260,11 @@ class StGLMesh : public StGLResource {
         protected:
 
     StBndSphere           myBndSphere;  //!< minimal boundary sphere computed for mesh
-    StArrayList<StGLVec3> myVertices;   //!< vertices array (stored in RAM)
-    StArrayList<StGLVec3> myNormals;    //!< normals array  (stored in RAM)
-    StArrayList<StGLVec2> myTCoords;    //!< texture coordinates array (stored in RAM)
-    StArrayList<StGLVec4> myColors;     //!< colors array   (stored in RAM)
-    StArrayList<GLuint>   myIndices;    //!< indices array  (stored in RAM)
+    std::vector<StGLVec3> myVertices;   //!< vertices array (stored in RAM)
+    std::vector<StGLVec3> myNormals;    //!< normals array  (stored in RAM)
+    std::vector<StGLVec2> myTCoords;    //!< texture coordinates array (stored in RAM)
+    std::vector<StGLVec4> myColors;     //!< colors array   (stored in RAM)
+    std::vector<GLuint>   myIndices;    //!< indices array  (stored in RAM)
     StGLVertexBuffer      myVertexBuf;  //!< vertices VBO   (stored in VRAM)
     StGLVertexBuffer      myNormalBuf;  //!< normals VBO    (stored in VRAM)
     StGLVertexBuffer      myTCoordBuf;  //!< texture coordinates VBO (stored in VRAM)

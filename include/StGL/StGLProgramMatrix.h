@@ -9,6 +9,8 @@
 
 #include <StGL/StGLProgram.h>
 
+#include <vector>
+
 /**
  * This class re-presents GLSL program which has alternative code paths,
  * dynamically switched depending on context.
@@ -66,12 +68,12 @@ class StGLProgramMatrix : public StGLResource {
             return;
         }
 
-        StArrayList<StString>& aParts = myVShaderSrc[theSection];
+        std::vector<StString>& aParts = myVShaderSrc[theSection];
         while(aParts.size() <= (size_t )thePartIndex) {
-            aParts.add("");
+            aParts.push_back("");
         }
 
-        aParts.changeValue(thePartIndex) = thePartText;
+        aParts.at(thePartIndex) = thePartText;
     }
 
     /**
@@ -86,12 +88,12 @@ class StGLProgramMatrix : public StGLResource {
             return;
         }
 
-        StArrayList<StString>& aParts = myFShaderSrc[theSection];
+        std::vector<StString>& aParts = myFShaderSrc[theSection];
         while(aParts.size() <= (size_t )thePartIndex) {
-            aParts.add("");
+            aParts.push_back("");
         }
 
-        aParts.changeValue(thePartIndex) = thePartText;
+        aParts.at(thePartIndex) = thePartText;
     }
 
     /**
@@ -185,10 +187,10 @@ class StGLProgramMatrix : public StGLResource {
         myIsActiveValid = false;
         StString aVertSrc, aFragSrc, aCfg;
         for(int aSectionIter = 0; aSectionIter < theNbVShaderSections; ++aSectionIter) {
-            const StArrayList<StString>& aSources = myVShaderSrc[aSectionIter];
-            if(!aSources.isEmpty()) {
+            const std::vector<StString>& aSources = myVShaderSrc[aSectionIter];
+            if(!aSources.empty()) {
                 const int anActiveSrc = myVShader[aSectionIter];
-                aVertSrc += aSources.getValue(anActiveSrc);
+                aVertSrc += aSources.at(anActiveSrc);
                 aCfg     += anActiveSrc;
             }
         #if defined(ST_DEBUG_SHADERS) && !defined(ST_HAVE_GLES2) && !defined(__ANDROID__)
@@ -196,26 +198,26 @@ class StGLProgramMatrix : public StGLResource {
                 continue;
             }
 
-            StArrayList< StHandle<StGLVertexShader> >& aShaders = myVShaderParts[aSectionIter];
+            std::vector< StHandle<StGLVertexShader> >& aShaders = myVShaderParts[aSectionIter];
             for(size_t aShaderIter = 0; aShaderIter < aSources.size(); ++aShaderIter) {
                 const StString& aSource = aSources[aShaderIter];
                 StHandle<StGLVertexShader> aShader;
                 if(aSource.isEmpty()) {
-                    aShaders.add(aShader);
+                    aShaders.push_back(aShader);
                     continue;
                 }
                 aShader = new StGLVertexShader(myTitle + "::VS" + aSectionIter + "::" + aShaderIter);
                 aShader->init(theCtx, aSource.toCString());
-                aShaders.add(aShader);
+                aShaders.push_back(aShader);
             }
         #endif
         }
 
         for(int aSectionIter = 0; aSectionIter < theNbFShaderSections; ++aSectionIter) {
-            const StArrayList<StString>& aSources = myFShaderSrc[aSectionIter];
-            if(!aSources.isEmpty()) {
+            const std::vector<StString>& aSources = myFShaderSrc[aSectionIter];
+            if(!aSources.empty()) {
                 const int anActiveSrc = myFShader[aSectionIter];
-                aFragSrc += aSources.getValue(anActiveSrc);
+                aFragSrc += aSources.at(anActiveSrc);
                 aCfg     += anActiveSrc;
             }
         #if defined(ST_DEBUG_SHADERS) && !defined(ST_HAVE_GLES2) && !defined(__ANDROID__)
@@ -223,17 +225,17 @@ class StGLProgramMatrix : public StGLResource {
                 continue;
             }
 
-            StArrayList< StHandle<StGLFragmentShader> >& aShaders = myFShaderParts[aSectionIter];
+            std::vector< StHandle<StGLFragmentShader> >& aShaders = myFShaderParts[aSectionIter];
             for(size_t aShaderIter = 0; aShaderIter < aSources.size(); ++aShaderIter) {
                 const StString& aSource = aSources[aShaderIter];
                 StHandle<StGLFragmentShader> aShader;
                 if(aSource.isEmpty()) {
-                    aShaders.add(aShader);
+                    aShaders.push_back(aShader);
                     continue;
                 }
                 aShader = new StGLFragmentShader(myTitle + "::FS" + aSectionIter + "::" + aShaderIter);
                 aShader->init(theCtx, aSource.toCString());
-                aShaders.add(aShader);
+                aShaders.push_back(aShader);
             }
         #endif
         }
@@ -271,11 +273,11 @@ class StGLProgramMatrix : public StGLResource {
      */
     template<class theShader_t, int theNbSections>
     ST_LOCAL void releaseShaders(StGLContext&                          theCtx,
-                                 StArrayList< StHandle<theShader_t> >* theArray) {
+                                 std::vector< StHandle<theShader_t> >* theArray) {
         for(int aSectionIter = 0; aSectionIter < theNbSections; ++aSectionIter) {
-            StArrayList< StHandle<theShader_t> >& aShaders = theArray[aSectionIter];
+            std::vector< StHandle<theShader_t> >& aShaders = theArray[aSectionIter];
             for(size_t aVShaderIter = 0; aVShaderIter < aShaders.size(); ++aVShaderIter) {
-                StHandle<theShader_t>& aShader = aShaders.changeValue(aVShaderIter);
+                StHandle<theShader_t>& aShader = aShaders.at(aVShaderIter);
                 if(!aShader.isNull()) {
                     aShader->release(theCtx);
                     aShader.nullify();
@@ -286,11 +288,11 @@ class StGLProgramMatrix : public StGLResource {
 
         protected:
 
-    StArrayList<StString>                       myVShaderSrc[theNbVShaderSections];   //!< per-section code parts combinations for Vertex   Shader
-    StArrayList<StString>                       myFShaderSrc[theNbFShaderSections];   //!< per-section code parts combinations for Fragment Shader
+    std::vector<StString>                       myVShaderSrc[theNbVShaderSections];   //!< per-section code parts combinations for Vertex   Shader
+    std::vector<StString>                       myFShaderSrc[theNbFShaderSections];   //!< per-section code parts combinations for Fragment Shader
 
-    StArrayList< StHandle<StGLVertexShader> >   myVShaderParts[theNbVShaderSections];
-    StArrayList< StHandle<StGLFragmentShader> > myFShaderParts[theNbFShaderSections];
+    std::vector< StHandle<StGLVertexShader> >   myVShaderParts[theNbVShaderSections];
+    std::vector< StHandle<StGLFragmentShader> > myFShaderParts[theNbFShaderSections];
 
     int                                         myVShader[theNbVShaderSections];      //!< currently activated code parts in each section of Vertex   Shader
     int                                         myFShader[theNbFShaderSections];      //!< currently activated code parts in each section of Fragment Shader

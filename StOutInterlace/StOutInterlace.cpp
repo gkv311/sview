@@ -1089,13 +1089,14 @@ void StOutInterlace::stglDraw() {
     }
 
     // reduce viewport to avoid additional aliasing of narrow lines
-    GLfloat aDX = GLfloat(myFrmBuffer->getVPSizeX()) / GLfloat(myFrmBuffer->getSizeX());
-    GLfloat aDY = GLfloat(myFrmBuffer->getVPSizeY()) / GLfloat(myFrmBuffer->getSizeY());
-    StArray<StGLVec2> aTCoords(4);
-    aTCoords[0] = StGLVec2(aDX,  0.0f);
-    aTCoords[1] = StGLVec2(aDX,  aDY);
-    aTCoords[2] = StGLVec2(0.0f, 0.0f);
-    aTCoords[3] = StGLVec2(0.0f, aDY);
+    const GLfloat aDX = GLfloat(myFrmBuffer->getVPSizeX()) / GLfloat(myFrmBuffer->getSizeX());
+    const GLfloat aDY = GLfloat(myFrmBuffer->getVPSizeY()) / GLfloat(myFrmBuffer->getSizeY());
+    const std::vector<StGLVec2> aTCoords = {
+        StGLVec2(aDX,  0.0f),
+        StGLVec2(aDX,  aDY),
+        StGLVec2(0.0f, 0.0f),
+        StGLVec2(0.0f, aDY)
+    };
     myQuadTexCoordBuf.init(*myContext, aTCoords);
 
     for(int anEyeIter = toSmooth ? 0 : 1; anEyeIter < 2; ++anEyeIter) {

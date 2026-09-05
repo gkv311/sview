@@ -9,6 +9,8 @@
 
 #include "StMIME.h"
 
+#include <vector>
+
 class StMIMEList : public StArrayList<StMIME> {
 
         public:
@@ -39,8 +41,8 @@ class StMIMEList : public StArrayList<StMIME> {
      * Creates list of extensions from MIME description list.
      * @return extensions list (StArrayList<StString> ).
      */
-    StArrayList<StString> getExtensionsList() const {
-        StArrayList<StString> anExtensionsList;
+    std::vector<StString> getExtensionsList() const {
+        std::vector<StString> anExtensionsList;
         size_t anExtId = 0;
         for(size_t aMimeId = 0; aMimeId < StArrayList<StMIME>::size(); ++aMimeId) {
             StString anExt = StArrayList<StMIME>::getValue(aMimeId).getExtension();
@@ -51,7 +53,7 @@ class StMIMEList : public StArrayList<StMIME> {
                 }
             }
             if(anExtId == anExtensionsList.size()) {
-                anExtensionsList.add(anExt);
+                anExtensionsList.push_back(anExt);
             }
         }
         return anExtensionsList;

@@ -22,9 +22,9 @@ namespace {
 
 StFTFontRegistry::StFTFontRegistry() {
     myFTLib = new StFTLibrary();
-    myExtensions.add("ttf");
-    myExtensions.add("ttc");
-    myExtensions.add("otf");
+    myExtensions.push_back("ttf");
+    myExtensions.push_back("ttc");
+    myExtensions.push_back("otf");
 
     const StString aCustFontDir = StProcess::getStShareFolder() + "fonts" + SYS_FS_SPLITTER;
     if(StFolder::isFolder(aCustFontDir)) {
@@ -53,7 +53,7 @@ StFTFontRegistry::StFTFontRegistry() {
     // chinese
     myFilesMajor.push_back(stCString("simsun.ttc"));
 #elif defined(__APPLE__)
-    myExtensions.add("dfont");
+    myExtensions.push_back("dfont");
     myFolders.push_back(stCString("/System/Library/Fonts"));
     myFolders.push_back(stCString("/Library/Fonts"));
 

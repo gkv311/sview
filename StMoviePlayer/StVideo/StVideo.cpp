@@ -139,9 +139,9 @@ StVideo::StVideo(const std::string&                 theALDeviceName,
 
     myPlayList->setExtensions(myMimesVideo.getExtensionsList());
     myTracksExt = myMimesSubs.getExtensionsList();
-    StArrayList<StString> anAudioExt = myMimesAudio.getExtensionsList();
-    for(size_t anExtIter = 0; anExtIter < anAudioExt.size(); ++anExtIter) {
-        myTracksExt.add(anAudioExt.getValue(anExtIter));
+    const std::vector<StString> anAudioExt = myMimesAudio.getExtensionsList();
+    for (const StString& anExtIter : anAudioExt) {
+        myTracksExt.push_back(anExtIter);
     }
 
     params.UseGpu           = new StBoolParam(false);
@@ -497,7 +497,7 @@ bool StVideo::addFile(const StString& theFileToLoad,
                               ? (StString(" ...") + aFileName.subString(aFileName.getLength() - 24, aFileName.getLength()))
                               : (StString(" ") + aFileName);
             }
-            theInfo.AudioList->add(aStreamTitle);
+            theInfo.AudioList->push_back(aStreamTitle);
 
             if(!myAudio->isInitialized()
             && (aPrefLangAudio.isEmpty() || aLang == aPrefLangAudio)
@@ -519,7 +519,7 @@ bool StVideo::addFile(const StString& theFileToLoad,
             if(aFormatCtx->nb_streams == 1) {
                 aStreamTitle += StString(", ") + aFileName;
             }
-            theInfo.SubtitleList->add(aStreamTitle);
+            theInfo.SubtitleList->push_back(aStreamTitle);
 
             if(params.ToAutoLoadSubs->getValue()
             && !mySubtitles1->isInitialized()
@@ -533,7 +533,7 @@ bool StVideo::addFile(const StString& theFileToLoad,
     // load first audio stream if preferred language is unavailable
     if(!myAudio->isInitialized()
     && !aPrefLangAudio.isEmpty()
-    && !theInfo.AudioList->isEmpty()) {
+    && !theInfo.AudioList->empty()) {
         for(unsigned int aStreamId = 0; aStreamId < aFormatCtx->nb_streams; ++aStreamId) {
             AVStream* aStream = aFormatCtx->streams[aStreamId];
             if(stAV::getCodecType(aStream) != AVMEDIA_TYPE_AUDIO) {
@@ -555,7 +555,7 @@ bool StVideo::addFile(const StString& theFileToLoad,
     if(params.ToAutoLoadSubs->getValue()
     && !mySubtitles1->isInitialized()
     && !aPrefLangAudio.isEmpty()
-    && !theInfo.SubtitleList->isEmpty()) {
+    && !theInfo.SubtitleList->empty()) {
         for(unsigned int aStreamId = 0; aStreamId < aFormatCtx->nb_streams; ++aStreamId) {
             AVStream* aStream = aFormatCtx->streams[aStreamId];
             if(stAV::getCodecType(aStream) != AVMEDIA_TYPE_SUBTITLE) {
@@ -596,8 +596,10 @@ bool StVideo::openSource(const StHandle<StFileNode>&     theNewSource,
     myFileInfoTmp = new StMovieInfo();
 
     StStreamsInfo aStreamsInfo;
-    aStreamsInfo.AudioList    = new StArrayList<StString>(8);
-    aStreamsInfo.SubtitleList = new StArrayList<StString>(8);
+    aStreamsInfo.AudioList    = std::make_shared<std::vector<StString>>();
+    aStreamsInfo.SubtitleList = std::make_shared<std::vector<StString>>();
+    aStreamsInfo.AudioList->reserve(8);
+    aStreamsInfo.SubtitleList->reserve(8);
     if(!theNewSource->isEmpty()) {
         bool isLoaded = false;
         for(size_t aNode = 0; aNode < theNewSource->size(); ++aNode) {
@@ -1444,7 +1446,7 @@ void StVideo::doRemovePhysically(const StHandle<StFileNode>& theFile) {
                           && aCurrent->getPath().isEquals(theFile->getPath());
 
     myEventMutex.lock();
-    myFilesToDelete.add(theFile);
+    myFilesToDelete.push_back(theFile);
     myEventMutex.unlock();
 
     if(toPlayNext) {
@@ -1501,7 +1503,7 @@ void StVideo::mainLoop() {
         myVideoTimer.nullify();
 
         myEventMutex.lock();
-        if(!myFilesToDelete.isEmpty()) {
+        if(!myFilesToDelete.empty()) {
             const StHandle<StFileNode> aCurrent = myPlayList->getCurrentFile();
             if(!aCurrent.isNull()
              && aCurrent->getPath().isEquals(myFilesToDelete[0]->getPath())) {

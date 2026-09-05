@@ -297,7 +297,7 @@ void StResourceManager::listSubFolders(const StString&        theFolder,
                                        std::vector<StString>& theSubFolders) const {
     const StString aPath = myResFolder + theFolder;
     StFolder aFileDir(aPath);
-    StArrayList<StString> anExtensions(1);
+    std::vector<StString> anExtensions;
     aFileDir.init(anExtensions, 1, true);
     for(size_t aNodeId = 0; aNodeId < aFileDir.size(); ++aNodeId) {
         const StFileNode* aFileNode = aFileDir.getValue(aNodeId);

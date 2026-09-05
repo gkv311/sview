@@ -28,10 +28,10 @@
 
 namespace {
 
-    static const char ST_OUT_PLUGIN_NAME[] = "StOutPageFlip";
+    static constexpr char ST_OUT_PLUGIN_NAME[] = "StOutPageFlip";
 
-    static const char ST_SETTING_WINDOWPOS[]  = "windowPos";
-    static const char ST_SETTING_DEVICE_ID[]  = "deviceId";
+    static constexpr char ST_SETTING_WINDOWPOS[]  = "windowPos";
+    static constexpr char ST_SETTING_DEVICE_ID[]  = "deviceId";
 }
 
 StOutPageFlip::StOutDirect3D::StOutDirect3D()
@@ -1149,11 +1149,12 @@ void StOutPageFlip::stglDraw() {
                     // unfortunately we need extra buffer to flip image - D3D and OpenGL use different coordinate rules
                     const GLfloat aDX = GLfloat(myOutD3d.GlBuffer->getVPSizeX()) / GLfloat(myOutD3d.GlBuffer->getSizeX());
                     const GLfloat aDY = GLfloat(myOutD3d.GlBuffer->getVPSizeY()) / GLfloat(myOutD3d.GlBuffer->getSizeY());
-                    StArray<StGLVec2> aTCoords(4);
-                    aTCoords[0] = StGLVec2(aDX,  aDY);
-                    aTCoords[1] = StGLVec2(aDX,  0.0f);
-                    aTCoords[2] = StGLVec2(0.0f, aDY);
-                    aTCoords[3] = StGLVec2(0.0f, 0.0f);
+                    std::vector<StGLVec2> aTCoords = {
+                        StGLVec2(aDX,  aDY),
+                        StGLVec2(aDX,  0.0f),
+                        StGLVec2(0.0f, aDY),
+                        StGLVec2(0.0f, 0.0f)
+                    };
                     myOutD3d.TCrdBuf.init(*myContext, aTCoords);
 
                     myContext->stglResizeViewport(myOutD3d.WglDxBuffer->getSizeX(),

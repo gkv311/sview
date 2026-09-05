@@ -61,8 +61,9 @@ void StGeometryTest::resizeGrid(const StRectI_t& winRectPx) {
     myCellSize.x() = 2.0f * GLfloat(cellSizePx) / GLfloat(winRectPx.width());
     myCellSize.y() = 2.0f * GLfloat(cellSizePx) / GLfloat(winRectPx.height());
 
-    size_t vertixesCount = (linesCountH + linesCountV) * 2;
-    StArray<StGLVec4> vertArray(vertixesCount);
+    const size_t vertixesCount = (linesCountH + linesCountV) * 2;
+    std::vector<StGLVec4> vertArray;
+    vertArray.resize(vertixesCount);
 
     // insert black gap to make quads
     StGLVec2 blackGap(GLfloat(winRectPx.width()  - cellSizePx * (linesCountV - 1)) / GLfloat(winRectPx.width()),
@@ -88,7 +89,7 @@ void StGeometryTest::resizeGrid(const StRectI_t& winRectPx) {
     myGrid.changeVBO(ST_VBO_VERTEX)->init(aCtx, vertArray);
 
     // white color
-    StArray<StGLVec4> lColorsArray(vertixesCount, StGLVec4(1.0f));
+    std::vector<StGLVec4> lColorsArray(vertixesCount, StGLVec4(1.0f));
     myGrid.changeVBO(ST_VBO_COLORS)->init(aCtx, lColorsArray);
 
     // bottom left circle
@@ -118,7 +119,7 @@ void StGeometryTest::resizeGrid(const StRectI_t& winRectPx) {
 /**
  * Simple function to setup common values in the array.
  */
-static inline void setValues(StArray<StGLVec4>& stVec4Array, const StGLVec4& value,
+static inline void setValues(std::vector<StGLVec4>& stVec4Array, const StGLVec4& value,
                              const size_t fromId, const size_t count) {
     for(size_t anId = fromId; anId < (fromId + count); ++anId) {
         stVec4Array[anId] = value;
@@ -139,7 +140,8 @@ void StGeometryTest::resizeColor() {
     GLfloat anYTop    = bottomLeft.y() + rectSize.y() - 4.0f * myPixelSize.x();
 
     // setup vertices
-    StArray<StGLVec4> aVertArray(COLOR_QUADS * VERT_PER_QUAD);
+    std::vector<StGLVec4> aVertArray;
+    aVertArray.resize(COLOR_QUADS * VERT_PER_QUAD);
     for(size_t quadId = 0; quadId < COLOR_QUADS; ++quadId) {
         GLfloat anXLeft  = bottomLeft.x() + GLfloat(quadId + 0) * rectSize.x() + 4.0f * myPixelSize.x();
         GLfloat anXRight = bottomLeft.x() + GLfloat(quadId + 1) * rectSize.x() - 4.0f * myPixelSize.x();
@@ -153,7 +155,8 @@ void StGeometryTest::resizeColor() {
     myColors.changeVBO(ST_VBO_VERTEX)->init(aCtx, aVertArray);
 
     // setup color
-    StArray<StGLVec4> aColorsArray(COLOR_QUADS * VERT_PER_QUAD);
+    std::vector<StGLVec4> aColorsArray;
+    aColorsArray.resize(COLOR_QUADS * VERT_PER_QUAD);
     setValues(aColorsArray, StGLVec4(0.0f, 0.0f, 1.0f, 1.0f), 0 * VERT_PER_QUAD, VERT_PER_QUAD); // blue
     setValues(aColorsArray, StGLVec4(0.0f, 1.0f, 1.0f, 1.0f), 1 * VERT_PER_QUAD, VERT_PER_QUAD); // aqua
     setValues(aColorsArray, StGLVec4(1.0f, 0.0f, 1.0f, 1.0f), 2 * VERT_PER_QUAD, VERT_PER_QUAD); // fuchsia
@@ -179,7 +182,8 @@ void StGeometryTest::resizeBrightness() {
     GLfloat anYTop    = bottomLeft.y() + rectSize.y() - 4.0f * myPixelSize.x();
 
     // setup vertices
-    StArray<StGLVec4> aVertArray(BR_QUADS * VERT_PER_QUAD);
+    std::vector<StGLVec4> aVertArray;
+    aVertArray.resize(BR_QUADS * VERT_PER_QUAD);
     for(size_t quadId = 0; quadId < BR_QUADS; ++quadId) {
         GLfloat anXLeft  = bottomLeft.x() + GLfloat(quadId + 0) * rectSize.x() + 4.0f * myPixelSize.x();
         GLfloat anXRight = bottomLeft.x() + GLfloat(quadId + 1) * rectSize.x() - 4.0f * myPixelSize.x();
@@ -193,7 +197,8 @@ void StGeometryTest::resizeBrightness() {
     myBrightness.changeVBO(ST_VBO_VERTEX)->init(aCtx, aVertArray);
 
     // setup color (increased brightness): 3% 10% 20% 30% ... 100%
-    StArray<StGLVec4> aColorsArray(BR_QUADS * VERT_PER_QUAD);
+    std::vector<StGLVec4> aColorsArray;
+    aColorsArray.resize(BR_QUADS * VERT_PER_QUAD);
     StGLVec4 aColor(0.03f, 0.03f, 0.03f, 1.0f);
     StGLVec4 aColorDelta(0.1f, 0.1f, 0.1f, 1.0f);
     for(size_t quadId = 0; quadId < BR_QUADS; ++quadId) {

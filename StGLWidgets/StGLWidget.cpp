@@ -149,7 +149,7 @@ inline StRectI_t computeAbsolutePos(const StRectI_t& theParentRect,
     return aRect;
 }
 
-void StGLWidget::getRectGl(StArray<StGLVec2>& theVertices) const {
+void StGLWidget::getRectGl(std::vector<StGLVec2>& theVertices) const {
     myRoot->getRectGl(getRectPxAbsolute(), theVertices);
 }
 

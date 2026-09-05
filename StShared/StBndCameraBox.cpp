@@ -28,21 +28,23 @@ StGLVec3 StBndCameraBox::getCenterGlobal() const {
 }
 
 void StBndCameraBox::enlarge(const StGLVec3& theNewPnt) {
-    StArray<StGLVec3> aPoints(1);
-    aPoints[0] = theNewPnt;
+    const std::vector<StGLVec3> aPoints = {
+        theNewPnt
+    };
     StBndCameraBox::enlarge(aPoints);
 }
 
-void StBndCameraBox::enlarge(const StArray<StGLVec3>& thePoints) {
+void StBndCameraBox::enlarge(const std::vector<StGLVec3>& thePoints) {
     if(thePoints.size() == 0) {
         return;
     }
+
     // translate the points using transformation matrix
-    StArray<StGLVec3> aPoints(thePoints.size());
-    StGLVec4 aPnt;
+    std::vector<StGLVec3> aPoints;
+    aPoints.resize(thePoints.size());
     for(size_t aPntId = 0; aPntId < aPoints.size(); ++aPntId) {
-        aPnt = myTransf * StGLVec4(thePoints.getValue(aPntId), 1.0f);
-        aPoints.changeValue(aPntId) = aPnt.xyz();
+        const StGLVec4 aPnt = myTransf * StGLVec4(thePoints[aPntId], 1.0f);
+        aPoints[aPntId] = aPnt.xyz();
     }
     StBndBox::enlarge(aPoints);
 }

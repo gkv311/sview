@@ -393,13 +393,22 @@ StRectD_t StGLRootWidget::getRectGl(const StRectI_t& theRectPx) const {
 }
 
 void StGLRootWidget::getRectGl(const StRectI_t& theRectPx,
-                               StArray<StGLVec2>& theVertices,
+                               std::array<StGLVec2, 4>& theVertices) const {
+    StRectD_t aRectGl = getRectGl(theRectPx);
+    theVertices[0] = StGLVec2(GLfloat(aRectGl.right()), GLfloat(aRectGl.top()));
+    theVertices[1] = StGLVec2(GLfloat(aRectGl.right()), GLfloat(aRectGl.bottom()));
+    theVertices[2] = StGLVec2(GLfloat(aRectGl.left()),  GLfloat(aRectGl.top()));
+    theVertices[3] = StGLVec2(GLfloat(aRectGl.left()),  GLfloat(aRectGl.bottom()));
+}
+
+void StGLRootWidget::getRectGl(const StRectI_t& theRectPx,
+                               std::vector<StGLVec2>& theVertices,
                                const size_t theFromId) const {
     StRectD_t aRectGl = getRectGl(theRectPx);
-    theVertices[theFromId + 0] = StGLVec2(GLfloat(aRectGl.right()), GLfloat(aRectGl.top()));
-    theVertices[theFromId + 1] = StGLVec2(GLfloat(aRectGl.right()), GLfloat(aRectGl.bottom()));
-    theVertices[theFromId + 2] = StGLVec2(GLfloat(aRectGl.left()),  GLfloat(aRectGl.top()));
-    theVertices[theFromId + 3] = StGLVec2(GLfloat(aRectGl.left()),  GLfloat(aRectGl.bottom()));
+    theVertices.at(theFromId + 0) = StGLVec2(GLfloat(aRectGl.right()), GLfloat(aRectGl.top()));
+    theVertices.at(theFromId + 1) = StGLVec2(GLfloat(aRectGl.right()), GLfloat(aRectGl.bottom()));
+    theVertices.at(theFromId + 2) = StGLVec2(GLfloat(aRectGl.left()),  GLfloat(aRectGl.top()));
+    theVertices.at(theFromId + 3) = StGLVec2(GLfloat(aRectGl.left()),  GLfloat(aRectGl.bottom()));
 }
 
 bool StGLRootWidget::tryClick(const StClickEvent& theEvent,
@@ -490,7 +499,7 @@ void StGLRootWidget::destroyWithDelay(StGLWidget* theWidget) {
             return; // already appended
         }
     }
-    myDestroyList.add(theWidget);
+    myDestroyList.push_back(theWidget);
 }
 
 void StGLRootWidget::clearDestroyList() {

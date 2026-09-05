@@ -342,7 +342,8 @@ void StGLTextureButton::stglResize() {
     StGLContext& aCtx = getContext();
 
     // update vertices
-    StArray<StGLVec2> aVertices(myToDrawShadow ? 8 : 4);
+    std::vector<StGLVec2> aVertices;
+    aVertices.resize(myToDrawShadow ? 8 : 4);
     StRectI_t aRect = getRectPxAbsolute();
     aRect.left()   += myMargins.left;
     aRect.right()  -= myMargins.right;
@@ -436,8 +437,10 @@ bool StGLTextureButton::stglInit() {
         return false;
     }
 
-    StArray<StGLVec2> aDummyVert(myToDrawShadow ? 8 : 4);
-    StArray<StGLVec2> aTexCoords(myToDrawShadow ? 8 : 4);
+    std::vector<StGLVec2> aDummyVert;
+    std::vector<StGLVec2> aTexCoords;
+    aDummyVert.resize(myToDrawShadow ? 8 : 4);
+    aTexCoords.resize(myToDrawShadow ? 8 : 4);
     aTexCoords[0] = StGLVec2(1.0f, 0.0f);
     aTexCoords[1] = StGLVec2(1.0f, 1.0f);
     aTexCoords[2] = StGLVec2(0.0f, 0.0f);

@@ -11,6 +11,7 @@
 #include <StGL/StGLTexture.h>
 #include <StGL/StGLFrameBuffer.h>
 #include <StGL/StGLVec.h>
+#include <StTemplates/StArrayList.h>
 #include <StTemplates/StRect.h>
 
 #include <map>

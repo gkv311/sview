@@ -135,7 +135,8 @@ void StGLSeekBar::stglResize() {
 }
 
 void StGLSeekBar::stglUpdateVertices() {
-    StArray<StGLVec2> aVertices(12);
+    std::vector<StGLVec2> aVertices;
+    aVertices.resize(12);
 
     // black border quad
     StRectI_t aRectPx(getRectPxAbsolute());

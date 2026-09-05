@@ -14,6 +14,8 @@
 #include <StSlots/StAction.h>
 #include <StStrings/StLangMap.h>
 
+#include <vector>
+
 class StGLTable;
 
 /**
@@ -92,7 +94,7 @@ class StGLTable : public StGLWidget {
      */
     ST_LOCAL const StGLTableItem& getElement(const int theRowId,
                                              const int theColId) const {
-        return *myTable.getValue(theRowId).getValue(theColId);
+        return *myTable.at(theRowId).at(theColId);
     }
 
     /**
@@ -100,7 +102,7 @@ class StGLTable : public StGLWidget {
      */
     ST_LOCAL StGLTableItem& changeElement(const int theRowId,
                                           const int theColId) {
-        return *myTable.changeValue(theRowId).changeValue(theColId);
+        return *myTable.at(theRowId).at(theColId);
     }
 
     /**
@@ -179,11 +181,11 @@ class StGLTable : public StGLWidget {
 
         protected: //! @name protected fields
 
-    StArrayList< StArrayList<StGLTableItem*> >
+    std::vector< std::vector<StGLTableItem*> >
                      myTable;         //!< table content
 
-    StArrayList<int> myRowBottoms;    //!< array of rows    bottoms
-    StArrayList<int> myColRights;     //!< array of columns rights
+    std::vector<int> myRowBottoms;    //!< array of rows    bottoms
+    std::vector<int> myColRights;     //!< array of columns rights
 
     StMarginsI       myItemMargins;   //!< margins for all table elements
 

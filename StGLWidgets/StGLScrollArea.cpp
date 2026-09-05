@@ -72,7 +72,8 @@ void StGLScrollArea::stglResize() {
         const int    aScrollSizeY = stMax(int(aScaleY * (double )aSizeY), myRoot->scale(4));
         const double aPosY        = double(-aContent->getRectPx().top()) / double(aContSizeY - aSizeY);
 
-        StArray<StGLVec2> aVertices(4);
+        std::vector<StGLVec2> aVertices;
+        aVertices.resize(4);
         StRectI_t aRectPx = getRectPxAbsolute();
         aRectPx.left()   =  aRectPx.right() - myRoot->scale(2);
         aRectPx.top()    += int(aPosY * double(aSizeY - aScrollSizeY));

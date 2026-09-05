@@ -14,6 +14,9 @@
 #include <StGL/StGLTexture.h>
 #include <StThreads/StResourceManager.h>
 
+#include <array>
+#include <vector>
+
 typedef StArray<StGLNamedTexture> StGLTextureArray;
 class StGLMenuProgram;
 class StGLMessageBox;
@@ -316,9 +319,16 @@ class StGLRootWidget : public StGLWidget {
      * Convert pixel coordinates (absolute) into GL coordinates.
      * Array should be 4 items length or you will got an exception!
      */
-    ST_CPPEXPORT void getRectGl(const StRectI_t&   theRectPx,
-                                StArray<StGLVec2>& theVertices,
-                                const size_t       theFromId = 0) const;
+    ST_CPPEXPORT void getRectGl(const StRectI_t& theRectPx,
+                                std::array<StGLVec2, 4>& theVertices) const;
+
+    /**
+     * Convert pixel coordinates (absolute) into GL coordinates.
+     * Array should be 4 items length or you will got an exception!
+     */
+    ST_CPPEXPORT void getRectGl(const StRectI_t& theRectPx,
+                                std::vector<StGLVec2>& theVertices,
+                                const size_t theFromId = 0) const;
 
     /**
      * Access the shared resource by unique id.
@@ -534,7 +544,7 @@ class StGLRootWidget : public StGLWidget {
     StPointD_t                myCursorZo;      //!< mouse cursor position
     GLint                     myViewport[4];   //!< cached GL viewport
 
-    StArrayList<StGLWidget*>  myDestroyList;   //!< list of widgets to be destroyed
+    std::vector<StGLWidget*>  myDestroyList;   //!< list of widgets to be destroyed
     StGLWidget*               myFocusWidget;   //!< widget currently in focus
     StGLMessageBox*           myModalDialog;   //!< active dialog
 

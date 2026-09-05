@@ -17,7 +17,7 @@ class StGLProgram : public StGLResource {
 
         public:
 
-    static const GLuint NO_PROGRAM = 0;
+    static constexpr GLuint NO_PROGRAM = 0;
 
     enum {
         TEXTURE_SAMPLE_0 = 0, // GL_TEXTURE0
@@ -48,7 +48,7 @@ class StGLProgram : public StGLResource {
     /**
      * @return true if program object is valid.
      */
-    inline bool isValid() const {
+    ST_LOCAL bool isValid() const {
         return myProgramId != NO_PROGRAM;
     }
 
@@ -82,9 +82,9 @@ class StGLProgram : public StGLResource {
     /**
      * Switch one shader object to another.
      */
-    inline StGLProgram& swapShader(StGLContext&      theCtx,
-                                   const StGLShader& theShaderFrom,
-                                   const StGLShader& theShaderTo) {
+    ST_LOCAL StGLProgram& swapShader(StGLContext&      theCtx,
+                                     const StGLShader& theShaderFrom,
+                                     const StGLShader& theShaderTo) {
         if(&theShaderFrom != &theShaderTo) {
             detachShader(theCtx, theShaderFrom).attachShader(theCtx, theShaderTo).link(theCtx);
         }

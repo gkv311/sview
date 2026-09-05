@@ -20,7 +20,6 @@
 
 StParamActiveStream::StParamActiveStream()
 : StInt32Param(-1),
-  myList(new StArrayList<StString>(1)),
   myMutex(),
   myIsChanged(false) {}
 
@@ -31,22 +30,22 @@ int32_t StParamActiveStream::getListSize() const {
     return aSize;
 }
 
-StHandle< StArrayList<StString> > StParamActiveStream::getList() const {
+std::shared_ptr<std::vector<StString>> StParamActiveStream::getList() const {
     myMutex.lock();
-    StHandle< StArrayList<StString> > aList = myList;
+    std::shared_ptr<std::vector<StString>> aList = myList;
     myMutex.unlock();
     return aList;
 }
 
 void StParamActiveStream::clearList() {
     myMutex.lock();
-    myList  = new StArrayList<StString>(1);
+    myList  = std::make_shared<std::vector<StString>>();
     myValue = -1;
     myIsChanged = false;
     myMutex.unlock();
 }
 
-void StParamActiveStream::setList(const StHandle< StArrayList<StString> >& theList,
+void StParamActiveStream::setList(const std::shared_ptr<std::vector<StString>>& theList,
                                   const int32_t theValue) {
     myMutex.lock();
     myList  = theList;
@@ -80,7 +79,7 @@ bool StParamActiveStream::setValue(const int32_t theValue) {
 
 int32_t StParamActiveStream::nextValue(const int32_t theIncrement) {
     myMutex.lock();
-    if(myList->isEmpty()) {
+    if(myList->empty()) {
         myMutex.unlock();
         return -1;
     }

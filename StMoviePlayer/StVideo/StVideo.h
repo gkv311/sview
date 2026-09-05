@@ -58,20 +58,23 @@ struct StMovieInfo {
  */
 struct StStreamsInfo {
 
-    StHandle< StArrayList<StString> > AudioList;
-    StHandle< StArrayList<StString> > SubtitleList;
-    double                            Duration;
-    int32_t                           LoadedAudio;
-    int32_t                           LoadedSubtitles1;
-    int32_t                           LoadedSubtitles2;
+    std::shared_ptr<std::vector<StString>> AudioList;
+    std::shared_ptr<std::vector<StString>> SubtitleList;
+
+    double  Duration;
+    int32_t LoadedAudio;
+    int32_t LoadedSubtitles1;
+    int32_t LoadedSubtitles2;
 
     StStreamsInfo()
     : Duration(0.0),
       LoadedAudio(-1),
       LoadedSubtitles1(-1),
       LoadedSubtitles2(-1) {
-        AudioList    = new StArrayList<StString>(8);
-        SubtitleList = new StArrayList<StString>(8);
+        AudioList    = std::make_shared<std::vector<StString>>();
+        SubtitleList = std::make_shared<std::vector<StString>>();
+        AudioList->reserve(8);
+        SubtitleList->reserve(8);
     }
 
 };
@@ -483,9 +486,9 @@ class StVideo {
     StHandle<StFileNode>          myCurrPlsFile;  //!< active playlist file node
     StHandle<StGLTextureQueue>    myTextureQueue; //!< decoded frames queue
 
-    StArrayList<StString>         myTracksExt;    //!< extra tracks extensions list
+    std::vector<StString>         myTracksExt;    //!< extra tracks extensions list
     StFolder                      myTracksFolder; //!< cached list of subtitles/audio tracks in the current folder
-    StArrayList< StHandle<StFileNode> >
+    std::vector< StHandle<StFileNode> >
                                   myFilesToDelete;//!< file nodes for removal
 
     StHandle<StVideoTimer>        myVideoTimer;   //!< video refresh timer (Audio -> Video sync)

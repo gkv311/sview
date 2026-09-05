@@ -18,6 +18,8 @@
 
 #include <StCore/StVirtualKeys.h> // mouse keys
 
+#include <vector>
+
 class  StGLRootWidget;
 class  StGLContext;
 struct StClickEvent;
@@ -451,7 +453,7 @@ class StGLWidget {
      */
     ST_CPPEXPORT StRectD_t getRectGl() const;
 
-    ST_CPPEXPORT void getRectGl(StArray<StGLVec2>& theVertices) const;
+    ST_CPPEXPORT void getRectGl(std::vector<StGLVec2>& theVertices) const;
 
     /**
      * Returns link to the projection camera from root widget.

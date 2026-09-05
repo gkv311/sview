@@ -11,7 +11,7 @@
 
 namespace {
     static const GLfloat ST_DTR_HALF = 0.5f * 0.0174532925f; // (degrees -> radians) * 0.5
-};
+}
 
 StGLProjCamera::StGLProjCamera()
 : myMatrix(),

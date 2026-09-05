@@ -2195,10 +2195,10 @@ void StMoviePlayer::doChangeMixImagesVideos(const bool theToMix) {
         return;
     }
     if(theToMix) {
-        StArrayList<StString> aMediaExt = myVideo->getMimeListVideo().getExtensionsList();
-        StArrayList<StString> anImgExt  = myVideo->getMimeListImages().getExtensionsList();
-        for(size_t anExtIter = 0; anExtIter < anImgExt.size(); ++anExtIter) {
-            aMediaExt.add(anImgExt.getValue(anExtIter));
+        std::vector<StString>       aMediaExt = myVideo->getMimeListVideo().getExtensionsList();
+        const std::vector<StString> anImgExt  = myVideo->getMimeListImages().getExtensionsList();
+        for (const StString& anExtIter : anImgExt) {
+            aMediaExt.push_back(anExtIter);
         }
         myPlayList->setExtensions(aMediaExt);
     } else {

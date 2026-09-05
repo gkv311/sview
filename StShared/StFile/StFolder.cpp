@@ -16,8 +16,8 @@
 #endif
 
 namespace {
-    static const StString IGNORE_DIR_CURR_NAME('.');
-    static const StString IGNORE_DIR_UP_NAME("..");
+    static constexpr StCString IGNORE_DIR_CURR_NAME = stCString(".");
+    static constexpr StCString IGNORE_DIR_UP_NAME = stCString("..");
 }
 
 StFolder::StFolder()
@@ -72,7 +72,7 @@ bool StFolder::createFolder(const StCString& thePath) {
 #endif
 }
 
-void StFolder::addItem(const StArrayList<StString>& theExtensions,
+void StFolder::addItem(const std::vector<StString>& theExtensions,
                        int theDeep,
                        const StString& theSearchFolderPath,
                        const StString& theCurrentItemName,
@@ -108,7 +108,7 @@ void StFolder::addItem(const StArrayList<StString>& theExtensions,
     }
 }
 
-void StFolder::init(const StArrayList<StString>& theExtensions,
+void StFolder::init(const std::vector<StString>& theExtensions,
                     const int                    theDeep,
                     const bool                   theToAddEmptyFolders) {
     // clean up old list...

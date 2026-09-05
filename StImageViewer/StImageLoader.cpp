@@ -94,9 +94,9 @@ void StImageLoader::processLoadFail(const StString& theErrorDesc) {
     myTextureQueue->clear();
 }
 
-void StImageLoader::metadataFromExif(const StHandle<StExifDir>& theDir,
+void StImageLoader::metadataFromExif(const std::shared_ptr<StExifDir>& theDir,
                                      StHandle<StImageInfo>&     theInfo) {
-    if(theDir.isNull()) {
+    if (theDir.get() == nullptr) {
         return;
     }
 

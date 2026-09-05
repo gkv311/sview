@@ -49,8 +49,8 @@ class StGLUVSphere : public StGLMesh {
 
         private:
 
-    StArrayList<GLsizei> myPrimCounts;
-    StArrayList<void*>   myIndPointers;
+    std::vector<GLsizei> myPrimCounts;
+    std::vector<void*>   myIndPointers;
     StGLVec3             myCenter;
     GLfloat              myRadius;
     size_t               myRings;

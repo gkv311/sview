@@ -12,7 +12,6 @@
 #include <StTemplates/StVec3.h>
 #include <StTemplates/StVec4.h>
 #include <StTemplates/StQuaternion.h>
-#include <StTemplates/StArrayList.h>
 
 typedef StVec2<GLfloat> StGLVec2;
 typedef StVec3<GLfloat> StGLVec3;

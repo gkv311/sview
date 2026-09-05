@@ -19,11 +19,11 @@ class StBndBox : public StBndContainer {
         public: //!< inheritance methods
 
     ST_CPPEXPORT virtual ~StBndBox();
-    ST_CPPEXPORT virtual void reset();
-    ST_CPPEXPORT virtual bool isIn(const StGLVec3& thePnt) const;
-    ST_CPPEXPORT virtual void enlarge(const GLfloat theTolerance);
-    ST_CPPEXPORT virtual void enlarge(const StGLVec3& theNewPnt);
-    ST_CPPEXPORT virtual void enlarge(const StArray<StGLVec3>& thePoints);
+    ST_CPPEXPORT virtual void reset() override;
+    ST_CPPEXPORT virtual bool isIn(const StGLVec3& thePnt) const override;
+    ST_CPPEXPORT virtual void enlarge(const GLfloat theTolerance) override;
+    ST_CPPEXPORT virtual void enlarge(const StGLVec3& theNewPnt) override;
+    ST_CPPEXPORT virtual void enlarge(const std::vector<StGLVec3>& thePoints) override;
 
         public:
 
@@ -41,42 +41,42 @@ class StBndBox : public StBndContainer {
     /**
      * Return the x/y/z minimal values.
      */
-    const StGLVec3& getMin() const {
+    ST_LOCAL const StGLVec3& getMin() const {
         return myMin;
     }
 
     /**
      * Return the x/y/z maximal values.
      */
-    const StGLVec3& getMax() const {
+    ST_LOCAL const StGLVec3& getMax() const {
         return myMax;
     }
 
     /**
      * Get width for the boundary box.
      */
-    GLfloat getDX() const {
+    ST_LOCAL GLfloat getDX() const {
         return myMax.x() - myMin.x();
     }
 
     /**
      * Get height for the boundary box.
      */
-    GLfloat getDY() const {
+    ST_LOCAL GLfloat getDY() const {
         return myMax.y() - myMin.y();
     }
 
     /**
      * Get DZ for the boundary box.
      */
-    GLfloat getDZ() const {
+    ST_LOCAL GLfloat getDZ() const {
         return myMax.z() - myMin.z();
     }
 
     /**
      * Compute boundary box center.
      */
-    StGLVec3 getCenter() const {
+    ST_LOCAL StGLVec3 getCenter() const {
         return StGLVec3::getLERP(myMin, myMax, 0.5f);
     }
 
@@ -92,7 +92,7 @@ class StBndBox : public StBndContainer {
      * @param theBndBox (const StBndBox& ) - another bounding box;
      * @return true if bounding boxes has intersection.
      */
-    bool areIntersect(const StBndBox& theBndBox) const {
+    ST_LOCAL bool areIntersect(const StBndBox& theBndBox) const {
         return !areDisjoint(theBndBox);
     }
 

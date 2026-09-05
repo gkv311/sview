@@ -10,6 +10,8 @@
 #include <StGLWidgets/StGLRadioButtonTextured.h>
 #include <StCore/StEvent.h>
 
+#include <algorithm>
+
 StGLSwitchTextured::StGLSwitchTextured(StGLWidget* theParent,
                                        const StHandle<StInt32Param>& theTrackedValue,
                                        const int theLeft, const int theTop,
@@ -98,7 +100,7 @@ bool StGLSwitchTextured::tryUnClick(const StClickEvent& theEvent,
                 // switch to next
                 while(aChild != NULL) {
                     aRadioBtn = (StGLRadioButtonTextured* )aChild;
-                    if(!mySkipValues.contains(aRadioBtn->getValueOn())) {
+                    if (std::find(mySkipValues.cbegin(), mySkipValues.cend(), aRadioBtn->getValueOn()) == mySkipValues.cend()) {
                         myTrackValue->setValue(aRadioBtn->getValueOn());
                         break;
                     }
@@ -123,6 +125,6 @@ void StGLSwitchTextured::addItem(const int32_t   theValueOn,
     StGLRadioButtonTextured* aNewItem = new StGLRadioButtonTextured(this, myTrackValue, theValueOn, theTexturePath, 0, 0);
     aNewItem->changeMargins() = myMargins;
     if(theToSkip) {
-        mySkipValues.add(theValueOn);
+        mySkipValues.push_back(theValueOn);
     }
 }

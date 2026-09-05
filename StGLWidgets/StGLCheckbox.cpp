@@ -66,7 +66,8 @@ void StGLCheckbox::stglResize() {
     }
 
     // outer vertices
-    StArray<StGLVec2> aVertices(8);
+    std::vector<StGLVec2> aVertices;
+    aVertices.resize(8);
     StGLContext& aCtx = getContext();
 
     StRectI_t aRectPx = getRectPxAbsolute();
@@ -100,7 +101,8 @@ bool StGLCheckbox::stglInit() {
 
     // initialize GLSL program
     StGLContext& aCtx = getContext();
-    StArray<StGLVec2> aDummyVert(8);
+    std::vector<StGLVec2> aDummyVert;
+    aDummyVert.resize(8);
     if(!myVertBuf.init(aCtx, aDummyVert)) {
         return false;
     }

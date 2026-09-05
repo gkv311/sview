@@ -121,11 +121,6 @@ void StGLMesh::unbindFixed(StGLContext& theCtx) const {
 
 StGLMesh::StGLMesh(const GLenum thePrimitives)
 : myBndSphere(),
-  myVertices(1),
-  myNormals(1),
-  myTCoords(1),
-  myColors(1),
-  myIndices(1),
   myPrimitives(thePrimitives) {
     //
 }
@@ -147,42 +142,41 @@ void StGLMesh::release(StGLContext& theCtx) {
 bool StGLMesh::computeMesh() {
     // dummy - we can not compute mesh from nowhere
     // however in general alien mesh could be set just as is
-    if(!myVertices.isEmpty()) {
-        if(myBndSphere.isVoid()) {
+    if (!myVertices.empty()) {
+        if (myBndSphere.isVoid()) {
             myBndSphere.enlarge(myVertices);
         }
         return true;
     }
     return false;
-};
+}
 
 bool StGLMesh::initVBOs(StGLContext& theCtx) {
     // reset all current VBOs
     clearVRAM(theCtx);
-    if(myVertices.isEmpty() && !computeMesh()) {
+    if (myVertices.empty() && !computeMesh()) {
         // no vertices - invalid mesh
         return false;
     }
-    if(myVertices.isEmpty()) {
+    if (myVertices.empty()) {
         // no vertices - invalid mesh
         return false;
     }
     bool isOK = myVertexBuf.init(theCtx, myVertices);
-    if(!myNormals.isEmpty() && myNormals.size() == myVertices.size()) {
+    if (!myNormals.empty() && myNormals.size() == myVertices.size()) {
         isOK = isOK && myNormalBuf.init(theCtx, myNormals);
     }
-    if(!myTCoords.isEmpty() && myTCoords.size() == myVertices.size()) {
+    if (!myTCoords.empty() && myTCoords.size() == myVertices.size()) {
         isOK = isOK && myTCoordBuf.init(theCtx, myTCoords);
     }
-    if(!myColors.isEmpty() && myColors.size() == myVertices.size()) {
+    if (!myColors.empty() && myColors.size() == myVertices.size()) {
         isOK = isOK && myColorsBuf.init(theCtx, myColors);
     }
-    if(!myIndices.isEmpty()) {
+    if (!myIndices.empty()) {
         isOK = isOK && myIndexBuf.init(theCtx, myIndices);
     }
     return isOK;
-
-};
+}
 
 bool StGLMesh::check(const StGLMeshProgram& theProgram) const {
     return !(theProgram.getLocation(ST_VBO_VERTEX).isValid() && !myVertexBuf.isValid())
@@ -206,11 +200,11 @@ void StGLMesh::drawFixed(StGLContext& theCtx) const {
 
 void StGLMesh::clearRAM() {
     myBndSphere.reset(); // should we?
-    myVertices.initList(1);
-    myNormals.initList(1);
-    myTCoords.initList(1);
-    myColors.initList(1);
-    myIndices.initList(1);
+    myVertices.clear();
+    myNormals.clear();
+    myTCoords.clear();
+    myColors.clear();
+    myIndices.clear();
 }
 
 void StGLMesh::clearVRAM(StGLContext& theCtx) {
@@ -223,8 +217,8 @@ void StGLMesh::clearVRAM(StGLContext& theCtx) {
 
 bool StGLMesh::computeNormals(size_t theDelta) {
     ST_ASSERT(theDelta > 0, "StGLMesh::computeNormals() - wrong delta");
-    myNormals.initArray(myVertices.size());
-    if(myVertices.isEmpty()) {
+    myNormals.resize(myVertices.size());
+    if (myVertices.empty()) {
         return false;
     }
 
@@ -244,9 +238,9 @@ bool StGLMesh::computeNormals(size_t theDelta) {
             const StGLVec3& aVert2 = myVertices[aV2];
             const StGLVec3& aVert3 = myVertices[aV3];
             aNorm = StGLVec3::cross(aVert2 - aVert1, aVert3 - aVert1);
-            myNormals.changeValue(aV1) += aNorm;
-            myNormals.changeValue(aV2) += aNorm;
-            myNormals.changeValue(aV3) += aNorm;
+            myNormals[aV1] += aNorm;
+            myNormals[aV2] += aNorm;
+            myNormals[aV3] += aNorm;
         }
     } else if(myVertices.size() >= 3) {
         size_t aLimit = myVertices.size() - 3;
@@ -258,17 +252,17 @@ bool StGLMesh::computeNormals(size_t theDelta) {
             const StGLVec3& aVert2 = myVertices[aV2];
             const StGLVec3& aVert3 = myVertices[aV3];
             aNorm = StGLVec3::cross(aVert2 - aVert1, aVert3 - aVert1);
-            myNormals.changeValue(aV1) += aNorm;
-            myNormals.changeValue(aV2) += aNorm;
-            myNormals.changeValue(aV3) += aNorm;
+            myNormals[aV1] += aNorm;
+            myNormals[aV2] += aNorm;
+            myNormals[aV3] += aNorm;
         }
     } else {
         return false;
     }
 
     // normalize normals (important for OpenGL)
-    for(size_t aNormId = 0; aNormId < myNormals.size(); ++aNormId) {
-        myNormals.changeValue(aNormId).normalize();
+    for (StGLVec3& aNormIter : myNormals) {
+        aNormIter.normalize();
     }
     return true;
 }

@@ -19,14 +19,14 @@ StGLQuads::StGLQuads(const GLenum thePrimitives)
 }
 
 bool StGLQuads::initScreen(StGLContext& theCtx) {
-    const GLfloat QUAD_VERTICES[4 * 4] = {
+    constexpr GLfloat QUAD_VERTICES[4 * 4] = {
          1.0f,  1.0f, 0.0f, 1.0f, // top-right
          1.0f, -1.0f, 0.0f, 1.0f, // bottom-right
         -1.0f,  1.0f, 0.0f, 1.0f, // top-left
         -1.0f, -1.0f, 0.0f, 1.0f  // bottom-left
     };
 
-    const GLfloat QUAD_TEXCOORD[2 * 4] = {
+    constexpr GLfloat QUAD_TEXCOORD[2 * 4] = {
         1.0f, 0.0f, // top-right
         1.0f, 1.0f, // bottom-right
         0.0f, 0.0f, // top-left

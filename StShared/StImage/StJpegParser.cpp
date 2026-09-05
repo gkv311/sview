@@ -413,16 +413,16 @@ StHandle<StJpegParser::Image> StJpegParser::parseImage(const int      theImgCoun
                 // there can be different section using the same marker
                 if(stAreEqual(aData + 2, "Exif\0\0", 6)) {
                     //ST_DEBUG_LOG("Exif section...");
-                    StHandle<StExifDir> aSubDir = new StExifDir();
-                    anImg->Exif.add(aSubDir);
+                    std::shared_ptr<StExifDir> aSubDir = std::make_shared<StExifDir>();
+                    anImg->Exif.push_back(aSubDir);
                     if(!aSubDir->parseExif(anImg->Exif, aData + 8, anItemLen - 8)) {
                         //
                     }
                 } else if(stAreEqual(aData + 2, "MPF\0", 4)) {
                     // MP Extensions (MPO)
-                    StHandle<StExifDir> aSubDir = new StExifDir();
+                    std::shared_ptr<StExifDir> aSubDir = std::make_shared<StExifDir>();
                     aSubDir->Type = StExifDir::DType_MPO;
-                    anImg->Exif.add(aSubDir);
+                    anImg->Exif.push_back(aSubDir);
                     if(!aSubDir->parseExif(anImg->Exif, aData + 6, anItemLen - 6)) {
                         //
                     }

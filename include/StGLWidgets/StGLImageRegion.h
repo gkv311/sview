@@ -162,13 +162,8 @@ class StGLImageRegion : public StGLWidget {
      */
     ST_LOCAL bool hasVideoStream() { return myHasVideoStream; }
 
-    const StArrayList< StHandle<StAction> >& getActions() const {
-        return myActions;
-    }
-
-    StArrayList< StHandle<StAction> >& changeActions() {
-        return myActions;
-    }
+    ST_LOCAL const std::vector< StHandle<StAction> >& getActions() const { return myActions; }
+    ST_LOCAL std::vector< StHandle<StAction> >& changeActions() { return myActions; }
 
     ST_CPPEXPORT virtual ~StGLImageRegion();
     ST_CPPEXPORT virtual void stglUpdate(const StPointD_t& thePointZo,
@@ -353,7 +348,7 @@ class StGLImageRegion : public StGLWidget {
 
         private: //! @name private fields
 
-    StArrayList< StHandle<StAction> >
+    std::vector< StHandle<StAction> >
                                myActions;        //!< actions list
     StHandle<StPlayList>       myList;           //!< handle to playlist
 

@@ -10,9 +10,10 @@
 #include "StExifEntry.h"
 
 #include <StAlienData.h>
+#include <StStrings/StString.h>
 
-#include <StTemplates/StHandle.h>
-#include <StTemplates/StArrayList.h>
+#include <memory>
+#include <vector>
 
 class StDictionary;
 
@@ -36,7 +37,7 @@ class StExifDir {
         DType_MPO,        //!< MP extensions
     };
 
-    typedef StArrayList< StHandle<StExifDir> > List;
+    typedef std::vector< std::shared_ptr<StExifDir> > List;
 
     /**
      * Structure for search request.
@@ -65,7 +66,7 @@ class StExifDir {
         public:
 
     StExifDir::List           SubDirs; //!< subdirectories list
-    StArrayList<StExifEntry>  Entries; //!< entries list
+    std::vector<StExifEntry>  Entries; //!< entries list
 
     DirType  Type;        //!< tags from different vendors/extensions may has overlapped ids
     bool     IsFileBE;    //!< indicate that data in this EXIF directory stored in Big-Endian order

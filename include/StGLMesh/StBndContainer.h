@@ -9,6 +9,8 @@
 
 #include <StGL/StGLVec.h>
 
+#include <vector>
+
 /**
  * This is the common interface for bounding container object.
  */
@@ -83,9 +85,9 @@ class StBndContainer {
 
     /**
      * Enlarge bounding container with 3D points set.
-     * @param thePoints (const StArray<StGLVec3>&) - 3D points set.
+     * @param thePoints 3D points set.
      */
-    virtual void enlarge(const StArray<StGLVec3>& thePoints) = 0;
+    virtual void enlarge(const std::vector<StGLVec3>& thePoints) = 0;
 
     /**
      * Enlarge bounding container with another container.

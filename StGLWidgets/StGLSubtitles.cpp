@@ -215,7 +215,8 @@ StGLSubtitles::~StGLSubtitles() {
 
 bool StGLSubtitles::stglInit() {
     if(!myVertBuf.isValid()) {
-        StArray<StGLVec2> aDummyVert(4);
+        std::vector<StGLVec2> aDummyVert;
+        aDummyVert.resize(4);
 
         StGLContext& aCtx = getContext();
         myVertBuf.init(aCtx, aDummyVert);
@@ -384,11 +385,14 @@ void StGLSubtitles::stglDraw(unsigned int theView) {
 
     // update vertices
     StVec2<int> anImgSize (myTexture.getSizeX(), myTexture.getSizeY()), anOffset (0, 0);
-    StArray<StGLVec2> aVertices(4), aTexCoords(4);
-    aTexCoords[0] = StGLVec2(1.0f, 0.0f);
-    aTexCoords[1] = StGLVec2(1.0f, 1.0f);
-    aTexCoords[2] = StGLVec2(0.0f, 0.0f);
-    aTexCoords[3] = StGLVec2(0.0f, 1.0f);
+    std::vector<StGLVec2> aVertices;
+    aVertices.resize(4);
+    std::vector<StGLVec2> aTexCoords = {
+        StGLVec2(1.0f, 0.0f),
+        StGLVec2(1.0f, 1.0f),
+        StGLVec2(0.0f, 0.0f),
+        StGLVec2(0.0f, 1.0f)
+    };
     if(aSampleRatio >= 1.0f) {
         anImgSize.x() = int(double(anImgSize.x()) * aSampleRatio);
     } else {

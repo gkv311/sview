@@ -55,7 +55,7 @@ class StJpegParser : public StRawFile {
     struct Image {
         unsigned char*  Data;     //!< pointer to the data
         size_t          Length;   //!< data length
-        StArrayList< StHandle<StExifDir> >
+        std::vector< std::shared_ptr<StExifDir> >
                         Exif;     //!< EXIF sections
         StHandle<Image> Thumb;    //!< optional thumbnail
         StHandle<Image> Next;     //!< link to the next image in file (if any)

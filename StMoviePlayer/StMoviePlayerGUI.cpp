@@ -1563,9 +1563,8 @@ void StMoviePlayerGUI::doShowMobileExMenu(const size_t ) {
         anItem->setIcon(stCMenuIcon("actionDiscard"));
 
         const bool hasVideo = myPlugin->myVideo->hasVideoStream();
-        const StHandle< StArrayList<StString> >& anAudioStreams = myPlugin->myVideo->params.activeAudio->getList();
-        if(!anAudioStreams.isNull()
-        && !anAudioStreams->isEmpty()) {
+        const std::shared_ptr<std::vector<StString>> anAudioStreams = myPlugin->myVideo->params.activeAudio->getList();
+        if (anAudioStreams.get() != nullptr && !anAudioStreams->empty()) {
             anItem = aMenu->addItem(tr(MENU_AUDIO));
             anItem->setIcon(stCMenuIcon("actionStreamAudio"));
             anItem->signals.onItemClick += stSlot(this, &StMoviePlayerGUI::doAudioStreamsCombo);
@@ -1576,9 +1575,8 @@ void StMoviePlayerGUI::doShowMobileExMenu(const size_t ) {
             anItem->signals.onItemClick += stSlot(this, &StMoviePlayerGUI::doAudioStreamsCombo);
         }
 
-        const StHandle< StArrayList<StString> >& aSubsStreams1 = myPlugin->myVideo->params.activeSubtitles1->getList();
-        if(!aSubsStreams1.isNull()
-        && !aSubsStreams1->isEmpty()) {
+        const std::shared_ptr<std::vector<StString>> aSubsStreams1 = myPlugin->myVideo->params.activeSubtitles1->getList();
+        if (aSubsStreams1.get() != nullptr && !aSubsStreams1->empty()) {
             anItem = aMenu->addItem(tr(MENU_SUBTITLES));
             anItem->setIcon(stCMenuIcon("actionStreamSubtitles"));
             anItem->signals.onItemClick += stSlot(this, &StMoviePlayerGUI::doSubtitlesStreamsCombo1);
@@ -2146,17 +2144,17 @@ void StMoviePlayerGUI::updateDescLabel(const StPointD_t& theCursor, StFormat the
 }
 
 void StMoviePlayerGUI::doAudioStreamsCombo(const size_t ) {
-    const StHandle< StArrayList<StString> >& aStreams = myPlugin->myVideo->params.activeAudio->getList();
+    const std::shared_ptr<std::vector<StString>> aStreams = myPlugin->myVideo->params.activeAudio->getList();
     const bool hasVideo = myPlugin->myVideo->hasVideoStream();
 
     StGLCombobox::ListBuilder aBuilder(this);
-    if(hasVideo || aStreams.isNull() || aStreams->isEmpty()) {
+    if (hasVideo || aStreams.get() == nullptr || aStreams->empty()) {
         aBuilder.getMenu()->addItem(tr(MENU_AUDIO_NONE), myPlugin->params.AudioStream, -1);
     }
-    if(!aStreams.isNull()) {
+    if (aStreams.get() != nullptr) {
         bool hasQuadAudio = false;
         for(size_t aStreamId = 0; aStreamId < aStreams->size(); ++aStreamId) {
-            const StString& aStreamName = aStreams->getValue(aStreamId);
+            const StString& aStreamName = aStreams->at(aStreamId);
             aBuilder.getMenu()->addItem(aStreamName, myPlugin->params.AudioStream, int32_t(aStreamId));
             hasQuadAudio = hasQuadAudio
                         || aStreamName.isContains(stCString("quad,"))
@@ -2168,11 +2166,10 @@ void StMoviePlayerGUI::doAudioStreamsCombo(const size_t ) {
     }
 
     //aBuilder.getMenu()->addSplitter();
-    StGLMenuItem* aDelayItem = NULL;
-    StGLRangeFieldFloat32* aDelayRange = NULL;
-    if(hasVideo) {
-        if(!aStreams.isNull()
-        && !aStreams->isEmpty()) {
+    StGLMenuItem* aDelayItem = nullptr;
+    StGLRangeFieldFloat32* aDelayRange = nullptr;
+    if (hasVideo) {
+        if (aStreams.get() != nullptr && !aStreams->empty()) {
             aDelayItem = aBuilder.getMenu()->addItem(tr(MENU_AUDIO_DELAY));
             aDelayItem->changeMargins().right = scale(100 + 16);
             aDelayItem->signals.onItemClick.connect(this, &StMoviePlayerGUI::doAudioDelay);
@@ -2252,9 +2249,9 @@ void StMoviePlayerGUI::fillSubtitlesPlacement(StGLMenu* theMenu, size_t theIndex
 }
 
 void StMoviePlayerGUI::doSubtitlesStreamsCombo(const size_t theIndex) {
-    const StHandle< StArrayList<StString> >& aStreams = theIndex == 0
-                                                      ? myPlugin->myVideo->params.activeSubtitles1->getList()
-                                                      : myPlugin->myVideo->params.activeSubtitles2->getList();
+    const std::shared_ptr<std::vector<StString>> aStreams = theIndex == 0
+                                                          ? myPlugin->myVideo->params.activeSubtitles1->getList()
+                                                          : myPlugin->myVideo->params.activeSubtitles2->getList();
     const bool hasAudioStream = myPlugin->myVideo->hasAudioStream();
     const bool hasVideoStream = myPlugin->myVideo->hasVideoStream();
 
@@ -2271,14 +2268,13 @@ void StMoviePlayerGUI::doSubtitlesStreamsCombo(const size_t theIndex) {
 
     StHandle<StInt32Param>& aStreamParam = theIndex == 0 ? myPlugin->params.SubtitlesStream1 : myPlugin->params.SubtitlesStream2;
     aBuilder.getMenu()->addItem(tr(MENU_SUBTITLES_NONE), aStreamParam, -1);
-    if(!aStreams.isNull()) {
+    if (aStreams.get() != nullptr) {
         for(size_t aStreamId = 0; aStreamId < aStreams->size(); ++aStreamId) {
-            aBuilder.getMenu()->addItem(aStreams->getValue(aStreamId), aStreamParam, int32_t(aStreamId));
+            aBuilder.getMenu()->addItem(aStreams->at(aStreamId), aStreamParam, int32_t(aStreamId));
         }
     }
 
-    if(!aStreams.isNull()
-    && !aStreams->isEmpty()) {
+    if (aStreams.get() != nullptr && !aStreams->empty()) {
         //myMenuSubtitles->addSplitter();
         if(!myWindow->isMobile()) {
             fillSubtitlesFontSize(aBuilder.getMenu(), theIndex);
@@ -2291,9 +2287,7 @@ void StMoviePlayerGUI::doSubtitlesStreamsCombo(const size_t theIndex) {
         aPlaceItem->signals.onItemClick.connect(this, &StMoviePlayerGUI::doSubtitlesPlacement);
     }
 
-    if(!aStreams.isNull()
-    && !aStreams->isEmpty()
-    && hasVideoStream) {
+    if (aStreams.get() != nullptr && !aStreams->empty() && hasVideoStream) {
         StHandle<StStereoParams> aParams = myImage->getSource();
         StFormat aSrcFormat = (StFormat )myPlugin->params.SrcStereoFormat->getValue();
         if(aSrcFormat == StFormat_AUTO && !aParams.isNull()) {

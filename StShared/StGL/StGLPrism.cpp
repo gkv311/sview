@@ -82,56 +82,68 @@ bool StGLPrism::init(StGLContext&    theCtx,
                      const StGLVec3& theX1Y0Z1,
                      const StGLVec3& theX1Y1Z1,
                      const StGLVec3& theX0Y1Z1) {
-    myVertices.initList(12 * 2
+    myVertices.reserve(12 * 2
         + myNbIsosX * 2 * (size_t(myToShowZ0) + size_t(myToShowZ1) + size_t(myToShowY0) + size_t(myToShowY1))
         + myNbIsosY * 2 * (size_t(myToShowZ0) + size_t(myToShowZ1) + size_t(myToShowX0) + size_t(myToShowX1))
         + myNbIsosZ * 2 * (size_t(myToShowX0) + size_t(myToShowX1) + size_t(myToShowY0) + size_t(myToShowY1)));
     // top-left DZ
-    myVertices.add(theX0Y0Z0).add(theX0Y0Z1);
+    myVertices.push_back(theX0Y0Z0);
+    myVertices.push_back(theX0Y0Z1);
     // top-right DZ
-    myVertices.add(theX1Y0Z0).add(theX1Y0Z1);
+    myVertices.push_back(theX1Y0Z0);
+    myVertices.push_back(theX1Y0Z1);
     // bottom-right DZ
-    myVertices.add(theX1Y1Z0).add(theX1Y1Z1);
+    myVertices.push_back(theX1Y1Z0);
+    myVertices.push_back(theX1Y1Z1);
     // bottom-left DZ
-    myVertices.add(theX0Y1Z0).add(theX0Y1Z1);
+    myVertices.push_back(theX0Y1Z0);
+    myVertices.push_back(theX0Y1Z1);
     // far top DX
-    myVertices.add(theX0Y0Z1).add(theX1Y0Z1);
+    myVertices.push_back(theX0Y0Z1);
+    myVertices.push_back(theX1Y0Z1);
     // far bottom DX
-    myVertices.add(theX0Y1Z1).add(theX1Y1Z1);
+    myVertices.push_back(theX0Y1Z1);
+    myVertices.push_back(theX1Y1Z1);
     // far left DY
-    myVertices.add(theX0Y0Z1).add(theX0Y1Z1);
+    myVertices.push_back(theX0Y0Z1);
+    myVertices.push_back(theX0Y1Z1);
     // far right DY
-    myVertices.add(theX1Y0Z1).add(theX1Y1Z1);
+    myVertices.push_back(theX1Y0Z1);
+    myVertices.push_back(theX1Y1Z1);
     // near top DX
-    myVertices.add(theX0Y0Z0).add(theX1Y0Z0);
+    myVertices.push_back(theX0Y0Z0);
+    myVertices.push_back(theX1Y0Z0);
     // near bottom DX
-    myVertices.add(theX0Y1Z0).add(theX1Y1Z0);
+    myVertices.push_back(theX0Y1Z0);
+    myVertices.push_back(theX1Y1Z0);
     // near left DY
-    myVertices.add(theX0Y0Z0).add(theX0Y1Z0);
+    myVertices.push_back(theX0Y0Z0);
+    myVertices.push_back(theX0Y1Z0);
     // near right DY
-    myVertices.add(theX1Y0Z0).add(theX1Y1Z0);
+    myVertices.push_back(theX1Y0Z0);
+    myVertices.push_back(theX1Y1Z0);
 
     // X-isolines
     for(size_t aDX = 1; aDX < (myNbIsosX + 1); ++aDX) {
         // DY lines near
         if(myToShowZ0) {
-            myVertices.add(StGLVec3::getLERP(theX0Y0Z0, theX1Y0Z0, GLfloat(aDX) / GLfloat(myNbIsosX + 1)));
-            myVertices.add(StGLVec3::getLERP(theX0Y1Z0, theX1Y1Z0, GLfloat(aDX) / GLfloat(myNbIsosX + 1)));
+            myVertices.push_back(StGLVec3::getLERP(theX0Y0Z0, theX1Y0Z0, GLfloat(aDX) / GLfloat(myNbIsosX + 1)));
+            myVertices.push_back(StGLVec3::getLERP(theX0Y1Z0, theX1Y1Z0, GLfloat(aDX) / GLfloat(myNbIsosX + 1)));
         }
         // DY lines far
         if(myToShowZ1) {
-            myVertices.add(StGLVec3::getLERP(theX0Y0Z1, theX1Y0Z1, GLfloat(aDX) / GLfloat(myNbIsosX + 1)));
-            myVertices.add(StGLVec3::getLERP(theX0Y1Z1, theX1Y1Z1, GLfloat(aDX) / GLfloat(myNbIsosX + 1)));
+            myVertices.push_back(StGLVec3::getLERP(theX0Y0Z1, theX1Y0Z1, GLfloat(aDX) / GLfloat(myNbIsosX + 1)));
+            myVertices.push_back(StGLVec3::getLERP(theX0Y1Z1, theX1Y1Z1, GLfloat(aDX) / GLfloat(myNbIsosX + 1)));
         }
         // DZ lines left
         if(myToShowY0) {
-            myVertices.add(StGLVec3::getLERP(theX0Y0Z0, theX1Y0Z0, GLfloat(aDX) / GLfloat(myNbIsosX + 1)));
-            myVertices.add(StGLVec3::getLERP(theX0Y0Z1, theX1Y0Z1, GLfloat(aDX) / GLfloat(myNbIsosX + 1)));
+            myVertices.push_back(StGLVec3::getLERP(theX0Y0Z0, theX1Y0Z0, GLfloat(aDX) / GLfloat(myNbIsosX + 1)));
+            myVertices.push_back(StGLVec3::getLERP(theX0Y0Z1, theX1Y0Z1, GLfloat(aDX) / GLfloat(myNbIsosX + 1)));
         }
         // DZ lines right
         if(myToShowY1) {
-            myVertices.add(StGLVec3::getLERP(theX0Y1Z0, theX1Y1Z0, GLfloat(aDX) / GLfloat(myNbIsosX + 1)));
-            myVertices.add(StGLVec3::getLERP(theX0Y1Z1, theX1Y1Z1, GLfloat(aDX) / GLfloat(myNbIsosX + 1)));
+            myVertices.push_back(StGLVec3::getLERP(theX0Y1Z0, theX1Y1Z0, GLfloat(aDX) / GLfloat(myNbIsosX + 1)));
+            myVertices.push_back(StGLVec3::getLERP(theX0Y1Z1, theX1Y1Z1, GLfloat(aDX) / GLfloat(myNbIsosX + 1)));
         }
     }
 
@@ -139,23 +151,23 @@ bool StGLPrism::init(StGLContext&    theCtx,
     for(size_t aDY = 1; aDY < (myNbIsosY + 1); ++aDY) {
         // DX lines near
         if(myToShowZ0) {
-            myVertices.add(StGLVec3::getLERP(theX0Y0Z0, theX0Y1Z0, GLfloat(aDY) / GLfloat(myNbIsosY + 1)));
-            myVertices.add(StGLVec3::getLERP(theX1Y0Z0, theX1Y1Z0, GLfloat(aDY) / GLfloat(myNbIsosY + 1)));
+            myVertices.push_back(StGLVec3::getLERP(theX0Y0Z0, theX0Y1Z0, GLfloat(aDY) / GLfloat(myNbIsosY + 1)));
+            myVertices.push_back(StGLVec3::getLERP(theX1Y0Z0, theX1Y1Z0, GLfloat(aDY) / GLfloat(myNbIsosY + 1)));
         }
         // DX lines far
         if(myToShowZ1) {
-            myVertices.add(StGLVec3::getLERP(theX0Y0Z1, theX0Y1Z1, GLfloat(aDY) / GLfloat(myNbIsosY + 1)));
-            myVertices.add(StGLVec3::getLERP(theX1Y0Z1, theX1Y1Z1, GLfloat(aDY) / GLfloat(myNbIsosY + 1)));
+            myVertices.push_back(StGLVec3::getLERP(theX0Y0Z1, theX0Y1Z1, GLfloat(aDY) / GLfloat(myNbIsosY + 1)));
+            myVertices.push_back(StGLVec3::getLERP(theX1Y0Z1, theX1Y1Z1, GLfloat(aDY) / GLfloat(myNbIsosY + 1)));
         }
         // DZ lines left
         if(myToShowX0) {
-            myVertices.add(StGLVec3::getLERP(theX0Y0Z0, theX0Y1Z0, GLfloat(aDY) / GLfloat(myNbIsosY + 1)));
-            myVertices.add(StGLVec3::getLERP(theX0Y0Z1, theX0Y1Z1, GLfloat(aDY) / GLfloat(myNbIsosY + 1)));
+            myVertices.push_back(StGLVec3::getLERP(theX0Y0Z0, theX0Y1Z0, GLfloat(aDY) / GLfloat(myNbIsosY + 1)));
+            myVertices.push_back(StGLVec3::getLERP(theX0Y0Z1, theX0Y1Z1, GLfloat(aDY) / GLfloat(myNbIsosY + 1)));
         }
         // DZ lines right
         if(myToShowX1) {
-            myVertices.add(StGLVec3::getLERP(theX1Y0Z0, theX1Y1Z0, GLfloat(aDY) / GLfloat(myNbIsosY + 1)));
-            myVertices.add(StGLVec3::getLERP(theX1Y0Z1, theX1Y1Z1, GLfloat(aDY) / GLfloat(myNbIsosY + 1)));
+            myVertices.push_back(StGLVec3::getLERP(theX1Y0Z0, theX1Y1Z0, GLfloat(aDY) / GLfloat(myNbIsosY + 1)));
+            myVertices.push_back(StGLVec3::getLERP(theX1Y0Z1, theX1Y1Z1, GLfloat(aDY) / GLfloat(myNbIsosY + 1)));
         }
     }
 
@@ -163,23 +175,23 @@ bool StGLPrism::init(StGLContext&    theCtx,
     for(size_t aDZ = 1; aDZ < (myNbIsosZ + 1); ++aDZ) {
         // DX lines from near-top to far-top
         if(myToShowY0) {
-            myVertices.add(StGLVec3::getLERP(theX0Y0Z0, theX0Y0Z1, GLfloat(aDZ) / GLfloat(myNbIsosZ + 1)));
-            myVertices.add(StGLVec3::getLERP(theX1Y0Z0, theX1Y0Z1, GLfloat(aDZ) / GLfloat(myNbIsosZ + 1)));
+            myVertices.push_back(StGLVec3::getLERP(theX0Y0Z0, theX0Y0Z1, GLfloat(aDZ) / GLfloat(myNbIsosZ + 1)));
+            myVertices.push_back(StGLVec3::getLERP(theX1Y0Z0, theX1Y0Z1, GLfloat(aDZ) / GLfloat(myNbIsosZ + 1)));
         }
         // DX lines from near-bottom to far-bottom
         if(myToShowY1) {
-            myVertices.add(StGLVec3::getLERP(theX0Y1Z0, theX0Y1Z1, GLfloat(aDZ) / GLfloat(myNbIsosZ + 1)));
-            myVertices.add(StGLVec3::getLERP(theX1Y1Z0, theX1Y1Z1, GLfloat(aDZ) / GLfloat(myNbIsosZ + 1)));
+            myVertices.push_back(StGLVec3::getLERP(theX0Y1Z0, theX0Y1Z1, GLfloat(aDZ) / GLfloat(myNbIsosZ + 1)));
+            myVertices.push_back(StGLVec3::getLERP(theX1Y1Z0, theX1Y1Z1, GLfloat(aDZ) / GLfloat(myNbIsosZ + 1)));
         }
         // DY lines from near-left to far-left
         if(myToShowX0) {
-            myVertices.add(StGLVec3::getLERP(theX0Y0Z0, theX0Y0Z1, GLfloat(aDZ) / GLfloat(myNbIsosZ + 1)));
-            myVertices.add(StGLVec3::getLERP(theX0Y1Z0, theX0Y1Z1, GLfloat(aDZ) / GLfloat(myNbIsosZ + 1)));
+            myVertices.push_back(StGLVec3::getLERP(theX0Y0Z0, theX0Y0Z1, GLfloat(aDZ) / GLfloat(myNbIsosZ + 1)));
+            myVertices.push_back(StGLVec3::getLERP(theX0Y1Z0, theX0Y1Z1, GLfloat(aDZ) / GLfloat(myNbIsosZ + 1)));
         }
         // DY lines from near-right to far-right
         if(myToShowX1) {
-            myVertices.add(StGLVec3::getLERP(theX1Y0Z0, theX1Y0Z1, GLfloat(aDZ) / GLfloat(myNbIsosZ + 1)));
-            myVertices.add(StGLVec3::getLERP(theX1Y1Z0, theX1Y1Z1, GLfloat(aDZ) / GLfloat(myNbIsosZ + 1)));
+            myVertices.push_back(StGLVec3::getLERP(theX1Y0Z0, theX1Y0Z1, GLfloat(aDZ) / GLfloat(myNbIsosZ + 1)));
+            myVertices.push_back(StGLVec3::getLERP(theX1Y1Z0, theX1Y1Z1, GLfloat(aDZ) / GLfloat(myNbIsosZ + 1)));
         }
     }
     return myVertexBuf.init(theCtx, myVertices);

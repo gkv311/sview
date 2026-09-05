@@ -169,13 +169,14 @@ StPlayList::StPlayList(const int  theRecursionDeep,
     //
 }
 
-void StPlayList::setExtensions(const StArrayList<StString>& theExtensions) {
-    myExtensions = theExtensions;
-    for(size_t anExtId = 0; anExtId < myExtensions.size(); ++anExtId) {
-        if(myExtensions[anExtId].isEqualsIgnoreCase(stCString("m3u"))) {
-            myExtensions.remove(anExtId); // playlist files are treated in special way
-            --anExtId;
+void StPlayList::setExtensions(const std::vector<StString>& theExtensions) {
+    myExtensions.clear();
+    myExtensions.reserve(theExtensions.size());
+    for (const StString& anExtIter : theExtensions) {
+        if (anExtIter.isEqualsIgnoreCase(stCString("m3u"))) {
+            continue; // playlist files are treated in special way
         }
+        myExtensions.push_back(anExtIter);
     }
 }
 

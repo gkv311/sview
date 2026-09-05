@@ -5,7 +5,6 @@
  */
 
 #include <StGLMesh/StBndBox.h>
-#include <StTemplates/StArrayList.h>
 
 namespace {
     static StGLVec3 getMinValues(const StGLVec3& theVec1, const StGLVec3& theVec2) {
@@ -79,18 +78,17 @@ void StBndBox::enlarge(const StGLVec3& theNewPnt) {
     }
 }
 
-void StBndBox::enlarge(const StArray<StGLVec3>& thePoints) {
-    if(thePoints.size() == 0) {
+void StBndBox::enlarge(const std::vector<StGLVec3>& thePoints) {
+    if (thePoints.size() == 0) {
         return;
     }
-    if(isVoid()) {
+    if (isVoid()) {
         // setup the first point
-        myMin = thePoints.getFirst();
-        myMax = thePoints.getFirst();
+        myMin = thePoints.front();
+        myMax = thePoints.front();
         StBndContainer::setDefined();
     }
-    for(size_t aPntId = 1; aPntId < thePoints.size(); ++aPntId) {
-        const StGLVec3& aPnt = thePoints[aPntId];
+    for (const StGLVec3& aPnt : thePoints) {
         myMin = getMinValues(myMin, aPnt);
         myMax = getMaxValues(myMax, aPnt);
     }

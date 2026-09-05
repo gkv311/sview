@@ -8,7 +8,6 @@
 #define __StGLShader_h_
 
 #include <StStrings/StString.h>
-#include <StTemplates/StArrayList.h>
 #include <StGL/StGLResource.h>
 
 /**

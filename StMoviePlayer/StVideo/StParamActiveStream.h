@@ -20,8 +20,10 @@
 #define __StParamActiveStream_h_
 
 #include <StSettings/StParam.h>
-#include <StTemplates/StArrayList.h>
 #include <StThreads/StMutex.h>
+
+#include <memory>
+#include <vector>
 
 /**
  * Parameter to control stream list.
@@ -38,7 +40,7 @@ class StParamActiveStream : public StInt32Param {
     /**
      * Returns list of streams.
      */
-    ST_LOCAL StHandle< StArrayList<StString> > getList() const;
+    ST_LOCAL std::shared_ptr<std::vector<StString>> getList() const;
 
     /**
      * Update configuration.
@@ -48,7 +50,7 @@ class StParamActiveStream : public StInt32Param {
     /**
      * Update configuration.
      */
-    ST_LOCAL void setList(const StHandle< StArrayList<StString> >& theList,
+    ST_LOCAL void setList(const std::shared_ptr<std::vector<StString>>& theList,
                           const int32_t theValue);
 
     /**
@@ -81,7 +83,7 @@ class StParamActiveStream : public StInt32Param {
 
         private:
 
-    StHandle< StArrayList<StString> > myList;
+    std::shared_ptr<std::vector<StString>> myList;
     mutable StMutex  myMutex;
     mutable bool     myIsChanged;
 

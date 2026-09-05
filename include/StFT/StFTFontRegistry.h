@@ -70,7 +70,7 @@ class StFTFontRegistry {
 
         private:
 
-    StArrayList<StString> myExtensions;  //!< list of supported font file extensions
+    std::vector<StString> myExtensions;  //!< list of supported font file extensions
     std::vector<StString> myFolders;     //!< font search paths
     std::vector<StString> myFilesMajor;  //!< major font file names which should present in the system
     std::vector<StString> myFilesMinor;  //!< minor font file names

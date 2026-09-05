@@ -72,7 +72,8 @@ void StGLRadioButton::stglResize() {
 
     // outer vertices
     StRectI_t aRectPx = getRectPxAbsolute();
-    StArray<StGLVec2> aVertices(8);
+    std::vector<StGLVec2> aVertices;
+    aVertices.resize(8);
     getRoot()->getRectGl(aRectPx, aVertices, 0);
 
     // inner vertices
@@ -99,7 +100,8 @@ bool StGLRadioButton::stglInit() {
     // initialize GLSL program
     myTextures.nullify();
     StGLContext& aCtx = getContext();
-    StArray<StGLVec2> aDummyVert(8);
+    std::vector<StGLVec2> aDummyVert;
+    aDummyVert.resize(8);
     if(!myVertBuf.init(aCtx, aDummyVert)) {
         return false;
     }

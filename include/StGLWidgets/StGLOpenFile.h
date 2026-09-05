@@ -133,11 +133,11 @@ class StGLOpenFile : public StGLMessageBox {
     StGLMenuCheckbox*          myExtraFilterCheck; //!< extra file filter checkbox
     StHandle<StBoolParam>      myToShowMainFilter;
     StHandle<StBoolParam>      myToShowExtraFilter;
-    StArrayList<StString>      myHotPaths;      //!< array of hot-links
+    std::vector<StString>      myHotPaths;      //!< array of hot-links
     StHandle<StFolder>         myFolder;        //!< currently opened folder
     StMIMEList                 myFilter;        //!< file filter
     StMIMEList                 myExtraFilter;   //!< extra file filter
-    StArrayList<StString>      myExtensions;    //!< extensions filter
+    std::vector<StString>      myExtensions;    //!< extensions filter
     StString                   myItemToLoad;    //!< new item to open
 
         protected: //! @name main file list settings

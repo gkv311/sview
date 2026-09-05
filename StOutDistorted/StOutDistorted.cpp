@@ -677,11 +677,12 @@ void StOutDistorted::stglDrawCursor(const StPointD_t&  theCursorPos,
         }
     }
 
-    StArray<StGLVec4> aVerts(4);
-    aVerts[0] = StGLVec4(aLensDisp + aCurLeft + aCurWidth, aCurTop - aCurHeight, 0.0f, 1.0f);
-    aVerts[1] = StGLVec4(aLensDisp + aCurLeft + aCurWidth, aCurTop,              0.0f, 1.0f);
-    aVerts[2] = StGLVec4(aLensDisp + aCurLeft,             aCurTop - aCurHeight, 0.0f, 1.0f);
-    aVerts[3] = StGLVec4(aLensDisp + aCurLeft,             aCurTop,              0.0f, 1.0f);
+    const std::vector<StGLVec4> aVerts = {
+        StGLVec4(aLensDisp + aCurLeft + aCurWidth, aCurTop - aCurHeight, 0.0f, 1.0f),
+        StGLVec4(aLensDisp + aCurLeft + aCurWidth, aCurTop,              0.0f, 1.0f),
+        StGLVec4(aLensDisp + aCurLeft,             aCurTop - aCurHeight, 0.0f, 1.0f),
+        StGLVec4(aLensDisp + aCurLeft,             aCurTop,              0.0f, 1.0f)
+    };
     myCurVertsBuf.init(*myContext, aVerts);
 
     myContext->core20fwd->glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
@@ -914,11 +915,12 @@ void StOutDistorted::stglDrawVR() {
 
         const GLfloat aDX = GLfloat(myFrBuffer->getVPSizeX()) / GLfloat(myFrBuffer->getSizeX());
         const GLfloat aDY = GLfloat(myFrBuffer->getVPSizeY()) / GLfloat(myFrBuffer->getSizeY());
-        StArray<StGLVec2> aTCoords(4);
-        aTCoords[0] = StGLVec2(aDX, 0.0f);
-        aTCoords[1] = StGLVec2(aDX, aDY);
-        aTCoords[2] = StGLVec2(0.0f, 0.0f);
-        aTCoords[3] = StGLVec2(0.0f, aDY);
+        const std::vector<StGLVec2> aTCoords = {
+            StGLVec2(aDX, 0.0f),
+            StGLVec2(aDX, aDY),
+            StGLVec2(0.0f, 0.0f),
+            StGLVec2(0.0f, aDY)
+        };
         myFrTCrdsBuf.init(*myContext, aTCoords);
 
         myFrBuffer->bindTexture(*myContext);
@@ -1098,11 +1100,12 @@ void StOutDistorted::stglDraw() {
     // reduce viewport to avoid additional aliasing of narrow lines
     const GLfloat aDX = GLfloat(myFrBuffer->getVPSizeX()) / GLfloat(myFrBuffer->getSizeX());
     const GLfloat aDY = GLfloat(myFrBuffer->getVPSizeY()) / GLfloat(myFrBuffer->getSizeY());
-    StArray<StGLVec2> aTCoords(4);
-    aTCoords[0] = StGLVec2(aDX,  0.0f);
-    aTCoords[1] = StGLVec2(aDX,  aDY);
-    aTCoords[2] = StGLVec2(0.0f, 0.0f);
-    aTCoords[3] = StGLVec2(0.0f, aDY);
+    const std::vector<StGLVec2> aTCoords = {
+        StGLVec2(aDX,  0.0f),
+        StGLVec2(aDX,  aDY),
+        StGLVec2(0.0f, 0.0f),
+        StGLVec2(0.0f, aDY)
+    };
     myFrTCrdsBuf.init(*myContext, aTCoords);
 
     const GLfloat aLensDisp = getLensDist() * 0.5f;

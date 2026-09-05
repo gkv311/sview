@@ -6,7 +6,6 @@
  */
 
 #include <StGLMesh/StBndSphere.h>
-#include <StTemplates/StArrayList.h>
 #include <StGL/StGLMatrix.h>
 
 #include <cfloat>
@@ -21,7 +20,7 @@ StBndSphere::~StBndSphere() {
     //
 }
 
-void StBndSphere::init(const StArray<StGLVec3>& thePoints) {
+void StBndSphere::init(const std::vector<StGLVec3>& thePoints) {
     initWelzl(thePoints);
 }
 
@@ -62,7 +61,7 @@ void StBndSphere::enlarge(const StGLVec3& theNewPnt) {
     }
 }
 
-void StBndSphere::enlarge(const StArray<StGLVec3>& thePoints) {
+void StBndSphere::enlarge(const std::vector<StGLVec3>& thePoints) {
     if(thePoints.size() == 0) {
         return;
     } else if(isVoid()) {
@@ -92,7 +91,7 @@ void StBndSphere::enlarge(const StArray<StGLVec3>& thePoints) {
     StBndContainer::setDefined();
 }
 
-void StBndSphere::initFast(const StArray<StGLVec3>& thePoints) {
+void StBndSphere::initFast(const std::vector<StGLVec3>& thePoints) {
     reset();
     if(thePoints.size() == 0) {
         return;
@@ -100,8 +99,8 @@ void StBndSphere::initFast(const StArray<StGLVec3>& thePoints) {
 
     // find a large diameter to start with
     // first get the bounding box and extreme points for it
-    StGLVec3 aMin = thePoints.getFirst();
-    StGLVec3 aMax = thePoints.getFirst();
+    StGLVec3 aMin = thePoints.front();
+    StGLVec3 aMax = thePoints.front();
     size_t aPntMinX = 0;
     size_t aPntMinY = 0;
     size_t aPntMinZ = 0;
@@ -190,7 +189,7 @@ namespace {
         size_t quantity;
         size_t indices[4];
 
-        bool isContains(const StArrayList<StGLVec3*>& thePoints, size_t theIndex, GLfloat theSquareEpsilon) {
+        bool isContains(const std::vector<StGLVec3*>& thePoints, size_t theIndex, GLfloat theSquareEpsilon) {
             for(size_t anId = 0; anId < quantity; ++anId) {
                 StGLVec3 dV = *thePoints[theIndex] - *thePoints[indices[anId]];
                 if(dV.squareModulus() < theSquareEpsilon) {
@@ -201,7 +200,7 @@ namespace {
         }
     };
 
-    typedef StSphere (*updateFunction_t)(const StArrayList<StGLVec3*>& thePermuted,
+    typedef StSphere (*updateFunction_t)(const std::vector<StGLVec3*>& thePermuted,
                                          size_t thePntIndex,
                                          StSupport& theSupport);
 
@@ -342,7 +341,7 @@ namespace {
         }
     }
 
-    StSphere updateSupport1(const StArrayList<StGLVec3*>& thePermuted,
+    StSphere updateSupport1(const std::vector<StGLVec3*>& thePermuted,
                             size_t thePntIndex,
                             StSupport& theSupport) {
         const StGLVec3& aPnt0 = *thePermuted[theSupport.indices[0]];
@@ -353,7 +352,7 @@ namespace {
         return aMinSphere;
     }
 
-    StSphere updateSupport2(const StArrayList<StGLVec3*>& thePermuted,
+    StSphere updateSupport2(const std::vector<StGLVec3*>& thePermuted,
                             size_t thePntIndex,
                             StSupport& theSupport) {
         const StGLVec3* point[2] = {
@@ -424,7 +423,7 @@ namespace {
         return aSpheres[aSphereMinR];
     }
 
-    StSphere updateSupport3(const StArrayList<StGLVec3*>& thePermuted,
+    StSphere updateSupport3(const std::vector<StGLVec3*>& thePermuted,
                             size_t thePntIndex,
                             StSupport& theSupport) {
         const StGLVec3* point[3] = {
@@ -542,7 +541,7 @@ namespace {
         return aSpheres[aSphereMinR];
     }
 
-    StSphere updateSupport4(const StArrayList<StGLVec3*>& thePermuted,
+    StSphere updateSupport4(const std::vector<StGLVec3*>& thePermuted,
                             size_t thePntIndex,
                             StSupport& theSupport) {
         const StGLVec3* point[4] = {
@@ -713,7 +712,7 @@ namespace {
 
 };
 
-void StBndSphere::initWelzl(const StArray<StGLVec3>& thePoints) {
+void StBndSphere::initWelzl(const std::vector<StGLVec3>& thePoints) {
     const GLfloat anEpsilon = 1e-03f;
     reset();
     if(thePoints.size() == 0) {
@@ -728,10 +727,11 @@ void StBndSphere::initWelzl(const StArray<StGLVec3>& thePoints) {
     anUpdatesList[4] = updateSupport4;
 
     // create identity permutation (0, 1,..., thePoints.size() - 1)
-    StArrayList<StGLVec3*> aPermuted(thePoints.size());
+    std::vector<StGLVec3*> aPermuted;
+    aPermuted.reserve(thePoints.size());
     for(size_t aPntId = 0; aPntId < thePoints.size(); ++aPntId) {
         // actually we will not change the input values
-        aPermuted.add((StGLVec3* )&thePoints[aPntId]);
+        aPermuted.push_back((StGLVec3* )&thePoints[aPntId]);
     }
 
     // generate random permutation, this needed for algorithm stability

@@ -112,7 +112,8 @@ void StGLMenuItem::stglResize() {
 
     // back vertices
     StRectI_t aRectPx = getRectPxAbsolute();
-    StArray<StGLVec2> aVertices(myArrowIcon != Arrow_None ? 8 : 4);
+    std::vector<StGLVec2> aVertices;
+    aVertices.resize(myArrowIcon != Arrow_None ? 8 : 4);
     myRoot->getRectGl(aRectPx, aVertices, 0);
     switch(myArrowIcon) {
         case Arrow_None: {
@@ -183,7 +184,8 @@ bool StGLMenuItem::stglInit() {
 
     // initialize GLSL program
     StGLContext& aCtx = getContext();
-    StArray<StGLVec2> aDummyVert(myArrowIcon != Arrow_None ? 8 : 4);
+    std::vector<StGLVec2> aDummyVert;
+    aDummyVert.resize(myArrowIcon != Arrow_None ? 8 : 4);
     if(!myBackVertexBuf.init(aCtx, aDummyVert)) {
         myIsInitialized = false;
         return false;

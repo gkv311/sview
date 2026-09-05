@@ -60,28 +60,28 @@ StGLTable::~StGLTable() {
 void StGLTable::setupTable(const int theNbRows,
                            const int theNbColumns) {
     // destroy old content
-    for(size_t aRowIter = 0; aRowIter < myTable.size(); ++aRowIter) {
-        StArrayList<StGLTableItem*>& aRow = myTable.changeValue(aRowIter);
-        for(size_t aColIter = 0; aColIter < aRow.size(); ++aColIter) {
-            StGLTableItem* anItem = aRow.changeValue(aColIter);
+    for (size_t aRowIter = 0; aRowIter < myTable.size(); ++aRowIter) {
+        std::vector<StGLTableItem*>& aRow = myTable[aRowIter];
+        for (size_t aColIter = 0; aColIter < aRow.size(); ++aColIter) {
+            StGLTableItem* anItem = aRow[aColIter];
             delete anItem;
         }
     }
     myTable.clear();
+    myRowBottoms.clear();
+    myColRights.clear();
 
     // initialize new empty content
-    for(int aRowIter = 0; aRowIter < theNbRows; ++aRowIter) {
-        myTable.add(StArrayList<StGLTableItem*>());
-        StArrayList<StGLTableItem*>& aRow = myTable.changeLast();
-        aRow.initArray(theNbColumns);
-        for(size_t aColIter = 0; aColIter < aRow.size(); ++aColIter) {
-            aRow.changeValue(aColIter) = new StGLTableItem(this);
+    myTable.resize(theNbRows);
+    myRowBottoms.resize(theNbRows, 0);
+    myColRights .resize(theNbColumns, 0);
+    for (size_t aRowIter = 0; aRowIter < myTable.size(); ++aRowIter) {
+        std::vector<StGLTableItem*>& aRow = myTable[aRowIter];
+        aRow.resize(theNbColumns);
+        for (size_t aColIter = 0; aColIter < aRow.size(); ++aColIter) {
+            aRow[aColIter] = new StGLTableItem(this);
         }
     }
-    myRowBottoms.initArray(theNbRows);
-    myColRights .initArray(theNbColumns);
-    stMemZero(&myRowBottoms.changeFirst(), sizeof(int) * myRowBottoms.size());
-    stMemZero(&myColRights .changeFirst(), sizeof(int) * myColRights .size());
 }
 
 void StGLTable::fillFromMap(const StDictionary& theMap,
@@ -377,73 +377,73 @@ bool StGLTable::stglInit() {
 }
 
 void StGLTable::updateLayout() {
-    if(myRowBottoms.isEmpty()
-    || myColRights .isEmpty()) {
+    if (myRowBottoms.empty()
+     || myColRights .empty()) {
         return;
     }
 
     // determine rows heights
     int aBottomPrev = 0;
-    for(size_t aRowIter = 0; aRowIter < myRowBottoms.size(); ++aRowIter) {
-        StArrayList<StGLTableItem*>& aRow = myTable.changeValue(aRowIter);
-        for(size_t aColIter = 0; aColIter < myColRights.size(); ++aColIter) {
-            StGLTableItem* anItem = aRow.changeValue(aColIter);
-            if(anItem->getItem() == NULL) {
+    for (size_t aRowIter = 0; aRowIter < myRowBottoms.size(); ++aRowIter) {
+        std::vector<StGLTableItem*>& aRow = myTable.at(aRowIter);
+        for (size_t aColIter = 0; aColIter < myColRights.size(); ++aColIter) {
+            StGLTableItem* anItem = aRow.at(aColIter);
+            if (anItem->getItem() == nullptr) {
                 continue;
             }
 
             const int aBefore = aRowIter != 0
-                              ? myRowBottoms.changeValue(aRowIter - 1)
+                              ? myRowBottoms.at(aRowIter - 1)
                               : 0;
             size_t aBotRowId = aRowIter + anItem->getRowSpan() - 1;
-            int&   aBottom   = myRowBottoms.changeValue(aBotRowId);
+            int&   aBottom   = myRowBottoms.at(aBotRowId);
             aBottom = stMax(aBottom,
                             aBefore + anItem->getItem()->getRectPx().height()
                           + myItemMargins.top + myItemMargins.bottom);
         }
-        int& aBottom = myRowBottoms.changeValue(aRowIter);
+        int& aBottom = myRowBottoms.at(aRowIter);
         aBottom      = stMax(aBottom, aBottomPrev);
         aBottomPrev  = aBottom;
     }
 
     // determine columns widths
     int aRightPrev = 0;
-    for(size_t aColIter = 0; aColIter < myColRights.size(); ++aColIter) {
-        for(size_t aRowIter = 0; aRowIter < myRowBottoms.size(); ++aRowIter) {
-            StGLTableItem* anItem = myTable.changeValue(aRowIter).changeValue(aColIter);
-            if(anItem->getItem() == NULL) {
+    for (size_t aColIter = 0; aColIter < myColRights.size(); ++aColIter) {
+        for (size_t aRowIter = 0; aRowIter < myRowBottoms.size(); ++aRowIter) {
+            StGLTableItem* anItem = myTable.at(aRowIter).at(aColIter);
+            if (anItem->getItem() == NULL) {
                 continue;
             }
 
             const int aBefore = aColIter != 0
-                              ? myColRights.changeValue(aColIter - 1)
+                              ? myColRights.at(aColIter - 1)
                               : 0;
             size_t aRightColId = aColIter + anItem->getColSpan() - 1;
-            int&   aRight      = myColRights.changeValue(aRightColId);
+            int&   aRight      = myColRights.at(aRightColId);
             aRight = stMax(aRight,
                            aBefore + anItem->getItem()->getRectPx().width()
                          + myItemMargins.left + myItemMargins.right);
         }
-        int& aRight = myColRights.changeValue(aColIter);
+        int& aRight = myColRights.at(aColIter);
         aRight      = stMax(aRight, aRightPrev);
         aRightPrev  = aRight;
     }
-    changeRectPx().right()  = getRectPx().left() + myColRights.getLast();
-    changeRectPx().bottom() = getRectPx().top()  + myRowBottoms.getLast();
+    changeRectPx().right()  = getRectPx().left() + myColRights.back();
+    changeRectPx().bottom() = getRectPx().top()  + myRowBottoms.back();
 
     // adjust table elements positions
     int aTop = 0;
-    for(size_t aRowIter = 0; aRowIter < myRowBottoms.size(); aTop = myRowBottoms.getValue(aRowIter++)) {
-        StArrayList<StGLTableItem*>& aRow = myTable.changeValue(aRowIter);
+    for (size_t aRowIter = 0; aRowIter < myRowBottoms.size(); aTop = myRowBottoms.at(aRowIter++)) {
+        std::vector<StGLTableItem*>& aRow = myTable.at(aRowIter);
         int aLeft = 0;
-        for(size_t aColIter = 0; aColIter < myColRights.size(); aLeft = myColRights.getValue(aColIter++)) {
-            StGLTableItem* anItem = aRow.changeValue(aColIter);
+        for (size_t aColIter = 0; aColIter < myColRights.size(); aLeft = myColRights.at(aColIter++)) {
+            StGLTableItem* anItem = aRow.at(aColIter);
             const size_t aBotRowId   = aRowIter + anItem->getRowSpan() - 1;
             const size_t aRightColId = aColIter + anItem->getColSpan() - 1;
             anItem->changeRectPx().top()    = aTop  + myItemMargins.top;
             anItem->changeRectPx().left()   = aLeft + myItemMargins.left;
-            anItem->changeRectPx().bottom() = myRowBottoms.changeValue(aBotRowId)   - myItemMargins.bottom;
-            anItem->changeRectPx().right()  = myColRights .changeValue(aRightColId) - myItemMargins.right;
+            anItem->changeRectPx().bottom() = myRowBottoms.at(aBotRowId)   - myItemMargins.bottom;
+            anItem->changeRectPx().right()  = myColRights .at(aRightColId) - myItemMargins.right;
         }
     }
 }

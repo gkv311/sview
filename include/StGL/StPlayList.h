@@ -138,7 +138,7 @@ class StPlayList {
     /**
      * Set extensions list.
      */
-    ST_CPPEXPORT void setExtensions(const StArrayList<StString>& theExtensions);
+    ST_CPPEXPORT void setExtensions(const std::vector<StString>& theExtensions);
 
     /**
      * Clear playlist.
@@ -451,7 +451,7 @@ class StPlayList {
     std::deque<StPlayItem*> myStackPrev;     //!< stack of previous items (for shuffle playback)
     std::deque<StPlayItem*> myStackNext;     //!< stack of next     items (for shuffle playback)
     size_t                  myItemsCount;    //!< current playlist size
-    StArrayList<StString>   myExtensions;    //!< extensions list
+    std::vector<StString>   myExtensions;    //!< extensions list
     StStereoParams          myDefStParams;   //!< default stereo parameters
     StMinGen                myRandGen;       //!< random number generator for shuffle playback
     size_t                  myPlayedCount;   //!< played items in current iteration (< myItemsCount)

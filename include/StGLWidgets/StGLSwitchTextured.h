@@ -11,6 +11,8 @@
 #include <StGLWidgets/StGLWidget.h>
 #include <StSettings/StParam.h>
 
+#include <vector>
+
 /**
  * This class represents a switch between values shown as image.
  * It behaves as clickable iterator - each click switch to the next value in cycle.
@@ -55,7 +57,7 @@ class StGLSwitchTextured : public StGLWidget {
         private:
 
     StHandle<StInt32Param> myTrackValue; //!< handle to tracked value
-    StArrayList<int32_t>   mySkipValues; //!< values to skip on click
+    std::vector<int32_t>   mySkipValues; //!< values to skip on click
 
 };
 

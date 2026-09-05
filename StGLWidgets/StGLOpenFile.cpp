@@ -434,15 +434,15 @@ StGLMenuCheckbox* StGLOpenFile::addHotCheckbox(const StHandle<StBoolParam>& theP
 
 void StGLOpenFile::initExtensions() {
     myExtensions.clear();
-    StArrayList<StString> aList1 = myToShowMainFilter ->getValue() ? myFilter.getExtensionsList()      : StArrayList<StString>(1);
-    StArrayList<StString> aList2 = myToShowExtraFilter->getValue() ? myExtraFilter.getExtensionsList() : StArrayList<StString>(1);
-    size_t anExtent = aList1.size() + aList2.size();
-    myExtensions.initList(anExtent);
+    const std::vector<StString> aList1 = myToShowMainFilter ->getValue() ? myFilter.getExtensionsList()      : std::vector<StString>();
+    const std::vector<StString> aList2 = myToShowExtraFilter->getValue() ? myExtraFilter.getExtensionsList() : std::vector<StString>();
+    const size_t anExtent = aList1.size() + aList2.size();
+    myExtensions.reserve(anExtent);
     for(size_t anExtIter = 0; anExtIter < aList1.size(); ++anExtIter) {
-        myExtensions.add(aList1[anExtIter]);
+        myExtensions.push_back(aList1[anExtIter]);
     }
     for(size_t anExtIter = 0; anExtIter < aList2.size(); ++anExtIter) {
-        myExtensions.add(aList2[anExtIter]);
+        myExtensions.push_back(aList2[anExtIter]);
     }
 }
 
@@ -507,7 +507,7 @@ void StGLOpenFile::addHotItem(const StString& theTarget,
     || !StFileNode::isFileExists(theTarget)) {
         return;
     }
-    myHotPaths.add(theTarget);
+    myHotPaths.push_back(theTarget);
 
     StGLMenuItem* anItem = new StGLPassiveMenuItem(myHotList);
     setItemIcon(anItem, myHotColor, true);
