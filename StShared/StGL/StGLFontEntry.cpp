@@ -13,7 +13,7 @@
 #include <StStrings/StLogger.h>
 #include <stAssert.h>
 
-StGLFontEntry::StGLFontEntry(const StHandle<StFTFont>& theFont)
+StGLFontEntry::StGLFontEntry(const std::shared_ptr<StFTFont>& theFont)
 : myFont(theFont),
   myAscender(0.0f),
   myLineSpacing(0.0f),
@@ -22,26 +22,26 @@ StGLFontEntry::StGLFontEntry(const StHandle<StFTFont>& theFont)
   myLastTileId(size_t(-1)),
   myGlyphMap(NULL) {
     stMemZero(&myLastTilePx, sizeof(myLastTilePx));
-    if(!myFont.isNull()) {
+    if (myFont.get() != nullptr) {
         myFont->setActiveStyle(StFTFont::Style_Regular);
     }
     myGlyphMap = &myGlyphMaps[StFTFont::Style_Regular];
 }
 
 StGLFontEntry::~StGLFontEntry() {
-    ST_ASSERT(myTextures.isEmpty(), "~StGLFontEntry() with unreleased GL resources");
+    ST_ASSERT(myTextures.empty(), "~StGLFontEntry() with unreleased GL resources");
 }
 
 void StGLFontEntry::release(StGLContext& theCtx) {
     for(size_t anIter = 0; anIter < myFbos.size(); ++anIter) {
-        StHandle<StGLFrameBuffer>& aFbo = myFbos.changeValue(anIter);
+        std::shared_ptr<StGLFrameBuffer>& aFbo = myFbos[anIter];
         aFbo->release(theCtx);
-        aFbo.nullify();
+        aFbo.reset();
     }
     for(size_t anIter = 0; anIter < myTextures.size(); ++anIter) {
-        StHandle<StGLTexture>& aTexture = myTextures.changeValue(anIter);
+        std::shared_ptr<StGLTexture>& aTexture = myTextures[anIter];
         aTexture->release(theCtx);
-        aTexture.nullify();
+        aTexture.reset();
     }
     myTextures.clear();
     myFbos.clear();
@@ -73,7 +73,7 @@ bool StGLFontEntry::stglInit(StGLContext&       theCtx,
 bool StGLFontEntry::stglInit(StGLContext& theCtx,
                              const bool   theToCreateTexture) {
     release(theCtx);
-    if(myFont.isNull() || !myFont->isValid()) {
+    if (myFont.get() == nullptr || !myFont->isValid()) {
         return false;
     }
 
@@ -114,10 +114,10 @@ bool StGLFontEntry::createTexture(StGLContext& theCtx) {
     stMemZero(&myLastTilePx, sizeof(myLastTilePx));
     myLastTilePx.bottom() = myTileSizeY;
 
-    myTextures.add(new StGLTexture(theCtx.arbTexRG ? GL_R8 : GL_ALPHA));
-    myFbos.add(new StGLFrameBuffer());
-    StHandle<StGLTexture>&     aTexture = myTextures[myTextures.size() - 1];
-    StHandle<StGLFrameBuffer>& aFbo     = myFbos    [myTextures.size() - 1];
+    myTextures.push_back(std::make_shared<StGLTexture>(theCtx.arbTexRG ? GL_R8 : GL_ALPHA));
+    myFbos.push_back(std::make_shared<StGLFrameBuffer>());
+    std::shared_ptr<StGLTexture>&     aTexture = myTextures.back();
+    std::shared_ptr<StGLFrameBuffer>& aFbo     = myFbos.back();
     if(!aTexture->initTrash(theCtx, aTextureSizeX, aTextureSizeY)) {
         return false;
     }
@@ -156,19 +156,17 @@ bool StGLFontEntry::setActiveStyle(const StFTFont::Style theStyle) {
 bool StGLFontEntry::renderGlyph(StGLContext&    theCtx,
                                 const stUtf32_t theChar,
                                 const bool      theToForce) {
-    if(!myFont->renderGlyph(theChar)) {
-        if(!theToForce
-        || !myFont->renderGlyphNotdef()) {
+    if (!myFont->renderGlyph(theChar)) {
+        if (!theToForce || !myFont->renderGlyphNotdef()) {
             return false;
         }
     }
 
-    if(myTextures.isEmpty()
-    && !createTexture(theCtx)) {
+    if (myTextures.empty() && !createTexture(theCtx)) {
         return false;
     }
 
-    StHandle<StGLTexture>& aTexture = myTextures[myTextures.size() - 1];
+    std::shared_ptr<StGLTexture>& aTexture = myTextures.back();
 
     const StImagePlane& anImg = myFont->getGlyphImage();
     const size_t aTileId = myLastTileId + 1;
@@ -210,7 +208,7 @@ bool StGLFontEntry::renderGlyph(StGLContext&    theCtx,
     myFont->getGlyphRect(aTile.px);
 
     myLastTileId = aTileId;
-    myTiles.add(aTile);
+    myTiles.push_back(aTile);
     return true;
 }
 

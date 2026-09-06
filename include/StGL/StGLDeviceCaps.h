@@ -17,35 +17,34 @@ struct StGLDeviceCaps {
     /**
      * Texture size limits.
      */
-    int maxTexDim;
+    int maxTexDim = 0;
 
     /**
      * Device support data transferring with row unpack size specified.
      * GL_PACK_ROW_LENGTH / GL_UNPACK_ROW_LENGTH can be used - OpenGL ES 3.0+ or any desktop.
      */
-    bool hasUnpack;
+    bool hasUnpack = true;
 
     /**
      * Return TRUE if image format can be uploaded into OpenGL texture.
      */
-    bool isSupportedFormat(StImagePlane::ImgFormat theFormat) const { return mySupportedFormats[theFormat]; }
+    ST_LOCAL bool isSupportedFormat(StImagePlane::ImgFormat theFormat) const { return mySupportedFormats[theFormat]; }
 
     /**
      * Set if image format can be uploaded into OpenGL texture.
      */
-    void setSupportedFormat(StImagePlane::ImgFormat theFormat, bool theIsSupported) { mySupportedFormats[theFormat] = theIsSupported; }
+    ST_LOCAL void setSupportedFormat(StImagePlane::ImgFormat theFormat, bool theIsSupported) { mySupportedFormats[theFormat] = theIsSupported; }
 
     /**
      * Empty constructor.
      */
-    ST_LOCAL StGLDeviceCaps()
-    : maxTexDim(0), hasUnpack(true) {
-        stMemZero(mySupportedFormats, sizeof(mySupportedFormats));
+    ST_LOCAL StGLDeviceCaps() {
+        //
     }
 
         private:
 
-    bool mySupportedFormats[StImagePlane::ImgNB];
+    bool mySupportedFormats[StImagePlane::ImgNB] {};
 
 };
 

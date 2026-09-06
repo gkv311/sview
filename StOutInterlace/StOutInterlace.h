@@ -47,8 +47,8 @@ class StOutInterlace : public StWindow {
     /**
      * Main constructor.
      */
-    ST_CPPEXPORT StOutInterlace(const StHandle<StResourceManager>& theResMgr,
-                                const StNativeWin_t                theParentWindow);
+    ST_CPPEXPORT StOutInterlace(const std::shared_ptr<StResourceManager>& theResMgr,
+                                const StNativeWin_t theParentWindow);
 
     /**
      * Destructor.
@@ -139,9 +139,9 @@ class StOutInterlace : public StWindow {
     /**
      * Look for interlaced monitors within the given list.
      */
-    ST_LOCAL static StHandle<StMonitor> getInterlacedMonitor(const StSearchMonitors& theMonitors,
-                                                             bool& theIsReversed,
-                                                             bool& theIsRowInterlaced);
+    ST_LOCAL static std::shared_ptr<StMonitor> getInterlacedMonitor(const StSearchMonitors& theMonitors,
+                                                                    bool& theIsReversed,
+                                                                    bool& theIsRowInterlaced);
 
     ST_LOCAL void stglDrawEDCodes();
 
@@ -210,31 +210,33 @@ class StOutInterlace : public StWindow {
 
         private:
 
-    StOutDevicesList          myDevices;
-    StHandle<StSettings>      mySettings;
-    StString                  myAbout;                    //!< about string
-    StHandle<StGLContext>     myContext;
-    StHandle<StGLFrameBuffer> myFrmBuffer;                //!< OpenGL frame buffer object
-    StHandle<StProgramFB>     myGlPrograms[DEVICE_NB];    //!< GLSL programs
-    StHandle<StProgramFB>     myGlProgramsRev[DEVICE_NB]; //!< GLSL programs with reversed left/right condition
+    StOutDevicesList                 myDevices;
+    std::shared_ptr<StSettings>      mySettings;
+    StString                         myAbout;                    //!< about string
+    std::shared_ptr<StGLContext>     myContext;
+    std::shared_ptr<StGLFrameBuffer> myFrmBuffer;                //!< OpenGL frame buffer object
+    std::shared_ptr<StProgramFB>     myGlPrograms[DEVICE_NB];    //!< GLSL programs
+    std::shared_ptr<StProgramFB>     myGlProgramsRev[DEVICE_NB]; //!< GLSL programs with reversed left/right condition
 
-    StHandle<StProgramFB>     myGlProgramMask;            //!< universal GLSL program which uses mask texture
-    StHandle<StGLTexture>     myTextureMask;              //!< texture holding mask for discarding pixels
-    StHandle<StGLTexture>     myTextureMaskEmpty;         //!< empty texture (no discard)
-    int                       myTexMaskDevice;            //!< texture mask device
-    bool                      myTexMaskReversed;          //!< texture mask is initialized in reversed state
+    std::shared_ptr<StProgramFB>     myGlProgramMask;            //!< universal GLSL program which uses mask texture
+    std::shared_ptr<StGLTexture>     myTextureMask;              //!< texture holding mask for discarding pixels
+    std::shared_ptr<StGLTexture>     myTextureMaskEmpty;         //!< empty texture (no discard)
 
-    StGLVertexBuffer          myQuadVertBuf;
-    StGLVertexBuffer          myQuadTexCoordBuf;
-    int                       myDevice;
-    StHandle<StMonitor>       myMonitor;                  //!< current monitor
-    BarrierState              myBarrierState;
+    int  myTexMaskDevice;            //!< texture mask device
+    bool myTexMaskReversed;          //!< texture mask is initialized in reversed state
 
-    StRectI_t                 myWinRect;
-    StRectI_t                 myEDRect;
-    StTimer                   myEDTimer;                  //!< EDimensional activator/disactivator timer
-    StHandle<StGLProgram>     myEDIntelaceOn;             //!< ED interlace activate program
-    StHandle<StGLProgram>     myEDOff;                    //!< ED disactivate program
+    StGLVertexBuffer           myQuadVertBuf;
+    StGLVertexBuffer           myQuadTexCoordBuf;
+    int                        myDevice;
+    std::shared_ptr<StMonitor> myMonitor;                  //!< current monitor
+    BarrierState               myBarrierState;
+
+    StRectI_t                    myWinRect;
+    StRectI_t                    myEDRect;
+    StTimer                      myEDTimer;                  //!< EDimensional activator/disactivator timer
+    std::shared_ptr<StGLProgram> myEDIntelaceOn;             //!< ED interlace activate program
+    std::shared_ptr<StGLProgram> myEDOff;                    //!< ED disactivate program
+
     GLsizei                   myVpSizeY;                  //!< VIewPort Y size
     StGLVarLocation           myVpSizeYOnLoc;             //!< helper shader variables
     StGLVarLocation           myVpSizeYOffLoc;

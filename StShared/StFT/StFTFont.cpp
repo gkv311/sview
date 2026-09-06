@@ -9,20 +9,12 @@
 #include <StFile/StFileNode.h>
 #include <StStrings/StLogger.h>
 
-StFTFont::StFTFont(StHandle<StFTLibrary> theFTLib)
+StFTFont::StFTFont(const std::shared_ptr<StFTLibrary>& theFTLib)
 : myFTLib(theFTLib),
-  myFTFace(NULL),
-  myStyle(StFTFont::Style_Regular),
-  myLoadFlags(FT_LOAD_NO_HINTING | FT_LOAD_TARGET_NORMAL),
-  myGlyphMaxWidth(1),
-  myGlyphMaxHeight(1),
-  myUChar(0) {
-    if(myFTLib.isNull()) {
-        myFTLib = new StFTLibrary();
+  myLoadFlags(FT_LOAD_NO_HINTING | FT_LOAD_TARGET_NORMAL) {
+    if (myFTLib.get() == nullptr) {
+        myFTLib = std::make_shared<StFTLibrary>();
     }
-    stMemZero(mySubsets, sizeof(mySubsets));
-    stMemZero(myFTFaces, sizeof(myFTFaces));
-    stMemZero(myFontFaces, sizeof(myFontFaces));
 }
 
 StFTFont::~StFTFont() {
@@ -31,15 +23,15 @@ StFTFont::~StFTFont() {
 
 void StFTFont::release() {
     myUChar  = 0;
-    myFTFace = NULL;
+    myFTFace = nullptr;
     myGlyphImg.nullify();
     myGlyphMaxWidth  = 1;
     myGlyphMaxHeight = 1;
-    for(size_t aStyleIt = 0; aStyleIt < StylesNB; ++aStyleIt) {
+    for (size_t aStyleIt = 0; aStyleIt < StylesNB; ++aStyleIt) {
         FT_Face& aFace = myFTFaces[aStyleIt];
-        if(aFace != NULL) {
+        if (aFace != nullptr) {
             FT_Done_Face(aFace);
-            aFace = NULL;
+            aFace = nullptr;
         }
         myFontPaths[aStyleIt].clear();
         myFontFaces[aStyleIt] = 0;
@@ -47,18 +39,18 @@ void StFTFont::release() {
 }
 
 bool StFTFont::setActiveStyle(const StFTFont::Style theStyle) {
-    if(myStyle == theStyle) {
+    if (myStyle == theStyle) {
         return true;
     }
 
-    if(myFTFaces[theStyle] != NULL) {
+    if (myFTFaces[theStyle] != nullptr) {
         myUChar  = 0;
         myStyle  = theStyle;
         myFTFace = myFTFaces[theStyle];
         return true;
     }
-    if(!hasCJK()
-    && !hasKorean()) {
+    if (!hasCJK()
+     && !hasKorean()) {
         // simulate style using transformation
     }
     return false;
@@ -71,15 +63,15 @@ bool StFTFont::init(const unsigned int thePointSize,
     myGlyphImg.nullify();
     myGlyphMaxWidth  = 1;
     myGlyphMaxHeight = 1;
-    if(myFTFaces[Style_Regular] == NULL) {
+    if (myFTFaces[Style_Regular] == nullptr) {
         return false;
     }
 
-    for(size_t aStyleIt = 0; aStyleIt < StylesNB; ++aStyleIt) {
+    for (size_t aStyleIt = 0; aStyleIt < StylesNB; ++aStyleIt) {
         FT_Face& aFace = myFTFaces[aStyleIt];
-        if(aFace == NULL) {
+        if (aFace == nullptr) {
             continue;
-        } else if(FT_Set_Char_Size(aFace, 0L, thePointSize * 64, theResolution, theResolution) != 0) {
+        } else if (FT_Set_Char_Size(aFace, 0L, thePointSize * 64, theResolution, theResolution) != 0) {
             ST_ERROR_LOG("Font '" + myFontPaths[aStyleIt] + "' doesn't contain requested size!");
             return false;
         }
@@ -114,24 +106,24 @@ bool StFTFont::load(const StString& theFontPath,
         return false;
     }
     myUChar  = 0;
-    myFTFace = NULL;
+    myFTFace = nullptr;
     myGlyphImg.nullify();
     myFontPaths[theStyle] = theFontPath;
     myFontFaces[theStyle] = theFaceId;
 
     FT_Face& aFace = myFTFaces[theStyle];
-    if(aFace != NULL) {
+    if (aFace != nullptr) {
         FT_Done_Face(aFace);
     }
     const StString aFontPath = StFileNode::getCompatibleName(theFontPath);
-    if(FT_New_Face(myFTLib->getInstance(), aFontPath.toCString(), (FT_Long )theFaceId, &aFace) != 0) {
+    if (FT_New_Face(myFTLib->getInstance(), aFontPath.toCString(), (FT_Long )theFaceId, &aFace) != 0) {
         ST_DEBUG_LOG("Font '" + aFontPath + "' fail to load!");
         FT_Done_Face(aFace);
-        aFace = NULL;
+        aFace = nullptr;
         return false;
     }
 
-    if(theToSyntItalic) {
+    if (theToSyntItalic) {
         const double THE_SHEAR_ANGLE = 10.0 * M_PI / 180.0;
 
         FT_Matrix aMat;
@@ -160,20 +152,20 @@ bool StFTFont::loadInternal(const StString&       theFontName,
         return false;
     }
     myUChar  = 0;
-    myFTFace = NULL;
+    myFTFace = nullptr;
     myGlyphImg.nullify();
     myFontPaths[theStyle] = theFontName;
     myFontFaces[theStyle] = 0;
 
     FT_Face& aFace = myFTFaces[theStyle];
-    if(aFace != NULL) {
+    if (aFace != nullptr) {
         FT_Done_Face(aFace);
     }
 
-    if(FT_New_Memory_Face(myFTLib->getInstance(), theFontData, theDataLen, 0, &aFace) != 0) {
+    if (FT_New_Memory_Face(myFTLib->getInstance(), theFontData, theDataLen, 0, &aFace) != 0) {
         ST_DEBUG_LOG("Font '" + theFontName + "' fail to load!");
         FT_Done_Face(aFace);
-        aFace = NULL;
+        aFace = nullptr;
         return false;
     }
     return loadCharmap(theFontName, aFace);
@@ -182,10 +174,10 @@ bool StFTFont::loadInternal(const StString&       theFontName,
 bool StFTFont::loadCharmap(const StString& theFontName,
                            FT_Face&        theFace) {
     (void )theFontName;
-    if(FT_Select_Charmap(theFace, ft_encoding_unicode) != 0) {
+    if (FT_Select_Charmap(theFace, ft_encoding_unicode) != 0) {
         ST_DEBUG_LOG("Font '" + theFontName + "' doesn't contain Unicode charmap!");
         FT_Done_Face(theFace);
-        theFace = NULL;
+        theFace = nullptr;
         return false;
     }
 
@@ -200,7 +192,7 @@ bool StFTFont::loadCharmap(const StString& theFontName,
 }
 
 bool StFTFont::loadGlyph(const stUtf32_t theUChar) {
-    if(myUChar == theUChar) {
+    if (myUChar == theUChar) {
         return myUChar != 0;
     }
 
@@ -208,7 +200,7 @@ bool StFTFont::loadGlyph(const stUtf32_t theUChar) {
     myUChar = 0;
     if(theUChar == 0
     || FT_Load_Char(myFTFace, theUChar, myLoadFlags) != 0
-    || myFTFace->glyph == NULL) {
+    || myFTFace->glyph == nullptr) {
         return false;
     }
 
@@ -220,7 +212,7 @@ inline bool wrapGlyphBitmap(const FT_Bitmap& theBitmap,
                             StImagePlane&    theOutImage) {
     const unsigned int aWidth  = (unsigned int )theBitmap.width;
     const unsigned int aHeight = (unsigned int )theBitmap.rows;
-    if(theBitmap.buffer == NULL
+    if(theBitmap.buffer == nullptr
     || aWidth  == 0
     || aHeight == 0) {
         return false;

@@ -22,8 +22,8 @@ class StGLPlayList : public StGLWidget {
     /**
      * Main constructor.
      */
-    ST_CPPEXPORT StGLPlayList(StGLWidget*                 theParent,
-                              const StHandle<StPlayList>& theList);
+    ST_CPPEXPORT StGLPlayList(StGLWidget* theParent,
+                              const std::shared_ptr<StPlayList>& theList);
 
     ST_CPPEXPORT virtual ~StGLPlayList();
     ST_CPPEXPORT virtual bool stglInit() ST_ATTR_OVERRIDE;
@@ -80,7 +80,8 @@ class StGLPlayList : public StGLWidget {
     StGLVertexBuffer     myBarVertBuf;   //!< vertices buffer
     StGLVec4             myBarColor;     //!< color of scroll bar
 
-    StHandle<StPlayList> myList;         //!< handle to playlist
+    std::shared_ptr<StPlayList> myList;  //!< handle to playlist
+
     size_t               myFromId;       //!< id in playlist of first item displayed on screen
     int                  myItemsNb;      //!< number of items displayed on screen
     volatile bool        myToResetList;  //!< playlist has been reseted

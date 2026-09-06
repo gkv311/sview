@@ -94,13 +94,13 @@ class StMoviePlayerGUI : public StGLRootWidget {
 
         public: //! @name StGLRootWidget overrides
 
-    ST_LOCAL StMoviePlayerGUI(StMoviePlayer*  thePlugin,
-                              StWindow*       theWindow,
+    ST_LOCAL StMoviePlayerGUI(StMoviePlayer* thePlugin,
+                              StWindow* theWindow,
                               StTranslations* theLangMap,
-                              const StHandle<StPlayList>&       thePlayList,
-                              const StHandle<StGLTextureQueue>& theTextureQueue,
-                              const StHandle<StSubQueue>&       theSubQueue1,
-                              const StHandle<StSubQueue>&       theSubQueue2);
+                              const std::shared_ptr<StPlayList>& thePlayList,
+                              const std::shared_ptr<StGLTextureQueue>& theTextureQueue,
+                              const std::shared_ptr<StSubQueue>& theSubQueue1,
+                              const std::shared_ptr<StSubQueue>& theSubQueue2);
     ST_LOCAL virtual ~StMoviePlayerGUI();
 
     ST_LOCAL virtual void stglResize(const StGLBoxPx& theViewPort,
@@ -144,7 +144,7 @@ class StMoviePlayerGUI : public StGLRootWidget {
     /**
      * Create normal (desktop) interface.
      */
-    ST_LOCAL void createDesktopUI(const StHandle<StPlayList>& thePlayList);
+    ST_LOCAL void createDesktopUI(const std::shared_ptr<StPlayList>& thePlayList);
     ST_LOCAL void createUpperToolbar();
     ST_LOCAL void createBottomToolbar(const int theIconSize,
                                       const int theIconSizeSmall);
@@ -184,7 +184,7 @@ class StMoviePlayerGUI : public StGLRootWidget {
     /**
      * Create mobile interface.
      */
-    ST_LOCAL void createMobileUI(const StHandle<StPlayList>& thePlayList);
+    ST_LOCAL void createMobileUI(const std::shared_ptr<StPlayList>& thePlayList);
 
     ST_LOCAL void createMobileUpperToolbar();
     ST_LOCAL void createMobileBottomToolbar();

@@ -30,7 +30,7 @@ class StDXNVWindow {
     /**
      * Default constructor.
      */
-    StDXNVWindow(const StHandle<StMsgQueue>& theMsgQueue,
+    StDXNVWindow(const std::shared_ptr<StMsgQueue>& theMsgQueue,
                  const size_t     theFboSizeX,
                  const size_t     theFboSizeY,
                  const StMonitor& theMonitor,
@@ -253,7 +253,8 @@ class StDXNVWindow {
 
         private:
 
-    StHandle<StMsgQueue>    myMsgQueue;     //!< messages queue
+    std::shared_ptr<StMsgQueue> myMsgQueue; //!< messages queue
+
     unsigned char*          myBufferL;
     unsigned char*          myBufferR;
     size_t                  myFboSizeX;

@@ -47,15 +47,14 @@ namespace {
 
 }
 
-StAVIOContext::StAVIOContext()
-: myAvioCtx(NULL) {
-    const int aBufferSize = 32768;
+StAVIOContext::StAVIOContext() {
+    constexpr int aBufferSize = 32768;
     unsigned char* aBufferIO = (unsigned char* )av_malloc(aBufferSize + AV_INPUT_BUFFER_PADDING_SIZE);
     myAvioCtx = avio_alloc_context(aBufferIO, aBufferSize, 0, this, readCallback, writeCallback, seekCallback);
 }
 
 StAVIOContext::~StAVIOContext() {
-    if(myAvioCtx != NULL) {
+    if (myAvioCtx != nullptr) {
         av_free(myAvioCtx);
     }
 }

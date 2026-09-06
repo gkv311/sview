@@ -24,7 +24,7 @@ class StGLFont : public StGLResource {
     /**
      * Default constructor from FT font.
      */
-    ST_CPPEXPORT StGLFont(const StHandle<StFTFont>& theFtFont);
+    ST_CPPEXPORT StGLFont(const std::shared_ptr<StFTFont>& theFtFont);
 
     /**
      * Destructor - should be called after release()!
@@ -39,14 +39,14 @@ class StGLFont : public StGLResource {
     /**
      * @return textured font instance of specified Unicode subset
      */
-    ST_LOCAL const StHandle<StGLFontEntry>& getFont(const StFTFont::Subset theSubset = StFTFont::Subset_General) const {
+    ST_LOCAL const std::shared_ptr<StGLFontEntry>& getFont(const StFTFont::Subset theSubset = StFTFont::Subset_General) const {
         return myFonts[theSubset];
     }
 
     /**
      * @return textured font instance of specified Unicode subset
      */
-    ST_LOCAL StHandle<StGLFontEntry>& changeFont(const StFTFont::Subset theSubset = StFTFont::Subset_General) {
+    ST_LOCAL std::shared_ptr<StGLFontEntry>& changeFont(const StFTFont::Subset theSubset = StFTFont::Subset_General) {
         return myFonts[theSubset];
     }
 
@@ -72,9 +72,9 @@ class StGLFont : public StGLResource {
      * Notice that this method doesn't return initialization success state.
      * @return true if initialization was already called.
      */
-    inline bool wasInitialized() const {
-        return !myFonts[0].isNull()
-             && myFonts[0]->wasInitialized();
+    ST_LOCAL bool wasInitialized() const {
+        return myFonts[0].get() != nullptr
+            && myFonts[0]->wasInitialized();
     }
 
     /**
@@ -94,7 +94,7 @@ class StGLFont : public StGLResource {
 
         protected:
 
-    StHandle<StGLFontEntry> myFonts[StFTFont::SubsetsNB]; //!< textured font instances
+    std::shared_ptr<StGLFontEntry> myFonts[StFTFont::SubsetsNB]; //!< textured font instances
 
 };
 

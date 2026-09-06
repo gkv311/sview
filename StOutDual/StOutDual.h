@@ -27,8 +27,8 @@ class StOutDual : public StWindow {
     /**
      * Main constructor.
      */
-    ST_CPPEXPORT StOutDual(const StHandle<StResourceManager>& theResMgr,
-                           const StNativeWin_t                theParentWindow);
+    ST_CPPEXPORT StOutDual(const std::shared_ptr<StResourceManager>& theResMgr,
+                           const StNativeWin_t theParentWindow);
 
     /**
      * Destructor.
@@ -144,13 +144,14 @@ class StOutDual : public StWindow {
 
         private:
 
-    StOutDevicesList          myDevices;
-    StHandle<StSettings>      mySettings;
-    StString                  myAbout;           //!< about string
+    StOutDevicesList            myDevices;
+    std::shared_ptr<StSettings> mySettings;
+    StString                    myAbout;    //!< about string
 
-    StHandle<StGLContext>     myContext;
-    StHandle<StGLFrameBuffer> myFrBuffer;        //!< OpenGL frame buffer object
-    StHandle<StProgramMM>     myProgram;
+    std::shared_ptr<StGLContext>     myContext;
+    std::shared_ptr<StGLFrameBuffer> myFrBuffer; //!< OpenGL frame buffer object
+    std::shared_ptr<StProgramMM>     myProgram;
+
     StFPSControl              myFPSControl;
     StGLVertexBuffer          myVertFlatBuf;     //!< buffers to draw simple fullsreen quad
     StGLVertexBuffer          myVertXMirBuf;

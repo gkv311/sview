@@ -22,7 +22,7 @@ class StGLStereoTexture : public StGLResource {
         RIGHT_TEXTURE = 1,
     };
 
-    inline void setTextureFormat(const GLint theTextureFormat) {
+    ST_LOCAL void setTextureFormat(const GLint theTextureFormat) {
         myTextures[LEFT_TEXTURE ].setTextureFormat(theTextureFormat);
         myTextures[RIGHT_TEXTURE].setTextureFormat(theTextureFormat);
     }
@@ -32,7 +32,7 @@ class StGLStereoTexture : public StGLResource {
     /**
      * Empty constructor.
      */
-    StGLStereoTexture(const GLint theTextureFormat) {
+    ST_LOCAL StGLStereoTexture(const GLint theTextureFormat) {
         setTextureFormat(theTextureFormat);
     }
 
@@ -52,7 +52,7 @@ class StGLStereoTexture : public StGLResource {
         myTextures[RIGHT_TEXTURE].release(theCtx);
     }
 
-    bool isValid() const {
+    ST_LOCAL bool isValid() const {
         return myTextures[LEFT_TEXTURE].isValid() && myTextures[RIGHT_TEXTURE].isValid();
     }
 
@@ -65,19 +65,19 @@ class StGLStereoTexture : public StGLResource {
      * @param theDataL
      * @return true on success.
      */
-    bool init(StGLContext&   theCtx,
-              const GLsizei  theTextureSizeX,
-              const GLsizei  theTextureSizeY,
-              const GLenum   theDataFormat,
-              const GLubyte* theDataR,
-              const GLubyte* theDataL) {
+    ST_LOCAL bool init(StGLContext&   theCtx,
+                       const GLsizei  theTextureSizeX,
+                       const GLsizei  theTextureSizeY,
+                       const GLenum   theDataFormat,
+                       const GLubyte* theDataR,
+                       const GLubyte* theDataL) {
         return myTextures[LEFT_TEXTURE ].init(theCtx, theTextureSizeX, theTextureSizeY, theDataFormat, theDataL)
             && myTextures[RIGHT_TEXTURE].init(theCtx, theTextureSizeX, theTextureSizeY, theDataFormat, theDataR);
     }
 
-    bool initBlack(StGLContext&  theCtx,
-                   const GLsizei theTextureSizeX,
-                   const GLsizei theTextureSizeY) {
+    ST_LOCAL bool initBlack(StGLContext&  theCtx,
+                            const GLsizei theTextureSizeX,
+                            const GLsizei theTextureSizeY) {
         return myTextures[LEFT_TEXTURE ].initBlack(theCtx, theTextureSizeX, theTextureSizeY)
             && myTextures[RIGHT_TEXTURE].initBlack(theCtx, theTextureSizeX, theTextureSizeY);
     }
@@ -86,9 +86,9 @@ class StGLStereoTexture : public StGLResource {
      * In GL version 1.1 or greater, pData may be a NULL pointer.
      * However data of the texture will be undefined!
      */
-    bool initTrash(StGLContext&  theCtx,
-                   const GLsizei theTextureSizeX,
-                   const GLsizei theTextureSizeY) {
+    ST_LOCAL bool initTrash(StGLContext&  theCtx,
+                            const GLsizei theTextureSizeX,
+                            const GLsizei theTextureSizeY) {
         return myTextures[LEFT_TEXTURE ].initTrash(theCtx, theTextureSizeX, theTextureSizeY)
             && myTextures[RIGHT_TEXTURE].initTrash(theCtx, theTextureSizeX, theTextureSizeY);
     }
@@ -96,38 +96,38 @@ class StGLStereoTexture : public StGLResource {
     /**
      * Bind left texture.
      */
-    void bindLeft(StGLContext& theCtx,
-                  const GLenum theTextureUnit = GL_TEXTURE0) {
+    ST_LOCAL void bindLeft(StGLContext& theCtx,
+                           const GLenum theTextureUnit = GL_TEXTURE0) {
         myTextures[LEFT_TEXTURE].bind(theCtx, theTextureUnit);
     }
 
     /**
      * Bind right texture.
      */
-    void bindRight(StGLContext& theCtx,
-                   const GLenum theTextureUnit = GL_TEXTURE0) {
+    ST_LOCAL void bindRight(StGLContext& theCtx,
+                            const GLenum theTextureUnit = GL_TEXTURE0) {
         myTextures[RIGHT_TEXTURE].bind(theCtx, theTextureUnit);
     }
 
-    void unbindLeft(StGLContext& theCtx) {
+    ST_LOCAL void unbindLeft(StGLContext& theCtx) {
         myTextures[LEFT_TEXTURE].unbind(theCtx);
     }
 
-    void unbindRight(StGLContext& theCtx) {
+    ST_LOCAL void unbindRight(StGLContext& theCtx) {
         myTextures[RIGHT_TEXTURE].unbind(theCtx);
     }
 
     /**
      * @return sizeX (GLsizei ) - texture width.
      */
-    GLsizei getSizeX() const {
+    ST_LOCAL GLsizei getSizeX() const {
         return myTextures[LEFT_TEXTURE].getSizeX();
     }
 
     /**
      * @return sizeY (GLsizei ) - texture height.
      */
-    GLsizei getSizeY() const {
+    ST_LOCAL GLsizei getSizeY() const {
         return myTextures[LEFT_TEXTURE].getSizeY();
     }
 
@@ -135,8 +135,8 @@ class StGLStereoTexture : public StGLResource {
      * Change Min and Mag filter.
      * After this call current texture will be undefined.
      */
-    void setMinMagFilter(StGLContext& theCtx,
-                         const GLenum theMinMagFilter) {
+    ST_LOCAL void setMinMagFilter(StGLContext& theCtx,
+                                  const GLenum theMinMagFilter) {
         myTextures[LEFT_TEXTURE ].setMinMagFilter(theCtx, theMinMagFilter);
         myTextures[RIGHT_TEXTURE].setMinMagFilter(theCtx, theMinMagFilter);
     }
@@ -144,14 +144,14 @@ class StGLStereoTexture : public StGLResource {
     /**
      * Return the left texture object.
      */
-    const StGLTexture& getTextureLeft() const {
+    ST_LOCAL const StGLTexture& getTextureLeft() const {
         return myTextures[LEFT_TEXTURE];
     }
 
     /**
      * Return the right texture object.
      */
-    const StGLTexture& getTextureRight() const {
+    ST_LOCAL const StGLTexture& getTextureRight() const {
         return myTextures[RIGHT_TEXTURE];
     }
 

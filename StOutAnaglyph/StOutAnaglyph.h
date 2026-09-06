@@ -25,8 +25,8 @@ class StOutAnaglyph : public StWindow {
     /**
      * Main constructor.
      */
-    ST_CPPEXPORT StOutAnaglyph(const StHandle<StResourceManager>& theResMgr,
-                               const StNativeWin_t                theParentWindow);
+    ST_CPPEXPORT StOutAnaglyph(const std::shared_ptr<StResourceManager>& theResMgr,
+                               const StNativeWin_t theParentWindow);
 
     /**
      * Destructor.
@@ -157,11 +157,12 @@ class StOutAnaglyph : public StWindow {
     typedef StGLStereoFrameBuffer::StGLStereoProgram StStereoProgram_t;
 
     StOutDevicesList                myDevices;
-    StHandle<StSettings>            mySettings;
+    std::shared_ptr<StSettings>     mySettings;
     StString                        myAbout;                //!< about string
 
-    StHandle<StGLContext>           myContext;
-    StHandle<StGLStereoFrameBuffer> myFrBuffer;
+    std::shared_ptr<StGLContext>           myContext;
+    std::shared_ptr<StGLStereoFrameBuffer> myFrBuffer;
+
     StStereoProgram_t*              myStereoProgram;        //!< pointer to current anaglyph program
     StStereoProgram_t               mySimpleAnaglyph;       //!< all available anaglyph programs
     StStereoProgram_t               myGrayAnaglyph;

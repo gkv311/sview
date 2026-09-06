@@ -49,13 +49,13 @@ namespace {
 
 }
 
-StImageLoader::StImageLoader(const StImageFile::ImageClass      theImageLib,
-                             const StHandle<StResourceManager>& theResMgr,
-                             const StHandle<StMsgQueue>&        theMsgQueue,
-                             const StHandle<StLangMap>&         theLangMap,
-                             const StHandle<StPlayList>&        thePlayList,
-                             const StHandle<StGLTextureQueue>&  theTextureQueue,
-                             const GLint                        theMaxTexDim)
+StImageLoader::StImageLoader(const StImageFile::ImageClass             theImageLib,
+                             const std::shared_ptr<StResourceManager>& theResMgr,
+                             const std::shared_ptr<StMsgQueue>&        theMsgQueue,
+                             const std::shared_ptr<StLangMap>&         theLangMap,
+                             const std::shared_ptr<StPlayList>&        thePlayList,
+                             const std::shared_ptr<StGLTextureQueue>&  theTextureQueue,
+                             const GLint                               theMaxTexDim)
 : myMimeList(ST_IMAGES_MIME_STRING),
   myVideoMimeList(ST_VIDEOS_MIME_STRING),
   myResMgr(theResMgr),
@@ -74,14 +74,14 @@ StImageLoader::StImageLoader(const StImageFile::ImageClass      theImageLib,
   myToFlipCubeZ3x2(false),
   myToSwapJps(false) {
       myPlayList->setExtensions(myMimeList.getExtensionsList());
-      myThread = new StThread(threadFunction, (void* )this, "StImageLoader");
+      myThread = std::make_shared<StThread>(threadFunction, (void* )this, "StImageLoader");
 }
 
 StImageLoader::~StImageLoader() {
     myAction = Action_Quit;
     myLoadNextEvent.set(); // stop the thread
     myThread->wait();
-    myThread.nullify();
+    myThread.reset();
 }
 
 void StImageLoader::setCompressMemory(const bool theToCompress) {
@@ -95,7 +95,7 @@ void StImageLoader::processLoadFail(const StString& theErrorDesc) {
 }
 
 void StImageLoader::metadataFromExif(const std::shared_ptr<StExifDir>& theDir,
-                                     StHandle<StImageInfo>&     theInfo) {
+                                     std::shared_ptr<StImageInfo>&     theInfo) {
     if (theDir.get() == nullptr) {
         return;
     }
@@ -118,14 +118,14 @@ void StImageLoader::metadataFromExif(const std::shared_ptr<StExifDir>& theDir,
     }
 }
 
-inline StHandle<StImage> scaledImage(StHandle<StImageFile>& theRef,
-                                     const StGLDeviceCaps&  theCaps,
-                                     const size_t           theMaxSizeX,
-                                     const size_t           theMaxSizeY,
-                                     StCubemap              theCubemap,
-                                     const size_t*          theCubeCoeffs,
-                                     StPairRatio            thePairRatio) {
-    if(theRef->isNull()) {
+inline std::shared_ptr<StImage> scaledImage(std::shared_ptr<StImageFile>& theRef,
+                                            const StGLDeviceCaps&  theCaps,
+                                            const size_t           theMaxSizeX,
+                                            const size_t           theMaxSizeY,
+                                            StCubemap              theCubemap,
+                                            const size_t*          theCubeCoeffs,
+                                            StPairRatio            thePairRatio) {
+    if (theRef->isNull()) {
         return theRef;
     }
 
@@ -166,7 +166,7 @@ inline StHandle<StImage> scaledImage(StHandle<StImageFile>& theRef,
             return theRef;
         }
 
-        StHandle<StImage> anImage = new StImage();
+        std::shared_ptr<StImage> anImage = std::make_shared<StImage>();
         if(toConvertRgb) {
             anImage->setColorModelPacked(anRgbImgFormat);
             anImage->setColorScale(StImage::ImgScale_Full);
@@ -223,7 +223,7 @@ inline StHandle<StImage> scaledImage(StHandle<StImageFile>& theRef,
         return theRef;
     }
 
-    StHandle<StImage> anImage = new StImage();
+    std::shared_ptr<StImage> anImage = std::make_shared<StImage>();
     const size_t aSizeX = stMin(theRef->getSizeX(), theMaxSizeX);
     const size_t aSizeY = stMin(theRef->getSizeY(), theMaxSizeY);
     if(toConvertRgb) {
@@ -260,15 +260,15 @@ inline StString formatSize(size_t theSizeX,
     return aText;
 }
 
-bool StImageLoader::loadImage(const StHandle<StFileNode>& theSource,
-                              StHandle<StStereoParams>&   theParams) {
+bool StImageLoader::loadImage(const std::shared_ptr<StFileNode>& theSource,
+                              std::shared_ptr<StStereoParams>& theParams) {
     const StString               aFilePath = theSource->getPath();
     const StImageFile::ImageType anImgType = StImageFile::guessImageType(aFilePath, theSource->getMIME());
 
-    StHandle<StImageFile> anImageFileL = StImageFile::create(myImageLib, anImgType);
-    StHandle<StImageFile> anImageFileR = StImageFile::create(myImageLib, anImgType);
-    if(anImageFileL.isNull()
-    || anImageFileR.isNull()) {
+    std::shared_ptr<StImageFile> anImageFileL = StImageFile::create(myImageLib, anImgType);
+    std::shared_ptr<StImageFile> anImageFileR = StImageFile::create(myImageLib, anImgType);
+    if (anImageFileL.get() == nullptr
+     || anImageFileR.get() == nullptr) {
         processLoadFail("No any image library was found!");
         return false;
     }
@@ -276,7 +276,7 @@ bool StImageLoader::loadImage(const StHandle<StFileNode>& theSource,
     // clear active
     myTextureQueue->clear();
 
-    StHandle<StImageInfo> anImgInfo = new StImageInfo();
+    std::shared_ptr<StImageInfo> anImgInfo = std::make_shared<StImageInfo>();
     anImgInfo->Id        = theParams;
     anImgInfo->Path      = aFilePath;
     anImgInfo->ImageType = anImgType;
@@ -311,24 +311,24 @@ bool StImageLoader::loadImage(const StHandle<StFileNode>& theSource,
         double anHParallax = 0.0; // parallax in percents
         const bool isParsed = aParser.readFile(aFilePath, aFileDescriptor);
 
-        StHandle<StJpegParser::Image> anImg1, anImg2;
+        std::shared_ptr<StJpegParser::Image> anImg1, anImg2;
         size_t aMaxSizeX = 0;
         size_t aMaxSizeY = 0;
-        for(StHandle<StJpegParser::Image> anImgIter = aParser.getImage(0); !anImgIter.isNull();
-            anImgIter = anImgIter->Next) {
+        for (std::shared_ptr<StJpegParser::Image> anImgIter = aParser.getImage(0); anImgIter.get() != nullptr;
+             anImgIter = anImgIter->Next) {
             aMaxSizeX = stMax(aMaxSizeX, anImgIter->SizeX);
             aMaxSizeY = stMax(aMaxSizeY, anImgIter->SizeY);
         }
 
         int anImgCounter = 1;
-        for(StHandle<StJpegParser::Image> anImgIter = aParser.getImage(0); !anImgIter.isNull();
-            anImgIter = anImgIter->Next, ++anImgCounter) {
-            if(anImgIter->SizeX == aMaxSizeX
-            && anImgIter->SizeY == aMaxSizeY) {
-                if(anImg1.isNull()) {
+        for (std::shared_ptr<StJpegParser::Image> anImgIter = aParser.getImage(0); anImgIter.get() != nullptr;
+             anImgIter = anImgIter->Next, ++anImgCounter) {
+            if (anImgIter->SizeX == aMaxSizeX
+             && anImgIter->SizeY == aMaxSizeY) {
+                if (anImg1.get() == nullptr) {
                     anImg1 = anImgIter;
                     continue;
-                } else if(anImg2.isNull()) {
+                } else if (anImg2.get() == nullptr) {
                     anImg2 = anImgIter;
                     continue;
                 }
@@ -336,12 +336,12 @@ bool StImageLoader::loadImage(const StHandle<StFileNode>& theSource,
             anImgInfo->Info.add(StArgument(tr(INFO_DIMENSIONS) + (" (") + anImgCounter + ")",
                                            StString() + anImgIter->SizeX + " x " + anImgIter->SizeY));
         }
-        if (anImg1.isNull()) {
+        if (anImg1.get() == nullptr) {
             // handle broken or unknown JPEG files / issues in JPEG parser
             ST_DEBUG_LOG("Warning, StJpegParser returned inconclusive list of sub-images");
             anImg1 = aParser.getImage(0);
         }
-        if (anImg1.isNull()) {
+        if (anImg1.get() == nullptr) {
             processLoadFail(StString("StJpegParser failed on \"") + aFilePath + '\"');
             return false;
         }
@@ -359,7 +359,7 @@ bool StImageLoader::loadImage(const StHandle<StFileNode>& theSource,
             StDictEntry& anEntry  = anImgInfo->Info.addChange("Jpeg.XMP");
             anEntry.changeValue() = aParser.getXMP();
         }
-        if(!anImg1.isNull()) {
+        if (anImg1.get() != nullptr) {
             for(size_t anExifId = 0; anExifId < anImg1->Exif.size(); ++anExifId) {
                 metadataFromExif(anImg1->Exif[anExifId], anImgInfo);
             }
@@ -369,10 +369,10 @@ bool StImageLoader::loadImage(const StHandle<StFileNode>& theSource,
                 anEntry.changeValue() = aTime;
             }
         }
-        if(myStFormatByUser == StFormat_AUTO) {
-            if(aParser.getSrcFormat() != StFormat_AUTO) {
+        if (myStFormatByUser == StFormat_AUTO) {
+            if (aParser.getSrcFormat() != StFormat_AUTO) {
                 aSrcFormatCurr = aParser.getSrcFormat();
-            } else if(!anImg1.isNull() && anImg2.isNull()
+            } else if (anImg1.get() != nullptr && anImg2.get() == nullptr
                     && anImg1->getQooCamMakerNote(aSrcFormatCurr)) {
                 //
             }
@@ -385,7 +385,7 @@ bool StImageLoader::loadImage(const StHandle<StFileNode>& theSource,
             return false;
         }
 
-        anImgInfo->IsSavable = anImg2.isNull();
+        anImgInfo->IsSavable = anImg2.get() == nullptr;
         anImgInfo->StInfoStream = aParser.getSrcFormat();
         if(anImgInfo->StInfoStream != StFormat_AUTO) {
             StDictEntry& anEntry  = anImgInfo->Info.addChange("Jpeg.JpsStereo");
@@ -404,7 +404,7 @@ bool StImageLoader::loadImage(const StHandle<StFileNode>& theSource,
             return false;
         }
 
-        if(!anImg2.isNull()) {
+        if (anImg2.get() != nullptr) {
             // read image from memory
             anImg2->getParallax(anHParallax); // in MPO parallax generally stored ONLY in second frame
             if(!anImageFileR->load(aFilePath, StImageFile::ST_TYPE_JPEG,
@@ -578,9 +578,9 @@ bool StImageLoader::loadImage(const StHandle<StFileNode>& theSource,
         }
     }
 
-    StHandle<StImage> anImageL = scaledImage(anImageFileL, myTextureQueue->getDeviceCaps(), aSizeXLim, aSizeYLim,
+    std::shared_ptr<StImage> anImageL = scaledImage(anImageFileL, myTextureQueue->getDeviceCaps(), aSizeXLim, aSizeYLim,
                                              aSrcCubemap, aCubeCoeffs, aPairRatio);
-    StHandle<StImage> anImageR = scaledImage(anImageFileR, myTextureQueue->getDeviceCaps(), aSizeXLim, aSizeYLim,
+    std::shared_ptr<StImage> anImageR = scaledImage(anImageFileR, myTextureQueue->getDeviceCaps(), aSizeXLim, aSizeYLim,
                                              aSrcCubemap, aCubeCoeffs, aPairRatio);
 #ifdef ST_DEBUG
     const double aScaleTimeMSec = aLoadTimer.getElapsedTimeInMilliSec() - aLoadTimeMSec;
@@ -645,10 +645,10 @@ bool StImageLoader::loadImage(const StHandle<StFileNode>& theSource,
     myLock.unlock();
 
     // clean up - close opened files and reset memory
-    anImageL.nullify();
-    anImageR.nullify();
-    anImageFileL.nullify();
-    anImageFileR.nullify();
+    anImageL.reset();
+    anImageR.reset();
+    anImageFileL.reset();
+    anImageFileR.reset();
 
     myTextureQueue->stglSwapFB(0);
 
@@ -657,11 +657,11 @@ bool StImageLoader::loadImage(const StHandle<StFileNode>& theSource,
     return true;
 }
 
-bool StImageLoader::saveImage(const StHandle<StFileNode>&     theSource,
-                              const StHandle<StStereoParams>& theParams,
-                              StImageFile::ImageType          theImgType) {
-    if(theParams.isNull()
-    || theImgType == StImageFile::ST_TYPE_NONE) {
+bool StImageLoader::saveImage(const std::shared_ptr<StFileNode>& theSource,
+                              const std::shared_ptr<StStereoParams>& theParams,
+                              StImageFile::ImageType theImgType) {
+    if (theParams.get() == nullptr
+     || theImgType == StImageFile::ST_TYPE_NONE) {
         myMsgQueue->pushError(tr(DIALOG_NOTHING_TO_SAVE));
         return false;
     }
@@ -679,8 +679,8 @@ bool StImageLoader::saveImage(const StHandle<StFileNode>&     theSource,
         myMsgQueue->pushInfo(tr(DIALOG_NO_SNAPSHOT));
         return false;
     }
-    StHandle<StImageFile> aDataResult = StImageFile::create(myImageLib);
-    if(aDataResult.isNull()) {
+    std::shared_ptr<StImageFile> aDataResult = StImageFile::create(myImageLib);
+    if (aDataResult.get() == nullptr) {
         myMsgQueue->pushError(stCString("No any image library was found!"));
         return false;
     }
@@ -768,13 +768,13 @@ bool StImageLoader::saveImage(const StHandle<StFileNode>&     theSource,
     return true;
 }
 
-bool StImageLoader::saveImageInfo(const StHandle<StImageInfo>& theInfo) {
-    if(theInfo.isNull()
-    || theInfo->Path.isEmpty()) {
+bool StImageLoader::saveImageInfo(const std::shared_ptr<StImageInfo>& theInfo) {
+    if (theInfo.get() == nullptr
+     || theInfo->Path.isEmpty()) {
         myMsgQueue->pushError(tr(DIALOG_NOTHING_TO_SAVE));
         return false;
-    } else if(theInfo->ImageType != StImageFile::ST_TYPE_JPEG
-           && theInfo->ImageType != StImageFile::ST_TYPE_JPS) {
+    } else if (theInfo->ImageType != StImageFile::ST_TYPE_JPEG
+            && theInfo->ImageType != StImageFile::ST_TYPE_JPS) {
         myMsgQueue->pushError(stCString("Operation is unavailable for this image type"));
         return false;
     }
@@ -799,8 +799,8 @@ bool StImageLoader::saveImageInfo(const StHandle<StImageInfo>& theInfo) {
 }
 
 void StImageLoader::mainLoop() {
-    StHandle<StFileNode>     aFileToLoad;
-    StHandle<StStereoParams> aFileParams;
+    std::shared_ptr<StFileNode>     aFileToLoad;
+    std::shared_ptr<StStereoParams> aFileParams;
     for(;;) {
         myLoadNextEvent.wait();
         switch(myAction) {
@@ -823,8 +823,8 @@ void StImageLoader::mainLoop() {
             }
             case Action_SaveInfo: {
                 myLock.lock();
-                StHandle<StImageInfo> anInfo = myInfoToSave;
-                myInfoToSave.nullify();
+                std::shared_ptr<StImageInfo> anInfo = myInfoToSave;
+                myInfoToSave.reset();
                 myAction = Action_NONE;
                 myLock.unlock();
                 myLoadNextEvent.reset();

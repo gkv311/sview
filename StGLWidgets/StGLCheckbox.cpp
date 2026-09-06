@@ -41,26 +41,26 @@ StGLCheckbox::StGLCheckbox(StGLWidget* theParent,
     changeRectPx().bottom() = getRectPx().top()  + theParent->getRoot()->scale(16);
 
     myTextures = myRoot->getCheckboxIcon();
-    if(myTextures.isNull()) {
+    if (myTextures.get() == nullptr) {
         const StString& anIcon0 = myRoot->getIcon(StGLRootWidget::IconImage_CheckboxOff);
         const StString& anIcon1 = myRoot->getIcon(StGLRootWidget::IconImage_CheckboxOn);
-        if(!anIcon0.isEmpty()
-        && !anIcon1.isEmpty()) {
-            myTextures = new StGLTextureArray(2);
-            myTextures->changeValue(0).setName(anIcon0);
-            myTextures->changeValue(1).setName(anIcon1);
+        if (!anIcon0.isEmpty()
+         && !anIcon1.isEmpty()) {
+            myTextures = std::make_shared<StGLTextureArray>(2);
+            myTextures->at(0).setName(anIcon0);
+            myTextures->at(1).setName(anIcon1);
             myRoot->getCheckboxIcon() = myTextures;
         }
     }
 }
 
 StGLCheckbox::~StGLCheckbox() {
-    myTextures.nullify(); // will be released by StGLRootWidget
+    myTextures.reset(); // will be released by StGLRootWidget
     myVertBuf.release(getContext());
 }
 
 void StGLCheckbox::stglResize() {
-    if(!myTextures.isNull()) {
+    if (myTextures.get() != nullptr) {
         StGLTextureButton::stglResize();
         return;
     }
@@ -88,14 +88,14 @@ void StGLCheckbox::stglResize() {
 }
 
 bool StGLCheckbox::stglInit() {
-    if(!myTextures.isNull()
-    &&  StGLTextureButton::stglInit()) {
+    if (myTextures.get() != nullptr
+     && StGLTextureButton::stglInit()) {
         return true;
     }
 
     // already initialized?
-    myTextures.nullify();
-    if(myVertBuf.isValid()) {
+    myTextures.reset();
+    if (myVertBuf.isValid()) {
         return true;
     }
 
@@ -103,7 +103,7 @@ bool StGLCheckbox::stglInit() {
     StGLContext& aCtx = getContext();
     std::vector<StGLVec2> aDummyVert;
     aDummyVert.resize(8);
-    if(!myVertBuf.init(aCtx, aDummyVert)) {
+    if (!myVertBuf.init(aCtx, aDummyVert)) {
         return false;
     }
 
@@ -112,19 +112,19 @@ bool StGLCheckbox::stglInit() {
 }
 
 void StGLCheckbox::stglDraw(unsigned int theView) {
-    if(!isVisible()) {
+    if (!isVisible()) {
         return;
     }
 
     myFaceId = myTrackValue->getValue() ? 1 : 0;
-    if(!myTextures.isNull()) {
+    if (myTextures.get() != nullptr) {
         StGLTextureButton::stglDraw(theView);
         return;
     }
 
     StGLContext&     aCtx     = getContext();
     StGLMenuProgram& aProgram = myRoot->getMenuProgram();
-    if(myIsResized) {
+    if (myIsResized) {
         stglResize();
     }
 

@@ -62,17 +62,17 @@ using namespace StMoviePlayerStrings;
 
 namespace {
 
-    static const int DISPL_Y_REGION_UPPER  = 32;
-    static const int DISPL_X_REGION_UPPER  = 32;
-    static const int DISPL_X_REGION_BOTTOM = 52;
+    static constexpr int DISPL_Y_REGION_UPPER  = 32;
+    static constexpr int DISPL_X_REGION_UPPER  = 32;
+    static constexpr int DISPL_X_REGION_BOTTOM = 52;
 
-    static const StGLVec3 aBlack (0.0f, 0.0f, 0.0f);
-    static const StGLVec3 aGreen (0.0f, 0.6f, 0.4f);
-    static const StGLVec3 aRed   (1.0f, 0.0f, 0.0f);
+    static constexpr StGLVec3 aBlack (0.0f, 0.0f, 0.0f);
+    static constexpr StGLVec3 aGreen (0.0f, 0.6f, 0.4f);
+    static constexpr StGLVec3 aRed   (1.0f, 0.0f, 0.0f);
 
 }
 
-void StMoviePlayerGUI::createDesktopUI(const StHandle<StPlayList>& thePlayList) {
+void StMoviePlayerGUI::createDesktopUI(const std::shared_ptr<StPlayList>& thePlayList) {
     createImageAdjustments();
     createUpperToolbar();
     createBottomToolbar(64, 32);
@@ -903,7 +903,7 @@ StGLMenu* StMoviePlayerGUI::createOutputMenu() {
          ->signals.onItemClick.connect(this, &StMoviePlayerGUI::doAboutRenderer);
     aMenu->addItem(tr(MENU_FPS),           aMenuFpsControl);
 
-    const StHandle<StWindow>& aRend = myPlugin->getMainWindow();
+    const std::shared_ptr<StWindow>& aRend = myPlugin->getMainWindow();
     StParamsList aParams;
     aRend->getOptions(aParams);
     StHandle<StBoolParamNamed> aBool;
@@ -1006,14 +1006,14 @@ class ST_LOCAL StInfoDialog : public StGLMessageBox {
 };
 
 void StMoviePlayerGUI::doAboutFile(const size_t ) {
-    StHandle<StMovieInfo>& anExtraInfo = myPlugin->myFileInfo;
-    anExtraInfo.nullify();
+    std::shared_ptr<StMovieInfo>& anExtraInfo = myPlugin->myFileInfo;
+    anExtraInfo.reset();
 
-    StHandle<StFileNode>     aFileNode;
-    StHandle<StStereoParams> aParams;
+    std::shared_ptr<StFileNode>     aFileNode;
+    std::shared_ptr<StStereoParams> aParams;
     if(!myPlugin->getCurrentFile(aFileNode, aParams, anExtraInfo)
-    ||  anExtraInfo.isNull()) {
-        anExtraInfo.nullify();
+    ||  anExtraInfo.get() == nullptr) {
+        anExtraInfo.reset();
         StGLMessageBox* aMsgBox = new StGLMessageBox(this, tr(DIALOG_FILE_INFO), tr(DIALOG_FILE_NOINFO));
         aMsgBox->addButton(tr(BUTTON_CLOSE), true);
         aMsgBox->stglInit();
@@ -1191,7 +1191,7 @@ StGLMenu* StMoviePlayerGUI::createLanguageMenu() {
     return aMenu;
 }
 
-void StMoviePlayerGUI::createMobileUI(const StHandle<StPlayList>& thePlayList) {
+void StMoviePlayerGUI::createMobileUI(const std::shared_ptr<StPlayList>& thePlayList) {
     createImageAdjustments();
     createMobileUpperToolbar();
     createMobileBottomToolbar();
@@ -1534,8 +1534,8 @@ void StMoviePlayerGUI::doOpenFile(const size_t theFileType) {
     }
 
     if(myPlugin->params.lastFolder.isEmpty()) {
-        StHandle<StFileNode> aCurrFile = myPlugin->myPlayList->getCurrentFile();
-        if(!aCurrFile.isNull()) {
+        std::shared_ptr<StFileNode> aCurrFile = myPlugin->myPlayList->getCurrentFile();
+        if (aCurrFile.get() != nullptr) {
             myPlugin->params.lastFolder = aCurrFile->isEmpty() ? aCurrFile->getFolderPath() : aCurrFile->getValue(0)->getFolderPath();
         }
     }
@@ -1546,19 +1546,19 @@ void StMoviePlayerGUI::doOpenFile(const size_t theFileType) {
 void StMoviePlayerGUI::doShowMobileExMenu(const size_t ) {
     const int aTop = scale(56);
 
-    StHandle<StMovieInfo>&   anExtraInfo = myPlugin->myFileInfo;
-    StHandle<StFileNode>     aFileNode;
-    StHandle<StStereoParams> aParams;
-    if(anExtraInfo.isNull()
-    && !myPlugin->getCurrentFile(aFileNode, aParams, anExtraInfo)) {
-        anExtraInfo.nullify();
+    std::shared_ptr<StMovieInfo>&   anExtraInfo = myPlugin->myFileInfo;
+    std::shared_ptr<StFileNode>     aFileNode;
+    std::shared_ptr<StStereoParams> aParams;
+    if (anExtraInfo.get() == nullptr
+     && !myPlugin->getCurrentFile(aFileNode, aParams, anExtraInfo)) {
+        anExtraInfo.reset();
     }
 
     StGLMenu*     aMenu  = new StGLMenu(this, 0, aTop, StGLMenu::MENU_VERTICAL_COMPACT, true);
     StGLMenuItem* anItem = NULL;
     aMenu->setCorner(StGLCorner(ST_VCORNER_TOP, ST_HCORNER_RIGHT));
     aMenu->setContextual(true);
-    if(!anExtraInfo.isNull()) {
+    if (anExtraInfo.get() != nullptr) {
         anItem = aMenu->addItem(tr(BUTTON_DELETE), myPlugin->getAction(StMoviePlayer::Action_DeleteFile));
         anItem->setIcon(stCMenuIcon("actionDiscard"));
 
@@ -1602,7 +1602,7 @@ void StMoviePlayerGUI::doShowMobileExMenu(const size_t ) {
             anItem->signals.onItemClick += stSlot(this, &StMoviePlayerGUI::doDisplayRatioCombo);
         }
 
-        anExtraInfo.nullify();
+        anExtraInfo.reset();
     }
     anItem = aMenu->addItem(tr(MENU_HELP_ABOUT));
     anItem->setIcon(stCMenuIcon("actionHelp"));
@@ -1614,13 +1614,13 @@ void StMoviePlayerGUI::doShowMobileExMenu(const size_t ) {
     setFocus(aMenu);
 }
 
-StMoviePlayerGUI::StMoviePlayerGUI(StMoviePlayer*  thePlugin,
-                                   StWindow*       theWindow,
+StMoviePlayerGUI::StMoviePlayerGUI(StMoviePlayer* thePlugin,
+                                   StWindow* theWindow,
                                    StTranslations* theLangMap,
-                                   const StHandle<StPlayList>&       thePlayList,
-                                   const StHandle<StGLTextureQueue>& theTextureQueue,
-                                   const StHandle<StSubQueue>&       theSubQueue1,
-                                   const StHandle<StSubQueue>&       theSubQueue2)
+                                   const std::shared_ptr<StPlayList>& thePlayList,
+                                   const std::shared_ptr<StGLTextureQueue>& theTextureQueue,
+                                   const std::shared_ptr<StSubQueue>& theSubQueue1,
+                                   const std::shared_ptr<StSubQueue>& theSubQueue2)
 : StGLRootWidget(thePlugin->myResMgr),
   myPlugin(thePlugin),
   myWindow(theWindow),
@@ -1969,14 +1969,14 @@ void StMoviePlayerGUI::setVisibility(const StPointD_t& theCursor,
     myAnimVisibility.setEmptyImage(!hasVideo && !myPlugin->myPlayList->isEmpty());
     myAnimVisibility.updateVisibility(theToForceHide, theToForceShow);
 
-    StHandle<StStereoParams> aParams = myImage->getSource();
+    std::shared_ptr<StStereoParams> aParams = myImage->getSource();
     StFormat aSrcFormat = (StFormat )myPlugin->params.SrcStereoFormat->getValue();
-    if( aSrcFormat == StFormat_AUTO
-    && !aParams.isNull()
-    &&  hasVideo) {
+    if (aSrcFormat == StFormat_AUTO
+     && aParams.get() != nullptr
+     && hasVideo) {
         aSrcFormat = aParams->StereoFormat;
     }
-    if(!aParams.isNull()
+    if (aParams.get() != nullptr
      && myImage->params.SwapLR->getValue()
      && hasVideo) {
         aSrcFormat = st::formatReversed(aSrcFormat);
@@ -1986,7 +1986,7 @@ void StMoviePlayerGUI::setVisibility(const StPointD_t& theCursor,
                          && aSrcFormat != StFormat_AUTO;
 
     bool toShowAll = myAnimVisibility.isVisibleGui();
-    if(!toShowAll && aParams.isNull()) {
+    if (!toShowAll && aParams.get() == nullptr) {
         // reveal GUI if nothing is open
         toShowAll = true;
     }
@@ -2054,19 +2054,19 @@ void StMoviePlayerGUI::setVisibility(const StPointD_t& theCursor,
 
     ///
 
-    const StViewSurface aViewMode = hasVideo && !aParams.isNull()
+    const StViewSurface aViewMode = hasVideo && aParams.get() != nullptr
                                   ? aParams->ViewingMode
                                   : StViewSurface_Plain;
     bool toShowPano = aViewMode != StViewSurface_Plain;
-    if(!toShowPano
-    &&  hasVideo
-    && !aParams.isNull()
+    if (!toShowPano
+     && hasVideo
+     && aParams.get() != nullptr
     /*&&  st::probePanorama(aParams->StereoFormat,
                           aParams->Src1SizeX, aParams->Src1SizeY,
                           aParams->Src2SizeX, aParams->Src2SizeY) != StPanorama_OFF*/) {
         toShowPano = true;
     }
-    if(myBtnPanorama != NULL) {
+    if (myBtnPanorama != nullptr) {
         myBtnPanorama->getTrackedValue()->setValue(aViewMode != StViewSurface_Plain);
         setWidgetOpacity(myBtnPanorama, toShowPano ? anOpacity : 0.0f, false);
     }
@@ -2288,9 +2288,9 @@ void StMoviePlayerGUI::doSubtitlesStreamsCombo(const size_t theIndex) {
     }
 
     if (aStreams.get() != nullptr && !aStreams->empty() && hasVideoStream) {
-        StHandle<StStereoParams> aParams = myImage->getSource();
+        std::shared_ptr<StStereoParams> aParams = myImage->getSource();
         StFormat aSrcFormat = (StFormat )myPlugin->params.SrcStereoFormat->getValue();
-        if(aSrcFormat == StFormat_AUTO && !aParams.isNull()) {
+        if (aSrcFormat == StFormat_AUTO && aParams.get() != nullptr) {
             aSrcFormat = aParams->StereoFormat;
         }
         if(aSrcFormat == StFormat_SideBySide_LR
@@ -2421,7 +2421,7 @@ void StMoviePlayerGUI::doResetHotKeys(const size_t ) {
 }
 
 void StMoviePlayerGUI::doListHotKeys(const size_t ) {
-    const StHandle<StWindow>& aRend = myPlugin->getMainWindow();
+    const std::shared_ptr<StWindow>& aRend = myPlugin->getMainWindow();
     StParamsList aParams;
     aParams.push_back(myPlugin->StApplication::params.ActiveDevice);
     aParams.push_back(myImage->params.DisplayMode);
@@ -2464,7 +2464,7 @@ void StMoviePlayerGUI::doChangeHotKey2(const size_t theId) {
 }
 
 void StMoviePlayerGUI::doMobileSettings(const size_t ) {
-    const StHandle<StWindow>& aRend = myPlugin->getMainWindow();
+    const std::shared_ptr<StWindow>& aRend = myPlugin->getMainWindow();
     StParamsList aParams;
     aParams.push_back(myPlugin->StApplication::params.ActiveDevice);
     aParams.push_back(myImage->params.DisplayMode);

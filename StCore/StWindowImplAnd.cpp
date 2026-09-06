@@ -385,7 +385,7 @@ bool StWindowImpl::onAndroidInitWindow() {
     myRectNorm.bottom() = myRectNorm.top()  + aHeight;
     myRectFull = myRectNorm;
 
-    myGlContext = new StGLContext(myResMgr);
+    myGlContext = std::make_shared<StGLContext>(myResMgr);
     if(!myGlContext->stglInit()) {
         myMaster.close();
         mySlave.close();

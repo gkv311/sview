@@ -123,8 +123,9 @@ class StGLOpenFile : public StGLMessageBox {
 
         protected: //! @name class fields
 
-    StHandle<StGLTextureArray> myTextureFolder;
-    StHandle<StGLTextureArray> myTextureFile;
+    std::shared_ptr<StGLTextureArray> myTextureFolder;
+    std::shared_ptr<StGLTextureArray> myTextureFile;
+
     StGLTextArea*              myCurrentPath;
     StGLScrollArea*            myHotListContent;
     StGLMenu*                  myHotList;       //!< widget containing the list of predefined libraries

@@ -9,10 +9,6 @@
 
 #include "StImageFile.h"
 
-// define StHandle template specialization
-class StStbImage;
-ST_DEFINE_HANDLE(StStbImage, StImageFile);
-
 /**
  * This class implements image load/save operations using STB library.
  */
@@ -30,7 +26,7 @@ class StStbImage : public StImageFile {
     ST_CPPEXPORT StStbImage();
     ST_CPPEXPORT virtual ~StStbImage();
 
-    ST_LOCAL virtual StHandle<StImageFile> createEmpty() const ST_ATTR_OVERRIDE { return new StStbImage(); }
+    ST_LOCAL virtual std::shared_ptr<StImageFile> createEmpty() const ST_ATTR_OVERRIDE { return std::make_shared<StStbImage>(); }
 
     ST_CPPEXPORT virtual void close() ST_ATTR_OVERRIDE;
     ST_CPPEXPORT virtual bool loadExtra(const StString& theFilePath,
@@ -44,7 +40,7 @@ class StStbImage : public StImageFile {
 
         private:
 
-     void* myStbImage;
+     void* myStbImage = nullptr;
 
 };
 

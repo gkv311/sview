@@ -26,8 +26,8 @@ class StOutIZ3D : public StWindow {
     /**
      * Main constructor.
      */
-    ST_CPPEXPORT StOutIZ3D(const StHandle<StResourceManager>& theResMgr,
-                           const StNativeWin_t                theParentWindow);
+    ST_CPPEXPORT StOutIZ3D(const std::shared_ptr<StResourceManager>& theResMgr,
+                           const StNativeWin_t theParentWindow);
 
     /**
      * Destructor.
@@ -123,12 +123,13 @@ class StOutIZ3D : public StWindow {
 
         private:
 
-    StOutDevicesList                myDevices;
-    StHandle<StSettings>            mySettings;
-    StString                        myAbout;           //!< about string
+    StOutDevicesList            myDevices;
+    std::shared_ptr<StSettings> mySettings;
+    StString                    myAbout;    //!< about string
 
-    StHandle<StGLContext>           myContext;
-    StHandle<StGLStereoFrameBuffer> myFrBuffer;        //!< frame buffer to draw
+    std::shared_ptr<StGLContext>           myContext;
+    std::shared_ptr<StGLStereoFrameBuffer> myFrBuffer; //!< frame buffer to draw
+
     StOutIZ3DShaders                myShaders;         //!< IZ3D shaders
     StGLTexture                     myTexTableOld;     //!< table textures
     StGLTexture                     myTexTableNew;

@@ -36,9 +36,9 @@ class StVideoTimer {
      * @param theAudio audio stream to synchronize from
      * @param theDelayVVFixedMs default video frame delay for streams with fixed FPS
      */
-    ST_LOCAL StVideoTimer(const StHandle<StVideoQueue>& theVideo,
-                          const StHandle<StAudioQueue>& theAudio,
-                          const double                  theDelayVVFixedMs = 40.0);
+    ST_LOCAL StVideoTimer(const std::shared_ptr<StVideoQueue>& theVideo,
+                          const std::shared_ptr<StAudioQueue>& theAudio,
+                          const double theDelayVVFixedMs = 40.0);
 
     /**
      * Destructor.
@@ -100,9 +100,10 @@ class StVideoTimer {
 
         private:
 
-    StHandle<StThread>     myThread;          //!< timer loop thread
-    StHandle<StVideoQueue> myVideo;           //!< video queue to sync
-    StHandle<StAudioQueue> myAudio;           //!< audio queue to sync from
+    std::shared_ptr<StThread>     myThread;   //!< timer loop thread
+    std::shared_ptr<StVideoQueue> myVideo;    //!< video queue to sync
+    std::shared_ptr<StAudioQueue> myAudio;    //!< audio queue to sync from
+
     mutable StMutex        myInfoLock;        //!< lock to retrieve information from other threads
     StCondition            myToQuitEv;        //!< thread exit event
     StTimer                myTimer;           //!< timer to refresh frames

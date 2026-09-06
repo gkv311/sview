@@ -285,16 +285,13 @@ struct StAVIOJniHttpContext::FunctionTable {
 };
 #endif
 
-StAVIOJniHttpContext::StAVIOJniHttpContext()
-: myFunctions(NULL),
+StAVIOJniHttpContext::StAVIOJniHttpContext() :
 #if defined(__ANDROID__)
-  myJEnv((JavaVM* )av_jni_get_java_vm(NULL)),
+  myJEnv((JavaVM* )av_jni_get_java_vm(nullptr))
 #else
-  myJEnv(NULL),
+  myJEnv(nullptr)
 #endif
-  myReadChannel(NULL),
-  myContentLen(0),
-  myPosition(0) {
+{
 #if defined(__ANDROID__)
     if(!myJEnv.isNull()) {
         myFunctions = new FunctionTable();

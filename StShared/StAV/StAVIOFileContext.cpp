@@ -10,8 +10,7 @@ extern "C" {
     #include <libavutil/error.h>
 };
 
-StAVIOFileContext::StAVIOFileContext()
-: myFile(NULL) {
+StAVIOFileContext::StAVIOFileContext() {
     //
 }
 
@@ -20,9 +19,9 @@ StAVIOFileContext::~StAVIOFileContext() {
 }
 
 void StAVIOFileContext::close() {
-    if(myFile != NULL) {
+    if (myFile != nullptr) {
         fclose(myFile);
-        myFile = NULL;
+        myFile = nullptr;
     }
 }
 
@@ -33,13 +32,13 @@ bool StAVIOFileContext::openFromDescriptor(int theFD, const char* theMode) {
 #else
     myFile =  ::fdopen(theFD, theMode);
 #endif
-    return myFile != NULL;
+    return myFile != nullptr;
 }
 
 int StAVIOFileContext::read(uint8_t* theBuf,
                             int      theBufSize) {
 
-    if(myFile == NULL) {
+    if (myFile == nullptr) {
         return -1;
     }
 
@@ -54,7 +53,7 @@ int StAVIOFileContext::read(uint8_t* theBuf,
 
 int StAVIOFileContext::write(const uint8_t* theBuf,
                              const int      theBufSize) {
-    if(myFile == NULL) {
+    if (myFile == nullptr) {
         return -1;
     }
 
@@ -63,8 +62,8 @@ int StAVIOFileContext::write(const uint8_t* theBuf,
 
 int64_t StAVIOFileContext::seek(int64_t theOffset,
                                 int     theWhence) {
-    if(theWhence == AVSEEK_SIZE
-    || myFile == NULL) {
+    if (theWhence == AVSEEK_SIZE
+     || myFile == nullptr) {
         return -1;
     }
 

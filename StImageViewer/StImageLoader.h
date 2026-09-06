@@ -34,7 +34,8 @@ class StThread;
 
 struct StImageInfo {
 
-    StHandle<StStereoParams> Id;
+    std::shared_ptr<StStereoParams> Id;
+
     StArgumentsMap           Info;
     StString                 Path;           //!< file path
     StImageFile::ImageType   ImageType;      //!< image type
@@ -72,16 +73,16 @@ class StImageLoader {
 
     ST_LOCAL const StMIMEList& getMimeListVideo() const { return myVideoMimeList; }
 
-    ST_LOCAL StImageLoader(const StImageFile::ImageClass      theImageLib,
-                           const StHandle<StResourceManager>& theResMgr,
-                           const StHandle<StMsgQueue>&        theMsgQueue,
-                           const StHandle<StLangMap>&         theLangMap,
-                           const StHandle<StPlayList>&        thePlayList,
-                           const StHandle<StGLTextureQueue>&  theTextureQueue,
-                           const GLint                        theMaxTexDim);
+    ST_LOCAL StImageLoader(const StImageFile::ImageClass             theImageLib,
+                           const std::shared_ptr<StResourceManager>& theResMgr,
+                           const std::shared_ptr<StMsgQueue>&        theMsgQueue,
+                           const std::shared_ptr<StLangMap>&         theLangMap,
+                           const std::shared_ptr<StPlayList>&        thePlayList,
+                           const std::shared_ptr<StGLTextureQueue>&  theTextureQueue,
+                           const GLint                               theMaxTexDim);
     ST_LOCAL ~StImageLoader();
 
-    ST_LOCAL inline const StHandle<StGLTextureQueue>& getTextureQueue() const {
+    ST_LOCAL const std::shared_ptr<StGLTextureQueue>& getTextureQueue() const {
         return myTextureQueue;
     }
 
@@ -107,7 +108,7 @@ class StImageLoader {
         myLoadNextEvent.set();
     }
 
-    ST_LOCAL void doSaveInfo(const StHandle<StImageInfo>& theInfo) {
+    ST_LOCAL void doSaveInfo(const std::shared_ptr<StImageInfo>& theInfo) {
         myLock.lock();
         myInfoToSave = theInfo;
         myAction     = Action_SaveInfo;
@@ -115,11 +116,11 @@ class StImageLoader {
         myLoadNextEvent.set();
     }
 
-    ST_LOCAL StHandle<StImageInfo> getFileInfo(const StHandle<StStereoParams>& theParams) const {
+    ST_LOCAL std::shared_ptr<StImageInfo> getFileInfo(const std::shared_ptr<StStereoParams>& theParams) const {
         myLock.lock();
-        StHandle<StImageInfo> anInfo = myImgInfo;
+        std::shared_ptr<StImageInfo> anInfo = myImgInfo;
         myLock.unlock();
-        return (!anInfo.isNull() && anInfo->Id == theParams) ? anInfo : NULL;
+        return (anInfo.get() != nullptr && anInfo->Id == theParams) ? anInfo : std::shared_ptr<StImageInfo>();
     }
 
     ST_LOCAL void setStereoFormat(const StFormat theSrcFormat) {
@@ -185,13 +186,13 @@ class StImageLoader {
 
         private:
 
-    ST_LOCAL bool loadImage(const StHandle<StFileNode>& theSource,
-                            StHandle<StStereoParams>&   theParams);
-    ST_LOCAL bool saveImage(const StHandle<StFileNode>& theSource,
-                            const StHandle<StStereoParams>& theParams,
+    ST_LOCAL bool loadImage(const std::shared_ptr<StFileNode>& theSource,
+                            std::shared_ptr<StStereoParams>&   theParams);
+    ST_LOCAL bool saveImage(const std::shared_ptr<StFileNode>& theSource,
+                            const std::shared_ptr<StStereoParams>& theParams,
                             StImageFile::ImageType theImgType);
 
-    ST_LOCAL bool saveImageInfo(const StHandle<StImageInfo>& theInfo);
+    ST_LOCAL bool saveImageInfo(const std::shared_ptr<StImageInfo>& theInfo);
 
     ST_LOCAL int getSnapshot(StImage* outDataLeft, StImage* outDataRight, bool isForce = false) {
         return myTextureQueue->getSnapshot(outDataLeft, outDataRight, isForce);
@@ -206,7 +207,7 @@ class StImageLoader {
      * Fill metadata map from EXIF.
      */
     ST_LOCAL void metadataFromExif(const std::shared_ptr<StExifDir>& theDir,
-                                   StHandle<StImageInfo>&     theInfo);
+                                   std::shared_ptr<StImageInfo>&     theInfo);
 
     ST_LOCAL const StString& tr(const size_t theId) const {
         return myLangMap->getValue(theId);
@@ -214,20 +215,21 @@ class StImageLoader {
 
         private:
 
-    const StMIMEList            myMimeList;
-    const StMIMEList            myVideoMimeList;
-    StHandle<StThread>          myThread;        //!< main loop thread
-    StHandle<StResourceManager> myResMgr;        //!< resource manager
-    StHandle<StLangMap>         myLangMap;       //!< translations dictionary
-    StHandle<StPlayList>        myPlayList;      //!< play list
-    mutable StMutex             myLock;          //!< lock to access not thread-safe properties
-    StCondition                 myLoadNextEvent;
-    StFormat                    myStFormatByUser;//!< target source format (auto-detect by default)
-    GLint                       myMaxTexDim;     //!< value for GL_MAX_TEXTURE_SIZE
-    StHandle<StGLTextureQueue>  myTextureQueue;  //!< decoded frames queue
-    StHandle<StImageInfo>       myImgInfo;       //!< info about currently loaded image
-    StHandle<StImageInfo>       myInfoToSave;    //!< modified info to be saved
-    StHandle<StMsgQueue>        myMsgQueue;      //!< messages queue
+    const StMIMEList myMimeList;
+    const StMIMEList myVideoMimeList;
+
+    std::shared_ptr<StThread>          myThread;        //!< main loop thread
+    std::shared_ptr<StResourceManager> myResMgr;        //!< resource manager
+    std::shared_ptr<StLangMap>         myLangMap;       //!< translations dictionary
+    std::shared_ptr<StPlayList>        myPlayList;      //!< play list
+    mutable StMutex                    myLock;          //!< lock to access not thread-safe properties
+    StCondition                        myLoadNextEvent;
+    StFormat                           myStFormatByUser;//!< target source format (auto-detect by default)
+    GLint                              myMaxTexDim;     //!< value for GL_MAX_TEXTURE_SIZE
+    std::shared_ptr<StGLTextureQueue>  myTextureQueue;  //!< decoded frames queue
+    std::shared_ptr<StImageInfo>       myImgInfo;       //!< info about currently loaded image
+    std::shared_ptr<StImageInfo>       myInfoToSave;    //!< modified info to be saved
+    std::shared_ptr<StMsgQueue>        myMsgQueue;      //!< messages queue
 
     volatile StImageFile::ImageClass myImageLib;
     volatile Action            myAction;

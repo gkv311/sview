@@ -11,10 +11,6 @@
 
 typedef unsigned int ILuint;
 
-// define StHandle template specialization
-class StDevILImage;
-ST_DEFINE_HANDLE(StDevILImage, StImageFile);
-
 /**
  * This class implements image load/save operations using DevIL library.
  */
@@ -22,11 +18,11 @@ class StDevILImage : public StImageFile {
 
         private:
 
-    ILuint myImageId;
+    ILuint myImageId = 0;
 
         private:
 
-    inline bool isValid() const {
+    ST_LOCAL bool isValid() const {
         return myImageId != 0;
     }
 
@@ -44,7 +40,7 @@ class StDevILImage : public StImageFile {
     ST_CPPEXPORT StDevILImage();
     ST_CPPEXPORT virtual ~StDevILImage();
 
-    ST_LOCAL virtual StHandle<StImageFile> createEmpty() const ST_ATTR_OVERRIDE { return new StDevILImage(); }
+    ST_LOCAL virtual std::shared_ptr<StImageFile> createEmpty() const ST_ATTR_OVERRIDE { return std::make_shared<StDevILImage>(); }
 
     ST_CPPEXPORT virtual void close() ST_ATTR_OVERRIDE;
     ST_CPPEXPORT virtual bool loadExtra(const StString& theFilePath,

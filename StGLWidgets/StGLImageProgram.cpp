@@ -527,7 +527,7 @@ bool StGLImageProgram::init(StGLContext&                 theCtx,
     registerFragments(theCtx);
 
     // re-configure shader parts when required
-    bool isChanged = myActiveProgram.isNull();
+    bool isChanged = myActiveProgram.get() == nullptr;
     isChanged = setFragmentShaderPart(theCtx, FragSection_Main,    0) || isChanged;
     isChanged = setFragmentShaderPart(theCtx, FragSection_Gamma,
                                       stAreEqual(params.gamma->getValue(), 1.0f, 0.0001f) ? FragGamma_Off : FragGamma_On) || isChanged;

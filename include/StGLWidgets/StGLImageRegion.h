@@ -84,32 +84,32 @@ class StGLImageRegion : public StGLWidget {
      * Default constructor.
      */
     ST_CPPEXPORT StGLImageRegion(StGLWidget* theParent,
-                                 const StHandle<StGLTextureQueue>& theTextureQueue,
-                                 const bool  theUsePanningKeys);
+                                 const std::shared_ptr<StGLTextureQueue>& theTextureQueue,
+                                 const bool theUsePanningKeys);
 
     /**
      * Return playlist.
      */
-    ST_LOCAL const StHandle<StPlayList>& getPlayList() const {
+    ST_LOCAL const std::shared_ptr<StPlayList>& getPlayList() const {
         return myList;
     }
 
     /**
      * Set playlist.
      */
-    ST_LOCAL void setPlayList(const StHandle<StPlayList>& theList) {
+    ST_LOCAL void setPlayList(const std::shared_ptr<StPlayList>& theList) {
         myList = theList;
     }
 
     /**
      * Return icon widget displayed on swipe gesture.
      */
-    StGLIcon* changeIconPrev() { return myIconPrev; }
+    ST_LOCAL StGLIcon* changeIconPrev() { return myIconPrev; }
 
     /**
      * Return icon widget displayed on swipe gesture.
      */
-    StGLIcon* changeIconNext() { return myIconNext; }
+    ST_LOCAL StGLIcon* changeIconNext() { return myIconNext; }
 
     /**
      * Setup device orientation.
@@ -119,22 +119,22 @@ class StGLImageRegion : public StGLWidget {
     /**
      * Dragging delay in milliseconds, 0.0 by default.
      */
-    ST_LOCAL inline double getDragDelayMs() const {
+    ST_LOCAL double getDragDelayMs() const {
         return myDragDelayMs;
     }
 
     /**
      * Setup dragging delay in milliseconds.
      */
-    ST_LOCAL inline void setDragDelayMs(const double theValue) {
+    ST_LOCAL void setDragDelayMs(const double theValue) {
         myDragDelayMs = theValue;
     }
 
-    ST_LOCAL inline StHandle<StGLTextureQueue>& getTextureQueue() {
+    ST_LOCAL std::shared_ptr<StGLTextureQueue>& getTextureQueue() {
         return myTextureQueue;
     }
 
-    ST_CPPEXPORT StHandle<StStereoParams> getSource();
+    ST_CPPEXPORT std::shared_ptr<StStereoParams> getSource();
 
     /**
      * Compute the head orientation.
@@ -207,7 +207,7 @@ class StGLImageRegion : public StGLWidget {
         StHandle<StFloat32Param>      Saturation;            //!< saturation value
 
         // per file parameters
-        StHandle<StStereoParams>      stereoFile;
+        std::shared_ptr<StStereoParams> stereoFile;
         StHandle<StBoolParamNamed>    SwapLR;                //!< reversion flag
         StHandle<StInt32ParamNamed>   ViewMode;              //!< StStereoParams::ViewMode
         StHandle<StFloat32Param>      SeparationDX;          //!< DX separation
@@ -235,37 +235,37 @@ class StGLImageRegion : public StGLWidget {
     ST_LOCAL void doParamsReset(const size_t ) { resetParams(); }
 
     ST_LOCAL void doParamsGamma(const size_t theDir) {
-        if(!params.stereoFile.isNull()) {
+        if (params.stereoFile.get() != nullptr) {
             theDir == 1 ? params.Gamma->increment() : params.Gamma->decrement();
         }
     }
 
     ST_LOCAL void doParamsSepX(const size_t theDir) {
-        if(!params.stereoFile.isNull()) {
+        if (params.stereoFile.get() != nullptr) {
             theDir == 1 ? params.SeparationDX->increment() : params.SeparationDX->decrement();
         }
     }
 
     ST_LOCAL void doParamsSepY(const size_t theDir) {
-        if(!params.stereoFile.isNull()) {
+        if (params.stereoFile.get() != nullptr) {
             theDir == 1 ? params.SeparationDY->increment() : params.SeparationDY->decrement();
         }
     }
 
     ST_LOCAL void doParamsRotZ90(const size_t theDir) {
-        if(!params.stereoFile.isNull()) {
+        if (params.stereoFile.get() != nullptr) {
             theDir == 1 ? params.stereoFile->incZRotate() : params.stereoFile->decZRotate();
         }
     }
 
     ST_LOCAL void doParamsRotZLeft(const double theValue) {
-        if(!params.stereoFile.isNull()) {
+        if (params.stereoFile.get() != nullptr) {
             params.stereoFile->decZRotateL((GLfloat )theValue);
         }
     }
 
     ST_LOCAL void doParamsRotZRight(const double theValue) {
-        if(!params.stereoFile.isNull()) {
+        if (params.stereoFile.get() != nullptr) {
             params.stereoFile->incZRotateL((GLfloat )theValue);
         }
     }
@@ -299,27 +299,27 @@ class StGLImageRegion : public StGLWidget {
     }
 
     ST_LOCAL void doParamsPanLeft(const double theValue) {
-        if(!params.stereoFile.isNull()) { params.stereoFile->moveToRight((GLfloat )theValue); }
+        if (params.stereoFile.get() != nullptr) { params.stereoFile->moveToRight((GLfloat )theValue); }
     }
 
     ST_LOCAL void doParamsPanRight(const double theValue) {
-        if(!params.stereoFile.isNull()) { params.stereoFile->moveToLeft((GLfloat )theValue); }
+        if (params.stereoFile.get() != nullptr) { params.stereoFile->moveToLeft((GLfloat )theValue); }
     }
 
     ST_LOCAL void doParamsPanUp(const double theValue) {
-        if(!params.stereoFile.isNull()) { params.stereoFile->moveToDown((GLfloat )theValue); }
+        if (params.stereoFile.get() != nullptr) { params.stereoFile->moveToDown((GLfloat )theValue); }
     }
 
     ST_LOCAL void doParamsPanDown(const double theValue) {
-        if(!params.stereoFile.isNull()) { params.stereoFile->moveToUp((GLfloat )theValue); }
+        if (params.stereoFile.get() != nullptr) { params.stereoFile->moveToUp((GLfloat )theValue); }
     }
 
     ST_LOCAL void doParamsScaleIn(const double theValue) {
-        if(!params.stereoFile.isNull()) { params.stereoFile->scaleIn((GLfloat )theValue); }
+        if (params.stereoFile.get() != nullptr) { params.stereoFile->scaleIn((GLfloat )theValue); }
     }
 
     ST_LOCAL void doParamsScaleOut(const double theValue) {
-        if(!params.stereoFile.isNull()) { params.stereoFile->scaleOut((GLfloat )theValue); }
+        if (params.stereoFile.get() != nullptr) { params.stereoFile->scaleOut((GLfloat )theValue); }
     }
 
     ST_LOCAL void doParamsRotYLeft (const double theValue);
@@ -348,39 +348,40 @@ class StGLImageRegion : public StGLWidget {
 
         private: //! @name private fields
 
-    std::vector< StHandle<StAction> >
-                               myActions;        //!< actions list
-    StHandle<StPlayList>       myList;           //!< handle to playlist
+    std::vector< StHandle<StAction> > myActions; //!< actions list
+    std::shared_ptr<StPlayList> myList;          //!< handle to playlist
 
-    StGLIcon*                  myIconPrev;       //!< icon displayed on swipe gesture
-    StGLIcon*                  myIconNext;       //!< icon displayed on swipe gesture
+    StGLIcon* myIconPrev = nullptr; //!< icon displayed on swipe gesture
+    StGLIcon* myIconNext = nullptr; //!< icon displayed on swipe gesture
 
     StGLQuads                  myQuad;           //!< flat quad
     StGLMesh                   myCube;           //!< cube for drawing cubemap
     StGLVec4                   myCubeClamp;      //!< cubemap clamping vector
-    StPanorama                 myCubePano;       //!< cubemap panorama format
+    StPanorama                 myCubePano = StPanorama_OFF; //!< cubemap panorama format
     StGLUVSphere               myUVSphere;       //!< sphere mesh object
     StGLUVSphere               myHemisphere;     //!< hemisphere mesh object
     StGLUVCylinder             myCylinder;       //!< cylinder mesh object
     StGLUVCylinder             myTheater;        //!< theater cylinder mesh object
     StGLProjCamera             myProjCam;        //!< copy of projection camera
     StGLImageProgram           myProgram;        //!< GL program to draw flat image
-    StHandle<StGLTextureQueue> myTextureQueue;   //!< shared texture queue
+
+    std::shared_ptr<StGLTextureQueue> myTextureQueue; //!< shared texture queue
+
     StPointD_t                 myClickPntZo;     //!< remembered mouse click position
     StTimer                    myClickTimer;     //!< timer to delay dragging action
     StTimer                    myFadeTimer;      //!< timer for transition to the next file
     StPointD_t                 myFadeFrom;       //!< fade starting delta
     StGLQuaternion             myDeviceQuat;     //!< device orientation
-    StVirtFlags                myKeyFlags;       //!< active key flags
-    double                     myDragDelayMs;    //!< dragging delay in milliseconds
-    double                     myDragDelayTmpMs; //!< temporary dragging delay
+    StVirtFlags                myKeyFlags = ST_VF_NONE; //!< active key flags
+    double                     myDragDelayMs = 0.0;    //!< dragging delay in milliseconds
+    double                     myDragDelayTmpMs = 0.0; //!< temporary dragging delay
     StVec2<int>                myFrameSize;      //!< frame dimensions
-    float                      mySampleRatio;    //!< sample aspect ratio
-    float                      myRotAngle;       //!< rotation angle gesture progress
-    bool                       myIsClickAborted;
-    bool                       myToRightRotate;
-    bool                       myIsInitialized;  //!< initialization state
-    bool                       myHasVideoStream; //!< should be initialized for each new stream
+    float                      mySampleRatio = 1.0f;    //!< sample aspect ratio
+    float                      myRotAngle = 0.0f;       //!< rotation angle gesture progress
+    bool                       myIsClickAborted = false;
+    bool                       myToRightRotate = false;
+    bool                       myIsInitialized = false;  //!< initialization state
+    bool                       myHasVideoStream = false; //!< should be initialized for each new stream
 
 };
 

@@ -11,10 +11,10 @@
 #include <StGL/StGLTexture.h>
 #include <StGL/StGLFrameBuffer.h>
 #include <StGL/StGLVec.h>
-#include <StTemplates/StArrayList.h>
 #include <StTemplates/StRect.h>
 
 #include <map>
+#include <vector>
 
 typedef StRect<GLfloat> StGLRect;
 
@@ -29,7 +29,7 @@ struct StGLTile {
 
         public: //! compare operators
 
-    bool operator==(const StGLTile& theCompare) const {
+    ST_LOCAL bool operator==(const StGLTile& theCompare) const {
         return uv == theCompare.uv && px == theCompare.px;
     }
 
@@ -45,7 +45,7 @@ class StGLFontEntry : public StGLResource {
     /**
      * Main constructor.
      */
-    ST_CPPEXPORT StGLFontEntry(const StHandle<StFTFont>& theFont);
+    ST_CPPEXPORT StGLFontEntry(const std::shared_ptr<StFTFont>& theFont);
 
     /**
      * Destructor - should be called after release()!
@@ -60,7 +60,7 @@ class StGLFontEntry : public StGLResource {
     /**
      * @return FreeType font instance specified on construction.
      */
-    inline StHandle<StFTFont>& getFont() {
+    ST_LOCAL std::shared_ptr<StFTFont>& getFont() {
         return myFont;
     }
 
@@ -79,8 +79,8 @@ class StGLFontEntry : public StGLResource {
     /**
      * @return true if font was loaded successfully.
      */
-    inline bool isValid() const {
-        return !myTextures.isEmpty() && myTextures[0]->isValid();
+    ST_LOCAL bool isValid() const {
+        return !myTextures.empty() && myTextures[0]->isValid();
     }
 
     /**
@@ -88,8 +88,8 @@ class StGLFontEntry : public StGLResource {
      * Use isValid() instead.
      * @return true if initialization was already called.
      */
-    inline bool wasInitialized() const {
-        return !myTextures.isEmpty();
+    ST_LOCAL bool wasInitialized() const {
+        return !myTextures.empty();
     }
 
     /**
@@ -111,22 +111,22 @@ class StGLFontEntry : public StGLResource {
      * Compute advance to the next character with kerning applied when applicable.
      * Assuming text rendered horizontally.
      */
-    ST_LOCAL inline float getAdvanceX(const stUtf32_t theUChar,
-                                      const stUtf32_t theUCharNext) {
+    ST_LOCAL float getAdvanceX(const stUtf32_t theUChar,
+                               const stUtf32_t theUCharNext) {
         return myFont->getAdvanceX(theUChar, theUCharNext);
     }
 
     /**
      * @return vertical distance from the horizontal baseline to the highest character coordinate.
      */
-    ST_LOCAL inline GLfloat getAscender() const {
+    ST_LOCAL GLfloat getAscender() const {
         return myAscender;
     }
 
     /**
      * @return default line spacing (the baseline-to-baseline distance).
      */
-    ST_LOCAL inline GLfloat getLineSpacing() const {
+    ST_LOCAL GLfloat getLineSpacing() const {
         return myLineSpacing;
     }
 
@@ -134,16 +134,16 @@ class StGLFontEntry : public StGLResource {
      * @return true if font contains specified symbol
      */
     ST_LOCAL bool hasSymbol(const stUtf32_t theUChar) const {
-        return !myFont.isNull()
-             && myFont->hasSymbol(theUChar);
+        return myFont.get() != nullptr
+            && myFont->hasSymbol(theUChar);
     }
 
     /**
      * @return true if this font contains glyphs of specified subset
      */
     ST_LOCAL bool hasSubset(StFTFont::Subset theSubset) const {
-        return !myFont.isNull()
-             && myFont->hasSubset(theSubset);
+        return myFont.get() != nullptr
+            && myFont->hasSubset(theSubset);
     }
 
     /**
@@ -180,17 +180,18 @@ class StGLFontEntry : public StGLResource {
 
         protected:
 
-    StHandle<StFTFont> myFont;                //!< FreeType font instance
-    GLfloat            myAscender;            //!< ascender     provided my FT font
-    GLfloat            myLineSpacing;         //!< line spacing provided my FT font
-    GLsizei            myTileSizeX;           //!< tile width
-    GLsizei            myTileSizeY;           //!< tile height
-    size_t             myLastTileId;          //!< id of last tile
-    StRect<int>        myLastTilePx;
+    std::shared_ptr<StFTFont> myFont; //!< FreeType font instance
 
-    StArrayList< StHandle<StGLTexture> >     myTextures; //!< texture list
-    StArrayList< StHandle<StGLFrameBuffer> > myFbos;     //!< FBO list
-    StArrayList<StGLTile> myTiles;            //!< tiles list
+    GLfloat     myAscender;            //!< ascender     provided my FT font
+    GLfloat     myLineSpacing;         //!< line spacing provided my FT font
+    GLsizei     myTileSizeX;           //!< tile width
+    GLsizei     myTileSizeY;           //!< tile height
+    size_t      myLastTileId;          //!< id of last tile
+    StRect<int> myLastTilePx;
+
+    std::vector< std::shared_ptr<StGLTexture> >     myTextures; //!< texture list
+    std::vector< std::shared_ptr<StGLFrameBuffer> > myFbos;     //!< FBO list
+    std::vector<StGLTile> myTiles;            //!< tiles list
 
     std::map<stUtf32_t, size_t>  myGlyphMaps[StFTFont::StylesNB];
     std::map<stUtf32_t, size_t>* myGlyphMap;                      //!< glyphs map for active style

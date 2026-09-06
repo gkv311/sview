@@ -11,10 +11,7 @@ extern "C" {
     #include <libavutil/error.h>
 };
 
-StAVIOMemContext::StAVIOMemContext()
-: mySrcBuffer(NULL),
-  mySrcSize(0),
-  myPosition(0) {
+StAVIOMemContext::StAVIOMemContext() {
     //
 }
 

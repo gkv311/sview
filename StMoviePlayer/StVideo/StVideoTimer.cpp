@@ -29,9 +29,9 @@ static SV_THREAD_FUNCTION refreshThread(void* videoTimer) {
     return SV_THREAD_RETURN 0;
 }
 
-StVideoTimer::StVideoTimer(const StHandle<StVideoQueue>& theVideo,
-                           const StHandle<StAudioQueue>& theAudio,
-                           const double                  theDelayVVFixedMs)
+StVideoTimer::StVideoTimer(const std::shared_ptr<StVideoQueue>& theVideo,
+                           const std::shared_ptr<StAudioQueue>& theAudio,
+                           const double theDelayVVFixedMs)
 : myVideo(theVideo),
   myAudio(theAudio),
   myToQuitEv(false),
@@ -54,13 +54,13 @@ StVideoTimer::StVideoTimer(const StHandle<StVideoQueue>& theVideo,
   mySpeedSlowRev(1.0 / mySpeedSlow),
   myIsBenchmark(false) {
     stMemZero(mySpeedDesc, sizeof(mySpeedDesc));
-    myThread = new StThread(refreshThread, (void* )this, "StVideoTimer");
+    myThread = std::make_shared<StThread>(refreshThread, (void* )this, "StVideoTimer");
 }
 
 StVideoTimer::~StVideoTimer() {
     myToQuitEv.set();
     myThread->wait();
-    myThread.nullify();
+    myThread.reset();
 }
 
 bool StVideoTimer::isQuitMessage() {

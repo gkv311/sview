@@ -277,20 +277,20 @@ bool StResourceManager::isResourceExist(const StString& theName) const {
     return false;
 }
 
-StHandle<StResource> StResourceManager::getResource(const StString& theName) const {
+std::shared_ptr<StResource> StResourceManager::getResource(const StString& theName) const {
     const StString aPath = myResFolder + theName;
-    if(StFileNode::isFileExists(aPath)) {
-        return new StFileResource(theName, aPath);
+    if (StFileNode::isFileExists(aPath)) {
+        return std::make_shared<StFileResource>(theName, aPath);
     }
 #if defined(__ANDROID__)
     if(myAssetMgr != NULL) {
         AAsset* anAsset = AAssetManager_open(myAssetMgr, aPath.toCString(), AASSET_MODE_UNKNOWN);
-        if(anAsset != NULL) {
-            return new StAssetResource(theName, aPath, anAsset);
+        if (anAsset != nullptr) {
+            return std::make_shared<StAssetResource>(theName, aPath, anAsset);
         }
     }
 #endif
-    return StHandle<StResource>();
+    return std::shared_ptr<StResource>();
 }
 
 void StResourceManager::listSubFolders(const StString&        theFolder,

@@ -29,9 +29,6 @@ class StSubQueue;
 class StSubtitleQueue;
 class StThread;
 
-// define StHandle template specialization
-ST_DEFINE_HANDLE(StSubtitleQueue, StAVPacketQueue);
-
 /**
  * Subtitles decoding thread.
  */
@@ -43,10 +40,10 @@ class StSubtitleQueue : public StAVPacketQueue {
         return evDowntime.check();
     }
 
-    ST_LOCAL StSubtitleQueue(const StHandle<StSubQueue>& theSubtitlesQueue);
+    ST_LOCAL StSubtitleQueue(const std::shared_ptr<StSubQueue>& theSubtitlesQueue);
     ST_LOCAL virtual ~StSubtitleQueue();
 
-    ST_LOCAL inline const StHandle<StSubQueue>& getSubtitlesQueue() const {
+    ST_LOCAL const std::shared_ptr<StSubQueue>& getSubtitlesQueue() const {
         return myOutQueue;
     }
 
@@ -77,7 +74,8 @@ class StSubtitleQueue : public StAVPacketQueue {
 
         private:
 
-    StHandle<StSubQueue> myOutQueue;
+    std::shared_ptr<StSubQueue> myOutQueue;
+
     StThread*            myThread;   //!< decoding loop thread
     StSubtitlesASS       myASS;      //!< ASS subtitles parser
     StCondition          evDowntime;

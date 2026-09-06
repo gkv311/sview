@@ -12,18 +12,8 @@
 
 #include <StAV/StAVImage.h>
 
-StGLTextureData::StGLTextureData(const StHandle<StGLTextureUploadParams>& theUploadParams)
-: myPrev(NULL),
-  myNext(NULL),
-  myDataPtr(NULL),
-  myDataSizeBytes(0),
-  myStParams(),
-  myPts(0.0),
-  mySrcFormat(StFormat_AUTO),
-  myCubemapFormat(StCubemap_OFF),
-  myUploadParams(theUploadParams),
-  myFillFromRow(0),
-  myFillRows(0) {
+StGLTextureData::StGLTextureData(const std::shared_ptr<StGLTextureUploadParams>& theUploadParams)
+: myUploadParams(theUploadParams) {
     //
 }
 
@@ -350,21 +340,20 @@ void StGLTextureData::copyProps(const StImage& theDataL,
 }
 
 inline bool canCopyReference(const StImage& theData) {
-    if(theData.isNull()) {
+    if (theData.isNull()) {
         return true;
     }
 
-    return !theData.getBufferCounter().isNull()
-        &&  theData.isTopDown();
+    return theData.getBufferCounter().get() != nullptr && theData.isTopDown();
 }
 
-void StGLTextureData::updateData(const StGLDeviceCaps&           theDeviceCaps,
-                                 const StImage&                  theDataL,
-                                 const StImage&                  theDataR,
-                                 const StHandle<StStereoParams>& theStParams,
-                                 const StFormat                  theFormat,
-                                 const StCubemap                 theCubemap,
-                                 const double                    thePts) {
+void StGLTextureData::updateData(const StGLDeviceCaps& theDeviceCaps,
+                                 const StImage& theDataL,
+                                 const StImage& theDataR,
+                                 const std::shared_ptr<StStereoParams>& theStParams,
+                                 const StFormat theFormat,
+                                 const StCubemap theCubemap,
+                                 const double thePts) {
     // setup new stereo source
     myStParams  = theStParams;
     myPts       = thePts;
@@ -886,14 +875,14 @@ bool StGLTextureData::fillTexture(StGLContext&     theCtx,
                                   StGLQuadTexture& theQTexture) {
 
     // setup rows count to be filled per fillTexture()
-    if(myFillRows == 0 || myFillFromRow == 0) {
+    if (myFillRows == 0 || myFillFromRow == 0) {
         // prepare textures for new data
         prepareTextures(theCtx, myDataL, myCubemapFormat, theQTexture.getBack(StGLQuadTexture::LEFT_TEXTURE));
         prepareTextures(theCtx, myDataR, myCubemapFormat, theQTexture.getBack(StGLQuadTexture::RIGHT_TEXTURE));
 
         // remove links to old stereo parameters
-        theQTexture.getBack(StGLQuadTexture::LEFT_TEXTURE).setSource(StHandle<StStereoParams>());
-        theQTexture.getBack(StGLQuadTexture::RIGHT_TEXTURE).setSource(StHandle<StStereoParams>());
+        theQTexture.getBack(StGLQuadTexture::LEFT_TEXTURE).setSource(std::shared_ptr<StStereoParams>());
+        theQTexture.getBack(StGLQuadTexture::RIGHT_TEXTURE).setSource(std::shared_ptr<StStereoParams>());
 
         const int aNbRowsL = stMin(int(myDataL.getSizeY()), theQTexture.getBack(StGLQuadTexture::LEFT_TEXTURE).getSizeY());
         const int aNbRowsR = !myDataR.isNull()
@@ -904,17 +893,17 @@ bool StGLTextureData::fillTexture(StGLContext&     theCtx,
         const int aMaxUploadChunkMiB   = myUploadParams->MaxUploadChunkMiB;
         const int aMaxUploadIterations = myUploadParams->MaxUploadIterations;
         int aNbIters = 1;
-        if(aMaxUploadChunkMiB > 0 && aMaxUploadIterations > 1) {
+        if (aMaxUploadChunkMiB > 0 && aMaxUploadIterations > 1) {
             size_t aStride = 0;
-            for(int aPlaneIter = 0; aPlaneIter < 4; ++aPlaneIter) {
+            for (int aPlaneIter = 0; aPlaneIter < 4; ++aPlaneIter) {
                 const StImagePlane& aPlaneL = myDataL.getPlane(aPlaneIter);
-                if(!aPlaneL.isNull()) {
+                if (!aPlaneL.isNull()) {
                     // don't use aPlane.getSizeRowBytes() here since it may contain extra padding for side-by-side input
                     aStride += aPlaneL.getSizeX() * aPlaneL.getSizePixelBytes();
                 }
-                if(!myDataR.isNull()) {
+                if (!myDataR.isNull()) {
                     const StImagePlane& aPlaneR = myDataR.getPlane(aPlaneIter);
-                    if(!aPlaneR.isNull()) {
+                    if (!aPlaneR.isNull()) {
                         aStride += aPlaneR.getSizeX() * aPlaneR.getSizePixelBytes();
                     }
                 }
@@ -924,26 +913,26 @@ bool StGLTextureData::fillTexture(StGLContext&     theCtx,
             aNbIters = stMin(aMaxUploadIterations, aNbMaxRows / aNbMaxFrameRows);
         }
         myFillRows = (aNbIters > 0) ? (aNbMaxRows / aNbIters) : aNbMaxRows;
-        if(myCubemapFormat == StCubemap_Packed || myCubemapFormat == StCubemap_PackedEAC) {
+        if (myCubemapFormat == StCubemap_Packed || myCubemapFormat == StCubemap_PackedEAC) {
             myFillRows = INT_MAX; /// TODO handle cube maps incremental updates specificall
         }
         myFillFromRow = 0;
     }
 
-    if(myFillRows == 0) {
+    if (myFillRows == 0) {
         // prevent dead loop
         return true;
     }
 
-    if(theQTexture.getBack(StGLQuadTexture::LEFT_TEXTURE).isValid()) {
-        for(size_t aPlaneId = 0; aPlaneId < 4; ++aPlaneId) {
+    if (theQTexture.getBack(StGLQuadTexture::LEFT_TEXTURE).isValid()) {
+        for (size_t aPlaneId = 0; aPlaneId < 4; ++aPlaneId) {
             fillTexture(theCtx,
                         theQTexture.getBack(StGLQuadTexture::LEFT_TEXTURE).getPlane(aPlaneId),
                         myDataL.getPlane(aPlaneId));
         }
     }
-    if(theQTexture.getBack(StGLQuadTexture::RIGHT_TEXTURE).isValid()) {
-        for(size_t aPlaneId = 0; aPlaneId < 4; ++aPlaneId) {
+    if (theQTexture.getBack(StGLQuadTexture::RIGHT_TEXTURE).isValid()) {
+        for (size_t aPlaneId = 0; aPlaneId < 4; ++aPlaneId) {
             fillTexture(theCtx,
                         theQTexture.getBack(StGLQuadTexture::RIGHT_TEXTURE).getPlane(aPlaneId),
                         myDataR.getPlane(aPlaneId));
@@ -952,16 +941,16 @@ bool StGLTextureData::fillTexture(StGLContext&     theCtx,
     theQTexture.getBack(StGLQuadTexture::LEFT_TEXTURE).unbind(theCtx);
 
     myFillFromRow += myFillRows;
-    if(myFillFromRow >= GLsizei(myDataL.getSizeY())
-    && (myDataR.isNull() || myFillFromRow >= GLsizei(myDataR.getSizeY()))) {
-        if(!myDataL.isNull() && theQTexture.getBack(StGLQuadTexture::LEFT_TEXTURE).isValid()) {
+    if (myFillFromRow >= GLsizei(myDataL.getSizeY())
+     && (myDataR.isNull() || myFillFromRow >= GLsizei(myDataR.getSizeY()))) {
+        if (!myDataL.isNull() && theQTexture.getBack(StGLQuadTexture::LEFT_TEXTURE).isValid()) {
             setupAttributes(theQTexture.getBack(StGLQuadTexture::LEFT_TEXTURE), myDataL);
         }
-        if(!myDataR.isNull() && theQTexture.getBack(StGLQuadTexture::RIGHT_TEXTURE).isValid()) {
+        if (!myDataR.isNull() && theQTexture.getBack(StGLQuadTexture::RIGHT_TEXTURE).isValid()) {
             setupAttributes(theQTexture.getBack(StGLQuadTexture::RIGHT_TEXTURE), myDataR);
         }
 
-        if(!myStParams.isNull()) {
+        if (myStParams.get() != nullptr) {
             myStParams->StereoFormat = mySrcFormat;
         }
         return true;
@@ -972,10 +961,10 @@ bool StGLTextureData::fillTexture(StGLContext&     theCtx,
 
 void StGLTextureData::getCopy(StImage* theDataL,
                               StImage* theDataR) const {
-    if(theDataL != NULL) {
+    if (theDataL != nullptr) {
         theDataL->initCopy(myDataL, true);
     }
-    if(theDataR != NULL) {
+    if (theDataR != nullptr) {
         theDataR->initCopy(myDataR, true);
     }
 }

@@ -19,8 +19,9 @@
 #ifndef __StSubtitlesASS_h_
 #define __StSubtitlesASS_h_
 
-#include <StTemplates/StHandle.h>
 #include <StStrings/StString.h>
+
+#include <memory>
 
 // forward declarations
 class StSubItem;
@@ -62,9 +63,9 @@ class StSubtitlesASS {
     /**
      * Parse the dialog event and returns a subtitle item.
      */
-    ST_LOCAL StHandle<StSubItem> parseEvent(const StString& theString,
-                                            double thePts,
-                                            double theDuration);
+    ST_LOCAL std::shared_ptr<StSubItem> parseEvent(const StString& theString,
+                                                   double thePts,
+                                                   double theDuration);
 
         private:
 

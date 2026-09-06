@@ -48,20 +48,20 @@ int sView_main() {
         StProcess::setEnv("StShare", aProcessUpPath);
     }
 
-    StHandle<StResourceManager> aResMgr = new StResourceManager();
-    StHandle<StApplication>     anApp   = StMultiApp::getInstance(aResMgr);
+    std::shared_ptr<StResourceManager> aResMgr = std::make_shared<StResourceManager>();
+    std::shared_ptr<StApplication>     anApp   = StMultiApp::getInstance(aResMgr);
     for(;;) {
-        if(anApp.isNull() || !anApp->open()) {
+        if (anApp.get() == nullptr || !anApp->open()) {
             return 1;
         }
 
         int aResult = anApp->exec();
-        StHandle<StOpenInfo> anOther = anApp->getOpenFileInOtherDrawer();
-        if(anOther.isNull()) {
+        std::shared_ptr<StOpenInfo> anOther = anApp->getOpenFileInOtherDrawer();
+        if (anOther.get() == nullptr) {
             return aResult;
         }
 
-        anApp.nullify();
+        anApp.reset();
         anApp = StMultiApp::getInstance(aResMgr, anOther);
     }
 }

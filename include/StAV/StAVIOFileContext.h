@@ -57,7 +57,7 @@ class StAVIOFileContext : public StAVIOContext {
 
         protected:
 
-    FILE* myFile;
+    FILE* myFile = nullptr;
 
 };
 

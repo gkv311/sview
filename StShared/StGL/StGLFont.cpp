@@ -10,8 +10,8 @@ StGLFont::StGLFont() {
     //
 }
 
-StGLFont::StGLFont(const StHandle<StFTFont>& theFtFont) {
-    myFonts[0] = new StGLFontEntry(theFtFont);
+StGLFont::StGLFont(const std::shared_ptr<StFTFont>& theFtFont) {
+    myFonts[0] = std::make_shared<StGLFontEntry>(theFtFont);
 }
 
 StGLFont::~StGLFont() {
@@ -19,9 +19,9 @@ StGLFont::~StGLFont() {
 }
 
 void StGLFont::release(StGLContext& theCtx) {
-    for(size_t anIter = 0; anIter < StFTFont::SubsetsNB; ++anIter) {
-        StHandle<StGLFontEntry>& aFont = myFonts[anIter];
-        if(!aFont.isNull()) {
+    for (size_t anIter = 0; anIter < StFTFont::SubsetsNB; ++anIter) {
+        std::shared_ptr<StGLFontEntry>& aFont = myFonts[anIter];
+        if (aFont.get() != nullptr) {
             aFont->release(theCtx);
         }
     }
@@ -30,15 +30,15 @@ void StGLFont::release(StGLContext& theCtx) {
 bool StGLFont::stglInit(StGLContext&       theCtx,
                         const unsigned int thePointSize,
                         const unsigned int theResolution) {
-    StHandle<StGLFontEntry>& aFontMain = myFonts[0];
-    if(aFontMain.isNull()
+    std::shared_ptr<StGLFontEntry>& aFontMain = myFonts[0];
+    if (aFontMain.get() == nullptr
     || !aFontMain->stglInit(theCtx, thePointSize, theResolution)) {
         return false;
     }
 
-    for(size_t anIter = 1; anIter < StFTFont::SubsetsNB; ++anIter) {
-        StHandle<StGLFontEntry>& aFont = myFonts[anIter];
-        if(!aFont.isNull()) {
+    for (size_t anIter = 1; anIter < StFTFont::SubsetsNB; ++anIter) {
+        std::shared_ptr<StGLFontEntry>& aFont = myFonts[anIter];
+        if (aFont.get() != nullptr) {
             aFont->stglInit(theCtx, thePointSize, theResolution, false);
         }
     }
@@ -46,15 +46,15 @@ bool StGLFont::stglInit(StGLContext&       theCtx,
 }
 
 bool StGLFont::stglInit(StGLContext& theCtx) {
-    StHandle<StGLFontEntry>& aFontMain = myFonts[0];
-    if(aFontMain.isNull()
+    std::shared_ptr<StGLFontEntry>& aFontMain = myFonts[0];
+    if (aFontMain.get() == nullptr
     || !aFontMain->stglInit(theCtx)) {
         return false;
     }
 
-    for(size_t anIter = 1; anIter < StFTFont::SubsetsNB; ++anIter) {
-        StHandle<StGLFontEntry>& aFont = myFonts[anIter];
-        if(!aFont.isNull()) {
+    for (size_t anIter = 1; anIter < StFTFont::SubsetsNB; ++anIter) {
+        std::shared_ptr<StGLFontEntry>& aFont = myFonts[anIter];
+        if (aFont.get() != nullptr) {
             aFont->stglInit(theCtx, false);
         }
     }
@@ -63,9 +63,9 @@ bool StGLFont::stglInit(StGLContext& theCtx) {
 
 bool StGLFont::setActiveStyle(const StFTFont::Style theStyle) {
     bool hasStyle = false;
-    for(size_t anIter = 0; anIter < StFTFont::SubsetsNB; ++anIter) {
-        StHandle<StGLFontEntry>& aFont = myFonts[anIter];
-        if(!aFont.isNull()) {
+    for (size_t anIter = 0; anIter < StFTFont::SubsetsNB; ++anIter) {
+        std::shared_ptr<StGLFontEntry>& aFont = myFonts[anIter];
+        if (aFont.get() != nullptr) {
             hasStyle = aFont->setActiveStyle(theStyle) || hasStyle;
         }
     }
@@ -78,10 +78,10 @@ void StGLFont::renderGlyph(StGLContext&    theCtx,
                            StGLTile&       theGlyph,
                            StGLVec2&       thePen) {
     const StFTFont::Subset aSubset = StFTFont::subset(theUChar);
-    StHandle<StGLFontEntry>& aFont = myFonts[aSubset];
-    if(!aFont.isNull()
-    && aFont->hasSymbol(theUChar)
-    && aFont->renderGlyph(theCtx, false, theUChar, theUCharNext, theGlyph, thePen)) {
+    std::shared_ptr<StGLFontEntry>& aFont = myFonts[aSubset];
+    if (aFont.get() != nullptr
+     && aFont->hasSymbol(theUChar)
+     && aFont->renderGlyph(theCtx, false, theUChar, theUCharNext, theGlyph, thePen)) {
         return;
     }
     myFonts[0]->renderGlyph(theCtx, true, theUChar, theUCharNext, theGlyph, thePen);

@@ -76,9 +76,9 @@ class StMoviePlayer : public StApplication {
     /**
      * Main constructor.
      */
-    ST_CPPEXPORT StMoviePlayer(const StHandle<StResourceManager>& theResMgr,
-                               const StNativeWin_t                theParentWin = (StNativeWin_t )NULL,
-                               const StHandle<StOpenInfo>&        theOpenInfo  = NULL);
+    ST_CPPEXPORT StMoviePlayer(const std::shared_ptr<StResourceManager>& theResMgr,
+                               const StNativeWin_t                       theParentWin = (StNativeWin_t )nullptr,
+                               const std::shared_ptr<StOpenInfo>&        theOpenInfo  = std::shared_ptr<StOpenInfo>());
 
     /**
      * Destructor.
@@ -151,9 +151,9 @@ class StMoviePlayer : public StApplication {
 
         public: //! @name Properties
 
-    ST_LOCAL bool getCurrentFile(StHandle<StFileNode>&     theFileNode,
-                                 StHandle<StStereoParams>& theParams,
-                                 StHandle<StMovieInfo>&    theInfo);
+    ST_LOCAL bool getCurrentFile(std::shared_ptr<StFileNode>&     theFileNode,
+                                 std::shared_ptr<StStereoParams>& theParams,
+                                 std::shared_ptr<StMovieInfo>&    theInfo);
 
     ST_LOCAL void getRecentList(StArrayList<StString>& theList);
 
@@ -161,7 +161,7 @@ class StMoviePlayer : public StApplication {
      * Return true if mobile UI should be enabled considering user option and window margins.
      */
     ST_LOCAL bool toUseMobileUI() const {
-        return toUseMobileUI(!myWindow.isNull() ? myWindow->getMargins() : StMarginsI());
+        return toUseMobileUI(myWindow.get() != nullptr ? myWindow->getMargins() : StMarginsI());
     }
 
     /**
@@ -281,9 +281,9 @@ class StMoviePlayer : public StApplication {
     ST_LOCAL void updateStrings();
     ST_LOCAL void saveGuiParams();
     ST_LOCAL void saveAllParams();
-    ST_LOCAL bool createGui(StHandle<StGLTextureQueue>& theTextureQueue,
-                            StHandle<StSubQueue>&       theSubQueue1,
-                            StHandle<StSubQueue>&       theSubQueue2);
+    ST_LOCAL bool createGui(std::shared_ptr<StGLTextureQueue>& theTextureQueue,
+                            std::shared_ptr<StSubQueue>&       theSubQueue1,
+                            std::shared_ptr<StSubQueue>&       theSubQueue2);
 
     /**
      * Parse arguments.
@@ -405,15 +405,15 @@ class StMoviePlayer : public StApplication {
 
         private: //! @name private fields
 
-    StHandle<StGLContext>       myContext;
-    StHandle<StSettings>        mySettings;        //!< settings manager for Image Viewer plugin
-    StHandle<StPlayList>        myPlayList;        //!< play list
-    StHandle<StMoviePlayerGUI>  myGUI;             //!< GUI root widget
-    StHandle<StVideo>           myVideo;           //!< main video playback class
-    StHandle<StCheckUpdates>    myUpdates;         //!< check updates utility
-    StHandle<StFileNode>        myFileToDelete;    //!< file node for removal
-    StHandle<StMovieInfo>       myFileInfo;        //!< file info for opened dialog
-    StHandle<StMovieOpenDialog> myOpenDialog;      //!< file open dialog
+    std::shared_ptr<StGLContext>       myContext;
+    std::shared_ptr<StSettings>        mySettings;        //!< settings manager for Image Viewer plugin
+    std::shared_ptr<StPlayList>        myPlayList;        //!< play list
+    std::shared_ptr<StMoviePlayerGUI>  myGUI;             //!< GUI root widget
+    std::shared_ptr<StVideo>           myVideo;           //!< main video playback class
+    std::shared_ptr<StCheckUpdates>    myUpdates;         //!< check updates utility
+    std::shared_ptr<StFileNode>        myFileToDelete;    //!< file node for removal
+    std::shared_ptr<StMovieInfo>       myFileInfo;        //!< file info for opened dialog
+    std::shared_ptr<StMovieOpenDialog> myOpenDialog;      //!< file open dialog
 
     StCondition                 myEventLoaded;     //!< indicate that new file was open
     StTimer                     myInactivityTimer; //!< timer initialized when application goes into paused state

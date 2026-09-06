@@ -27,13 +27,13 @@ class StGLSubtitles : public StGLTextArea {
      * This class groups active subtitle items (with interleaved show time).
      * In most cases will contain just one item.
      */
-    class StSubShowItems : public StArrayList<StHandle <StSubItem> > {
+    class StSubShowItems : public StArrayList<std::shared_ptr <StSubItem> > {
 
             public:
 
-        StString     Text;  //!< active string representation
-        StImagePlane Image; //!< active image  representation
-        float        Scale; //!< image scale factor
+        StString     Text;         //!< active string representation
+        StImagePlane Image;        //!< active image  representation
+        float        Scale = 1.0f; //!< image scale factor
 
             public:
 
@@ -52,7 +52,7 @@ class StGLSubtitles : public StGLTextArea {
         /**
          * Append subtitle item.
          */
-        ST_LOCAL void add(const StHandle<StSubItem>& theItem);
+        ST_LOCAL void add(const std::shared_ptr<StSubItem>& theItem);
 
     };
 
@@ -62,7 +62,7 @@ class StGLSubtitles : public StGLTextArea {
      * Main constructor.
      */
     ST_CPPEXPORT StGLSubtitles(StGLImageRegion* theParent,
-                               const StHandle<StSubQueue>&     theSubQueue,
+                               const std::shared_ptr<StSubQueue>& theSubQueue,
                                const StHandle<StInt32Param>&   thePlace,
                                const StHandle<StFloat32Param>& theFontSize);
 
@@ -79,7 +79,7 @@ class StGLSubtitles : public StGLTextArea {
     /**
      * Retrieve handle to the queue.
      */
-    ST_CPPEXPORT const StHandle<StSubQueue>& getQueue() const;
+    ST_CPPEXPORT const std::shared_ptr<StSubQueue>& getQueue() const;
 
     /**
      * Update PTS.
@@ -102,15 +102,17 @@ class StGLSubtitles : public StGLTextArea {
 
         private:
 
-    StGLTexture              myTexture;   //!< texture for image-based subtitles
-    StGLVertexBuffer         myVertBuf;   //!< vertex buffer for image-based subtitles
-    StGLVertexBuffer         myTCrdBuf;   //!< texture coordinates buffer for image-based subtitles
-    StHandle<StSubQueue>     myQueue;     //!< thread-safe subtitles queue
-    StSubShowItems           myShowItems; //!< active (shown) subtitle items
-    double                   myPTS;       //!< active PTS
+    StGLTexture      myTexture;   //!< texture for image-based subtitles
+    StGLVertexBuffer myVertBuf;   //!< vertex buffer for image-based subtitles
+    StGLVertexBuffer myTCrdBuf;   //!< texture coordinates buffer for image-based subtitles
+
+    std::shared_ptr<StSubQueue> myQueue; //!< thread-safe subtitles queue
+
+    StSubShowItems myShowItems; //!< active (shown) subtitle items
+    double         myPTS = 0.0; //!< active PTS
 
     class StImgProgram;
-    StGLShare<StImgProgram>  myImgProgram;
+    StGLShare<StImgProgram> myImgProgram;
 
 };
 

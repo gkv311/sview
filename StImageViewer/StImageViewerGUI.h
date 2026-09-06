@@ -92,8 +92,8 @@ class StImageViewerGUI : public StGLRootWidget {
     ST_LOCAL StImageViewerGUI(StImageViewer*  thePlugin,
                               StWindow*       theWindow,
                               StTranslations* theLangMap,
-                              const StHandle<StPlayList>&       thePlayList,
-                              const StHandle<StGLTextureQueue>& theTextureQueue);
+                              const std::shared_ptr<StPlayList>& thePlayList,
+                              const std::shared_ptr<StGLTextureQueue>& theTextureQueue);
     ST_LOCAL virtual ~StImageViewerGUI();
     ST_LOCAL virtual void stglUpdate(const StPointD_t& thePointZo,
                                      bool theIsPreciseInput) ST_ATTR_OVERRIDE;
@@ -150,7 +150,7 @@ class StImageViewerGUI : public StGLRootWidget {
     /**
      * Create normal (desktop) interface.
      */
-    ST_LOCAL void createDesktopUI(const StHandle<StPlayList>& thePlayList);
+    ST_LOCAL void createDesktopUI(const std::shared_ptr<StPlayList>& thePlayList);
 
     /**
      * Create upper tool-bar.
@@ -181,7 +181,7 @@ class StImageViewerGUI : public StGLRootWidget {
     /**
      * Create mobile interface.
      */
-    ST_LOCAL void      createMobileUI(const StHandle<StPlayList>& thePlayList);
+    ST_LOCAL void      createMobileUI(const std::shared_ptr<StPlayList>& thePlayList);
 
     ST_LOCAL void      createMobileUpperToolbar();
     ST_LOCAL void      createMobileBottomToolbar();

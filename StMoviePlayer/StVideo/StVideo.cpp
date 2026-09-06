@@ -28,8 +28,8 @@
 using namespace StMoviePlayerStrings;
 
 namespace {
-    static const char ST_AUDIOS_MIME_STRING[] = ST_VIDEO_PLUGIN_AUDIO_MIME_CHAR;
-    static const char ST_SUBTIT_MIME_STRING[] = ST_VIDEO_PLUGIN_SUBTIT_MIME_CHAR;
+    static constexpr char ST_AUDIOS_MIME_STRING[] = ST_VIDEO_PLUGIN_AUDIO_MIME_CHAR;
+    static constexpr char ST_SUBTIT_MIME_STRING[] = ST_VIDEO_PLUGIN_SUBTIT_MIME_CHAR;
 
     static SV_THREAD_FUNCTION threadFunction(void* theStVideo) {
         StVideo* aStVideo  = (StVideo* )theStVideo;
@@ -104,15 +104,15 @@ namespace {
 const char* StVideo::ST_IMAGES_MIME_STRING = ST_IMAGE_PLUGIN_MIME_CHAR;
 const char* StVideo::ST_VIDEOS_MIME_STRING = ST_VIDEO_PLUGIN_MIME_CHAR;
 
-StVideo::StVideo(const std::string&                 theALDeviceName,
-                 StAudioQueue::StAlHintOutput       theAlOutput,
-                 StAudioQueue::StAlHintHrtf         theAlHrtf,
-                 const StHandle<StResourceManager>& theResMgr,
-                 const StHandle<StTranslations>&    theLangMap,
-                 const StHandle<StPlayList>&        thePlayList,
-                 const StHandle<StGLTextureQueue>&  theTextureQueue,
-                 const StHandle<StSubQueue>&        theSubtitlesQueue1,
-                 const StHandle<StSubQueue>&        theSubtitlesQueue2)
+StVideo::StVideo(const std::string& theALDeviceName,
+                 StAudioQueue::StAlHintOutput theAlOutput,
+                 StAudioQueue::StAlHintHrtf theAlHrtf,
+                 const std::shared_ptr<StResourceManager>& theResMgr,
+                 const std::shared_ptr<StTranslations>& theLangMap,
+                 const std::shared_ptr<StPlayList>& thePlayList,
+                 const std::shared_ptr<StGLTextureQueue>& theTextureQueue,
+                 const std::shared_ptr<StSubQueue>& theSubtitlesQueue1,
+                 const std::shared_ptr<StSubQueue>& theSubtitlesQueue2)
 : myMimesVideo(ST_VIDEOS_MIME_STRING),
   myMimesAudio(ST_AUDIOS_MIME_STRING),
   myMimesSubs(ST_SUBTIT_MIME_STRING),
@@ -150,23 +150,23 @@ StVideo::StVideo(const std::string&                 theALDeviceName,
     params.activeSubtitles1 = new StParamActiveStream();
     params.activeSubtitles2 = new StParamActiveStream();
 
-    myVideoMaster = new StVideoQueue(myTextureQueue);
+    myVideoMaster = std::make_shared<StVideoQueue>(myTextureQueue);
     myVideoMaster->signals.onError.connect(this, &StVideo::doOnErrorRedirect);
 
-    myVideoSlave  = new StVideoQueue(myTextureQueue, myVideoMaster);
+    myVideoSlave  = std::make_shared<StVideoQueue>(myTextureQueue, myVideoMaster);
     myVideoSlave->signals.onError.connect(this, &StVideo::doOnErrorRedirect);
 
-    myAudio = new StAudioQueue(theALDeviceName, theAlOutput, theAlHrtf);
+    myAudio = std::make_shared<StAudioQueue>(theALDeviceName, theAlOutput, theAlHrtf);
     myAudio->signals.onError.connect(this, &StVideo::doOnErrorRedirect);
 
-    mySubtitles1 = new StSubtitleQueue(theSubtitlesQueue1);
+    mySubtitles1 = std::make_shared<StSubtitleQueue>(theSubtitlesQueue1);
     mySubtitles1->signals.onError.connect(this, &StVideo::doOnErrorRedirect);
 
-    mySubtitles2 = new StSubtitleQueue(theSubtitlesQueue2);
+    mySubtitles2 = std::make_shared<StSubtitleQueue>(theSubtitlesQueue2);
     mySubtitles2->signals.onError.connect(this, &StVideo::doOnErrorRedirect);
 
     // launch working thread
-    myThread = new StThread(threadFunction, (void* )this, "StVideo");
+    myThread = std::make_shared<StThread>(threadFunction, (void* )this, "StVideo");
 }
 
 class ST_LOCAL StHangKiller {
@@ -179,13 +179,13 @@ class ST_LOCAL StHangKiller {
       myLimitSec(theLimitSec),
       myDoneEvent(false),
       myStageIter(0) {
-        myThread = new StThread(threadWatcher, this, "StHangKiller");
+        myThread = std::make_shared<StThread>(threadWatcher, this, "StHangKiller");
     }
 
     ~StHangKiller() {
         myDoneEvent.set();
         myThread->wait();
-        myThread.nullify();
+        myThread.reset();
     }
 
     void nextStage() {
@@ -226,7 +226,8 @@ class ST_LOCAL StHangKiller {
 
         private:
 
-    StHandle<StThread> myThread;
+    std::shared_ptr<StThread> myThread;
+
     const char**       myStages;
     const double       myLimitSec;
     StCondition        myDoneEvent;
@@ -262,32 +263,32 @@ StVideo::~StVideo() {
 
     StHangKiller aHangKiller(10.0, THE_STATES);
     myThread->wait();
-    myThread.nullify();
-    myVideoTimer.nullify();
+    myThread.reset();
+    myVideoTimer.reset();
 
     // close all decoding threads
     aHangKiller.nextStage();
-    mySubtitles2.nullify();
-    mySubtitles1.nullify();
+    mySubtitles2.reset();
+    mySubtitles1.reset();
     aHangKiller.nextStage();
-    myAudio.nullify();
+    myAudio.reset();
     aHangKiller.nextStage();
-    myVideoSlave.nullify();
+    myVideoSlave.reset();
     aHangKiller.nextStage();
-    myVideoMaster.nullify();
+    myVideoMaster.reset();
     aHangKiller.setDone();
     close(); // we must quit or flush video/audio threads before close()!
 }
 
 void StVideo::close() {
-    if(!myVideoSlave.isNull())  { myVideoSlave->deinit(); }
-    if(!myVideoMaster.isNull()) { myVideoMaster->deinit(); }
-    if(!myAudio.isNull())       { myAudio->deinit(); }
-    if(!mySubtitles1.isNull())  { mySubtitles1->deinit(); }
-    if(!mySubtitles2.isNull())  { mySubtitles2->deinit(); }
-    for(size_t ctxId = 0; ctxId < myCtxList.size(); ++ctxId) {
+    if (myVideoSlave.get() != nullptr)  { myVideoSlave->deinit(); }
+    if (myVideoMaster.get() != nullptr) { myVideoMaster->deinit(); }
+    if (myAudio.get() != nullptr)       { myAudio->deinit(); }
+    if (mySubtitles1.get() != nullptr)  { mySubtitles1->deinit(); }
+    if (mySubtitles2.get() != nullptr)  { mySubtitles2->deinit(); }
+    for (size_t ctxId = 0; ctxId < myCtxList.size(); ++ctxId) {
         AVFormatContext*& formatCtx = myCtxList[ctxId];
-        if(formatCtx != NULL) {
+        if (formatCtx != NULL) {
             avformat_close_input(&formatCtx);
         }
     }
@@ -301,9 +302,9 @@ void StVideo::close() {
     params.activeAudio->clearList();
     params.activeSubtitles1->clearList();
     params.activeSubtitles2->clearList();
-    myCurrNode.nullify();
-    myCurrParams.nullify();
-    myCurrPlsFile.nullify();
+    myCurrNode.reset();
+    myCurrParams.reset();
+    myCurrPlsFile.reset();
 
     myEventMutex.lock();
         myDuration = 0.0;
@@ -320,35 +321,35 @@ void StVideo::setAudioDelay(const float theDelaySec) {
 }
 
 bool StVideo::addFile(const StString& theFileToLoad,
-                      const StHandle<StStereoParams>& theNewParams,
+                      const std::shared_ptr<StStereoParams>& theNewParams,
                       StStreamsInfo&  theInfo) {
     // open video file
     StString aFileName, aDummy;
     StFileNode::getFolderAndFile(theFileToLoad, aDummy, aFileName);
 
-    StHandle<StAVIOContext> anIOContext;
-    if(StFileNode::isContentProtocolPath(theFileToLoad)) {
+    std::shared_ptr<StAVIOContext> anIOContext;
+    if (StFileNode::isContentProtocolPath(theFileToLoad)) {
         int aFileDescriptor = myResMgr->openFileDescriptor(theFileToLoad);
-        if(aFileDescriptor != -1) {
-            StHandle<StAVIOFileContext> aFileCtx = new StAVIOFileContext();
-            if(aFileCtx->openFromDescriptor(aFileDescriptor, "rb")) {
+        if (aFileDescriptor != -1) {
+            std::shared_ptr<StAVIOFileContext> aFileCtx = std::make_shared<StAVIOFileContext>();
+            if (aFileCtx->openFromDescriptor(aFileDescriptor, "rb")) {
                 anIOContext = aFileCtx;
             }
         }
     }
 #if defined(__ANDROID__)
-    else if(theFileToLoad.isStartsWith(stCString("https://"))) {
+    else if (theFileToLoad.isStartsWith(stCString("https://"))) {
         static const bool hasHttpsProtocol = stAV::isEnabledInputProtocol("https");
-        if(!hasHttpsProtocol) {
-            StHandle<StAVIOJniHttpContext> aHttpCtx = new StAVIOJniHttpContext();
-            if(aHttpCtx->open(theFileToLoad)) {
+        if (!hasHttpsProtocol) {
+            std::shared_ptr<StAVIOJniHttpContext> aHttpCtx = std::make_shared<StAVIOJniHttpContext>();
+            if (aHttpCtx->open(theFileToLoad)) {
                 anIOContext = aHttpCtx;
             }
         }
     }
 #endif
-    AVFormatContext* aFormatCtx = NULL;
-    if(!anIOContext.isNull()) {
+    AVFormatContext* aFormatCtx = nullptr;
+    if (anIOContext.get() != nullptr) {
         aFormatCtx = avformat_alloc_context();
         aFormatCtx->pb = anIOContext->getAvioContext();
     }
@@ -492,7 +493,7 @@ bool StVideo::addFile(const StString& theFileToLoad,
             }
 
             if( aFormatCtx->nb_streams == 1
-            && !myCtxList.isEmpty()) {
+            && !myCtxList.empty()) {
                 aStreamTitle += (aFileName.getLength() > 24)
                               ? (StString(" ...") + aFileName.subString(aFileName.getLength() - 24, aFileName.getLength()))
                               : (StString(" ") + aFileName);
@@ -573,15 +574,15 @@ bool StVideo::addFile(const StString& theFileToLoad,
         }
     }
 
-    myFileIOList.add(anIOContext);
-    myCtxList.add(aFormatCtx);
-    myFileList.add(theFileToLoad);
+    myFileIOList.push_back(anIOContext);
+    myCtxList.push_back(aFormatCtx);
+    myFileList.push_back(theFileToLoad);
     return true;
 }
 
-bool StVideo::openSource(const StHandle<StFileNode>&     theNewSource,
-                         const StHandle<StStereoParams>& theNewParams,
-                         const StHandle<StFileNode>&     theNewPlsFile) {
+bool StVideo::openSource(const std::shared_ptr<StFileNode>&     theNewSource,
+                         const std::shared_ptr<StStereoParams>& theNewParams,
+                         const std::shared_ptr<StFileNode>&     theNewPlsFile) {
     // just for safe - close previously opened video
     close();
 
@@ -593,7 +594,7 @@ bool StVideo::openSource(const StHandle<StFileNode>&     theNewSource,
     myVideoSlave ->setUseOpenJpeg(toUseOpenJpeg);
     myAudio->setTrackHeadOrientation(false);
 
-    myFileInfoTmp = new StMovieInfo();
+    myFileInfoTmp = std::make_shared<StMovieInfo>();
 
     StStreamsInfo aStreamsInfo;
     aStreamsInfo.AudioList    = std::make_shared<std::vector<StString>>();
@@ -870,7 +871,7 @@ bool StVideo::doSeekStream(AVFormatContext* theFormatCtx,
     return isSeekDone;
 }
 
-bool StVideo::pushPacket(StHandle<StAVPacketQueue>& theAVPacketQueue,
+bool StVideo::pushPacket(const std::shared_ptr<StAVPacketQueue>& theAVPacketQueue,
                          StAVPacket& thePacket) {
     if(theAVPacketQueue->isFull()) {
         return false;
@@ -982,7 +983,7 @@ void StVideo::doSwitchAudioStream(std::vector<StAVPacket>& theAVPackets,
         && !mySubtitles2 ->isInContext(aFormatCtx)) {
             continue;
         }
-        myPlayCtxList.add(aFormatCtx);
+        myPlayCtxList.push_back(aFormatCtx);
         theAVPackets.push_back(StAVPacket(myCurrParams));
         theQueueIsFull.push_back(false);
     }
@@ -999,7 +1000,7 @@ void StVideo::doSwitchSubtitlesStream(std::vector<StAVPacket>& theAVPackets,
                                       const int theIndex) {
     double aCurrPts = getPts();
     doFlushSoft();
-    StHandle<StSubtitleQueue>& aSubsQueue = theIndex == 0 ? mySubtitles1 : mySubtitles2;
+    std::shared_ptr<StSubtitleQueue>& aSubsQueue = theIndex == 0 ? mySubtitles1 : mySubtitles2;
     if(aSubsQueue->isInitialized()) {
         aSubsQueue->pushEnd();
         while(!aSubsQueue->isEmpty() || !aSubsQueue->isInDowntime()) {
@@ -1043,7 +1044,7 @@ void StVideo::doSwitchSubtitlesStream(std::vector<StAVPacket>& theAVPackets,
       && !mySubtitles2 ->isInContext(aFormatCtx)) {
         continue;
       }
-      myPlayCtxList.add(aFormatCtx);
+      myPlayCtxList.push_back(aFormatCtx);
       theAVPackets.push_back(StAVPacket(myCurrParams));
       theQueueIsFull.push_back(false);
     }
@@ -1103,7 +1104,7 @@ void StVideo::packetsLoop() {
             continue;
         }
 
-        myPlayCtxList.add(aFormatCtx);
+        myPlayCtxList.push_back(aFormatCtx);
         anAVPackets.push_back(StAVPacket(myCurrParams));
         aQueueIsFull.push_back(false);
         aQueueIsEmpty.push_back(false);
@@ -1166,7 +1167,7 @@ void StVideo::packetsLoop() {
         // check events
         checkInitVideoStreams();
 
-        if(!myVideoTimer.isNull()) {
+        if (myVideoTimer.get() != nullptr) {
             myVideoTimer->setAudioDelay(myAudioDelayMSec);
             myVideoTimer->setBenchmark(myIsBenchmark);
         }
@@ -1189,7 +1190,7 @@ void StVideo::packetsLoop() {
                     myCurrParams->Timestamp = 0.0f;
                 }
 
-                myPlayList->updateRecent(myCurrPlsFile.isNull() ? myCurrNode : myCurrPlsFile, myCurrParams);
+                myPlayList->updateRecent(myCurrPlsFile.get() == nullptr ? myCurrNode : myCurrPlsFile, myCurrParams);
                 if(toQuit) {
                     myQuitEvent.set();
                 }
@@ -1317,7 +1318,7 @@ void StVideo::packetsLoop() {
 }
 
 bool StVideo::saveSnapshotAs(StImageFile::ImageType theImgType) {
-    if(myCurrParams.isNull() || myCurrNode.isNull()) {
+    if (myCurrParams.get() == nullptr || myCurrNode.get() == nullptr) {
         stInfo(myLangMap->getValue(StMoviePlayerStrings::DIALOG_NOTHING_TO_SAVE));
         return false;
     }
@@ -1337,8 +1338,8 @@ bool StVideo::saveSnapshotAs(StImageFile::ImageType theImgType) {
         stInfo(myLangMap->getValue(StMoviePlayerStrings::DIALOG_NO_SNAPSHOT));
         return false;
     }
-    StHandle<StImageFile> dataResult = StImageFile::create();
-    if(dataResult.isNull()) {
+    std::shared_ptr<StImageFile> dataResult = StImageFile::create();
+    if (dataResult.get() == nullptr) {
         signals.onError(stCString("No any image library was found!"));
         return false;
     }
@@ -1411,12 +1412,12 @@ bool StVideo::saveSnapshotAs(StImageFile::ImageType theImgType) {
     return true;
 }
 
-StHandle<StMovieInfo> StVideo::getFileInfo(const StHandle<StStereoParams>& theParams) const {
+std::shared_ptr<StMovieInfo> StVideo::getFileInfo(const std::shared_ptr<StStereoParams>& theParams) const {
     myEventMutex.lock();
-    StHandle<StMovieInfo> anInfo = myFileInfo;
+    std::shared_ptr<StMovieInfo> anInfo = myFileInfo;
     myEventMutex.unlock();
-    if(anInfo.isNull() || anInfo->Id != theParams) {
-        return NULL;
+    if (anInfo.get() == nullptr || anInfo->Id != theParams) {
+        return nullptr;
     }
 
     // continuously read source format since it can be stored in frame
@@ -1434,14 +1435,14 @@ StHandle<StMovieInfo> StVideo::getFileInfo(const StHandle<StStereoParams>& thePa
     return anInfo;
 }
 
-void StVideo::doRemovePhysically(const StHandle<StFileNode>& theFile) {
-    if(theFile.isNull()
-    || theFile->size() != 0) {
+void StVideo::doRemovePhysically(const std::shared_ptr<StFileNode>& theFile) {
+    if (theFile.get() == nullptr
+     || theFile->size() != 0) {
         return;
     }
 
-    const StHandle<StFileNode> aCurrent = myPlayList->getCurrentFile();
-    const bool toPlayNext = !aCurrent.isNull()
+    const std::shared_ptr<StFileNode> aCurrent = myPlayList->getCurrentFile();
+    const bool toPlayNext =  aCurrent.get() != nullptr
                           && aCurrent->size() == 0
                           && aCurrent->getPath().isEquals(theFile->getPath());
 
@@ -1449,50 +1450,50 @@ void StVideo::doRemovePhysically(const StHandle<StFileNode>& theFile) {
     myFilesToDelete.push_back(theFile);
     myEventMutex.unlock();
 
-    if(toPlayNext) {
+    if (toPlayNext) {
         doLoadNext();
     }
 }
 
 void StVideo::mainLoop() {
     bool isOpenSuccess = false;
-    StHandle<StFileNode> aFileToLoad, aPlsFile;
-    StHandle<StStereoParams> aFileParams;
+    std::shared_ptr<StFileNode> aFileToLoad, aPlsFile;
+    std::shared_ptr<StStereoParams> aFileParams;
     double aDummy;
     bool aDummyBool;
-    for(;;) {
+    for (;;) {
         // wait for initial message
         waitEvent();
-        if(toQuit) {
+        if (toQuit) {
             close();
             myQuitEvent.set();
             return;
         }
 
-        if(!myPlayList->getCurrentFile(aFileToLoad, aFileParams, aPlsFile)) {
+        if (!myPlayList->getCurrentFile(aFileToLoad, aFileParams, aPlsFile)) {
             continue;
         }
         isOpenSuccess = openSource(aFileToLoad, aFileParams, aPlsFile);
-        if(isOpenSuccess) {
+        if (isOpenSuccess) {
             break;
         }
     }
 
     // initial play event
-    for(;;) {
+    for (;;) {
 
-        if(myVideoMaster->isInContext(myCtxList[0])) {
-            myVideoTimer = new StVideoTimer(myVideoMaster, myAudio,
+        if (myVideoMaster->isInContext(myCtxList[0])) {
+            myVideoTimer = std::make_shared<StVideoTimer>(myVideoMaster, myAudio,
                 1000.0 * av_q2d(myVideoMaster->getCodecContext()->time_base));
             myVideoTimer->setAudioDelay(myAudioDelayMSec);
             myVideoTimer->setBenchmark(myIsBenchmark);
-        } else if(myCtxList.size() > 1 && myVideoMaster->isInContext(myCtxList[1])) {
-            myVideoTimer = new StVideoTimer(myVideoMaster, myAudio,
+        } else if (myCtxList.size() > 1 && myVideoMaster->isInContext(myCtxList[1])) {
+            myVideoTimer = std::make_shared<StVideoTimer>(myVideoMaster, myAudio,
                 1000.0 * av_q2d(myVideoMaster->getCodecContext()->time_base));
             myVideoTimer->setAudioDelay(myAudioDelayMSec);
             myVideoTimer->setBenchmark(myIsBenchmark);
         } else {
-            myVideoTimer.nullify();
+            myVideoTimer.reset();
         }
 
         // decoding processed in other threads
@@ -1500,17 +1501,17 @@ void StVideo::mainLoop() {
         // and manipulate times
         packetsLoop();
 
-        myVideoTimer.nullify();
+        myVideoTimer.reset();
 
         myEventMutex.lock();
-        if(!myFilesToDelete.empty()) {
-            const StHandle<StFileNode> aCurrent = myPlayList->getCurrentFile();
-            if(!aCurrent.isNull()
+        if (!myFilesToDelete.empty()) {
+            const std::shared_ptr<StFileNode> aCurrent = myPlayList->getCurrentFile();
+            if (aCurrent.get() != nullptr
              && aCurrent->getPath().isEquals(myFilesToDelete[0]->getPath())) {
                 close();
             }
-            for(size_t anIter = 0; anIter < myFilesToDelete.size(); ++anIter) {
-                const StHandle<StFileNode>& aNode = myFilesToDelete[anIter];
+            for (size_t anIter = 0; anIter < myFilesToDelete.size(); ++anIter) {
+                const std::shared_ptr<StFileNode>& aNode = myFilesToDelete[anIter];
                 if(!myPlayList->removePhysically(aNode)) {
                     signals.onError(StString("File can not be deleted!\n" + aNode->getPath()));
                 }
@@ -1519,11 +1520,11 @@ void StVideo::mainLoop() {
         }
         myEventMutex.unlock();
 
-        for(;;) {
-            if(popPlayEvent(aDummy, aDummyBool) != ST_PLAYEVENT_NEXT) {
+        for (;;) {
+            if (popPlayEvent(aDummy, aDummyBool) != ST_PLAYEVENT_NEXT) {
                 myPlayList->walkToNext(false);
             }
-            if(toQuit) {
+            if (toQuit) {
                 // make sure to close AVIO contexts from the same working thread,
                 // because some of them can be attached to specific thread (like StAVIOJniHttpContext to JavaVM)
                 close();
@@ -1531,10 +1532,10 @@ void StVideo::mainLoop() {
                 return;
             }
             isOpenSuccess = false;
-            if(myPlayList->getCurrentFile(aFileToLoad, aFileParams, aPlsFile)) {
+            if (myPlayList->getCurrentFile(aFileToLoad, aFileParams, aPlsFile)) {
                 isOpenSuccess = openSource(aFileToLoad, aFileParams, aPlsFile);
             }
-            if(!isOpenSuccess) {
+            if (!isOpenSuccess) {
                 waitEvent();
             } else {
                 break;

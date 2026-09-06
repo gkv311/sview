@@ -116,8 +116,8 @@ int StVideoQueue::getFrameBuffer(AVCodecContext* theCodecCtx,
     int aResult = 0;
     bool isDone = false;
 #if defined(_WIN32)
-    if(theFrame->format == stAV::PIX_FMT::DXVA2_VLD) {
-        if(!myHWAccelCtx.isNull()) {
+    if (theFrame->format == stAV::PIX_FMT::DXVA2_VLD) {
+        if (myHWAccelCtx.get() != nullptr) {
             aResult = myHWAccelCtx->getFrameBuffer(*this, theFrame);
         } else {
             aResult = -1;
@@ -125,8 +125,8 @@ int StVideoQueue::getFrameBuffer(AVCodecContext* theCodecCtx,
         isDone  = true;
     }
 /*#elif defined(__APPLE__) // standard FFmpeg VideoToolbox wrapper is used - action is not needed
-    if(theFrame->format == stAV::PIX_FMT::VIDEOTOOLBOX_VLD) {
-        if(!myHWAccelCtx.isNull()) {
+    if (theFrame->format == stAV::PIX_FMT::VIDEOTOOLBOX_VLD) {
+        if (myHWAccelCtx.get() != nullptr) {
             aResult = myHWAccelCtx->getFrameBuffer(*this, theFrame);
         } else {
             aResult = -1;
@@ -149,8 +149,8 @@ inline AVCodecID stFindCodecId(const char* theName) {
     return aCodec != NULL ? aCodec->id : AV_CODEC_ID_NONE;
 }
 
-StVideoQueue::StVideoQueue(const StHandle<StGLTextureQueue>& theTextureQueue,
-                           const StHandle<StVideoQueue>&     theMaster)
+StVideoQueue::StVideoQueue(const std::shared_ptr<StGLTextureQueue>& theTextureQueue,
+                           const std::shared_ptr<StVideoQueue>&     theMaster)
 : StAVPacketQueue(512),
   CodecIdH264  (stFindCodecId("h264")),
   CodecIdHEVC  (stFindCodecId("hevc")),
@@ -203,9 +203,9 @@ StVideoQueue::StVideoQueue(const StHandle<StGLTextureQueue>& theTextureQueue,
     myFrame.Frame->opaque = NULL;
 #endif
 
-    myFrameBufRef = new StAVFrameCounter();
+    myFrameBufRef = std::make_shared<StAVFrameCounter>();
 
-    myThread = new StThread(threadFunction, (void* )this, theMaster.isNull() ? "StVideoQueueM" : "StVideoQueueS");
+    myThread = std::make_shared<StThread>(threadFunction, (void* )this, theMaster.get() == nullptr ? "StVideoQueueM" : "StVideoQueueS");
 }
 
 StVideoQueue::~StVideoQueue() {
@@ -215,10 +215,10 @@ StVideoQueue::~StVideoQueue() {
     pushQuit();
 
     myThread->wait();
-    myThread.nullify();
+    myThread.reset();
 
     deinit();
-    myHWAccelCtx.nullify();
+    myHWAccelCtx.reset();
 }
 
 namespace {
@@ -303,7 +303,7 @@ bool StVideoQueue::initCodec(const AVCodec* theCodec,
 bool StVideoQueue::init(AVFormatContext*   theFormatCtx,
                         const unsigned int theStreamId,
                         const StString&    theFileName,
-                        const StHandle<StStereoParams>& theNewParams) {
+                        const std::shared_ptr<StStereoParams>& theNewParams) {
     if(!StAVPacketQueue::init(theFormatCtx, theStreamId, theFileName)) {
         signals.onError(stCString("FFmpeg: invalid stream"));
         deinit();
@@ -516,11 +516,11 @@ bool StVideoQueue::init(AVFormatContext*   theFormatCtx,
 
 void StVideoQueue::deinit() {
     myIsGpuFailed = false;
-    if(myMaster.isNull()) {
+    if (myMaster.get() == nullptr) {
         myTextureQueue->clear();
         myTextureQueue->setConnectedStream(false);
     }
-    mySlave.nullify();
+    mySlave.reset();
     myPixelRatio = 1.0f;
     myPixelRatioComp = 1.0f;
     myDataAdp.nullify();
@@ -535,7 +535,7 @@ void StVideoQueue::deinit() {
     myCachedFrame.nullify();
 
     StAVPacketQueue::deinit();
-    if(!myHWAccelCtx.isNull()) {
+    if (myHWAccelCtx.get() != nullptr) {
         myHWAccelCtx->decoderDestroy(myCodecCtx);
     }
     if(myCodecCtx != NULL) {
@@ -710,7 +710,7 @@ void StVideoQueue::prepareFrame(const StFormat theSrcFormat) {
 
 void StVideoQueue::pushFrame(const StImage&     theSrcDataLeft,
                              const StImage&     theSrcDataRight,
-                             const StHandle<StStereoParams>& theStParams,
+                             const std::shared_ptr<StStereoParams>& theStParams,
                              const StFormat     theSrcFormat,
                              const StCubemap    theCubemapFormat,
                              const double       theSrcPTS) {
@@ -786,7 +786,7 @@ void StVideoQueue::decodeLoop() {
                     avcodec_flush_buffers(myCodecCtx);
                 }
                 // now we clear our sttextures buffer
-                if(myMaster.isNull()) {
+                if (myMaster.get() == nullptr) {
                     myTextureQueue->clear();
                 }
                 myCachedFrame.nullify();
@@ -816,15 +816,15 @@ void StVideoQueue::decodeLoop() {
                 // avcodec_send_packet with NULL to initiate draining data followed by avcodec_receive_frame
                 // to recieve last frames.
 
-                if(!myMaster.isNull()) {
-                    while(myHasDataState.check() && !myMaster->isInDowntime()) {
+                if (myMaster.get() != nullptr) {
+                    while (myHasDataState.check() && !myMaster->isInDowntime()) {
                         StThread::sleep(10);
                     }
                     // wake up Master
                     myDataAdp.nullify();
                     myHasDataState.set();
                 } else {
-                    if(!mySlave.isNull()) {
+                    if (mySlave.get() != nullptr) {
                         mySlave->unlockData();
                     }
                     StTimer stTimerWaitEmpty(true);
@@ -844,7 +844,7 @@ void StVideoQueue::decodeLoop() {
         }
 
         // wait master retrieve previous data
-        while(!myMaster.isNull() && myHasDataState.check()) {
+        while (myMaster.get() != nullptr && myHasDataState.check()) {
             //
         }
 
@@ -921,9 +921,9 @@ bool StVideoQueue::decodeFrame(const StHandle<StAVPacket>& thePacket,
     thePrevPts = myFramePts;
 
     // do we need to skip frames or not
-    static const double OVERR_LIMIT = 0.2;
-    static const double GREATER_LIMIT = 100.0;
-    if(myMaster.isNull()) {
+    static constexpr double OVERR_LIMIT = 0.2;
+    static constexpr double GREATER_LIMIT = 100.0;
+    if (myMaster.get() == nullptr) {
         const double anAudioClock = getAClock() + double(myAudioDelayMSec) * 0.001;
         double diff = anAudioClock - myFramePts;
         if(diff > OVERR_LIMIT && diff < GREATER_LIMIT) {
@@ -936,7 +936,7 @@ bool StVideoQueue::decodeFrame(const StHandle<StAVPacket>& thePacket,
                 myAvDiscard = AVDISCARD_NONREF;
                 ///myCodecCtx->skip_frame = AVDISCARD_NONKEY;
                 myCodecCtx->skip_frame = myAvDiscard;
-                if(!mySlave.isNull()) {
+                if (mySlave.get() != nullptr) {
                     mySlave->myCodecCtx->skip_frame = myAvDiscard;
                 }
             }
@@ -945,7 +945,7 @@ bool StVideoQueue::decodeFrame(const StHandle<StAVPacket>& thePacket,
                 ST_DEBUG_LOG("skip frames: AVDISCARD_DEFAULT (off)");
                 myAvDiscard = AVDISCARD_DEFAULT;
                 myCodecCtx->skip_frame = myAvDiscard;
-                if(!mySlave.isNull()) {
+                if (mySlave.get() != nullptr) {
                     mySlave->myCodecCtx->skip_frame = myAvDiscard;
                 }
             }
@@ -953,7 +953,7 @@ bool StVideoQueue::decodeFrame(const StHandle<StAVPacket>& thePacket,
     }
 
     // copy frame back from GPU to CPU memory
-    if(!myHWAccelCtx.isNull()) {
+    if (myHWAccelCtx.get() != nullptr) {
         myHWAccelCtx->retrieveFrame(*this, myFrame.Frame);
     }
 
@@ -1033,10 +1033,10 @@ bool StVideoQueue::decodeFrame(const StHandle<StAVPacket>& thePacket,
 
     prepareFrame(aSrcFormat);
 
-    if(!mySlave.isNull()) {
+    if (mySlave.get() != nullptr) {
         if(theIsStarted) {
-            StHandle<StStereoParams> aParams = thePacket->getSource();
-            if(!aParams.isNull()) {
+            std::shared_ptr<StStereoParams> aParams = thePacket->getSource();
+            if (aParams.get() != nullptr) {
                 aParams->setSeparationNeutral(myHParallax);
                 aParams->setZRotateZero((float )myRotateDeg);
             }
@@ -1077,13 +1077,13 @@ bool StVideoQueue::decodeFrame(const StHandle<StAVPacket>& thePacket,
             }
             break;
         }
-    } else if(!myMaster.isNull()) {
+    } else if (myMaster.get() != nullptr) {
         // push data to Master
         myHasDataState.set();
     } else {
         if(theIsStarted) {
-            StHandle<StStereoParams> aParams = thePacket->getSource();
-            if(!aParams.isNull()) {
+            std::shared_ptr<StStereoParams> aParams = thePacket->getSource();
+            if (aParams.get() != nullptr) {
                 aParams->setSeparationNeutral(myHParallax);
                 aParams->setZRotateZero((float )myRotateDeg);
             }

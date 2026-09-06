@@ -12,8 +12,7 @@
 
 #include <vector>
 
-StAVVideoMuxer::StAVVideoMuxer()
-: myStereoFormat(StFormat_Mono) {
+StAVVideoMuxer::StAVVideoMuxer() {
     //
 }
 

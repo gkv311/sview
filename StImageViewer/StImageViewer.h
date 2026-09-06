@@ -45,9 +45,9 @@ class StImageViewer : public StApplication {
     /**
      * Main constructor.
      */
-    ST_CPPEXPORT StImageViewer(const StHandle<StResourceManager>& theResMgr,
-                               const StNativeWin_t                theParentWin = (StNativeWin_t )NULL,
-                               const StHandle<StOpenInfo>&        theOpenInfo  = NULL,
+    ST_CPPEXPORT StImageViewer(const std::shared_ptr<StResourceManager>& theResMgr,
+                               const StNativeWin_t                theParentWin = (StNativeWin_t )nullptr,
+                               const std::shared_ptr<StOpenInfo>& theOpenInfo  = std::shared_ptr<StOpenInfo>(),
                                const StString&                    theAppName   = "");
 
     /**
@@ -165,7 +165,7 @@ class StImageViewer : public StApplication {
      * Return true if mobile UI should be enabled considering user option and window margins.
      */
     ST_LOCAL bool toUseMobileUI() const {
-        return toUseMobileUI(!myWindow.isNull() ? myWindow->getMargins() : StMarginsI());
+        return toUseMobileUI(myWindow.get() != nullptr ? myWindow->getMargins() : StMarginsI());
     }
 
     /**
@@ -179,9 +179,9 @@ class StImageViewer : public StApplication {
     /**
      * Retrieve current playlist item.
      */
-    ST_LOCAL bool getCurrentFile(StHandle<StFileNode>&     theFileNode,
-                                 StHandle<StStereoParams>& theParams,
-                                 StHandle<StImageInfo>&    theInfo);
+    ST_LOCAL bool getCurrentFile(std::shared_ptr<StFileNode>& theFileNode,
+                                 std::shared_ptr<StStereoParams>& theParams,
+                                 std::shared_ptr<StImageInfo>& theInfo);
 
         private: //! @name private callback Slots
 
@@ -266,15 +266,15 @@ class StImageViewer : public StApplication {
 
         private: //! @name private fields
 
-    StHandle<StGLContext>       myContext;
-    StHandle<StSettings>        mySettings;        //!< settings manager for Image Viewer plugin
-    StHandle<StPlayList>        myPlayList;        //!< play list
-    StHandle<StImageViewerGUI>  myGUI;             //!< GUI root widget
-    StHandle<StImageLoader>     myLoader;          //!< main image loader class
-    StHandle<StCheckUpdates>    myUpdates;         //!< check updates utility
-    StHandle<StFileNode>        myFileToDelete;    //!< file node for removal
-    StHandle<StImageInfo>       myFileInfo;        //!< file info for opened dialog
-    StHandle<StImageOpenDialog> myOpenDialog;      //!< file open dialog
+    std::shared_ptr<StGLContext>       myContext;
+    std::shared_ptr<StSettings>        mySettings;        //!< settings manager for Image Viewer plugin
+    std::shared_ptr<StPlayList>        myPlayList;        //!< play list
+    std::shared_ptr<StImageViewerGUI>  myGUI;             //!< GUI root widget
+    std::shared_ptr<StImageLoader>     myLoader;          //!< main image loader class
+    std::shared_ptr<StCheckUpdates>    myUpdates;         //!< check updates utility
+    std::shared_ptr<StFileNode>        myFileToDelete;    //!< file node for removal
+    std::shared_ptr<StImageInfo>       myFileInfo;        //!< file info for opened dialog
+    std::shared_ptr<StImageOpenDialog> myOpenDialog;      //!< file open dialog
     StString                    myAppName;         //!< name of customized application
 
     StCondition                 myEventLoaded;     //!< indicate that new file was open

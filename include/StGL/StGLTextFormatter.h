@@ -122,17 +122,17 @@ class StGLTextFormatter {
     /**
      * Retrieve formatting results.
      */
-    ST_CPPEXPORT void getResult(std::vector<GLuint>&                               theTextures,
-                                std::vector< StHandle < std::vector<StGLVec2> > >& theVertsPerTexture,
-                                std::vector< StHandle < std::vector<StGLVec2> > >& theTCrdsPerTexture) const;
+    ST_CPPEXPORT void getResult(std::vector<GLuint>& theTextures,
+                                std::vector< std::shared_ptr < std::vector<StGLVec2> > >& theVertsPerTexture,
+                                std::vector< std::shared_ptr < std::vector<StGLVec2> > >& theTCrdsPerTexture) const;
 
     /**
      * Retrieve formatting results.
      */
-    ST_CPPEXPORT void getResult(StGLContext&                                theCtx,
-                                std::vector<GLuint>&                        theTextures,
-                                StArrayList< StHandle <StGLVertexBuffer> >& theVertsPerTexture,
-                                StArrayList< StHandle <StGLVertexBuffer> >& theTCrdsPerTexture) const;
+    ST_CPPEXPORT void getResult(StGLContext& theCtx,
+                                std::vector<GLuint>& theTextures,
+                                std::vector< std::shared_ptr <StGLVertexBuffer> >& theVertsPerTexture,
+                                std::vector< std::shared_ptr <StGLVertexBuffer> >& theTCrdsPerTexture) const;
 
     /**
      * @return width of formatted text.

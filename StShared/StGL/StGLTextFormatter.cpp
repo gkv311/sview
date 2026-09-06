@@ -97,9 +97,9 @@ inline StGLVec2& floor(StGLVec2& theVec) {
     return theVec;
 }
 
-void StGLTextFormatter::getResult(std::vector<GLuint>&                               theTextures,
-                                  std::vector< StHandle <std::vector <StGLVec2> > >& theVertsPerTexture,
-                                  std::vector< StHandle <std::vector <StGLVec2> > >& theTCrdsPerTexture) const {
+void StGLTextFormatter::getResult(std::vector<GLuint>& theTextures,
+                                  std::vector< std::shared_ptr <std::vector <StGLVec2> > >& theVertsPerTexture,
+                                  std::vector< std::shared_ptr <std::vector <StGLVec2> > >& theTCrdsPerTexture) const {
     StGLVec2 aVec(0.0f, 0.0f);
     theTextures.clear();
     theVertsPerTexture.clear();
@@ -117,8 +117,8 @@ void StGLTextFormatter::getResult(std::vector<GLuint>&                          
         }
         if(aListId >= theTextures.size()) {
             theTextures.push_back(aTexture);
-            theVertsPerTexture.push_back(new std::vector<StGLVec2>());
-            theTCrdsPerTexture.push_back(new std::vector<StGLVec2>());
+            theVertsPerTexture.push_back(std::make_shared<std::vector<StGLVec2>>());
+            theTCrdsPerTexture.push_back(std::make_shared<std::vector<StGLVec2>>());
             aNbRectPerTexture.push_back(0);
         }
 
@@ -166,33 +166,33 @@ void StGLTextFormatter::getResult(std::vector<GLuint>&                          
     }
 }
 
-void StGLTextFormatter::getResult(StGLContext&                                theCtx,
-                                  std::vector<GLuint>&                        theTextures,
-                                  StArrayList< StHandle <StGLVertexBuffer> >& theVertsPerTexture,
-                                  StArrayList< StHandle <StGLVertexBuffer> >& theTCrdsPerTexture) const {
-    std::vector< StHandle < std::vector<StGLVec2> > > aVertsPerTexture;
-    std::vector< StHandle < std::vector<StGLVec2> > > aTCrdsPerTexture;
+void StGLTextFormatter::getResult(StGLContext& theCtx,
+                                  std::vector<GLuint>& theTextures,
+                                  std::vector< std::shared_ptr <StGLVertexBuffer> >& theVertsPerTexture,
+                                  std::vector< std::shared_ptr <StGLVertexBuffer> >& theTCrdsPerTexture) const {
+    std::vector< std::shared_ptr < std::vector<StGLVec2> > > aVertsPerTexture;
+    std::vector< std::shared_ptr < std::vector<StGLVec2> > > aTCrdsPerTexture;
     getResult(theTextures, aVertsPerTexture, aTCrdsPerTexture);
 
-    if(theVertsPerTexture.size() != theTextures.size()) {
-        for(size_t aTextureIter = 0; aTextureIter < theVertsPerTexture.size(); ++aTextureIter) {
+    if (theVertsPerTexture.size() != theTextures.size()) {
+        for (size_t aTextureIter = 0; aTextureIter < theVertsPerTexture.size(); ++aTextureIter) {
             theVertsPerTexture[aTextureIter]->release(theCtx);
             theTCrdsPerTexture[aTextureIter]->release(theCtx);
         }
         theVertsPerTexture.clear();
         theTCrdsPerTexture.clear();
 
-        while(theVertsPerTexture.size() < theTextures.size()) {
-            StHandle <StGLVertexBuffer> aVertsVbo = new StGLVertexBuffer();
-            StHandle <StGLVertexBuffer> aTcrdsVbo = new StGLVertexBuffer();
-            theVertsPerTexture.add(aVertsVbo);
-            theTCrdsPerTexture.add(aTcrdsVbo);
+        while (theVertsPerTexture.size() < theTextures.size()) {
+            std::shared_ptr <StGLVertexBuffer> aVertsVbo = std::make_shared<StGLVertexBuffer>();
+            std::shared_ptr <StGLVertexBuffer> aTcrdsVbo = std::make_shared<StGLVertexBuffer>();
+            theVertsPerTexture.push_back(aVertsVbo);
+            theTCrdsPerTexture.push_back(aTcrdsVbo);
             aVertsVbo->init(theCtx);
             aTcrdsVbo->init(theCtx);
         }
     }
 
-    for(size_t aTextureIter = 0; aTextureIter < theTextures.size(); ++aTextureIter) {
+    for (size_t aTextureIter = 0; aTextureIter < theTextures.size(); ++aTextureIter) {
         const std::vector<StGLVec2>& aVerts = *aVertsPerTexture[aTextureIter];
         const std::vector<StGLVec2>& aTCrds = *aTCrdsPerTexture[aTextureIter];
         theVertsPerTexture[aTextureIter]->init(theCtx, aVerts);
@@ -214,14 +214,14 @@ void StGLTextFormatter::append(StGLContext&          theCtx,
                                const StCString&      theString,
                                const StFTFont::Style theStyle,
                                StGLFont&             theFont) {
-    if(theFont.getFont().isNull()) {
+    if (theFont.getFont().get() == nullptr) {
         return;
     }
 
     theFont.setActiveStyle(theStyle);
     myAscender    = stMax(myAscender,    theFont.getFont()->getAscender());
     myLineSpacing = stMax(myLineSpacing, theFont.getFont()->getLineSpacing());
-    if(theString.isEmpty()) {
+    if (theString.isEmpty()) {
         return;
     }
 
@@ -229,16 +229,16 @@ void StGLTextFormatter::append(StGLContext&          theCtx,
 
     // first pass - render all symbols using associated font on single ZERO baseline
     StGLTile aTile;
-    for(StUtf8Iter anIter = theString.iterator(); *anIter != 0 && anIter.getIndex() < theString.Length;) {
+    for (StUtf8Iter anIter = theString.iterator(); *anIter != 0 && anIter.getIndex() < theString.Length;) {
         const stUtf32_t aCharThis =   *anIter;
         const stUtf32_t aCharNext = *++anIter;
 
-        if(aCharThis == '\x0D') {
+        if (aCharThis == '\x0D') {
             continue; // ignore CR
-        } else if(aCharThis == '\x0A') {
-            /// if(theWidth <= 0.0f) myAlignWidth =
+        } else if (aCharThis == '\x0A') {
+            /// if (theWidth <= 0.0f) myAlignWidth =
             continue; // will be processed on second pass
-        } else if(aCharThis == ' ') {
+        } else if (aCharThis == ' ') {
             myPen.x() += theFont.changeFont()->getAdvanceX(aCharThis, aCharNext);
             continue;
         }
@@ -261,13 +261,13 @@ enum CtrlTag {
 void StGLTextFormatter::appendHTML(StGLContext&    theCtx,
                                    const StString& theString,
                                    StGLFont&       theFont) {
-    if(theFont.getFont().isNull()) {
+    if (theFont.getFont().get() == nullptr) {
         return;
     }
 
     myAscender    = stMax(myAscender,    theFont.getFont()->getAscender());
     myLineSpacing = stMax(myLineSpacing, theFont.getFont()->getLineSpacing());
-    if(theString.isEmpty()) {
+    if (theString.isEmpty()) {
         return;
     }
 
@@ -275,27 +275,27 @@ void StGLTextFormatter::appendHTML(StGLContext&    theCtx,
     size_t          aStartId  = anIter.getIndex();
     const stUtf8_t* aStartPtr = anIter.getBufferHere();
     StFTFont::Style aStyle    = myDefStyle;
-    for(; *anIter != 0;) {
+    for (; *anIter != 0;) {
         const stUtf8_t* anEndPtr  =    anIter.getBufferHere();
         const size_t    aCurrId   =    anIter.getIndex();
         const stUtf32_t aCharThis =   *anIter;
         const stUtf32_t aCharNext = *++anIter;
-        if(aCharThis != '<') {
+        if (aCharThis != '<') {
             continue;
         }
         bool isClose = false;
-        if(aCharNext == '/') {
+        if (aCharNext == '/') {
             isClose = true;
             ++anIter;
         }
 
         CtrlTag aTag = CtrlTag_UNKNOWN;
-        if(stAreEqual(anIter.getBufferHere(), "I>", 2)
-        || stAreEqual(anIter.getBufferHere(), "i>", 2)) {
+        if (stAreEqual(anIter.getBufferHere(), "I>", 2)
+         || stAreEqual(anIter.getBufferHere(), "i>", 2)) {
             aTag    = CtrlTag_Italic;
             anIter += 2;
-        } else if(stAreEqual(anIter.getBufferHere(), "B>", 2)
-               || stAreEqual(anIter.getBufferHere(), "b>", 2)) {
+        } else if (stAreEqual(anIter.getBufferHere(), "B>", 2)
+                || stAreEqual(anIter.getBufferHere(), "b>", 2)) {
             aTag    = CtrlTag_Bold;
             anIter += 2;
         } else {
@@ -303,7 +303,7 @@ void StGLTextFormatter::appendHTML(StGLContext&    theCtx,
             continue;
         }
 
-        if(anEndPtr != aStartPtr) {
+        if (anEndPtr != aStartPtr) {
             const size_t    aSubSize   = size_t(anEndPtr - aStartPtr);
             const size_t    aSubLen    = aCurrId - aStartId;
             const StCString aSubString = stStringExtConstr(aStartPtr, aSubSize, aSubLen);
@@ -312,7 +312,7 @@ void StGLTextFormatter::appendHTML(StGLContext&    theCtx,
         aStartId  = anIter.getIndex();
         aStartPtr = anIter.getBufferHere();
 
-        switch(aTag) {
+        switch (aTag) {
             case CtrlTag_Italic: {
                 if(isClose) {
                     if(aStyle == StFTFont::Style_BoldItalic) {

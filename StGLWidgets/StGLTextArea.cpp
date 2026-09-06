@@ -28,13 +28,7 @@ StGLTextArea::StGLTextArea(StGLWidget* theParent,
   myTextColor(0.0f, 0.0f, 0.0f, 1.0f),
   myShadowColor(0.0f, 0.0f, 0.0f, 1.0f),
   myBackColor(0.365f, 0.722f, 1.0f, 1.0f),
-  myBorderColor(0.0f, 0.0f, 0.0f, 1.0f),
-  myTextDX(0.0f),
-  myTextWidth(-1.0f),
-  myToRecompute(true),
-  myToShowBorder(false),
-  myToDrawShadow(false),
-  myIsInitialized(false) {
+  myBorderColor(0.0f, 0.0f, 0.0f, 1.0f) {
     myFont = myRoot->getFontManager()->findCreate(StFTFont::Typeface_SansSerif, getFontSize());
 }
 
@@ -79,17 +73,17 @@ void StGLTextArea::computeTextWidth(const StString& theText,
                                     const GLfloat   theWidthMax,
                                     int&            theWidth,
                                     int&            theHeight) {
-    if(myFont.isNull()) {
+    if (myFont.get() == nullptr) {
         computeTextWidthFake(theText, theWidth, theHeight);
         return;
     }
-    StHandle<StGLFontEntry>& aFontGenEntry = myFont->changeFont();
-    if(aFontGenEntry.isNull()) {
+    std::shared_ptr<StGLFontEntry>& aFontGenEntry = myFont->changeFont();
+    if (aFontGenEntry.get() == nullptr) {
         computeTextWidthFake(theText, theWidth, theHeight);
         return;
     }
-    StHandle<StFTFont>& aFontGen = aFontGenEntry->getFont();
-    if(aFontGen.isNull() || !aFontGen->isValid()) {
+    std::shared_ptr<StFTFont>& aFontGen = aFontGenEntry->getFont();
+    if (aFontGen.get() == nullptr || !aFontGen->isValid()) {
         computeTextWidthFake(theText, theWidth, theHeight);
         return;
     }
@@ -116,10 +110,10 @@ void StGLTextArea::computeTextWidth(const StString& theText,
             continue;
         }
 
-        const StFTFont::Subset   aSubset = StFTFont::subset(aCharThis);
-        StHandle<StGLFontEntry>& anEntry = myFont->changeFont(aSubset);
+        const StFTFont::Subset          aSubset = StFTFont::subset(aCharThis);
+        std::shared_ptr<StGLFontEntry>& anEntry = myFont->changeFont(aSubset);
         GLfloat anAdvance = 0.0f;
-        if(!anEntry.isNull() && !anEntry->getFont().isNull()) {
+        if (anEntry.get() != nullptr && anEntry->getFont().get() != nullptr) {
             anAdvance = anEntry->getFont()->getAdvanceX(aCharThis, aCharNext);
         } else {
             anAdvance = aFontGen->getAdvanceX(aCharThis, aCharNext);
@@ -169,11 +163,11 @@ bool StGLTextArea::stglInit() {
     }
 
     // initialize GL resources for the font
-    if(myFont.isNull()) {
+    if (myFont.get() == nullptr) {
         return false; // critical error
     } else if(!myFont->wasInitialized()) {
-        if( myFont->changeFont().isNull()
-        ||  myFont->changeFont()->getFont().isNull()
+        if( myFont->changeFont().get() == nullptr
+        ||  myFont->changeFont()->getFont().get() == nullptr
         || !myFont->changeFont()->getFont()->isValid()) {
             return false; // critical error
         } else if(!myFont->stglInit(aCtx)) {

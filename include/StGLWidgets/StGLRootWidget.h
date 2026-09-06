@@ -17,7 +17,7 @@
 #include <array>
 #include <vector>
 
-typedef StArray<StGLNamedTexture> StGLTextureArray;
+typedef std::vector<StGLNamedTexture> StGLTextureArray;
 class StGLMenuProgram;
 class StGLMessageBox;
 class StGLTextProgram;
@@ -88,7 +88,7 @@ class StGLRootWidget : public StGLWidget {
     /**
      * Main constructor.
      */
-    ST_CPPEXPORT StGLRootWidget(const StHandle<StResourceManager>& theResMgr);
+    ST_CPPEXPORT StGLRootWidget(const std::shared_ptr<StResourceManager>& theResMgr);
 
     /**
      * Destructor.
@@ -132,8 +132,8 @@ class StGLRootWidget : public StGLWidget {
      */
     ST_LOCAL const StString& getIcon(const StGLRootWidget::IconImage theIcon) const { return myIcons[theIcon]; }
 
-    ST_LOCAL StHandle<StGLTextureArray>& getCheckboxIcon() { return myCheckboxIcon; }
-    ST_LOCAL StHandle<StGLTextureArray>& getRadioIcon()    { return myRadioIcon; }
+    ST_LOCAL std::shared_ptr<StGLTextureArray>& getCheckboxIcon() { return myCheckboxIcon; }
+    ST_LOCAL std::shared_ptr<StGLTextureArray>& getRadioIcon()    { return myRadioIcon; }
 
     /**
      * Function iterate children and self to change clicking state.
@@ -384,24 +384,24 @@ class StGLRootWidget : public StGLWidget {
     /**
      * @return OpenGL context.
      */
-    ST_CPPEXPORT const StHandle<StGLContext>& getContextHandle() const;
+    ST_CPPEXPORT const std::shared_ptr<StGLContext>& getContextHandle() const;
 
     /**
      * Setup OpenGL context.
      */
-    ST_CPPEXPORT void setContext(const StHandle<StGLContext>& theCtx);
+    ST_CPPEXPORT void setContext(const std::shared_ptr<StGLContext>& theCtx);
 
     /**
      * Access resource manager.
      */
-    ST_LOCAL const StHandle<StResourceManager>& getResourceManager() const {
+    ST_LOCAL const std::shared_ptr<StResourceManager>& getResourceManager() const {
         return myResMgr;
     }
 
     /**
      * @return reference to shared font manager
      */
-    ST_LOCAL StHandle<StGLFontManager>& getFontManager() {
+    ST_LOCAL std::shared_ptr<StGLFontManager>& getFontManager() {
         return myGlFontMgr;
     }
 
@@ -512,48 +512,52 @@ class StGLRootWidget : public StGLWidget {
 
         private:
 
-    StGLSharePointer**        myShareArray;    //!< resources shared within GL context (commonly used)
-    size_t                    myShareSize;
-    StHandle<StResourceManager> myResMgr;      //!< resources manager
-    StGLProjCamera            myProjCamera;    //!< projection camera
-    StGLMatrix                myScrProjMat;    //!< projection matrix within translation to the screen
-    StHandle<StGLFontManager> myGlFontMgr;     //!< shared font manager
-    StHandle<StGLContext>     myGlCtx;         //!< OpenGL context
-    GLfloat                   myScrDispX;
-    GLfloat                   myLensDist;
-    int                       myScrDispXPx;
+    StGLSharePointer** myShareArray = nullptr; //!< resources shared within GL context (commonly used)
+    size_t             myShareSize = 0;
 
-    StGLVec4                  myColors[Color_NB]; //!< colors of standard elements
-    StString                  myIcons[IconImage_NB];
+    std::shared_ptr<StResourceManager> myResMgr; //!< resources manager
 
-    StHandle<StGLTextureArray> myCheckboxIcon;
-    StHandle<StGLTextureArray> myRadioIcon;
-    StHandle<StGLMenuProgram>  myMenuProgram;
-    StHandle<StGLTextProgram>  myTextProgram;
-    StHandle<StGLTextBorderProgram> myTextBorderProgram;
+    StGLProjCamera            myProjCamera; //!< projection camera
+    StGLMatrix                myScrProjMat; //!< projection matrix within translation to the screen
 
-    bool                      myIsMobile;      //!< flag indicating mobile device
-    StMarginsI                myMarginsPx;     //!< active area margins in pixels
-    StRectD_t                 myRectGl;        //!< rectangle in GL coordinates
-    StRectD_t                 myRectWorkGl;    //!< rectangle of working area in GL coordinates
-    StRectI_t                 myRectPxFull;    //!< full rectangle (including non-working area)
-    GLdouble                  myScaleGlX;      //!< scale factor to optimize convertion from Pixels -> GL coordinates
-    GLdouble                  myScaleGlY;      //!< scale factor to optimize convertion from Pixels -> GL coordinates
-    GLfloat                   myScaleGUI;      //!< scale factor for GUI elements (text, icons), 1.0 by default
-    unsigned int              myResolution;    //!< resolution in DPI (for text rendering), 72 by default, stored with myScaleGUI applied
-    StPointD_t                myCursorZo;      //!< mouse cursor position
-    GLint                     myViewport[4];   //!< cached GL viewport
+    std::shared_ptr<StGLFontManager> myGlFontMgr; //!< shared font manager
+    std::shared_ptr<StGLContext>     myGlCtx;     //!< OpenGL context
 
-    std::vector<StGLWidget*>  myDestroyList;   //!< list of widgets to be destroyed
-    StGLWidget*               myFocusWidget;   //!< widget currently in focus
-    StGLMessageBox*           myModalDialog;   //!< active dialog
+    GLfloat myScrDispX = 0.0f;
+    GLfloat myLensDist = 0.0f;
+    int     myScrDispXPx = 0;
 
-    bool                      myIsMenuPressed; //!< global flag to perform navigation in menu after first item clicked
+    StGLVec4 myColors[Color_NB]; //!< colors of standard elements
+    StString myIcons[IconImage_NB];
+
+    std::shared_ptr<StGLTextureArray> myCheckboxIcon;
+    std::shared_ptr<StGLTextureArray> myRadioIcon;
+    std::shared_ptr<StGLMenuProgram>  myMenuProgram;
+    std::shared_ptr<StGLTextProgram>  myTextProgram;
+    std::shared_ptr<StGLTextBorderProgram> myTextBorderProgram;
+
+    bool         myIsMobile = false; //!< flag indicating mobile device
+    StMarginsI   myMarginsPx;        //!< active area margins in pixels
+    StRectD_t    myRectGl;           //!< rectangle in GL coordinates
+    StRectD_t    myRectWorkGl;       //!< rectangle of working area in GL coordinates
+    StRectI_t    myRectPxFull;       //!< full rectangle (including non-working area)
+    GLdouble     myScaleGlX = 1.0;   //!< scale factor to optimize convertion from Pixels -> GL coordinates
+    GLdouble     myScaleGlY = 1.0;   //!< scale factor to optimize convertion from Pixels -> GL coordinates
+    GLfloat      myScaleGUI = 1.0f;  //!< scale factor for GUI elements (text, icons), 1.0 by default
+    unsigned int myResolution = 72u; //!< resolution in DPI (for text rendering), 72 by default, stored with myScaleGUI applied
+    StPointD_t   myCursorZo;         //!< mouse cursor position
+    GLint        myViewport[4] {};   //!< cached GL viewport
+
+    std::vector<StGLWidget*>  myDestroyList;           //!< list of widgets to be destroyed
+    StGLWidget*               myFocusWidget = nullptr; //!< widget currently in focus
+    StGLMessageBox*           myModalDialog = nullptr; //!< active dialog
+
+    bool myIsMenuPressed = false; //!< global flag to perform navigation in menu after first item clicked
 
         protected:
 
-    IconSize                  myMenuIconSize;  //!< scaled size of menu icon
-    int                       myClickThreshold;//!< cursor distance between click/unclick events to determine as clicking
+    IconSize myMenuIconSize   = IconSize_16; //!< scaled size of menu icon
+    int      myClickThreshold = 3;           //!< cursor distance between click/unclick events to determine as clicking
 
 };
 

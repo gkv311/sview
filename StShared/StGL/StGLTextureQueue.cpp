@@ -9,20 +9,8 @@
 #include <StGL/StGLContext.h>
 
 StGLTextureQueue::StGLTextureQueue(const size_t theQueueSizeMax)
-: myDataFront(NULL),
-  myDataSnap(NULL),
-  myDataBack(NULL),
-  myQueueSize(0),
-  myQueueSizeMax(theQueueSizeMax),
-  mySwapFBCount(0),
-  myCurrSrcFormat(StFormat_Mono),
-  myCurrPts(0.0),
-  myNewShotEvent(false),
-  myIsInUpdTexture(false),
-  myIsReadyToSwap(false),
-  myToCompress(false),
-  myHasStream(false),
-  myUploadParams(new StGLTextureUploadParams()) {
+: myQueueSizeMax(theQueueSizeMax),
+  myUploadParams(std::make_shared<StGLTextureUploadParams>()) {
     ST_ASSERT(myQueueSizeMax >= 2, "StGLTextureQueue() - queue size limit should be >= 2");
     // 1920x1080@YUV420p   ~  3 MiB
     // 1920x1080@RGB8      ~  6 MiB
@@ -56,13 +44,13 @@ void StGLTextureQueue::setCompressMemory(const bool theToCompress) {
 }
 
 // this function called ONLY from image thread
-bool StGLTextureQueue::push(const StImage&     theSrcDataLeft,
-                            const StImage&     theSrcDataRight,
-                            const StHandle<StStereoParams>& theStParams,
-                            const StFormat     theSrcFormat,
-                            const StCubemap    theSrcCubemap,
-                            const double       theSrcPTS) {
-    if(isFull()) {
+bool StGLTextureQueue::push(const StImage& theSrcDataLeft,
+                            const StImage& theSrcDataRight,
+                            const std::shared_ptr<StStereoParams>& theStParams,
+                            const StFormat theSrcFormat,
+                            const StCubemap theSrcCubemap,
+                            const double theSrcPTS) {
+    if (isFull()) {
         return false;
     }
 

@@ -32,7 +32,7 @@ class StStereoParams {
 
         public:
 
-    static StString GET_VIEW_MODE_NAME(StViewSurface theViewMode) {
+    ST_LOCAL static StString GET_VIEW_MODE_NAME(StViewSurface theViewMode) {
         switch(theViewMode) {
             case StViewSurface_Cubemap:    return "cubemap";
             case StViewSurface_CubemapEAC: return "eac";
@@ -45,7 +45,7 @@ class StStereoParams {
         return "flat";
     }
 
-    static StViewSurface GET_VIEW_MODE_FROM_STRING(const StString& theViewModeStr) {
+    ST_LOCAL static StViewSurface GET_VIEW_MODE_FROM_STRING(const StString& theViewModeStr) {
         if(theViewModeStr.isStartsWithIgnoreCase(stCString("cubemap"))) {
             return StViewSurface_Cubemap;
         } else if(theViewModeStr.isStartsWithIgnoreCase(stCString("eac"))) {
@@ -66,7 +66,7 @@ class StStereoParams {
     /**
      * Convert panorama mode into surface view.
      */
-    static StViewSurface getViewSurfaceForPanoramaSource(StPanorama thePano, bool theToFallbackSphere) {
+    ST_LOCAL static StViewSurface getViewSurfaceForPanoramaSource(StPanorama thePano, bool theToFallbackSphere) {
         switch(thePano) {
             case StPanorama_Cubemap6_1:
             case StPanorama_Cubemap1_6:
@@ -90,37 +90,15 @@ class StStereoParams {
     /**
      * Main constructor - default parameters.
      */
-    StStereoParams()
-    : Src1SizeX(0),
-      Src1SizeY(0),
-      Src2SizeX(0),
-      Src2SizeY(0),
-      ViewingMode(StViewSurface_Plain),
-      Timestamp(0.0f),
-      StereoFormat(StFormat_Mono),
-      ToSwapLR(false),
-      ToFlipCubeZ(false),
-      PanCenter(0.0f, 0.0f),
-      ScaleFactor(1.0f),
-      mySepDxPx(0),
-      mySepDxZeroPx(0),
-      mySepDyPx(0),
-      mySepRotDegrees(0.0f),
-      myXRotateDegrees(0.0f),
-      myYRotateDegrees(0.0f),
-      myZRotateDegrees(0.0f),
-      myPanYaw(0.0f),
-      myPanPitch(0.0f),
-      myPanYawZero(0.0f),
-      myPanPitchZero(0.0f),
-      myZRotateZero(0.0f) {
+    ST_LOCAL StStereoParams()
+    : PanCenter(0.0f, 0.0f) {
         //
     }
 
     /**
      * @return true if source format is MONO image.
      */
-    bool isMono() const {
+    ST_LOCAL bool isMono() const {
         return StereoFormat == StFormat_Mono;
     }
 
@@ -128,24 +106,24 @@ class StStereoParams {
      * @return horizontal separation in pixels.
      * This number means delta between views.
      */
-    int getSeparationDx() const {
+    ST_LOCAL int getSeparationDx() const {
         return mySepDxZeroPx + mySepDxPx;
     }
 
     /**
      * Set horizontal separation in pixels.
      */
-    void setSeparationDx(int theValue) {
+    ST_LOCAL void setSeparationDx(int theValue) {
         mySepDxPx = theValue - mySepDxZeroPx;
     }
 
     /** Return neutral point. */
-    int getSeparationNeutral() const { return mySepDxZeroPx; }
+    ST_LOCAL int getSeparationNeutral() const { return mySepDxZeroPx; }
 
     /**
      * Setup neutral point.
      */
-    void setSeparationNeutral(int theSepDx = 0) {
+    ST_LOCAL void setSeparationNeutral(int theSepDx = 0) {
         mySepDxZeroPx = theSepDx;
     }
 
@@ -153,91 +131,91 @@ class StStereoParams {
      * @return vertical separation in pixels.
      * This number means delta between views.
      */
-    GLint getSeparationDy() const {
+    ST_LOCAL GLint getSeparationDy() const {
         return mySepDyPx;
     }
 
     /**
      * Set vertical separation in pixels.
      */
-    void setSeparationDy(int theValue) {
+    ST_LOCAL void setSeparationDy(int theValue) {
         mySepDyPx = theValue;
     }
 
     /**
      * @return angular separation between views in degrees.
      */
-    float getSepRotation() const {
+    ST_LOCAL float getSepRotation() const {
         return mySepRotDegrees;
     }
 
     /**
      * @return angular separation between views in degrees.
      */
-    void setSepRotation(float theValue) {
+    ST_LOCAL void setSepRotation(float theValue) {
         mySepRotDegrees = theValue;
     }
 
     /**
      * @return angle for panorama view
      */
-    float getPanYaw() const {
+    ST_LOCAL float getPanYaw() const {
         return myPanYawZero + myPanYaw;
     }
 
     /**
      * @return angle for panorama view
      */
-    float getPanPitch() const {
+    ST_LOCAL float getPanPitch() const {
         return myPanPitchZero + myPanPitch;
     }
 
     /**
      * @return rotation angle in degrees.
      */
-    float getXRotate() const {
+    ST_LOCAL float getXRotate() const {
         return myXRotateDegrees;
     }
 
     /**
      * Change rotation angle in degrees.
      */
-    void setXRotate(float theValue) {
+    ST_LOCAL void setXRotate(float theValue) {
         myXRotateDegrees = theValue;
     }
 
     /**
      * @return rotation angle in degrees.
      */
-    float getYRotate() const {
+    ST_LOCAL float getYRotate() const {
         return myYRotateDegrees;
     }
 
     /**
      * Change rotation angle in degrees.
      */
-    void setYRotate(float theValue) {
+    ST_LOCAL void setYRotate(float theValue) {
         myYRotateDegrees = theValue;
     }
 
     /**
      * @return rotation angle in degrees.
      */
-    float getZRotate() const {
+    ST_LOCAL float getZRotate() const {
         return myZRotateZero + myZRotateDegrees;
     }
 
     /**
      * @param theAngleDegrees - rotation angle in degrees.
      */
-    void setZRotateZero(float theAngleDegrees) {
+    ST_LOCAL void setZRotateZero(float theAngleDegrees) {
         myZRotateZero = theAngleDegrees;
     }
 
     /**
      * Setup default rotation.
      */
-    void setRotateZero(float theYaw, float thePitch, float theRoll) {
+    ST_LOCAL void setRotateZero(float theYaw, float thePitch, float theRoll) {
         myPanYawZero   = theYaw;
         myPanPitchZero = thePitch;
         myZRotateZero  = theRoll;
@@ -246,7 +224,7 @@ class StStereoParams {
     /**
      * @return true if rotation is not modified
      */
-    bool isZeroRotate() const {
+    ST_LOCAL bool isZeroRotate() const {
         return myPanYaw == 0.0f
             && myPanPitch == 0.0f
             && myZRotateDegrees == 0.0f;
@@ -255,35 +233,35 @@ class StStereoParams {
     /**
      * @param toSwapLR set swap Left/Right flag.
      */
-    void setSwapLR(const bool theToSwapLR) {
+    ST_LOCAL void setSwapLR(const bool theToSwapLR) {
         ToSwapLR = theToSwapLR;
     }
 
     /**
      * Reverse swap Left/Right flag.
      */
-    void doSwapLR() {
+    ST_LOCAL void doSwapLR() {
         ToSwapLR = !ToSwapLR;
     }
 
     /**
      * Zoom in.
      */
-    void scaleIn(const GLfloat theDuration = 0.02f) {
+    ST_LOCAL void scaleIn(const GLfloat theDuration = 0.02f) {
         ScaleFactor *= (1.0f + theDuration);
     }
 
     /**
      * Zoom out.
      */
-    void scaleOut(const GLfloat theDuration = 0.02f) {
+    ST_LOCAL void scaleOut(const GLfloat theDuration = 0.02f) {
         ScaleFactor = stMax(ScaleFactor / (1.0f + theDuration), 0.05f);
     }
 
     /**
      * Help method used in StGLImageRegion to fit image into rectangle.
      */
-    static inline StGLVec2 getRatioScale(const GLfloat rectRatio, const GLfloat imageRatio) {
+    ST_LOCAL static inline StGLVec2 getRatioScale(const GLfloat rectRatio, const GLfloat imageRatio) {
         if(rectRatio < imageRatio) {
             return StGLVec2(rectRatio, rectRatio / imageRatio);
         } else {
@@ -291,23 +269,23 @@ class StStereoParams {
         }
     }
 
-    StGLVec2 moveFlatDelta(const StGLVec2& theMoveVec,
-                           const GLfloat   theRectRatio) const {
+    ST_LOCAL StGLVec2 moveFlatDelta(const StGLVec2& theMoveVec,
+                                    const GLfloat   theRectRatio) const {
         return StGLVec2((theMoveVec.x() * theRectRatio) / ScaleFactor,
                          theMoveVec.y() / ScaleFactor);
     }
 
-    void moveFlat(const StGLVec2& theMoveVec,
+    ST_LOCAL void moveFlat(const StGLVec2& theMoveVec,
                   const GLfloat   theRectRatio) {
         PanCenter += moveFlatDelta(theMoveVec, theRectRatio);
     }
 
-    void moveSphere(const StGLVec2& theMoveVec) {
+    ST_LOCAL void moveSphere(const StGLVec2& theMoveVec) {
         myPanYaw += theMoveVec.x();
         myPanPitch = clipPitch(myPanPitch + theMoveVec.y());
     }
 
-    void moveToRight(const float theDuration = 0.02f) {
+    ST_LOCAL void moveToRight(const float theDuration = 0.02f) {
         switch(ViewingMode) {
             case StViewSurface_Sphere:
             case StViewSurface_Hemisphere:
@@ -323,7 +301,7 @@ class StStereoParams {
         }
     }
 
-    void moveToLeft(const float theDuration = 0.02f) {
+    ST_LOCAL void moveToLeft(const float theDuration = 0.02f) {
         switch(ViewingMode) {
             case StViewSurface_Sphere:
             case StViewSurface_Hemisphere:
@@ -342,7 +320,7 @@ class StStereoParams {
     /**
      * Clip pitch angle to the range [-90, 90] degrees.
      */
-    static float clipPitch(const float thePitchDeg) {
+    ST_LOCAL static float clipPitch(const float thePitchDeg) {
         if(thePitchDeg <= -90.0f) {
             return -90.0f;
         } else if(thePitchDeg >= 90.0f) {
@@ -351,7 +329,7 @@ class StStereoParams {
         return thePitchDeg;
     }
 
-    void moveToDown(const float theDuration = 0.02f) {
+    ST_LOCAL void moveToDown(const float theDuration = 0.02f) {
         switch(ViewingMode) {
             case StViewSurface_Sphere:
             case StViewSurface_Hemisphere:
@@ -367,7 +345,7 @@ class StStereoParams {
         }
     }
 
-    void moveToUp(const float theDuration = 0.02f) {
+    ST_LOCAL void moveToUp(const float theDuration = 0.02f) {
         switch(ViewingMode) {
             case StViewSurface_Sphere:
             case StViewSurface_Hemisphere:
@@ -383,26 +361,26 @@ class StStereoParams {
         }
     }
 
-    void incZRotate() {
+    ST_LOCAL void incZRotate() {
         myZRotateDegrees -= 90.0f;
     }
 
-    void decZRotate() {
+    ST_LOCAL void decZRotate() {
         myZRotateDegrees += 90.0f;
     }
 
-    void incZRotateL(const GLfloat theDuration = 0.02f) {
+    ST_LOCAL void incZRotateL(const GLfloat theDuration = 0.02f) {
         myZRotateDegrees -= 5.0f * theDuration;
     }
 
-    void decZRotateL(const GLfloat theDuration = 0.02f) {
+    ST_LOCAL void decZRotateL(const GLfloat theDuration = 0.02f) {
         myZRotateDegrees += 5.0f * theDuration;
     }
 
     /**
      * Reset parameters.
      */
-    bool reset() {
+    ST_LOCAL bool reset() {
         if (mySepDxPx == 0
             && mySepDyPx == 0
             && mySepRotDegrees == 0.0f
@@ -434,35 +412,36 @@ class StStereoParams {
 
         public:
 
-    size_t       Src1SizeX;        //!< width  of the 1st original image
-    size_t       Src1SizeY;        //!< height of the 1st original image
-    size_t       Src2SizeX;        //!< width  of the 2nd original image
-    size_t       Src2SizeY;        //!< height of the 2nd original image
+    size_t       Src1SizeX = 0;        //!< width  of the 1st original image
+    size_t       Src1SizeY = 0;        //!< height of the 1st original image
+    size_t       Src2SizeX = 0;        //!< width  of the 2nd original image
+    size_t       Src2SizeY = 0;        //!< height of the 2nd original image
 
-    StViewSurface ViewingMode;     //!< viewing mode - panorama or flat image
-    GLfloat      Timestamp;        //!< playback timestamp
+    StViewSurface ViewingMode = StViewSurface_Plain; //!< viewing mode - panorama or flat image
 
-    StFormat     StereoFormat;     //!< stereoscopic format
-    bool         ToSwapLR;         //!< reverse left/right views
-    bool         ToFlipCubeZ;      //!< reverse Z-coordinate in cubemap
+    GLfloat       Timestamp = 0.0f; //!< playback timestamp
 
-    StGLVec2     PanCenter;        //!< relative position
-    GLfloat      ScaleFactor;      //!< scaling factor
+    StFormat     StereoFormat = StFormat_Mono; //!< stereoscopic format
+    bool         ToSwapLR = false;             //!< reverse left/right views
+    bool         ToFlipCubeZ = false;          //!< reverse Z-coordinate in cubemap
+
+    StGLVec2     PanCenter;          //!< relative position
+    GLfloat      ScaleFactor = 1.0f; //!< scaling factor
 
         private:
 
-    int   mySepDxPx;        //!< horizontal    separation in pixels
-    int   mySepDxZeroPx;    //!< zero-parallax separation in pixels
-    int   mySepDyPx;        //!< vertical      separation in pixels
-    float mySepRotDegrees;  //!< angular separation in degrees
-    float myXRotateDegrees; //!< rotation angle in degrees
-    float myYRotateDegrees; //!< rotation angle in degrees
-    float myZRotateDegrees; //!< rotation angle in degrees
-    float myPanYaw;         //!< angle for panorama view
-    float myPanPitch;       //!< angle for panorama view
-    float myPanYawZero;     //!< zero-rotation angle in degrees
-    float myPanPitchZero;   //!< zero-rotation angle in degrees
-    float myZRotateZero;    //!< zero-rotation angle in degrees
+    int   mySepDxPx = 0;           //!< horizontal    separation in pixels
+    int   mySepDxZeroPx = 0;       //!< zero-parallax separation in pixels
+    int   mySepDyPx = 0;           //!< vertical      separation in pixels
+    float mySepRotDegrees = 0.0f;  //!< angular separation in degrees
+    float myXRotateDegrees = 0.0f; //!< rotation angle in degrees
+    float myYRotateDegrees = 0.0f; //!< rotation angle in degrees
+    float myZRotateDegrees = 0.0f; //!< rotation angle in degrees
+    float myPanYaw = 0.0f;         //!< angle for panorama view
+    float myPanPitch = 0.0f;       //!< angle for panorama view
+    float myPanYawZero = 0.0f;     //!< zero-rotation angle in degrees
+    float myPanPitchZero = 0.0f;   //!< zero-rotation angle in degrees
+    float myZRotateZero = 0.0f;    //!< zero-rotation angle in degrees
 
 };
 

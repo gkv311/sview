@@ -127,53 +127,53 @@ class StGLContext {
      * Color + Depth + Stencil buffer bits.
      */
     struct BufferBits {
-        GLint RGB;      //!< red + green + blue bits
-        GLint Alpha;    //!< alpha bits
-        GLint Depth;    //!< depth bits
-        GLint Stencil;  //!< stencil bits
+        GLint RGB = 0;      //!< red + green + blue bits
+        GLint Alpha = 0;    //!< alpha bits
+        GLint Depth = 0;    //!< depth bits
+        GLint Stencil = 0;  //!< stencil bits
 
-        GLint SizeX;
-        GLint SizeY;
+        GLint SizeX = 0;
+        GLint SizeY = 0;
     };
 
         public:    //! @name OpenGL functions - core versions
 
-    StGLCore11*     core11;     //!< OpenGL 1.1 core functionality
-    StGLCore11Fwd*  core11fwd;  //!< OpenGL 1.1 without deprecated entry points
-    StGLCore20*     core20;     //!< OpenGL 2.0 core functionality (includes 1.5)
-    StGLCore20Fwd*  core20fwd;  //!< OpenGL 2.0 without deprecated entry points
-    StGLCore32*     core32;     //!< OpenGL 3.2 core profile
-    StGLCore32Back* core32back; //!< OpenGL 3.2 backward compatibility profile
-    StGLCore41*     core41;     //!< OpenGL 4.1 core profile
-    StGLCore41Back* core41back; //!< OpenGL 4.1 backward compatibility profile
-    StGLCore42*     core42;     //!< OpenGL 4.2 core profile
-    StGLCore42Back* core42back; //!< OpenGL 4.2 backward compatibility profile
-    StGLCore43*     core43;     //!< OpenGL 4.3 core profile
-    StGLCore43Back* core43back; //!< OpenGL 4.3 backward compatibility profile
-    StGLCore44*     core44;     //!< OpenGL 4.4 core profile
-    StGLCore44Back* core44back; //!< OpenGL 4.4 backward compatibility profile
+    StGLCore11*     core11 = nullptr;     //!< OpenGL 1.1 core functionality
+    StGLCore11Fwd*  core11fwd = nullptr;  //!< OpenGL 1.1 without deprecated entry points
+    StGLCore20*     core20 = nullptr;     //!< OpenGL 2.0 core functionality (includes 1.5)
+    StGLCore20Fwd*  core20fwd = nullptr;  //!< OpenGL 2.0 without deprecated entry points
+    StGLCore32*     core32 = nullptr;     //!< OpenGL 3.2 core profile
+    StGLCore32Back* core32back = nullptr; //!< OpenGL 3.2 backward compatibility profile
+    StGLCore41*     core41 = nullptr;     //!< OpenGL 4.1 core profile
+    StGLCore41Back* core41back = nullptr; //!< OpenGL 4.1 backward compatibility profile
+    StGLCore42*     core42 = nullptr;     //!< OpenGL 4.2 core profile
+    StGLCore42Back* core42back = nullptr; //!< OpenGL 4.2 backward compatibility profile
+    StGLCore43*     core43 = nullptr;     //!< OpenGL 4.3 core profile
+    StGLCore43Back* core43back = nullptr; //!< OpenGL 4.3 backward compatibility profile
+    StGLCore44*     core44 = nullptr;     //!< OpenGL 4.4 core profile
+    StGLCore44Back* core44back = nullptr; //!< OpenGL 4.4 backward compatibility profile
 
         public:    //! @name OpenGL functions - extensions
 
-    StGLArbFbo*     arbFbo;     //!< GL_ARB_framebuffer_object
-    bool            arbNPTW;    //!< GL_ARB_texture_non_power_of_two
-    bool            arbTexRG;   //!< GL_ARB_texture_rg
-    bool            arbTexFloat;//!< GL_ARB_texture_float (on desktop OpenGL - since 3.0 or as extension GL_ARB_texture_float; on OpenGL ES - since 3.0)
-    bool            arbTexClear;//!< GL_ARB_clear_texture
-    bool            hasHighp;   //!< highp in GLSL ES fragment shader is supported
-    bool            hasTexRGBA8;//!< always available on desktop; on OpenGL ES - since 3.0 or as extension GL_OES_rgb8_rgba8
-    bool            extTexBGRA8;//!< GL_EXT_texture_format_BGRA8888 for OpenGL ES
-    bool            extTexR16;  //!< GL_EXT_texture_norm16 on OpenGL ES
-    StGLFunctions*  extAll;     //!< access to ALL extensions for advanced users
-    bool            extSwapTear;//!< WGL_EXT_swap_control_tear/GLX_EXT_swap_control_tear
-    bool            khrFlushControl; //!< GL_KHR_context_flush_control / WGL_ARB_context_flush_control / GLX_ARB_context_flush_control / EGL_KHR_context_flush_control
+    StGLArbFbo*     arbFbo = nullptr; //!< GL_ARB_framebuffer_object
+    bool            arbNPTW = false;    //!< GL_ARB_texture_non_power_of_two
+    bool            arbTexRG = false;   //!< GL_ARB_texture_rg
+    bool            arbTexFloat = false;//!< GL_ARB_texture_float (on desktop OpenGL - since 3.0 or as extension GL_ARB_texture_float; on OpenGL ES - since 3.0)
+    bool            arbTexClear = false;//!< GL_ARB_clear_texture
+    bool            hasHighp = false;   //!< highp in GLSL ES fragment shader is supported
+    bool            hasTexRGBA8 = false;//!< always available on desktop; on OpenGL ES - since 3.0 or as extension GL_OES_rgb8_rgba8
+    bool            extTexBGRA8 = false;//!< GL_EXT_texture_format_BGRA8888 for OpenGL ES
+    bool            extTexR16 = false;  //!< GL_EXT_texture_norm16 on OpenGL ES
+    StGLFunctions*  extAll = nullptr; //!< access to ALL extensions for advanced users
+    bool            extSwapTear = false;//!< WGL_EXT_swap_control_tear/GLX_EXT_swap_control_tear
+    bool            khrFlushControl = false; //!< GL_KHR_context_flush_control / WGL_ARB_context_flush_control / GLX_ARB_context_flush_control / EGL_KHR_context_flush_control
 
         public:    //! @name class interface
 
     /**
      * Empty constructor.
      */
-    ST_CPPEXPORT StGLContext(const StHandle<StResourceManager>& theResMgr);
+    ST_CPPEXPORT StGLContext(const std::shared_ptr<StResourceManager>& theResMgr);
 
     /**
      * Default constructor.
@@ -198,12 +198,12 @@ class StGLContext {
     /**
      * File resources manager.
      */
-    ST_LOCAL const StHandle<StResourceManager>& getResourceManager() const { return myResMgr; }
+    ST_LOCAL const std::shared_ptr<StResourceManager>& getResourceManager() const { return myResMgr; }
 
     /**
      * Setup messages queue.
      */
-    ST_CPPEXPORT void setMessagesQueue(const StHandle<StMsgQueue>& theQueue);
+    ST_CPPEXPORT void setMessagesQueue(const std::shared_ptr<StMsgQueue>& theQueue);
 
     /**
      * Push error message to the messages queue.
@@ -226,8 +226,8 @@ class StGLContext {
      * You should check extension availability before this!
      */
     template <typename Function_t>
-    inline bool stglFindProc(const char* theName,
-                             Function_t& theFunction) const {
+    ST_LOCAL bool stglFindProc(const char* theName,
+                               Function_t& theFunction) const {
         theFunction = (Function_t )stglFindProc(theName);
         return (theFunction != NULL);
     }
@@ -338,7 +338,7 @@ class StGLContext {
     /**
      * Setup viewport.
      */
-    inline void stglResizeViewport(const GLsizei theSizeX,
+    ST_LOCAL void stglResizeViewport(const GLsizei theSizeX,
                                    const GLsizei theSizeY) {
         const StGLBoxPx aRect = {{ 0, 0, theSizeX, theSizeY }};
         stglResizeViewport(aRect);
@@ -347,14 +347,14 @@ class StGLContext {
     /**
      * @return current viewport rectangle
      */
-    inline const StGLBoxPx& stglViewport() const {
+    ST_LOCAL const StGLBoxPx& stglViewport() const {
         return myViewport;
     }
 
     /**
      * Setup viewport.
      */
-    inline void stglResize(const StRect<GLint>& theWinRect) {
+    ST_LOCAL void stglResize(const StRect<GLint>& theWinRect) {
         const StGLBoxPx aRect = {{ 0, 0, theWinRect.width(), theWinRect.height() }};
         stglResizeViewport(aRect);
     }
@@ -362,14 +362,14 @@ class StGLContext {
     /**
      * @return currently bound FBO for drawing operations
      */
-    inline GLuint stglFramebufferDraw() const {
+    ST_LOCAL GLuint stglFramebufferDraw() const {
         return myFramebufferDraw;
     }
 
     /**
      * @return currently bound FBO for reading operations
      */
-    inline GLuint stglFramebufferRead() const {
+    ST_LOCAL GLuint stglFramebufferRead() const {
         return myFramebufferDraw;
     }
 
@@ -459,32 +459,32 @@ class StGLContext {
         protected: //! @name class fields
 
 #ifdef __APPLE__
-    StLibrary               mySysLib;             //!< optional handle to system GL library (MacOS X specific)
+    StLibrary mySysLib; //!< optional handle to system GL library (MacOS X specific)
 #endif
-    StHandle<StGLFunctions> myFuncs;              //!< mega structure for all GL functions
-    StHandle<StResourceManager>
-                            myResMgr;             //!< file resources manager
-    StHandle<StMsgQueue>    myMsgQueue;           //!< messages queue
+    std::shared_ptr<StGLFunctions>     myFuncs;    //!< mega structure for all GL functions
+    std::shared_ptr<StResourceManager> myResMgr;   //!< file resources manager
+    std::shared_ptr<StMsgQueue>        myMsgQueue; //!< messages queue
+
     StGLDeviceCaps          myDevCaps;            //!< device caps
-    GlVendor                myGlVendor;           //!< GPU vendor
-    GlVendor                myGlDriverVendor;     //!< driver vendor
-    GPU_Name                myGpuName;            //!< GPU name
-    GLint                   myVerMajor;           //!< cached GL version major number
-    GLint                   myVerMinor;           //!< cached GL version minor number
+    GlVendor                myGlVendor = GlVendor_UNKNOWN; //!< GPU vendor
+    GlVendor                myGlDriverVendor = GlVendor_UNKNOWN; //!< driver vendor
+    GPU_Name                myGpuName = GPU_UNKNOWN; //!< GPU name
+    GLint                   myVerMajor = 0;       //!< cached GL version major number
+    GLint                   myVerMinor = 0;       //!< cached GL version minor number
     BufferBits              myWindowBits;         //!< default buffer (window) bits
     BufferBits              myFBOBits;            //!< FBO bits
-    bool                    myWasInit;            //!< initialization state
+    bool                    myWasInit = false;    //!< initialization state
 
     StImagePlane            myTmpPlane1;          //!< auxiliary temporary image buffer
     StImagePlane            myTmpPlane2;          //!< auxiliary temporary image buffer
 
         protected: //! @name current state
 
-    std::stack<StGLBoxPx>   myScissorStack;       //!< cached stack of scissor rectangles
-    StGLBoxPx               myViewport;           //!< cached viewport rectangle
-    GLuint                  myFramebufferDraw;    //!< bound draw buffer
-    GLuint                  myFramebufferRead;    //!< bound read buffer
-    bool                    myIsBound;            //!< flag indicating make current state
+    std::stack<StGLBoxPx>   myScissorStack;        //!< cached stack of scissor rectangles
+    StGLBoxPx               myViewport;            //!< cached viewport rectangle
+    GLuint                  myFramebufferDraw = 0; //!< bound draw buffer
+    GLuint                  myFramebufferRead = 0; //!< bound read buffer
+    bool                    myIsBound = false;     //!< flag indicating make current state
 
 };
 

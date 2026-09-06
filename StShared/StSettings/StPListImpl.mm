@@ -49,8 +49,8 @@ bool StSettings::flush() {
     return true;
 }
 
-StSettings::StSettings(const StHandle<StResourceManager>& theResMgr,
-                       const StString&                    theSettingsSet)
+StSettings::StSettings(const std::shared_ptr<StResourceManager>& theResMgr,
+                       const StString& theSettingsSet)
 : myDict(NULL),
   myToFlush(false) {
     myFilePath = theResMgr->getSettingsFolder() + theSettingsSet + ".plist";

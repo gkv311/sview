@@ -7,20 +7,14 @@
 #ifndef __StImageFile_h_
 #define __StImageFile_h_
 
-#include <StTemplates/StHandle.h>
 #include <StStrings/StDictionary.h>
 #include <StGLStereo/StFormatEnum.h>
 
 #include "StImage.h"
 
+#include <memory>
+
 class StMIME;
-
-// define StHandle template specialization
-class StImageFile;
-ST_DEFINE_HANDLE(StImageFile, StImage);
-
-class StImageFileCounter;
-ST_DEFINE_HANDLE(StImageFileCounter, StBufferCounter);
 
 /**
  * Interface extending StImage with load/save capabilities.
@@ -57,13 +51,13 @@ class StImageFile : public StImage {
     /** Structure for passing parameters to image saving. */
     struct SaveImageParams {
         /** Image type. */
-        ImageType  SaveImageType;
+        ImageType SaveImageType = ST_TYPE_NONE;
         /** Stereo format to be stored as metadata. */
-        StFormat   StereoFormat;
+        StFormat  StereoFormat = StFormat_AUTO;
         /** Compression level within [0..1] range (0 minimal compression, 1 maximum, -1 default). */
-        float      Compression;
+        float     Compression = -1.0f;
 
-        SaveImageParams() : SaveImageType(ST_TYPE_NONE), StereoFormat(StFormat_AUTO), Compression(-1.0) {}
+        SaveImageParams() {}
     };
 
         public:
@@ -80,10 +74,10 @@ class StImageFile : public StImage {
     ST_CPPEXPORT static ImageType guessImageType(const StString& theFileName,
                                                  const StMIME&   theMIMEType);
 
-    ST_CPPEXPORT static StHandle<StImageFile> create(const StString& thePreferred,
-                                                     ImageType       theImgType = ST_TYPE_NONE);
-    ST_CPPEXPORT static StHandle<StImageFile> create(ImageClass      thePreferred = ST_LIBAV,
-                                                     ImageType       theImgType = ST_TYPE_NONE);
+    ST_CPPEXPORT static std::shared_ptr<StImageFile> create(const StString& thePreferred,
+                                                            ImageType       theImgType = ST_TYPE_NONE);
+    ST_CPPEXPORT static std::shared_ptr<StImageFile> create(ImageClass      thePreferred = ST_LIBAV,
+                                                            ImageType       theImgType = ST_TYPE_NONE);
 
         public:
 
@@ -185,14 +179,14 @@ class StImageFile : public StImage {
     /**
      * Create new instance of this class.
      */
-    virtual StHandle<StImageFile> createEmpty() const = 0;
+    virtual std::shared_ptr<StImageFile> createEmpty() const = 0;
 
         protected:
 
     StDictionary myMetadata;
     StString     myStateDescr;
-    StFormat     mySrcFormat;
-    StPanorama   mySrcPanorama;
+    StFormat     mySrcFormat = StFormat_AUTO;
+    StPanorama   mySrcPanorama = StPanorama_OFF;
 
 };
 
@@ -211,14 +205,14 @@ class StImageFileCounter : public StBufferCounter {
     /**
      * Main constructor.
      */
-    ST_CPPEXPORT StImageFileCounter(const StHandle<StImage>& theImage);
+    ST_CPPEXPORT StImageFileCounter(const std::shared_ptr<StImage>& theImage);
 
     /**
      * Create the new reference (e.g. increment counter).
      * If theOther has the same type, than the ref counter will be reused.
      * Otherwise then new counter will be allocated.
      */
-    ST_CPPEXPORT virtual void createReference(StHandle<StBufferCounter>& theOther) const ST_ATTR_OVERRIDE;
+    ST_CPPEXPORT virtual void createReference(std::shared_ptr<StBufferCounter>& theOther) const ST_ATTR_OVERRIDE;
 
     /**
      * Release current reference.
@@ -232,7 +226,7 @@ class StImageFileCounter : public StBufferCounter {
 
         private:
 
-    StHandle<StImage> myImageFile;
+    std::shared_ptr<StImage> myImageFile;
 
 };
 

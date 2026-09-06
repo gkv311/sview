@@ -55,7 +55,7 @@ namespace {
 
             private:
 
-        const StApplication* myApp;
+        const StApplication* myApp = nullptr;
         StString myAppName;
 
     };
@@ -63,16 +63,16 @@ namespace {
 }
 
 void StApplication::doChangeDevice(const int32_t theValue) {
-    if(myWindow.isNull() || !myIsOpened
-    || theValue < 0
-    || size_t(theValue) >= myDevices.size()) {
+    if (myWindow.get() == nullptr || !myIsOpened
+     || theValue < 0
+     || size_t(theValue) >= myDevices.size()) {
         return;
     }
 
-    mySwitchTo.nullify();
-    const StHandle<StOutDevice>& aDev = myDevices[theValue];
+    mySwitchTo.reset();
+    const std::shared_ptr<StOutDevice>& aDev = myDevices[theValue];
     for(size_t aRendIter = 0; aRendIter < myRenderers.size(); ++aRendIter) {
-        StHandle<StWindow>& aRend = myRenderers[aRendIter];
+        std::shared_ptr<StWindow>& aRend = myRenderers[aRendIter];
         if(aDev->PluginId == aRend->getRendererId()) {
             if(aRend->setDevice(aDev->DeviceId)
             || aRend != myWindow) {
@@ -83,11 +83,11 @@ void StApplication::doChangeDevice(const int32_t theValue) {
     }
 }
 
-StApplication::StApplication(const StHandle<StResourceManager>& theResMgr,
-                             const StNativeWin_t                theParentWin,
-                             const StHandle<StOpenInfo>&        theOpenInfo)
+StApplication::StApplication(const std::shared_ptr<StResourceManager>& theResMgr,
+                             const StNativeWin_t theParentWin,
+                             const std::shared_ptr<StOpenInfo>& theOpenInfo)
 : myResMgr(theResMgr),
-  myMsgQueue(new StMsgQueue()),
+  myMsgQueue(std::make_shared<StMsgQueue>()),
   myEventsBuffer(new StEventsBuffer()),
   myWinParent(theParentWin),
   myRendId(ST_SETTING_AUTO_VALUE),
@@ -99,9 +99,9 @@ StApplication::StApplication(const StHandle<StResourceManager>& theResMgr,
     stApplicationInit(theOpenInfo);
 }
 
-void StApplication::stApplicationInit(const StHandle<StOpenInfo>& theOpenInfo) {
-    if(myResMgr.isNull()) {
-        myResMgr = new StResourceManager();
+void StApplication::stApplicationInit(const std::shared_ptr<StOpenInfo>& theOpenInfo) {
+    if (myResMgr.get() == nullptr) {
+        myResMgr = std::make_shared<StResourceManager>();
     }
 #ifdef ST_DEBUG_GL
     myGlDebug = true;
@@ -128,11 +128,11 @@ void StApplication::stApplicationInit(const StHandle<StOpenInfo>& theOpenInfo) {
     SetDllDirectoryW(aStCoreFolder.toCString());
 #endif
     myOpenFileInfo = theOpenInfo;
-    if(myOpenFileInfo.isNull()) {
+    if (myOpenFileInfo.get() == nullptr) {
         myOpenFileInfo = parseProcessArguments();
     }
-    if(myOpenFileInfo.isNull()) {
-        myOpenFileInfo = new StOpenInfo();
+    if (myOpenFileInfo.get() == nullptr) {
+        myOpenFileInfo = std::make_shared<StOpenInfo>();
     }
 
     const StArgumentsMap anArgs = myOpenFileInfo->getArgumentsMap();
@@ -171,27 +171,27 @@ bool StApplication::open(const StOpenInfo& theOpenInfo) {
 }
 
 bool StApplication::open() {
-    if(!myWindow.isNull()) {
+    if (myWindow.get() != nullptr) {
         return true;
     }
 
     StSettings aGlobalSettings(myResMgr, "sview");
-    if(!mySwitchTo.isNull()) {
+    if (mySwitchTo.get() != nullptr) {
         myRendId = mySwitchTo->getRendererId();
         myWindow = mySwitchTo;
-        mySwitchTo.nullify();
+        mySwitchTo.reset();
         aGlobalSettings.saveString(ST_SETTING_RENDERER,      myRendId);
         aGlobalSettings.saveBool  (ST_SETTING_RENDERER_AUTO, false);
     } else {
         if (myRenderers.empty()) {
-            myWindow = new StWindow(myResMgr, myWinParent);
+            myWindow = std::make_shared<StWindow>(myResMgr, myWinParent);
             myWindow->setMessagesQueue(myMsgQueue);
             myWindow->params.VSyncMode = params.VSyncMode;
         } else {
             bool isAuto = myRendId.isEqualsIgnoreCase(ST_SETTING_AUTO_VALUE);
             if(!isAuto) {
                 for(size_t anIter = 0; anIter < myRenderers.size(); ++anIter) {
-                    StHandle<StWindow> aWin = myRenderers[anIter];
+                    std::shared_ptr<StWindow> aWin = myRenderers[anIter];
                     if(myRendId == aWin->getRendererId()) {
                         myWindow = aWin;
                         aGlobalSettings.saveString(ST_SETTING_RENDERER,      myRendId);
@@ -200,7 +200,7 @@ bool StApplication::open() {
                     }
                 }
 
-                if(myWindow.isNull()) {
+                if (myWindow.get() == nullptr) {
                     stError(StString("Output with id '" + myRendId + "' is not found."));
                     isAuto = true;
                 }
@@ -212,16 +212,16 @@ bool StApplication::open() {
                 aGlobalSettings.saveBool  (ST_SETTING_RENDERER_AUTO, isAuto);
                 myWindow = myRenderers[0];
                 if (!myDevices.empty()) {
-                    StHandle<StOutDevice> aBestDev = myDevices[0];
-                    for(size_t aDevIter = 0; aDevIter < myDevices.size(); ++aDevIter) {
-                        const StHandle<StOutDevice>& aDev = myDevices[aDevIter];
+                    std::shared_ptr<StOutDevice> aBestDev = myDevices[0];
+                    for (size_t aDevIter = 0; aDevIter < myDevices.size(); ++aDevIter) {
+                        const std::shared_ptr<StOutDevice>& aDev = myDevices[aDevIter];
                         if(aDev->Priority > aBestDev->Priority) {
                             aBestDev = aDev;
                         }
                     }
-                    for(size_t anIter = 0; anIter < myRenderers.size(); ++anIter) {
-                        const StHandle<StWindow>& aWin = myRenderers[anIter];
-                        if(aBestDev->PluginId == aWin->getRendererId()) {
+                    for (size_t anIter = 0; anIter < myRenderers.size(); ++anIter) {
+                        const std::shared_ptr<StWindow>& aWin = myRenderers[anIter];
+                        if (aBestDev->PluginId == aWin->getRendererId()) {
                             myWindow = aWin;
                             myWindow->setDevice(aBestDev->DeviceId);
                             break;
@@ -236,10 +236,10 @@ bool StApplication::open() {
     // synchronize devices enumeration
     const StString aPluginId = myWindow->getRendererId();
     const StString aDeviceId = myWindow->getDeviceId();
-    for(size_t aDevIter = 0; aDevIter < myDevices.size(); ++aDevIter) {
-        const StHandle<StOutDevice>& aDev = myDevices[aDevIter];
-        if(aPluginId == aDev->PluginId
-        && aDeviceId == aDev->DeviceId) {
+    for (size_t aDevIter = 0; aDevIter < myDevices.size(); ++aDevIter) {
+        const std::shared_ptr<StOutDevice>& aDev = myDevices[aDevIter];
+        if (aPluginId == aDev->PluginId
+         && aDeviceId == aDev->DeviceId) {
             params.ActiveDevice->setValue((int32_t )aDevIter);
             break;
         }
@@ -275,18 +275,18 @@ bool StApplication::open() {
     return myIsOpened;
 }
 
-void StApplication::addRenderer(const StHandle<StWindow>& theRenderer) {
-    if(theRenderer.isNull()) {
+void StApplication::addRenderer(const std::shared_ptr<StWindow>& theRenderer) {
+    if (theRenderer.get() == nullptr) {
         return;
     }
 
-    StHandle<StWindow> aRenderer = theRenderer;
+    std::shared_ptr<StWindow> aRenderer = theRenderer;
     aRenderer->params.VSyncMode = params.VSyncMode; // share VSync mode between renderers
     aRenderer->setMessagesQueue(myMsgQueue);
     myRenderers.push_back(aRenderer);
     size_t aDevIter = myDevices.size();
     aRenderer->getDevices(myDevices);
-    for(; aDevIter < myDevices.size(); ++aDevIter) {
+    for (; aDevIter < myDevices.size(); ++aDevIter) {
         params.ActiveDevice->changeValues().push_back(myDevices[aDevIter]->Name);
     }
 }
@@ -296,42 +296,42 @@ void StApplication::beforeDraw() {
 }
 
 void StApplication::doDrawProxy(unsigned int theView) {
-    stglDraw(!myWindow.isNull() && myWindow->isStereoOutput() ? theView : (unsigned int)ST_DRAW_MONO);
+    stglDraw(myWindow.get() != nullptr && myWindow->isStereoOutput() ? theView : (unsigned int)ST_DRAW_MONO);
 }
 
 void StApplication::stglDraw(unsigned int ) {
     //
 }
 
-const StHandle<StWindow>& StApplication::getMainWindow() const {
+const std::shared_ptr<StWindow>& StApplication::getMainWindow() const {
     return myWindow;
 }
 
 bool StApplication::isActive() const {
-    return !myWindow.isNull()
+    return myWindow.get() != nullptr
         && myWindow->isActive();
 }
 
-const StHandle<StMsgQueue>& StApplication::getMessagesQueue() const {
+const std::shared_ptr<StMsgQueue>& StApplication::getMessagesQueue() const {
     return myMsgQueue;
 }
 
 int StApplication::exec() {
-    if(!myIsOpened) {
-        if(!open()) {
+    if (!myIsOpened) {
+        if (!open()) {
             return 1;
         }
     }
 
-    if(!myWindow.isNull()) {
+    if (myWindow.get() != nullptr) {
         // just debug output Monitors' configuration
         const StSearchMonitors& aMonitors = myWindow->getMonitors();
-        for(size_t aMonIter = 0; aMonIter < aMonitors.size(); ++aMonIter) {
+        for (size_t aMonIter = 0; aMonIter < aMonitors.size(); ++aMonIter) {
             ST_DEBUG_LOG(aMonitors[aMonIter].toString());
         }
     }
 
-    for(; !myWindow.isNull() && myIsOpened;) {
+    for (; myWindow.get() != nullptr && myIsOpened;) {
         processEvents();
     }
     return myExitCode;
@@ -351,7 +351,7 @@ void StApplication::doClose(const StCloseEvent& ) {
 }
 
 void StApplication::doPause(const StPauseEvent& ) {
-    if(!myWindow.isNull()) {
+    if (myWindow.get() != nullptr) {
         myWindow->beforeClose();
     }
 }
@@ -400,8 +400,8 @@ StHandle<StAction> StApplication::getActionForKey(unsigned int theHKey) const {
 
 void StApplication::registerHotKeys() {
     myKeyActions.clear();
-    StKeysState* aKeysState = !myWindow.isNull() ? &myWindow->changeKeysState() : NULL;
-    if(aKeysState != NULL) {
+    StKeysState* aKeysState = myWindow.get() != nullptr ? &myWindow->changeKeysState() : nullptr;
+    if (aKeysState != nullptr) {
         aKeysState->resetRegisteredKeys();
     }
     for(std::map< int, StHandle<StAction> >::iterator anIter = myActions.begin();
@@ -474,11 +474,11 @@ void StApplication::doFileDrop (const StDNDropEvent& ) {}
 void StApplication::doNavigate (const StNavigEvent&  ) {}
 
 void StApplication::processEvents() {
-    if(myWindow.isNull() || !myIsOpened) {
+    if (myWindow.get() == nullptr || !myIsOpened) {
         return; // nothing to do
     }
 
-    if(myToQuit) {
+    if (myToQuit) {
         // force Render to quit
         myWindow->beforeClose();
         myWindow->close();
@@ -492,9 +492,9 @@ void StApplication::processEvents() {
 
     // application-specific queued events
     myEventsBuffer->swapBuffers();
-    for(size_t anEventIter = 0; anEventIter < myEventsBuffer->getSize(); ++anEventIter) {
+    for (size_t anEventIter = 0; anEventIter < myEventsBuffer->getSize(); ++anEventIter) {
         StEvent& anEvent = myEventsBuffer->changeEvent(anEventIter);
-        if(anEvent.Type == stEvent_Action) {
+        if (anEvent.Type == stEvent_Action) {
             doAction(anEvent.Action);
         }
     }
@@ -505,26 +505,26 @@ void StApplication::processEvents() {
 
     const StString aDevice = myWindow->getDeviceId();
     const int32_t  aDevNum = params.ActiveDevice->getValue();
-    if(!mySwitchTo.isNull()) {
-        if(!resetDevice()) {
+    if (mySwitchTo.get() != nullptr) {
+        if (!resetDevice()) {
             myToQuit = true;
         }
-        mySwitchTo.nullify();
-    } else if(myWindow->isLostDevice()) {
+        mySwitchTo.reset();
+    } else if (myWindow->isLostDevice()) {
         mySwitchTo = myWindow;
-        if(!resetDevice()) {
+        if (!resetDevice()) {
             myToQuit = true;
         }
-        mySwitchTo.nullify();
-    } else if(aDevNum >= 0
-           && size_t(aDevNum) < myDevices.size()
-           && aDevice != myDevices[aDevNum]->DeviceId) {
+        mySwitchTo.reset();
+    } else if (aDevNum >= 0
+            && size_t(aDevNum) < myDevices.size()
+            && aDevice != myDevices[aDevNum]->DeviceId) {
         // device was changed by renderer itself - synchronize value
         const StString aPlugin = myWindow->getRendererId();
-        for(size_t aDevIter = 0; aDevIter < myDevices.size(); ++aDevIter) {
-            const StHandle<StOutDevice>& anOutDev = myDevices[aDevIter];
-            if(aPlugin == anOutDev->PluginId
-            && aDevice == anOutDev->DeviceId) {
+        for (size_t aDevIter = 0; aDevIter < myDevices.size(); ++aDevIter) {
+            const std::shared_ptr<StOutDevice>& anOutDev = myDevices[aDevIter];
+            if (aPlugin == anOutDev->PluginId
+             && aDevice == anOutDev->DeviceId) {
                 params.ActiveDevice->setValue((int32_t )aDevIter);
                 break;
             }
@@ -532,8 +532,8 @@ void StApplication::processEvents() {
     }
 }
 
-StHandle<StOpenInfo> StApplication::parseProcessArguments() {
-    StHandle<StOpenInfo> anInfo = new StOpenInfo();
+std::shared_ptr<StOpenInfo> StApplication::parseProcessArguments() {
+    std::shared_ptr<StOpenInfo> anInfo = std::make_shared<StOpenInfo>();
 
     std::vector<StString> anArguments = StProcess::getArguments();
     StArgumentsMap anOpenFileArgs;
@@ -635,8 +635,8 @@ void StApplication::setDefaultDrawer(const StString& theDrawer) const {
     aGlobalSettings.saveString(ST_SETTING_DEF_DRAWER, theDrawer);
 }
 
-bool StApplication::readDefaultDrawer(StHandle<StOpenInfo>& theInfo) {
-    StHandle<StResourceManager> aResMgr = new StResourceManager();
+bool StApplication::readDefaultDrawer(std::shared_ptr<StOpenInfo>& theInfo) {
+    std::shared_ptr<StResourceManager> aResMgr = std::make_shared<StResourceManager>();
     StSettings aGlobalSettings(aResMgr, "sview");
     StString aDefDrawer;
     aGlobalSettings.loadString(ST_SETTING_DEF_DRAWER, aDefDrawer);
@@ -644,8 +644,8 @@ bool StApplication::readDefaultDrawer(StHandle<StOpenInfo>& theInfo) {
         return false;
     }
 
-    if(theInfo.isNull()) {
-        theInfo = new StOpenInfo();
+    if (theInfo.get() == nullptr) {
+        theInfo = std::make_shared<StOpenInfo>();
     }
     StArgumentsMap anArgs = theInfo->getArgumentsMap();
     anArgs.add(StArgument("in", aDefDrawer));
@@ -662,12 +662,12 @@ void StApplication::doChangeLanguage(const int32_t ) {
     myToRecreateMenu = true;
     myLangMap->resetReloaded();
 
-    for(size_t aRendIter = 0; aRendIter < myRenderers.size(); ++aRendIter) {
-        StHandle<StWindow>& aRend = myRenderers[aRendIter];
+    for (size_t aRendIter = 0; aRendIter < myRenderers.size(); ++aRendIter) {
+        std::shared_ptr<StWindow>& aRend = myRenderers[aRendIter];
         aRend->doChangeLanguage();
     }
 
-    for(size_t aDevIter = 0; aDevIter < myDevices.size(); ++aDevIter) {
+    for (size_t aDevIter = 0; aDevIter < myDevices.size(); ++aDevIter) {
         params.ActiveDevice->defineOption((int32_t )aDevIter, myDevices[aDevIter]->Name);
     }
 }

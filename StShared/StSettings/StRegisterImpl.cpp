@@ -51,8 +51,8 @@ struct StRegKey {
 
 };
 
-StSettings::StSettings(const StHandle<StResourceManager>& /*theResMgr*/,
-                       const StString&                    theSettingsSet)
+StSettings::StSettings(const std::shared_ptr<StResourceManager>& /*theResMgr*/,
+                       const StString& theSettingsSet)
 : mySettingsSet(theSettingsSet.toUtfWide()),
   myRegisterPath(StStringUtfWide("SOFTWARE\\sView\\") + theSettingsSet.toUtfWide()),
   myToFlush(false) {

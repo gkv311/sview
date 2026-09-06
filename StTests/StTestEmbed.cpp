@@ -123,7 +123,7 @@ SV_THREAD_FUNCTION StTestEmbed::embedAppThread(void* thePtr) {
 }
 
 void StTestEmbed::embedAppLoop() {
-    StHandle<StApplication> anApp = new StApplication(new StResourceManager(), myParent);
+    std::shared_ptr<StApplication> anApp = std::make_shared<StApplication>(std::make_shared<StResourceManager>(), myParent);
     if(!anApp->open()) {
         return;
     }

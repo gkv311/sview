@@ -21,6 +21,8 @@
 #include <android/configuration.h>
 #include <android/native_activity.h>
 
+#include <memory>
+
 class StAndroidGlue;
 class StApplication;
 class StKeysState;
@@ -420,8 +422,9 @@ class StAndroidGlue {
 
         protected: //! @name protected fields
 
-    StHandle<StThread>      myThread;            //!< application thread
-    StHandle<StApplication> myApp;               //!< application instance
+    std::shared_ptr<StThread>      myThread; //!< application thread
+    std::shared_ptr<StApplication> myApp;    //!< application instance
+
     ANativeActivity*        myActivity;          //!< ANativeActivity object instance that this application is running in
     AConfiguration*         myConfig;            //!< The current configuration the application is running in
     ALooper*                myLooper;            //!< ALooper associated with the application thread

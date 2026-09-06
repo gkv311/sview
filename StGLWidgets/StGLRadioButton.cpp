@@ -44,26 +44,26 @@ StGLRadioButton::StGLRadioButton(StGLWidget* theParent,
     changeRectPx().bottom() = getRectPx().top()  + myRoot->scale(16);
 
     myTextures = myRoot->getRadioIcon();
-    if(myTextures.isNull()) {
+    if (myTextures.get() == nullptr) {
         const StString& anIcon0 = myRoot->getIcon(StGLRootWidget::IconImage_RadioButtonOff);
         const StString& anIcon1 = myRoot->getIcon(StGLRootWidget::IconImage_RadioButtonOn);
         if(!anIcon0.isEmpty()
         && !anIcon1.isEmpty()) {
-            myTextures = new StGLTextureArray(2);
-            myTextures->changeValue(0).setName(anIcon0);
-            myTextures->changeValue(1).setName(anIcon1);
+            myTextures = std::make_shared<StGLTextureArray>(2);
+            myTextures->at(0).setName(anIcon0);
+            myTextures->at(1).setName(anIcon1);
             myRoot->getRadioIcon() = myTextures;
         }
     }
 }
 
 StGLRadioButton::~StGLRadioButton() {
-    myTextures.nullify(); // will be released by StGLRootWidget
+    myTextures.reset(); // will be released by StGLRootWidget
     myVertBuf.release(getContext());
 }
 
 void StGLRadioButton::stglResize() {
-    if(!myTextures.isNull()) {
+    if (myTextures.get() != nullptr) {
         StGLTextureButton::stglResize();
         return;
     }
@@ -87,22 +87,21 @@ void StGLRadioButton::stglResize() {
 }
 
 bool StGLRadioButton::stglInit() {
-    if(!myTextures.isNull()
-     && StGLTextureButton::stglInit()) {
+    if (myTextures.get() != nullptr && StGLTextureButton::stglInit()) {
         return true;
     }
 
     // already initialized?
-    if(myVertBuf.isValid()) {
+    if (myVertBuf.isValid()) {
         return true;
     }
 
     // initialize GLSL program
-    myTextures.nullify();
+    myTextures.reset();
     StGLContext& aCtx = getContext();
     std::vector<StGLVec2> aDummyVert;
     aDummyVert.resize(8);
-    if(!myVertBuf.init(aCtx, aDummyVert)) {
+    if (!myVertBuf.init(aCtx, aDummyVert)) {
         return false;
     }
 
@@ -120,7 +119,7 @@ void StGLRadioButton::stglDraw(unsigned int theView) {
     }
 
     myFaceId = isActiveState() ? 1 : 0;
-    if(!myTextures.isNull()) {
+    if (myTextures.get() != nullptr) {
         StGLTextureButton::stglDraw(theView);
         return;
     }

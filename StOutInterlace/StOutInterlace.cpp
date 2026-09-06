@@ -24,17 +24,17 @@
 
 namespace {
 
-    static const char ST_OUT_PLUGIN_NAME[] = "StOutInterlace";
+    static constexpr char ST_OUT_PLUGIN_NAME[] = "StOutInterlace";
 
 #if !defined(__ANDROID__)
     // shaders data files
-    static const char VSHADER_ED[]              = "vED.shv";
-    static const char FSHADER_EDINTERLACE_ON[]  = "fEDinterlace.shf";
-    static const char FSHADER_ED_OFF[]          = "fEDoff.shf";
+    static constexpr char VSHADER_ED[]              = "vED.shv";
+    static constexpr char FSHADER_EDINTERLACE_ON[]  = "fEDinterlace.shf";
+    static constexpr char FSHADER_ED_OFF[]          = "fEDoff.shf";
 #endif
 
-    static const char ST_SETTING_DEVICE_ID[]    = "deviceId";
-    static const char ST_SETTING_WINDOWPOS[]    = "windowPos";
+    static constexpr char ST_SETTING_DEVICE_ID[]    = "deviceId";
+    static constexpr char ST_SETTING_WINDOWPOS[]    = "windowPos";
 
     struct StMonInterlacedInfo_t {
         const stUtf8_t* pnpid;
@@ -45,7 +45,7 @@ namespace {
     /**
      * Database of known interlaced monitors.
      */
-    static const StMonInterlacedInfo_t THE_KNOWN_MONITORS[] = {
+    static constexpr StMonInterlacedInfo_t THE_KNOWN_MONITORS[] = {
         {"ZMT1900", false, true}, // Zalman Trimon M190S
         {"ZMT2200", false, true}, // Zalman Trimon M220W
         {"ENV2373", true , true}, // Envision
@@ -171,13 +171,13 @@ bool StProgramFB::link(StGLContext& theCtx) {
 
 StAtomic<int32_t> StOutInterlace::myInstancesNb(0);
 
-StHandle<StMonitor> StOutInterlace::getInterlacedMonitor(const StSearchMonitors& theMonitors,
-                                                         bool& theIsReversed,
-                                                         bool& theIsRowInterlaced) {
+std::shared_ptr<StMonitor> StOutInterlace::getInterlacedMonitor(const StSearchMonitors& theMonitors,
+                                                                bool& theIsReversed,
+                                                                bool& theIsRowInterlaced) {
     for(size_t aMonIter = 0; aMonIter < theMonitors.size(); ++aMonIter) {
         const StMonitor& aMon = theMonitors[aMonIter];
         if(isInterlacedMonitor(aMon, theIsReversed, theIsRowInterlaced)) {
-            return new StMonitor(aMon);
+            return std::make_shared<StMonitor>(aMon);
         }
     }
     return NULL;
@@ -262,20 +262,20 @@ void StOutInterlace::updateStrings() {
             + aDescr.format("2009-2026", "kirill@sview.ru", "www.sview.ru");
 }
 
-StOutInterlace::StOutInterlace(const StHandle<StResourceManager>& theResMgr,
-                               const StNativeWin_t                theParentWindow)
+StOutInterlace::StOutInterlace(const std::shared_ptr<StResourceManager>& theResMgr,
+                               const StNativeWin_t theParentWindow)
 : StWindow(theResMgr, theParentWindow),
-  mySettings(new StSettings(theResMgr, ST_OUT_PLUGIN_NAME)),
-  myFrmBuffer(new StGLFrameBuffer()),
-  myTextureMask(new StGLTexture(GL_ALPHA)),
-  myTextureMaskEmpty(new StGLTexture(GL_ALPHA)),
+  mySettings(std::make_shared<StSettings>(theResMgr, ST_OUT_PLUGIN_NAME)),
+  myFrmBuffer(std::make_shared<StGLFrameBuffer>()),
+  myTextureMask(std::make_shared<StGLTexture>(GL_ALPHA)),
+  myTextureMaskEmpty(std::make_shared<StGLTexture>(GL_ALPHA)),
   myTexMaskDevice(DEVICE_AUTO),
   myTexMaskReversed(false),
   myDevice(DEVICE_AUTO),
   myBarrierState(BarrierState_Unknown),
   myEDTimer(true),
-  myEDIntelaceOn(new StGLProgram("ED Interlace On")),
-  myEDOff(new StGLProgram("ED Interlace Off")),
+  myEDIntelaceOn(std::make_shared<StGLProgram>("ED Interlace On")),
+  myEDOff(std::make_shared<StGLProgram>("ED Interlace Off")),
   myVpSizeY(10),
   myIsMonReversed(false),
   myIsMonPortrait(false),
@@ -296,36 +296,36 @@ StOutInterlace::StOutInterlace(const StHandle<StResourceManager>& theResMgr,
     StWindow::signals.onAnotherMonitor = stSlot(this, &StOutInterlace::doNewMonitor);
 
     const StSearchMonitors& aMonitors = StWindow::getMonitors();
-    myGlPrograms[DEVICE_ROW_INTERLACED]       = new StProgramFB("Row Interlace");
-    myGlPrograms[DEVICE_COL_INTERLACED]       = new StProgramFB("Column Interlace");
-    myGlPrograms[DEVICE_CHESSBOARD]           = new StProgramFB("Chessboard");
+    myGlPrograms[DEVICE_ROW_INTERLACED]       = std::make_shared<StProgramFB>("Row Interlace");
+    myGlPrograms[DEVICE_COL_INTERLACED]       = std::make_shared<StProgramFB>("Column Interlace");
+    myGlPrograms[DEVICE_CHESSBOARD]           = std::make_shared<StProgramFB>("Chessboard");
     myGlPrograms[DEVICE_ROW_INTERLACED_ED]    = myGlPrograms[DEVICE_ROW_INTERLACED];
     myGlPrograms[DEVICE_COL_INTERLACED_MI3D]  = myGlPrograms[DEVICE_COL_INTERLACED];
 
-    myGlProgramsRev[DEVICE_ROW_INTERLACED]      = new StProgramFB("Row Interlace Inversed");
-    myGlProgramsRev[DEVICE_COL_INTERLACED]      = new StProgramFB("Column Interlace Inversed");
-    myGlProgramsRev[DEVICE_CHESSBOARD]          = new StProgramFB("Chessboard Inversed");
+    myGlProgramsRev[DEVICE_ROW_INTERLACED]      = std::make_shared<StProgramFB>("Row Interlace Inversed");
+    myGlProgramsRev[DEVICE_COL_INTERLACED]      = std::make_shared<StProgramFB>("Column Interlace Inversed");
+    myGlProgramsRev[DEVICE_CHESSBOARD]          = std::make_shared<StProgramFB>("Chessboard Inversed");
     myGlProgramsRev[DEVICE_ROW_INTERLACED_ED]   = myGlProgramsRev[DEVICE_ROW_INTERLACED];
     myGlProgramsRev[DEVICE_COL_INTERLACED_MI3D] = myGlProgramsRev[DEVICE_COL_INTERLACED];
 
-    myGlProgramMask = new StProgramFB("Interlace Mask");
+    myGlProgramMask = std::make_shared<StProgramFB>("Interlace Mask");
 
     // devices list
-    StHandle<StOutDevice> aDevRow = new StOutDevice();
+    std::shared_ptr<StOutDevice> aDevRow = std::make_shared<StOutDevice>();
     aDevRow->PluginId = ST_OUT_PLUGIN_NAME;
     aDevRow->DeviceId = stCString("Row");
     aDevRow->Priority = ST_DEVICE_SUPPORT_NONE;
     aDevRow->Name     = stCString("Row Interlaced");
     myDevices.push_back(aDevRow);
 
-    StHandle<StOutDevice> aDevCol = new StOutDevice();
+    std::shared_ptr<StOutDevice> aDevCol = std::make_shared<StOutDevice>();
     aDevCol->PluginId = ST_OUT_PLUGIN_NAME;
     aDevCol->DeviceId = stCString("Col");
     aDevCol->Priority = ST_DEVICE_SUPPORT_NONE;
     aDevCol->Name     = stCString("Column Interlaced");
     myDevices.push_back(aDevCol);
 
-    StHandle<StOutDevice> aDevChess = new StOutDevice();
+    std::shared_ptr<StOutDevice> aDevChess = std::make_shared<StOutDevice>();
     aDevChess->PluginId = ST_OUT_PLUGIN_NAME;
     aDevChess->DeviceId = stCString("Chess");
 #if defined(__ANDROID__)
@@ -336,7 +336,7 @@ StOutInterlace::StOutInterlace(const StHandle<StResourceManager>& theResMgr,
     aDevChess->Name     = stCString("DLP TV (chessboard)");
     myDevices.push_back(aDevChess);
 
-    StHandle<StOutDevice> aDevED = new StOutDevice();
+    std::shared_ptr<StOutDevice> aDevED = std::make_shared<StOutDevice>();
     aDevED->PluginId = ST_OUT_PLUGIN_NAME;
     aDevED->DeviceId = stCString("RowED");
 #if defined(__ANDROID__)
@@ -347,7 +347,7 @@ StOutInterlace::StOutInterlace(const StHandle<StResourceManager>& theResMgr,
     aDevED->Name     = stCString("Interlaced ED");
     myDevices.push_back(aDevED);
 
-    StHandle<StOutDevice> aDevMI3D = new StOutDevice();
+    std::shared_ptr<StOutDevice> aDevMI3D = std::make_shared<StOutDevice>();
     aDevMI3D->PluginId = ST_OUT_PLUGIN_NAME;
     aDevMI3D->DeviceId = stCString("ColMI3D");
     aDevMI3D->Priority = ST_DEVICE_SUPPORT_IGNORE;
@@ -368,8 +368,8 @@ StOutInterlace::StOutInterlace(const StHandle<StResourceManager>& theResMgr,
     // detect connected displays
     bool isDummyReversed = false;
     bool isRowInterlaced = false;
-    StHandle<StMonitor> aMonInterlaced = getInterlacedMonitor(aMonitors, isDummyReversed, isRowInterlaced);
-    if(!aMonInterlaced.isNull()) {
+    std::shared_ptr<StMonitor> aMonInterlaced = getInterlacedMonitor(aMonitors, isDummyReversed, isRowInterlaced);
+    if (aMonInterlaced.get() != nullptr) {
         if(isRowInterlaced) {
             aDevRow->Priority = ST_DEVICE_SUPPORT_PREFER;
         } else {
@@ -401,9 +401,9 @@ StOutInterlace::StOutInterlace(const StHandle<StResourceManager>& theResMgr,
                               256, 256 + aDefWidth);
         const bool isLoadedPosition = mySettings->loadInt32Rect(ST_SETTING_WINDOWPOS, aRect);
         StMonitor aMonitor = aMonitors[aRect.center()];
-        if(params.BindToMon->getValue()
-        && !aMonInterlaced.isNull()
-        && !isInterlacedMonitor(aMonitor, isDummyReversed, isRowInterlaced)) {
+        if (params.BindToMon->getValue()
+         && aMonInterlaced.get() != nullptr
+         && !isInterlacedMonitor(aMonitor, isDummyReversed, isRowInterlaced)) {
             aMonitor = *aMonInterlaced;
         }
         if(isLoadedPosition) {
@@ -424,7 +424,7 @@ StOutInterlace::StOutInterlace(const StHandle<StResourceManager>& theResMgr,
     }
 
     // setup myIsMonReversed value for actual placement
-    if(!aMonInterlaced.isNull()) {
+    if (aMonInterlaced.get() != nullptr) {
         myIsMonReversed = false;
         StMonitor aMonitor = aMonitors[StWindow::getPlacement().center()];
         isInterlacedMonitor(aMonitor, myIsMonReversed, isRowInterlaced);
@@ -449,8 +449,8 @@ StOutInterlace::StOutInterlace(const StHandle<StResourceManager>& theResMgr,
 }
 
 void StOutInterlace::releaseResources() {
-    if(!myContext.isNull()) {
-        for(size_t anIter = 0; anIter < DEVICE_NB; ++anIter) {
+    if (myContext.get() != nullptr) {
+        for (size_t anIter = 0; anIter < DEVICE_NB; ++anIter) {
             myGlPrograms   [anIter]->release(*myContext);
             myGlProgramsRev[anIter]->release(*myContext);
         }
@@ -463,7 +463,7 @@ void StOutInterlace::releaseResources() {
         myTextureMaskEmpty->release(*myContext);
         myGlProgramMask->release(*myContext);
     }
-    myContext.nullify();
+    myContext.reset();
 
     // read windowed placement
     StWindow::hide();
@@ -799,14 +799,14 @@ void StOutInterlace::processEvents() {
 
     // resize ED rectangle
     const StRectI_t aRect = StWindow::getPlacement();
-    if(aRect != myWinRect) {
+    if (aRect != myWinRect) {
         myWinRect = aRect;
         myVpSizeY = aRect.height();
-        if(!StWindow::isFullScreen()) {
+        if (!StWindow::isFullScreen()) {
             const StSearchMonitors& aMonitors = StWindow::getMonitors();
-            if(myMonitor.isNull()) {
-                myMonitor = new StMonitor(aMonitors[aRect.center()]);
-            } else if(!myMonitor->getVRect().isPointIn(aRect.center())) {
+            if (myMonitor.get() == nullptr) {
+                myMonitor = std::make_shared<StMonitor>(aMonitors[aRect.center()]);
+            } else if (!myMonitor->getVRect().isPointIn(aRect.center())) {
                 *myMonitor = aMonitors[aRect.center()];
             }
             myEDRect.left()   = 0;
@@ -1114,11 +1114,11 @@ void StOutInterlace::stglDraw() {
 
         myContext->stglResizeViewport(aVPort);
         myFrmBuffer->bindTexture(*myContext);
-        StHandle<StGLTexture>& aTexMask = (anEyeIter == 0) ? myTextureMaskEmpty : myTextureMask;
-        if(toUseTexMask) {
+        std::shared_ptr<StGLTexture>& aTexMask = (anEyeIter == 0) ? myTextureMaskEmpty : myTextureMask;
+        if (toUseTexMask) {
             aTexMask->bind(*myContext, GL_TEXTURE1);
         }
-        const StHandle<StProgramFB>& aProgram = toUseTexMask
+        const std::shared_ptr<StProgramFB>& aProgram = toUseTexMask
                                               ? myGlProgramMask
                                               : (toReverseReverse
                                                 ? myGlProgramsRev[aDevice]
@@ -1183,7 +1183,7 @@ void StOutInterlace::stglDraw() {
 }
 
 void StOutInterlace::doSwitchVSync(const int32_t theValue) {
-    if(myContext.isNull()) {
+    if (myContext.get() == nullptr) {
         return;
     }
 
@@ -1206,8 +1206,8 @@ void StOutInterlace::doSetBindToMonitor(const bool theValue) {
         return;
     }
 
-    StHandle<StMonitor> anInterlacedMon = getInterlacedMonitor(aMonitors, myIsMonReversed, isRowInterlaced);
-    if(anInterlacedMon.isNull()) {
+    std::shared_ptr<StMonitor> anInterlacedMon = getInterlacedMonitor(aMonitors, myIsMonReversed, isRowInterlaced);
+    if (anInterlacedMon.get() == nullptr) {
         return;
     }
 

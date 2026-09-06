@@ -8,6 +8,7 @@
 #define __StGLQuadTexture_h_
 
 #include "StGLStereoTexture.h"
+
 #include <StImage/StImage.h>
 #include <StGL/StParams.h>
 
@@ -64,10 +65,10 @@ class StGLFrameTexture : public StGLTexture {
 
         private:
 
-    StGLVec2   myDataSize;     //!< data size in the texture (x()=right and y()=bottom)
-    float      myDisplayRatio; //!< display aspect ratio
-    float      myPAR;          //!< pixel aspect ratio
-    StPanorama myPanorama;     //!< packed panorama format
+    StGLVec2   myDataSize;                  //!< data size in the texture (x()=right and y()=bottom)
+    float      myDisplayRatio = 1.0f;       //!< display aspect ratio
+    float      myPAR = 1.0f;                //!< pixel aspect ratio
+    StPanorama myPanorama = StPanorama_OFF; //!< packed panorama format
 
 };
 
@@ -84,24 +85,24 @@ class StGLFrameTextures : public StGLResource {
      */
     ST_CPPEXPORT virtual void release(StGLContext& theCtx) ST_ATTR_OVERRIDE;
 
-    inline StHandle<StStereoParams> getSource() const {
+    ST_LOCAL std::shared_ptr<StStereoParams> getSource() const {
         return myParams;
     }
 
-    inline void setSource(const StHandle<StStereoParams>& theParams) {
+    ST_LOCAL void setSource(const std::shared_ptr<StStereoParams>& theParams) {
         myParams = theParams;
     }
 
-    inline StImage::ImgColorScale getColorScale() const {
+    ST_LOCAL StImage::ImgColorScale getColorScale() const {
         return myImgScale;
     }
 
-    inline StImage::ImgColorModel getColorModel() const {
+    ST_LOCAL StImage::ImgColorModel getColorModel() const {
         return myImgCM;
     }
 
-    inline void setColorModel(const StImage::ImgColorModel theColorModel,
-                              const StImage::ImgColorScale theColorScale) {
+    ST_LOCAL void setColorModel(const StImage::ImgColorModel theColorModel,
+                                const StImage::ImgColorScale theColorScale) {
         myImgCM    = theColorModel;
         myImgScale = theColorScale;
     }
@@ -109,28 +110,28 @@ class StGLFrameTextures : public StGLResource {
     /**
      * @return true if main data is valid.
      */
-    inline bool isValid() const {
+    ST_LOCAL bool isValid() const {
         return myTextures[0].isValid();
     }
 
     /**
      * @return sizeX (GLsizei ) - main texture width.
      */
-    inline GLsizei getSizeX() const {
+    ST_LOCAL GLsizei getSizeX() const {
         return myTextures[0].getSizeX();
     }
 
     /**
      * @return sizeY (GLsizei ) - main texture height.
      */
-    inline GLsizei getSizeY() const {
+    ST_LOCAL GLsizei getSizeY() const {
         return myTextures[0].getSizeY();
     }
 
     /**
      * Access to texture plane using id.
      */
-    inline StGLFrameTexture& getPlane(size_t thePlaneId = 0) {
+    ST_LOCAL StGLFrameTexture& getPlane(size_t thePlaneId = 0) {
         ST_ASSERT(thePlaneId < 4, "StGLFrameTextures::getPlane() - out of range access");
         return myTextures[thePlaneId];
     }
@@ -138,8 +139,8 @@ class StGLFrameTextures : public StGLResource {
     /**
      * Bind as multitexture.
      */
-    inline void bind(StGLContext& theCtx,
-                     const GLenum theTextureUnit = GL_TEXTURE0) {
+    ST_LOCAL void bind(StGLContext& theCtx,
+                       const GLenum theTextureUnit = GL_TEXTURE0) {
         if(myTextures[0].isValid()) { myTextures[0].bind(theCtx, theTextureUnit);     }
         if(myTextures[1].isValid()) { myTextures[1].bind(theCtx, theTextureUnit + 1); }
         if(myTextures[2].isValid()) { myTextures[2].bind(theCtx, theTextureUnit + 2); }
@@ -149,7 +150,7 @@ class StGLFrameTextures : public StGLResource {
     /**
      * Unbind textures.
      */
-    inline void unbind(StGLContext& theCtx) {
+    ST_LOCAL void unbind(StGLContext& theCtx) {
         if(myTextures[3].isValid()) { myTextures[3].unbind(theCtx); }
         if(myTextures[2].isValid()) { myTextures[2].unbind(theCtx); }
         if(myTextures[1].isValid()) { myTextures[1].unbind(theCtx); }
@@ -187,10 +188,11 @@ class StGLFrameTextures : public StGLResource {
 
         private:
 
-    StHandle<StStereoParams> myParams;      //!< source pointer
-    StGLFrameTexture         myTextures[4]; //!< texture planes
-    StImage::ImgColorModel   myImgCM;       //!< color model
-    StImage::ImgColorScale   myImgScale;    //!< color scale
+    std::shared_ptr<StStereoParams> myParams; //!< source pointer
+
+    StGLFrameTexture       myTextures[4]; //!< texture planes
+    StImage::ImgColorModel myImgCM    = StImage::ImgColor_RGB;  //!< color model
+    StImage::ImgColorScale myImgScale = StImage::ImgScale_Full; //!< color scale
 
 };
 
@@ -228,21 +230,21 @@ class StGLQuadTexture : public StGLResource {
     /**
      * @return texture (StGLFrameTextures& ) - texture from front pair (for rendering).
      */
-    inline StGLFrameTextures& getFront(const LeftOrRight theLeftOrRight) {
+    ST_LOCAL StGLFrameTextures& getFront(const LeftOrRight theLeftOrRight) {
         return myTextures[getFrontId() + theLeftOrRight];
     }
 
     /**
      * @return texture (StGLFrameTextures& ) - texture from back pair (for filling).
      */
-    inline StGLFrameTextures& getBack(const LeftOrRight theLeftOrRight) {
+    ST_LOCAL StGLFrameTextures& getBack(const LeftOrRight theLeftOrRight) {
         return myTextures[getBackId() + theLeftOrRight];
     }
 
     /**
      * Swap FRONT / BACK.
      */
-    inline void swapFB() {
+    ST_LOCAL void swapFB() {
         myActive = !myActive; // process swap itself
     }
 
@@ -265,18 +267,18 @@ class StGLQuadTexture : public StGLResource {
 
         private:
 
-    inline size_t getFrontId() const {
+    ST_LOCAL size_t getFrontId() const {
         return myActive ? FRONT_TEXTURE : BACK_TEXTURE;
     }
 
-    inline size_t getBackId() const {
+    ST_LOCAL size_t getBackId() const {
         return myActive ? BACK_TEXTURE : FRONT_TEXTURE;
     }
 
         private:
 
-    StGLFrameTextures myTextures[4]; //!< Front and Back stereo textures
-    bool              myActive;      //!< Front/Back flag
+    StGLFrameTextures myTextures[4];   //!< Front and Back stereo textures
+    bool              myActive = true; //!< Front/Back flag
 
 };
 

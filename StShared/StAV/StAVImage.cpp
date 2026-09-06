@@ -17,10 +17,7 @@ bool StAVImage::init() {
     return stAV::init();
 }
 
-StAVImage::StAVImage()
-: myFormatCtx(NULL),
-  myCodecCtx(NULL),
-  myCodec(NULL) {
+StAVImage::StAVImage() {
     StAVImage::init();
 }
 
@@ -119,8 +116,8 @@ static void fillPointersAV(const StImage& theImage,
     }
 }
 
-static const int THE_SWSCALE_FLAGS_FAST    = SWS_BICUBIC;
-static const int THE_SWSCALE_FLAGS_QUALITY = SWS_LANCZOS | SWS_ACCURATE_RND | SWS_FULL_CHR_H_INT;
+static constexpr int THE_SWSCALE_FLAGS_FAST    = SWS_BICUBIC;
+static constexpr int THE_SWSCALE_FLAGS_QUALITY = SWS_LANCZOS | SWS_ACCURATE_RND | SWS_FULL_CHR_H_INT;
 
 /**
  * Convert image from one format to another using swscale.

@@ -20,10 +20,10 @@
 
 namespace {
 
-    static const char ST_OUT_PLUGIN_NAME[]   = "StOutDual";
+    static constexpr char ST_OUT_PLUGIN_NAME[]   = "StOutDual";
 
-    static const char ST_SETTING_DEVICE_ID[] = "deviceId";
-    static const char ST_SETTING_WINDOWPOS[] = "windowPos";
+    static constexpr char ST_SETTING_DEVICE_ID[] = "deviceId";
+    static constexpr char ST_SETTING_WINDOWPOS[] = "windowPos";
 
     // translation resources
     enum {
@@ -72,7 +72,7 @@ class StProgramMM : public StGLProgram {
     }
 
     virtual bool init(StGLContext& theCtx) ST_ATTR_OVERRIDE {
-        const char VERTEX_SHADER[] =
+        constexpr char VERTEX_SHADER[] =
            "attribute vec4 vVertex; \
             attribute vec2 vTexCoord; \
             varying vec2 fTexCoord; \
@@ -81,7 +81,7 @@ class StProgramMM : public StGLProgram {
                 gl_Position = vVertex; \
             }";
 
-        const char FRAGMENT_SHADER[] =
+        constexpr char FRAGMENT_SHADER[] =
            "uniform sampler2D texR, texL; \
             varying vec2 fTexCoord; \
             void main(void) { \
@@ -185,12 +185,12 @@ void StOutDual::updateStrings() {
             + aDescr.format("2007-2026", "kirill@sview.ru", "www.sview.ru");
 }
 
-StOutDual::StOutDual(const StHandle<StResourceManager>& theResMgr,
-                     const StNativeWin_t                theParentWindow)
+StOutDual::StOutDual(const std::shared_ptr<StResourceManager>& theResMgr,
+                     const StNativeWin_t theParentWindow)
 : StWindow(theResMgr, theParentWindow),
-  mySettings(new StSettings(theResMgr, ST_OUT_PLUGIN_NAME)),
-  myFrBuffer(new StGLFrameBuffer()),
-  myProgram(new StProgramMM()),
+  mySettings(std::make_shared<StSettings>(theResMgr, ST_OUT_PLUGIN_NAME)),
+  myFrBuffer(std::make_shared<StGLFrameBuffer>()),
+  myProgram(std::make_shared<StProgramMM>()),
   myDevice(DEVICE_AUTO),
   myToCompressMem(myInstancesNb.increment() > 1),
   myIsBroken(false) {
@@ -209,14 +209,14 @@ StOutDual::StOutDual(const StHandle<StResourceManager>& theResMgr,
     }*/
 
     // devices list
-    StHandle<StOutDevice> aDevDual = new StOutDevice();
+    std::shared_ptr<StOutDevice> aDevDual = std::make_shared<StOutDevice>();
     aDevDual->PluginId = ST_OUT_PLUGIN_NAME;
     aDevDual->DeviceId = stCString("Dual");
     aDevDual->Priority = aSupportLevel;
     aDevDual->Name     = stCString("Dual Output");
     myDevices.push_back(aDevDual);
 
-    StHandle<StOutDevice> aDevMirr = new StOutDevice();
+    std::shared_ptr<StOutDevice> aDevMirr = std::make_shared<StOutDevice>();
     aDevMirr->PluginId = ST_OUT_PLUGIN_NAME;
     aDevMirr->DeviceId = stCString("Mirror");
     aDevMirr->Priority = aSupportLevel;
@@ -271,7 +271,7 @@ StOutDual::StOutDual(const StHandle<StResourceManager>& theResMgr,
 }
 
 void StOutDual::releaseResources() {
-    if(!myContext.isNull()) {
+    if (myContext.get() != nullptr) {
         myProgram->release(*myContext);
         myVertFlatBuf.release(*myContext);
         myVertXMirBuf.release(*myContext);
@@ -279,17 +279,17 @@ void StOutDual::releaseResources() {
         myTexCoordBuf.release(*myContext);
         myFrBuffer->release(*myContext);
     }
-    myContext.nullify();
+    myContext.reset();
 
     // read windowed placement
     StWindow::hide();
-    if(isMovable()) {
+    if (isMovable()) {
         StWindow::setFullScreen(false);
     }
 }
 
 void StOutDual::beforeClose() {
-    if(isMovable() && myWasUsed) {
+    if (isMovable() && myWasUsed) {
         mySettings->saveInt32Rect(ST_SETTING_WINDOWPOS, StWindow::getWindowedPlacement());
     }
     mySettings->saveParam(params.SlaveMonId);
@@ -335,26 +335,26 @@ bool StOutDual::create() {
         return true;
     }
     // create vertices buffers to draw simple textured quad
-    const GLfloat QUAD_VERTICES[4 * 4] = {
+    constexpr GLfloat QUAD_VERTICES[4 * 4] = {
          1.0f, -1.0f, 0.0f, 1.0f, // top-right
          1.0f,  1.0f, 0.0f, 1.0f, // bottom-right
         -1.0f, -1.0f, 0.0f, 1.0f, // top-left
         -1.0f,  1.0f, 0.0f, 1.0f  // bottom-left
     };
-    const GLfloat QUAD_VERTICES_XMIR[4 * 4] = {
+    constexpr GLfloat QUAD_VERTICES_XMIR[4 * 4] = {
         -1.0f, -1.0f, 0.0f, 1.0f, // top-right
         -1.0f,  1.0f, 0.0f, 1.0f, // bottom-right
          1.0f, -1.0f, 0.0f, 1.0f, // top-left
          1.0f,  1.0f, 0.0f, 1.0f  // bottom-left
     };
-    const GLfloat QUAD_VERTICES_YMIR[4 * 4] = {
+    constexpr GLfloat QUAD_VERTICES_YMIR[4 * 4] = {
          1.0f,  1.0f, 0.0f, 1.0f, // top-right
          1.0f, -1.0f, 0.0f, 1.0f, // bottom-right
         -1.0f,  1.0f, 0.0f, 1.0f, // top-left
         -1.0f, -1.0f, 0.0f, 1.0f  // bottom-left
     };
 
-    const GLfloat QUAD_TEXCOORD[2 * 4] = {
+    constexpr GLfloat QUAD_TEXCOORD[2 * 4] = {
         1.0f, 0.0f,
         1.0f, 1.0f,
         0.0f, 0.0f,
@@ -522,7 +522,7 @@ void StOutDual::stglDraw() {
 }
 
 void StOutDual::doSwitchVSync(const int32_t theValue) {
-    if(myContext.isNull()) {
+    if (myContext.get() == nullptr) {
         return;
     }
 

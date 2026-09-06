@@ -54,12 +54,12 @@ const StFileNode* StFileNode::findValue(const StCString& theName) const {
     return NULL;
 }
 
-StHandle<StFileNode> StFileNode::detach() const {
-    StHandle<StFileNode> aCopy = new StFileNode(getPath());
+std::shared_ptr<StFileNode> StFileNode::detach() const {
+    std::shared_ptr<StFileNode> aCopy = std::make_shared<StFileNode>(getPath());
     aCopy->setMIME(getMIME());
-    for(size_t aSubId = 0; aSubId < size(); ++aSubId) {
+    for (size_t aSubId = 0; aSubId < size(); ++aSubId) {
         const StFileNode* aSubNode = getValue(aSubId);
-        aCopy->add(new StFileNode(aSubNode->getSubPath(), aCopy.access()));
+        aCopy->add(new StFileNode(aSubNode->getSubPath(), aCopy.get()));
     }
     return aCopy;
 }

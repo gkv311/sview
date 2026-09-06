@@ -50,14 +50,14 @@ class StJNIEnv {
     /**
      * Return true if JNI environment is NULL.
      */
-    ST_LOCAL bool isNull() const { return myJniEnv == NULL; }
+    ST_LOCAL bool isNull() const { return myJniEnv == nullptr; }
 
         private:
 
-    JavaVM* myJavaVM;   //!< pointer to global Java VM instance
-    JNIEnv* myJniEnv;   //!< JNI environment for working thread
-    size_t  myThreadId; //!< attached thread id
-    bool    myToDetach; //!< flag to detach
+    JavaVM* myJavaVM = nullptr; //!< pointer to global Java VM instance
+    JNIEnv* myJniEnv = nullptr; //!< JNI environment for working thread
+    size_t  myThreadId = 0;     //!< attached thread id
+    bool    myToDetach = false; //!< flag to detach
 
 };
 

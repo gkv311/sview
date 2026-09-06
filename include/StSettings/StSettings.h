@@ -42,8 +42,8 @@ class StSettings {
      * @param theResMgr     file resources manager
      * @param theModuleName module name to distinguish settings with the same name for different components/applications
      */
-    ST_CPPEXPORT StSettings(const StHandle<StResourceManager>& theResMgr,
-                            const StString&                    theModuleName);
+    ST_CPPEXPORT StSettings(const std::shared_ptr<StResourceManager>& theResMgr,
+                            const StString& theModuleName);
 
     /**
      * Destructor.

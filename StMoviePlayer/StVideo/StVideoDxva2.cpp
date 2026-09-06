@@ -675,8 +675,7 @@ bool StDxva2Context::decoderCreate(StVideoQueue&   theVideo,
 }
 
 bool StVideoQueue::hwaccelInit() {
-    if(!myHWAccelCtx.isNull()
-    && !myHWAccelCtx->isValid()) {
+    if (myHWAccelCtx.get() != nullptr && !myHWAccelCtx->isValid()) {
         return false;
     } else if(myCodecCtx->codec_id == AV_CODEC_ID_NONE) {
         return false;
@@ -693,14 +692,14 @@ bool StVideoQueue::hwaccelInit() {
         return false;
     }
 
-    if(myHWAccelCtx.isNull()) {
-        myHWAccelCtx = new StDxva2Context();
-        if(!myHWAccelCtx->create(*this)) {
+    if (myHWAccelCtx.get() == nullptr) {
+        myHWAccelCtx = std::make_shared<StDxva2Context>();
+        if (!myHWAccelCtx->create(*this)) {
             return false;
         }
     }
 
-    if(!myHWAccelCtx->decoderCreate(*this, myCodecCtx)) {
+    if (!myHWAccelCtx->decoderCreate(*this, myCodecCtx)) {
         return false;
     }
     fillCodecInfo(myCodecCtx->codec, " (DXVA2)");

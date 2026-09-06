@@ -58,9 +58,9 @@ class StAVIOMemContext : public StAVIOContext {
 
         protected:
 
-    uint8_t* mySrcBuffer; //!< memory buffer
-    int64_t  mySrcSize;   //!< buffer size
-    int64_t  myPosition;  //!< current position within the buffer
+    uint8_t* mySrcBuffer = nullptr; //!< memory buffer
+    int64_t  mySrcSize = 0;         //!< buffer size
+    int64_t  myPosition = 0;        //!< current position within the buffer
 
 };
 

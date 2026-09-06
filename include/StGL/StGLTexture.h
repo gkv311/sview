@@ -23,7 +23,7 @@ class StGLTexture : public StGLResource {
 
         public:
 
-    static const GLuint NO_TEXTURE = 0;
+    static constexpr GLuint NO_TEXTURE = 0;
 
     /**
      * Function setup the best internal texture format to fit the image data.
@@ -68,7 +68,7 @@ class StGLTexture : public StGLResource {
      */
     ST_CPPEXPORT virtual void release(StGLContext& theCtx) ST_ATTR_OVERRIDE;
 
-    bool operator==(const StGLTexture& theOther) const {
+    ST_LOCAL bool operator==(const StGLTexture& theOther) const {
        return myTextureId == theOther.myTextureId;
     }
 
@@ -147,14 +147,14 @@ class StGLTexture : public StGLResource {
     /**
      * @return texture width.
      */
-    inline GLsizei getSizeX() const {
+    ST_LOCAL GLsizei getSizeX() const {
         return mySizeX;
     }
 
     /**
      * @return texture height.
      */
-    inline GLsizei getSizeY() const {
+    ST_LOCAL GLsizei getSizeY() const {
         return mySizeY;
     }
 
@@ -218,7 +218,7 @@ class StGLTexture : public StGLResource {
     /**
      * @return GL texture ID.
      */
-    inline GLuint getTextureId() const {
+    ST_LOCAL GLuint getTextureId() const {
         return myTextureId;
     }
 
@@ -239,15 +239,15 @@ class StGLTexture : public StGLResource {
 
         protected:
 
-    GLsizei mySizeX;       //!< texture width
-    GLsizei mySizeY;       //!< texture height
-    GLenum  myTarget;      //!< target - GL_TEXTURE_2D, GL_TEXTURE_CUBE_MAP, 2D texture by default
-    GLint   myTextFormat;  //!< texture format - GL_RGB, GL_RGBA,...
-    GLuint  myTextureId;   //!< GL texture ID
-    GLenum  myTextureUnit; //!< texture unit
-    GLenum  myFilterMin;   //!< current minify  texture filter (GL_TEXTURE_MIN_FILTER)
-    GLenum  myFilterMag;   //!< current magnify texture filter (GL_TEXTURE_MAG_FILTER)
-    int     myHasMipMaps;  //!< indicates if mip levels have been generated
+    GLsizei mySizeX = 0;              //!< texture width
+    GLsizei mySizeY = 0;              //!< texture height
+    GLenum  myTarget = 0;             //!< target - GL_TEXTURE_2D, GL_TEXTURE_CUBE_MAP, 2D texture by default
+    GLint   myTextFormat = 0;         //!< texture format - GL_RGB, GL_RGBA,...
+    GLuint  myTextureId = NO_TEXTURE; //!< GL texture ID
+    GLenum  myTextureUnit = 0;        //!< texture unit
+    GLenum  myFilterMin = 0;          //!< current minify  texture filter (GL_TEXTURE_MIN_FILTER)
+    GLenum  myFilterMag = 0;          //!< current magnify texture filter (GL_TEXTURE_MAG_FILTER)
+    int     myHasMipMaps = false;     //!< indicates if mip levels have been generated
 
         private:
 

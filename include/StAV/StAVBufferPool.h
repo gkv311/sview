@@ -22,9 +22,7 @@ class StAVBufferPool {
     /**
      * Empty constructor
      */
-    ST_LOCAL StAVBufferPool()
-    : myPool(NULL),
-      myBufferSize(0) {
+    ST_LOCAL StAVBufferPool() {
         //
     }
 
@@ -67,7 +65,7 @@ class StAVBufferPool {
     /**
      * Return buffer size within the pool.
      */
-    int getBufferSize() const {
+    ST_LOCAL int getBufferSize() const {
         return myBufferSize;
     }
 
@@ -84,8 +82,8 @@ class StAVBufferPool {
 
         private:
 
-    AVBufferPool* myPool;
-    int           myBufferSize;
+    AVBufferPool* myPool = nullptr;
+    int           myBufferSize = 0;
 
 };
 

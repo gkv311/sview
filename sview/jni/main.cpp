@@ -52,11 +52,11 @@ class StMainGlue : public StAndroidGlue {
         StMutexAuto aLock(myFetchLock);
         const StString aFileExtension = StFileNode::getExtension(myCreatePath);
 
-        StHandle<StOpenInfo> anInfo = new StOpenInfo();
+        std::shared_ptr<StOpenInfo> anInfo = std::make_shared<StOpenInfo>();
         anInfo->setPath(myDndPath);
         myDndPath.clear();
 
-        StHandle<StResourceManager> aResMgr = new StAndroidResourceManager(this);
+        std::shared_ptr<StResourceManager> aResMgr = std::make_shared<StAndroidResourceManager>(this);
         aResMgr->setFolder(StResourceManager::FolderId_SdCard,
                            getStoragePath(myThJniEnv, "sdcard"));
         aResMgr->setFolder(StResourceManager::FolderId_Downloads,
@@ -81,7 +81,7 @@ class StMainGlue : public StAndroidGlue {
             }
             anArgs.set(StDictEntry("toSaveRecent","true"));
             anInfo->setArgumentsMap(anArgs);
-            myApp = new StImageViewer(aResMgr, this, anInfo);
+            myApp = std::make_shared<StImageViewer>(aResMgr, this, anInfo);
             return;
         }
 
@@ -93,7 +93,7 @@ class StMainGlue : public StAndroidGlue {
             anInfo->setArgumentsMap(anArgs);
         }
 
-        myApp = new StMoviePlayer(aResMgr, this, anInfo);
+        myApp = std::make_shared<StMoviePlayer>(aResMgr, this, anInfo);
     }
 
 };

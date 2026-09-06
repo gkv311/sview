@@ -36,20 +36,14 @@ void StAVPacket::avInitPacket() {
     myPacket.side_data_elems = 0;*/
 }
 
-StAVPacket::StAVPacket()
-: myStParams(),
-  myDurationSec(0.0),
-  myType(DATA_PACKET),
-  myIsOwn(false) {
+StAVPacket::StAVPacket() {
     avInitPacket();
 }
 
-StAVPacket::StAVPacket(const StHandle<StStereoParams>& theStParams,
+StAVPacket::StAVPacket(const std::shared_ptr<StStereoParams>& theStParams,
                        const int theType)
 : myStParams(theStParams),
-  myDurationSec(0.0),
-  myType(theType),
-  myIsOwn(false) {
+  myType(theType) {
     avInitPacket();
 }
 

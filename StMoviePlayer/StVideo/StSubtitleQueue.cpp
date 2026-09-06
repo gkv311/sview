@@ -37,7 +37,7 @@ static SV_THREAD_FUNCTION threadFunction(void* theSubtitleQueue) {
     return SV_THREAD_RETURN 0;
 }
 
-StSubtitleQueue::StSubtitleQueue(const StHandle<StSubQueue>& theSubtitlesQueue)
+StSubtitleQueue::StSubtitleQueue(const std::shared_ptr<StSubQueue>& theSubtitlesQueue)
 : StAVPacketQueue(512),
   myOutQueue(theSubtitlesQueue),
   myThread(NULL),
@@ -161,7 +161,7 @@ void StSubtitleQueue::decodeLoop() {
                                 aDuration = 3.0; // duration is always zero here...
                             }
 
-                            StHandle<StSubItem> aNewSubItem = new StSubItem(aPts, aPts + aDuration);
+                            std::shared_ptr<StSubItem> aNewSubItem = std::make_shared<StSubItem>(aPts, aPts + aDuration);
                             aNewSubItem->Image.initTrash(StImagePlane::ImgRGBA, aRect->w, aRect->h);
                             aNewSubItem->Scale = myImageScale;
 
@@ -196,7 +196,7 @@ void StSubtitleQueue::decodeLoop() {
                             break;
                         }
                         case SUBTITLE_TEXT: {
-                            StHandle<StSubItem> aNewSubItem = new StSubItem(aPts, aPts + aDuration);
+                            std::shared_ptr<StSubItem> aNewSubItem = std::make_shared<StSubItem>(aPts, aPts + aDuration);
                             aNewSubItem->Text = aRect->text;
                             aNewSubItem->Text.replaceFast(ST_CRLF_REDUNDANT, ST_CRLF_REPLACEMENT); // remove redundant CR symbols
                             myOutQueue->push(aNewSubItem);
@@ -204,8 +204,8 @@ void StSubtitleQueue::decodeLoop() {
                         }
                         case SUBTITLE_ASS: {
                             StString aTextData = aRect->ass;
-                            StHandle<StSubItem> aNewSubItem = myASS.parseEvent(aTextData, aPts, aDuration);
-                            if(!aNewSubItem.isNull()) {
+                            std::shared_ptr<StSubItem> aNewSubItem = myASS.parseEvent(aTextData, aPts, aDuration);
+                            if (aNewSubItem.get() != nullptr) {
                                 myOutQueue->push(aNewSubItem);
                             }
                             break;
@@ -219,7 +219,7 @@ void StSubtitleQueue::decodeLoop() {
             avsubtitle_free(&aSubtitle);
         } else {
             // just plain text
-            StHandle<StSubItem> aNewSubItem = new StSubItem(aPts, aPts + aDuration);
+            std::shared_ptr<StSubItem> aNewSubItem = std::make_shared<StSubItem>(aPts, aPts + aDuration);
             aNewSubItem->Text = (const char* )aPacket->getData();
             aNewSubItem->Text.replaceFast(ST_CRLF_REDUNDANT, ST_CRLF_REPLACEMENT); // remove redundant CR symbols
             myOutQueue->push(aNewSubItem);

@@ -75,9 +75,6 @@ class StHWAccelContext {
 
 };
 
-// define StHandle template specialization
-ST_DEFINE_HANDLE(StVideoQueue, StAVPacketQueue);
-
 /**
  * This is Video playback class (filled OpenGL textures)
  * which feeded with packets (StAVPacket),
@@ -130,7 +127,7 @@ class StVideoQueue : public StAVPacketQueue {
         return myDowntimeState.check();
     }
 
-    ST_LOCAL void setSlave(const StHandle<StVideoQueue>& theSlave) {
+    ST_LOCAL void setSlave(const std::shared_ptr<StVideoQueue>& theSlave) {
         mySlave = theSlave;
     }
 
@@ -217,8 +214,8 @@ class StVideoQueue : public StAVPacketQueue {
      */
     ST_LOCAL void setSwapJPS(bool theToSwap) { myToSwapJps = theToSwap; }
 
-    ST_LOCAL StVideoQueue(const StHandle<StGLTextureQueue>& theTextureQueue,
-                          const StHandle<StVideoQueue>&     theMaster = StHandle<StVideoQueue>());
+    ST_LOCAL StVideoQueue(const std::shared_ptr<StGLTextureQueue>& theTextureQueue,
+                          const std::shared_ptr<StVideoQueue>&     theMaster = std::shared_ptr<StVideoQueue>());
     ST_LOCAL virtual ~StVideoQueue();
 
     /**
@@ -235,7 +232,7 @@ class StVideoQueue : public StAVPacketQueue {
     ST_LOCAL bool init(AVFormatContext*   theFormatCtx,
                        const unsigned int theStreamId,
                        const StString&    theFileName,
-                       const StHandle<StStereoParams>& theNewParams);
+                       const std::shared_ptr<StStereoParams>& theNewParams);
 
     /**
      * Clean function.
@@ -283,7 +280,7 @@ class StVideoQueue : public StAVPacketQueue {
         return (myCodecCtx != NULL) ? myCodecCtx->coded_height : 0;
     }
 
-    ST_LOCAL StHandle<StGLTextureQueue>& getTextureQueue() {
+    ST_LOCAL std::shared_ptr<StGLTextureQueue>& getTextureQueue() {
         return myTextureQueue;
     }
 
@@ -363,22 +360,22 @@ private:
 
     ST_LOCAL void pushFrame(const StImage&     theSrcDataLeft,
                             const StImage&     theSrcDataRight,
-                            const StHandle<StStereoParams>& theStParams,
+                            const std::shared_ptr<StStereoParams>& theStParams,
                             const StFormat     theSrcFormat,
                             const StCubemap    theCubemapFormat,
                             const double       theSrcPTS);
 
         private:
 
-    StHandle<StThread>         myThread;          //!< decoding loop thread
-    StCondition                myDowntimeState;   //!< event to indicate downtime state
-    StHandle<StGLTextureQueue> myTextureQueue;    //!< decoded frames queue
+    std::shared_ptr<StThread>         myThread;          //!< decoding loop thread
+    StCondition                       myDowntimeState;   //!< event to indicate downtime state
+    std::shared_ptr<StGLTextureQueue> myTextureQueue;    //!< decoded frames queue
 
-    StCondition                myHasDataState;
-    StHandle<StVideoQueue>     myMaster;          //!< handle to Master decoding thread
-    StHandle<StVideoQueue>     mySlave;           //!< handle to Slave  decoding thread
+    StCondition                       myHasDataState;
+    std::shared_ptr<StVideoQueue>     myMaster;          //!< handle to Master decoding thread
+    std::shared_ptr<StVideoQueue>     mySlave;           //!< handle to Slave  decoding thread
 
-    StHandle<StHWAccelContext> myHWAccelCtx;
+    std::shared_ptr<StHWAccelContext> myHWAccelCtx;
 #if defined(__ANDROID__)
     const AVCodec*             myCodecH264HW;     //!< h264 decoder using dedicated hardware (Android Media Codec)
     const AVCodec*             myCodecHevcHW;     //!< hevc decoder using dedicated hardware
@@ -396,7 +393,7 @@ private:
     bool                       myToRgbIsBroken;   //!< indicates broke swscale context - to RGB conversion is impossible
 
     StAVFrame                  myFrame;           //!< original decoded video frame
-    StHandle<StAVFrameCounter> myFrameBufRef;
+    std::shared_ptr<StAVFrameCounter> myFrameBufRef;
     StImage                    myDataAdp;         //!< buffer data adaptor
     AVDiscard                  myAvDiscard;       //!< discard parameter (to skip or not frames)
 

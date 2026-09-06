@@ -51,7 +51,7 @@ struct StOutDevice {
     int      Priority; //!< device   priority (ST_DEVICE_SUPPORT_ enumeration)
 
 };
-typedef std::vector< StHandle<StOutDevice> > StOutDevicesList;
+typedef std::vector< std::shared_ptr<StOutDevice> > StOutDevicesList;
 
 /**
  * Slave configuration.
@@ -130,8 +130,8 @@ class StWindow {
      * @param theResMgr       resources manager
      * @param theParentWindow Parent window
      */
-    ST_CPPEXPORT StWindow(const StHandle<StResourceManager>& theResMgr,
-                          const StNativeWin_t                theParentWindow);
+    ST_CPPEXPORT StWindow(const std::shared_ptr<StResourceManager>& theResMgr,
+                          const StNativeWin_t theParentWindow);
 
     /**
      * Destructor.
@@ -312,14 +312,14 @@ class StWindow {
     /**
      * Resources manager.
      */
-    ST_CPPEXPORT const StHandle<StResourceManager>& getResourceManager() const;
+    ST_CPPEXPORT const std::shared_ptr<StResourceManager>& getResourceManager() const;
 
     /**
      * Messages queue.
      */
-    ST_CPPEXPORT const StHandle<StMsgQueue>& getMessagesQueue() const;
+    ST_CPPEXPORT const std::shared_ptr<StMsgQueue>& getMessagesQueue() const;
 
-    ST_CPPEXPORT void setMessagesQueue(const StHandle<StMsgQueue>& theQueue);
+    ST_CPPEXPORT void setMessagesQueue(const std::shared_ptr<StMsgQueue>& theQueue);
 
         public: //! @name OpenGL routines
 
@@ -360,7 +360,7 @@ class StWindow {
     /**
      * @return OpenGL context
      */
-    ST_CPPEXPORT const StHandle<StGLContext>& getContext() const;
+    ST_CPPEXPORT const std::shared_ptr<StGLContext>& getContext() const;
 
         public: //! @name renderer properties
 
@@ -623,14 +623,14 @@ class StWindow {
 
         private: //! @name private fields
 
-    StWindowImpl*               myWin;            //!< window implementation class - we hide implementation details since them too platform-specific
-    double                      myTargetFps;      //!< user data
+    StWindowImpl*               myWin = nullptr;   //!< window implementation class - we hide implementation details since them too platform-specific
+    double                      myTargetFps = 0.0; //!< user data
 
         protected:
 
-    StHandle<StMsgQueue>        myMsgQueue;       //!< messages queue
-    bool                        myWasUsed;        //!< flag indicates that window has been actually used (created)
-    bool                        myIsForcedStereo; //!< flag to force stereo output for mono sources
+    std::shared_ptr<StMsgQueue> myMsgQueue;               //!< messages queue
+    bool                        myWasUsed = false;        //!< flag indicates that window has been actually used (created)
+    bool                        myIsForcedStereo = false; //!< flag to force stereo output for mono sources
 
         private: //! @name no copies, please
 

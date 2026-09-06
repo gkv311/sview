@@ -351,7 +351,7 @@ StAudioQueue::StAudioQueue(const std::string& theAlDeviceName,
     stMemSet(myAlSources, 0, sizeof(myAlSources));
 
     // launch thread parse incoming packets from queue
-    myThread = new StThread(threadFunction, (void* )this, "StAudioQueue");
+    myThread = std::make_shared<StThread>(threadFunction, (void* )this, "StAudioQueue");
 }
 
 StAudioQueue::~StAudioQueue() {
@@ -359,7 +359,7 @@ StAudioQueue::~StAudioQueue() {
     pushQuit();
 
     myThread->wait();
-    myThread.nullify();
+    myThread.reset();
 
     deinit();
 }

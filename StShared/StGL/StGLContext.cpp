@@ -39,50 +39,17 @@
     #endif
 #endif
 
-StGLContext::StGLContext(const StHandle<StResourceManager>& theResMgr)
-: core11(NULL),
-  core11fwd(NULL),
-  core20(NULL),
-  core20fwd(NULL),
-  core32(NULL),
-  core32back(NULL),
-  core41(NULL),
-  core41back(NULL),
-  core42(NULL),
-  core42back(NULL),
-  core43(NULL),
-  core43back(NULL),
-  core44(NULL),
-  core44back(NULL),
-  arbFbo(NULL),
-  arbNPTW(false),
-  arbTexRG(false),
-  arbTexFloat(false),
-  arbTexClear(false),
-#if defined(GL_ES_VERSION_2_0)
-  hasHighp(false),
-  hasTexRGBA8(false),
-  extTexBGRA8(false),
-  extTexR16(false),
-#else
-  hasHighp(true),
-  hasTexRGBA8(true), // always available on desktop
-  extTexBGRA8(true),
-  extTexR16(true),
+StGLContext::StGLContext(const std::shared_ptr<StResourceManager>& theResMgr)
+: myFuncs(std::make_shared<StGLFunctions>()),
+  myResMgr(theResMgr) {
+
+#if !defined(GL_ES_VERSION_2_0)
+    hasHighp = true;
+    hasTexRGBA8 = true; // always available on desktop
+    extTexBGRA8 = true;
+    extTexR16 = true;
 #endif
-  extAll(NULL),
-  extSwapTear(false),
-  khrFlushControl(false),
-  myFuncs(new StGLFunctions()),
-  myResMgr(theResMgr),
-  myGlVendor(GlVendor_UNKNOWN),
-  myGpuName(GPU_UNKNOWN),
-  myVerMajor(0),
-  myVerMinor(0),
-  myWasInit(false),
-  myFramebufferDraw(0),
-  myFramebufferRead(0),
-  myIsBound(false) {
+
     stMemZero(&(*myFuncs),   sizeof(StGLFunctions));
     extAll = &(*myFuncs);
     stMemZero(&myViewport,   sizeof(StGLBoxPx));
@@ -100,63 +67,8 @@ StGLContext::StGLContext(const StHandle<StResourceManager>& theResMgr)
 }
 
 StGLContext::StGLContext(const bool theToInitialize)
-: core11(NULL),
-  core11fwd(NULL),
-  core20(NULL),
-  core20fwd(NULL),
-  core32(NULL),
-  core32back(NULL),
-  core41(NULL),
-  core41back(NULL),
-  core42(NULL),
-  core42back(NULL),
-  core43(NULL),
-  core43back(NULL),
-  core44(NULL),
-  core44back(NULL),
-  arbFbo(NULL),
-  arbNPTW(false),
-  arbTexRG(false),
-  arbTexFloat(false),
-  arbTexClear(false),
-#if defined(GL_ES_VERSION_2_0)
-  hasHighp(false),
-  hasTexRGBA8(false),
-  extTexBGRA8(false),
-  extTexR16(false),
-#else
-  hasHighp(true),
-  hasTexRGBA8(true),
-  extTexBGRA8(true),
-  extTexR16(true),
-#endif
-  extAll(NULL),
-  extSwapTear(false),
-  khrFlushControl(false),
-  myFuncs(new StGLFunctions()),
-  myGlVendor(GlVendor_UNKNOWN),
-  myGpuName(GPU_UNKNOWN),
-  myVerMajor(0),
-  myVerMinor(0),
-  myWasInit(false),
-  myFramebufferDraw(0),
-  myFramebufferRead(0),
-  myIsBound(false) {
-    stMemZero(&(*myFuncs),   sizeof(StGLFunctions));
-    extAll = &(*myFuncs);
-    stMemZero(&myViewport,   sizeof(StGLBoxPx));
-    stMemZero(&myWindowBits, sizeof(BufferBits));
-    stMemZero(&myFBOBits,    sizeof(BufferBits));
-#ifdef __APPLE__
-    mySysLib.loadSimple("/System/Library/Frameworks/OpenGL.framework/Versions/Current/OpenGL");
-#endif
-
-#if defined(GL_ES_VERSION_2_0)
-    myDevCaps.hasUnpack = false;
-#else
-    myDevCaps.hasUnpack = true; // always available on desktop
-#endif
-    if(theToInitialize) {
+: StGLContext(std::shared_ptr<StResourceManager>()) {
+    if (theToInitialize) {
         stglInit();
     }
 }
@@ -242,12 +154,12 @@ void StGLContext::stglDebugCallback(unsigned int theSource,
     //}
 }
 
-void StGLContext::setMessagesQueue(const StHandle<StMsgQueue>& theQueue) {
+void StGLContext::setMessagesQueue(const std::shared_ptr<StMsgQueue>& theQueue) {
     myMsgQueue = theQueue;
 }
 
 void StGLContext::pushError(const StCString& theMessage) {
-    if(!myMsgQueue.isNull()) {
+    if (myMsgQueue.get() != nullptr) {
         myMsgQueue->pushError(theMessage);
     } else {
         ST_ERROR_LOG(theMessage);

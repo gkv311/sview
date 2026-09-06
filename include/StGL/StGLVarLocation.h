@@ -16,7 +16,7 @@ class StGLVarLocation {
 
         public:
 
-    static const GLint NO_LOC = -1;
+    static constexpr GLint NO_LOC = -1;
 
         private:
 
@@ -27,24 +27,24 @@ class StGLVarLocation {
     /**
      * Construct a special location which actually means NO location.
      */
-    StGLVarLocation() : myLocation(NO_LOC) {}
+    ST_LOCAL StGLVarLocation() : myLocation(NO_LOC) {}
 
     /**
      * Constructor with initialization.
      */
-    explicit StGLVarLocation(const GLint theLocation) : myLocation(theLocation) {}
+    ST_LOCAL explicit StGLVarLocation(const GLint theLocation) : myLocation(theLocation) {}
 
     /**
      * Note you may safely put invalid location in functions like glUniform*
      * - the data passed in will be silently ignored.
      * @return true if location is not equal to -1.
      */
-    bool isValid() const { return myLocation != NO_LOC; }
+    ST_LOCAL bool isValid() const { return myLocation != NO_LOC; }
 
     /**
      * Convert operators help silently put object to GL functions like glUniform*.
      */
-    operator GLint() const { return myLocation; }
+    ST_LOCAL operator GLint() const { return myLocation; }
 
 };
 

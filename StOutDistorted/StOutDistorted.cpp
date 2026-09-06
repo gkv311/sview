@@ -31,12 +31,12 @@
 
 namespace {
 
-    static const char ST_OUT_PLUGIN_NAME[]   = "StOutDistorted";
+    static constexpr char ST_OUT_PLUGIN_NAME[]   = "StOutDistorted";
 
-    static const char ST_SETTING_DEVICE_ID[] = "deviceId";
-    static const char ST_SETTING_WINDOWPOS[] = "windowPos";
-    static const char ST_SETTING_WARP_COEF[] = "warpCoef";
-    static const char ST_SETTING_CHROME_AB[] = "chromeAb";
+    static constexpr char ST_SETTING_DEVICE_ID[] = "deviceId";
+    static constexpr char ST_SETTING_WINDOWPOS[] = "windowPos";
+    static constexpr char ST_SETTING_WARP_COEF[] = "warpCoef";
+    static constexpr char ST_SETTING_CHROME_AB[] = "chromeAb";
 
     // translation resources
     enum {
@@ -223,16 +223,16 @@ void StOutDistorted::updateAbout() {
 #endif
 }
 
-StOutDistorted::StOutDistorted(const StHandle<StResourceManager>& theResMgr,
-                               const StNativeWin_t                theParentWindow)
+StOutDistorted::StOutDistorted(const std::shared_ptr<StResourceManager>& theResMgr,
+                               const StNativeWin_t theParentWindow)
 : StWindow(theResMgr, theParentWindow),
-  mySettings(new StSettings(theResMgr, ST_OUT_PLUGIN_NAME)),
+  mySettings(std::make_shared<StSettings>(theResMgr, ST_OUT_PLUGIN_NAME)),
   myDevice(DEVICE_AUTO),
   myToResetDevice(false),
-  myFrBuffer(new StGLFrameBuffer()),
-  myCursor(new StGLTexture(GL_RGBA8)),
-  myProgramFlat(new StProgramFlat()),
-  myProgramBarrel(new StProgramBarrel()),
+  myFrBuffer(std::make_shared<StGLFrameBuffer>()),
+  myCursor(std::make_shared<StGLTexture>(GL_RGBA8)),
+  myProgramFlat(std::make_shared<StProgramFlat>()),
+  myProgramBarrel(std::make_shared<StProgramBarrel>()),
   myBarrelCoef(1.0f, 0.22f, 0.24f, 0.041f), // 7 inches
   //myBarrelCoef(1.0f, 0.18f, 0.115f, 0.0387f),
   myChromAb(0.996f, -0.004f, 1.014f, 0.0f),
@@ -291,14 +291,14 @@ StOutDistorted::StOutDistorted(const StHandle<StResourceManager>& theResMgr,
 #endif
 
     // devices list
-    StHandle<StOutDevice> aDevDistorted = new StOutDevice();
+    std::shared_ptr<StOutDevice> aDevDistorted = std::make_shared<StOutDevice>();
     aDevDistorted->PluginId = ST_OUT_PLUGIN_NAME;
     aDevDistorted->DeviceId = stCString("Distorted");
     aDevDistorted->Priority = aSupportParallel;
     aDevDistorted->Name     = stCString("TV (parallel pair)");
     myDevices.push_back(aDevDistorted);
 
-    StHandle<StOutDevice> aDevVR = new StOutDevice();
+    std::shared_ptr<StOutDevice> aDevVR = std::make_shared<StOutDevice>();
     aDevVR->PluginId = ST_OUT_PLUGIN_NAME;
     aDevVR->DeviceId = stCString("OpenVR");
     aDevVR->Priority = aSupportOpenVr;
@@ -306,7 +306,7 @@ StOutDistorted::StOutDistorted(const StHandle<StResourceManager>& theResMgr,
     myDevices.push_back(aDevVR);
 
     if(aSupportS3DV != ST_DEVICE_SUPPORT_NONE) {
-        StHandle<StOutDevice> aDevS3dv = new StOutDevice();
+        std::shared_ptr<StOutDevice> aDevS3dv = std::make_shared<StOutDevice>();
         aDevS3dv->PluginId = ST_OUT_PLUGIN_NAME;
         aDevS3dv->DeviceId = stCString("S3DV");
         aDevS3dv->Priority = aSupportS3DV;
@@ -349,10 +349,10 @@ StOutDistorted::StOutDistorted(const StHandle<StResourceManager>& theResMgr,
 }
 
 void StOutDistorted::releaseResources() {
-    if(!myContext.isNull()) {
-        if(!myVrFullscreenMsg.isNull()) {
+    if (myContext.get() != nullptr) {
+        if (myVrFullscreenMsg.get() != nullptr) {
             myVrFullscreenMsg->release(*myContext);
-            myVrFullscreenMsg.nullify();
+            myVrFullscreenMsg.reset();
         }
     #ifdef ST_HAVE_OPENVR
         if(myVrHmd != NULL) {
@@ -370,7 +370,7 @@ void StOutDistorted::releaseResources() {
         myFrBuffer->release(*myContext);
         myCursor->release(*myContext);
     }
-    myContext.nullify();
+    myContext.reset();
 
     // read windowed placement
     StWindow::hide();
@@ -466,16 +466,14 @@ bool StOutDistorted::create() {
     // cursor texture
     {
         StAVImage aCursorImg;
-        StHandle<StResource> aCursorRes = getResourceManager()->getResource(StString("textures") + SYS_FS_SPLITTER + "cursor.png");
-        uint8_t* aData     = NULL;
+        std::shared_ptr<StResource> aCursorRes = getResourceManager()->getResource(StString("textures") + SYS_FS_SPLITTER + "cursor.png");
+        uint8_t* aData     = nullptr;
         int      aDataSize = 0;
-        if(!aCursorRes.isNull()
-        && !aCursorRes->isFile()
-        &&  aCursorRes->read()) {
+        if (aCursorRes.get() != nullptr && !aCursorRes->isFile() && aCursorRes->read()) {
             aData     = (uint8_t* )aCursorRes->getData();
             aDataSize = aCursorRes->getSize();
         }
-        if(aCursorImg.load(!aCursorRes.isNull() ? aCursorRes->getPath() : StString(), StImageFile::ST_TYPE_PNG, aData, aDataSize)) {
+        if (aCursorImg.load(aCursorRes.get() != nullptr ? aCursorRes->getPath() : StString(), StImageFile::ST_TYPE_PNG, aData, aDataSize)) {
             myCursor->init(*myContext, aCursorImg.getPlane());
         }
     }
@@ -517,21 +515,19 @@ bool StOutDistorted::create() {
 
     if(myDevice == DEVICE_HMD) {
         StAVImage anImage;
-        StHandle<StResource> aWarnRes = getResourceManager()->getResource(StString("textures") + SYS_FS_SPLITTER + "hmd_exit_fullscreen.png");
-        uint8_t* aData     = NULL;
+        std::shared_ptr<StResource> aWarnRes = getResourceManager()->getResource(StString("textures") + SYS_FS_SPLITTER + "hmd_exit_fullscreen.png");
+        uint8_t* aData     = nullptr;
         int      aDataSize = 0;
-        if(!aWarnRes.isNull()
-        && !aWarnRes->isFile()
-        &&  aWarnRes->read()) {
+        if (aWarnRes.get() != nullptr && !aWarnRes->isFile() && aWarnRes->read()) {
             aData     = (uint8_t* )aWarnRes->getData();
             aDataSize = aWarnRes->getSize();
         }
-        if(anImage.load(!aWarnRes.isNull() ? aWarnRes->getPath() : StString(), StImageFile::ST_TYPE_PNG, aData, aDataSize)) {
-            myVrFullscreenMsg = new StGLTextureQuad();
-            if(!myVrFullscreenMsg->init(*myContext, anImage.getPlane())) {
+        if (anImage.load(aWarnRes.get() != nullptr ? aWarnRes->getPath() : StString(), StImageFile::ST_TYPE_PNG, aData, aDataSize)) {
+            myVrFullscreenMsg = std::make_shared<StGLTextureQuad>();
+            if (!myVrFullscreenMsg->init(*myContext, anImage.getPlane())) {
                 ST_ERROR_LOG(ST_OUT_PLUGIN_NAME + " Plugin, Texture can not be initialized!");
                 myVrFullscreenMsg->release(*myContext);
-                myVrFullscreenMsg.nullify();
+                myVrFullscreenMsg.reset();
             }
         } else {
             ST_ERROR_LOG(ST_OUT_PLUGIN_NAME + " Plugin, Texture missed: " + anImage.getState());
@@ -940,14 +936,14 @@ void StOutDistorted::stglDrawVR() {
         myContext->stglResizeViewport(aVPBoth);
         myContext->stglResetScissorRect();
         myContext->core20fwd->glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-        if(!myVrFullscreenMsg.isNull()) {
+        if (myVrFullscreenMsg.get() != nullptr) {
             myVrFullscreenMsg->stglDraw(*myContext);
         }
         StWindow::stglSwap(ST_WIN_ALL);
-        if(myVrToDrawMsg) {
+        if (myVrToDrawMsg) {
             myVrToDrawMsg = false;
             myVrMsgTimer.restart();
-        } else if(!hasComposError) {
+        } else if (!hasComposError) {
             myVrMsgTimer.stop();
         }
     }
@@ -1127,11 +1123,11 @@ void StOutDistorted::stglDraw() {
     myContext->stglResizeViewport(aViewPortL);
     myContext->stglSetScissorRect(aViewPortL, false);
 
-    StGLProgram*    aProgram   = myProgramFlat.access();
+    StGLProgram*    aProgram   = myProgramFlat.get();
     StGLVarLocation aVertexLoc = myProgramFlat->getVVertexLoc();
     StGLVarLocation aTexCrdLoc = myProgramFlat->getVTexCoordLoc();
     if(myDevice == DEVICE_HMD) {
-        aProgram   = myProgramBarrel.access();
+        aProgram   = myProgramBarrel.get();
         aVertexLoc = myProgramBarrel->getVVertexLoc();
         aTexCrdLoc = myProgramBarrel->getVTexCoordLoc();
         myProgramBarrel->setScaleIn(*myContext, StGLVec2(2.0f / aDX, 2.0f / aDY));
@@ -1139,7 +1135,7 @@ void StOutDistorted::stglDraw() {
     }
 
     myFrBuffer->bindTexture(*myContext);
-    if(aProgram == myProgramBarrel.access()) {
+    if (aProgram == myProgramBarrel.get()) {
         myProgramBarrel->setLensCenter(*myContext, StGLVec2((0.5f + aLensDisp) * aDX, 0.5f * aDY));
     }
     aProgram->use(*myContext);
@@ -1165,7 +1161,7 @@ void StOutDistorted::stglDraw() {
     myContext->stglSetScissorRect(aViewPortR, false);
 
     myFrBuffer->bindTexture(*myContext);
-    if(aProgram == myProgramBarrel.access()) {
+    if (aProgram == myProgramBarrel.get()) {
         myProgramBarrel->setLensCenter(*myContext, StGLVec2((0.5f - aLensDisp) * aDX, 0.5f * aDY));
     }
     aProgram->use(*myContext);
@@ -1187,7 +1183,7 @@ void StOutDistorted::stglDraw() {
 }
 
 void StOutDistorted::doSwitchVSync(const int32_t theValue) {
-    if(myContext.isNull()) {
+    if (myContext.get() == nullptr) {
         return;
     }
 

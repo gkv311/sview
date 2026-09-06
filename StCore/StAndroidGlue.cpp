@@ -296,7 +296,7 @@ int StAndroidGlue::openFileDescriptor(const StString& thePath) {
 }
 
 void StAndroidGlue::start() {
-    myThread = new StThread(threadEntryWrapper, this, "StAndroidGlue");
+    myThread = std::make_shared<StThread>(threadEntryWrapper, this, "StAndroidGlue");
 
     // Wait for thread to start
     pthread_mutex_lock(&myMutex);
@@ -320,7 +320,7 @@ StAndroidGlue::~StAndroidGlue() {
     writeCommand(CommandId_Destroy);
     pthread_mutex_unlock(&myMutex);
 
-    if(!myThread.isNull()) {
+    if (myThread.get() != nullptr) {
         myThread->wait();
     }
 
@@ -500,26 +500,26 @@ void StAndroidGlue::threadEntry() {
 
     for(;;) {
         createApplication();
-        if(myApp.isNull()) {
+        if (myApp.get() == nullptr) {
             stError("Error: no application to execute!");
             break;
-        } else if(!myApp->open()) {
+        } else if (!myApp->open()) {
             stError("Error: application can not be executed!");
             break;
         }
         myApp->exec();
 
-        StHandle<StOpenInfo> anOther = myApp->getOpenFileInOtherDrawer();
-        if(anOther.isNull()) {
+        std::shared_ptr<StOpenInfo> anOther = myApp->getOpenFileInOtherDrawer();
+        if (anOther.get() == nullptr) {
             break;
         }
 
-        myApp.nullify();
+        myApp.reset();
         StArgument aDrawerArg = anOther->getArgumentsMap()["in"];
         myDndPath = anOther->getPath();
         myStAppClass = aDrawerArg.getValue();
     }
-    myApp.nullify();
+    myApp.reset();
 
     // application is done but we are waiting for destroying event...
     bool isFirstWait = true;

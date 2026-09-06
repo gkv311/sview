@@ -27,19 +27,17 @@ namespace {
         : StBoolParamNamed(false, stCString("swapLR"), stCString("SwapLR")), myWidget(theWidget) {}
 
         void invalidateWidget() {
-            myWidget = NULL;
+            myWidget = nullptr;
         }
 
         virtual bool getValue() const ST_ATTR_OVERRIDE {
-            const StHandle<StStereoParams>& aParams = myWidget->params.stereoFile;
-            return !aParams.isNull()
-                 && aParams->ToSwapLR;
+            const std::shared_ptr<StStereoParams>& aParams = myWidget->params.stereoFile;
+            return aParams.get() != nullptr && aParams->ToSwapLR;
         }
 
         virtual bool setValue(const bool theValue) ST_ATTR_OVERRIDE {
-            const StHandle<StStereoParams>& aParams = myWidget->params.stereoFile;
-            if(aParams.isNull()
-            || aParams->ToSwapLR == theValue) {
+            const std::shared_ptr<StStereoParams>& aParams = myWidget->params.stereoFile;
+            if (aParams.get() == nullptr || aParams->ToSwapLR == theValue) {
                 return false;
             }
             aParams->setSwapLR(theValue);
@@ -48,7 +46,7 @@ namespace {
 
             private:
 
-        StGLImageRegion* myWidget;  //!< parent widget holding image parameters
+        StGLImageRegion* myWidget = nullptr; //!< parent widget holding image parameters
 
     };
 
@@ -60,18 +58,17 @@ namespace {
         : StInt32ParamNamed(0, stCString("viewMode"), stCString("View Mode")), myWidget(theWidget) {}
 
         void invalidateWidget() {
-            myWidget = NULL;
+            myWidget = nullptr;
         }
 
         virtual int32_t getValue() const ST_ATTR_OVERRIDE {
-            const StHandle<StStereoParams>& aParams = myWidget->params.stereoFile;
-            return aParams.isNull() ? 0 : aParams->ViewingMode;
+            const std::shared_ptr<StStereoParams>& aParams = myWidget->params.stereoFile;
+            return aParams.get() == nullptr ? 0 : aParams->ViewingMode;
         }
 
         virtual bool setValue(const int32_t theValue) ST_ATTR_OVERRIDE {
-            const StHandle<StStereoParams>& aParams = myWidget->params.stereoFile;
-            if(aParams.isNull()
-            || aParams->ViewingMode == theValue) {
+            const std::shared_ptr<StStereoParams>& aParams = myWidget->params.stereoFile;
+            if (aParams.get() == nullptr || aParams->ViewingMode == theValue) {
                 return false;
             }
             aParams->ViewingMode = (StViewSurface )theValue;
@@ -81,7 +78,7 @@ namespace {
 
             private:
 
-        StGLImageRegion* myWidget;  //!< parent widget holding image parameters
+        StGLImageRegion* myWidget = nullptr; //!< parent widget holding image parameters
 
     };
 
@@ -186,40 +183,29 @@ namespace {
     };
 
     // we use negative scale factor to show sphere inside out!
-    static const float THE_SPHERE_RADIUS     = -10.0f;
-    static const float THE_PANORAMA_DEF_ZOOM = 0.45f; // circa 85 degrees FOV
+    static constexpr float THE_SPHERE_RADIUS     = -10.0f;
+    static constexpr float THE_PANORAMA_DEF_ZOOM = 0.45f; // circa 85 degrees FOV
 
     static const float THE_THEATER_ANGLE = float(M_PI * 0.5);
     static const float THE_THEATER_FROM  = float(M_PI) - THE_THEATER_ANGLE * 0.5f;
 }
 
 StGLImageRegion::StGLImageRegion(StGLWidget* theParent,
-                                 const StHandle<StGLTextureQueue>& theTextureQueue,
+                                 const std::shared_ptr<StGLTextureQueue>& theTextureQueue,
                                  bool theUsePanningKeys)
 : StGLWidget(theParent, 0, 0, StGLCorner(ST_VCORNER_TOP, ST_HCORNER_LEFT)),
-  myIconPrev(NULL),
-  myIconNext(NULL),
   myCube(GL_TRIANGLES),
-  myCubePano(StPanorama_OFF),
   myUVSphere  (StGLVec3(0.0f, 0.0f, 0.0f), 1.0f, 64, false),
   myHemisphere(StGLVec3(0.0f, 0.0f, 0.0f), 1.0f, 64, true),
   myCylinder  (StGLVec3(0.0f, 0.0f, 0.0f), 1.0f, 1.0f, 64),
   myTheater   (StGLVec3(0.0f, 0.0f, 0.0f), 1.0f, 1.0f, THE_THEATER_FROM, THE_THEATER_FROM + THE_THEATER_ANGLE, 64),
   myTextureQueue(theTextureQueue),
-  myClickPntZo(0.0, 0.0),
-  myKeyFlags(ST_VF_NONE),
-  myDragDelayMs(0.0),
-  myDragDelayTmpMs(0.0),
-  mySampleRatio(1.0f),
-  myRotAngle(0.0f),
-  myIsClickAborted(false),
+  myClickPntZo(0.0, 0.0)
+{
 #ifdef ST_EXTRA_CONTROLS
-  myToRightRotate(true),
-#else
-  myToRightRotate(false),
+    myToRightRotate = true;
 #endif
-  myIsInitialized(false),
-  myHasVideoStream(false) {
+
     myIconPrev = new StGLIcon(this,  getRoot()->scale(48), 0, StGLCorner(ST_VCORNER_CENTER, ST_HCORNER_LEFT),  1);
     myIconPrev->setOpacity(0.0f, false);
     myIconNext = new StGLIcon(this, -getRoot()->scale(48), 0, StGLCorner(ST_VCORNER_CENTER, ST_HCORNER_RIGHT), 1);
@@ -459,7 +445,7 @@ StGLImageRegion::~StGLImageRegion() {
     ((StFloat32StereoParam* )params.SeparationRot.access())->invalidateWidget();
 }
 
-StHandle<StStereoParams> StGLImageRegion::getSource() {
+std::shared_ptr<StStereoParams> StGLImageRegion::getSource() {
     return params.stereoFile;
 }
 
@@ -472,7 +458,7 @@ void StGLImageRegion::stglUpdate(const StPointD_t& thePointZo,
     StGLWidget::stglUpdate(thePointZo, theIsPreciseInput);
     if(myIsInitialized) {
         myHasVideoStream = myTextureQueue->stglUpdateStTextures(getContext()) || myTextureQueue->hasConnectedStream();
-        StHandle<StStereoParams> aFileParams = myTextureQueue->getQTexture().getFront(StGLQuadTexture::LEFT_TEXTURE).getSource();
+        std::shared_ptr<StStereoParams> aFileParams = myTextureQueue->getQTexture().getFront(StGLQuadTexture::LEFT_TEXTURE).getSource();
         if(params.stereoFile != aFileParams) {
             params.stereoFile = aFileParams;
             myFadeTimer.stop();
@@ -702,9 +688,8 @@ StGLVec2 StGLImageRegion::getMouseMoveSphere() const {
 bool StGLImageRegion::getHeadOrientation(StGLQuaternion& theOrient,
                                          unsigned int theView,
                                          const bool theToApplyDefShift) const {
-    StHandle<StStereoParams> aParams = params.stereoFile;
-    if(aParams.isNull()
-    || aParams->ViewingMode == StViewSurface_Plain) {
+    std::shared_ptr<StStereoParams> aParams = params.stereoFile;
+    if (aParams.get() == nullptr || aParams->ViewingMode == StViewSurface_Plain) {
         theOrient = StGLQuaternion();
         return false;
     }
@@ -744,10 +729,10 @@ bool StGLImageRegion::getHeadOrientation(StGLQuaternion& theOrient,
 void StGLImageRegion::stglDraw(unsigned int theView) {
     myIconPrev->setOpacity(0.0f, false);
     myIconNext->setOpacity(0.0f, false);
-    StHandle<StStereoParams> aParams = getSource();
-    if(!myIsInitialized || !isVisible() || aParams.isNull()
-    || !myTextureQueue->getQTexture().getFront(StGLQuadTexture::LEFT_TEXTURE).isValid()
-    || !myHasVideoStream) {
+    std::shared_ptr<StStereoParams> aParams = getSource();
+    if (!myIsInitialized || !isVisible() || aParams.get() == nullptr
+     || !myTextureQueue->getQTexture().getFront(StGLQuadTexture::LEFT_TEXTURE).isValid()
+     || !myHasVideoStream) {
         StGLWidget::stglDraw(theView);
         return;
     }
@@ -784,10 +769,10 @@ void StGLImageRegion::stglDraw(unsigned int theView) {
 
 void StGLImageRegion::stglDrawView(unsigned int theView) {
     StGLQuadTexture::LeftOrRight aLeftOrRight = StGLQuadTexture::LEFT_TEXTURE;
-    StHandle<StStereoParams> aParams = getSource();
+    std::shared_ptr<StStereoParams> aParams = getSource();
     mySampleRatio = 1.0f;
     myFrameSize = StVec2<int>(0, 0);
-    if(!myIsInitialized || aParams.isNull()) {
+    if (!myIsInitialized || aParams.get() == nullptr) {
         return;
     }
 
@@ -1016,7 +1001,7 @@ void StGLImageRegion::stglDrawView(unsigned int theView) {
                         aParams->scaleIn(aScaleSteps);
                         aParams->moveFlat(aVec, aRectRatio);
                     }
-                } else if(!myList.isNull()) {
+                } else if (myList.get() != nullptr) {
                     // previous / next swipe gesture
                     const double anIntensMult = toDragImageInSwipe ? 1.0 : 3.0;
                     const StPlayList::CurrentPosition aPos = myList->getCurrentPosition();
@@ -1338,9 +1323,9 @@ void StGLImageRegion::stglDrawView(unsigned int theView) {
 }
 
 void StGLImageRegion::doRightUnclick(const StPointD_t& theCursorZo) {
-    StHandle<StStereoParams> aParams = getSource();
-    if(!myIsInitialized || aParams.isNull()
-     || aParams->ViewingMode != StViewSurface_Plain) {
+    std::shared_ptr<StStereoParams> aParams = getSource();
+    if (!myIsInitialized || aParams.get() == nullptr
+      || aParams->ViewingMode != StViewSurface_Plain) {
         return;
     }
 
@@ -1364,15 +1349,15 @@ void StGLImageRegion::doRightUnclick(const StPointD_t& theCursorZo) {
 
 bool StGLImageRegion::tryClick(const StClickEvent& theEvent,
                                bool&               theIsItemClicked) {
-    StHandle<StStereoParams> aParams = getSource();
-    const bool hasImage = !aParams.isNull()
-                        && myHasVideoStream
-                        && myTextureQueue->getQTexture().getFront(StGLQuadTexture::LEFT_TEXTURE).isValid();
-    if(!myIsInitialized || !hasImage) {
+    std::shared_ptr<StStereoParams> aParams = getSource();
+    const bool hasImage = aParams.get() != nullptr
+                       && myHasVideoStream
+                       && myTextureQueue->getQTexture().getFront(StGLQuadTexture::LEFT_TEXTURE).isValid();
+    if (!myIsInitialized || !hasImage) {
         return false;
     }
 
-    if(StGLWidget::tryClick(theEvent, theIsItemClicked)) {
+    if (StGLWidget::tryClick(theEvent, theIsItemClicked)) {
         if(theEvent.Button == ST_MOUSE_RIGHT
         && (myToRightRotate || (myKeyFlags & ST_VF_CONTROL) == ST_VF_CONTROL)) {
             myClickPntZo = StPointD_t(theEvent.PointX, theEvent.PointY);
@@ -1398,12 +1383,12 @@ bool StGLImageRegion::tryClick(const StClickEvent& theEvent,
 
 bool StGLImageRegion::tryUnClick(const StClickEvent& theEvent,
                                  bool&               theIsItemUnclicked) {
-    StHandle<StStereoParams> aParams = getSource();
-    const bool hasImage = !aParams.isNull()
-                        && myHasVideoStream
-                        && myTextureQueue->getQTexture().getFront(StGLQuadTexture::LEFT_TEXTURE).isValid();
-    if(!myIsInitialized || !hasImage) {
-        if(isClicked(theEvent.Button)) {
+    std::shared_ptr<StStereoParams> aParams = getSource();
+    const bool hasImage = aParams.get() != nullptr
+                       && myHasVideoStream
+                       && myTextureQueue->getQTexture().getFront(StGLQuadTexture::LEFT_TEXTURE).isValid();
+    if (!myIsInitialized || !hasImage) {
+        if (isClicked(theEvent.Button)) {
             theIsItemUnclicked = true;
             setClicked(theEvent.Button, false);
             return true;
@@ -1422,7 +1407,7 @@ bool StGLImageRegion::tryUnClick(const StClickEvent& theEvent,
             case StViewSurface_Plain: {
                 if(!myIsClickAborted) { // && theEvent.Type != stEvent_MouseCancel
                     aParams->moveFlat(getMouseMoveFlat(myClickPntZo, aCursor), GLfloat(getRectPx().ratio()));
-                } else if(!myList.isNull()) {
+                } else if (myList.get() != nullptr) {
                     // previous / next swipe gesture
                     StPlayList::CurrentPosition aPos = myList->getCurrentPosition();
                     const double aMouseDX = myClickPntZo.x() - getRoot()->getCursorZo().x();
@@ -1468,11 +1453,11 @@ bool StGLImageRegion::tryUnClick(const StClickEvent& theEvent,
 }
 
 bool StGLImageRegion::doScroll(const StScrollEvent& theEvent) {
-    StHandle<StStereoParams> aParams = getSource();
+    std::shared_ptr<StStereoParams> aParams = getSource();
     StPointD_t aCursor(theEvent.PointX, theEvent.PointY);
-    if(!myIsInitialized
-    ||  aParams.isNull()
-    ||  theEvent.IsFromMultiTouch) {
+    if (!myIsInitialized
+     || aParams.get() == nullptr
+     || theEvent.IsFromMultiTouch) {
         return false;
     }
 
@@ -1509,9 +1494,9 @@ bool StGLImageRegion::doScroll(const StScrollEvent& theEvent) {
 
 void StGLImageRegion::scaleAt(const StPointD_t& thePoint,
                               const float       theStep) {
-    StHandle<StStereoParams> aParams = getSource();
-    if(!myIsInitialized
-    ||  aParams.isNull()) {
+    std::shared_ptr<StStereoParams> aParams = getSource();
+    if (!myIsInitialized
+     || aParams.get() == nullptr) {
         return;
     }
 
@@ -1556,12 +1541,12 @@ void StGLImageRegion::scaleAt(const StPointD_t& thePoint,
 }
 
 bool StGLImageRegion::doGesture(const StGestureEvent& theEvent) {
-    StHandle<StStereoParams> aParams = getSource();
-    if(!myIsInitialized || aParams.isNull()) {
+    std::shared_ptr<StStereoParams> aParams = getSource();
+    if (!myIsInitialized || aParams.get() == nullptr) {
         return false;
     }
 
-    switch(theEvent.Type) {
+    switch (theEvent.Type) {
         case stEvent_GestureCancel: {
             myRotAngle = 0.0f;
             return false;
@@ -1647,52 +1632,52 @@ bool StGLImageRegion::doKeyUp(const StKeyEvent& theEvent) {
 }
 
 void StGLImageRegion::doParamsRotYLeft(const double ) {
-    if(params.stereoFile.isNull()
-    || params.stereoFile->ViewingMode != StViewSurface_Plain) {
+    if (params.stereoFile.get() == nullptr
+     || params.stereoFile->ViewingMode != StViewSurface_Plain) {
         return;
     }
 
     GLfloat anYRotate = params.stereoFile->getYRotate() + 1.0f;
-    for(; anYRotate > 360.0f;) {
+    for (; anYRotate > 360.0f;) {
         anYRotate -= 360.0f;
     }
     params.stereoFile->setYRotate(anYRotate);
 }
 
 void StGLImageRegion::doParamsRotYRight(const double ) {
-    if(params.stereoFile.isNull()
-    || params.stereoFile->ViewingMode != StViewSurface_Plain) {
+    if (params.stereoFile.get() == nullptr
+     || params.stereoFile->ViewingMode != StViewSurface_Plain) {
         return;
     }
 
     GLfloat anYRotate = params.stereoFile->getYRotate() - 1.0f;
-    for(; anYRotate < 0.0f;) {
+    for (; anYRotate < 0.0f;) {
         anYRotate += 360.0f;
     }
     params.stereoFile->setYRotate(anYRotate);
 }
 
 void StGLImageRegion::doParamsRotXUp(const double ) {
-    if(params.stereoFile.isNull()
-    || params.stereoFile->ViewingMode != StViewSurface_Plain) {
+    if (params.stereoFile.get() == nullptr
+     || params.stereoFile->ViewingMode != StViewSurface_Plain) {
         return;
     }
 
     GLfloat anXRotate = params.stereoFile->getXRotate() + 1.0f;
-    for(; anXRotate > 360.0f;) {
+    for (; anXRotate > 360.0f;) {
         anXRotate -= 360.0f;
     }
     params.stereoFile->setXRotate(anXRotate);
 }
 
 void StGLImageRegion::doParamsRotXDown(const double ) {
-    if(params.stereoFile.isNull()
-    || params.stereoFile->ViewingMode != StViewSurface_Plain) {
+    if (params.stereoFile.get() == nullptr
+     || params.stereoFile->ViewingMode != StViewSurface_Plain) {
         return;
     }
 
     GLfloat anXRotate = params.stereoFile->getXRotate() - 1.0f;
-    for(; anXRotate < 0.0f;) {
+    for (; anXRotate < 0.0f;) {
         anXRotate += 360.0f;
     }
     params.stereoFile->setXRotate(anXRotate);
@@ -1703,7 +1688,7 @@ bool StGLImageRegion::resetParams() {
     hasChanges = params.SeparationDX->reset() || hasChanges;
     hasChanges = params.SeparationDY->reset() || hasChanges;
     hasChanges = params.SeparationRot->reset() || hasChanges;
-    if(!params.stereoFile.isNull()) {
+    if (params.stereoFile.get() != nullptr) {
         hasChanges = params.stereoFile->reset() || hasChanges;
     }
     if (hasChanges) {

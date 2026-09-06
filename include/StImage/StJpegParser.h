@@ -55,10 +55,12 @@ class StJpegParser : public StRawFile {
     struct Image {
         unsigned char*  Data;     //!< pointer to the data
         size_t          Length;   //!< data length
+
         std::vector< std::shared_ptr<StExifDir> >
                         Exif;     //!< EXIF sections
-        StHandle<Image> Thumb;    //!< optional thumbnail
-        StHandle<Image> Next;     //!< link to the next image in file (if any)
+        std::shared_ptr<Image> Thumb; //!< optional thumbnail
+        std::shared_ptr<Image> Next;  //!< link to the next image in file (if any)
+
         size_t          SizeX;    //!< image width  in pixels
         size_t          SizeY;    //!< image height in pixels
         uint16_t        ParX;     //!< Pixel Aspect Ratio
@@ -135,8 +137,8 @@ class StJpegParser : public StRawFile {
      */
     inline size_t getNbImages() const {
         size_t aCount = 0;
-        for(StHandle<StJpegParser::Image> anImg = myImages;
-            !anImg.isNull(); anImg = anImg->Next) {
+        for (std::shared_ptr<StJpegParser::Image> anImg = myImages;
+             anImg.get() != nullptr; anImg = anImg->Next) {
             ++aCount;
         }
         return aCount;
@@ -145,16 +147,16 @@ class StJpegParser : public StRawFile {
     /**
      * Access image with specified index
      */
-    inline StHandle<StJpegParser::Image> getImage(size_t theImgId) const {
+    inline std::shared_ptr<StJpegParser::Image> getImage(size_t theImgId) const {
         size_t aCount = 0;
-        for(StHandle<StJpegParser::Image> anImg = myImages;
-            !anImg.isNull(); anImg = anImg->Next) {
-            if(aCount == theImgId) {
+        for (std::shared_ptr<StJpegParser::Image> anImg = myImages;
+             anImg.get() != nullptr; anImg = anImg->Next) {
+            if (aCount == theImgId) {
                 return anImg;
             }
             ++aCount;
         }
-        return StHandle<StJpegParser::Image>();
+        return std::shared_ptr<StJpegParser::Image>();
     }
 
     /**
@@ -224,10 +226,10 @@ class StJpegParser : public StRawFile {
     /**
      * Parse one image in data.
      */
-    ST_CPPEXPORT StHandle<StJpegParser::Image> parseImage(const int      theImgCount,
-                                                          const int      theDepth,
-                                                          unsigned char* theDataStart,
-                                                          const bool     theToFindSOI);
+    ST_CPPEXPORT std::shared_ptr<StJpegParser::Image> parseImage(const int      theImgCount,
+                                                                 const int      theDepth,
+                                                                 unsigned char* theDataStart,
+                                                                 const bool     theToFindSOI);
 
     /**
      * Create new section at specified offset.
@@ -241,7 +243,8 @@ class StJpegParser : public StRawFile {
 
         protected:
 
-    StHandle<Image> myImages;     //!< images list
+    std::shared_ptr<Image> myImages; //!< images list
+
     ptrdiff_t       myOffsets[OffsetsNb];
                                   //!< array of offsets in image data, starting from session lenght (zero offset is invalid)
     StString        myComment;    //!< string stored in COM segment (directly in JPEG, NOT inside EXIF)

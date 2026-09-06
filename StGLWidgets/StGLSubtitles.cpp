@@ -87,7 +87,7 @@ class StGLSubtitles::StImgProgram : public StGLProgram {
 };
 
 StGLSubtitles::StSubShowItems::StSubShowItems()
-: StArrayList<StHandle <StSubItem> >(8), Scale (1.0f) {
+: StArrayList<std::shared_ptr <StSubItem> >(8), Scale (1.0f) {
     //
 }
 
@@ -95,7 +95,7 @@ bool StGLSubtitles::StSubShowItems::pop(const double thePTS) {
     bool isChanged = false;
     for(size_t anId = size() - 1; anId < size_t(-1); --anId) {
         // filter outdated and forward items
-        const StHandle<StSubItem>& anItem = getValue(anId);
+        const std::shared_ptr<StSubItem>& anItem = getValue(anId);
         if(anItem->TimeEnd < thePTS || anItem->TimeStart > thePTS) {
             remove(anId);
             isChanged = true;
@@ -112,7 +112,7 @@ bool StGLSubtitles::StSubShowItems::pop(const double thePTS) {
     // update active text
     Text = getFirst()->Text;
     for(size_t anId = 1; anId < size(); ++anId) {
-        const StHandle<StSubItem>& anItem = getValue(anId);
+        const std::shared_ptr<StSubItem>& anItem = getValue(anId);
         Text += StString('\n');
         Text += anItem->Text;
     }
@@ -130,7 +130,7 @@ bool StGLSubtitles::StSubShowItems::pop(const double thePTS) {
     return isChanged;
 }
 
-void StGLSubtitles::StSubShowItems::add(const StHandle<StSubItem>& theItem) {
+void StGLSubtitles::StSubShowItems::add(const std::shared_ptr<StSubItem>& theItem) {
     if(!Text.isEmpty()) {
         Text += StString('\n');
     }
@@ -142,11 +142,11 @@ void StGLSubtitles::StSubShowItems::add(const StHandle<StSubItem>& theItem) {
         Scale = theItem->Scale;
     }
 
-    StArrayList<StHandle <StSubItem> >::add(theItem);
+    StArrayList<std::shared_ptr <StSubItem> >::add(theItem);
 }
 
 StGLSubtitles::StGLSubtitles(StGLImageRegion* theParent,
-                             const StHandle<StSubQueue>&     theSubQueue,
+                             const std::shared_ptr<StSubQueue>& theSubQueue,
                              const StHandle<StInt32Param>&   thePlace,
                              const StHandle<StFloat32Param>& theFontSize)
 : StGLTextArea(theParent,
@@ -164,8 +164,8 @@ StGLSubtitles::StGLSubtitles(StGLImageRegion* theParent,
     params.Parser   = new StEnumParam(1, stCString("subsParser"));
     params.ToApplyStereo = new StBoolParamNamed(true, stCString("subsApplyStereo"));
 
-    if(myQueue.isNull()) {
-        myQueue = new StSubQueue();
+    if (myQueue.get() == nullptr) {
+        myQueue = std::make_shared<StSubQueue>();
     }
 
     myToDrawShadow = true;
@@ -175,30 +175,30 @@ StGLSubtitles::StGLSubtitles(StGLImageRegion* theParent,
     myFormatter.setupAlignment(StGLTextFormatter::ST_ALIGN_X_CENTER,
                                StGLTextFormatter::ST_ALIGN_Y_BOTTOM);
 
-    StHandle<StGLFont> aFontNew = new StGLFont();
-    StHandle<StFTLibrary> aLib = getRoot()->getFontManager()->getLibrary();
+    std::shared_ptr<StGLFont> aFontNew = std::make_shared<StGLFont>();
+    std::shared_ptr<StFTLibrary> aLib = getRoot()->getFontManager()->getLibrary();
     const FontSize     aSize       = (FontSize )(int )params.FontSize->getValue();
     const unsigned int aResolution = getRoot()->getFontManager()->getResolution();
-    for(size_t anIter = 0; anIter < StFTFont::SubsetsNB; ++anIter) {
-        StHandle<StGLFontEntry>& aFontGlSrc = myFont->changeFont((StFTFont::Subset )anIter);
-        if(aFontGlSrc.isNull()) {
+    for (size_t anIter = 0; anIter < StFTFont::SubsetsNB; ++anIter) {
+        std::shared_ptr<StGLFontEntry>& aFontGlSrc = myFont->changeFont((StFTFont::Subset )anIter);
+        if (aFontGlSrc.get() == nullptr) {
             continue;
         }
 
-        StHandle<StFTFont> aFontFt = new StFTFont(aLib);
+        std::shared_ptr<StFTFont> aFontFt = std::make_shared<StFTFont>(aLib);
         if (aFontGlSrc->getFont()->getFilePath(StFTFont::Style_Regular) == StGLFontManager::getFallbackFontPath()) {
             // handle fallback font specifically
-            StHandle<StGLFontEntry> aFallBack = getRoot()->getFontManager()->findCreateFallback(aSize);
-            aFontFt = !aFallBack.isNull() ? aFallBack->getFont() : StHandle<StFTFont>();
+            std::shared_ptr<StGLFontEntry> aFallBack = getRoot()->getFontManager()->findCreateFallback(aSize);
+            aFontFt = aFallBack.get() != nullptr ? aFallBack->getFont() : std::shared_ptr<StFTFont>();
         } else {
-            for(int aStyleIt = 0; aStyleIt < StFTFont::StylesNB; ++aStyleIt) {
+            for (int aStyleIt = 0; aStyleIt < StFTFont::StylesNB; ++aStyleIt) {
                 aFontFt->load(aFontGlSrc->getFont()->getFilePath((StFTFont::Style )aStyleIt),
                               aFontGlSrc->getFont()->getFaceIndex((StFTFont::Style )aStyleIt),
                               (StFTFont::Style )aStyleIt);
             }
         }
         aFontFt->init(aSize, aResolution);
-        aFontNew->changeFont((StFTFont::Subset )anIter) = new StGLFontEntry(aFontFt);
+        aFontNew->changeFont((StFTFont::Subset )anIter) = std::make_shared<StGLFontEntry>(aFontFt);
     }
     mySize = aSize;
     myFont = aFontNew;
@@ -207,7 +207,7 @@ StGLSubtitles::StGLSubtitles(StGLImageRegion* theParent,
 StGLSubtitles::~StGLSubtitles() {
     StGLContext& aCtx = getContext();
     myFont->release(aCtx);
-    myFont.nullify();
+    myFont.reset();
     myTexture.release(aCtx);
     myVertBuf.release(aCtx);
     myTCrdBuf.release(aCtx);
@@ -233,7 +233,7 @@ bool StGLSubtitles::stglInit() {
 void StGLSubtitles::stglUpdate(const StPointD_t& ,
                                bool ) {
     bool isChanged = myShowItems.pop(myPTS);
-    for(StHandle<StSubItem> aNewSubItem = myQueue->pop(myPTS); !aNewSubItem.isNull(); aNewSubItem = myQueue->pop(myPTS)) {
+    for (std::shared_ptr<StSubItem> aNewSubItem = myQueue->pop(myPTS); aNewSubItem.get() != nullptr; aNewSubItem = myQueue->pop(myPTS)) {
         isChanged = true;
         myShowItems.add(aNewSubItem);
     }
@@ -336,7 +336,7 @@ void StGLSubtitles::stglDraw(unsigned int theView) {
         return;
     }
 
-    StHandle<StStereoParams> aParams;
+    std::shared_ptr<StStereoParams> aParams;
     StFormat aStFormat = StFormat_Mono;
     unsigned int aView = theView;
     float aSampleRatio = 1.0f;
@@ -345,7 +345,7 @@ void StGLSubtitles::stglDraw(unsigned int theView) {
                                     ? dynamic_cast<StGLImageRegion*>(myParent)
                                     : NULL) {
         aParams = anImgRegion->getSource();
-        if(!aParams.isNull()) {
+        if (aParams.get() != nullptr) {
             aStFormat = aParams->StereoFormat;
             aSampleRatio = anImgRegion->getSampleRatio();
             aFrameDims   = anImgRegion->getFrameSize();
@@ -483,7 +483,7 @@ void StGLSubtitles::stglResize() {
     }
 }
 
-const StHandle<StSubQueue>& StGLSubtitles::getQueue() const {
+const std::shared_ptr<StSubQueue>& StGLSubtitles::getQueue() const {
     return myQueue;
 }
 

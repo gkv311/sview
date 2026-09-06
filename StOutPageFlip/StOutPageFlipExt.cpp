@@ -56,8 +56,8 @@ void StOutPageFlipExt::updateStringsExt() {
     params.ControlCode->defineOption(DEVICE_CONTROL_ED_ON_OFF, myLangMap.changeValueId(STTR_PARAMETER_CONTROL_ED,        "eDimensional auto on/off"));
 }
 
-StOutPageFlipExt::StOutPageFlipExt(const StHandle<StResourceManager>& theResMgr,
-                                   const StNativeWin_t                theParentWindow)
+StOutPageFlipExt::StOutPageFlipExt(const std::shared_ptr<StResourceManager>& theResMgr,
+                                   const StNativeWin_t theParentWindow)
 : StOutPageFlip(theResMgr, theParentWindow),
   myVpSizeY(0),
   myVpSizeX(0),
@@ -82,7 +82,7 @@ StOutPageFlipExt::StOutPageFlipExt(const StHandle<StResourceManager>& theResMgr,
 }
 
 void StOutPageFlipExt::releaseResources() {
-    if(!myContext.isNull()) {
+    if (myContext.get() != nullptr) {
         myCodesLine.release(*myContext);
         myCodesEDOnOff.release(*myContext);
     }
@@ -164,8 +164,8 @@ void StOutPageFlipExt::processEvents() {
 
         if(!StWindow::isFullScreen()) {
             const StSearchMonitors& aMonitors = StWindow::getMonitors();
-            if(myMonitor.isNull()) {
-                myMonitor = new StMonitor(aMonitors[aRect.center()]);
+            if (myMonitor.get() == nullptr) {
+                myMonitor = std::make_shared<StMonitor>(aMonitors[aRect.center()]);
             } else if(!myMonitor->getVRect().isPointIn(aRect.center())) {
                 *myMonitor = aMonitors[aRect.center()];
             }

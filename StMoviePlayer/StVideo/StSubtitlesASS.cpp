@@ -19,6 +19,8 @@
 #include "StSubtitlesASS.h"
 
 #include <StGLWidgets/StSubQueue.h>
+#include <StTemplates/StArrayList.h>
+
 #include <cmath>
 
 namespace {
@@ -246,11 +248,11 @@ void StSubtitlesASS::parseStyle(StString& theText) {
     }
 }
 
-StHandle<StSubItem> StSubtitlesASS::parseEvent(const StString& theString,
-                                               double thePts,
-                                               double theDuration) {
+std::shared_ptr<StSubItem> StSubtitlesASS::parseEvent(const StString& theString,
+                                                      double thePts,
+                                                      double theDuration) {
     if(!isValid()) {
-        return StHandle<StSubItem>();
+        return std::shared_ptr<StSubItem>();
     }
 
     double aDuration = theDuration;
@@ -259,7 +261,7 @@ StHandle<StSubItem> StSubtitlesASS::parseEvent(const StString& theString,
     if(theString.isStartsWithIgnoreCase(HEADER_Dialog)) {
         aList = theString.split(',', size_t(myElementsNb));
         if(aList->size() < size_t(myElementsNb)) {
-            return StHandle<StSubItem>();
+            return std::shared_ptr<StSubItem>();
         }
 
         aDuration = parseTime(aList->getValue(myIdPtsEnd)) - parseTime(aList->getValue(myIdPtsStart));
@@ -274,7 +276,7 @@ StHandle<StSubItem> StSubtitlesASS::parseEvent(const StString& theString,
         // TODO - where this format is documented?
         aList = theString.split(',', size_t(9));
         if(aList->size() != 9) {
-            return StHandle<StSubItem>();
+            return std::shared_ptr<StSubItem>();
         }
 
         aText = &aList->changeValue(8);
@@ -288,7 +290,7 @@ StHandle<StSubItem> StSubtitlesASS::parseEvent(const StString& theString,
     }
     if(aText->isEmpty()) {
         // ignore empty strings
-        return StHandle<StSubItem>();
+        return std::shared_ptr<StSubItem>();
     }
 
     // parse style codes
@@ -297,7 +299,7 @@ StHandle<StSubItem> StSubtitlesASS::parseEvent(const StString& theString,
     aText->replaceFast(ST_CRLF_REDUNDANT, ST_CRLF_REPLACEMENT);
     aText->replaceFast(ST_ASS_NEWLINE,    ST_NEWLINE_REPLACEMENT);
     aText->replaceFast(ST_ASS_NEWLINE2,   ST_NEWLINE_REPLACEMENT);
-    StHandle<StSubItem> aNewSubItem = new StSubItem(thePts, thePts + aDuration);
+    std::shared_ptr<StSubItem> aNewSubItem = std::make_shared<StSubItem>(thePts, thePts + aDuration);
     aNewSubItem->Text = *aText;
     return aNewSubItem;
 }

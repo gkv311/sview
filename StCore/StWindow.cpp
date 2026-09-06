@@ -34,15 +34,15 @@ void StWindow::copySignals() {
 }
 
 StWindow::StWindow()
-: myWin(new StWindowImpl(new StResourceManager(), (StNativeWin_t )NULL)),
+: myWin(new StWindowImpl(std::make_shared<StResourceManager>(), (StNativeWin_t )nullptr)),
   myTargetFps(0.0),
   myWasUsed(false),
   myIsForcedStereo(false) {
     copySignals();
 }
 
-StWindow::StWindow(const StHandle<StResourceManager>& theResMgr,
-                   const StNativeWin_t                theParentWindow)
+StWindow::StWindow(const std::shared_ptr<StResourceManager>& theResMgr,
+                   const StNativeWin_t theParentWindow)
 : myWin(new StWindowImpl(theResMgr, theParentWindow)),
   myTargetFps(0.0),
   myWasUsed(false),
@@ -243,7 +243,7 @@ void StWindow::stglSwap(const int theWinEnum) {
 
 bool StWindow::stglMakeCurrent() {
     const bool isBound = myWin->stglMakeCurrent(ST_WIN_MASTER);
-    if(!myWin->myGlContext.isNull()) {
+    if (myWin->myGlContext.get() != nullptr) {
         myWin->myGlContext->setBound(isBound);
     }
     return isBound;
@@ -251,14 +251,14 @@ bool StWindow::stglMakeCurrent() {
 
 bool StWindow::stglMakeCurrent(const int theWinEnum) {
     const bool isBound = myWin->stglMakeCurrent(theWinEnum);
-    if(!myWin->myGlContext.isNull()) {
+    if (myWin->myGlContext.get() != nullptr) {
         myWin->myGlContext->setBound(isBound);
     }
     return isBound;
 }
 
 void StWindow::stglDraw() {
-    if(myWin->myGlContext.isNull()) {
+    if (myWin->myGlContext.get() == nullptr) {
         return;
     }
 
@@ -287,15 +287,15 @@ bool StWindow::isMouseMoved() const {
     return myWin->myIsMouseMoved;
 }
 
-const StHandle<StResourceManager>& StWindow::getResourceManager() const {
+const std::shared_ptr<StResourceManager>& StWindow::getResourceManager() const {
     return myWin->myResMgr;
 }
 
-const StHandle<StMsgQueue>& StWindow::getMessagesQueue() const {
+const std::shared_ptr<StMsgQueue>& StWindow::getMessagesQueue() const {
     return myMsgQueue;
 }
 
-void StWindow::setMessagesQueue(const StHandle<StMsgQueue>& theQueue) {
+void StWindow::setMessagesQueue(const std::shared_ptr<StMsgQueue>& theQueue) {
     myMsgQueue = theQueue;
 }
 
@@ -323,7 +323,7 @@ GLfloat StWindow::getScaleFactor() const {
     return myWin->getScaleFactor();
 }
 
-const StHandle<StGLContext>& StWindow::getContext() const {
+const std::shared_ptr<StGLContext>& StWindow::getContext() const {
     return myWin->myGlContext;
 }
 

@@ -118,11 +118,11 @@ void StOutIZ3D::updateStrings() {
             + aDescr.format("2009-2026", "kirill@sview.ru", "www.sview.ru");
 }
 
-StOutIZ3D::StOutIZ3D(const StHandle<StResourceManager>& theResMgr,
-                     const StNativeWin_t                theParentWindow)
+StOutIZ3D::StOutIZ3D(const std::shared_ptr<StResourceManager>& theResMgr,
+                     const StNativeWin_t theParentWindow)
 : StWindow(theResMgr, theParentWindow),
-  mySettings(new StSettings(theResMgr, ST_OUT_PLUGIN_NAME)),
-  myFrBuffer(new StGLStereoFrameBuffer()),
+  mySettings(std::make_shared<StSettings>(theResMgr, ST_OUT_PLUGIN_NAME)),
+  myFrBuffer(std::make_shared<StGLStereoFrameBuffer>()),
   myToCompressMem(myInstancesNb.increment() > 1),
   myIsBroken(false) {
     const StSearchMonitors& aMonitors = StWindow::getMonitors();
@@ -142,7 +142,7 @@ StOutIZ3D::StOutIZ3D(const StHandle<StResourceManager>& theResMgr,
     }
 
     // devices list
-    StHandle<StOutDevice> aDevice = new StOutDevice();
+    std::shared_ptr<StOutDevice> aDevice = std::make_shared<StOutDevice>();
     aDevice->PluginId = ST_OUT_PLUGIN_NAME;
     aDevice->DeviceId = stCString("iZ3D");
     aDevice->Priority = aSupportLevel;
@@ -173,13 +173,13 @@ StOutIZ3D::StOutIZ3D(const StHandle<StResourceManager>& theResMgr,
 }
 
 void StOutIZ3D::releaseResources() {
-    if(!myContext.isNull()) {
+    if (myContext.get() != nullptr) {
         myShaders.release(*myContext);
         myTexTableOld.release(*myContext);
         myTexTableNew.release(*myContext);
         myFrBuffer->release(*myContext);
     }
-    myContext.nullify();
+    myContext.reset();
 
     // read windowed placement
     StWindow::hide();
@@ -217,7 +217,7 @@ bool StOutIZ3D::create() {
     // initialize GL context
     myContext = StWindow::getContext();
     myContext->setMessagesQueue(myMsgQueue);
-    const StHandle<StResourceManager>& aResMgr = getResourceManager();
+    const std::shared_ptr<StResourceManager>& aResMgr = getResourceManager();
     if(!myContext->isGlGreaterEqual(2, 0)) {
         myMsgQueue->pushError(stCString("OpenGL 2.0 is required by iZ3D Output"));
         myIsBroken = true;
@@ -230,16 +230,14 @@ bool StOutIZ3D::create() {
 
     // INIT iZ3D tables textures
     StAVImage aTableImg;
-    StHandle<StResource> aTableOld = aResMgr->getResource(StString("textures") + SYS_FS_SPLITTER + "iz3dTableOld.png");
-    uint8_t* aData     = NULL;
+    std::shared_ptr<StResource> aTableOld = aResMgr->getResource(StString("textures") + SYS_FS_SPLITTER + "iz3dTableOld.png");
+    uint8_t* aData     = nullptr;
     int      aDataSize = 0;
-    if(!aTableOld.isNull()
-    && !aTableOld->isFile()
-    &&  aTableOld->read()) {
+    if (aTableOld.get() != nullptr && !aTableOld->isFile() && aTableOld->read()) {
         aData     = (uint8_t* )aTableOld->getData();
         aDataSize = aTableOld->getSize();
     }
-    if(!aTableImg.load(!aTableOld.isNull() ? aTableOld->getPath() : StString(), StImageFile::ST_TYPE_PNG, aData, aDataSize)) {
+    if (!aTableImg.load(aTableOld.get() != nullptr ? aTableOld->getPath() : StString(), StImageFile::ST_TYPE_PNG, aData, aDataSize)) {
         myMsgQueue->pushError(StString("iZ3D output - critical error:\n") + aTableImg.getState());
         myIsBroken = true;
         return true;
@@ -251,16 +249,14 @@ bool StOutIZ3D::create() {
         return true;
     }
 
-    StHandle<StResource> aTableNew = aResMgr->getResource(StString("textures") + SYS_FS_SPLITTER + "iz3dTableNew.png");
-    aData     = NULL;
+    std::shared_ptr<StResource> aTableNew = aResMgr->getResource(StString("textures") + SYS_FS_SPLITTER + "iz3dTableNew.png");
+    aData     = nullptr;
     aDataSize = 0;
-    if(!aTableNew.isNull()
-    && !aTableNew->isFile()
-    &&  aTableNew->read()) {
+    if (aTableNew.get() != nullptr && !aTableNew->isFile() && aTableNew->read()) {
         aData     = (uint8_t* )aTableNew->getData();
         aDataSize = aTableNew->getSize();
     }
-    if(!aTableImg.load(!aTableNew.isNull() ? aTableNew->getPath() : StString(), StImageFile::ST_TYPE_PNG, aData, aDataSize)) {
+    if (!aTableImg.load(aTableNew.get() != nullptr ? aTableNew->getPath() : StString(), StImageFile::ST_TYPE_PNG, aData, aDataSize)) {
         myMsgQueue->pushError(StString("iZ3D output - critical error:\n") + aTableImg.getState());
         myIsBroken = true;
         return true;
@@ -397,7 +393,7 @@ void StOutIZ3D::stglDraw() {
 }
 
 void StOutIZ3D::doSwitchVSync(const int32_t theValue) {
-    if(myContext.isNull()) {
+    if (myContext.get() == nullptr) {
         return;
     }
 

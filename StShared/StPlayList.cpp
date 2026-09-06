@@ -21,7 +21,7 @@ StPlayItem::StPlayItem(StFileNode* theFileNode,
   myNextItem(NULL),
   myPosition(0),
   myFileNode(theFileNode),
-  myStParams(new StStereoParams(theDefParams)),
+  myStParams(std::make_shared<StStereoParams>(theDefParams)),
   myPlayFlag(false) {
     //
 }
@@ -224,19 +224,19 @@ int32_t StPlayList::getSerial() {
 
 void StPlayList::clear() {
     StMutexAuto anAutoLock(myMutex);
-    if(myFirst != NULL) {
+    if (myFirst != nullptr) {
         myWasCleared = true;
     }
 
-    if(!myPlsFile.isNull()
-    && myCurrent != NULL) {
-        if(myPlsFile->File->isEmpty()) {
-            myPlsFile->File->add(new StFileNode(myCurrent->getPath(), myPlsFile->File.access()));
+    if (myPlsFile.get() != nullptr
+     && myCurrent != nullptr) {
+        if (myPlsFile->File->isEmpty()) {
+            myPlsFile->File->add(new StFileNode(myCurrent->getPath(), myPlsFile->File.get()));
         } else {
             myPlsFile->File->changeValue(0)->setSubPath(myCurrent->getPath());
         }
     }
-    myPlsFile.nullify();
+    myPlsFile.reset();
 
     // destroy double-linked list content
     for(StPlayItem *anItem(myFirst), *anItemToDel(NULL); anItem != NULL;) {
@@ -474,22 +474,22 @@ bool StPlayList::walkToNext(const bool theToForce) {
     return false;
 }
 
-StHandle<StFileNode> StPlayList::getCurrentFile() {
+std::shared_ptr<StFileNode> StPlayList::getCurrentFile() {
     StMutexAuto anAutoLock(myMutex);
-    if(myCurrent == NULL) {
+    if (myCurrent == nullptr) {
         // empty list
-        return StHandle<StFileNode>();
+        return std::shared_ptr<StFileNode>();
     }
     StFileNode* aFileNode = myCurrent->getFileNode();
-    if(aFileNode == NULL) {
+    if (aFileNode == nullptr) {
         // invalid item
-        return StHandle<StFileNode>();
+        return std::shared_ptr<StFileNode>();
     }
-    return new StFileNode(aFileNode->getPath());
+    return std::make_shared<StFileNode>(aFileNode->getPath());
 }
 
-void StPlayList::setTitle(const StHandle<StStereoParams>& theKey,
-                          const StString&                 theTitle) {
+void StPlayList::setTitle(const std::shared_ptr<StStereoParams>& theKey,
+                          const StString& theTitle) {
     StMutexAuto anAutoLock(myMutex);
     if(myCurrent == NULL) {
         return;
@@ -505,33 +505,33 @@ void StPlayList::setTitle(const StHandle<StStereoParams>& theKey,
     signals.onTitleChange(anItemId);
 }
 
-bool StPlayList::getCurrentFile(StHandle<StFileNode>&     theFileNode,
-                                StHandle<StStereoParams>& theParams,
-                                StHandle<StFileNode>&     thePlsFile) {
-    theFileNode.nullify();
-    theParams.nullify();
-    thePlsFile.nullify();
+bool StPlayList::getCurrentFile(std::shared_ptr<StFileNode>& theFileNode,
+                                std::shared_ptr<StStereoParams>& theParams,
+                                std::shared_ptr<StFileNode>& thePlsFile) {
+    theFileNode.reset();
+    theParams.reset();
+    thePlsFile.reset();
     StMutexAuto anAutoLock(myMutex);
-    if(myCurrent == NULL) {
+    if (myCurrent == nullptr) {
         // empty list
         return false;
     }
     StFileNode* aFileNode = myCurrent->getFileNode();
-    if(aFileNode == NULL) {
+    if (aFileNode == nullptr) {
         // invalid item
         return false;
     }
 
     theFileNode = aFileNode->detach();
     theParams   = myCurrent->getParams();
-    if(!myPlsFile.isNull()) {
+    if (myPlsFile.get() != nullptr) {
         thePlsFile = myPlsFile->File;
     }
     return true;
 }
 
-void StPlayList::addToNode(const StHandle<StFileNode>& theFileNode,
-                           const StString&             thePathToAdd) {
+void StPlayList::addToNode(const std::shared_ptr<StFileNode>& theFileNode,
+                           const StString& thePathToAdd) {
     StString aPath = theFileNode->getPath();
     StMutexAuto anAutoLock(myMutex);
     if(myCurrent == NULL) {
@@ -808,7 +808,7 @@ size_t StPlayList::findRecent(const StString thePathL,
 
     StMutexAuto anAutoLock(myMutex);
     for(size_t anIter = 0; anIter < myRecent.size(); ++anIter) {
-        const StHandle<StRecentItem>& aRecent = myRecent[anIter];
+        const std::shared_ptr<StRecentItem>& aRecent = myRecent[anIter];
         if(stAreSameRecent(aNode, *aRecent->File)) {
             return anIter;
         }
@@ -816,14 +816,14 @@ size_t StPlayList::findRecent(const StString thePathL,
     return size_t(-1);
 }
 
-StHandle<StStereoParams> StPlayList::openRecent(const size_t theItemId) {
+std::shared_ptr<StStereoParams> StPlayList::openRecent(const size_t theItemId) {
     StMutexAuto anAutoLock(myMutex);
     if(theItemId >= myRecent.size()) {
-        return StHandle<StStereoParams>();
+        return std::shared_ptr<StStereoParams>();
     }
 
-    const StHandle<StRecentItem> aRecent = myRecent[theItemId];
-    const StHandle<StFileNode>   aFile   = aRecent->File;
+    const std::shared_ptr<StRecentItem> aRecent = myRecent[theItemId];
+    const std::shared_ptr<StFileNode>   aFile   = aRecent->File;
     if(aFile->size() == 2) {
         // stereo pair from two files
         clear();
@@ -839,23 +839,23 @@ StHandle<StStereoParams> StPlayList::openRecent(const size_t theItemId) {
     return aRecent->Params;
 }
 
-void StPlayList::updateRecent(const StHandle<StFileNode>&     theFile,
-                              const StHandle<StStereoParams>& theParams) {
-    if(theFile.isNull()) {
+void StPlayList::updateRecent(const std::shared_ptr<StFileNode>& theFile,
+                              const std::shared_ptr<StStereoParams>& theParams) {
+    if (theFile.get() == nullptr) {
         return;
     }
 
     StMutexAuto anAutoLock(myMutex);
-    if(!myPlsFile.isNull()
+    if (myPlsFile.get() != nullptr
      && myPlsFile->File == theFile) {
         // remember properties of last played file
         myPlsFile->Params = theParams;
         return;
     }
 
-    for(size_t anIter = 0; anIter < myRecent.size(); ++anIter) {
-        StHandle<StRecentItem>& aRecent = myRecent[anIter];
-        if(stAreSameRecent(*theFile, *aRecent->File)) {
+    for (size_t anIter = 0; anIter < myRecent.size(); ++anIter) {
+        std::shared_ptr<StRecentItem>& aRecent = myRecent[anIter];
+        if (stAreSameRecent(*theFile, *aRecent->File)) {
             aRecent->Params = theParams;
             return;
         }
@@ -872,8 +872,8 @@ void StPlayList::getRecentList(StArrayList<StString>& theList) const {
     theList.clear();
     StMutexAuto anAutoLock(myMutex);
     for(size_t anIter = 0; anIter < myRecent.size(); ++anIter) {
-        const StHandle<StRecentItem>& aRecent = myRecent[anIter];
-        const StHandle<StFileNode>&   aFile   = aRecent->File;
+        const std::shared_ptr<StRecentItem>& aRecent = myRecent[anIter];
+        const std::shared_ptr<StFileNode>&   aFile   = aRecent->File;
 
         const StString aPath = aFile->size() == 2 ? aFile->getValue(0)->getPath() : aFile->getPath();
         StString aTitleString;
@@ -885,39 +885,39 @@ void StPlayList::getRecentList(StArrayList<StString>& theList) const {
 
 void StPlayList::currentToRecent() {
     StMutexAuto anAutoLock(myMutex);
-    if( myCurrent == NULL
-    || !myPlsFile.isNull()) {
+    if (myCurrent == nullptr
+     || myPlsFile.get() != nullptr) {
         return;
     }
 
-    StHandle<StPlayList::StRecentItem> aRecent = addRecentFile(*myCurrent->getFileNode());
+    std::shared_ptr<StPlayList::StRecentItem> aRecent = addRecentFile(*myCurrent->getFileNode());
     aRecent->Params = myCurrent->getParams();
 }
 
-const StHandle<StPlayList::StRecentItem>& StPlayList::addRecentFile(const StFileNode& theFile,
-                                                                    const bool        theToFront) {
+const std::shared_ptr<StPlayList::StRecentItem>& StPlayList::addRecentFile(const StFileNode& theFile,
+                                                                           const bool        theToFront) {
     // remove duplicates
-    for(size_t anIter = 0; anIter < myRecent.size(); ++anIter) {
-        const StHandle<StRecentItem>& aRecent = myRecent[anIter];
-        if(stAreSameRecent(theFile, *aRecent->File)) {
+    for (size_t anIter = 0; anIter < myRecent.size(); ++anIter) {
+        const std::shared_ptr<StRecentItem>& aRecent = myRecent[anIter];
+        if (stAreSameRecent(theFile, *aRecent->File)) {
             myRecent.erase(myRecent.begin() + anIter);
             break;
         }
     }
 
-    if(myRecent.size() > myRecentLimit) {
+    if (myRecent.size() > myRecentLimit) {
         myRecent.pop_back();
     }
 
-    StHandle<StRecentItem> aNewRecent = new StRecentItem();
+    std::shared_ptr<StRecentItem> aNewRecent = std::make_shared<StRecentItem>();
     const StString aPath = theFile.getPath();
     if (StFileNode::isContentProtocolPath(aPath)) {
         // ignore temporary URLs
-        aNewRecent->File = new StFileNode();
+        aNewRecent->File = std::make_shared<StFileNode>();
     } else {
         aNewRecent->File = theFile.detach();
     }
-    if(theToFront) {
+    if (theToFront) {
         myRecent.push_front(aNewRecent);
     } else {
         myRecent.push_back(aNewRecent);
@@ -929,13 +929,13 @@ const StHandle<StPlayList::StRecentItem>& StPlayList::addRecentFile(const StFile
 StString StPlayList::dumpRecentList() const {
     StMutexAuto anAutoLock(myMutex);
     StArgumentsMap aMap;
-    for(size_t anIter = 0; anIter < myRecent.size(); ++anIter) {
-        const StHandle<StRecentItem>&   aRecent = myRecent[anIter];
-        const StHandle<StFileNode>&     aFile   = aRecent->File;
-        const StHandle<StStereoParams>& aParams = aRecent->Params;
-        if(!myPlsFile.isNull()
+    for (size_t anIter = 0; anIter < myRecent.size(); ++anIter) {
+        const std::shared_ptr<StRecentItem>&   aRecent = myRecent[anIter];
+        const std::shared_ptr<StFileNode>&     aFile   = aRecent->File;
+        const std::shared_ptr<StStereoParams>& aParams = aRecent->Params;
+        if (myPlsFile.get() != nullptr
          && aFile == myPlsFile->File
-         && myCurrent != NULL) {
+         && myCurrent != nullptr) {
             StArgument anArgFile(StString("file")  + anIter, aFile->getPath());
             StArgument anArgPos (StString("pos")   + anIter, myCurrent->getPath());
             aMap.add(anArgFile);
@@ -954,7 +954,7 @@ StString StPlayList::dumpRecentList() const {
             aMap.add(anArgLeft);
             aMap.add(anArgRight);
         }
-        if(!aParams.isNull()) {
+        if (aParams.get() != nullptr) {
             if(aParams->Timestamp > 360.0) {
                 std::stringstream aStream;
                 aStream.imbue(std::locale("C"));
@@ -979,27 +979,27 @@ void StPlayList::loadRecentList(const StString theString) {
         const StArgument anArgLeft  = aMap[StString("left")  + anIter];
         const StArgument anArgRight = aMap[StString("right") + anIter];
         const StArgument anArgTime  = aMap[StString("time")  + anIter];
-        StHandle<StRecentItem> aRecent;
+        std::shared_ptr<StRecentItem> aRecent;
         if(anArgLeft.isValid() && anArgRight.isValid()) {
-            StHandle<StFileNode> aFileNode = new StFileNode(StString());
-            aFileNode->add(new StFileNode(anArgLeft.getValue(),  aFileNode.access()));
-            aFileNode->add(new StFileNode(anArgRight.getValue(), aFileNode.access()));
+            std::shared_ptr<StFileNode> aFileNode = std::make_shared<StFileNode>(StString());
+            aFileNode->add(new StFileNode(anArgLeft.getValue(),  aFileNode.get()));
+            aFileNode->add(new StFileNode(anArgRight.getValue(), aFileNode.get()));
             aRecent = addRecentFile(*aFileNode, false);
         } else if(anArgFile.isValid()) {
-            StHandle<StFileNode> aFileNode = new StFileNode(anArgFile.getValue());
+            std::shared_ptr<StFileNode> aFileNode = std::make_shared<StFileNode>(anArgFile.getValue());
             const StArgument anArgPos = aMap[StString("pos") + anIter];
             if(anArgPos.isValid()) {
-                aFileNode->add(new StFileNode(anArgPos.getValue(), aFileNode.access()));
+                aFileNode->add(new StFileNode(anArgPos.getValue(), aFileNode.get()));
             }
             aRecent = addRecentFile(*aFileNode, false);
         }
-        if(aRecent.isNull()) {
+        if (aRecent.get() == nullptr) {
             continue;
         }
 
         if(anArgTime.isValid()) {
-            if(aRecent->Params.isNull()) {
-                aRecent->Params = new StStereoParams();
+            if (aRecent->Params.get() == nullptr) {
+                aRecent->Params = std::make_shared<StStereoParams>();
             }
             std::stringstream aStream;
             aStream.imbue(std::locale("C"));
@@ -1028,10 +1028,10 @@ void StPlayList::open(const StCString& thePath,
     // check if it is recently played playlist
     bool hasTarget = !theItem.isEmpty();
     StString aTarget = hasTarget ? theItem : thePath;
-    if(!hasTarget) {
-        for(size_t anIter = 0; anIter < myRecent.size(); ++anIter) {
-            const StHandle<StRecentItem>& aRecent = myRecent[anIter];
-            const StHandle<StFileNode>&   aFile   = aRecent->File;
+    if (!hasTarget) {
+        for (size_t anIter = 0; anIter < myRecent.size(); ++anIter) {
+            const std::shared_ptr<StRecentItem>& aRecent = myRecent[anIter];
+            const std::shared_ptr<StFileNode>&   aFile   = aRecent->File;
             if(aFile->size() != 1) {
                 continue;
             }
@@ -1064,33 +1064,33 @@ void StPlayList::open(const StCString& thePath,
         }
 
         // parse m3u playlist
-        if(anExt.isEqualsIgnoreCase(stCString("m3u"))
-        || anExt.isEqualsIgnoreCase(stCString("m3u8"))) {
-            StHandle<StRawFile> aRawFile = new StRawFile(thePath);
-            if(aRawFile->readFile()) {
+        if (anExt.isEqualsIgnoreCase(stCString("m3u"))
+         || anExt.isEqualsIgnoreCase(stCString("m3u8"))) {
+            std::shared_ptr<StRawFile> aRawFile = std::make_shared<StRawFile>(thePath);
+            if (aRawFile->readFile()) {
                 StFolder* aPlsFolder = new StFolder(aFolderPath, &myFoldersRoot);
                 myFoldersRoot.add(aPlsFolder);
 
                 StString aTitle;
-                for(char* anIter = skipBOM((char* )aRawFile->getBuffer()); anIter != NULL;) {
+                for (char* anIter = skipBOM((char* )aRawFile->getBuffer()); anIter != NULL;) {
                     anIter = parseM3UIter(anIter, aPlsFolder, aTitle);
                 }
-                aRawFile.nullify();
+                aRawFile.reset();
 
-                if(myFirst != nullptr
-                && myFirst->getNext() == nullptr) {
+                if (myFirst != nullptr
+                 && myFirst->getNext() == nullptr) {
                     const StString aFirstPath = myFirst->getPath();
                     StString anItemExt = StFileNode::getExtension(aFirstPath);
-                    if(anItemExt.isEqualsIgnoreCase(stCString("m3u"))
-                    || anItemExt.isEqualsIgnoreCase(stCString("m3u8"))) {
-                        aRawFile = new StRawFile(aFirstPath);
-                        if(aRawFile->readFile()) {
-                            for(char* anIter = skipBOM((char* )aRawFile->getBuffer()); anIter != NULL;) {
+                    if (anItemExt.isEqualsIgnoreCase(stCString("m3u"))
+                     || anItemExt.isEqualsIgnoreCase(stCString("m3u8"))) {
+                        aRawFile = std::make_shared<StRawFile>(aFirstPath);
+                        if (aRawFile->readFile()) {
+                            for (char* anIter = skipBOM((char* )aRawFile->getBuffer()); anIter != NULL;) {
                                 anIter = parseM3UIter(anIter, NULL, aTitle);
                             }
                             remove(aFirstPath, false);
                         }
-                        aRawFile.nullify();
+                        aRawFile.reset();
                     }
                 }
 
@@ -1138,12 +1138,12 @@ void StPlayList::open(const StCString& thePath,
     addToPlayList(aSubFolder);
 
     myCurrent = myFirst;
-    if(hasTarget || !aFileName.isEmpty()) {
+    if (hasTarget || !aFileName.isEmpty()) {
         // set current item
-        for(StPlayItem* anItem = myFirst; anItem != NULL; anItem = anItem->getNext()) {
-            if(anItem->getPath() == aTarget) {
+        for (StPlayItem* anItem = myFirst; anItem != NULL; anItem = anItem->getNext()) {
+            if (anItem->getPath() == aTarget) {
                 myCurrent = anItem;
-                if(myPlsFile.isNull()) {
+                if (myPlsFile.get() == nullptr) {
                     addRecentFile(*anItem->getFileNode()); // append to recent files list
                 }
                 break;

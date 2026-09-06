@@ -9,10 +9,6 @@
 
 #include "StImageFile.h"
 
-// define StHandle template specialization
-class StFreeImage;
-ST_DEFINE_HANDLE(StFreeImage, StImageFile);
-
 /**
  * This class implements image load/save operations using FreeImage library.
  */
@@ -30,7 +26,7 @@ class StFreeImage : public StImageFile {
     ST_CPPEXPORT StFreeImage();
     ST_CPPEXPORT virtual ~StFreeImage();
 
-    ST_LOCAL virtual StHandle<StImageFile> createEmpty() const ST_ATTR_OVERRIDE { return new StFreeImage(); }
+    ST_LOCAL virtual std::shared_ptr<StImageFile> createEmpty() const ST_ATTR_OVERRIDE { return std::make_shared<StFreeImage>(); }
 
     ST_CPPEXPORT virtual void close() ST_ATTR_OVERRIDE;
     ST_CPPEXPORT virtual bool loadExtra(const StString& theFilePath,
@@ -44,7 +40,7 @@ class StFreeImage : public StImageFile {
         private:
 
     typedef struct FIBITMAP FIBITMAP;
-    FIBITMAP* myDIB;
+    FIBITMAP* myDIB = nullptr;
 
 };
 

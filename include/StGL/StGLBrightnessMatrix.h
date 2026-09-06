@@ -23,7 +23,7 @@ class StGLBrightnessMatrix : public StGLMatrix {
     /**
      * Create an identity matrix (brightness 1.0).
      */
-    StGLBrightnessMatrix()
+    ST_LOCAL StGLBrightnessMatrix()
     : StGLMatrix(),
       myBrightness(1.0f) {
         //
@@ -32,7 +32,7 @@ class StGLBrightnessMatrix : public StGLMatrix {
     /**
      * Create the brightness matrix.
      */
-    StGLBrightnessMatrix(const GLfloat theBright)
+    ST_LOCAL StGLBrightnessMatrix(const GLfloat theBright)
     : StGLMatrix(),
       myBrightness(theBright) {
         setBrightness(theBright);
@@ -41,14 +41,14 @@ class StGLBrightnessMatrix : public StGLMatrix {
     /**
      * Returns true if brightness value is 1.0
      */
-    bool isIdentity() const {
+    ST_LOCAL bool isIdentity() const {
         return stAreEqual(myBrightness, 1.0f, 0.0001f);
     }
 
     /**
      * Get the brightness value used on matrix creation.
      */
-    GLfloat getBrightness() const {
+    ST_LOCAL GLfloat getBrightness() const {
         return myBrightness;
     }
 
@@ -57,7 +57,7 @@ class StGLBrightnessMatrix : public StGLMatrix {
      * 1.0 - identity matrix;
      * 0.0 - black matrix;
      */
-    void setBrightness(const GLfloat theBright) {
+    ST_LOCAL void setBrightness(const GLfloat theBright) {
         myBrightness = (theBright > 0.0f) ? theBright : 0.0f;
         initIdentity();
         changeValue(0, 0) = changeValue(1, 1) = changeValue(2, 2) = theBright;

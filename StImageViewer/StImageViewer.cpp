@@ -128,12 +128,12 @@ void StImageViewer::updateStrings() {
     myLangMap->params.language->setName(tr(MENU_HELP_LANGS));
 }
 
-StImageViewer::StImageViewer(const StHandle<StResourceManager>& theResMgr,
+StImageViewer::StImageViewer(const std::shared_ptr<StResourceManager>& theResMgr,
                              const StNativeWin_t                theParentWin,
-                             const StHandle<StOpenInfo>&        theOpenInfo,
+                             const std::shared_ptr<StOpenInfo>& theOpenInfo,
                              const StString&                    theAppName)
 : StApplication(theResMgr, theParentWin, theOpenInfo),
-  myPlayList(new StPlayList(1, false)),
+  myPlayList(std::make_shared<StPlayList>(1, false)),
   myAppName(!theAppName.isEmpty() ? theAppName : ST_DRAWER_PLUGIN_NAME),
   myEventLoaded(false),
   //
@@ -143,9 +143,9 @@ StImageViewer::StImageViewer(const StHandle<StResourceManager>& theResMgr,
   myToSaveSrcFormat(false),
   myEscNoQuit(false),
   myToCheckPoorOrient(true) {
-    mySettings = new StSettings(myResMgr, myAppName);
-    myLangMap  = new StTranslations(myResMgr, StImageViewer::ST_DRAWER_PLUGIN_NAME);
-    myOpenDialog = new StImageOpenDialog(this);
+    mySettings = std::make_shared<StSettings>(myResMgr, myAppName);
+    myLangMap  = std::make_shared<StTranslations>(myResMgr, StImageViewer::ST_DRAWER_PLUGIN_NAME);
+    myOpenDialog = std::make_shared<StImageOpenDialog>(this);
     StImageViewerStrings::loadDefaults(*myLangMap);
     myLangMap->params.language->signals.onChanged += stSlot(this, &StImageViewer::doChangeLanguage);
 
@@ -245,16 +245,16 @@ StImageViewer::StImageViewer(const StHandle<StResourceManager>& theResMgr,
     params.IsShuffle->signals.onChanged.connect(this, &StImageViewer::doSwitchShuffle);
 
 #if defined(__ANDROID__)
-    addRenderer(new StOutInterlace  (myResMgr, theParentWin));
-    addRenderer(new StOutAnaglyph   (myResMgr, theParentWin));
-    addRenderer(new StOutDistorted  (myResMgr, theParentWin));
+    addRenderer(std::make_shared<StOutInterlace>  (myResMgr, theParentWin));
+    addRenderer(std::make_shared<StOutAnaglyph>   (myResMgr, theParentWin));
+    addRenderer(std::make_shared<StOutDistorted>  (myResMgr, theParentWin));
 #else
-    addRenderer(new StOutAnaglyph   (myResMgr, theParentWin));
-    addRenderer(new StOutDual       (myResMgr, theParentWin));
-    addRenderer(new StOutIZ3D       (myResMgr, theParentWin));
-    addRenderer(new StOutInterlace  (myResMgr, theParentWin));
-    addRenderer(new StOutDistorted  (myResMgr, theParentWin));
-    addRenderer(new StOutPageFlipExt(myResMgr, theParentWin));
+    addRenderer(std::make_shared<StOutAnaglyph>   (myResMgr, theParentWin));
+    addRenderer(std::make_shared<StOutDual>       (myResMgr, theParentWin));
+    addRenderer(std::make_shared<StOutIZ3D>       (myResMgr, theParentWin));
+    addRenderer(std::make_shared<StOutInterlace>  (myResMgr, theParentWin));
+    addRenderer(std::make_shared<StOutDistorted>  (myResMgr, theParentWin));
+    addRenderer(std::make_shared<StOutPageFlipExt>(myResMgr, theParentWin));
 #endif
 
     // no need in Depth buffer
@@ -264,8 +264,8 @@ StImageViewer::StImageViewer(const StHandle<StResourceManager>& theResMgr,
         StWinAttr_GlStencilSize, (StWinAttr )0,
         StWinAttr_NULL
     };
-    for(size_t aRendIter = 0; aRendIter < myRenderers.size(); ++aRendIter) {
-        StHandle<StWindow>& aRend = myRenderers[aRendIter];
+    for (size_t aRendIter = 0; aRendIter < myRenderers.size(); ++aRendIter) {
+        std::shared_ptr<StWindow>& aRend = myRenderers[aRendIter];
         aRend->setAttributes(anAttribs);
     }
 
@@ -404,8 +404,8 @@ StImageViewer::StImageViewer(const StHandle<StResourceManager>& theResMgr,
 }
 
 bool StImageViewer::resetDevice() {
-    if(myGUI.isNull()
-    || myLoader.isNull()) {
+    if (myGUI.get() == nullptr
+     || myLoader.get() == nullptr) {
         return init();
     }
 
@@ -414,12 +414,12 @@ bool StImageViewer::resetDevice() {
 
     releaseDevice();
     myWindow->close();
-    myWindow.nullify();
+    myWindow.reset();
     return open();
 }
 
 void StImageViewer::saveGuiParams() {
-    if(myGUI.isNull()) {
+    if (myGUI.get() == nullptr) {
         return;
     }
 
@@ -440,7 +440,7 @@ void StImageViewer::saveGuiParams() {
 
 void StImageViewer::saveAllParams() {
     saveGuiParams();
-    if(!myGUI.isNull()) {
+    if (myGUI.get() != nullptr) {
         mySettings->saveParam (params.ExitOnEscape);
         mySettings->saveParam (params.ScaleAdjust);
         mySettings->saveParam (params.ScaleHiDPI2X);
@@ -476,9 +476,9 @@ void StImageViewer::saveAllParams() {
     }
 
     StString aLastL, aLastR;
-    StHandle<StFileNode> aFile = myPlayList->getCurrentFile();
-    if((params.ToSaveRecent->getValue() || params.ToOpenLast->getValue())
-    && !aFile.isNull()) {
+    std::shared_ptr<StFileNode> aFile = myPlayList->getCurrentFile();
+    if ((params.ToSaveRecent->getValue() || params.ToOpenLast->getValue())
+     && aFile.get() != nullptr) {
         if(aFile->isEmpty()) {
             aLastL = aFile->getPath();
         } else if(aFile->size() == 2) {
@@ -488,10 +488,10 @@ void StImageViewer::saveAllParams() {
     }
 
     // skip temporary URLs
-    if(StFileNode::isContentProtocolPath(aLastL)) {
+    if (StFileNode::isContentProtocolPath(aLastL)) {
         aLastL.clear();
         aLastR.clear();
-    } else if(StFileNode::isContentProtocolPath(aLastR)) {
+    } else if (StFileNode::isContentProtocolPath(aLastR)) {
         aLastR.clear();
     }
 
@@ -505,28 +505,28 @@ void StImageViewer::releaseDevice() {
 
     // release GUI data and GL resources before closing the window
     myKeyActions.clear();
-    myGUI.nullify();
-    myContext.nullify();
+    myGUI.reset();
+    myContext.reset();
 }
 
 StImageViewer::~StImageViewer() {
-    myUpdates.nullify();
+    myUpdates.reset();
     releaseDevice();
     // wait image loading thread to quit and release resources
-    myLoader.nullify();
+    myLoader.reset();
 }
 
 bool StImageViewer::createGui() {
-    if(!myGUI.isNull()) {
+    if (myGUI.get() != nullptr) {
         saveGuiParams();
-        myGUI.nullify();
+        myGUI.reset();
         myKeyActions.clear();
     }
 
     // create the GUI with default values
     params.ScaleHiDPI->setValue(myWindow->getScaleFactor());
-    myGUI = new StImageViewerGUI(this, myWindow.access(), myLangMap.access(), myPlayList,
-                                 myLoader.isNull() ? NULL : myLoader->getTextureQueue());
+    myGUI = std::make_shared<StImageViewerGUI>(this, myWindow.get(), myLangMap.get(), myPlayList,
+                                               myLoader.get() == nullptr ? nullptr : myLoader->getTextureQueue());
     myGUI->setContext(myContext);
     StGLDeviceCaps aDevCaps = myContext->getDeviceCaps();
     // better slow-down GPU memory copy but avoid extra memory usage
@@ -570,7 +570,7 @@ bool StImageViewer::createGui() {
     if(!myGUI->myImage->stglInit()) {
         myMsgQueue->pushError(stCString("Image Viewer - critical error:\nFrame region initialization failed!"));
         myMsgQueue->popAll();
-        myGUI.nullify();
+        myGUI.reset();
         return false;
     }
     myGUI->stglInit();
@@ -598,9 +598,8 @@ void StImageViewer::doChangeLanguage(const int32_t theNewLang) {
 }
 
 bool StImageViewer::init() {
-    const bool isReset = !myLoader.isNull();
-    if(!myContext.isNull()
-    && !myGUI.isNull()) {
+    const bool isReset = myLoader.get() != nullptr;
+    if (myContext.get() != nullptr && myGUI.get() != nullptr) {
         return true;
     }
 
@@ -625,7 +624,7 @@ bool StImageViewer::init() {
     if(!createGui()) {
         myMsgQueue->pushError(stCString("Image Viewer - critical error:\nFrame region initialization failed!"));
         myMsgQueue->popAll();
-        myGUI.nullify();
+        myGUI.reset();
         return false;
     }
 
@@ -641,8 +640,8 @@ bool StImageViewer::init() {
     StString anImgLibStr;
     mySettings->loadString(ST_SETTING_IMAGELIB, anImgLibStr);
     params.imageLib = StImageFile::imgLibFromString(anImgLibStr);
-    myLoader = new StImageLoader(params.imageLib, myResMgr, myMsgQueue, myLangMap, myPlayList,
-                                 myGUI->myImage->getTextureQueue(), myContext->getMaxTextureSize());
+    myLoader = std::make_shared<StImageLoader>(params.imageLib, myResMgr, myMsgQueue, myLangMap, myPlayList,
+                                               myGUI->myImage->getTextureQueue(), myContext->getMaxTextureSize());
     myLoader->signals.onLoaded.connect(this, &StImageViewer::doLoaded);
     myLoader->setCompressMemory(myWindow->isMobile());
     myLoader->setSwapJPS(params.ToSwapJPS->getValue());
@@ -663,7 +662,7 @@ bool StImageViewer::init() {
     const int aNbDays = StCheckUpdates::getNbDaysFromInterval((StCheckUpdates::UpdateInteval )params.CheckUpdatesDays->getValue());
     if(aNbDays > 0
     && std::abs(aCurrentDayInYear - params.LastUpdateDay->getValue()) > aNbDays) {
-        myUpdates = new StCheckUpdates();
+        myUpdates = std::make_shared<StCheckUpdates>();
         myUpdates->init();
         params.LastUpdateDay->setValue(aCurrentDayInYear);
         mySettings->saveParam(params.LastUpdateDay);
@@ -759,7 +758,7 @@ void StImageViewer::parseArguments(const StArgumentsMap& theArguments) {
 }
 
 bool StImageViewer::open() {
-    const bool isReset = !mySwitchTo.isNull();
+    const bool isReset = mySwitchTo.get() != nullptr;
     if(!StApplication::open()
     || !init()) {
         myMsgQueue->popAll();
@@ -844,7 +843,7 @@ void StImageViewer::doPause(const StPauseEvent& theEvent) {
 }
 
 void StImageViewer::doResize(const StSizeEvent& ) {
-    if(myGUI.isNull()) {
+    if (myGUI.get() == nullptr) {
         return;
     }
 
@@ -865,7 +864,7 @@ void StImageViewer::doResize(const StSizeEvent& ) {
 }
 
 void StImageViewer::doImageAdjustReset(const size_t ) {
-    if(myGUI.isNull()) {
+    if (myGUI.get() == nullptr) {
         return;
     }
 
@@ -875,27 +874,27 @@ void StImageViewer::doImageAdjustReset(const size_t ) {
 }
 
 void StImageViewer::doSaveImageInfoBegin(const size_t ) {
-    if(!myFileInfo.isNull()) {
+    if (myFileInfo.get() != nullptr) {
         return; // already opened
     }
 
-    StHandle<StFileNode>     aFileNode;
-    StHandle<StStereoParams> aParams;
+    std::shared_ptr<StFileNode>     aFileNode;
+    std::shared_ptr<StStereoParams> aParams;
     if(!getCurrentFile(aFileNode, aParams, myFileInfo)
-    ||  myFileInfo.isNull()) {
+    ||  myFileInfo.get() == nullptr) {
         myMsgQueue->pushInfo(myLangMap->getValue(StImageViewerStrings::DIALOG_FILE_NOINFO));
-        myFileInfo.nullify();
+        myFileInfo.reset();
         return;
     } else if(!myFileInfo->IsSavable) {
         myMsgQueue->pushInfo(myLangMap->getValue(StImageViewerStrings::DIALOG_SAVE_INFO_UNSUPPORTED));
-        myFileInfo.nullify();
+        myFileInfo.reset();
         return;
     }
 
     const StString aText = myLangMap->getValue(StImageViewerStrings::DIALOG_SAVE_INFO_QUESTION)
                          + "\n" + myFileInfo->Path;
 
-    StInfoDialog* aDialog = new StInfoDialog(this, myGUI.access(), myLangMap->getValue(StImageViewerStrings::DIALOG_SAVE_INFO_TITLE),
+    StInfoDialog* aDialog = new StInfoDialog(this, myGUI.get(), myLangMap->getValue(StImageViewerStrings::DIALOG_SAVE_INFO_TITLE),
                                              myGUI->scale(512), myGUI->scale(256));
     aDialog->setText(aText);
 
@@ -915,14 +914,14 @@ void StImageViewer::doSaveImageInfoBegin(const size_t ) {
 }
 
 void StImageViewer::doDeleteFileBegin(const size_t ) {
-    //if(!myFileToDelete.isNull()) {
+    //if (myFileToDelete.get() != nullptr) {
     //    return;
     //}
 
     myFileToDelete = myPlayList->getCurrentFile();
-    if(myFileToDelete.isNull()
-    || myFileToDelete->size() != 0) {
-        myFileToDelete.nullify();
+    if (myFileToDelete.get() == nullptr
+     || myFileToDelete->size() != 0) {
+        myFileToDelete.reset();
         return;
     }
 
@@ -931,7 +930,7 @@ void StImageViewer::doDeleteFileBegin(const size_t ) {
                          + (isReadOnly ? "\nWARNING! The file is READ ONLY!" : "")
                          + "\n" + myFileToDelete->getPath();
 
-    StGLMessageBox* aDialog = new StGLMessageBox(myGUI.access(), myLangMap->getValue(StImageViewerStrings::DIALOG_DELETE_FILE_TITLE),
+    StGLMessageBox* aDialog = new StGLMessageBox(myGUI.get(), myLangMap->getValue(StImageViewerStrings::DIALOG_DELETE_FILE_TITLE),
                                                  aText, myGUI->scale(512), myGUI->scale(256));
     aDialog->addButton(myLangMap->getValue(StImageViewerStrings::BUTTON_DELETE), true)->signals.onBtnClick += stSlot(this, &StImageViewer::doDeleteFileEnd);
     aDialog->addButton(myLangMap->getValue(StImageViewerStrings::BUTTON_CANCEL), false);
@@ -939,8 +938,8 @@ void StImageViewer::doDeleteFileBegin(const size_t ) {
 }
 
 void StImageViewer::doDeleteFileEnd(const size_t ) {
-    if(myFileToDelete.isNull()
-    || myLoader.isNull()) {
+    if (myFileToDelete.get() == nullptr
+     || myLoader.get() == nullptr) {
         return;
     }
 
@@ -950,11 +949,11 @@ void StImageViewer::doDeleteFileEnd(const size_t ) {
         doUpdateStateLoading();
         myLoader->doLoadNext();
     }
-    myFileToDelete.nullify();
+    myFileToDelete.reset();
 }
 
 void StImageViewer::doKeyDown(const StKeyEvent& theEvent) {
-    if(myGUI.isNull()) {
+    if (myGUI.get() == nullptr) {
         return;
     }
 
@@ -1016,7 +1015,7 @@ void StImageViewer::doKeyDown(const StKeyEvent& theEvent) {
 }
 
 void StImageViewer::doKeyHold(const StKeyEvent& theEvent) {
-    if(myGUI.isNull()) {
+    if (myGUI.get() == nullptr) {
         return;
     }
 
@@ -1028,7 +1027,7 @@ void StImageViewer::doKeyHold(const StKeyEvent& theEvent) {
 }
 
 void StImageViewer::doKeyUp(const StKeyEvent& theEvent) {
-    if(myGUI.isNull()) {
+    if (myGUI.get() == nullptr) {
         return;
     }
 
@@ -1039,7 +1038,7 @@ void StImageViewer::doKeyUp(const StKeyEvent& theEvent) {
 }
 
 void StImageViewer::doMouseDown(const StClickEvent& theEvent) {
-    if(myGUI.isNull()) {
+    if (myGUI.get() == nullptr) {
         return;
     }
 
@@ -1047,7 +1046,7 @@ void StImageViewer::doMouseDown(const StClickEvent& theEvent) {
 }
 
 void StImageViewer::doMouseUp(const StClickEvent& theEvent) {
-    if(myGUI.isNull()) {
+    if (myGUI.get() == nullptr) {
         return;
     }
 
@@ -1058,19 +1057,19 @@ void StImageViewer::doMouseUp(const StClickEvent& theEvent) {
 }
 
 void StImageViewer::doTouch(const StTouchEvent& theEvent) {
-    if(!myGUI.isNull()) {
+    if (myGUI.get() != nullptr) {
         myGUI->doTouch(theEvent);
     }
 }
 
 void StImageViewer::doGesture(const StGestureEvent& theEvent) {
-    if(!myGUI.isNull()) {
+    if (myGUI.get() != nullptr) {
         myGUI->doGesture(theEvent);
     }
 }
 
 void StImageViewer::doScroll(const StScrollEvent& theEvent) {
-    if(myGUI.isNull()) {
+    if (myGUI.get() == nullptr) {
         return;
     }
 
@@ -1091,7 +1090,7 @@ void StImageViewer::doFileDrop(const StDNDropEvent& theEvent) {
     if(!myPlayList->checkExtension(aFile1)
      && myLoader->getMimeListVideo().checkExtension(StFileNode::getExtension(aFile1))) {
         // redirect to StMoviePlayer
-        myOpenFileOtherApp = new StOpenInfo();
+        myOpenFileOtherApp = std::make_shared<StOpenInfo>();
         StArgumentsMap anArgs;
         anArgs.add(StArgument("in", "video"));
         myOpenFileOtherApp->setArgumentsMap(anArgs);
@@ -1136,7 +1135,7 @@ void StImageViewer::doNavigate(const StNavigEvent& theEvent) {
 }
 
 void StImageViewer::beforeDraw() {
-    if(myGUI.isNull()) {
+    if (myGUI.get() == nullptr) {
         return;
     }
 
@@ -1149,7 +1148,7 @@ void StImageViewer::beforeDraw() {
             if(!myPlayList->checkExtension(myOpenDialog->getPathLeft())
              && myLoader->getMimeListVideo().checkExtension(StFileNode::getExtension(myOpenDialog->getPathLeft()))) {
                 // redirect to StMoviePlayer
-                myOpenFileOtherApp = new StOpenInfo();
+                myOpenFileOtherApp = std::make_shared<StOpenInfo>();
                 StArgumentsMap anArgs;
                 anArgs.add(StArgument("in", "video"));
                 myOpenFileOtherApp->setArgumentsMap(anArgs);
@@ -1188,7 +1187,7 @@ void StImageViewer::beforeDraw() {
         doUpdateStateLoaded();
     }
 
-    if(myToCheckUpdates && !myUpdates.isNull() && myUpdates->isInitialized()) {
+    if(myToCheckUpdates && myUpdates.get() != nullptr && myUpdates->isInitialized()) {
         if(myUpdates->isNeedUpdate()) {
             myGUI->showUpdatesNotify();
         }
@@ -1205,7 +1204,7 @@ void StImageViewer::beforeDraw() {
 }
 
 void StImageViewer::stglDraw(unsigned int theView) {
-    const bool hasCtx = !myContext.isNull() && myContext->isBound();
+    const bool hasCtx = myContext.get() != nullptr && myContext->isBound();
     if(!hasCtx || myWindow->isPaused()) {
         if(theView == ST_DRAW_LEFT
         || theView == ST_DRAW_MONO) {
@@ -1231,7 +1230,7 @@ void StImageViewer::stglDraw(unsigned int theView) {
         myContext->core20fwd->glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
     }
 
-    if(myGUI.isNull()) {
+    if (myGUI.get() == nullptr) {
         return;
     }
 
@@ -1247,9 +1246,9 @@ void StImageViewer::stglDraw(unsigned int theView) {
 
         // check for mono state
         bool hasStereoSource = false;
-        StHandle<StStereoParams> aParams = myGUI->myImage->getSource();
-        if(!aParams.isNull()) {
-            hasStereoSource =!aParams->isMono()
+        std::shared_ptr<StStereoParams> aParams = myGUI->myImage->getSource();
+        if (aParams.get() != nullptr) {
+            hasStereoSource = !aParams->isMono()
                            && myGUI->myImage->hasVideoStream()
                            && myGUI->myImage->params.DisplayMode->getValue() == StGLImageRegion::MODE_STEREO;
         }
@@ -1261,7 +1260,7 @@ void StImageViewer::stglDraw(unsigned int theView) {
 }
 
 void StImageViewer::doScaleGui(const int32_t ) {
-    if(myGUI.isNull()) {
+    if (myGUI.get() == nullptr) {
         return;
     }
     myToRecreateMenu = true;
@@ -1272,7 +1271,7 @@ void StImageViewer::doChangeMobileUI(const bool ) {
 }
 
 void StImageViewer::doHideSystemBars(const bool ) {
-    if(myWindow.isNull()) {
+    if (myWindow.get() == nullptr) {
         return;
     }
 
@@ -1280,14 +1279,14 @@ void StImageViewer::doHideSystemBars(const bool ) {
 }
 
 void StImageViewer::doScaleHiDPI(const bool ) {
-    if(myGUI.isNull()) {
+    if (myGUI.get() == nullptr) {
         return;
     }
     myToRecreateMenu = true;
 }
 
 void StImageViewer::doSwitchSrcFormat(const int32_t theSrcFormat) {
-    if(myLoader.isNull()) {
+    if (myLoader.get() == nullptr) {
         return;
     }
 
@@ -1299,7 +1298,7 @@ void StImageViewer::doSwitchSrcFormat(const int32_t theSrcFormat) {
 }
 
 void StImageViewer::doSwitchViewMode(const int32_t theMode) {
-    if(myLoader.isNull()) {
+    if (myLoader.get() == nullptr) {
         return;
     }
 
@@ -1320,14 +1319,14 @@ void StImageViewer::doSwitchViewMode(const int32_t theMode) {
 }
 
 void StImageViewer::doSetStereoOutput(const size_t theMode) {
-    if(myLoader.isNull()) {
+    if (myLoader.get() == nullptr) {
         return;
     }
     myGUI->myImage->params.DisplayMode->setValue((int32_t )theMode);
 }
 
 void StImageViewer::doTheaterOnOff(const size_t ) {
-    if(myLoader.isNull()) {
+    if (myLoader.get() == nullptr) {
         return;
     }
 
@@ -1338,14 +1337,14 @@ void StImageViewer::doTheaterOnOff(const size_t ) {
 }
 
 void StImageViewer::doPanoramaOnOff(const size_t ) {
-    if(myLoader.isNull()) {
+    if (myLoader.get() == nullptr) {
         return;
     }
 
-    StHandle<StStereoParams> aParams = myGUI->myImage->getSource();
-    if(aParams.isNull()
-    || aParams->Src1SizeX == 0
-    || aParams->Src1SizeY == 0) {
+    std::shared_ptr<StStereoParams> aParams = myGUI->myImage->getSource();
+    if (aParams.get() == nullptr
+     || aParams->Src1SizeX == 0
+     || aParams->Src1SizeY == 0) {
         return;
     }
 
@@ -1378,11 +1377,10 @@ void StImageViewer::doPanoramaOnOff(const size_t ) {
 }
 
 void StImageViewer::doChangeSwapJPS(const bool ) {
-    if(!myLoader.isNull()) {
+    if (myLoader.get() != nullptr) {
         myLoader->setSwapJPS(params.ToSwapJPS->getValue());
-        StHandle<StStereoParams> aParams = myGUI->myImage->getSource();
-        if(!aParams.isNull()
-        && !myPlayList->isEmpty()) {
+        std::shared_ptr<StStereoParams> aParams = myGUI->myImage->getSource();
+        if (aParams.get() != nullptr && !myPlayList->isEmpty()) {
             StString aCurrFile = myPlayList->getCurrentTitle();
             aCurrFile.toLowerCase();
             if(aCurrFile.isEndsWith(stCString(".jps"))
@@ -1394,7 +1392,7 @@ void StImageViewer::doChangeSwapJPS(const bool ) {
 }
 
 void StImageViewer::doChangeStickPano360(const bool ) {
-    if(myLoader.isNull()) {
+    if (myLoader.get() == nullptr) {
         return;
     }
 
@@ -1403,8 +1401,8 @@ void StImageViewer::doChangeStickPano360(const bool ) {
         return;
     }
 
-    StHandle<StStereoParams> aParams = myGUI->myImage->getSource();
-    if(!aParams.isNull()
+    std::shared_ptr<StStereoParams> aParams = myGUI->myImage->getSource();
+    if (aParams.get() != nullptr
     &&  myGUI->myImage->params.ViewMode->getValue() == StViewSurface_Plain
     && !myPlayList->isEmpty()) {
         myLoader->doLoadNext();
@@ -1412,7 +1410,7 @@ void StImageViewer::doChangeStickPano360(const bool ) {
 }
 
 void StImageViewer::doChangeFlipCubeZ(const bool ) {
-    if(myLoader.isNull()) {
+    if (myLoader.get() == nullptr) {
         return;
     }
 
@@ -1425,7 +1423,7 @@ void StImageViewer::doOpen1FileFromGui(StHandle<StString> thePath) {
 }
 
 void StImageViewer::doOpen1FileAction(const size_t ) {
-    if(!myGUI.isNull() && (myWindow->isFullScreen() || myGUI->isMobile())) {
+    if (myGUI.get() != nullptr && (myWindow->isFullScreen() || myGUI->isMobile())) {
         myGUI->doOpenFile(0);
         return;
     }
@@ -1456,18 +1454,18 @@ void StImageViewer::doUpdateStateLoaded() {
 }
 
 void StImageViewer::doAboutImage(const size_t ) {
-    if(!myGUI.isNull()) {
+    if (myGUI.get() != nullptr) {
         myGUI->doAboutImage(0);
     }
 }
 
 void StImageViewer::doSaveImageInfo(const size_t theToSave) {
-    if(!myGUI.isNull()
-    && !myFileInfo.isNull()
-    &&  theToSave == 1) {
+    if (myGUI.get() != nullptr
+     && myFileInfo.get() != nullptr
+     && theToSave == 1) {
         myLoader->doSaveInfo(myFileInfo);
     }
-    myFileInfo.nullify();
+    myFileInfo.reset();
 }
 
 void StImageViewer::doListFirst(const size_t ) {
@@ -1492,11 +1490,11 @@ void StImageViewer::doListNext(const size_t ) {
 }
 
 void StImageViewer::doShowHideGUI(const size_t ) {
-    const bool toShow = !params.ToShowMenu->getValue() || (!myGUI.isNull() && !myGUI->isVisibleGUI());
+    const bool toShow = !params.ToShowMenu->getValue() || (myGUI.get() != nullptr && !myGUI->isVisibleGUI());
     params.ToShowMenu->setValue(toShow);
     params.ToShowTopbar->setValue(toShow);
     params.ToShowBottom->setValue(toShow);
-    if(toShow && !myGUI.isNull()) {
+    if(toShow && myGUI.get() != nullptr) {
         myGUI->setVisibility(myWindow->getMousePos(), false, true);
     }
 }
@@ -1531,7 +1529,7 @@ void StImageViewer::doSwitchVSync(const bool theValue) {
 }
 
 void StImageViewer::doFullscreen(const bool theIsFullscreen) {
-    if(!myWindow.isNull()) {
+    if (myWindow.get() != nullptr) {
         myWindow->setAttribute(StWinAttr_ExclusiveFullScreen, params.IsExclusiveFullScreen->getValue());
         myWindow->setFullScreen(theIsFullscreen);
     }
@@ -1542,8 +1540,8 @@ void StImageViewer::doLoaded() {
 }
 
 void StImageViewer::doShowPlayList(const bool theToShow) {
-    if(myGUI.isNull()
-    || myGUI->myPlayList == NULL) {
+    if (myGUI.get() == nullptr
+     || myGUI->myPlayList == nullptr) {
         return;
     }
 
@@ -1551,8 +1549,8 @@ void StImageViewer::doShowPlayList(const bool theToShow) {
 }
 
 void StImageViewer::doShowAdjustImage(const bool theToShow) {
-    if(myGUI.isNull()
-    || myGUI->myAdjustOverlay == NULL) {
+    if (myGUI.get() == nullptr
+     || myGUI->myAdjustOverlay == nullptr) {
         return;
     }
 
@@ -1560,7 +1558,7 @@ void StImageViewer::doShowAdjustImage(const bool theToShow) {
 }
 
 void StImageViewer::doFileNext() {
-    if(myLoader.isNull()) {
+    if (myLoader.get() == nullptr) {
         return;
     }
 
@@ -1568,10 +1566,10 @@ void StImageViewer::doFileNext() {
     doUpdateStateLoading();
 }
 
-bool StImageViewer::getCurrentFile(StHandle<StFileNode>&     theFileNode,
-                                   StHandle<StStereoParams>& theParams,
-                                   StHandle<StImageInfo>&    theInfo) {
-    theInfo.nullify();
+bool StImageViewer::getCurrentFile(std::shared_ptr<StFileNode>&     theFileNode,
+                                   std::shared_ptr<StStereoParams>& theParams,
+                                   std::shared_ptr<StImageInfo>&    theInfo) {
+    theInfo.reset();
     if(!myPlayList->getCurrentFile(theFileNode, theParams)) {
         return false;
     }

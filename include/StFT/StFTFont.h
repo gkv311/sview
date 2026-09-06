@@ -13,6 +13,8 @@
 #include <StTemplates/StVec2.h>
 #include <StTemplates/StRect.h>
 
+#include <memory>
+
 /**
  * Structure holds the paths to font family files.
  */
@@ -25,12 +27,12 @@ struct StFTFontFamily {
     StString BoldItalic;
 
     // face index within font container
-    int RegularFace;
-    int BoldFace;
-    int ItalicFace;
-    int BoldItalicFace;
+    int RegularFace = 0;
+    int BoldFace = 0;
+    int ItalicFace = 0;
+    int BoldItalicFace = 0;
 
-    ST_LOCAL StFTFontFamily() : RegularFace (0), BoldFace (0), ItalicFace (0), BoldItalicFace (0) {}
+    ST_LOCAL StFTFontFamily() {}
 };
 
 struct StFTFontPack {
@@ -162,7 +164,7 @@ class StFTFont {
     /**
      * Create uninitialized instance.
      */
-    ST_CPPEXPORT StFTFont(StHandle<StFTLibrary> theFTLib = NULL);
+    ST_CPPEXPORT StFTFont(const std::shared_ptr<StFTLibrary>& theFTLib = std::shared_ptr<StFTLibrary>());
 
     /**
      * Destructor.
@@ -172,21 +174,21 @@ class StFTFont {
     /**
      * @return true if font is loaded.
      */
-    inline bool isValid() const {
-        return myFTFace != NULL;
+    ST_LOCAL bool isValid() const {
+        return myFTFace != nullptr;
     }
 
     /**
      * @return image plane for currently rendered glyph.
      */
-    inline const StImagePlane& getGlyphImage() const {
+    ST_LOCAL const StImagePlane& getGlyphImage() const {
         return myGlyphImg;
     }
 
     /**
      * Compute glyph rectangle.
      */
-    inline void getGlyphRect(StRect<float>& theRect) const {
+    ST_LOCAL void getGlyphRect(StRect<float>& theRect) const {
         const FT_Bitmap& aBitmap = myFTFace->glyph->bitmap;
         theRect.left()   = float(myFTFace->glyph->bitmap_left);
         theRect.top()    = float(myFTFace->glyph->bitmap_top);
@@ -268,14 +270,14 @@ class StFTFont {
     /**
      * @return vertical distance from the horizontal baseline to the highest character coordinate.
      */
-    inline float getAscender() const {
+    ST_LOCAL float getAscender() const {
         return float(myFTFace->ascender) * (float(myFTFace->size->metrics.y_ppem) / float(myFTFace->units_per_EM));
     }
 
     /**
      * @return default line spacing (the baseline-to-baseline distance).
      */
-    inline float getLineSpacing() const {
+    ST_LOCAL float getLineSpacing() const {
         return float(myFTFace->height) * (float(myFTFace->size->metrics.y_ppem) / float(myFTFace->units_per_EM));
     }
 
@@ -424,19 +426,22 @@ class StFTFont {
 
         protected:
 
-    StHandle<StFTLibrary> myFTLib;               //!< handle to the FT library object
-    FT_Face               myFTFace;              //!< active FT face object
-    StFTFont::Style       myStyle;               //!< active FT face style
-    FT_Face               myFTFaces[StylesNB];   //!< FT face objects
-    StString              myFontPaths[StylesNB]; //!< font paths
-    int                   myFontFaces[StylesNB]; //!< font face ids
-    bool                  mySubsets[SubsetsNB];
-    FT_Int32              myLoadFlags;           //!< default load flags
-    unsigned int          myGlyphMaxWidth;       //!< maximum glyph width
-    unsigned int          myGlyphMaxHeight;      //!< maximum glyph height
+    std::shared_ptr<StFTLibrary> myFTLib; //!< handle to the FT library object
 
-    StImagePlane          myGlyphImg;            //!< cached glyph plane
-    stUtf32_t             myUChar;               //!< currently loaded unicode character
+    FT_Face         myFTFace = nullptr;      //!< active FT face object
+    StFTFont::Style myStyle = Style_Regular; //!< active FT face style
+
+    FT_Face   myFTFaces[StylesNB] {};   //!< FT face objects
+    StString  myFontPaths[StylesNB];    //!< font paths
+    int       myFontFaces[StylesNB] {}; //!< font face ids
+    bool      mySubsets[SubsetsNB] {};
+    FT_Int32  myLoadFlags = 0;          //!< default load flags
+
+    unsigned int myGlyphMaxWidth = 1;  //!< maximum glyph width
+    unsigned int myGlyphMaxHeight = 1; //!< maximum glyph height
+
+    StImagePlane myGlyphImg;  //!< cached glyph plane
+    stUtf32_t    myUChar = 0; //!< currently loaded unicode character
 
 };
 

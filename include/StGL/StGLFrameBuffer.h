@@ -8,7 +8,8 @@
 #define __StGLFrameBuffer_h_
 
 #include <StGL/StGLTexture.h>
-#include <StTemplates/StHandle.h>
+
+#include <memory>
 
 /**
  * Simple class represents Virtual (texture) stereo Frame buffer object.
@@ -18,8 +19,8 @@ class StGLFrameBuffer : public StGLResource {
 
         public:
 
-    static const GLuint NO_FRAMEBUFFER  = 0;
-    static const GLuint NO_RENDERBUFFER = 0;
+    static constexpr GLuint NO_FRAMEBUFFER  = 0;
+    static constexpr GLuint NO_RENDERBUFFER = 0;
 
     /**
      * Empty constructor.
@@ -39,9 +40,9 @@ class StGLFrameBuffer : public StGLResource {
     /**
      * Returns true if FBO was initialized.
      */
-    inline bool isValid() const {
+    ST_LOCAL bool isValid() const {
         return isValidFrameBuffer()
-            && !myTextureColor.isNull()
+            && myTextureColor.get() != nullptr
             && myTextureColor->isValid();
     }
 
@@ -57,9 +58,9 @@ class StGLFrameBuffer : public StGLResource {
     /**
      * Initialize the FBO with specified color texture.
      */
-    ST_CPPEXPORT bool init(StGLContext&  theCtx,
-                           const StHandle<StGLTexture>& theColorTexture,
-                           const bool    theNeedDepthBuffer);
+    ST_CPPEXPORT bool init(StGLContext& theCtx,
+                           const std::shared_ptr<StGLTexture>& theColorTexture,
+                           const bool theNeedDepthBuffer);
 
     /**
      * (Re)initialize the FBO with specified dimensions.
@@ -79,42 +80,42 @@ class StGLFrameBuffer : public StGLResource {
     /**
      * @return texture width.
      */
-    inline GLsizei getSizeX() const {
+    ST_LOCAL GLsizei getSizeX() const {
         return myTextureColor->getSizeX();
     }
 
     /**
      * @return texture height.
      */
-    inline GLsizei getSizeY() const {
+    ST_LOCAL GLsizei getSizeY() const {
         return myTextureColor->getSizeY();
     }
 
     /**
      * FBO viewport width.
      */
-    inline GLsizei getVPSizeX() const {
+    ST_LOCAL GLsizei getVPSizeX() const {
         return myViewPortX;
     }
 
     /**
      * FBO viewport height.
      */
-    inline GLsizei getVPSizeY() const {
+    ST_LOCAL GLsizei getVPSizeY() const {
         return myViewPortY;
     }
 
     /**
      * Set new FBO viewport width. Should be <= texture width.
      */
-    inline void setVPSizeX(const GLsizei theSizeX) {
+    ST_LOCAL void setVPSizeX(const GLsizei theSizeX) {
         myViewPortX = theSizeX;
     }
 
     /**
      * Set new FBO viewport height. Should be <= texture height.
      */
-    inline void setVPSizeY(const GLsizei theSizeY) {
+    ST_LOCAL void setVPSizeY(const GLsizei theSizeY) {
         myViewPortY = theSizeY;
     }
 
@@ -131,7 +132,7 @@ class StGLFrameBuffer : public StGLResource {
     /**
      * Unbind frame buffer.
      */
-    inline void unbindBuffer(StGLContext& theCtx) {
+    ST_LOCAL void unbindBuffer(StGLContext& theCtx) {
         unbindBufferGlobal(theCtx);
     }
 
@@ -143,22 +144,22 @@ class StGLFrameBuffer : public StGLResource {
     /**
      * Return color texture.
      */
-    ST_LOCAL const StHandle<StGLTexture>& getTextureColor() const {
+    ST_LOCAL const std::shared_ptr<StGLTexture>& getTextureColor() const {
         return myTextureColor;
     }
 
     /**
      * Bind color texture (to render the texture).
      */
-    inline void bindTexture(StGLContext& theCtx,
-                            const GLenum theTextureUnit = GL_TEXTURE0) {
+    ST_LOCAL void bindTexture(StGLContext& theCtx,
+                              const GLenum theTextureUnit = GL_TEXTURE0) {
         myTextureColor->bind(theCtx, theTextureUnit);
     }
 
     /**
      * Unbind color texture.
      */
-    inline void unbindTexture(StGLContext& theCtx) {
+    ST_LOCAL void unbindTexture(StGLContext& theCtx) {
         myTextureColor->unbind(theCtx);
     }
 
@@ -172,8 +173,8 @@ class StGLFrameBuffer : public StGLResource {
     /**
      * Detach texture from this FBO without destruction.
      */
-    ST_CPPEXPORT void detachColorTexture(StGLContext&                 theCtx,
-                                         const StHandle<StGLTexture>& theTextureColor);
+    ST_CPPEXPORT void detachColorTexture(StGLContext& theCtx,
+                                         const std::shared_ptr<StGLTexture>& theTextureColor);
 
     /**
      * Clear texture using glClear call.
@@ -183,33 +184,34 @@ class StGLFrameBuffer : public StGLResource {
     /**
      * Create temporary FBO and clear specified texture using glClear call.
      */
-    ST_CPPEXPORT static void clearTexture(StGLContext&                 theCtx,
-                                          const StHandle<StGLTexture>& theTexture);
+    ST_CPPEXPORT static void clearTexture(StGLContext& theCtx,
+                                          const std::shared_ptr<StGLTexture>& theTexture);
 
         private:
 
     /**
      * Validate FrameBuffer id.
      */
-    inline bool isValidFrameBuffer() const {
+    ST_LOCAL bool isValidFrameBuffer() const {
         return myGLFBufferId != NO_FRAMEBUFFER;
     }
 
     /**
      * Validate RenderBuffer id.
      */
-    inline bool isValidDepthBuffer() const {
+    ST_LOCAL bool isValidDepthBuffer() const {
         return myGLDepthRBId != NO_RENDERBUFFER;
     }
 
         private:
 
-    StHandle<StGLTexture> myTextureColor;
+    std::shared_ptr<StGLTexture> myTextureColor;
 
-    GLuint  myGLFBufferId; //!< FrameBuffer  object ID
-    GLuint  myGLDepthRBId; //!< RenderBuffer object for depth ID
-    GLsizei myViewPortX;   //!< FBO viewport width  <= texture width
-    GLsizei myViewPortY;   //!< FBO viewport height <= texture height
+    GLuint  myGLFBufferId = NO_FRAMEBUFFER;  //!< FrameBuffer  object ID
+    GLuint  myGLDepthRBId = NO_RENDERBUFFER; //!< RenderBuffer object for depth ID
+
+    GLsizei myViewPortX = 0; //!< FBO viewport width  <= texture width
+    GLsizei myViewPortY = 0; //!< FBO viewport height <= texture height
 
 };
 

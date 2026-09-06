@@ -9,8 +9,8 @@
 #include <StGLWidgets/StGLMessageBox.h>
 #include <StGLWidgets/StGLRootWidget.h>
 
-StGLMsgStack::StGLMsgStack(StGLWidget*                 theParent,
-                           const StHandle<StMsgQueue>& theMsgQueue)
+StGLMsgStack::StGLMsgStack(StGLWidget* theParent,
+                           const std::shared_ptr<StMsgQueue>& theMsgQueue)
 : StGLContainer(theParent, 0, 0),
   myMsgQueue(theMsgQueue) {
     changeRectPx().bottom() = 1;

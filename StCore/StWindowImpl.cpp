@@ -39,8 +39,8 @@ namespace {
 // shared counter for fullscreen windows to detect inactive state
 StAtomic<int32_t> StWindowImpl::myFullScreenWinNb(0);
 
-StWindowImpl::StWindowImpl(const StHandle<StResourceManager>& theResMgr,
-                           const StNativeWin_t                theParentWindow)
+StWindowImpl::StWindowImpl(const std::shared_ptr<StResourceManager>& theResMgr,
+                           const StNativeWin_t theParentWindow)
 : myResMgr(theResMgr),
   myParentWin(theParentWindow),
   myWindowTitle(WINDOW_TITLE_DEFAULT),
@@ -255,7 +255,7 @@ void StWindowImpl::close() {
     hide(ST_WIN_SLAVE);
 
     // close GL contexts
-    myGlContext.nullify();
+    myGlContext.reset();
     mySlave.close();
     myMaster.close();
 #ifdef _WIN32
@@ -271,7 +271,7 @@ void StWindowImpl::close() {
             break;
         }
     }
-    myMsgThread.nullify();
+    myMsgThread.reset();
 #elif defined(__ANDROID__)
     if(myParentWin != NULL) {
         myParentWin->signals.onInputEvent -= stSlot(this, &StWindowImpl::onAndroidInput);
@@ -1060,15 +1060,15 @@ StPointD_t StWindowImpl::getMousePos() {
 bool StWindowImpl::stglMakeCurrent(const int winNum){
     switch(winNum) {
           case ST_WIN_MASTER: {
-            if(myMaster.glMakeCurrent()) {
-                if(!myGlContext.isNull()) {
+            if (myMaster.glMakeCurrent()) {
+                if (myGlContext.get() != nullptr) {
                     myGlContext->stglResetErrors();
                 }
                 return true;
             }
             return false;
         } case ST_WIN_SLAVE: {
-            if(myTiledCfg == TiledCfg_Separate) {
+            if (myTiledCfg == TiledCfg_Separate) {
                 return mySlave.glMakeCurrent();
             } else {
                 return myMaster.glMakeCurrent();

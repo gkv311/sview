@@ -26,11 +26,11 @@ class StAVVideoMuxer {
         protected:
 
     struct StRemuxContext {
-        AVFormatContext*          Context;
-        bool                      State;
+        AVFormatContext*          Context = nullptr;
+        bool                      State = true;
         std::vector<unsigned int> Streams;
 
-        StRemuxContext() : Context(NULL), State(true) {}
+        StRemuxContext() {}
     };
 
         public:
@@ -94,7 +94,7 @@ class StAVVideoMuxer {
         private:
 
     std::vector<AVFormatContext*> myCtxListSrc;
-    StFormat                      myStereoFormat;
+    StFormat                      myStereoFormat = StFormat_Mono;
 
 };
 

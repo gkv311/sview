@@ -46,10 +46,10 @@ StAVFrameCounter::~StAVFrameCounter() {
     av_frame_free(&myFrame);
 }
 
-void StAVFrameCounter::createReference(StHandle<StBufferCounter>& theOther) const {
-    StHandle<StAVFrameCounter> anAvRef = StHandle<StAVFrameCounter>::downcast(theOther);
-    if(anAvRef.isNull()) {
-        anAvRef = new StAVFrameCounter();
+void StAVFrameCounter::createReference(std::shared_ptr<StBufferCounter>& theOther) const {
+    std::shared_ptr<StAVFrameCounter> anAvRef = std::dynamic_pointer_cast<StAVFrameCounter>(theOther);
+    if (anAvRef.get() == nullptr) {
+        anAvRef = std::make_shared<StAVFrameCounter>();
         theOther = anAvRef;
     }
 

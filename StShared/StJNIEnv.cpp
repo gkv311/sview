@@ -14,11 +14,8 @@
 #endif
 
 StJNIEnv::StJNIEnv(JavaVM* theJavaVM)
-: myJavaVM(theJavaVM),
-  myJniEnv(NULL),
-  myThreadId(0),
-  myToDetach(false) {
-    if(myJavaVM == NULL) {
+: myJavaVM(theJavaVM) {
+    if (myJavaVM == nullptr) {
         return;
     }
 
@@ -57,10 +54,10 @@ StJNIEnv::~StJNIEnv() {
 }
 
 void StJNIEnv::detach() {
-    if(myJavaVM != NULL
-    && myJniEnv != NULL
-    && myToDetach) {
-        if(myThreadId != StThread::getCurrentThreadId()) {
+    if (myJavaVM != nullptr
+     && myJniEnv != nullptr
+     && myToDetach) {
+        if (myThreadId != StThread::getCurrentThreadId()) {
             ST_ERROR_LOG("Internal error, StJNIEnv::detach() - attempt to detach from another thread");
         }
     #if defined(__ANDROID__)
@@ -68,6 +65,6 @@ void StJNIEnv::detach() {
     #endif
     }
 
-    myJniEnv   = NULL;
+    myJniEnv   = nullptr;
     myToDetach = false;
 }

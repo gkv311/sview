@@ -9,7 +9,8 @@
 
 #include <StFile/StNode.h>
 #include <StFile/StMIMEList.h>
-#include <StTemplates/StHandle.h>
+
+#include <memory>
 
 /**
  * Structure defining Open File dialog content.
@@ -87,7 +88,7 @@ class StFileNode : public StNode {
      * but without back-referencies to top elementes in the tree (parent path).
      * @return new handle to detached file node copy.
      */
-    ST_CPPEXPORT virtual StHandle<StFileNode> detach() const;
+    ST_CPPEXPORT virtual std::shared_ptr<StFileNode> detach() const;
 
     /**
      * Returns MIME information assigned to this file node.

@@ -142,7 +142,7 @@ class StGLTextureButton::ButtonPrograms : public StGLProgramMatrix<1, 2, StGLTex
     /**
      * Access program.
      */
-    StHandle<StGLTextureButton::Program>& getProgram(const StGLTextureButton::ProgramIndex theIndex) { return myPrograms[theIndex]; }
+    std::shared_ptr<StGLTextureButton::Program>& getProgram(const StGLTextureButton::ProgramIndex theIndex) { return myPrograms[theIndex]; }
 
     /**
      * Main constructor.
@@ -155,7 +155,7 @@ class StGLTextureButton::ButtonPrograms : public StGLProgramMatrix<1, 2, StGLTex
             "    return texture2D(uTexture, theTexCoord);\n"
             "}\n\n");
 
-        const char VERT_SHADER[] =
+        constexpr char VERT_SHADER[] =
            "uniform mat4  uProjMat;\n"
            "uniform vec4  uDisp;\n"
            "uniform float uTime;\n"
@@ -177,7 +177,7 @@ class StGLTextureButton::ButtonPrograms : public StGLProgramMatrix<1, 2, StGLTex
            "    gl_Position = uProjMat * v;\n"
            "}\n";
 
-        const char FRAG_SHADER[] =
+        constexpr char FRAG_SHADER[] =
            "uniform vec3 uParams;\n"
            "varying vec2 fTexCoord;\n"
            "vec4 getColor(in vec2 theTexCoord);\n"
@@ -208,10 +208,10 @@ class StGLTextureButton::ButtonPrograms : public StGLProgramMatrix<1, 2, StGLTex
     ST_LOCAL virtual void release(StGLContext& theCtx) ST_ATTR_OVERRIDE {
         StGLProgramMatrix<1, 2, StGLTextureButton::Program>::release(theCtx);
         for(int aProgIter = 0; aProgIter < StGLTextureButton::ProgramIndex_NB; ++aProgIter) {
-            StHandle<StGLTextureButton::Program>& aProgram = myPrograms[aProgIter];
-            if(!aProgram.isNull()) {
+            std::shared_ptr<StGLTextureButton::Program>& aProgram = myPrograms[aProgIter];
+            if (aProgram.get() != nullptr) {
                 aProgram->release(theCtx);
-                aProgram.nullify();
+                aProgram.reset();
             }
         }
     }
@@ -241,7 +241,7 @@ class StGLTextureButton::ButtonPrograms : public StGLProgramMatrix<1, 2, StGLTex
             return false;
         }
         myPrograms[StGLTextureButton::ProgramIndex_WaveRGB] = myActiveProgram;
-        myActiveProgram.nullify();
+        myActiveProgram.reset();
 
         setFragmentShaderPart(theCtx, FragSection_GetColor, FragGetColor_Alpha);
         if(!initProgram(theCtx)) {
@@ -254,7 +254,7 @@ class StGLTextureButton::ButtonPrograms : public StGLProgramMatrix<1, 2, StGLTex
 
         private:
 
-    StHandle<StGLTextureButton::Program> myPrograms[StGLTextureButton::ProgramIndex_NB];
+    std::shared_ptr<StGLTextureButton::Program> myPrograms[StGLTextureButton::ProgramIndex_NB];
 
 };
 
@@ -281,7 +281,7 @@ StGLTextureButton::StGLTextureButton(StGLWidget*      theParent,
   myAnim(Anim_Wave),
   myToDrawShadow(false) {
     if(theFacesCount != 0) {
-        myTextures = new StGLTextureArray(theFacesCount);
+        myTextures = std::make_shared<StGLTextureArray>(theFacesCount);
     }
     StGLWidget::signals.onMouseUnclick = stSlot(this, &StGLTextureButton::doMouseUnclick);
 }
@@ -290,9 +290,9 @@ StGLTextureButton::~StGLTextureButton() {
     StGLContext& aCtx = getContext();
     myVertBuf.release(aCtx);
     myTCrdBuf.release(aCtx);
-    if(!myTextures.isNull()) {
+    if (myTextures.get() != nullptr) {
         for(size_t anIter = 0; anIter < myTextures->size(); ++anIter) {
-            myTextures->changeValue(anIter).release(aCtx);
+            myTextures->at(anIter).release(aCtx);
         }
     }
 }
@@ -303,9 +303,9 @@ void StGLTextureButton::setAction(const StHandle<StAction>& theAction) {
 
 void StGLTextureButton::setTexturePath(const StString* theTexturesPaths,
                                        const size_t    theCount) {
-    if(myTextures.isNull()) {
-        if(theCount != 0) {
-            myTextures = new StGLTextureArray(theCount);
+    if (myTextures.get() == nullptr) {
+        if (theCount != 0) {
+            myTextures = std::make_shared<StGLTextureArray>(theCount);
         } else {
         #ifdef ST_DEBUG
             ST_DEBUG_LOG_AT("WARNING, Attempt to set an empty list of textures to StGLTextureButton!");
@@ -315,23 +315,23 @@ void StGLTextureButton::setTexturePath(const StString* theTexturesPaths,
     }
     const size_t aNbTextures = (theCount > myTextures->size()) ? myTextures->size() : theCount;
 #ifdef ST_DEBUG
-    if(theCount != myTextures->size()) {
+    if (theCount != myTextures->size()) {
         ST_DEBUG_LOG_AT("WARNING, Not enough textures paths for StGLTextureButton!");
     }
 #endif
-    for(size_t aTexIter = 0; aTexIter < aNbTextures; ++aTexIter) {
-        myTextures->changeValue(aTexIter).setName(theTexturesPaths[aTexIter]);
+    for (size_t aTexIter = 0; aTexIter < aNbTextures; ++aTexIter) {
+        myTextures->at(aTexIter).setName(theTexturesPaths[aTexIter]);
     }
 }
 
 void StGLTextureButton::setFaceId(const size_t theId) {
-    if(myFaceId == theId
-    || theId >= myTextures->size()) {
+    if (myFaceId == theId
+     || theId >= myTextures->size()) {
         return;
     }
 
     myFaceId = theId;
-    const StGLNamedTexture& aTexture = myTextures->getValue(myFaceId);
+    const StGLNamedTexture& aTexture = myTextures->at(myFaceId);
     myProgramIndex = StGLTexture::isAlphaFormat(aTexture.getTextureFormat())
                    ? StGLTextureButton::ProgramIndex_WaveAlpha
                    : StGLTextureButton::ProgramIndex_WaveRGB;
@@ -357,12 +357,12 @@ void StGLTextureButton::stglResize() {
     myVertBuf.init(aCtx, aVertices);
 
     // update projection matrix
-    if(myProgram.isNull()) {
+    if (myProgram.isNull()) {
         return;
     }
 
-    StHandle<StGLTextureButton::Program>& aProgram = myProgram->getProgram(myProgramIndex);
-    if(aProgram.isNull()) {
+    std::shared_ptr<StGLTextureButton::Program>& aProgram = myProgram->getProgram(myProgramIndex);
+    if (aProgram.get() == nullptr) {
         return;
     }
 
@@ -372,25 +372,25 @@ void StGLTextureButton::stglResize() {
 }
 
 bool StGLTextureButton::stglInit() {
-    if(myTextures.isNull()) {
+    if (myTextures.get() == nullptr) {
         return false;
     }
 
     StGLContext& aCtx = getContext();
-    const StHandle<StResourceManager>& aResMgr = getRoot()->getResourceManager();
-    for(size_t aFaceIter = 0; aFaceIter < myTextures->size(); ++aFaceIter) {
-        StGLNamedTexture& aTexture = myTextures->changeValue(aFaceIter);
-        if(aTexture.isValid()) {
+    const std::shared_ptr<StResourceManager>& aResMgr = getRoot()->getResourceManager();
+    for (size_t aFaceIter = 0; aFaceIter < myTextures->size(); ++aFaceIter) {
+        StGLNamedTexture& aTexture = myTextures->at(aFaceIter);
+        if (aTexture.isValid()) {
             continue;
         }
 
-        if(aTexture.getName().isEmpty()) {
+        if (aTexture.getName().isEmpty()) {
             ST_DEBUG_LOG("StGLTextureButton, texture for face " + aFaceIter + " not set");
             continue;
         }
 
-        StHandle<StResource> aRes = aResMgr->getResource(aTexture.getName());
-        if(aRes.isNull()) {
+        std::shared_ptr<StResource> aRes = aResMgr->getResource(aTexture.getName());
+        if (aRes.get() == nullptr) {
             ST_DEBUG_LOG("StGLTextureButton, texture '" + aTexture.getName() + "' not found");
             continue;
         }
@@ -419,7 +419,7 @@ bool StGLTextureButton::stglInit() {
         aTexture.init(aCtx, anImage.getPlane());
     }
 
-    const StGLNamedTexture& aTexture = myTextures->getValue(myFaceId);
+    const StGLNamedTexture& aTexture = myTextures->at(myFaceId);
     if(aTexture.isValid()) {
         changeRectPx().right()  = getRectPx().left() + aTexture.getSizeX() + myMargins.left + myMargins.right;
         changeRectPx().bottom() = getRectPx().top()  + aTexture.getSizeY() + myMargins.top  + myMargins.bottom;
@@ -497,12 +497,11 @@ void StGLTextureButton::stglDraw(unsigned int ) {
         return;
     }
 
-    StHandle<StGLTextureButton::Program>& aProgram = myProgram->getProgram(myProgramIndex);
-    StGLNamedTexture& aTexture = myTextures->changeValue(myFaceId);
+    std::shared_ptr<StGLTextureButton::Program>& aProgram = myProgram->getProgram(myProgramIndex);
+    StGLNamedTexture& aTexture = myTextures->at(myFaceId);
     const bool hasShadow = myToDrawShadow
                         && myProgramIndex == ProgramIndex_WaveAlpha;
-    if( aProgram.isNull()
-    || !aTexture.isValid()) {
+    if (aProgram.get() == nullptr || !aTexture.isValid()) {
         return;
     }
 
@@ -584,7 +583,7 @@ StGLIcon::StGLIcon(StGLWidget*      theParent,
 
 StGLIcon::~StGLIcon() {
     if(myIsExternalTexture) {
-        myTextures.nullify();
+        myTextures.reset();
     }
 }
 

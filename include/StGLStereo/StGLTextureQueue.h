@@ -90,12 +90,12 @@ class StGLTextureQueue {
      * @param theSrcPTS       PTS (presentation timestamp)
      * @return true on success
      */
-    ST_CPPEXPORT bool push(const StImage&     theSrcDataLeft,
-                           const StImage&     theSrcDataRight,
-                           const StHandle<StStereoParams>& theStParams,
-                           const StFormat     theSrcFormat,
-                           const StCubemap    theSrcCubemap,
-                           const double       theSrcPTS);
+    ST_CPPEXPORT bool push(const StImage& theSrcDataLeft,
+                           const StImage& theSrcDataRight,
+                           const std::shared_ptr<StStereoParams>& theStParams,
+                           const StFormat theSrcFormat,
+                           const StCubemap theSrcCubemap,
+                           const double theSrcPTS);
 
     /**
      * Retrieve queue statistics.
@@ -256,36 +256,37 @@ class StGLTextureQueue {
         private:
 
     StMutex          myMutexPop;
-    StGLTextureData* myDataFront;      //!< queue pointer
-    StGLTextureData* myDataSnap;       //!< snapshot pointer
+    StGLTextureData* myDataFront = nullptr; //!< queue pointer
+    StGLTextureData* myDataSnap = nullptr;  //!< snapshot pointer
     StMutex          myMutexPush;
-    StGLTextureData* myDataBack;       //!< queue pointer
+    StGLTextureData* myDataBack = nullptr;  //!< queue pointer
 
     mutable StMutex  myMutexSize;
-    size_t           myQueueSize;
-    size_t           myQueueSizeMax;
+    size_t           myQueueSize = 0;
+    size_t           myQueueSizeMax = 0;
 
     StGLQuadTexture  myQTexture;       //!< quad stereo texture
 
     StMutex          mySwapFBMutex;
-    size_t           mySwapFBCount;
+    size_t           mySwapFBCount = 0;
 
     StMutex          myMeterMutex;
     StFPSMeter       myFPSMeter;
 
     StMutex          myMutexSrcFormat;
-    int              myCurrSrcFormat;  //!< current source format
+    int              myCurrSrcFormat = StFormat_Mono; //!< current source format
 
-    double           myCurrPts;
+    double           myCurrPts = 0.0;
 
     StCondition      myNewShotEvent;
-    bool             myIsInUpdTexture; //!< private bools for plugin thread
-    bool             myIsReadyToSwap;
-    bool             myToCompress;     //!< release unused memory as fast as possible
-    volatile bool    myHasStream;      //!< flag indicates that some stream connected to this queue
+    bool             myIsInUpdTexture = false; //!< private bools for plugin thread
+    bool             myIsReadyToSwap = false;
+    bool             myToCompress = false;     //!< release unused memory as fast as possible
+    volatile bool    myHasStream = false;      //!< flag indicates that some stream connected to this queue
 
-    StGLDeviceCaps   myDeviceCaps;     //!< device capabilities
-    StHandle<StGLTextureUploadParams> myUploadParams; //!< texture streaming parameters
+    StGLDeviceCaps   myDeviceCaps; //!< device capabilities
+
+    std::shared_ptr<StGLTextureUploadParams> myUploadParams; //!< texture streaming parameters
 
 };
 

@@ -16,16 +16,11 @@ StGLFrameTexture::StGLFrameTexture()
 #else
 : StGLTexture(GL_RGB8),
 #endif
-  myDataSize(1.0f, 1.0f),
-  myDisplayRatio(1.0f),
-  myPAR(1.0f),
-  myPanorama(StPanorama_OFF) {
+  myDataSize(1.0f, 1.0f) {
     //
 }
 
-StGLFrameTextures::StGLFrameTextures()
-: myParams(),
-  myImgCM(StImage::ImgColor_RGB) {
+StGLFrameTextures::StGLFrameTextures() {
     //
 }
 
@@ -129,8 +124,7 @@ void StGLQuadTexture::setMinMagFilter(StGLContext& theCtx,
     myTextures[BACK_TEXTURE  + RIGHT_TEXTURE].setMinMagFilter(theCtx, theMinFilter, theMagFilter);
 }
 
-StGLQuadTexture::StGLQuadTexture()
-: myActive(true) {
+StGLQuadTexture::StGLQuadTexture() {
     //
 }
 

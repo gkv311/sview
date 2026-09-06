@@ -25,16 +25,15 @@ class StGLSharePointer {
      * Empty constructor
      */
     StGLSharePointer()
-    : myPointer(NULL),
-      myCounter(0) {
+    : myCounter(0) {
         //
     }
 
         public:
 
-    void*                 myPointer;
-    StAtomic<ptrdiff_t>   myCounter;
-    StHandle<StGLContext> myCtx;
+    void* myPointer = nullptr;
+    StAtomic<ptrdiff_t> myCounter;
+    std::shared_ptr<StGLContext> myCtx;
 
 };
 
@@ -64,29 +63,29 @@ class StGLShare {
      * Destructor
      */
     ~StGLShare() {
-        if(myEntity->myCounter.decrement() == 0) {
+        if (myEntity->myCounter.decrement() == 0) {
             Type* aPtr = (Type* )myEntity->myPointer;
-            if(aPtr != NULL) {
-                if(!myEntity->myCtx.isNull()) {
+            if (aPtr != nullptr) {
+                if (myEntity->myCtx.get() != nullptr) {
                     aPtr->release(*myEntity->myCtx);
                 }
                 delete aPtr;
             }
-            myEntity->myPointer = NULL;
-            myEntity->myCtx.nullify();
+            myEntity->myPointer = nullptr;
+            myEntity->myCtx.reset();
         }
     }
 
     /**
      * Create (assign) new instance
      */
-    void create(const StHandle<StGLContext>& theCtx,
-                Type*                        theValue) {
+    void create(const std::shared_ptr<StGLContext>& theCtx,
+                Type* theValue) {
         myEntity->myPointer = theValue;
         myEntity->myCtx     = theCtx;
     }
 
-    void setContext(const StHandle<StGLContext>& theCtx) {
+    void setContext(const std::shared_ptr<StGLContext>& theCtx) {
         myEntity->myCtx = theCtx;
     }
 
@@ -95,7 +94,7 @@ class StGLShare {
      */
     bool isNull() const
     {
-        return myEntity->myPointer == NULL;
+        return myEntity->myPointer == nullptr;
     }
 
     /**
@@ -128,7 +127,7 @@ class StGLShare {
 
         private:
 
-    StGLSharePointer*     myEntity;
+    StGLSharePointer* myEntity = nullptr;
 
 };
 

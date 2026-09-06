@@ -11,6 +11,8 @@
 #include <StGLWidgets/StGLWidget.h>
 #include <StStrings/StMsgQueue.h>
 
+#include <memory>
+
 /**
  * Widget intended to display text messages.
  */
@@ -18,8 +20,8 @@ class ST_LOCAL StGLMsgStack : public StGLContainer {
 
         public:
 
-    ST_CPPEXPORT StGLMsgStack(StGLWidget*                 theParent,
-                              const StHandle<StMsgQueue>& theMsgQueue);
+    ST_CPPEXPORT StGLMsgStack(StGLWidget* theParent,
+                              const std::shared_ptr<StMsgQueue>& theMsgQueue);
     ST_CPPEXPORT virtual ~StGLMsgStack();
     ST_CPPEXPORT virtual void stglResize() ST_ATTR_OVERRIDE;
     ST_CPPEXPORT virtual void stglUpdate(const StPointD_t& thePointZo,
@@ -27,8 +29,9 @@ class ST_LOCAL StGLMsgStack : public StGLContainer {
 
         private:
 
-    StHandle<StMsgQueue> myMsgQueue; //!< messages queue
-    StMsg                myMsgTmp;   //!< temporary message object
+    std::shared_ptr<StMsgQueue> myMsgQueue; //!< messages queue
+
+    StMsg myMsgTmp; //!< temporary message object
 
 };
 

@@ -400,28 +400,16 @@ static GLenum getDataType(GLint theInternalFormat) {
 }
 
 StGLTexture::StGLTexture()
-: mySizeX(0),
-  mySizeY(0),
-  myTarget(GL_TEXTURE_2D),
-  myTextFormat(GL_RGBA8),
-  myTextureId(NO_TEXTURE),
-  myTextureUnit(GL_TEXTURE0),
-  myFilterMin(GL_LINEAR),
-  myFilterMag(GL_LINEAR),
-  myHasMipMaps(0) {
+: StGLTexture(GL_RGBA8) {
     //
 }
 
 StGLTexture::StGLTexture(const GLint theTextureFormat)
-: mySizeX(0),
-  mySizeY(0),
-  myTarget(GL_TEXTURE_2D),
+: myTarget(GL_TEXTURE_2D),
   myTextFormat(theTextureFormat),
-  myTextureId(NO_TEXTURE),
   myTextureUnit(GL_TEXTURE0),
   myFilterMin(GL_LINEAR),
-  myFilterMag(GL_LINEAR),
-  myHasMipMaps(0) {
+  myFilterMag(GL_LINEAR) {
     //
 }
 

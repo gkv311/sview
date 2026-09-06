@@ -35,13 +35,13 @@ StImageOpenDialog::~StImageOpenDialog() {
 
 bool StImageOpenDialog::openDialog(const size_t theNbFiles) {
     StMutexAuto aLock(myMutex);
-    if(myState != StImageOpenDialog::Dialog_Inactive) {
+    if (myState != StImageOpenDialog::Dialog_Inactive) {
         return false;
     }
 
-    if(myPlugin->params.lastFolder.isEmpty()) {
-        StHandle<StFileNode> aCurrFile = myPlugin->myPlayList->getCurrentFile();
-        if(!aCurrFile.isNull()) {
+    if (myPlugin->params.lastFolder.isEmpty()) {
+        std::shared_ptr<StFileNode> aCurrFile = myPlugin->myPlayList->getCurrentFile();
+        if (aCurrFile.get() != nullptr) {
             myPlugin->params.lastFolder = aCurrFile->isEmpty() ? aCurrFile->getFolderPath() : aCurrFile->getValue(0)->getFolderPath();
         }
     }

@@ -15,13 +15,6 @@ struct AVFormatContext;
 struct AVCodecContext;
 struct AVCodec;
 
-// define StHandle template specialization
-class StAVImage;
-ST_DEFINE_HANDLE(StAVImage, StImageFile);
-
-class StAVFrameCounter;
-ST_DEFINE_HANDLE(StAVFrameCounter, StBufferCounter);
-
 /**
  * This class implements image load/save operation using libav* libraries.
  */
@@ -62,7 +55,7 @@ class StAVImage : public StImageFile {
     /**
      * Create new instance.
      */
-    virtual StHandle<StImageFile> createEmpty() const ST_ATTR_OVERRIDE { return new StAVImage(); }
+    virtual std::shared_ptr<StImageFile> createEmpty() const ST_ATTR_OVERRIDE { return std::make_shared<StAVImage>(); }
 
     /**
      * Close currently opened image context and release memory.
@@ -95,9 +88,9 @@ class StAVImage : public StImageFile {
 
         private:
 
-    AVFormatContext* myFormatCtx; //!< file context
-    AVCodecContext*  myCodecCtx;  //!< codec context
-    const AVCodec*   myCodec;     //!< codec
+    AVFormatContext* myFormatCtx = nullptr; //!< file context
+    AVCodecContext*  myCodecCtx = nullptr;  //!< codec context
+    const AVCodec*   myCodec = nullptr;     //!< codec
     StAVFrame        myFrame;
 
 };
@@ -119,17 +112,17 @@ class StAVFrameCounter : public StBufferCounter {
      * If theOther has the same type, than the ref counter will be reused.
      * Otherwise then new counter will be allocated.
      */
-    ST_CPPEXPORT virtual void createReference(StHandle<StBufferCounter>& theOther) const;
+    ST_CPPEXPORT virtual void createReference(std::shared_ptr<StBufferCounter>& theOther) const override;
 
     /**
      * Release current reference.
      */
-    ST_CPPEXPORT virtual void releaseReference();
+    ST_CPPEXPORT virtual void releaseReference() override;
 
     /**
      * Release reference counter.
      */
-    ST_CPPEXPORT virtual ~StAVFrameCounter();
+    ST_CPPEXPORT virtual ~StAVFrameCounter() override;
 
     /**
      * Initialize a proxy reference.
@@ -138,8 +131,8 @@ class StAVFrameCounter : public StBufferCounter {
 
         private:
 
-    AVFrame* myFrame;   //!< frame
-    bool     myIsProxy; //!< proxy reference to be moved, not copied
+    AVFrame* myFrame = nullptr; //!< frame
+    bool     myIsProxy = false; //!< proxy reference to be moved, not copied
 
 };
 

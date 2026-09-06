@@ -23,7 +23,7 @@ class StGLSaturationMatrix : public StGLMatrix {
     /**
      * Create an identity matrix (saturation 1.0).
      */
-    StGLSaturationMatrix()
+    ST_LOCAL StGLSaturationMatrix()
     : StGLMatrix(),
       mySaturation(1.0f) {
         //
@@ -32,7 +32,7 @@ class StGLSaturationMatrix : public StGLMatrix {
     /**
      * Create saturation matrix.
      */
-    StGLSaturationMatrix(const GLfloat theSatur)
+    ST_LOCAL StGLSaturationMatrix(const GLfloat theSatur)
     : StGLMatrix(),
       mySaturation(theSatur) {
         setSaturation(theSatur);
@@ -41,14 +41,14 @@ class StGLSaturationMatrix : public StGLMatrix {
     /**
      * Returns true if saturation value is 1.0
      */
-    bool isIdentity() const {
+    ST_LOCAL bool isIdentity() const {
         return stAreEqual(mySaturation, 1.0f, 0.0001f);
     }
 
     /**
      * Get the saturation value used on matrix creation.
      */
-    GLfloat getSaturation() const {
+    ST_LOCAL GLfloat getSaturation() const {
         return mySaturation;
     }
 
@@ -59,7 +59,7 @@ class StGLSaturationMatrix : public StGLMatrix {
      *  0.0..1.0 - interpolated;
      * -1.0 - complement the colors (special usage).
      */
-    void setSaturation(const GLfloat theSatur) {
+    ST_LOCAL void setSaturation(const GLfloat theSatur) {
         static const StGLVec3 LUMEN_VEC(0.3086f, 0.6094f, 0.0820f);
 
         mySaturation = theSatur;

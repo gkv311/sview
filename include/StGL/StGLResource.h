@@ -40,8 +40,8 @@ class ST_LOCAL StGLAutoRelease {
     /**
      * Main constructor
      */
-    inline StGLAutoRelease(StGLContext&  theCtx,
-                           StGLResource& theEntity)
+    ST_LOCAL StGLAutoRelease(StGLContext&  theCtx,
+                             StGLResource& theEntity)
     : myCtx(theCtx),
       myEntity(theEntity) {
         //
@@ -50,7 +50,7 @@ class ST_LOCAL StGLAutoRelease {
     /**
      * Destructor
      */
-    inline ~StGLAutoRelease() {
+    ST_LOCAL ~StGLAutoRelease() {
         myEntity.release(myCtx);
     }
 

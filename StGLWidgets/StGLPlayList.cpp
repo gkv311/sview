@@ -15,8 +15,8 @@
 #include <StGL/StGLContext.h>
 #include <StGLCore/StGLCore20.h>
 
-StGLPlayList::StGLPlayList(StGLWidget*                 theParent,
-                           const StHandle<StPlayList>& theList)
+StGLPlayList::StGLPlayList(StGLWidget* theParent,
+                           const std::shared_ptr<StPlayList>& theList)
 : StGLWidget(theParent, -theParent->getRoot()->scale(32), 0),
   myMenu(NULL),
   myBarColor(getRoot()->getColorForElement(StGLRootWidget::Color_ScrollBar)),

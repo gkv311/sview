@@ -77,18 +77,18 @@ class StGLStereoFrameBuffer : public StGLStereoTexture {
      */
     ST_CPPEXPORT virtual void release(StGLContext& theCtx) ST_ATTR_OVERRIDE;
 
-    inline const StGLVertexBuffer& getQuadVertices() const {
+    ST_LOCAL const StGLVertexBuffer& getQuadVertices() const {
         return myVerticesBuf;
     }
 
-    inline const StGLVertexBuffer& getQuadTexCoords() const {
+    ST_LOCAL const StGLVertexBuffer& getQuadTexCoords() const {
         return myTexCoordBuf;
     }
 
     /**
      * Returns true if FBO was initialized.
      */
-    inline bool isValid() const {
+    ST_LOCAL bool isValid() const {
         return isValidFrameBuffer() && StGLStereoTexture::isValid();// && isValidDepthBuffer();
     }
 
@@ -117,14 +117,14 @@ class StGLStereoFrameBuffer : public StGLStereoTexture {
     /**
      * FBO viewport width.
      */
-    inline GLsizei getVPSizeX() const {
+    ST_LOCAL GLsizei getVPSizeX() const {
         return myViewPortX;
     }
 
     /**
      * FBO viewport height.
      */
-    inline GLsizei getVPSizeY() const {
+    ST_LOCAL GLsizei getVPSizeY() const {
         return myViewPortY;
     }
 
@@ -140,21 +140,21 @@ class StGLStereoFrameBuffer : public StGLStereoTexture {
      */
     ST_CPPEXPORT void setupViewPort(StGLContext& theCtx);
 
-    inline void bindTextureLeft(StGLContext& theCtx,
-                                const GLenum theTextureUnit = GL_TEXTURE0) {
+    ST_LOCAL void bindTextureLeft(StGLContext& theCtx,
+                                  const GLenum theTextureUnit = GL_TEXTURE0) {
         StGLStereoTexture::bindLeft(theCtx, theTextureUnit);
     }
 
-    inline void unbindTextureLeft(StGLContext& theCtx) {
+    ST_LOCAL void unbindTextureLeft(StGLContext& theCtx) {
         StGLStereoTexture::unbindLeft(theCtx);
     }
 
-    inline void bindTextureRight(StGLContext& theCtx,
-                                 const GLenum theTextureUnit = GL_TEXTURE0) {
+    ST_LOCAL void bindTextureRight(StGLContext& theCtx,
+                                   const GLenum theTextureUnit = GL_TEXTURE0) {
         StGLStereoTexture::bindRight(theCtx, theTextureUnit);
     }
 
-    inline void unbindTextureRight(StGLContext& theCtx) {
+    ST_LOCAL void unbindTextureRight(StGLContext& theCtx) {
         StGLStereoTexture::unbindRight(theCtx);
     }
 
@@ -163,7 +163,7 @@ class StGLStereoFrameBuffer : public StGLStereoTexture {
      */
     ST_CPPEXPORT void bindBufferLeft(StGLContext& theCtx);
 
-    inline void unbindBufferLeft(StGLContext& theCtx) {
+    ST_LOCAL void unbindBufferLeft(StGLContext& theCtx) {
         StGLFrameBuffer::unbindBufferGlobal(theCtx);
     }
 
@@ -172,18 +172,18 @@ class StGLStereoFrameBuffer : public StGLStereoTexture {
      */
     ST_CPPEXPORT void bindBufferRight(StGLContext& theCtx);
 
-    inline void unbindBufferRight(StGLContext& theCtx) {
+    ST_LOCAL void unbindBufferRight(StGLContext& theCtx) {
         StGLFrameBuffer::unbindBufferGlobal(theCtx);
     }
 
-    inline void bindMultiTexture(StGLContext& theCtx,
-                                 const GLenum theTextureUnit0 = GL_TEXTURE0,
-                                 const GLenum theTextureUnit1 = GL_TEXTURE1) {
+    ST_LOCAL void bindMultiTexture(StGLContext& theCtx,
+                                   const GLenum theTextureUnit0 = GL_TEXTURE0,
+                                   const GLenum theTextureUnit1 = GL_TEXTURE1) {
         bindTextureLeft (theCtx, theTextureUnit0);
         bindTextureRight(theCtx, theTextureUnit1);
     }
 
-    inline void unbindMultiTexture(StGLContext& theCtx) {
+    ST_LOCAL void unbindMultiTexture(StGLContext& theCtx) {
         unbindTextureLeft(theCtx);
         unbindTextureRight(theCtx);
     }
@@ -196,7 +196,7 @@ class StGLStereoFrameBuffer : public StGLStereoTexture {
     /**
      * Validate FrameBuffer ids.
      */
-    inline bool isValidFrameBuffer() const {
+    ST_LOCAL bool isValidFrameBuffer() const {
         return myGLFBufferIds[StGLStereoTexture::LEFT_TEXTURE ] != StGLFrameBuffer::NO_FRAMEBUFFER
             && myGLFBufferIds[StGLStereoTexture::RIGHT_TEXTURE] != StGLFrameBuffer::NO_FRAMEBUFFER;
     }
@@ -204,19 +204,19 @@ class StGLStereoFrameBuffer : public StGLStereoTexture {
     /**
      * Validate RenderBuffer ids.
      */
-    inline bool isValidDepthBuffer() const {
+    ST_LOCAL bool isValidDepthBuffer() const {
         return myGLDepthRBIds[StGLStereoTexture::LEFT_TEXTURE ] != StGLFrameBuffer::NO_RENDERBUFFER
             && myGLDepthRBIds[StGLStereoTexture::RIGHT_TEXTURE] != StGLFrameBuffer::NO_RENDERBUFFER;
     }
 
         private:
 
-    StGLVertexBuffer myVerticesBuf;     //!< buffers to draw simple fullsreen quad
+    StGLVertexBuffer myVerticesBuf;        //!< buffers to draw simple fullsreen quad
     StGLVertexBuffer myTexCoordBuf;
-    GLuint           myGLFBufferIds[2]; //!< FrameBuffer objects
-    GLuint           myGLDepthRBIds[2]; //!< RenderBuffer objects for depth ID
-    GLsizei          myViewPortX;       //!< FBO viewport width  <= texture width
-    GLsizei          myViewPortY;       //!< FBO viewport height <= texture height
+    GLuint           myGLFBufferIds[2] {}; //!< FrameBuffer objects
+    GLuint           myGLDepthRBIds[2] {}; //!< RenderBuffer objects for depth ID
+    GLsizei          myViewPortX = 0;      //!< FBO viewport width  <= texture width
+    GLsizei          myViewPortY = 0;      //!< FBO viewport height <= texture height
 
 };
 

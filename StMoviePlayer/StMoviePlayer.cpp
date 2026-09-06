@@ -61,33 +61,33 @@ using namespace StMoviePlayerStrings;
 
 namespace {
 
-    static const char ST_SETTING_LAST_FOLDER[]   = "lastFolder";
-    static const char ST_SETTING_RECENT_FILES[]  = "recent";
+    static constexpr char ST_SETTING_LAST_FOLDER[]   = "lastFolder";
+    static constexpr char ST_SETTING_RECENT_FILES[]  = "recent";
 
-    static const char ST_SETTING_VIEWMODE[]      = "viewMode";
-    static const char ST_SETTING_GAMMA[]         = "viewGamma";
-    static const char ST_SETTING_BRIGHTNESS[]    = "viewBrightness";
-    static const char ST_SETTING_SATURATION[]    = "viewSaturation";
-    static const char ST_SETTING_SEP_DX[]        = "viewSepDX";
-    static const char ST_SETTING_SEP_DY[]        = "viewSepDY";
-    static const char ST_SETTING_SEP_ROT[]       = "viewSepRot";
+    static constexpr char ST_SETTING_VIEWMODE[]      = "viewMode";
+    static constexpr char ST_SETTING_GAMMA[]         = "viewGamma";
+    static constexpr char ST_SETTING_BRIGHTNESS[]    = "viewBrightness";
+    static constexpr char ST_SETTING_SATURATION[]    = "viewSaturation";
+    static constexpr char ST_SETTING_SEP_DX[]        = "viewSepDX";
+    static constexpr char ST_SETTING_SEP_DY[]        = "viewSepDY";
+    static constexpr char ST_SETTING_SEP_ROT[]       = "viewSepRot";
 
 #ifdef ST_HAVE_MONGOOSE
-    static const char ST_SETTING_WEBUI_CMDPORT[] = "webuiCmdPort";
+    static constexpr char ST_SETTING_WEBUI_CMDPORT[] = "webuiCmdPort";
 #endif
 
-    static const char ST_ARGUMENT_FILE_LEFT[]  = "left";
-    static const char ST_ARGUMENT_FILE_RIGHT[] = "right";
-    static const char ST_ARGUMENT_FILE_LAST[]  = "last";
-    static const char ST_ARGUMENT_FILE_DEMO[]  = "demo";
-    static const char ST_ARGUMENT_FILE_PAUSE[] = "pause";
-    static const char ST_ARGUMENT_FILE_PAUSED[]= "paused";
-    static const char ST_ARGUMENT_FILE_SEEK[]  = "seek";
-    static const char ST_ARGUMENT_MONITOR[]    = "monitorId";
-    static const char ST_ARGUMENT_WINLEFT[]    = "windowLeft";
-    static const char ST_ARGUMENT_WINTOP[]     = "windowTop";
-    static const char ST_ARGUMENT_WINWIDTH[]   = "windowWidth";
-    static const char ST_ARGUMENT_WINHEIGHT[]  = "windowHeight";
+    static constexpr char ST_ARGUMENT_FILE_LEFT[]  = "left";
+    static constexpr char ST_ARGUMENT_FILE_RIGHT[] = "right";
+    static constexpr char ST_ARGUMENT_FILE_LAST[]  = "last";
+    static constexpr char ST_ARGUMENT_FILE_DEMO[]  = "demo";
+    static constexpr char ST_ARGUMENT_FILE_PAUSE[] = "pause";
+    static constexpr char ST_ARGUMENT_FILE_PAUSED[]= "paused";
+    static constexpr char ST_ARGUMENT_FILE_SEEK[]  = "seek";
+    static constexpr char ST_ARGUMENT_MONITOR[]    = "monitorId";
+    static constexpr char ST_ARGUMENT_WINLEFT[]    = "windowLeft";
+    static constexpr char ST_ARGUMENT_WINTOP[]     = "windowTop";
+    static constexpr char ST_ARGUMENT_WINWIDTH[]   = "windowWidth";
+    static constexpr char ST_ARGUMENT_WINHEIGHT[]  = "windowHeight";
 
 }
 
@@ -98,8 +98,7 @@ void StMoviePlayer::doChangeDevice(const int32_t theValue) {
 
 void StMoviePlayer::doPause(const StPauseEvent& theEvent) {
     StApplication::doPause(theEvent);
-    if(!myVideo.isNull()
-    && !myGUI.isNull()) {
+    if (myVideo.get() != nullptr && myGUI.get() != nullptr) {
         // update playback position before saving settings
         double aDuration = 0.0;
         double aPts      = 0.0;
@@ -107,14 +106,14 @@ void StMoviePlayer::doPause(const StPauseEvent& theEvent) {
         myVideo->getPlaybackState(aDuration, aPts, isVideoPlayed, isAudioPlayed);
         if(aPts > 300.0
         && aPts < aDuration - 300.0) {
-            StHandle<StStereoParams> aParams = myGUI->myImage->getSource();
-            if(!aParams.isNull()) {
+            std::shared_ptr<StStereoParams> aParams = myGUI->myImage->getSource();
+            if (aParams.get() != nullptr) {
                 aParams->Timestamp = (GLfloat )aPts;
             }
         }
     }
     saveAllParams();
-    if(myVideo.isNull()) {
+    if (myVideo.get() == nullptr) {
         return;
     }
 
@@ -236,11 +235,11 @@ void StMoviePlayer::updateStrings() {
     myLangMap->params.language->setName(tr(MENU_HELP_LANGS));
 }
 
-StMoviePlayer::StMoviePlayer(const StHandle<StResourceManager>& theResMgr,
-                             const StNativeWin_t                theParentWin,
-                             const StHandle<StOpenInfo>&        theOpenInfo)
+StMoviePlayer::StMoviePlayer(const std::shared_ptr<StResourceManager>& theResMgr,
+                             const StNativeWin_t                       theParentWin,
+                             const std::shared_ptr<StOpenInfo>&        theOpenInfo)
 : StApplication(theResMgr, theParentWin, theOpenInfo),
-  myPlayList(new StPlayList(4, true)),
+  myPlayList(std::make_shared<StPlayList>(4, true)),
   myEventLoaded(false),
   mySeekOnLoad(-1.0),
   myAudioOnLoad(-1),
@@ -251,9 +250,9 @@ StMoviePlayer::StMoviePlayer(const StHandle<StResourceManager>& theResMgr,
   myToUpdateALList(false),
   myToCheckUpdates(true),
   myToCheckPoorOrient(true) {
-    mySettings = new StSettings(myResMgr, ST_DRAWER_PLUGIN_NAME);
-    myLangMap  = new StTranslations(myResMgr, StMoviePlayer::ST_DRAWER_PLUGIN_NAME);
-    myOpenDialog = new StMovieOpenDialog(this);
+    mySettings = std::make_shared<StSettings>(myResMgr, ST_DRAWER_PLUGIN_NAME);
+    myLangMap  = std::make_shared<StTranslations>(myResMgr, StMoviePlayer::ST_DRAWER_PLUGIN_NAME);
+    myOpenDialog = std::make_shared<StMovieOpenDialog>(this);
     StMoviePlayerStrings::loadDefaults(*myLangMap);
     myLangMap->params.language->signals.onChanged += stSlot(this, &StMoviePlayer::doChangeLanguage);
     myTitle = stCString("sView - Movie Player");
@@ -471,16 +470,16 @@ StMoviePlayer::StMoviePlayer(const StHandle<StResourceManager>& theResMgr,
     params.ToForceBFormat->signals.onChanged = stSlot(this, &StMoviePlayer::doSetForceBFormat);
 
 #if defined(__ANDROID__)
-    addRenderer(new StOutInterlace  (myResMgr, theParentWin));
-    addRenderer(new StOutAnaglyph   (myResMgr, theParentWin));
-    addRenderer(new StOutDistorted  (myResMgr, theParentWin));
+    addRenderer(std::make_shared<StOutInterlace>  (myResMgr, theParentWin));
+    addRenderer(std::make_shared<StOutAnaglyph>   (myResMgr, theParentWin));
+    addRenderer(std::make_shared<StOutDistorted>  (myResMgr, theParentWin));
 #else
-    addRenderer(new StOutAnaglyph   (myResMgr, theParentWin));
-    addRenderer(new StOutDual       (myResMgr, theParentWin));
-    addRenderer(new StOutIZ3D       (myResMgr, theParentWin));
-    addRenderer(new StOutInterlace  (myResMgr, theParentWin));
-    addRenderer(new StOutDistorted  (myResMgr, theParentWin));
-    addRenderer(new StOutPageFlipExt(myResMgr, theParentWin));
+    addRenderer(std::make_shared<StOutAnaglyph>   (myResMgr, theParentWin));
+    addRenderer(std::make_shared<StOutDual>       (myResMgr, theParentWin));
+    addRenderer(std::make_shared<StOutIZ3D>       (myResMgr, theParentWin));
+    addRenderer(std::make_shared<StOutInterlace>  (myResMgr, theParentWin));
+    addRenderer(std::make_shared<StOutDistorted>  (myResMgr, theParentWin));
+    addRenderer(std::make_shared<StOutPageFlipExt>(myResMgr, theParentWin));
 #endif
 
     // no need in Depth buffer
@@ -490,8 +489,8 @@ StMoviePlayer::StMoviePlayer(const StHandle<StResourceManager>& theResMgr,
         StWinAttr_GlStencilSize, (StWinAttr )0,
         StWinAttr_NULL
     };
-    for(size_t aRendIter = 0; aRendIter < myRenderers.size(); ++aRendIter) {
-        StHandle<StWindow>& aRend = myRenderers[aRendIter];
+    for (size_t aRendIter = 0; aRendIter < myRenderers.size(); ++aRendIter) {
+        std::shared_ptr<StWindow>& aRend = myRenderers[aRendIter];
         aRend->setAttributes(anAttribs);
     }
 
@@ -716,8 +715,7 @@ StMoviePlayer::StMoviePlayer(const StHandle<StResourceManager>& theResMgr,
 }
 
 bool StMoviePlayer::resetDevice() {
-    if(myGUI.isNull()
-    || myVideo.isNull()) {
+    if (myGUI.get() == nullptr || myVideo.get() == nullptr) {
         return init();
     }
 
@@ -726,12 +724,12 @@ bool StMoviePlayer::resetDevice() {
 
     releaseDevice();
     myWindow->close();
-    myWindow.nullify();
+    myWindow.reset();
     return open();
 }
 
 void StMoviePlayer::saveGuiParams() {
-    if(myGUI.isNull()) {
+    if (myGUI.get() == nullptr) {
         return;
     }
 
@@ -752,7 +750,7 @@ void StMoviePlayer::saveGuiParams() {
 
 void StMoviePlayer::saveAllParams() {
     saveGuiParams();
-    if(!myGUI.isNull()) {
+    if (myGUI.get() != nullptr) {
         mySettings->saveParam (params.ExitOnEscape);
         mySettings->saveParam (params.ScaleAdjust);
         mySettings->saveParam (params.ScaleHiDPI2X);
@@ -826,46 +824,46 @@ void StMoviePlayer::releaseDevice() {
 
     // release GUI data and GL resources before closing the window
     myKeyActions.clear();
-    myGUI.nullify();
-    myContext.nullify();
+    myGUI.reset();
+    myContext.reset();
 }
 
 StMoviePlayer::~StMoviePlayer() {
     doStopWebUI();
 
-    myUpdates.nullify();
-    if(!myVideo.isNull()) {
+    myUpdates.reset();
+    if (myVideo.get() != nullptr) {
         myVideo->startDestruction();
     }
 
     releaseDevice();
     // wait video playback thread to quit and release resources
-    myVideo.nullify();
+    myVideo.reset();
 }
 
-bool StMoviePlayer::createGui(StHandle<StGLTextureQueue>& theTextureQueue,
-                              StHandle<StSubQueue>&       theSubQueue1,
-                              StHandle<StSubQueue>&       theSubQueue2) {
-    if(!myGUI.isNull()) {
+bool StMoviePlayer::createGui(std::shared_ptr<StGLTextureQueue>& theTextureQueue,
+                              std::shared_ptr<StSubQueue>&       theSubQueue1,
+                              std::shared_ptr<StSubQueue>&       theSubQueue2) {
+    if (myGUI.get() != nullptr) {
         saveGuiParams();
-        myGUI.nullify();
+        myGUI.reset();
         myKeyActions.clear();
     }
 
-    if(!myVideo.isNull()) {
+    if (myVideo.get() != nullptr) {
         theTextureQueue = myVideo->getTextureQueue();
         theSubQueue1    = myVideo->getSubtitlesQueue1();
         theSubQueue2    = myVideo->getSubtitlesQueue2();
     } else {
-        theTextureQueue = new StGLTextureQueue(16);
-        theSubQueue1    = new StSubQueue();
-        theSubQueue2    = new StSubQueue();
+        theTextureQueue = std::make_shared<StGLTextureQueue>(16);
+        theSubQueue1    = std::make_shared<StSubQueue>();
+        theSubQueue2    = std::make_shared<StSubQueue>();
     }
 
     params.ScaleHiDPI->setValue(myWindow->getScaleFactor());
     doChangeMobileUI(params.IsMobileUI->getValue());
-    myGUI = new StMoviePlayerGUI(this, myWindow.access(), myLangMap.access(), myPlayList,
-                                 theTextureQueue, theSubQueue1, theSubQueue2);
+    myGUI = std::make_shared<StMoviePlayerGUI>(this, myWindow.get(), myLangMap.get(), myPlayList,
+                                               theTextureQueue, theSubQueue1, theSubQueue2);
     myGUI->setContext(myContext);
     theTextureQueue->setDeviceCaps(myContext->getDeviceCaps());
 
@@ -930,7 +928,7 @@ void StMoviePlayer::doChangeLanguage(const int32_t theNewLang) {
 }
 
 void StMoviePlayer::doImageAdjustReset(const size_t ) {
-    if(myGUI.isNull()) {
+    if (myGUI.get() == nullptr) {
         return;
     }
 
@@ -941,14 +939,14 @@ void StMoviePlayer::doImageAdjustReset(const size_t ) {
 
 
 void StMoviePlayer::doDeleteFileBegin(const size_t ) {
-    //if(!myFileToDelete.isNull()) {
+    //if (myFileToDelete.get() != nullptr) {
     //    return;
     //}
 
     myFileToDelete = myPlayList->getCurrentFile();
-    if(myFileToDelete.isNull()
-    || myFileToDelete->size() != 0) {
-        myFileToDelete.nullify();
+    if (myFileToDelete.get() == nullptr
+     || myFileToDelete->size() != 0) {
+        myFileToDelete.reset();
         return;
     }
 
@@ -957,7 +955,7 @@ void StMoviePlayer::doDeleteFileBegin(const size_t ) {
                          + (isReadOnly ? "\nWARNING! The file is READ ONLY!" : "")
                          + "\n" + myFileToDelete->getPath();
 
-    StGLMessageBox* aDialog = new StGLMessageBox(myGUI.access(), myLangMap->getValue(StMoviePlayerStrings::DIALOG_DELETE_FILE_TITLE),
+    StGLMessageBox* aDialog = new StGLMessageBox(myGUI.get(), myLangMap->getValue(StMoviePlayerStrings::DIALOG_DELETE_FILE_TITLE),
                                                  aText, myGUI->scale(512), myGUI->scale(256));
     aDialog->addButton(myLangMap->getValue(StMoviePlayerStrings::BUTTON_DELETE), true)->signals.onBtnClick += stSlot(this, &StMoviePlayer::doDeleteFileEnd);
     aDialog->addButton(myLangMap->getValue(StMoviePlayerStrings::BUTTON_CANCEL), false);
@@ -965,14 +963,14 @@ void StMoviePlayer::doDeleteFileBegin(const size_t ) {
 }
 
 void StMoviePlayer::doDeleteFileEnd(const size_t ) {
-    if(myFileToDelete.isNull()
-    || myVideo.isNull()) {
+    if (myFileToDelete.get() == nullptr
+     || myVideo.get() == nullptr) {
         return;
     }
 
     StFileNode::removeReadOnlyFlag(myFileToDelete->getPath());
     myVideo->doRemovePhysically(myFileToDelete);
-    myFileToDelete.nullify();
+    myFileToDelete.reset();
 }
 
 void StMoviePlayer::doStopWebUI() {
@@ -1027,9 +1025,9 @@ void StMoviePlayer::doSwitchWebUI(const int32_t theValue) {
 }
 
 bool StMoviePlayer::init() {
-    const bool isReset = !myVideo.isNull();
-    if(!myContext.isNull()
-    && !myGUI.isNull()) {
+    const bool isReset = myVideo.get() != nullptr;
+    if (myContext.get() != nullptr
+     && myGUI.get() != nullptr) {
         return true;
     }
 
@@ -1046,7 +1044,7 @@ bool StMoviePlayer::init() {
     if(!isReset) {
     #ifdef ST_HAVE_MONGOOSE
         // handle this argument in advance
-        if(!myOpenFileInfo.isNull()) {
+        if (myOpenFileInfo.get() != nullptr) {
             StArgument anArgWebuiCmd = myOpenFileInfo->getArgumentsMap()[ST_SETTING_WEBUI_CMDPORT];
             if(anArgWebuiCmd.isValid()) {
                 params.IsLocalWebUI->setValue(true);
@@ -1063,13 +1061,13 @@ bool StMoviePlayer::init() {
     }
 
     // create the GUI with default values
-    StHandle<StGLTextureQueue> aTextureQueue;
-    StHandle<StSubQueue>       aSubQueue1, aSubQueue2;
+    std::shared_ptr<StGLTextureQueue> aTextureQueue;
+    std::shared_ptr<StSubQueue>       aSubQueue1, aSubQueue2;
     if(!createGui(aTextureQueue, aSubQueue1, aSubQueue2)) {
         myMsgQueue->pushError(stCString("Movie Player - critical error:\n"
                                         "Frame region initialization failed!"));
         myMsgQueue->popAll();
-        myGUI.nullify();
+        myGUI.reset();
         return false;
     }
 
@@ -1079,13 +1077,13 @@ bool StMoviePlayer::init() {
 
     // create the video playback thread
     if(!isReset) {
-        myVideo = new StVideo(params.AudioAlDevice->getCTitle(),
+        myVideo = std::make_shared<StVideo>(params.AudioAlDevice->getCTitle(),
                               (StAudioQueue::StAlHintOutput )params.AudioAlOutput->getValue(),
                               (StAudioQueue::StAlHintHrtf   )params.AudioAlHrtf->getValue(),
                               myResMgr, myLangMap, myPlayList,
                               aTextureQueue, aSubQueue1, aSubQueue2);
-        myVideo->signals.onError  = stSlot(myMsgQueue.access(), &StMsgQueue::doPushError);
-        myVideo->signals.onLoaded = stSlot(this,                &StMoviePlayer::doLoaded);
+        myVideo->signals.onError  = stSlot(myMsgQueue.get(), &StMsgQueue::doPushError);
+        myVideo->signals.onLoaded = stSlot(this,             &StMoviePlayer::doLoaded);
         myVideo->params.UseGpu       = params.UseGpu;
         myVideo->params.UseOpenJpeg  = params.UseOpenJpeg;
         myVideo->params.ToAutoLoadSubs = params.ToAutoLoadSubs;
@@ -1129,7 +1127,7 @@ bool StMoviePlayer::init() {
     const int aNbDays = StCheckUpdates::getNbDaysFromInterval((StCheckUpdates::UpdateInteval )params.CheckUpdatesDays->getValue());
     if(aNbDays > 0
     && std::abs(aCurrentDayInYear - params.LastUpdateDay->getValue()) > aNbDays) {
-        myUpdates = new StCheckUpdates();
+        myUpdates = std::make_shared<StCheckUpdates>();
         myUpdates->init();
         params.LastUpdateDay->setValue(aCurrentDayInYear);
         mySettings->saveParam(params.LastUpdateDay);
@@ -1218,7 +1216,7 @@ void StMoviePlayer::parseArguments(const StArgumentsMap& theArguments) {
 }
 
 bool StMoviePlayer::open() {
-    const bool isReset = !mySwitchTo.isNull();
+    const bool isReset = mySwitchTo.get() != nullptr;
     if(!StApplication::open()
     || !init()) {
         myMsgQueue->popAll();
@@ -1343,7 +1341,7 @@ bool StMoviePlayer::open() {
 }
 
 void StMoviePlayer::doResize(const StSizeEvent& ) {
-    if(myGUI.isNull()) {
+    if (myGUI.get() == nullptr) {
         return;
     }
 
@@ -1364,7 +1362,7 @@ void StMoviePlayer::doResize(const StSizeEvent& ) {
 }
 
 void StMoviePlayer::doKeyDown(const StKeyEvent& theEvent) {
-    if(myGUI.isNull()) {
+    if (myGUI.get() == nullptr) {
         return;
     }
 
@@ -1398,7 +1396,7 @@ void StMoviePlayer::doKeyDown(const StKeyEvent& theEvent) {
 }
 
 void StMoviePlayer::doKeyHold(const StKeyEvent& theEvent) {
-    if(myGUI.isNull()) {
+    if (myGUI.get() == nullptr) {
         return;
     }
 
@@ -1410,7 +1408,7 @@ void StMoviePlayer::doKeyHold(const StKeyEvent& theEvent) {
 }
 
 void StMoviePlayer::doKeyUp(const StKeyEvent& theEvent) {
-    if(myGUI.isNull()) {
+    if (myGUI.get() == nullptr) {
         return;
     }
 
@@ -1421,7 +1419,7 @@ void StMoviePlayer::doKeyUp(const StKeyEvent& theEvent) {
 }
 
 void StMoviePlayer::doMouseDown(const StClickEvent& theEvent) {
-    if(myGUI.isNull()) {
+    if (myGUI.get() == nullptr) {
         return;
     }
 
@@ -1429,7 +1427,7 @@ void StMoviePlayer::doMouseDown(const StClickEvent& theEvent) {
 }
 
 void StMoviePlayer::doMouseUp(const StClickEvent& theEvent) {
-    if(myGUI.isNull()) {
+    if (myGUI.get() == nullptr) {
         return;
     }
 
@@ -1454,19 +1452,19 @@ void StMoviePlayer::doMouseUp(const StClickEvent& theEvent) {
 }
 
 void StMoviePlayer::doTouch(const StTouchEvent& theEvent) {
-    if(!myGUI.isNull()) {
+    if (myGUI.get() != nullptr) {
         myGUI->doTouch(theEvent);
     }
 }
 
 void StMoviePlayer::doGesture(const StGestureEvent& theEvent) {
-    if(!myGUI.isNull()) {
+    if (myGUI.get() != nullptr) {
         myGUI->doGesture(theEvent);
     }
 }
 
 void StMoviePlayer::doScroll(const StScrollEvent& theEvent) {
-    if(myGUI.isNull()) {
+    if (myGUI.get() == nullptr) {
         return;
     }
 
@@ -1492,7 +1490,7 @@ void StMoviePlayer::doScroll(const StScrollEvent& theEvent) {
 }
 
 void StMoviePlayer::doAudioVolume(size_t theDirection) {
-    if(myVideo.isNull()) {
+    if (myGUI.get() == nullptr) {
         return;
     }
 
@@ -1504,7 +1502,7 @@ void StMoviePlayer::doAudioVolume(size_t theDirection) {
 }
 
 void StMoviePlayer::doAudioNext(size_t theDirection) {
-    if(myVideo.isNull()) {
+    if (myGUI.get() == nullptr) {
         return;
     }
 
@@ -1513,7 +1511,7 @@ void StMoviePlayer::doAudioNext(size_t theDirection) {
 }
 
 void StMoviePlayer::doSubtitlesNext(size_t theDirection) {
-    if(myVideo.isNull()) {
+    if (myGUI.get() == nullptr) {
         return;
     }
 
@@ -1522,9 +1520,9 @@ void StMoviePlayer::doSubtitlesNext(size_t theDirection) {
 }
 
 void StMoviePlayer::doSubtitlesCopy(size_t ) {
-    if(myVideo.isNull()
-    || myGUI.isNull()
-    || myGUI->mySubtitles1 == NULL) {
+    if (myVideo.get() == nullptr
+     || myGUI.get() == nullptr
+     || myGUI->mySubtitles1 == NULL) {
         return;
     }
 
@@ -1536,8 +1534,8 @@ void StMoviePlayer::doSubtitlesCopy(size_t ) {
 }
 
 void StMoviePlayer::doFromClipboard(size_t ) {
-    if(myVideo.isNull()
-    || myGUI.isNull()) {
+    if (myVideo.get() == nullptr
+     || myGUI.get() == nullptr) {
         return;
     }
 
@@ -1585,7 +1583,7 @@ void StMoviePlayer::doFromClipboard(size_t ) {
 }
 
 void StMoviePlayer::doFileNext() {
-    if(myVideo.isNull()) {
+    if (myVideo.get() == nullptr) {
         return;
     }
 
@@ -1610,8 +1608,8 @@ void StMoviePlayer::doFileDrop(const StDNDropEvent& theEvent) {
                 continue;
             }
 
-            StHandle<StFileNode> aCurrFile = myPlayList->getCurrentFile();
-            if(aCurrFile.isNull()) {
+            std::shared_ptr<StFileNode> aCurrFile = myPlayList->getCurrentFile();
+            if (aCurrFile.get() == nullptr) {
                 ST_ERROR_LOG("Can not attach subtitles");
                 return;
             }
@@ -1629,7 +1627,7 @@ void StMoviePlayer::doFileDrop(const StDNDropEvent& theEvent) {
         if(!myPlayList->checkExtension(aFile1)
          && myVideo->getMimeListImages().checkExtension(anExt1)) {
             // redirect to StMoviePlayer
-            myOpenFileOtherApp = new StOpenInfo();
+            myOpenFileOtherApp = std::make_shared<StOpenInfo>();
             StArgumentsMap anArgs;
             anArgs.add(StArgument("in", "image"));
             myOpenFileOtherApp->setArgumentsMap(anArgs);
@@ -1702,7 +1700,7 @@ void StMoviePlayer::doNavigate(const StNavigEvent& theEvent) {
 }
 
 void StMoviePlayer::beforeDraw() {
-    if(myGUI.isNull()) {
+    if (myGUI.get() == nullptr) {
         return;
     }
 
@@ -1724,7 +1722,7 @@ void StMoviePlayer::beforeDraw() {
 
     // fetch Open File operation results
     if(myOpenDialog->hasResults()) {
-        StHandle<StFileNode> aCurrFile = myPlayList->getCurrentFile();
+        std::shared_ptr<StFileNode> aCurrFile = myPlayList->getCurrentFile();
         StString aFilePath;
         if(!myOpenDialog->getPathAudio().isEmpty()) {
             aFilePath = myOpenDialog->getPathAudio();
@@ -1747,7 +1745,7 @@ void StMoviePlayer::beforeDraw() {
             if(!myPlayList->checkExtension(myOpenDialog->getPathLeft())
              && myVideo->getMimeListImages().checkExtension(StFileNode::getExtension(myOpenDialog->getPathLeft()))) {
                 // redirect to StImageViewer
-                myOpenFileOtherApp = new StOpenInfo();
+                myOpenFileOtherApp = std::make_shared<StOpenInfo>();
                 StArgumentsMap anArgs;
                 anArgs.add(StArgument("in", "image"));
                 myOpenFileOtherApp->setArgumentsMap(anArgs);
@@ -1774,8 +1772,8 @@ void StMoviePlayer::beforeDraw() {
     // re-create GUI when necessary
     if(params.ScaleHiDPI->setValue(myWindow->getScaleFactor())
     || myToRecreateMenu) {
-        StHandle<StGLTextureQueue> aTextureQueue;
-        StHandle<StSubQueue>       aSubQueue1, aSubQueue2;
+        std::shared_ptr<StGLTextureQueue> aTextureQueue;
+        std::shared_ptr<StSubQueue>       aSubQueue1, aSubQueue2;
         createGui(aTextureQueue, aSubQueue1, aSubQueue2);
         myToRecreateMenu = false;
     }
@@ -1784,7 +1782,7 @@ void StMoviePlayer::beforeDraw() {
         doUpdateStateLoaded();
     }
 
-    if(myToCheckUpdates && !myUpdates.isNull() && myUpdates->isInitialized()) {
+    if (myToCheckUpdates && myUpdates.get() != nullptr && myUpdates->isInitialized()) {
         if(myUpdates->isNeedUpdate()) {
             myGUI->showUpdatesNotify();
         }
@@ -1854,8 +1852,8 @@ void StMoviePlayer::beforeDraw() {
 
     // check for mono state
     bool hasStereoSource = false;
-    StHandle<StStereoParams> aParams = myGUI->myImage->getSource();
-    if(!aParams.isNull()) {
+    std::shared_ptr<StStereoParams> aParams = myGUI->myImage->getSource();
+    if (aParams.get() != nullptr) {
         StGLQuaternion aHeadOrient;
         const bool toTrackHead = params.ToTrackHeadAudio->getValue()
                               && myGUI->myImage->getHeadOrientation(aHeadOrient, ST_DRAW_MONO, false);
@@ -1917,9 +1915,9 @@ void StMoviePlayer::doUpdateOpenALDeviceList(const size_t ) {
 }
 
 void StMoviePlayer::stglDraw(unsigned int theView) {
-    const bool hasCtx = !myContext.isNull() && myContext->isBound();
+    const bool hasCtx = myContext.get() != nullptr && myContext->isBound();
     if(!hasCtx || myWindow->isPaused()) {
-        if(!myGUI.isNull()
+        if (myGUI.get() != nullptr
          && myGUI->myImage != NULL) {
             myGUI->myImage->stglSkipFrames();
         }
@@ -1930,8 +1928,8 @@ void StMoviePlayer::stglDraw(unsigned int theView) {
                 double aDuration = 0.0;
                 double aPts      = 0.0;
                 bool isVideoPlayed = false, isAudioPlayed = false;
-                const bool isPlaying = !myVideo.isNull()
-                                     && myVideo->getPlaybackState(aDuration, aPts, isVideoPlayed, isAudioPlayed);
+                const bool isPlaying = myVideo.get() != nullptr
+                                    && myVideo->getPlaybackState(aDuration, aPts, isVideoPlayed, isAudioPlayed);
                 const double aTimeout = hasCtx ? 300.0 : 60.0;
                 if(!myInactivityTimer.isOn()) {
                     myInactivityTimer.restart();
@@ -1954,7 +1952,7 @@ void StMoviePlayer::stglDraw(unsigned int theView) {
         myContext->core20fwd->glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
     }
 
-    if(myGUI.isNull()) {
+    if (myGUI.get() == nullptr) {
         return;
     }
 
@@ -1963,8 +1961,8 @@ void StMoviePlayer::stglDraw(unsigned int theView) {
 }
 
 void StMoviePlayer::doShowPlayList(const bool theToShow) {
-    if(myGUI.isNull()
-    || myGUI->myPlayList == NULL) {
+    if (myGUI.get() == nullptr
+     || myGUI->myPlayList == NULL) {
         return;
     }
 
@@ -1972,8 +1970,8 @@ void StMoviePlayer::doShowPlayList(const bool theToShow) {
 }
 
 void StMoviePlayer::doShowAdjustImage(const bool theToShow) {
-    if(myGUI.isNull()
-    || myGUI->myAdjustOverlay == NULL) {
+    if (myGUI.get() == nullptr
+     || myGUI->myAdjustOverlay == NULL) {
         return;
     }
 
@@ -1981,7 +1979,7 @@ void StMoviePlayer::doShowAdjustImage(const bool theToShow) {
 }
 
 void StMoviePlayer::doPlayListReverse(const size_t ) {
-    if(myGUI.isNull()) {
+    if (myGUI.get() == nullptr) {
         return;
     }
 
@@ -2001,37 +1999,37 @@ void StMoviePlayer::doSwitchVSync(const bool theValue) {
 }
 
 void StMoviePlayer::doSwitchAudioDevice(const int32_t /*theDevId*/) {
-    if(!myVideo.isNull()) {
+    if (myVideo.get() != nullptr) {
         myVideo->switchAudioDevice(params.AudioAlDevice->getCTitle());
     }
 }
 
 bool StMoviePlayer::hasAlHintOutput() const {
-    return !myVideo.isNull()
-         && myVideo->hasAlHintOutput();
+    return myVideo.get() != nullptr
+        && myVideo->hasAlHintOutput();
 }
 
 bool StMoviePlayer::hasAlHintHrtf() const {
-    return !myVideo.isNull()
-         && myVideo->hasAlHintHrtf();
+    return myVideo.get() != nullptr
+        && myVideo->hasAlHintHrtf();
 }
 
 void StMoviePlayer::doSwitchAudioAlHints(const int32_t ) {
-    if(!myVideo.isNull()) {
+    if (myVideo.get() != nullptr) {
         myVideo->setAlHints((StAudioQueue::StAlHintOutput )params.AudioAlOutput->getValue(),
                             (StAudioQueue::StAlHintHrtf )params.AudioAlHrtf->getValue());
     }
 }
 
 void StMoviePlayer::doSetForceBFormat(const bool theValue) {
-    if(!myVideo.isNull()) {
+    if (myVideo.get() != nullptr) {
         myVideo->setForceBFormat(theValue);
     }
 }
 
 void StMoviePlayer::doSetAudioVolume(const float theGaindB) {
-    if(!myVideo.isNull()
-    && !params.AudioMute->getValue()) {
+    if (myVideo.get() != nullptr
+     && !params.AudioMute->getValue()) {
         const GLfloat aGain = params.AudioGain->isMinValue()
                             ? 0.0f
                             : GLfloat(StMoviePlayerGUI::dBellToRatio(theGaindB));
@@ -2040,7 +2038,7 @@ void StMoviePlayer::doSetAudioVolume(const float theGaindB) {
 }
 
 void StMoviePlayer::doSetAudioMute(const bool theToMute) {
-    if(!myVideo.isNull()) {
+    if (myVideo.get() != nullptr) {
         const GLfloat aGain = (theToMute || params.AudioGain->isMinValue())
                             ? 0.0f
                             : GLfloat(StMoviePlayerGUI::dBellToRatio(params.AudioGain->getValue()));
@@ -2049,7 +2047,7 @@ void StMoviePlayer::doSetAudioMute(const bool theToMute) {
 }
 
 void StMoviePlayer::doSetAudioDelay(const float theDelaySec) {
-    if(!myVideo.isNull()) {
+    if (myVideo.get() != nullptr) {
         myVideo->setAudioDelay(theDelaySec);
     }
 }
@@ -2091,13 +2089,13 @@ void StMoviePlayer::doUpdateStateLoaded() {
 }
 
 void StMoviePlayer::doAboutFile(const size_t ) {
-    if(!myGUI.isNull()) {
+    if (myGUI.get() != nullptr) {
         myGUI->doAboutFile(0);
     }
 }
 
 void StMoviePlayer::doSwitchViewMode(const int32_t theMode) {
-    if(myVideo.isNull()) {
+    if (myVideo.get() == nullptr) {
         return;
     }
 
@@ -2105,7 +2103,7 @@ void StMoviePlayer::doSwitchViewMode(const int32_t theMode) {
 }
 
 void StMoviePlayer::doTheaterOnOff(const size_t ) {
-    if(myVideo.isNull()) {
+    if (myVideo.get() == nullptr) {
         return;
     }
 
@@ -2113,19 +2111,19 @@ void StMoviePlayer::doTheaterOnOff(const size_t ) {
 }
 
 void StMoviePlayer::doPanoramaOnOff(const size_t ) {
-    if(myVideo.isNull()) {
+    if (myVideo.get() == nullptr) {
         return;
     }
 
-    StHandle<StStereoParams> aParams = myGUI->myImage->getSource();
-    if(aParams.isNull()
-    || aParams->Src1SizeX == 0
-    || aParams->Src1SizeY == 0) {
+    std::shared_ptr<StStereoParams> aParams = myGUI->myImage->getSource();
+    if (aParams.get() == nullptr
+     || aParams->Src1SizeX == 0
+     || aParams->Src1SizeY == 0) {
         return;
     }
 
     int aMode = myGUI->myImage->params.ViewMode->getValue();
-    if(aMode != StViewSurface_Plain) {
+    if (aMode != StViewSurface_Plain) {
         myGUI->myImage->params.ViewMode->setValue(StViewSurface_Plain);
         return;
     }
@@ -2137,7 +2135,7 @@ void StMoviePlayer::doPanoramaOnOff(const size_t ) {
 }
 
 void StMoviePlayer::doChangeStickPano360(const bool ) {
-    if(myVideo.isNull()) {
+    if (myVideo.get() == nullptr) {
         return;
     }
 
@@ -2145,7 +2143,7 @@ void StMoviePlayer::doChangeStickPano360(const bool ) {
 }
 
 void StMoviePlayer::doChangeSwapJPS(const bool ) {
-    if(myVideo.isNull()) {
+    if (myVideo.get() == nullptr) {
         return;
     }
 
@@ -2159,21 +2157,21 @@ void StMoviePlayer::doSwitchSrcFormat(const int32_t theSrcFormat) {
     bool   isVideoPlayed = false;
     bool   isAudioPlayed = false;
     bool   isPlaying = myVideo->getPlaybackState(aDuration, aPts, isVideoPlayed, isAudioPlayed);
-    StHandle<StStereoParams> aParams = myGUI->myImage->getSource();
-    if(!isPlaying && !aParams.isNull() && myGUI->myImage->hasVideoStream()) {
+    std::shared_ptr<StStereoParams> aParams = myGUI->myImage->getSource();
+    if (!isPlaying && aParams.get() != nullptr && myGUI->myImage->hasVideoStream()) {
         myVideo->pushPlayEvent(ST_PLAYEVENT_SEEK, aPts - 0.01);
     }
 }
 
 void StMoviePlayer::doSetStereoOutput(const size_t theMode) {
-    if(myVideo.isNull()) {
+    if (myVideo.get() == nullptr) {
         return;
     }
     myGUI->myImage->params.DisplayMode->setValue((int32_t )theMode);
 }
 
 void StMoviePlayer::doScaleGui(const int32_t ) {
-    if(myGUI.isNull()) {
+    if (myGUI.get() == nullptr) {
         return;
     }
     myToRecreateMenu = true;
@@ -2184,14 +2182,14 @@ void StMoviePlayer::doChangeMobileUI(const bool ) {
 }
 
 void StMoviePlayer::doScaleHiDPI(const bool ) {
-    if(myGUI.isNull()) {
+    if (myGUI.get() == nullptr) {
         return;
     }
     myToRecreateMenu = true;
 }
 
 void StMoviePlayer::doChangeMixImagesVideos(const bool theToMix) {
-    if(myVideo.isNull()) {
+    if (myVideo.get() == nullptr) {
         return;
     }
     if(theToMix) {
@@ -2239,11 +2237,11 @@ void StMoviePlayer::doListLast(const size_t ) {
 }
 
 void StMoviePlayer::doShowHideGUI(const size_t ) {
-    const bool toShow = !params.ToShowMenu->getValue() || (!myGUI.isNull() && !myGUI->isVisibleGUI());
+    const bool toShow = !params.ToShowMenu->getValue() || (myGUI.get() != nullptr && !myGUI->isVisibleGUI());
     params.ToShowMenu->setValue(toShow);
     params.ToShowTopbar->setValue(toShow);
     params.ToShowBottom->setValue(toShow);
-    if(toShow && !myGUI.isNull()) {
+    if (toShow && myGUI.get() != nullptr) {
         myGUI->setVisibility(myWindow->getMousePos(), false, true);
     }
 }
@@ -2265,7 +2263,7 @@ void StMoviePlayer::doOpen1SubtitleFromGui(StHandle<StString> thePath) {
 }
 
 void StMoviePlayer::doOpen1FileAction(const size_t ) {
-    if(!myGUI.isNull() && (myWindow->isFullScreen() || myGUI->isMobile())) {
+    if (myGUI.get() != nullptr && (myWindow->isFullScreen() || myGUI->isMobile())) {
         myGUI->doOpenFile(StMovieOpenDialog::Dialog_SingleMovie);
         return;
     }
@@ -2273,7 +2271,7 @@ void StMoviePlayer::doOpen1FileAction(const size_t ) {
 }
 
 void StMoviePlayer::doOpen2Files(const size_t ) {
-    if(!myGUI.isNull() && (myWindow->isFullScreen() || myGUI->isMobile())) {
+    if (myGUI.get() != nullptr && (myWindow->isFullScreen() || myGUI->isMobile())) {
         //myGUI->doOpenFile(StMovieOpenDialog::Dialog_DoubleMovie);
         //return;
     }
@@ -2281,24 +2279,24 @@ void StMoviePlayer::doOpen2Files(const size_t ) {
 }
 
 void StMoviePlayer::doSaveFileInfo(const size_t theToSave) {
-    if(!myGUI.isNull()
-    && !myFileInfo.isNull()
-    &&  theToSave == 1) {
+    if (myGUI.get() != nullptr
+     && myFileInfo.get() != nullptr
+     && theToSave == 1) {
         //myLoader->doSaveInfo(myFileInfo);
     }
-    myFileInfo.nullify();
+    myFileInfo.reset();
 }
 
 void StMoviePlayer::doOpenRecent(const size_t theItemId) {
-    if(myVideo.isNull()) {
+    if (myVideo.get() == nullptr) {
         return;
     }
 
-    StHandle<StStereoParams> anOldParams = myPlayList->openRecent(theItemId);
+    std::shared_ptr<StStereoParams> anOldParams = myPlayList->openRecent(theItemId);
     doUpdateStateLoading();
     myVideo->pushPlayEvent(ST_PLAYEVENT_RESUME);
     myVideo->doLoadNext();
-    if(!anOldParams.isNull()) {
+    if (anOldParams.get() != nullptr) {
         mySeekOnLoad = anOldParams->Timestamp;
     }
 }
@@ -2308,7 +2306,7 @@ void StMoviePlayer::doClearRecent(const size_t ) {
 }
 
 void StMoviePlayer::doAddAudioStream(const size_t ) {
-    if(!myGUI.isNull() && (myWindow->isFullScreen() || myGUI->isMobile())) {
+    if (myGUI.get() != nullptr && (myWindow->isFullScreen() || myGUI->isMobile())) {
         myGUI->doOpenFile(StMovieOpenDialog::Dialog_Audio);
         return;
     }
@@ -2316,7 +2314,7 @@ void StMoviePlayer::doAddAudioStream(const size_t ) {
 }
 
 void StMoviePlayer::doAddSubtitleStream(const size_t ) {
-    if(!myGUI.isNull() && (myWindow->isFullScreen() || myGUI->isMobile())) {
+    if (myGUI.get() != nullptr && (myWindow->isFullScreen() || myGUI->isMobile())) {
         myGUI->doOpenFile(StMovieOpenDialog::Dialog_Subtitles);
         return;
     }
@@ -2381,7 +2379,7 @@ void StMoviePlayer::doSwitchSubtitlesStream2(const int32_t theStreamId) {
 }
 
 void StMoviePlayer::doFullscreen(const bool theIsFullscreen) {
-    if(!myWindow.isNull()) {
+    if (myWindow.get() != nullptr) {
         myWindow->setAttribute(StWinAttr_ExclusiveFullScreen, params.IsExclusiveFullScreen->getValue());
         myWindow->setFullScreen(theIsFullscreen);
     }
@@ -2398,7 +2396,7 @@ void StMoviePlayer::doSnapshot(const size_t theImgType) {
 }
 
 void StMoviePlayer::doHideSystemBars(const bool ) {
-    if(myWindow.isNull()) {
+    if (myWindow.get() == nullptr) {
         return;
     }
 
@@ -2406,17 +2404,17 @@ void StMoviePlayer::doHideSystemBars(const bool ) {
 }
 
 void StMoviePlayer::doSetBenchmark(const bool theValue) {
-    if(myVideo.isNull()) {
+    if (myVideo.get() == nullptr) {
         return;
     }
 
     myVideo->setBenchmark(theValue);
 }
 
-bool StMoviePlayer::getCurrentFile(StHandle<StFileNode>&     theFileNode,
-                                   StHandle<StStereoParams>& theParams,
-                                   StHandle<StMovieInfo>&    theInfo) {
-    theInfo.nullify();
+bool StMoviePlayer::getCurrentFile(std::shared_ptr<StFileNode>& theFileNode,
+                                   std::shared_ptr<StStereoParams>& theParams,
+                                   std::shared_ptr<StMovieInfo>& theInfo) {
+    theInfo.reset();
     if(!myPlayList->getCurrentFile(theFileNode, theParams)) {
         return false;
     }
@@ -2437,20 +2435,20 @@ int StMoviePlayer::beginRequest(mg_connection*         theConnection,
     // process general requests
     if(anURI.isEquals(stCString("/"))) {
         // return index page
-        StHandle<StResource> aRes = myResMgr->getResource(StString("web") + SYS_FS_SPLITTER + "index.htm");
-        mg_send_file(theConnection, !aRes.isNull() ? aRes->getPath().toCString() : "");
+        std::shared_ptr<StResource> aRes = myResMgr->getResource(StString("web") + SYS_FS_SPLITTER + "index.htm");
+        mg_send_file(theConnection, aRes.get() != nullptr ? aRes->getPath().toCString() : "");
         return 1;
     } else if(anURI.isStartsWith(stCString("/web"))) {
         // return Web UI files
         const StString aSubPath = anURI.subString(5, size_t(-1));
-        StHandle<StResource> aRes = myResMgr->getResource(StString("web") + SYS_FS_SPLITTER + aSubPath);
-        mg_send_file(theConnection, !aRes.isNull() ? aRes->getPath().toCString() : "");
+        std::shared_ptr<StResource> aRes = myResMgr->getResource(StString("web") + SYS_FS_SPLITTER + aSubPath);
+        mg_send_file(theConnection, aRes.get() != nullptr ? aRes->getPath().toCString() : "");
         return 1;
     } else if(anURI.isStartsWith(stCString("/textures"))) {
         // return textures images
         const StString aSubPath = anURI.subString(10, size_t(-1));
-        StHandle<StResource> aRes = myResMgr->getResource(StString("textures") + SYS_FS_SPLITTER + aSubPath);
-        mg_send_file(theConnection, !aRes.isNull() ? aRes->getPath().toCString() : "");
+        std::shared_ptr<StResource> aRes = myResMgr->getResource(StString("textures") + SYS_FS_SPLITTER + aSubPath);
+        mg_send_file(theConnection, aRes.get() != nullptr ? aRes->getPath().toCString() : "");
         return 1;
     }
 

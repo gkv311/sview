@@ -232,33 +232,36 @@ class StGLTextArea : public StGLWidget {
 
         private:
 
-    std::vector<GLuint>                       myTexturesList;
-    StArrayList< StHandle<StGLVertexBuffer> > myTextVertBuf;
-    StArrayList< StHandle<StGLVertexBuffer> > myTextTCrdBuf;
+    std::vector<GLuint> myTexturesList;
 
-    StGLVertexBuffer     myBorderIVertBuf;
-    StGLVertexBuffer     myBorderOVertBuf;
+    std::vector< std::shared_ptr<StGLVertexBuffer> > myTextVertBuf;
+    std::vector< std::shared_ptr<StGLVertexBuffer> > myTextTCrdBuf;
+
+    StGLVertexBuffer myBorderIVertBuf;
+    StGLVertexBuffer myBorderOVertBuf;
 
         protected:
 
-    StHandle<StGLFont>   myFont;          //!< used font
-    StGLTextFormatter    myFormatter;     //!< text formatter
-    StString             myText;          //!< text
-    FontSize             mySize;          //!< font size
-    StGLVec4             myTextColor;     //!< text   color
-    StGLVec4             myShadowColor;   //!< shadow color
-    StGLVec4             myBackColor;     //!< text area color
-    StGLVec4             myBorderColor;   //!< text area border color
+    std::shared_ptr<StGLFont> myFont; //!< used font
 
-    GLfloat              myTextDX;        //!< extra displacement
-    StGLRect             myTextBndBox;    //!< text boundary box
+    StGLTextFormatter myFormatter;//!< text formatter
 
-    GLfloat              myTextWidth;     //!< text width limit
+    StString myText;              //!< text
+    FontSize mySize = SIZE_NORMAL; //!< font size
+    StGLVec4 myTextColor;     //!< text   color
+    StGLVec4 myShadowColor;   //!< shadow color
+    StGLVec4 myBackColor;     //!< text area color
+    StGLVec4 myBorderColor;   //!< text area border color
 
-    bool                 myToRecompute;   //!< flag indicates that text VBOs should be recomputed
-    bool                 myToShowBorder;  //!< to show text area border
-    bool                 myToDrawShadow;  //!< to render text shadow
-    bool                 myIsInitialized;
+    GLfloat  myTextDX = 0.0f; //!< extra displacement
+    StGLRect myTextBndBox;    //!< text boundary box
+
+    GLfloat myTextWidth = -1.0f; //!< text width limit
+
+    bool myToRecompute   = true;  //!< flag indicates that text VBOs should be recomputed
+    bool myToShowBorder  = false; //!< to show text area border
+    bool myToDrawShadow  = false; //!< to render text shadow
+    bool myIsInitialized = false;
 
 };
 

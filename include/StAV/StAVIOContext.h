@@ -51,7 +51,7 @@ class StAVIOContext {
 
         protected:
 
-    AVIOContext* myAvioCtx;
+    AVIOContext* myAvioCtx = nullptr;
 
 };
 

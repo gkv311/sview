@@ -329,7 +329,7 @@ bool StWindowImpl::create() {
         return false;
     }
 
-    myGlContext = new StGLContext(myResMgr);
+    myGlContext = std::make_shared<StGLContext>(myResMgr);
     if(!myGlContext->stglInit()) {
         myMaster.close();
         mySlave.close();

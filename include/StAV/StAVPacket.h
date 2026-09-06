@@ -11,6 +11,8 @@
 
 #include <StGL/StParams.h>
 
+#include <memory>
+
 /**
  * This is just a wrapper to AVPacket structure
  * with some useful copy functionality inside.
@@ -42,7 +44,7 @@ class StAVPacket {
      */
     ST_CPPEXPORT StAVPacket();
 
-    ST_CPPEXPORT StAVPacket(const StHandle<StStereoParams>& theStParams,
+    ST_CPPEXPORT StAVPacket(const std::shared_ptr<StStereoParams>& theStParams,
                             const int theType = DATA_PACKET);
 
     ST_CPPEXPORT StAVPacket(const StAVPacket& theCopy);
@@ -54,37 +56,37 @@ class StAVPacket {
      */
     ST_CPPEXPORT void free();
 
-    inline AVPacket* getAVpkt() {
+    ST_LOCAL AVPacket* getAVpkt() {
         return &myPacket;
     }
 
     ST_CPPEXPORT void setAVpkt(const AVPacket& theCopy);
 
-    inline const StHandle<StStereoParams>& getSource() const {
+    ST_LOCAL const std::shared_ptr<StStereoParams>& getSource() const {
         return myStParams;
     }
 
-    inline int getType() const {
+    ST_LOCAL int getType() const {
         return myType;
     }
 
-    inline const uint8_t* getData() const {
+    ST_LOCAL const uint8_t* getData() const {
         return myPacket.data;
     }
 
-    inline uint8_t* changeData() {
+    ST_LOCAL uint8_t* changeData() {
         return myPacket.data;
     }
 
-    inline int getSize() const {
+    ST_LOCAL int getSize() const {
         return myPacket.size;
     }
 
-    inline int64_t getPts() const {
+    ST_LOCAL int64_t getPts() const {
         return myPacket.pts;
     }
 
-    inline int64_t getDts() const {
+    ST_LOCAL int64_t getDts() const {
         return myPacket.dts;
     }
 
@@ -96,46 +98,46 @@ class StAVPacket {
         return myPacket.duration;
     }
 
-    inline double getDurationSeconds() const {
+    ST_LOCAL double getDurationSeconds() const {
         return myDurationSec;
     }
 
-    inline void setDurationSeconds(const double theDurationSec) {
+    ST_LOCAL void setDurationSeconds(const double theDurationSec) {
         myDurationSec = theDurationSec;
     }
 
-    inline int getStreamId() const {
+    ST_LOCAL int getStreamId() const {
         return myPacket.stream_index;
     }
 
-    inline bool isKeyFrame() const {
+    ST_LOCAL bool isKeyFrame() const {
         return myPacket.flags & AV_PKT_FLAG_KEY;
     }
 
-    inline void setKeyFrame() {
+    ST_LOCAL void setKeyFrame() {
         myPacket.flags |= AV_PKT_FLAG_KEY;
     }
 
     // dummy
-    inline bool operator==(const StAVPacket& compare) const {
+    ST_LOCAL bool operator==(const StAVPacket& compare) const {
         return this == &compare;
     }
-    inline bool operator!=(const StAVPacket& compare) const {
+    ST_LOCAL bool operator!=(const StAVPacket& compare) const {
         return this != &compare;
     }
-    inline bool operator>(const StAVPacket& compare) const {
+    ST_LOCAL bool operator>(const StAVPacket& compare) const {
         return this > &compare;
     }
-    inline bool operator<(const StAVPacket& compare) const {
+    ST_LOCAL bool operator<(const StAVPacket& compare) const {
         return this < &compare;
     }
-    inline bool operator>=(const StAVPacket& compare) const {
+    ST_LOCAL bool operator>=(const StAVPacket& compare) const {
         return this >= &compare;
     }
-    inline bool operator<=(const StAVPacket& compare) const {
+    ST_LOCAL bool operator<=(const StAVPacket& compare) const {
         return this <= &compare;
     }
-    inline StString toString() const {
+    ST_LOCAL StString toString() const {
         return StString();
     }
 
@@ -148,11 +150,13 @@ class StAVPacket {
 
         private:
 
-    AVPacket                 myPacket;
-    StHandle<StStereoParams> myStParams;
-    double                   myDurationSec;
-    int                      myType;
-    bool                     myIsOwn;
+    AVPacket myPacket;
+
+    std::shared_ptr<StStereoParams> myStParams;
+
+    double myDurationSec = 0.0;
+    int    myType = DATA_PACKET;
+    bool   myIsOwn = false;
 
 };
 

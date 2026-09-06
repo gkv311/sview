@@ -56,12 +56,12 @@ using namespace StImageViewerStrings;
 
 namespace {
 
-    static const int DISPL_Y_REGION_UPPER = 32;
-    static const int DISPL_X_REGION_UPPER = 32;
+    static constexpr int DISPL_Y_REGION_UPPER = 32;
+    static constexpr int DISPL_X_REGION_UPPER = 32;
 
-    static const StGLVec3 aBlack (0.0f, 0.0f, 0.0f);
-    static const StGLVec3 aGreen (0.0f, 0.6f, 0.4f);
-    static const StGLVec3 aRed   (1.0f, 0.0f, 0.0f);
+    static constexpr StGLVec3 aBlack (0.0f, 0.0f, 0.0f);
+    static constexpr StGLVec3 aGreen (0.0f, 0.6f, 0.4f);
+    static constexpr StGLVec3 aRed   (1.0f, 0.0f, 0.0f);
 
 }
 
@@ -69,7 +69,7 @@ StInfoDialog::~StInfoDialog() {
     myPlugin->doSaveImageInfo(0);
 }
 
-void StImageViewerGUI::createDesktopUI(const StHandle<StPlayList>& thePlayList) {
+void StImageViewerGUI::createDesktopUI(const std::shared_ptr<StPlayList>& thePlayList) {
     if(myPlugin->params.ToShowFps->getValue()) {
         myFpsWidget = new StGLFpsLabel(this);
     }
@@ -539,7 +539,7 @@ StGLMenu* StImageViewerGUI::createOutputMenu() {
     aMenu->addItem(myPlugin->params.ToShowFps);
     aMenu->addItem(myPlugin->params.IsVSyncOn);
 
-    const StHandle<StWindow>& aRend = myPlugin->getMainWindow();
+    const std::shared_ptr<StWindow>& aRend = myPlugin->getMainWindow();
     StParamsList aParams;
     aRend->getOptions(aParams);
     StHandle<StBoolParamNamed> aBool;
@@ -598,14 +598,14 @@ void StImageViewerGUI::doUserTips(const size_t ) {
 }
 
 void StImageViewerGUI::doAboutImage(const size_t ) {
-    StHandle<StImageInfo>& anExtraInfo = myPlugin->myFileInfo;
-    anExtraInfo.nullify();
+    std::shared_ptr<StImageInfo>& anExtraInfo = myPlugin->myFileInfo;
+    anExtraInfo.reset();
 
-    StHandle<StFileNode>     aFileNode;
-    StHandle<StStereoParams> aParams;
-    if(!myPlugin->getCurrentFile(aFileNode, aParams, anExtraInfo)
-    ||  anExtraInfo.isNull()) {
-        anExtraInfo.nullify();
+    std::shared_ptr<StFileNode>     aFileNode;
+    std::shared_ptr<StStereoParams> aParams;
+    if (!myPlugin->getCurrentFile(aFileNode, aParams, anExtraInfo)
+    ||  anExtraInfo.get() == nullptr) {
+        anExtraInfo.reset();
         StGLMessageBox* aMsgBox = new StGLMessageBox(this, tr(DIALOG_FILE_INFO), tr(DIALOG_FILE_NOINFO));
         aMsgBox->addButton(tr(BUTTON_CLOSE), true);
         aMsgBox->stglInit();
@@ -752,7 +752,7 @@ void StImageViewerGUI::doResetHotKeys(const size_t ) {
 }
 
 void StImageViewerGUI::doListHotKeys(const size_t ) {
-    const StHandle<StWindow>& aRend = myPlugin->getMainWindow();
+    const std::shared_ptr<StWindow>& aRend = myPlugin->getMainWindow();
     StParamsList aParams;
     aParams.push_back(myPlugin->StApplication::params.ActiveDevice);
     aParams.push_back(myImage->params.DisplayMode);
@@ -795,7 +795,7 @@ void StImageViewerGUI::doChangeHotKey2(const size_t theId) {
 }
 
 void StImageViewerGUI::doMobileSettings(const size_t ) {
-    const StHandle<StWindow>& aRend = myPlugin->getMainWindow();
+    const std::shared_ptr<StWindow>& aRend = myPlugin->getMainWindow();
     StParamsList aParams;
     aParams.push_back(myPlugin->StApplication::params.ActiveDevice);
     aParams.push_back(myImage->params.DisplayMode);
@@ -908,7 +908,7 @@ StGLMenu* StImageViewerGUI::createLanguageMenu() {
     return aMenu;
 }
 
-void StImageViewerGUI::createMobileUI(const StHandle<StPlayList>& thePlayList) {
+void StImageViewerGUI::createMobileUI(const std::shared_ptr<StPlayList>& thePlayList) {
     createImageAdjustments();
     createMobileUpperToolbar();
     createMobileBottomToolbar();
@@ -1204,9 +1204,9 @@ void StImageViewerGUI::doOpenFile(const size_t ) {
     aDialog->setMimeList(myPlugin->myLoader->getMimeListImages(), "Images", false);
     aDialog->setMimeList(myPlugin->myLoader->getMimeListVideo(),  "Videos", true);
 
-    if(myPlugin->params.lastFolder.isEmpty()) {
-        StHandle<StFileNode> aCurrFile = myPlugin->myPlayList->getCurrentFile();
-        if(!aCurrFile.isNull()) {
+    if (myPlugin->params.lastFolder.isEmpty()) {
+        std::shared_ptr<StFileNode> aCurrFile = myPlugin->myPlayList->getCurrentFile();
+        if (aCurrFile.get() != nullptr) {
             myPlugin->params.lastFolder = aCurrFile->isEmpty() ? aCurrFile->getFolderPath() : aCurrFile->getValue(0)->getFolderPath();
         }
     }
@@ -1217,22 +1217,22 @@ void StImageViewerGUI::doOpenFile(const size_t ) {
 void StImageViewerGUI::doShowMobileExMenu(const size_t ) {
     const int aTop = scale(56);
 
-    StHandle<StImageInfo>&   anExtraInfo = myPlugin->myFileInfo;
-    StHandle<StFileNode>     aFileNode;
-    StHandle<StStereoParams> aParams;
-    if(anExtraInfo.isNull()
-    && !myPlugin->getCurrentFile(aFileNode, aParams, anExtraInfo)) {
-        anExtraInfo.nullify();
+    std::shared_ptr<StImageInfo>&   anExtraInfo = myPlugin->myFileInfo;
+    std::shared_ptr<StFileNode>     aFileNode;
+    std::shared_ptr<StStereoParams> aParams;
+    if (anExtraInfo.get() == nullptr
+     && !myPlugin->getCurrentFile(aFileNode, aParams, anExtraInfo)) {
+        anExtraInfo.reset();
     }
 
     StGLMenu*     aMenu  = new StGLMenu(this, 0, aTop, StGLMenu::MENU_VERTICAL_COMPACT, true);
     StGLMenuItem* anItem = NULL;
     aMenu->setCorner(StGLCorner(ST_VCORNER_TOP, ST_HCORNER_RIGHT));
     aMenu->setContextual(true);
-    if(!anExtraInfo.isNull()) {
+    if (anExtraInfo.get() != nullptr) {
         anItem = aMenu->addItem(tr(BUTTON_DELETE), myPlugin->getAction(StImageViewer::Action_DeleteFile));
         anItem->setIcon(stCMenuIcon("actionDiscard"));
-        anExtraInfo.nullify();
+        anExtraInfo.reset();
     }
     anItem = aMenu->addItem(tr(MENU_HELP_ABOUT));
     anItem->setIcon(stCMenuIcon("actionHelp"));
@@ -1250,8 +1250,8 @@ void StImageViewerGUI::doShowMobileExMenu(const size_t ) {
 StImageViewerGUI::StImageViewerGUI(StImageViewer*  thePlugin,
                                    StWindow*       theWindow,
                                    StTranslations* theLangMap,
-                                   const StHandle<StPlayList>&       thePlayList,
-                                   const StHandle<StGLTextureQueue>& theTextureQueue)
+                                   const std::shared_ptr<StPlayList>& thePlayList,
+                                   const std::shared_ptr<StGLTextureQueue>& theTextureQueue)
 : StGLRootWidget(thePlugin->myResMgr),
   myPlugin(thePlugin),
   myWindow(theWindow),
@@ -1295,9 +1295,9 @@ StImageViewerGUI::StImageViewerGUI(StImageViewer*  thePlugin,
 
     myPlugin->params.ToShowFps->signals.onChanged.connect(this, &StImageViewerGUI::doShowFPS);
 
-    StHandle<StGLTextureQueue> aTextureQueue = theTextureQueue;
-    if(aTextureQueue.isNull()) {
-        aTextureQueue = new StGLTextureQueue(2);
+    std::shared_ptr<StGLTextureQueue> aTextureQueue = theTextureQueue;
+    if (aTextureQueue.get() == nullptr) {
+        aTextureQueue = std::make_shared<StGLTextureQueue>(2);
     }
 
     myImage = new StGLImageRegion(this, aTextureQueue, true);
@@ -1417,17 +1417,15 @@ void StImageViewerGUI::setVisibility(const StPointD_t& theCursor,
                                 || (toShowPlayList && myPlayList != NULL && myPlayList->isPointIn(theCursor))
                                 || (hasMainMenu    && myMenuRoot->isActive()));
 
-    StHandle<StStereoParams> aParams = myImage->getSource();
-    myAnimVisibility.setEmptyImage(aParams.isNull() && !myPlugin->myPlayList->isEmpty());
+    std::shared_ptr<StStereoParams> aParams = myImage->getSource();
+    myAnimVisibility.setEmptyImage(aParams.get() == nullptr && !myPlugin->myPlayList->isEmpty());
     myAnimVisibility.updateVisibility(theToForceHide, theToForceShow);
 
     StFormat aSrcFormat = (StFormat )myPlugin->params.SrcStereoFormat->getValue();
-    if(aSrcFormat == StFormat_AUTO
-    && !aParams.isNull()) {
+    if (aSrcFormat == StFormat_AUTO && aParams.get() != nullptr) {
         aSrcFormat = aParams->StereoFormat;
     }
-    if(!aParams.isNull()
-     && myImage->params.SwapLR->getValue()) {
+    if (aParams.get() != nullptr && myImage->params.SwapLR->getValue()) {
         aSrcFormat = st::formatReversed(aSrcFormat);
     }
 
@@ -1480,12 +1478,11 @@ void StImageViewerGUI::setVisibility(const StPointD_t& theCursor,
     }
     setWidgetOpacity(myBtnSwapLR, aSrcFormat != StFormat_Mono ? myPanelUpper->getOpacity() : 0.0f, false);
 
-    const StViewSurface aViewMode = !aParams.isNull()
+    const StViewSurface aViewMode = aParams.get() != nullptr
                                   ? aParams->ViewingMode
                                   : StViewSurface_Plain;
     bool toShowPano = aViewMode != StViewSurface_Plain;
-    if(!toShowPano
-    && !aParams.isNull()
+    if (!toShowPano && aParams.get() != nullptr
     /*&&  st::probePanorama(aParams->StereoFormat,
                           aParams->Src1SizeX, aParams->Src1SizeY,
                           aParams->Src2SizeX, aParams->Src2SizeY) != StPanorama_OFF*/) {

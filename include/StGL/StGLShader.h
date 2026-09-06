@@ -17,7 +17,7 @@ class StGLShader : public StGLResource {
 
         public:
 
-    static const GLuint NO_SHADER = 0;
+    static constexpr GLuint NO_SHADER = 0;
 
         public:
 
@@ -36,7 +36,7 @@ class StGLShader : public StGLResource {
      * Implementations should define this method to return:
      * GL_VERTEX_SHADER, GL_FRAGMENT_SHADER or GL_GEOMETRY_SHADER.
      */
-    inline GLenum getType() const {
+    ST_LOCAL GLenum getType() const {
         return myShaderType;
     }
 
@@ -45,7 +45,7 @@ class StGLShader : public StGLResource {
     /**
      * @return true if shader object is valid.
      */
-    inline bool isValid() const {
+    ST_LOCAL bool isValid() const {
         return myShaderId != NO_SHADER;
     }
 

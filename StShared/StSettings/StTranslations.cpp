@@ -20,8 +20,8 @@ namespace {
     static constexpr StCString ST_LNG_FILE_SUFFIX    = stCString(".lng");
 }
 
-StTranslations::StTranslations(const StHandle<StResourceManager>& theResMgr,
-                               const StString&                    theModuleName)
+StTranslations::StTranslations(const std::shared_ptr<StResourceManager>& theResMgr,
+                               const StString& theModuleName)
 : myResMgr(theResMgr),
   myModuleName(theModuleName),
   myWasReloaded(false) {
@@ -39,10 +39,9 @@ void StTranslations::reload() {
         myLangFolderList.push_back(aFolders[aNodeId]);
 
         const StString aNameFile = StString("lang" ST_FILE_SPLITTER) + aFolders[aNodeId] + ST_FILE_SPLITTER "language.lng";
-        StHandle<StResource> aRes = myResMgr->getResource(aNameFile);
+        std::shared_ptr<StResource> aRes = myResMgr->getResource(aNameFile);
         StString aName;
-        if(!aRes.isNull()
-        &&  aRes->read()) {
+        if (aRes.get() != nullptr && aRes->read()) {
             const char*  aSrc = (const char* )aRes->getData();
             const size_t aLen = (size_t      )aRes->getSize();
             aName = StString(aSrc, aLen);
@@ -173,9 +172,8 @@ void StTranslations::reload() {
                                 + "lang"       + SYS_FS_SPLITTER
                                 + aFolderName  + SYS_FS_SPLITTER
                                 + myModuleName + ST_LNG_FILE_SUFFIX;
-    StHandle<StResource> aRes = myResMgr->getResource(aResName);
-    if(!aRes.isNull()
-    &&  aRes->read()) {
+    std::shared_ptr<StResource> aRes = myResMgr->getResource(aResName);
+    if (aRes.get() != nullptr && aRes->read()) {
         const char* aSrc = (const char* )aRes->getData();
         const int   aLen = aRes->getSize();
         read(aSrc, aLen);
@@ -237,9 +235,8 @@ void StTranslations::setLanguage(const int32_t theNewLang) {
                             + "lang" ST_FILE_SPLITTER
                             + aFolderName  + SYS_FS_SPLITTER
                             + myModuleName + ST_LNG_FILE_SUFFIX;
-    StHandle<StResource> aRes = myResMgr->getResource(aResName);
-    if(!aRes.isNull()
-    &&  aRes->read()) {
+    std::shared_ptr<StResource> aRes = myResMgr->getResource(aResName);
+    if (aRes.get() != nullptr && aRes->read()) {
         const char* aSrc = (const char* )aRes->getData();
         const int   aLen = aRes->getSize();
         read(aSrc, aLen);

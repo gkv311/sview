@@ -78,7 +78,7 @@ class StPlayItem {
         return !myTitle.isEmpty();
     }
 
-    inline StHandle<StStereoParams> getParams() {
+    inline std::shared_ptr<StStereoParams> getParams() {
         return myStParams;
     }
 
@@ -96,7 +96,7 @@ class StPlayItem {
     StPlayItem* myNextItem; //!< next item in list
     size_t      myPosition; //!< position in list
     StFileNode* myFileNode; //!< link to file node
-    StHandle<StStereoParams> myStParams; //!< stereo parameters
+    std::shared_ptr<StStereoParams> myStParams; //!< stereo parameters
     StString    myTitle;    //!< item title
     bool        myPlayFlag; //!< flag for shuffle check
 
@@ -174,34 +174,34 @@ class StPlayList {
     /**
      * Returns file node for current playing position.
      */
-    ST_CPPEXPORT StHandle<StFileNode> getCurrentFile();
+    ST_CPPEXPORT std::shared_ptr<StFileNode> getCurrentFile();
 
     /**
      * Set title for specified item.
      */
-    ST_CPPEXPORT void setTitle(const StHandle<StStereoParams>& theKey,
-                               const StString&                 theTitle);
+    ST_CPPEXPORT void setTitle(const std::shared_ptr<StStereoParams>& theKey,
+                               const StString& theTitle);
 
     /**
      * Returns file node and stereo parameters for current playing position.
      * @return true if playlist is not empty.
      */
-    ST_CPPEXPORT bool getCurrentFile(StHandle<StFileNode>&     theFileNode,
-                                     StHandle<StStereoParams>& theParams,
-                                     StHandle<StFileNode>&     thePlsFile);
+    ST_CPPEXPORT bool getCurrentFile(std::shared_ptr<StFileNode>& theFileNode,
+                                     std::shared_ptr<StStereoParams>& theParams,
+                                     std::shared_ptr<StFileNode>& thePlsFile);
 
     /**
      * Returns file node and stereo parameters for current playing position.
      * @return true if playlist is not empty.
      */
-    ST_LOCAL bool getCurrentFile(StHandle<StFileNode>&     theFileNode,
-                                 StHandle<StStereoParams>& theParams) {
-        StHandle<StFileNode> aPlsFile;
+    ST_LOCAL bool getCurrentFile(std::shared_ptr<StFileNode>& theFileNode,
+                                 std::shared_ptr<StStereoParams>& theParams) {
+        std::shared_ptr<StFileNode> aPlsFile;
         return getCurrentFile(theFileNode, theParams, aPlsFile);
     }
 
-    ST_CPPEXPORT void addToNode(const StHandle<StFileNode>& theFileNode,
-                                const StString&             thePathToAdd);
+    ST_CPPEXPORT void addToNode(const std::shared_ptr<StFileNode>& theFileNode,
+                                const StString& thePathToAdd);
 
     /**
      * Remove file from playlist.
@@ -212,7 +212,7 @@ class StPlayList {
     /**
      * Remove file from playlist and delete it physically.
      */
-    ST_LOCAL bool removePhysically(const StHandle<StFileNode>& theFileNode) {
+    ST_LOCAL bool removePhysically(const std::shared_ptr<StFileNode>& theFileNode) {
         return remove(theFileNode->getPath(), true);
     }
 
@@ -365,7 +365,7 @@ class StPlayList {
      * @param theItemId Position in recent files list
      * @return saved parameters or NULL
      */
-    ST_CPPEXPORT StHandle<StStereoParams> openRecent(const size_t theItemId);
+    ST_CPPEXPORT std::shared_ptr<StStereoParams> openRecent(const size_t theItemId);
 
     /**
      * Reset list of recently opened files.
@@ -375,8 +375,8 @@ class StPlayList {
     /**
      * Update parameters of recent item.
      */
-    ST_CPPEXPORT void updateRecent(const StHandle<StFileNode>&     theFile,
-                                   const StHandle<StStereoParams>& theParams);
+    ST_CPPEXPORT void updateRecent(const std::shared_ptr<StFileNode>& theFile,
+                                   const std::shared_ptr<StStereoParams>& theParams);
 
         public: //!< Signals
 
@@ -402,8 +402,8 @@ class StPlayList {
         private:
 
     struct StRecentItem {
-        StHandle<StFileNode>     File;
-        StHandle<StStereoParams> Params;
+        std::shared_ptr<StFileNode> File;
+        std::shared_ptr<StStereoParams> Params;
     };
 
         private:
@@ -426,8 +426,8 @@ class StPlayList {
     /**
      * Add file to list of recent files.
      */
-    ST_LOCAL const StHandle<StRecentItem>& addRecentFile(const StFileNode& theFile,
-                                                         const bool        theToFront = true);
+    ST_LOCAL const std::shared_ptr<StRecentItem>& addRecentFile(const StFileNode& theFile,
+                                                                const bool        theToFront = true);
 
     /**
      * M3U parsing stuff.
@@ -460,8 +460,8 @@ class StPlayList {
     bool                    myToLoopSingle;  //!< play single item in loop
     bool                    myIsLoopFlag;
 
-    StHandle<StRecentItem>  myPlsFile;       //!< current playlist file (if any)
-    std::deque< StHandle<StRecentItem> > myRecent; //!< list of recently opened files
+    std::shared_ptr<StRecentItem>  myPlsFile;       //!< current playlist file (if any)
+    std::deque< std::shared_ptr<StRecentItem> > myRecent; //!< list of recently opened files
     size_t                  myRecentLimit;   //!< the maximum size of list with recently opened files
     mutable bool            myIsNewRecent;   //!< flag indicates modified state of recent files list
 

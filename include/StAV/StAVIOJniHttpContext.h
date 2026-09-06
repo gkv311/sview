@@ -69,12 +69,14 @@ class StAVIOJniHttpContext : public StAVIOContext {
 
         protected:
 
-    FunctionTable* myFunctions; //!< JNI function table
-    StJNIEnv myJEnv;        //!< JavaVM environment
-    StString myUrl;         //!< opened URL
-    void*    myReadChannel; //!< pointer to java.nio.channels.ReadableByteChannel
-    int64_t  myContentLen;  //!< file length
-    int64_t  myPosition;    //!< current position within the stream
+    FunctionTable* myFunctions = nullptr; //!< JNI function table
+
+    StJNIEnv myJEnv; //!< JavaVM environment
+    StString myUrl;  //!< opened URL
+
+    void*    myReadChannel = nullptr; //!< pointer to java.nio.channels.ReadableByteChannel
+    int64_t  myContentLen = 0;        //!< file length
+    int64_t  myPosition = 0;          //!< current position within the stream
 
 };
 

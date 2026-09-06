@@ -42,12 +42,12 @@ class StApplication {
     /**
      * Parse process arguments.
      */
-    ST_CPPEXPORT static StHandle<StOpenInfo> parseProcessArguments();
+    ST_CPPEXPORT static std::shared_ptr<StOpenInfo> parseProcessArguments();
 
     /**
      * Read default drawer from setting.
      */
-    ST_CPPEXPORT static bool readDefaultDrawer(StHandle<StOpenInfo>& theInfo);
+    ST_CPPEXPORT static bool readDefaultDrawer(std::shared_ptr<StOpenInfo>& theInfo);
 
     /**
      * @return TRUE if specified drawer is set as default in settings.
@@ -70,9 +70,9 @@ class StApplication {
     /**
      * Main constructor.
      */
-    ST_CPPEXPORT StApplication(const StHandle<StResourceManager>& theResMgr,
+    ST_CPPEXPORT StApplication(const std::shared_ptr<StResourceManager>& theResMgr,
                                const StNativeWin_t                theParentWin,
-                               const StHandle<StOpenInfo>&        theOpenInfo  = NULL);
+                               const std::shared_ptr<StOpenInfo>& theOpenInfo = std::shared_ptr<StOpenInfo>());
 
     /**
      * Destructor.
@@ -127,12 +127,12 @@ class StApplication {
     /**
      * @return file to open in another drawer
      */
-    const StHandle<StOpenInfo>& getOpenFileInOtherDrawer() const { return myOpenFileOtherApp; }
+    const std::shared_ptr<StOpenInfo>& getOpenFileInOtherDrawer() const { return myOpenFileOtherApp; }
 
     /**
      * Return active renderer and main application window.
      */
-    ST_CPPEXPORT const StHandle<StWindow>& getMainWindow() const;
+    ST_CPPEXPORT const std::shared_ptr<StWindow>& getMainWindow() const;
 
     /**
      * @return true if main application window is in active state
@@ -142,7 +142,7 @@ class StApplication {
     /**
      * @return default messages queue
      */
-    ST_CPPEXPORT const StHandle<StMsgQueue>& getMessagesQueue() const;
+    ST_CPPEXPORT const std::shared_ptr<StMsgQueue>& getMessagesQueue() const;
 
     /**
      * Register hot keys for specified actions.
@@ -189,7 +189,7 @@ class StApplication {
     /**
      * Register renderer.
      */
-    ST_CPPEXPORT void addRenderer(const StHandle<StWindow>& theRenderer);
+    ST_CPPEXPORT void addRenderer(const std::shared_ptr<StWindow>& theRenderer);
 
     /**
      * Modify actions.
@@ -330,26 +330,28 @@ class StApplication {
 
         private:
 
-    ST_LOCAL void stApplicationInit(const StHandle<StOpenInfo>& theOpenInfo);
+    ST_LOCAL void stApplicationInit(const std::shared_ptr<StOpenInfo>& theOpenInfo);
     ST_LOCAL void doDrawProxy(unsigned int theView);
 
         protected: //! @name protected fields
 
-    std::vector< StHandle<StWindow> > myRenderers; //!< list of registered renderers
-    StHandle<StResourceManager>       myResMgr;    //!< resources manager
-    StHandle<StTranslations>          myLangMap;   //!< translated strings map
-    StHandle<StMsgQueue>  myMsgQueue;              //!< messages queue
-    StHandle<StWindow>    myWindow;                //!< active renderer and main application window
-    StHandle<StWindow>    mySwitchTo;              //!< new renderer to switch to
-    StHandle<StOpenInfo>  myOpenFileInfo;          //!< file to open
-    StHandle<StOpenInfo>  myOpenFileOtherApp;      //!< file to open in another drawer
+    std::vector< std::shared_ptr<StWindow> > myRenderers;//!< list of registered renderers
+
+    std::shared_ptr<StResourceManager> myResMgr;   //!< resources manager
+    std::shared_ptr<StTranslations>    myLangMap;  //!< translated strings map
+    std::shared_ptr<StMsgQueue>        myMsgQueue; //!< messages queue
+
+    std::shared_ptr<StWindow>    myWindow;          //!< active renderer and main application window
+    std::shared_ptr<StWindow>    mySwitchTo;        //!< new renderer to switch to
+    std::shared_ptr<StOpenInfo>  myOpenFileInfo;    //!< file to open
+    std::shared_ptr<StOpenInfo>  myOpenFileOtherApp;//!< file to open in another drawer
     std::map< int, StHandle<StAction> >
                           myActions;               //!< ID -> Action map
     std::map< std::string, int >
                           myActionLookup;          //!< lookup map ActionName -> ActionID
     std::map< unsigned int, StHandle<StAction> >
                           myKeyActions;            //!< Hot Key -> Action map
-    StHandle<StEventsBuffer>
+    std::shared_ptr<StEventsBuffer>
                           myEventsBuffer;          //!< extra buffer for application-specific queued events
 
     StNativeWin_t         myWinParent;

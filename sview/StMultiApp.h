@@ -11,8 +11,8 @@
 
 namespace StMultiApp {
 
-    ST_LOCAL StHandle<StApplication> getInstance(const StHandle<StResourceManager>& theResMgr,
-                                                 const StHandle<StOpenInfo>&        theInfo = NULL);
+    ST_LOCAL std::shared_ptr<StApplication> getInstance(const std::shared_ptr<StResourceManager>& theResMgr,
+                                                        const std::shared_ptr<StOpenInfo>&        theInfo = std::shared_ptr<StOpenInfo>());
 
 }
 

@@ -385,7 +385,7 @@ bool StWindowImpl::create() {
     }
 
     myMaster.glMakeCurrent();
-    myGlContext = new StGLContext(myResMgr);
+    myGlContext = std::make_shared<StGLContext>(myResMgr);
     if (!myGlContext->stglInit()) {
         stError("Critical error - broken GL context!\nInvalid OpenGL driver?");
         myInitState = STWIN_ERROR_COCOA_NO_GL;

@@ -66,7 +66,7 @@ class StAVFrame {
 
         public:
 
-    AVFrame* Frame;
+    AVFrame* Frame = nullptr;
 
         private:
 

@@ -9,10 +9,6 @@
 
 #include "StImageFile.h"
 
-// define StHandle template specialization
-class StWicImage;
-ST_DEFINE_HANDLE(StWicImage, StImageFile);
-
 /**
  * This class implements image load/save operations using WinCodec library (WinAPI).
  */
@@ -30,7 +26,7 @@ class StWicImage : public StImageFile {
     ST_CPPEXPORT StWicImage();
     ST_CPPEXPORT virtual ~StWicImage();
 
-    ST_LOCAL virtual StHandle<StImageFile> createEmpty() const ST_ATTR_OVERRIDE { return new StWicImage(); }
+    ST_LOCAL virtual std::shared_ptr<StImageFile> createEmpty() const ST_ATTR_OVERRIDE { return std::make_shared<StWicImage>(); }
 
     ST_CPPEXPORT virtual void close() ST_ATTR_OVERRIDE;
     ST_CPPEXPORT virtual bool loadExtra(const StString& theFilePath,

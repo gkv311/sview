@@ -37,7 +37,7 @@ class StGLTextureData {
     /**
      * Default constructor
      */
-    ST_CPPEXPORT StGLTextureData(const StHandle<StGLTextureUploadParams>& theUploadParams);
+    ST_CPPEXPORT StGLTextureData(const std::shared_ptr<StGLTextureUploadParams>& theUploadParams);
 
     /**
      * Destructor.
@@ -47,15 +47,15 @@ class StGLTextureData {
     /**
      * @return stereo parameters for current data
      */
-    inline const StHandle<StStereoParams>& getSource() const {
+    ST_LOCAL const std::shared_ptr<StStereoParams>& getSource() const {
         return myStParams;
     }
 
     ST_LOCAL void resetStParams() {
-        myStParams.nullify();
-        if(!myDataPair.getBufferCounter().isNull()
-        || !myDataL.getBufferCounter().isNull()
-        || !myDataR.getBufferCounter().isNull()) {
+        myStParams.reset();
+        if (myDataPair.getBufferCounter().get() != nullptr
+         || myDataL.getBufferCounter().get() != nullptr
+         || myDataR.getBufferCounter().get() != nullptr) {
             reset();
         }
     }
@@ -63,7 +63,7 @@ class StGLTextureData {
     /**
      * @return presentation timestamp
      */
-    inline double getPTS() {
+    ST_LOCAL double getPTS() {
         return myPts;
     }
 
@@ -85,7 +85,7 @@ class StGLTextureData {
      * Iterator's function.
      * @return previous item
      */
-    inline StGLTextureData* getPrev() {
+    ST_LOCAL StGLTextureData* getPrev() {
         return myPrev;
     }
 
@@ -93,7 +93,7 @@ class StGLTextureData {
      * Iterator's function, communicate queue.
      * @param textureData setted previous item
      */
-    inline void setPrev(StGLTextureData* theTextureData) {
+    ST_LOCAL void setPrev(StGLTextureData* theTextureData) {
         myPrev = theTextureData;
         if(theTextureData != NULL) {
             theTextureData->myNext = this;
@@ -104,7 +104,7 @@ class StGLTextureData {
      * Iterator's function.
      * @return next item
      */
-    inline StGLTextureData* getNext() {
+    ST_LOCAL StGLTextureData* getNext() {
         return myNext;
     }
 
@@ -112,7 +112,7 @@ class StGLTextureData {
      * Iterator's function, communicate queue.
      * @param textureData setted next item
      */
-    inline void setNext(StGLTextureData* theTextureData) {
+    ST_LOCAL void setNext(StGLTextureData* theTextureData) {
         myNext = theTextureData;
         if(theTextureData != NULL) {
             theTextureData->myPrev = this;
@@ -129,13 +129,13 @@ class StGLTextureData {
      * @param theCubemap  cubemap format
      * @param thePts      presentation timestamp
      */
-    ST_CPPEXPORT void updateData(const StGLDeviceCaps&           theDevCaps,
-                                 const StImage&                  theDataL,
-                                 const StImage&                  theDataR,
-                                 const StHandle<StStereoParams>& theStParams,
-                                 const StFormat                  theFormat,
-                                 const StCubemap                 theCubemap,
-                                 const double                    thePts);
+    ST_CPPEXPORT void updateData(const StGLDeviceCaps& theDevCaps,
+                                 const StImage& theDataL,
+                                 const StImage& theDataR,
+                                 const std::shared_ptr<StStereoParams>& theStParams,
+                                 const StFormat theFormat,
+                                 const StCubemap theCubemap,
+                                 const double thePts);
 
     /**
      * Perform texture update with current data.
@@ -180,23 +180,23 @@ class StGLTextureData {
 
         private:
 
-    StGLTextureData*         myPrev;          //!< pointer to previous item in the list
-    StGLTextureData*         myNext;          //!< pointer to next item
+    StGLTextureData* myPrev = nullptr; //!< pointer to previous item in the list
+    StGLTextureData* myNext = nullptr; //!< pointer to next item
 
-    GLubyte*                 myDataPtr;       //!< data for left and right views
-    size_t                   myDataSizeBytes; //!< allocated data size in bytes
-    StImage                  myDataPair;
-    StImage                  myDataL;
-    StImage                  myDataR;
+    GLubyte* myDataPtr = nullptr; //!< data for left and right views
+    size_t   myDataSizeBytes = 0; //!< allocated data size in bytes
+    StImage  myDataPair;
+    StImage  myDataL;
+    StImage  myDataR;
 
-    StHandle<StStereoParams> myStParams;
-    double                   myPts;           //!< presentation timestamp
-    StFormat                 mySrcFormat;
-    StCubemap                myCubemapFormat;
+    std::shared_ptr<StStereoParams> myStParams;
+    double                   myPts = 0.0; //!< presentation timestamp
+    StFormat                 mySrcFormat = StFormat_AUTO;
+    StCubemap                myCubemapFormat = StCubemap_OFF;
 
-    StHandle<StGLTextureUploadParams> myUploadParams; //!< texture streaming parameters
-    GLsizei                  myFillFromRow;
-    GLsizei                  myFillRows;
+    std::shared_ptr<StGLTextureUploadParams> myUploadParams; //!< texture streaming parameters
+    GLsizei myFillFromRow = 0;
+    GLsizei myFillRows = 0;
 
 };
 

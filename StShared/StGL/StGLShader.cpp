@@ -141,9 +141,8 @@ bool StGLShader::init(StGLContext&       theCtx,
 
 bool StGLShader::initFile(StGLContext&    theCtx,
                           const StString& theName) {
-    StHandle<StResource> aRes = theCtx.getResourceManager()->getResource(theName);
-    if( aRes.isNull()
-    || !aRes->read()) {
+    std::shared_ptr<StResource> aRes = theCtx.getResourceManager()->getResource(theName);
+    if (aRes.get() == nullptr || !aRes->read()) {
         theCtx.pushError(StString("Shader file '") + theName + "' is not found!");
         return false;
     }

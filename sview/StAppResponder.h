@@ -9,10 +9,11 @@
 #ifndef __StAppResponder_h_
 #define __StAppResponder_h_
 
-#include <StTemplates/StHandle.h>
 #include <StThreads/StThread.h>
 
 #import <Cocoa/Cocoa.h>
+
+#include <memory>
 
 // forward declarations
 class StApplication;
@@ -23,10 +24,10 @@ class StApplication;
 @interface StAppResponder : NSObject <NSApplicationDelegate>
     {
         @private
-        StHandle<StThread> myThread; //!< handle to StApplication thread (if started)
+        std::shared_ptr<StThread> myThread; //!< handle to StApplication thread (if started)
 
         @private
-        StHandle<StApplication> myStApp; //!< StApplication instance
+        std::shared_ptr<StApplication> myStApp; //!< StApplication instance
 
         @private
         NSTimer*           myTimer;  //!< timer may be used instead of dedicated thread

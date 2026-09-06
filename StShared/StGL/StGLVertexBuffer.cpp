@@ -13,10 +13,7 @@
 #include <stAssert.h>
 
 StGLVertexBuffer::StGLVertexBuffer()
-: myBufferId(0),
-  myElemSize(4),
-  myElemsCount(0),
-  myDataType(GL_FLOAT) {
+: myDataType(GL_FLOAT) {
     //
 }
 

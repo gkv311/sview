@@ -86,17 +86,17 @@ class StGLMatrix {
      */
     ST_CPPEXPORT const StGLMatrix& operator=(const StGLMatrix& copyMat);
 
-    GLfloat getValue(size_t theRow, size_t theCol) const {
+    ST_LOCAL GLfloat getValue(size_t theRow, size_t theCol) const {
         //ST_DEBUG_ASSERT(theRow < 4 && theCol < 4);
         return matrix[theCol * 4 + theRow];
     }
 
-    GLfloat& changeValue(size_t theRow, size_t theCol) {
+    ST_LOCAL GLfloat& changeValue(size_t theRow, size_t theCol) {
         //ST_DEBUG_ASSERT(theRow < 4 && theCol < 4);
         return matrix[theCol * 4 + theRow];
     }
 
-    StGLVec4 getRow(size_t theRowId) const {
+    ST_LOCAL StGLVec4 getRow(size_t theRowId) const {
         //ST_DEBUG_ASSERT(theRowId < 4);
         return StGLVec4(getValue(theRowId, 0),
                         getValue(theRowId, 1),
@@ -104,7 +104,7 @@ class StGLMatrix {
                         getValue(theRowId, 3));
     }
 
-    void setRow(const StGLVec4& theRow, size_t theRowId) {
+    ST_LOCAL void setRow(const StGLVec4& theRow, size_t theRowId) {
         //ST_DEBUG_ASSERT(theRowId < 4);
         changeValue(theRowId, 0) = theRow.x();
         changeValue(theRowId, 1) = theRow.y();
@@ -112,18 +112,18 @@ class StGLMatrix {
         changeValue(theRowId, 3) = theRow.w();
     }
 
-    void setRow(const StGLVec3& theRow, size_t theRowId) {
+    ST_LOCAL void setRow(const StGLVec3& theRow, size_t theRowId) {
         //ST_DEBUG_ASSERT(theRowId < 4);
         changeValue(theRowId, 0) = theRow.x();
         changeValue(theRowId, 1) = theRow.y();
         changeValue(theRowId, 2) = theRow.z();
     }
 
-    void setRow(size_t theRowId, const StGLVec4& theRow) {
+    ST_LOCAL void setRow(size_t theRowId, const StGLVec4& theRow) {
         setRow(theRow, theRowId);
     }
 
-    StGLVec4 getColumn(size_t theColId) const {
+    ST_LOCAL StGLVec4 getColumn(size_t theColId) const {
         //ST_DEBUG_ASSERT(theColId < 4);
         return StGLVec4(getValue(theColId, 0),
                         getValue(theColId, 1),
@@ -131,7 +131,7 @@ class StGLMatrix {
                         getValue(theColId, 3));
     }
 
-    void setColumn(const StGLVec4& theColumn, size_t theColId) {
+    ST_LOCAL void setColumn(const StGLVec4& theColumn, size_t theColId) {
         //ST_DEBUG_ASSERT(theColId < 4);
         changeValue(0, theColId) = theColumn.x();
         changeValue(1, theColId) = theColumn.y();
@@ -139,14 +139,14 @@ class StGLMatrix {
         changeValue(3, theColId) = theColumn.w();
     }
 
-    void setColumn(const StGLVec3& theColumn, size_t theColId) {
+    ST_LOCAL void setColumn(const StGLVec3& theColumn, size_t theColId) {
         //ST_DEBUG_ASSERT(theColId < 4);
         changeValue(0, theColId) = theColumn.x();
         changeValue(1, theColId) = theColumn.y();
         changeValue(2, theColId) = theColumn.z();
     }
 
-    void setColumn(size_t theColId, const StGLVec4& theColumn) {
+    ST_LOCAL void setColumn(size_t theColId, const StGLVec4& theColumn) {
         setColumn(theColumn, theColId);
     }
 
@@ -169,7 +169,7 @@ class StGLMatrix {
      * Automatically return GLfloat* to be silently used as argument got OpenGL functions.
      * Note that the matrix values are stored as OpenGL need (flat columns instead of flat rows).
      */
-    operator const GLfloat*() const {
+    ST_LOCAL operator const GLfloat*() const {
         return matrix;
     }
 
@@ -177,18 +177,18 @@ class StGLMatrix {
      * Automatically return GLfloat* to be silently used as argument got OpenGL functions.
      * Note that the matrix values are stored as OpenGL need (flat columns instead of flat rows).
      */
-    operator GLfloat*() {
+    ST_LOCAL operator GLfloat*() {
         return matrix;
     }
 
-    bool isRowZero(size_t row) const {
+    ST_LOCAL bool isRowZero(size_t row) const {
         return (getValue(row, 0) == 0.0f) &&
                (getValue(row, 1) == 0.0f) &&
                (getValue(row, 2) == 0.0f) &&
                (getValue(row, 3) == 0.0f);
     }
 
-    bool isColumnZero(size_t column) const {
+    ST_LOCAL bool isColumnZero(size_t column) const {
         return (getValue(0, column) == 0.0f) &&
                (getValue(1, column) == 0.0f) &&
                (getValue(2, column) == 0.0f) &&
@@ -237,7 +237,7 @@ class StGLMatrix {
                              const StGLVec3& theCenter,
                              const StGLDir3& theUp);
 
-    StString toString() const {
+    ST_LOCAL StString toString() const {
         return StString("{\n")
              + getRow(0).toString() + '\n'
              + getRow(1).toString() + '\n'

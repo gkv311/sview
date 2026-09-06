@@ -32,9 +32,9 @@ class StDiagnostics : public StApplication {
 
     static const StString ST_DRAWER_PLUGIN_NAME;
 
-    ST_CPPEXPORT StDiagnostics(const StHandle<StResourceManager>& theResMgr,
-                               const StNativeWin_t                theParentWin = (StNativeWin_t )NULL,
-                               const StHandle<StOpenInfo>&        theOpenInfo  = NULL);
+    ST_CPPEXPORT StDiagnostics(const std::shared_ptr<StResourceManager>& theResMgr,
+                               const StNativeWin_t theParentWin = (StNativeWin_t )nullptr,
+                               const std::shared_ptr<StOpenInfo>& theOpenInfo  = std::shared_ptr<StOpenInfo>());
     ST_CPPEXPORT virtual ~StDiagnostics();
 
     ST_CPPEXPORT virtual bool open() ST_ATTR_OVERRIDE;
@@ -77,9 +77,9 @@ class StDiagnostics : public StApplication {
 
         private:
 
-    StHandle<StGLContext>      myContext;
-    StHandle<StSettings>       mySettings; //!< settings manager for Diagnostics plugin
-    StHandle<StDiagnosticsGUI> myGUI;      //!< GUI root widget
+    std::shared_ptr<StGLContext>      myContext;
+    std::shared_ptr<StSettings>       mySettings; //!< settings manager for Diagnostics plugin
+    std::shared_ptr<StDiagnosticsGUI> myGUI;      //!< GUI root widget
 
         private:
 

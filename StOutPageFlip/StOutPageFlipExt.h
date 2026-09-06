@@ -26,8 +26,8 @@ class StOutPageFlipExt : public StOutPageFlip {
     /**
      * Main constructor.
      */
-    ST_CPPEXPORT StOutPageFlipExt(const StHandle<StResourceManager>& theResMgr,
-                                  const StNativeWin_t                theParentWindow);
+    ST_CPPEXPORT StOutPageFlipExt(const std::shared_ptr<StResourceManager>& theResMgr,
+                                  const StNativeWin_t theParentWindow);
 
     /**
      * Destructor.
@@ -97,7 +97,8 @@ class StOutPageFlipExt : public StOutPageFlip {
 
         private:
 
-    StHandle<StMonitor> myMonitor;      //!< current monitor
+    std::shared_ptr<StMonitor> myMonitor;      //!< current monitor
+
     StRectI_t           myWinRect;
     StGLColoredLine     myCodesLine;
     StGLControlED       myCodesEDOnOff;

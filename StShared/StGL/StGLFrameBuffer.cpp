@@ -13,11 +13,7 @@
 #include <StStrings/StLogger.h>
 #include <stAssert.h>
 
-StGLFrameBuffer::StGLFrameBuffer()
-: myGLFBufferId(NO_FRAMEBUFFER),
-  myGLDepthRBId(NO_RENDERBUFFER),
-  myViewPortX(0),
-  myViewPortY(0) {
+StGLFrameBuffer::StGLFrameBuffer() {
     //
 }
 
@@ -27,14 +23,14 @@ StGLFrameBuffer::~StGLFrameBuffer() {
 }
 
 void StGLFrameBuffer::release(StGLContext& theCtx) {
-    if(!myTextureColor.isNull()) {
+    if (myTextureColor.get() != nullptr) {
         myTextureColor->release(theCtx);
     }
-    if(isValidDepthBuffer()) {
+    if (isValidDepthBuffer()) {
         theCtx.arbFbo->glDeleteRenderbuffers(1, &myGLDepthRBId);
         myGLDepthRBId = NO_RENDERBUFFER;
     }
-    if(isValidFrameBuffer()) {
+    if (isValidFrameBuffer()) {
         theCtx.arbFbo->glDeleteFramebuffers(1, &myGLFBufferId);
         myGLFBufferId = NO_FRAMEBUFFER;
     }
@@ -94,8 +90,8 @@ bool StGLFrameBuffer::init(StGLContext&  theCtx,
                            const GLsizei theSizeY,
                            const bool    theNeedDepthBuffer) {
     // create the texture
-    if(myTextureColor.isNull()) {
-        myTextureColor = new StGLTexture(theTextureFormat);
+    if (myTextureColor.get() == nullptr) {
+        myTextureColor = std::make_shared<StGLTexture>(theTextureFormat);
     }
     if(!myTextureColor->initTrash(theCtx, theSizeX, theSizeY)) {
         release(theCtx);
@@ -104,15 +100,15 @@ bool StGLFrameBuffer::init(StGLContext&  theCtx,
     return init(theCtx, myTextureColor, theNeedDepthBuffer);
 }
 
-bool StGLFrameBuffer::init(StGLContext&  theCtx,
-                           const StHandle<StGLTexture>& theColorTexture,
-                           const bool    theNeedDepthBuffer) {
-    if(theColorTexture.isNull()
-    || theCtx.arbFbo == NULL) {
+bool StGLFrameBuffer::init(StGLContext& theCtx,
+                           const std::shared_ptr<StGLTexture>& theColorTexture,
+                           const bool theNeedDepthBuffer) {
+    if (theColorTexture.get() == nullptr
+     || theCtx.arbFbo == nullptr) {
         release(theCtx);
         return false;
-    } else if(myTextureColor != theColorTexture) {
-        if(!myTextureColor.isNull()) {
+    } else if (myTextureColor != theColorTexture) {
+        if (myTextureColor.get() != nullptr) {
             myTextureColor->release(theCtx);
         }
     }
@@ -167,12 +163,12 @@ bool StGLFrameBuffer::init(StGLContext&  theCtx,
     return true;
 }
 
-void StGLFrameBuffer::detachColorTexture(StGLContext&                 theCtx,
-                                         const StHandle<StGLTexture>& theTextureColor) {
-    if(myGLFBufferId == NO_FRAMEBUFFER
-    || theTextureColor.isNull()
-    || myTextureColor != theTextureColor
-    || !myTextureColor->isValid()) {
+void StGLFrameBuffer::detachColorTexture(StGLContext& theCtx,
+                                         const std::shared_ptr<StGLTexture>& theTextureColor) {
+    if (myGLFBufferId == NO_FRAMEBUFFER
+     || theTextureColor.get() == nullptr
+     || myTextureColor != theTextureColor
+     || !myTextureColor->isValid()) {
         return;
     }
 
@@ -180,7 +176,7 @@ void StGLFrameBuffer::detachColorTexture(StGLContext&                 theCtx,
     theCtx.arbFbo->glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D,
                                           0, 0);
     unbindBuffer(theCtx);
-    myTextureColor.nullify();
+    myTextureColor.reset();
 }
 
 void StGLFrameBuffer::clearTexture(StGLContext& theCtx) {
@@ -209,8 +205,8 @@ void StGLFrameBuffer::clearTexture(StGLContext& theCtx) {
     }
 }
 
-void StGLFrameBuffer::clearTexture(StGLContext&                 theCtx,
-                                   const StHandle<StGLTexture>& theTexture) {
+void StGLFrameBuffer::clearTexture(StGLContext& theCtx,
+                                   const std::shared_ptr<StGLTexture>& theTexture) {
     StGLFrameBuffer aFbo;
     if(!aFbo.init(theCtx, theTexture, false)) {
         return;

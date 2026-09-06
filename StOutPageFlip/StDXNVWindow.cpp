@@ -19,7 +19,7 @@ namespace {
 
 }
 
-StDXNVWindow::StDXNVWindow(const StHandle<StMsgQueue>& theMsgQueue,
+StDXNVWindow::StDXNVWindow(const std::shared_ptr<StMsgQueue>& theMsgQueue,
                            const size_t     theFboSizeX,
                            const size_t     theFboSizeY,
                            const StMonitor& theMonitor,

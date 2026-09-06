@@ -157,10 +157,7 @@ const char* StImage::formatImgPixelFormat() const {
     return "unknown";
 }
 
-StImage::StImage()
-: myPAR(1.0f),
-  myColorModel(ImgColor_RGB),
-  myColorScale(ImgScale_Full) {
+StImage::StImage() {
     //
 }
 
@@ -205,7 +202,7 @@ bool StImage::initWrapper(const StImage& theCopy) {
 
 bool StImage::initReference(const StImage& theCopy) {
     nullify();
-    if( theCopy.myBufCounter.isNull()
+    if( theCopy.myBufCounter.get() == nullptr
     || !initWrapper(theCopy)) {
         return false;
     }
@@ -363,7 +360,7 @@ void StImage::nullify() {
     myPlanes[1].nullify();
     myPlanes[2].nullify();
     myPlanes[3].nullify();
-    if(!myBufCounter.isNull()) {
+    if (myBufCounter.get() != nullptr) {
         myBufCounter->releaseReference();
     }
     myPAR = 1.0f;

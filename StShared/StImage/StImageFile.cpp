@@ -62,9 +62,7 @@ struct StDDSFileHeader {
     uint32_t Reserved2;
 };
 
-StImageFile::StImageFile()
-: mySrcFormat(StFormat_AUTO),
-  mySrcPanorama(StPanorama_OFF) {
+StImageFile::StImageFile() {
     //
 }
 
@@ -155,60 +153,60 @@ StImageFile::ImageType StImageFile::guessImageType(const StString& theFileName,
     return StImageFile::ST_TYPE_NONE;
 }
 
-StHandle<StImageFile> StImageFile::create(const StString& thePreferred,
-                                          ImageType       theImgType) {
+std::shared_ptr<StImageFile> StImageFile::create(const StString& thePreferred,
+                                                 ImageType       theImgType) {
     return StImageFile::create(imgLibFromString(thePreferred), theImgType);
 }
 
-StHandle<StImageFile> StImageFile::create(StImageFile::ImageClass thePreferred,
-                                          ImageType               theImgType) {
+std::shared_ptr<StImageFile> StImageFile::create(StImageFile::ImageClass thePreferred,
+                                                 ImageType               theImgType) {
     (void)theImgType;
     // open requested library if it exists
     switch(thePreferred) {
         case ST_FREEIMAGE: {
-            if(StFreeImage::init()) {
-                return new StFreeImage();
+            if (StFreeImage::init()) {
+                return std::make_shared<StFreeImage>();
             }
             break;
         }
         case ST_DEVIL: {
-            if(StDevILImage::init()) {
-                return new StDevILImage();
+            if (StDevILImage::init()) {
+                return std::make_shared<StDevILImage>();
             }
             break;
         }
         case ST_STB: {
-            if(StStbImage::init()) {
-                return new StStbImage();
+            if (StStbImage::init()) {
+                return std::make_shared<StStbImage>();
             }
             break;
         }
         case ST_WIC: {
-            if(StWicImage::init()) {
-                return new StWicImage();
+            if (StWicImage::init()) {
+                return std::make_shared<StWicImage>();
             }
             break;
         }
         case ST_NSIMAGE: {
-            if(StNsImage::init()) {
-                return new StNsImage();
+            if (StNsImage::init()) {
+                return std::make_shared<StNsImage>();
             }
             break;
         }
         default:
         case ST_LIBAV: {
-            if(StAVImage::init()) {
-                return new StAVImage();
+            if (StAVImage::init()) {
+                return std::make_shared<StAVImage>();
             }
             break;
         }
     }
 
     // use default library anyway (that currently always linked)
-    if(StAVImage::init()) {
-        return new StAVImage();
+    if (StAVImage::init()) {
+        return std::make_shared<StAVImage>();
     }
-    return StHandle<StImageFile>();
+    return std::shared_ptr<StImageFile>();
 }
 
 bool StImageFile::load(const StString& theFilePath,
@@ -255,7 +253,7 @@ bool StImageFile::load(const StString& theFilePath,
         StDDSFileHeader* aHeaderTile = (StDDSFileHeader* )&aTileBuffer.changeValue(4);
         aHeaderTile->Caps2 &= ~(StDDSFileHeader::DDSCompleteCubemap);
 
-        StHandle<StImageFile> aTileImage = createEmpty();
+        std::shared_ptr<StImageFile> aTileImage = createEmpty();
 
         memcpy(&aTileBuffer.changeValue(aHeaderSize), &theDataPtr[aHeaderSize], aTileDataSize);
         if(!aTileImage->loadExtra(theFilePath, theImageType, &aTileBuffer.changeFirst(), (int )aTileBuffer.size(), false)
@@ -318,20 +316,20 @@ bool StImageFile::load(const StString& theFilePath,
 
 StImageFileCounter::StImageFileCounter() {}
 
-StImageFileCounter::StImageFileCounter(const StHandle<StImage>& theImage)
+StImageFileCounter::StImageFileCounter(const std::shared_ptr<StImage>& theImage)
 : myImageFile(theImage) {}
 
 StImageFileCounter::~StImageFileCounter() {}
 
-void StImageFileCounter::createReference(StHandle<StBufferCounter>& theOther) const {
-    StHandle<StImageFileCounter> anImgFileRef = StHandle<StImageFileCounter>::downcast(theOther);
-    if(anImgFileRef.isNull()) {
-        anImgFileRef = new StImageFileCounter();
+void StImageFileCounter::createReference(std::shared_ptr<StBufferCounter>& theOther) const {
+    std::shared_ptr<StImageFileCounter> anImgFileRef = std::dynamic_pointer_cast<StImageFileCounter>(theOther);
+    if (anImgFileRef.get() == nullptr) {
+        anImgFileRef = std::make_shared<StImageFileCounter>();
         theOther = anImgFileRef;
     }
     anImgFileRef->myImageFile = myImageFile;
 }
 
 void StImageFileCounter::releaseReference() {
-    myImageFile.nullify();
+    myImageFile.reset();
 }

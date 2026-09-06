@@ -43,26 +43,16 @@ bool StGLStereoFrameBuffer::StGLStereoProgram::link(StGLContext& theCtx) {
 
 StGLStereoFrameBuffer::StGLStereoFrameBuffer()
 #if defined(GL_ES_VERSION_2_0)
-: StGLStereoTexture(GL_RGBA),
+: StGLStereoFrameBuffer(GL_RGBA)
 #else
-: StGLStereoTexture(GL_RGBA8),
+: StGLStereoFrameBuffer(GL_RGBA8)
 #endif
-  myVerticesBuf(),
-  myTexCoordBuf(),
-  myViewPortX(0),
-  myViewPortY(0) {
-    myGLFBufferIds[StGLStereoTexture::LEFT_TEXTURE ] = StGLFrameBuffer::NO_FRAMEBUFFER;
-    myGLFBufferIds[StGLStereoTexture::RIGHT_TEXTURE] = StGLFrameBuffer::NO_FRAMEBUFFER;
-    myGLDepthRBIds[StGLStereoTexture::LEFT_TEXTURE]  = StGLFrameBuffer::NO_RENDERBUFFER;
-    myGLDepthRBIds[StGLStereoTexture::RIGHT_TEXTURE] = StGLFrameBuffer::NO_RENDERBUFFER;
+{
+    //
 }
 
 StGLStereoFrameBuffer::StGLStereoFrameBuffer(const GLint theTextureFormat)
-: StGLStereoTexture(theTextureFormat),
-  myVerticesBuf(),
-  myTexCoordBuf(),
-  myViewPortX(0),
-  myViewPortY(0) {
+: StGLStereoTexture(theTextureFormat) {
     myGLFBufferIds[StGLStereoTexture::LEFT_TEXTURE ] = StGLFrameBuffer::NO_FRAMEBUFFER;
     myGLFBufferIds[StGLStereoTexture::RIGHT_TEXTURE] = StGLFrameBuffer::NO_FRAMEBUFFER;
     myGLDepthRBIds[StGLStereoTexture::LEFT_TEXTURE]  = StGLFrameBuffer::NO_RENDERBUFFER;

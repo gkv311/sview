@@ -16,10 +16,10 @@ struct StGLFontKey {
     StString     Name; //!< font family name
     unsigned int Size; //!< font size
 
-    StGLFontKey(const StString& theName,
-                unsigned int    theSize) : Name(theName), Size(theSize) {}
+    ST_LOCAL StGLFontKey(const StString& theName,
+                         unsigned int    theSize) : Name(theName), Size(theSize) {}
 
-    inline bool operator<(const StGLFontKey& theOther) const {
+    ST_LOCAL bool operator<(const StGLFontKey& theOther) const {
         return this->Size < theOther.Size
             || (this->Size == theOther.Size
              && this->Name <  theOther.Name);
@@ -30,10 +30,10 @@ struct StGLFontTypeKey {
     StFTFont::Typeface Type; //!< font typeface
     unsigned int       Size; //!< font size
 
-    StGLFontTypeKey(const StFTFont::Typeface theTypeface,
-                    unsigned int             theSize) : Type(theTypeface), Size(theSize) {}
+    ST_LOCAL StGLFontTypeKey(const StFTFont::Typeface theTypeface,
+                            unsigned int             theSize) : Type(theTypeface), Size(theSize) {}
 
-    inline bool operator<(const StGLFontTypeKey& theOther) const {
+    ST_LOCAL bool operator<(const StGLFontTypeKey& theOther) const {
         return this->Size < theOther.Size
             || (this->Size == theOther.Size
              && this->Type <  theOther.Type);
@@ -48,15 +48,13 @@ class StGLFontManager : public StGLResource {
         public:
 
     /** Return name of fallback font entry. */
-    ST_LOCAL static const char* getFallbackFontName() {
-        static const char* aName = "ST_DejaVuSerif_ttf";
-        return aName;
+    ST_LOCAL static constexpr const char* getFallbackFontName() {
+        return "ST_DejaVuSerif_ttf";
     }
 
     /** Return path of fallback font. */
-    ST_LOCAL static const char* getFallbackFontPath() {
-        static const char* aName = "internal://DejaVuSerif_internal.ttf";
-        return aName;
+    ST_LOCAL static constexpr const char* getFallbackFontPath() {
+        return "internal://DejaVuSerif_internal.ttf";
     }
 
         public:
@@ -91,42 +89,44 @@ class StGLFontManager : public StGLResource {
     /**
      * Find font and create it if not already created.
      */
-    ST_CPPEXPORT const StHandle<StGLFont>& findCreate(const StFTFont::Typeface theType,
-                                                      unsigned int             theSize);
+    ST_CPPEXPORT const std::shared_ptr<StGLFont>& findCreate(const StFTFont::Typeface theType,
+                                                             unsigned int             theSize);
 
     /**
      * Find font for specified family name and size.
      */
-    ST_CPPEXPORT StHandle<StGLFontEntry> find(const StString& theName,
-                                              unsigned int    theSize) const;
+    ST_CPPEXPORT std::shared_ptr<StGLFontEntry> find(const StString& theName,
+                                                     unsigned int    theSize) const;
 
     /**
      * Find font for specified family name and size, and create it if not already created.
      */
-    ST_CPPEXPORT StHandle<StGLFontEntry> findCreate(const StString& theName,
-                                                    unsigned int    theSize);
+    ST_CPPEXPORT std::shared_ptr<StGLFontEntry> findCreate(const StString& theName,
+                                                           unsigned int    theSize);
 
     /**
      * Find fallback font for specified size, and create it if not already created.
      */
-    ST_CPPEXPORT StHandle<StGLFontEntry> findCreateFallback(unsigned int theSize);
+    ST_CPPEXPORT std::shared_ptr<StGLFontEntry> findCreateFallback(unsigned int theSize);
 
     /**
      * @return handle to the FT library object
      */
-    ST_LOCAL const StHandle<StFTLibrary>& getLibrary() const {
+    ST_LOCAL const std::shared_ptr<StFTLibrary>& getLibrary() const {
         return myFTLib;
     }
 
         protected:
 
-    StHandle<StFTLibrary>               myFTLib;      //!< handle to the FT library object
-    StHandle<StFTFontRegistry>          myRegistry;   //!< fonts registry
+    std::shared_ptr<StFTLibrary>      myFTLib;    //!< handle to the FT library object
+    std::shared_ptr<StFTFontRegistry> myRegistry; //!< fonts registry
+
     std::map< StGLFontKey,
-              StHandle<StGLFontEntry> > myFonts;      //!< fonts map
+              std::shared_ptr<StGLFontEntry> > myFonts; //!< fonts map
     std::map< StGLFontTypeKey,
-              StHandle<StGLFont> >      myFontTypes;  //!< font typefaces map
-    unsigned int                        myResolution; //!< fonts resolution
+              std::shared_ptr<StGLFont> > myFontTypes;  //!< font typefaces map
+
+    unsigned int myResolution; //!< fonts resolution
 
 };
 

@@ -180,10 +180,10 @@ class StGLVertexBuffer : public StGLResource {
 
         private:
 
-    GLuint     myBufferId;
-    GLsizeiptr myElemSize;
-    GLsizeiptr myElemsCount;
-    GLenum     myDataType;
+    GLuint     myBufferId = 0;
+    GLsizeiptr myElemSize = 4;
+    GLsizeiptr myElemsCount = 0;
+    GLenum     myDataType = 0;
 
 };
 

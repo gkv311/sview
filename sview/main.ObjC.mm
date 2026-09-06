@@ -15,9 +15,9 @@
 
 namespace {
 
-    static StAppResponder*      TheAppResponder = NULL;
-    static StHandle<StOpenInfo> TheOpenInfo = new StOpenInfo();
-    static volatile bool        TheToQuit = false;
+    static StAppResponder* TheAppResponder = nullptr;
+    static std::shared_ptr<StOpenInfo> TheOpenInfo = std::make_shared<StOpenInfo>();
+    static volatile bool   TheToQuit = false;
 
     static SV_THREAD_FUNCTION anAppThreadFunc(void* theResponder) {
         StCocoaLocalPool aPool;
@@ -54,7 +54,7 @@ namespace {
 @implementation StAppResponder
 
     - (id ) init {
-        if(TheAppResponder != NULL) {
+        if(TheAppResponder != nullptr) {
             if(self != TheAppResponder) {
                 // should never happens
                 [self release];
@@ -63,11 +63,11 @@ namespace {
         }
 
         self = [super init];
-        if(self == NULL) {
-            return NULL;
+        if(self == nullptr) {
+            return nullptr;
         }
-        myStApp.nullify();
-        myTimer = NULL;
+        myStApp.reset();
+        myTimer = nullptr;
 
         // latest macOS versions cause sView crashes with background OpenGL thread
         myIsThreaded = false;
@@ -77,8 +77,8 @@ namespace {
     }
 
     + (StAppResponder* ) sharedInstance {
-        if(TheAppResponder == NULL) {
-            TheAppResponder = [[super allocWithZone: NULL] init];
+        if(TheAppResponder == nullptr) {
+            TheAppResponder = [[super allocWithZone: nullptr] init];
         }
         return TheAppResponder;
     }
@@ -144,9 +144,9 @@ namespace {
             return YES;
         }
 
-        if(myStApp.isNull()) {
+        if (myStApp.get() == nullptr) {
             TheOpenInfo->setPath(aFilePath);
-            [self launchSelf: NULL];
+            [self launchSelf: nullptr];
             return YES;
         }
 
@@ -196,27 +196,27 @@ namespace {
 
     - (void ) applicationWillTerminate: (NSNotification* ) theNotification {
         TheToQuit = true; // needed if sView closed by Cocoa call rather than from StDrawer
-        if(!myThread.isNull()) {
+        if (myThread.get() != nullptr) {
             myThread->wait();
-            myThread.nullify();
+            myThread.reset();
         } else {
-            if(!myStApp.isNull() && !myStApp->closingDown()) {
+            if (myStApp.get() != nullptr && !myStApp->closingDown()) {
                 myStApp->exit(0);
             }
-            myStApp.nullify();
+            myStApp.reset();
         }
     }
 
     - (void ) launchSelf: (id ) theSender {
-        if(!myStApp.isNull()
-        || !myThread.isNull()) {
+        if (myStApp.get() != nullptr
+         || myThread.get() != nullptr) {
             return; // already launched - invalid call
         }
 
         if(myIsThreaded) {
             // start StApplication instance in dedicated thread
             ST_DEBUG_LOG("StAppResponder, application started in dedicated thread");
-            myThread = new StThread(anAppThreadFunc, self, "StApplication");
+            myThread = std::make_shared<StThread>(anAppThreadFunc, self, "StApplication");
         } else {
             // process StApplication rendering iterations by timer
             ST_DEBUG_LOG("StAppResponder, application started in main thread!");
@@ -232,21 +232,21 @@ namespace {
     }
 
     - (bool ) startStApp: (id ) theSender {
-        if(!myStApp.isNull()) {
+        if (myStApp.get() != nullptr) {
             return false;
         }
 
-        StHandle<StResourceManager> aResMgr = new StResourceManager();
+        std::shared_ptr<StResourceManager> aResMgr = std::make_shared<StResourceManager>();
         myStApp = StMultiApp::getInstance(aResMgr, TheOpenInfo);
-        if(!myStApp->open()) {
-            myStApp.nullify();
+        if (!myStApp->open()) {
+            myStApp.reset();
             return false;
         }
 
-        if(!myStApp->getMainWindow().isNull()) {
+        if (myStApp->getMainWindow().get() != nullptr) {
             // just debug output Monitors' configuration - for consistency with StApplication::exec()
             const StSearchMonitors& aMonitors = myStApp->getMainWindow()->getMonitors();
-            for(size_t aMonIter = 0; aMonIter < aMonitors.size(); ++aMonIter) {
+            for (size_t aMonIter = 0; aMonIter < aMonitors.size(); ++aMonIter) {
                 ST_DEBUG_LOG(aMonitors[aMonIter].toString());
             }
         }
@@ -255,7 +255,7 @@ namespace {
     }
 
     - (bool ) loopIter: (id ) theSender {
-        if(myStApp.isNull()) {
+        if (myStApp.get() == nullptr) {
             return false;
         }
 
@@ -264,17 +264,17 @@ namespace {
         }
 
         if(myStApp->closingDown()) {
-            StHandle<StOpenInfo> anOther = myStApp->getOpenFileInOtherDrawer();
-            if(!anOther.isNull()) {
-                myStApp.nullify();
-                StHandle<StResourceManager> aResMgr = new StResourceManager();
+            std::shared_ptr<StOpenInfo> anOther = myStApp->getOpenFileInOtherDrawer();
+            if (anOther.get() != nullptr) {
+                myStApp.reset();
+                std::shared_ptr<StResourceManager> aResMgr = std::make_shared<StResourceManager>();
                 myStApp = StMultiApp::getInstance(aResMgr, anOther);
-                if(!myStApp.isNull() && myStApp->open()) {
+                if (myStApp.get() != nullptr && myStApp->open()) {
                     return true;
                 }
             }
 
-            myStApp.nullify();
+            myStApp.reset();
 
             // this will call exit(), so code below has no effect
             [NSApp terminate: nil];
@@ -285,7 +285,7 @@ namespace {
     }
 
     - (void ) launchImageViewer: (id ) theSender {
-        if(myStApp.isNull()) {
+        if (myStApp.get() == nullptr) {
             StArgumentsMap anArgs;
             anArgs.add(StArgument("in", "image"));
             TheOpenInfo->setArgumentsMap(anArgs);
@@ -299,7 +299,7 @@ namespace {
     }
 
     - (void ) launchMoviePlayer: (id ) theSender {
-        if(myStApp.isNull()) {
+        if (myStApp.get() == nullptr) {
             StArgumentsMap anArgs;
             anArgs.add(StArgument("in", "video"));
             TheOpenInfo->setArgumentsMap(anArgs);
@@ -313,7 +313,7 @@ namespace {
     }
 
     - (void ) launchDiagnostics: (id ) theSender {
-        if(myStApp.isNull()) {
+        if (myStApp.get() == nullptr) {
             StArgumentsMap anArgs;
             anArgs.add(StArgument("in", "StDiagnostics"));
             TheOpenInfo->setArgumentsMap(anArgs);

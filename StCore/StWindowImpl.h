@@ -44,8 +44,8 @@ class StWindowImpl {
 
         public: //! @name main interface
 
-    ST_LOCAL StWindowImpl(const StHandle<StResourceManager>& theResMgr,
-                          const StNativeWin_t                theParentWindow);
+    ST_LOCAL StWindowImpl(const std::shared_ptr<StResourceManager>& theResMgr,
+                          const StNativeWin_t theParentWindow);
     ST_LOCAL ~StWindowImpl();
     ST_LOCAL void close();
     ST_LOCAL const StString& getTitle() const { return myWindowTitle; }
@@ -274,8 +274,8 @@ class StWindowImpl {
 
     static StAtomic<int32_t> myFullScreenWinNb; //!< shared counter for fullscreen windows to detect inactive state
 
-    StHandle<StResourceManager> myResMgr; //!< file resources manager
-    StHandle<StGLContext> myGlContext;
+    std::shared_ptr<StResourceManager> myResMgr; //!< file resources manager
+    std::shared_ptr<StGLContext> myGlContext;
     StWinHandles       myMaster;          //!< master window
     StWinHandles       mySlave;           //!< slave  window (optional)
     StNativeWin_t      myParentWin;       //!< parent window (optional, for embedding)
@@ -331,7 +331,7 @@ class StWindowImpl {
 
     StSearchMonitors   myMsgMonitors;     //!< available monitors, accessed from message thread
     POINT              myPointTest;       //!< temporary point object to verify cached window position
-    StHandle<StThread> myMsgThread;       //!< dedicated thread for window message loop
+    std::shared_ptr<StThread> myMsgThread;//!< dedicated thread for window message loop
     StCondition        myEventInitWin;    //!< special event waited from createWindows() thread
     StCondition        myEventInitGl;
     StCondition        myEventQuit;       //!< quit message thread event

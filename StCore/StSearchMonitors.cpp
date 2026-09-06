@@ -676,7 +676,7 @@ void StSearchMonitors::initFromConfig() {
     const StString ST_GLOBAL_SETTINGS_GROUP("sview");
     const StString ST_GLOBAL_SETTINGS_MONITORS("monitors");
 
-    StSettings aGlobalSettings(new StResourceManager(), ST_GLOBAL_SETTINGS_GROUP);
+    StSettings aGlobalSettings(std::make_shared<StResourceManager>(), ST_GLOBAL_SETTINGS_GROUP);
     StMonitor aMonDummy;
     for (size_t aParamIter = 0; aParamIter < 256; ++aParamIter) {
         const StString aPrefix     = ST_GLOBAL_SETTINGS_MONITORS + stCString(".") + aParamIter;

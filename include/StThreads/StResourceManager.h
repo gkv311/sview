@@ -173,7 +173,7 @@ class StResourceManager {
     /**
      * Access resource with specified name.
      */
-    ST_CPPEXPORT StHandle<StResource> getResource(const StString& theName) const;
+    ST_CPPEXPORT std::shared_ptr<StResource> getResource(const StString& theName) const;
 
     /**
      * Read content of specified folder.

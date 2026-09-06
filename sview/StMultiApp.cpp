@@ -65,19 +65,19 @@ static StString getAbout() {
     return anAboutString;
 }
 
-StHandle<StApplication> StMultiApp::getInstance(const StHandle<StResourceManager>& theResMgr,
-                                                const StHandle<StOpenInfo>&        theInfo) {
-    StHandle<StOpenInfo> anInfo = theInfo;
-    if(anInfo.isNull()
-    || (!anInfo->hasPath() && !anInfo->hasArgs())) {
+std::shared_ptr<StApplication> StMultiApp::getInstance(const std::shared_ptr<StResourceManager>& theResMgr,
+                                                       const std::shared_ptr<StOpenInfo>&        theInfo) {
+    std::shared_ptr<StOpenInfo> anInfo = theInfo;
+    if (anInfo.get() == nullptr
+     || (!anInfo->hasPath() && !anInfo->hasArgs())) {
         anInfo = StApplication::parseProcessArguments();
     }
-    if(anInfo.isNull()) {
+    if (anInfo.get() == nullptr) {
         // show help
         StString aShowHelpString = getAbout();
         st::cout << aShowHelpString;
         stInfo(aShowHelpString);
-        return NULL;
+        return nullptr;
     }
 
     // command interface
@@ -137,7 +137,7 @@ StHandle<StApplication> StMultiApp::getInstance(const StHandle<StResourceManager
             anAction = StString("action?") + anAction;
         }
     }
-    if(!anAction.isEmpty()) {
+    if (!anAction.isEmpty()) {
         StArgument anArgCmdPort = anArgs["webuiCmdPort"];
         StString   aPort        = "8080";
         if(anArgCmdPort.isValid()) {
@@ -146,32 +146,32 @@ StHandle<StApplication> StMultiApp::getInstance(const StHandle<StResourceManager
         StString anUrl     = StString("http://localhost:") + aPort + "/" + anAction;
         StString aResponse = StRawFile::readTextFile(anUrl);
         st::cout << aResponse << "\n";
-        return NULL;
+        return nullptr;
     }
 
     // select application
     const StString ARGUMENT_DRAWER = "in";
     StArgument anArgDrawer = anArgs[ARGUMENT_DRAWER];
-    if(!anInfo->hasPath() && !anArgDrawer.isValid()) {
+    if (!anInfo->hasPath() && !anArgDrawer.isValid()) {
         StApplication::readDefaultDrawer(anInfo);
         anArgDrawer = anInfo->getArgumentsMap()[ARGUMENT_DRAWER];
     }
-    if(anArgDrawer.isValid()) {
-        if(anArgDrawer.getValue() == "image"
-        || anArgDrawer.getValue() == "StImageViewer") {
-            return new StImageViewer(theResMgr, NULL, anInfo);
-        } else if(anArgDrawer.getValue() == "video"
-               || anArgDrawer.getValue() == "StMoviePlayer") {
-            return new StMoviePlayer(theResMgr, NULL, anInfo);
-        } else if(anArgDrawer.getValue() == "diag"
-               || anArgDrawer.getValue() == "StDiagnostics") {
-            return new StDiagnostics(theResMgr, NULL, anInfo);
+    if (anArgDrawer.isValid()) {
+        if (anArgDrawer.getValue() == "image"
+         || anArgDrawer.getValue() == "StImageViewer") {
+            return std::make_shared<StImageViewer>(theResMgr, nullptr, anInfo);
+        } else if (anArgDrawer.getValue() == "video"
+                || anArgDrawer.getValue() == "StMoviePlayer") {
+            return std::make_shared<StMoviePlayer>(theResMgr, nullptr, anInfo);
+        } else if (anArgDrawer.getValue() == "diag"
+                || anArgDrawer.getValue() == "StDiagnostics") {
+            return std::make_shared<StDiagnostics>(theResMgr, nullptr, anInfo);
         } else {
             // show help
             StString aShowHelpString = getAbout();
             st::cout << aShowHelpString;
             stInfo(aShowHelpString);
-            return NULL;
+            return nullptr;
         }
     }
 
@@ -179,11 +179,11 @@ StHandle<StApplication> StMultiApp::getInstance(const StHandle<StResourceManager
     const StString aFileExtension = StFileNode::getExtension(aPath);
 
     const StMIMEList aMimeImg(ST_IMAGE_PLUGIN_MIME_CHAR);
-    for(size_t aMimeIter = 0; aMimeIter < aMimeImg.size(); ++aMimeIter) {
-        if(aFileExtension.isEqualsIgnoreCase(aMimeImg[aMimeIter].getExtension())) {
-            return new StImageViewer(theResMgr, NULL, anInfo);
+    for (size_t aMimeIter = 0; aMimeIter < aMimeImg.size(); ++aMimeIter) {
+        if (aFileExtension.isEqualsIgnoreCase(aMimeImg[aMimeIter].getExtension())) {
+            return std::make_shared<StImageViewer>(theResMgr, nullptr, anInfo);
         }
     }
 
-    return new StMoviePlayer(theResMgr, NULL, anInfo);
+    return std::make_shared<StMoviePlayer>(theResMgr, nullptr, anInfo);
 }

@@ -25,8 +25,8 @@ class StTranslations : public StLangMap {
      * @param theResMgr     file resources manager
      * @param theModuleName module name, the subfolder where translations files should be placed
      */
-    ST_CPPEXPORT StTranslations(const StHandle<StResourceManager>& theResMgr,
-                                const StString&                    theModuleName);
+    ST_CPPEXPORT StTranslations(const std::shared_ptr<StResourceManager>& theResMgr,
+                                const StString& theModuleName);
 
     /**
      * Destructor.
@@ -92,8 +92,8 @@ class StTranslations : public StLangMap {
 
         private:
 
-    StHandle<StResourceManager>
-                          myResMgr;         //!< file resource manager
+    std::shared_ptr<StResourceManager> myResMgr; //!< file resource manager
+
     StString              myModuleName;     //!< module name like 'StImageViewer'
     std::vector<StString> myLangFolderList; //!< translation files
     StString              myLangCode;       //!< active language code

@@ -40,14 +40,15 @@ class StSubQueue;
 
 struct StMovieInfo {
 
-    StHandle<StStereoParams> Id;
-    StArgumentsMap           Info;
-    StArgumentsMap           Codecs;
-    StString                 Path;           //!< file path
-    StFormat                 StInfoStream;   //!< source format as stored in file metadata
-    StFormat                 StInfoFileName; //!< source format detected from file name
-    bool                     HasVideo;       //!< true if file contains video
-    bool                     IsSavable;      //!< indicate that file can be saved without re-encoding
+    std::shared_ptr<StStereoParams> Id;
+
+    StArgumentsMap Info;
+    StArgumentsMap Codecs;
+    StString       Path;           //!< file path
+    StFormat       StInfoStream;   //!< source format as stored in file metadata
+    StFormat       StInfoFileName; //!< source format detected from file name
+    bool           HasVideo;       //!< true if file contains video
+    bool           IsSavable;      //!< indicate that file can be saved without re-encoding
 
     StMovieInfo() : StInfoStream(StFormat_AUTO), StInfoFileName(StFormat_AUTO), HasVideo(false), IsSavable(false) {}
 
@@ -108,15 +109,15 @@ class StVideo {
     /**
      * Main constructor.
      */
-    ST_LOCAL StVideo(const std::string&                 theALDeviceName,
-                     StAudioQueue::StAlHintOutput       theAlOutput,
-                     StAudioQueue::StAlHintHrtf         theAlHrtf,
-                     const StHandle<StResourceManager>& theResMgr,
-                     const StHandle<StTranslations>&    theLangMap,
-                     const StHandle<StPlayList>&        thePlayList,
-                     const StHandle<StGLTextureQueue>&  theTextureQueue,
-                     const StHandle<StSubQueue>&        theSubtitlesQueue1,
-                     const StHandle<StSubQueue>&        theSubtitlesQueue2);
+    ST_LOCAL StVideo(const std::string& theALDeviceName,
+                     StAudioQueue::StAlHintOutput theAlOutput,
+                     StAudioQueue::StAlHintHrtf theAlHrtf,
+                     const std::shared_ptr<StResourceManager>& theResMgr,
+                     const std::shared_ptr<StTranslations>& theLangMap,
+                     const std::shared_ptr<StPlayList>& thePlayList,
+                     const std::shared_ptr<StGLTextureQueue>& theTextureQueue,
+                     const std::shared_ptr<StSubQueue>& theSubtitlesQueue1,
+                     const std::shared_ptr<StSubQueue>& theSubtitlesQueue2);
 
     /**
      * Destructor.
@@ -128,17 +129,17 @@ class StVideo {
      */
     ST_LOCAL void startDestruction();
 
-    ST_LOCAL const StHandle<StGLTextureQueue>& getTextureQueue() const { return myTextureQueue; }
+    ST_LOCAL const std::shared_ptr<StGLTextureQueue>& getTextureQueue() const { return myTextureQueue; }
 
     /**
      * Return first subtitles queue.
      */
-    ST_LOCAL const StHandle<StSubQueue>& getSubtitlesQueue1() const { return mySubtitles1->getSubtitlesQueue(); }
+    ST_LOCAL const std::shared_ptr<StSubQueue>& getSubtitlesQueue1() const { return mySubtitles1->getSubtitlesQueue(); }
 
     /**
      * Return secondary subtitles queue.
      */
-    ST_LOCAL const StHandle<StSubQueue>& getSubtitlesQueue2() const { return mySubtitles2->getSubtitlesQueue(); }
+    ST_LOCAL const std::shared_ptr<StSubQueue>& getSubtitlesQueue2() const { return mySubtitles2->getSubtitlesQueue(); }
 
     /**
      * Ignore sync rules and perform swap when ready.
@@ -186,7 +187,7 @@ class StVideo {
     /**
      * Retrieve information about currently played file.
      */
-    ST_LOCAL StHandle<StMovieInfo> getFileInfo(const StHandle<StStereoParams>& theParams) const;
+    ST_LOCAL std::shared_ptr<StMovieInfo> getFileInfo(const std::shared_ptr<StStereoParams>& theParams) const;
 
         public: //! @name callback Slots
 
@@ -200,7 +201,7 @@ class StVideo {
     /**
      * Add file node for removal.
      */
-    ST_LOCAL void doRemovePhysically(const StHandle<StFileNode>& theFile);
+    ST_LOCAL void doRemovePhysically(const std::shared_ptr<StFileNode>& theFile);
 
     /**
      * Save current displayed frame.
@@ -367,12 +368,12 @@ class StVideo {
      * Private method to append one format context (one file).
      */
     ST_LOCAL bool addFile(const StString& theFileToLoad,
-                          const StHandle<StStereoParams>& theNewParams,
+                          const std::shared_ptr<StStereoParams>& theNewParams,
                           StStreamsInfo&  theInfo);
 
-    ST_LOCAL bool openSource(const StHandle<StFileNode>&     theNewSource,
-                             const StHandle<StStereoParams>& theNewParams,
-                             const StHandle<StFileNode>&     theNewPlsFile);
+    ST_LOCAL bool openSource(const std::shared_ptr<StFileNode>&     theNewSource,
+                             const std::shared_ptr<StStereoParams>& theNewParams,
+                             const std::shared_ptr<StFileNode>&     theNewPlsFile);
 
     /**
      * Close active played file(s).
@@ -416,7 +417,7 @@ class StVideo {
                                           std::vector<bool>& theQueueIsFull,
                                           size_t& theEmptyQueues,
                                           const int theIndex);
-    ST_LOCAL bool pushPacket(StHandle<StAVPacketQueue>& theAVPacketQueue,
+    ST_LOCAL bool pushPacket(const std::shared_ptr<StAVPacketQueue>& theAVPacketQueue,
                              StAVPacket& thePacket);
 
     /**
@@ -456,42 +457,43 @@ class StVideo {
 
         private: //! @name private fields
 
-    StMIMEList                    myMimesVideo;
-    StMIMEList                    myMimesAudio;
-    StMIMEList                    myMimesSubs;
-    StMIMEList                    myMimesImages;
-    StHandle<StThread>            myThread;      //!< main loop thread
-    StHandle<StResourceManager>   myResMgr;      //!< resource manager
-    StHandle<StTranslations>      myLangMap;     //!< translations dictionary
+    StMIMEList myMimesVideo;
+    StMIMEList myMimesAudio;
+    StMIMEList myMimesSubs;
+    StMIMEList myMimesImages;
 
-    StArrayList<StString>         myFileList;    //!< file list
-    StArrayList<AVFormatContext*> myCtxList;     //!< format context for each file
-    StArrayList< StHandle<StAVIOContext> >
+    std::shared_ptr<StThread>          myThread;  //!< main loop thread
+    std::shared_ptr<StResourceManager> myResMgr;  //!< resource manager
+    std::shared_ptr<StTranslations>    myLangMap; //!< translations dictionary
+
+    std::vector<StString>         myFileList;    //!< file list
+    std::vector<AVFormatContext*> myCtxList;     //!< format context for each file
+    std::vector< std::shared_ptr<StAVIOContext> >
                                   myFileIOList;  //!< associated IO context
-    StArrayList<AVFormatContext*> myPlayCtxList; //!< currently played contexts
+    std::vector<AVFormatContext*> myPlayCtxList; //!< currently played contexts
 
-    StHandle<StVideoQueue>        myVideoMaster;  //!< Master video decoding thread
-    StHandle<StVideoQueue>        myVideoSlave;   //!< Slave  video decoding thread
-    StHandle<StAudioQueue>        myAudio;        //!< audio decoding thread
-    StHandle<StSubtitleQueue>     mySubtitles1;   //!< subtitles (first) decoding thread
-    StHandle<StSubtitleQueue>     mySubtitles2;   //!< subtitles (secondary) decoding thread
-    AVFormatContext*              mySlaveCtx;     //!< Slave video format context
-    signed int                    mySlaveStream;  //!< Slave video stream id
+    std::shared_ptr<StVideoQueue>        myVideoMaster;  //!< Master video decoding thread
+    std::shared_ptr<StVideoQueue>        myVideoSlave;   //!< Slave  video decoding thread
+    std::shared_ptr<StAudioQueue>        myAudio;        //!< audio decoding thread
+    std::shared_ptr<StSubtitleQueue>     mySubtitles1;   //!< subtitles (first) decoding thread
+    std::shared_ptr<StSubtitleQueue>     mySubtitles2;   //!< subtitles (secondary) decoding thread
+    AVFormatContext*                     mySlaveCtx;     //!< Slave video format context
+    signed int                           mySlaveStream;  //!< Slave video stream id
 
-    StHandle<StPlayList>          myPlayList;     //!< play list
-    StHandle<StMovieInfo>         myFileInfo;     //!< info about currently loaded file
-    StHandle<StMovieInfo>         myFileInfoTmp;
-    StHandle<StFileNode>          myCurrNode;     //!< active (played) file node
-    StHandle<StStereoParams>      myCurrParams;   //!< parameters for active file node
-    StHandle<StFileNode>          myCurrPlsFile;  //!< active playlist file node
-    StHandle<StGLTextureQueue>    myTextureQueue; //!< decoded frames queue
+    std::shared_ptr<StPlayList>          myPlayList;     //!< play list
+    std::shared_ptr<StMovieInfo>         myFileInfo;     //!< info about currently loaded file
+    std::shared_ptr<StMovieInfo>         myFileInfoTmp;
+    std::shared_ptr<StFileNode>          myCurrNode;     //!< active (played) file node
+    std::shared_ptr<StStereoParams>      myCurrParams;   //!< parameters for active file node
+    std::shared_ptr<StFileNode>          myCurrPlsFile;  //!< active playlist file node
+    std::shared_ptr<StGLTextureQueue>    myTextureQueue; //!< decoded frames queue
 
     std::vector<StString>         myTracksExt;    //!< extra tracks extensions list
     StFolder                      myTracksFolder; //!< cached list of subtitles/audio tracks in the current folder
-    std::vector< StHandle<StFileNode> >
+    std::vector< std::shared_ptr<StFileNode> >
                                   myFilesToDelete;//!< file nodes for removal
 
-    StHandle<StVideoTimer>        myVideoTimer;   //!< video refresh timer (Audio -> Video sync)
+    std::shared_ptr<StVideoTimer>        myVideoTimer;   //!< video refresh timer (Audio -> Video sync)
     mutable StMutex               myEventMutex;   //!< lock for thread-safety
     double                        myDuration;     //!< active file duration in seconds
     double                        myPtsSeek;      //!< seeking target

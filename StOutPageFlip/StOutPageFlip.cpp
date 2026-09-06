@@ -485,10 +485,10 @@ void StOutPageFlip::updateStrings() {
             + aDescr.format("2007-2026", "kirill@sview.ru", "www.sview.ru");
 }
 
-StOutPageFlip::StOutPageFlip(const StHandle<StResourceManager>& theResMgr,
-                             const StNativeWin_t                theParentWindow)
+StOutPageFlip::StOutPageFlip(const std::shared_ptr<StResourceManager>& theResMgr,
+                             const StNativeWin_t theParentWindow)
 : StWindow(theResMgr, theParentWindow),
-  mySettings(new StSettings(theResMgr, ST_OUT_PLUGIN_NAME)),
+  mySettings(std::make_shared<StSettings>(theResMgr, ST_OUT_PLUGIN_NAME)),
   myLangMap(theResMgr, ST_OUT_PLUGIN_NAME),
   myDevice(DEVICE_AUTO),
   myToDrawStereo(false),
@@ -526,14 +526,14 @@ StOutPageFlip::StOutPageFlip(const StHandle<StResourceManager>& theResMgr,
     }
 
     // devices list
-    StHandle<StOutDevice> aDevShutters = new StOutDevice();
+    std::shared_ptr<StOutDevice> aDevShutters = std::make_shared<StOutDevice>();
     aDevShutters->PluginId = ST_OUT_PLUGIN_NAME;
     aDevShutters->DeviceId = stCString("Shutters");
     aDevShutters->Priority = aSupportLevelShutters;
     aDevShutters->Name     = stCString("Shutter glasses");
     myDevices.push_back(aDevShutters);
 
-    StHandle<StOutDevice> aDevVuzix = new StOutDevice();
+    std::shared_ptr<StOutDevice> aDevVuzix = std::make_shared<StOutDevice>();
     aDevVuzix->PluginId = ST_OUT_PLUGIN_NAME;
     aDevVuzix->DeviceId = stCString("Vuzix");
     aDevVuzix->Priority = aSupportLevelVuzix;
@@ -598,12 +598,12 @@ StOutPageFlip::StOutPageFlip(const StHandle<StResourceManager>& theResMgr,
 }
 
 void StOutPageFlip::releaseResources() {
-    if(!myWarning.isNull()) {
+    if (myWarning.get() != nullptr) {
         myWarning->release(*myContext);
-        myWarning.nullify();
+        myWarning.reset();
     }
 #ifdef _WIN32
-    if(!myContext.isNull()) {
+    if (myContext.get() != nullptr) {
         myOutD3d.Program->release(*myContext);
         myOutD3d.VertBuf.release(*myContext);
         myOutD3d.TCrdBuf.release(*myContext);
@@ -611,8 +611,8 @@ void StOutPageFlip::releaseResources() {
 #endif
 
     dxRelease();
-    myContext.nullify();
-    myVuzixSDK.nullify();
+    myContext.reset();
+    myVuzixSDK.reset();
 
     // read windowed placement
     StWindow::hide();
@@ -651,7 +651,7 @@ void StOutPageFlip::setupDevice() {
             if(!StVuzixSDK::isConnected(StWindow::getMonitors())) {
                 myMsgQueue->pushError(stCString("PageFlip output - Vuzix HMD Not Found!"));
                 break;
-            } else if(myVuzixSDK.isNull()) {
+            } else if (myVuzixSDK.get() == nullptr) {
                 myMsgQueue->pushError(stCString("PageFlip output - Failed to Load Vuzix VR920 Driver!"));
                 break;
             }
@@ -659,7 +659,7 @@ void StOutPageFlip::setupDevice() {
             break;
         }
         default: {
-            if(!myVuzixSDK.isNull()) {
+            if (myVuzixSDK.get() != nullptr) {
                 myVuzixSDK->setMonoOut();
                 myVuzixSDK->close();
             }
@@ -893,21 +893,19 @@ bool StOutPageFlip::create() {
 
     // load fullscreen-only warning
     StAVImage anImage;
-    StHandle<StResource> aWarnRes = getResourceManager()->getResource(StString("textures") + SYS_FS_SPLITTER + "pageflip_fullscreen.png");
-    uint8_t* aData     = NULL;
+    std::shared_ptr<StResource> aWarnRes = getResourceManager()->getResource(StString("textures") + SYS_FS_SPLITTER + "pageflip_fullscreen.png");
+    uint8_t* aData     = nullptr;
     int      aDataSize = 0;
-    if(!aWarnRes.isNull()
-    && !aWarnRes->isFile()
-    &&  aWarnRes->read()) {
+    if (aWarnRes.get() != nullptr && !aWarnRes->isFile() && aWarnRes->read()) {
         aData     = (uint8_t* )aWarnRes->getData();
         aDataSize = aWarnRes->getSize();
     }
-    if(anImage.load(!aWarnRes.isNull() ? aWarnRes->getPath() : StString(), StImageFile::ST_TYPE_PNG, aData, aDataSize)) {
-        myWarning = new StGLTextureQuad();
-        if(!myWarning->init(*myContext, anImage.getPlane())) {
+    if (anImage.load(aWarnRes.get() != nullptr ? aWarnRes->getPath() : StString(), StImageFile::ST_TYPE_PNG, aData, aDataSize)) {
+        myWarning = std::make_shared<StGLTextureQuad>();
+        if (!myWarning->init(*myContext, anImage.getPlane())) {
             ST_ERROR_LOG(ST_OUT_PLUGIN_NAME + " Plugin, Texture can not be initialized!");
             myWarning->release(*myContext);
-            myWarning.nullify();
+            myWarning.reset();
         }
     } else {
         ST_ERROR_LOG(ST_OUT_PLUGIN_NAME + " Plugin, Texture missed: " + anImage.getState());
@@ -921,9 +919,9 @@ bool StOutPageFlip::create() {
 #endif
 
     // initialize Vuzix library
-    myVuzixSDK = new StVuzixSDK();
+    myVuzixSDK = std::make_shared<StVuzixSDK>();
     if(myVuzixSDK->init() != STERROR_LIBNOERROR) {
-        myVuzixSDK.nullify();
+        myVuzixSDK.reset();
         //ST_DEBUG_LOG(ST_OUT_PLUGIN_NAME + ST_STRING(" Plugin, Failed to Load Vuzix VR920 Driver!"));
     }
 
@@ -1031,14 +1029,14 @@ void StOutPageFlip::stglDraw() {
     const StGLBoxPx aVPort = StWindow::stglViewport(ST_WIN_MASTER);
     myContext->stglResizeViewport(aVPort);
 
-    if(!StWindow::isStereoOutput()) {
+    if (!StWindow::isStereoOutput()) {
         // Vuzix driver control
-        if(myToDrawStereo) {
-            if(myDevice == DEVICE_VUZIX && !myVuzixSDK.isNull()) {
+        if (myToDrawStereo) {
+            if (myDevice == DEVICE_VUZIX && myVuzixSDK.get() != nullptr) {
                 myVuzixSDK->setMonoOut();
             }
 
-            if(params.QuadBuffer->getValue() == QUADBUFFER_SOFT) {
+            if (params.QuadBuffer->getValue() == QUADBUFFER_SOFT) {
                 myContext->stglSetVSync((StGLContext::VSync_Mode )StWindow::params.VSyncMode->getValue());
             }
 
@@ -1049,7 +1047,7 @@ void StOutPageFlip::stglDraw() {
         dxDisactivate();
 
         // setup whole back buffer (left+right) for hardware GL Quad Buffer
-        if(params.QuadBuffer->getValue() == QUADBUFFER_HARD_OPENGL) {
+        if (params.QuadBuffer->getValue() == QUADBUFFER_HARD_OPENGL) {
         #if !defined(GL_ES_VERSION_2_0)
             myContext->core20fwd->glDrawBuffer(GL_BACK);
         #endif
@@ -1057,7 +1055,7 @@ void StOutPageFlip::stglDraw() {
 
         // draw new MONO frame
         StWindow::signals.onRedraw(ST_DRAW_LEFT);
-        if(myDevice != DEVICE_VUZIX) {
+        if (myDevice != DEVICE_VUZIX) {
             stglDrawExtra(ST_DRAW_LEFT, StGLDeviceControl::OUT_MONO);
         }
 
@@ -1066,18 +1064,18 @@ void StOutPageFlip::stglDraw() {
         StWindow::stglSwap(ST_WIN_MASTER);
         ++myFPSControl;
         return;
-    } else if(!myToDrawStereo) {
-        if(myDevice == DEVICE_VUZIX && !myVuzixSDK.isNull()
-        && params.QuadBuffer->getValue() != QUADBUFFER_HARD_OPENGL) {
+    } else if (!myToDrawStereo) {
+        if (myDevice == DEVICE_VUZIX && myVuzixSDK.get() != nullptr
+         && params.QuadBuffer->getValue() != QUADBUFFER_HARD_OPENGL) {
             myVuzixSDK->setStereoOut();
         }
-        if(params.QuadBuffer->getValue() == QUADBUFFER_SOFT) {
+        if (params.QuadBuffer->getValue() == QUADBUFFER_SOFT) {
             myContext->stglSetVSync(StGLContext::VSync_ON);
         }
         myToDrawStereo = true;
     }
 
-    switch(params.QuadBuffer->getValue()) {
+    switch (params.QuadBuffer->getValue()) {
         case QUADBUFFER_HARD_OPENGL: {
             // We check capabilities at runtime to ensure that OpenGL context was created with Quad-Buffer.
             // Also we requires fullscreen for RadeOn cards on Windows 7.
@@ -1097,7 +1095,7 @@ void StOutPageFlip::stglDraw() {
             #endif
                 StWindow::signals.onRedraw(ST_DRAW_RIGHT);
                 StWindow::signals.onRedraw(ST_DRAW_LEFT);
-                if(!myWarning.isNull()) {
+                if (myWarning.get() != nullptr) {
                     myWarning->stglDraw(*myContext);
                 }
             } else {
@@ -1223,7 +1221,7 @@ void StOutPageFlip::stglDraw() {
                 StWindow::signals.onRedraw(ST_DRAW_RIGHT); // reverse order to avoid non-smooth mono->stereo transition
                 StWindow::signals.onRedraw(ST_DRAW_LEFT);
 
-                if(!myWarning.isNull()) {
+                if (myWarning.get() != nullptr) {
                     myWarning->stglDraw(*myContext);
                 }
 
@@ -1251,9 +1249,9 @@ void StOutPageFlip::stglDrawAggressive(unsigned int theView) {
     myContext->stglResizeViewport(aVPort);
     StWindow::signals.onRedraw(theView);
 
-    if(myDevice == DEVICE_VUZIX) {
-        if(!myVuzixSDK.isNull()) {
-            if(theView == ST_DRAW_LEFT) { myVuzixSDK->waitAckLeft(); } else { myVuzixSDK->waitAckRight(); }
+    if (myDevice == DEVICE_VUZIX) {
+        if (myVuzixSDK.get() != nullptr) {
+            if (theView == ST_DRAW_LEFT) { myVuzixSDK->waitAckLeft(); } else { myVuzixSDK->waitAckRight(); }
         }
     } else {
         stglDrawExtra(theView, StGLDeviceControl::OUT_STEREO);
@@ -1263,8 +1261,8 @@ void StOutPageFlip::stglDrawAggressive(unsigned int theView) {
     ++myFPSControl;
 
     // Inform VR920 to begin scanning on next vSync, a new right eye frame.
-    if(myDevice == DEVICE_VUZIX && !myVuzixSDK.isNull()) {
-        if(theView == ST_DRAW_LEFT) { myVuzixSDK->setLeft(); } else { myVuzixSDK->setRight(); }
+    if (myDevice == DEVICE_VUZIX && myVuzixSDK.get() != nullptr) {
+        if (theView == ST_DRAW_LEFT) { myVuzixSDK->setLeft(); } else { myVuzixSDK->setRight(); }
     }
 }
 
@@ -1274,24 +1272,24 @@ void StOutPageFlip::doSetQuadBuffer(const int32_t ) {
 
 void StOutPageFlip::doShowExtra(const bool theValue) {
     myToResetDevice = true;
-    if(theValue) {
+    if (theValue) {
         params.QuadBuffer->defineOption(QUADBUFFER_SOFT, myLangMap.changeValueId(STTR_PARAMETER_QB_EMULATED, "OpenGL Emulated"));
     } else {
         params.QuadBuffer->changeValues().erase(std::next(params.QuadBuffer->changeValues().begin(),
                                                           params.QuadBuffer->getValues().size() - 1));
-        if(params.QuadBuffer->getValue() == QUADBUFFER_SOFT) {
+        if (params.QuadBuffer->getValue() == QUADBUFFER_SOFT) {
             params.QuadBuffer->setValue(QUADBUFFER_HARD_OPENGL);
         }
     }
 }
 
 void StOutPageFlip::doSwitchVSync(const int32_t theValue) {
-    if(myContext.isNull()) {
+    if (myContext.get() == nullptr) {
         return;
     }
 
     StWindow::stglMakeCurrent(ST_WIN_MASTER);
-    if(params.QuadBuffer->getValue() == QUADBUFFER_SOFT) {
+    if (params.QuadBuffer->getValue() == QUADBUFFER_SOFT) {
         //myContext->stglSetVSync(StGLContext::VSync_ON);
     } else {
         myContext->stglSetVSync((StGLContext::VSync_Mode )theValue);

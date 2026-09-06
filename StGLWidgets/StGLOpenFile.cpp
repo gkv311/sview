@@ -380,17 +380,17 @@ void StGLOpenFile::addSystemDrives() {
 
 StGLOpenFile::~StGLOpenFile() {
     StGLContext& aCtx = getContext();
-    if(!myTextureFolder.isNull()) {
-        for(size_t aTexIter = 0; aTexIter < myTextureFolder->size(); ++aTexIter) {
-            myTextureFolder->changeValue(aTexIter).release(aCtx);
+    if (myTextureFolder.get() != nullptr) {
+        for (size_t aTexIter = 0; aTexIter < myTextureFolder->size(); ++aTexIter) {
+            myTextureFolder->at(aTexIter).release(aCtx);
         }
-        myTextureFolder.nullify();
+        myTextureFolder.reset();
     }
-    if(!myTextureFile.isNull()) {
-        for(size_t aTexIter = 0; aTexIter < myTextureFile->size(); ++aTexIter) {
-            myTextureFile->changeValue(aTexIter).release(aCtx);
+    if (myTextureFile.get() != nullptr) {
+        for (size_t aTexIter = 0; aTexIter < myTextureFile->size(); ++aTexIter) {
+            myTextureFile->at(aTexIter).release(aCtx);
         }
-        myTextureFile.nullify();
+        myTextureFile.reset();
     }
 }
 
@@ -537,15 +537,15 @@ void StGLOpenFile::setItemIcon(StGLMenuItem*   theItem,
     }
 
     theItem->changeMargins().left = myMarginX + myIconSizeX + myMarginX;
-    if(myTextureFolder.isNull()) {
+    if (myTextureFolder.get() == nullptr) {
         const StString& anIcon0 = myRoot->getIcon(StGLRootWidget::IconImage_Folder);
         const StString& anIcon1 = myRoot->getIcon(StGLRootWidget::IconImage_File);
         if(!anIcon0.isEmpty()
         && !anIcon1.isEmpty()) {
-            myTextureFolder = new StGLTextureArray(1);
-            myTextureFile   = new StGLTextureArray(1);
-            myTextureFolder->changeValue(0).setName(anIcon0);
-            myTextureFile  ->changeValue(0).setName(anIcon1);
+            myTextureFolder = std::make_shared<StGLTextureArray>(1);
+            myTextureFile   = std::make_shared<StGLTextureArray>(1);
+            myTextureFolder->at(0).setName(anIcon0);
+            myTextureFile  ->at(0).setName(anIcon1);
         } else {
             return;
         }

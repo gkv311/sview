@@ -116,11 +116,11 @@ void StOutAnaglyph::updateStrings() {
             + aDescr.format("2007-2026", "kirill@sview.ru", "www.sview.ru");
 }
 
-StOutAnaglyph::StOutAnaglyph(const StHandle<StResourceManager>& theResMgr,
-                             const StNativeWin_t                theParentWindow)
+StOutAnaglyph::StOutAnaglyph(const std::shared_ptr<StResourceManager>& theResMgr,
+                             const StNativeWin_t theParentWindow)
 : StWindow(theResMgr, theParentWindow),
-  mySettings(new StSettings(theResMgr, ST_OUT_PLUGIN_NAME)),
-  myFrBuffer(new StGLStereoFrameBuffer()),
+  mySettings(std::make_shared<StSettings>(theResMgr, ST_OUT_PLUGIN_NAME)),
+  myFrBuffer(std::make_shared<StGLStereoFrameBuffer>()),
   myStereoProgram(NULL),
   mySimpleAnaglyph("Anaglyph Simple"),
   myGrayAnaglyph("Anaglyph Gray"),
@@ -134,7 +134,7 @@ StOutAnaglyph::StOutAnaglyph(const StHandle<StResourceManager>& theResMgr,
     myStereoProgram = &mySimpleAnaglyph;
 
     // devices list
-    StHandle<StOutDevice> aDevice = new StOutDevice();
+    std::shared_ptr<StOutDevice> aDevice = std::make_shared<StOutDevice>();
     aDevice->PluginId = ST_OUT_PLUGIN_NAME;
     aDevice->DeviceId = stCString("Anaglyph");
     aDevice->Priority = ST_DEVICE_SUPPORT_LOW; // anaglyph could be run on every display...
@@ -171,7 +171,7 @@ StOutAnaglyph::StOutAnaglyph(const StHandle<StResourceManager>& theResMgr,
 }
 
 void StOutAnaglyph::releaseResources() {
-    if(!myContext.isNull()) {
+    if (myContext.get() != nullptr) {
         StGLContext& aCtx = *myContext;
         mySimpleAnaglyph.release(aCtx);
         myGrayAnaglyph.release(aCtx);
@@ -182,7 +182,7 @@ void StOutAnaglyph::releaseResources() {
         myGreenAnaglyph.release(aCtx);
         myFrBuffer->release(aCtx);
     }
-    myContext.nullify();
+    myContext.reset();
 
     // read windowed placement
     StWindow::hide(ST_WIN_MASTER);
@@ -389,7 +389,7 @@ void StOutAnaglyph::doSetShader(const int32_t ) {
 }
 
 void StOutAnaglyph::doSwitchVSync(const int32_t theValue) {
-    if(myContext.isNull()) {
+    if (myContext.get() == nullptr) {
         return;
     }
 

@@ -22,7 +22,7 @@ namespace {
     // we do not use StAtomic<> template here to avoid static classes initialization ambiguity
     static volatile size_t ST_WIDGET_RES_COUNTER = 0;
 
-    static const int THE_ICON_SIZES[StGLRootWidget::IconSizeNb + 1] = {
+    static constexpr int THE_ICON_SIZES[StGLRootWidget::IconSizeNb + 1] = {
         16,
         24,
         32,
@@ -43,28 +43,15 @@ size_t StGLRootWidget::generateShareId() {
     return StAtomicOp::Increment(ST_WIDGET_RES_COUNTER);
 }
 
-StGLRootWidget::StGLRootWidget(const StHandle<StResourceManager>& theResMgr)
+StGLRootWidget::StGLRootWidget(const std::shared_ptr<StResourceManager>& theResMgr)
 : StGLWidget(NULL, 0, 0, StGLCorner(ST_VCORNER_TOP, ST_HCORNER_LEFT)),
   myShareArray(new StGLSharePointer*[10]),
   myShareSize(10),
   myResMgr(theResMgr),
-  myScrDispX(0.0f),
-  myLensDist(0.0f),
-  myScrDispXPx(0),
-  myMenuProgram(new StGLMenuProgram()),
-  myTextProgram(new StGLTextProgram()),
-  myTextBorderProgram(new StGLTextBorderProgram()),
-  myIsMobile(false),
-  myScaleGlX(1.0),
-  myScaleGlY(1.0),
-  myScaleGUI(1.0f),
-  myResolution(72),
-  myCursorZo(0.0, 0.0),
-  myFocusWidget(NULL),
-  myModalDialog(NULL),
-  myIsMenuPressed(false),
-  myMenuIconSize(IconSize_16),
-  myClickThreshold(3) {
+  myMenuProgram(std::make_shared<StGLMenuProgram>()),
+  myTextProgram(std::make_shared<StGLTextProgram>()),
+  myTextBorderProgram(std::make_shared<StGLTextBorderProgram>()),
+  myCursorZo(0.0, 0.0) {
     myRectPxFull = getRectPx();
 
     // unify access
@@ -75,10 +62,10 @@ StGLRootWidget::StGLRootWidget(const StHandle<StResourceManager>& theResMgr)
     myViewport[3] = 1;
 
     // allocate shared resources array
-    for(size_t aResId = 0; aResId < myShareSize; ++aResId) {
+    for (size_t aResId = 0; aResId < myShareSize; ++aResId) {
         myShareArray[aResId] = new StGLSharePointer();
     }
-    myGlFontMgr = new StGLFontManager(myResolution);
+    myGlFontMgr = std::make_shared<StGLFontManager>(myResolution);
 
     myColors[Color_Menu]            = StGLVec4(0.855f, 0.855f, 0.855f, 1.0f);
     myColors[Color_MenuHighlighted] = StGLVec4(0.765f, 0.765f, 0.765f, 1.0f);
@@ -102,27 +89,27 @@ StGLRootWidget::~StGLRootWidget() {
         delete myShareArray[aResId];
     }
     delete[] myShareArray;
-    if(!myGlCtx.isNull()) {
+    if (myGlCtx.get() != nullptr) {
         myMenuProgram->release(*myGlCtx);
-        myMenuProgram.nullify();
+        myMenuProgram.reset();
         myTextProgram->release(*myGlCtx);
-        myTextProgram.nullify();
+        myTextProgram.reset();
         myTextBorderProgram->release(*myGlCtx);
-        myTextBorderProgram.nullify();
-        if(!myCheckboxIcon.isNull()) {
-            for(size_t aTexIter = 0; aTexIter < myCheckboxIcon->size(); ++aTexIter) {
-                myCheckboxIcon->changeValue(aTexIter).release(*myGlCtx);
+        myTextBorderProgram.reset();
+        if (myCheckboxIcon.get() != nullptr) {
+            for (size_t aTexIter = 0; aTexIter < myCheckboxIcon->size(); ++aTexIter) {
+                myCheckboxIcon->at(aTexIter).release(*myGlCtx);
             }
-            myCheckboxIcon.nullify();
+            myCheckboxIcon.reset();
         }
-        if(!myRadioIcon.isNull()) {
-            for(size_t aTexIter = 0; aTexIter < myRadioIcon->size(); ++aTexIter) {
-                myRadioIcon->changeValue(aTexIter).release(*myGlCtx);
+        if (myRadioIcon.get() != nullptr) {
+            for (size_t aTexIter = 0; aTexIter < myRadioIcon->size(); ++aTexIter) {
+                myRadioIcon->at(aTexIter).release(*myGlCtx);
             }
-            myRadioIcon.nullify();
+            myRadioIcon.reset();
         }
         myGlFontMgr->release(*myGlCtx);
-        myGlFontMgr.nullify();
+        myGlFontMgr.reset();
     }
 }
 
@@ -130,11 +117,11 @@ StGLContext& StGLRootWidget::getContext() {
     return *myGlCtx;
 }
 
-const StHandle<StGLContext>& StGLRootWidget::getContextHandle() const {
+const std::shared_ptr<StGLContext>& StGLRootWidget::getContextHandle() const {
     return myGlCtx;
 }
 
-void StGLRootWidget::setContext(const StHandle<StGLContext>& theCtx) {
+void StGLRootWidget::setContext(const std::shared_ptr<StGLContext>& theCtx) {
     myGlCtx = theCtx;
 }
 
@@ -236,9 +223,9 @@ void StGLRootWidget::setScale(const GLfloat     theScale,
 }
 
 bool StGLRootWidget::stglInit() {
-    if(myGlCtx.isNull()) {
-        myGlCtx = new StGLContext(myResMgr);
-        if(!myGlCtx->stglInit()) {
+    if (myGlCtx.get() == nullptr) {
+        myGlCtx = std::make_shared<StGLContext>(myResMgr);
+        if (!myGlCtx->stglInit()) {
             return false;
         }
     }

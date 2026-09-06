@@ -185,7 +185,7 @@ StJpegParser::~StJpegParser() {
 
 void StJpegParser::reset() {
     // destroy all images
-    myImages.nullify();
+    myImages.reset();
     myComment.clear();
     myXMP.clear();
     myStFormat = StFormat_AUTO;
@@ -207,32 +207,32 @@ bool StJpegParser::readFile(const StCString& theFilePath,
 }
 
 bool StJpegParser::parse() {
-    if(myBuffer == NULL) {
+    if (myBuffer == NULL) {
         return false;
     }
 
     int aCount = 0;
     myImages = parseImage(++aCount, 1, myBuffer, false);
-    if(myImages.isNull()) {
+    if (myImages.get() == nullptr) {
         return false;
     }
 
     // continue reading the file (MPO may contains more than 1 image)
-    for(StHandle<StJpegParser::Image> anImg = myImages;
-        !anImg.isNull(); anImg = anImg->Next) {
+    for (std::shared_ptr<StJpegParser::Image> anImg = myImages;
+         anImg.get() != nullptr; anImg = anImg->Next) {
         anImg->Next = parseImage(++aCount, 1, anImg->Data + anImg->Length, true);
     }
 
     return true;
 }
 
-StHandle<StJpegParser::Image> StJpegParser::parseImage(const int      theImgCount,
-                                                       const int      theDepth,
-                                                       unsigned char* theDataStart,
-                                                       const bool     theToFindSOI) {
+std::shared_ptr<StJpegParser::Image> StJpegParser::parseImage(const int      theImgCount,
+                                                              const int      theDepth,
+                                                              unsigned char* theDataStart,
+                                                              const bool     theToFindSOI) {
     // check out of bounds
     if(theDataStart == NULL) {
-        return StHandle<StJpegParser::Image>();
+        return std::shared_ptr<StJpegParser::Image>();
     }
 
     unsigned char*       aData    = theDataStart;
@@ -251,18 +251,18 @@ StHandle<StJpegParser::Image> StJpegParser::parseImage(const int      theImgCoun
 
     // check out of bounds
     if((aData + 2) > aDataEnd) {
-        return StHandle<StJpegParser::Image>();
+        return std::shared_ptr<StJpegParser::Image>();
     }
 
     // check the jpeg identifier
     if(aData[0] != 0xFF || aData[1] != M_SOI) {
         ST_DEBUG_LOG("StJpegParser, no SOI at position " + size_t(aData - myBuffer) + " / " + myLength);
-        return StHandle<StJpegParser::Image>();
+        return std::shared_ptr<StJpegParser::Image>();
     }
     aData += 2; // skip already read bytes
 
     // parse the data
-    StHandle<StJpegParser::Image> anImg = new StJpegParser::Image();
+    std::shared_ptr<StJpegParser::Image> anImg = std::make_shared<StJpegParser::Image>();
     anImg->Data = aData - 2;
     bool toDetectCubemap = false;
 
@@ -316,7 +316,7 @@ StHandle<StJpegParser::Image> StJpegParser::parseImage(const int      theImgCoun
             // here the subimage (thumbnail)...
             //ST_DEBUG_LOG("Jpeg, SOI at position " + size_t(aData - myBuffer) + " / " + myLength);
             anImg->Thumb = StJpegParser::parseImage(theImgCount, theDepth + 1, aData - 2, false);
-            if(!anImg->Thumb.isNull()) {
+            if (anImg->Thumb.get() != nullptr) {
                 //ST_DEBUG_LOG("anImg->Thumb->Length= " + anImg->Thumb->Length);
                 aData += anImg->Thumb->Length - 2;
             }
@@ -325,11 +325,11 @@ StHandle<StJpegParser::Image> StJpegParser::parseImage(const int      theImgCoun
 
         if(aData + 2 >= aDataEnd) {
             ST_DEBUG_LOG("Corrupt jpeg file or error in parser");
-            if(myImages.isNull()) {
+            if (myImages.get() == nullptr) {
                 anImg->Data   = myBuffer;
                 anImg->Length = myLength;
             } else {
-                anImg.nullify();
+                anImg.reset();
             }
             return anImg;
         } else if(aSkippedBytes > 10) {
@@ -550,10 +550,10 @@ bool StJpegParser::insertSection(const uint8_t   theMarker,
                                  const ptrdiff_t theOffset) {
     const size_t aDiff    = size_t(theSectLen) + 2; // 2 bytes for marker
     const size_t aNewSize = myLength + aDiff;
-    if(aNewSize > myBuffSize) {
+    if (aNewSize > myBuffSize) {
         myBuffSize = aNewSize + 256;
         stUByte_t* aNewData = stMemAllocAligned<stUByte_t*>(myBuffSize);
-        if(aNewData == NULL) {
+        if (aNewData == NULL) {
             return false;
         }
         stMemCpy(aNewData, myBuffer, myLength);
@@ -563,16 +563,16 @@ bool StJpegParser::insertSection(const uint8_t   theMarker,
         myIsOwnData = true;
 
         // update pointers of image(s) data
-        for(StHandle<StJpegParser::Image> anImg = myImages;
-            !anImg.isNull(); anImg = anImg->Next) {
+        for (std::shared_ptr<StJpegParser::Image> anImg = myImages;
+             anImg.get() != nullptr; anImg = anImg->Next) {
             ptrdiff_t anOffset = anImg->Data - myBuffer;
-            if(anOffset >= theOffset) {
+            if (anOffset >= theOffset) {
                 anOffset += aDiff;
             }
             anImg->Data = aNewData + anOffset;
-            if(!anImg->Thumb.isNull()) {
+            if (anImg->Thumb.get() != nullptr) {
                 anOffset = anImg->Thumb->Data - myBuffer;
-                if(anOffset >= theOffset) {
+                if (anOffset >= theOffset) {
                     anOffset += aDiff;
                 }
                 anImg->Thumb->Data = aNewData + anOffset;
@@ -584,8 +584,8 @@ bool StJpegParser::insertSection(const uint8_t   theMarker,
     myLength = aNewSize;
 
     // update offset table
-    for(size_t anIter = 0; anIter < OffsetsNb; ++anIter) {
-        if(myOffsets[anIter] >= theOffset) {
+    for (size_t anIter = 0; anIter < OffsetsNb; ++anIter) {
+        if (myOffsets[anIter] >= theOffset) {
             myOffsets[anIter] += aDiff;
         }
     }
@@ -679,9 +679,9 @@ StJpegParser::Image::~Image() {
 
 void StJpegParser::fillDictionary(StDictionary& theDict,
                                   const bool    theToShowUnknown) const {
-    for(StHandle<StJpegParser::Image> anImg = myImages;
-        !anImg.isNull(); anImg = anImg->Next) {
-        for(size_t anExifId = 0; anExifId < anImg->Exif.size(); ++anExifId) {
+    for (std::shared_ptr<StJpegParser::Image> anImg = myImages;
+         anImg.get() != nullptr; anImg = anImg->Next) {
+        for (size_t anExifId = 0; anExifId < anImg->Exif.size(); ++anExifId) {
             anImg->Exif[anExifId]->fillDictionary(theDict, theToShowUnknown);
         }
     }

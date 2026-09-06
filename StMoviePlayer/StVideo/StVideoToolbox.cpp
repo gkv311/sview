@@ -234,18 +234,18 @@ bool StVideoToolboxContext::retrieveFrame(StVideoQueue& ,
 }
 
 bool StVideoQueue::hwaccelInit() {
-    if(myCodecCtx->codec_id == AV_CODEC_ID_NONE) {
+    if (myCodecCtx->codec_id == AV_CODEC_ID_NONE) {
         return false;
     }
 
-    if(myHWAccelCtx.isNull()) {
-        myHWAccelCtx = new StVideoToolboxContext();
-        if(!myHWAccelCtx->create(*this)) {
+    if (myHWAccelCtx.get() == nullptr) {
+        myHWAccelCtx = std::make_shared<StVideoToolboxContext>();
+        if (!myHWAccelCtx->create(*this)) {
             return false;
         }
     }
 
-    if(!myHWAccelCtx->decoderCreate(*this, myCodecCtx)) {
+    if (!myHWAccelCtx->decoderCreate(*this, myCodecCtx)) {
         return false;
     }
     fillCodecInfo(myCodecCtx->codec, " (VideoToolbox)");

@@ -34,9 +34,6 @@
 class StAudioQueue;
 class StThread;
 
-// define StHandle template specialization
-ST_DEFINE_HANDLE(StAudioQueue, StAVPacketQueue);
-
 /**
  * This is Audio playback class (OpenAL is used)
  * which feed with packets (StAVPacket),
@@ -359,7 +356,8 @@ class StAudioQueue : public StAVPacketQueue {
         ST_AL_INIT_KO,
     } IState_t;
 
-    StHandle<StThread> myThread;        //!< decoding loop thread
+    std::shared_ptr<StThread> myThread;        //!< decoding loop thread
+
     mutable StTimer    myPlaybackTimer; //!< timer used for current PTS calculation
     StCondition        myDowntimeEvent;
     StAVFrame          myFrame;         //!< decoded audio frame

@@ -46,8 +46,8 @@ class StOutPageFlip : public StWindow {
     /**
      * Main constructor.
      */
-    ST_CPPEXPORT StOutPageFlip(const StHandle<StResourceManager>& theResMgr,
-                               const StNativeWin_t                theParentWindow);
+    ST_CPPEXPORT StOutPageFlip(const std::shared_ptr<StResourceManager>& theResMgr,
+                               const StNativeWin_t theParentWindow);
 
     /**
      * Destructor.
@@ -208,12 +208,14 @@ class StOutPageFlip : public StWindow {
 
         protected:
 
-    StOutDevicesList      myDevices;
-    StHandle<StSettings>  mySettings;
-    StString              myAbout;      //!< about string
-    StHandle<StGLContext> myContext;
-    StHandle<StVuzixSDK>  myVuzixSDK;   //!< Vuzix HMD control
-    StHandle<StGLTextureQuad> myWarning;
+    StOutDevicesList             myDevices;
+    std::shared_ptr<StSettings>  mySettings;
+    StString                     myAbout;      //!< about string
+    std::shared_ptr<StGLContext> myContext;
+    std::shared_ptr<StVuzixSDK>  myVuzixSDK;   //!< Vuzix HMD control
+
+    std::shared_ptr<StGLTextureQuad> myWarning;
+
     StTranslations        myLangMap;
     DeviceEnum            myDevice;
     StDXInfo              myDxInfo;

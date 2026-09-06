@@ -166,7 +166,7 @@ class StGLTextureButton : public StGLWidget {
     StGLVertexBuffer           myTCrdBuf;      //!< texture coordinates VBO
     StGLVec4                   myColor;        //!< button color for alpha-textures
     StGLVec4                   myShadowColor;  //!< shadow color for alpha-textures
-    StHandle<StGLTextureArray> myTextures;     //!< list of textures (button faces)
+    std::shared_ptr<StGLTextureArray> myTextures; //!< list of textures (button faces)
     size_t                     myFaceId;       //!< active button face
     float                      myOpacityScale; //!< scale factor to be applied to the widget opacity
 
@@ -203,14 +203,14 @@ class StGLIcon : public StGLTextureButton {
     /**
      * Define externally managed textures.
      */
-    ST_LOCAL void setExternalTextures(const StHandle<StGLTextureArray>& theTextures) {
+    ST_LOCAL void setExternalTextures(const std::shared_ptr<StGLTextureArray>& theTextures) {
         myTextures          = theTextures;
         myIsExternalTexture = true;
     }
 
         protected:
 
-    bool myIsExternalTexture; //!< flag indicating that assigned texture should not be released
+    bool myIsExternalTexture = false; //!< flag indicating that assigned texture should not be released
 
 };
 

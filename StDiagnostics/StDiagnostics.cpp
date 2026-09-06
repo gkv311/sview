@@ -33,27 +33,27 @@
 
 const StString StDiagnostics::ST_DRAWER_PLUGIN_NAME("StDiagnostics");
 
-StDiagnostics::StDiagnostics(const StHandle<StResourceManager>& theResMgr,
-                             const StNativeWin_t                theParentWin,
-                             const StHandle<StOpenInfo>&        theOpenInfo)
+StDiagnostics::StDiagnostics(const std::shared_ptr<StResourceManager>& theResMgr,
+                             const StNativeWin_t theParentWin,
+                             const std::shared_ptr<StOpenInfo>& theOpenInfo)
 : StApplication(theResMgr, theParentWin, theOpenInfo) {
     myTitle = "sView - Stereoscopic Device Diagnostics";
     params.IsFullscreen = new StBoolParam(false);
     params.IsFullscreen->signals.onChanged.connect(this, &StDiagnostics::doFullscreen);
 
-    myGUI = new StDiagnosticsGUI(this);
+    myGUI = std::make_shared<StDiagnosticsGUI>(this);
 
 #if defined(__ANDROID__)
-    addRenderer(new StOutInterlace  (myResMgr, theParentWin));
-    addRenderer(new StOutAnaglyph   (myResMgr, theParentWin));
-    addRenderer(new StOutDistorted  (myResMgr, theParentWin));
+    addRenderer(std::make_shared<StOutInterlace>  (myResMgr, theParentWin));
+    addRenderer(std::make_shared<StOutAnaglyph>   (myResMgr, theParentWin));
+    addRenderer(std::make_shared<StOutDistorted>  (myResMgr, theParentWin));
 #else
-    addRenderer(new StOutAnaglyph   (myResMgr, theParentWin));
-    addRenderer(new StOutDual       (myResMgr, theParentWin));
-    addRenderer(new StOutIZ3D       (myResMgr, theParentWin));
-    addRenderer(new StOutInterlace  (myResMgr, theParentWin));
-    addRenderer(new StOutDistorted  (myResMgr, theParentWin));
-    addRenderer(new StOutPageFlipExt(myResMgr, theParentWin));
+    addRenderer(std::make_shared<StOutAnaglyph>   (myResMgr, theParentWin));
+    addRenderer(std::make_shared<StOutDual>       (myResMgr, theParentWin));
+    addRenderer(std::make_shared<StOutIZ3D>       (myResMgr, theParentWin));
+    addRenderer(std::make_shared<StOutInterlace>  (myResMgr, theParentWin));
+    addRenderer(std::make_shared<StOutDistorted>  (myResMgr, theParentWin));
+    addRenderer(std::make_shared<StOutPageFlipExt>(myResMgr, theParentWin));
 #endif
 
     // create actions
@@ -74,7 +74,7 @@ StDiagnostics::StDiagnostics(const StHandle<StResourceManager>& theResMgr,
 }
 
 StDiagnostics::~StDiagnostics() {
-    myGUI.nullify();
+    myGUI.reset();
 }
 
 bool StDiagnostics::open() {
@@ -99,7 +99,7 @@ bool StDiagnostics::open() {
     if(!myGUI->stglInit()) {
         myMsgQueue->pushError(stCString("StDiagnostics - critical error:\nGUI initialization failed!"));
         myMsgQueue->popAll();
-        myGUI.nullify();
+        myGUI.reset();
         return false;
     }
 
@@ -116,7 +116,7 @@ bool StDiagnostics::open() {
 }
 
 void StDiagnostics::doResize(const StSizeEvent& ) {
-    if(myGUI.isNull()) {
+    if (myGUI.get() == nullptr) {
         return;
     }
 
@@ -130,7 +130,7 @@ void StDiagnostics::doResize(const StSizeEvent& ) {
 }
 
 void StDiagnostics::doMouseDown(const StClickEvent& theEvent) {
-    if(myGUI.isNull()) {
+    if (myGUI.get() == nullptr) {
         return;
     }
 
@@ -138,7 +138,7 @@ void StDiagnostics::doMouseDown(const StClickEvent& theEvent) {
 }
 
 void StDiagnostics::doMouseUp(const StClickEvent& theEvent) {
-    if(myGUI.isNull()) {
+    if (myGUI.get() == nullptr) {
         return;
     }
 
@@ -149,7 +149,7 @@ void StDiagnostics::doMouseUp(const StClickEvent& theEvent) {
 }
 
 void StDiagnostics::doKeyDown(const StKeyEvent& theEvent) {
-    if(myGUI.isNull()) {
+    if (myGUI.get() == nullptr) {
         return;
     }
 
@@ -169,21 +169,19 @@ void StDiagnostics::doKeyDown(const StKeyEvent& theEvent) {
 }
 
 void StDiagnostics::doKeyHold(const StKeyEvent& theEvent) {
-    if(!myGUI.isNull()
-    && myGUI->getFocus() != NULL) {
+    if (myGUI.get() != nullptr && myGUI->getFocus() != nullptr) {
         myGUI->doKeyHold(theEvent);
     }
 }
 
 void StDiagnostics::doKeyUp(const StKeyEvent& theEvent) {
-    if(!myGUI.isNull()
-    && myGUI->getFocus() != NULL) {
+    if (myGUI.get() != nullptr && myGUI->getFocus() != nullptr) {
         myGUI->doKeyUp(theEvent);
     }
 }
 
 void StDiagnostics::beforeDraw() {
-    if(myGUI.isNull()) {
+    if (myGUI.get() == nullptr) {
         return;
     }
 
@@ -191,13 +189,12 @@ void StDiagnostics::beforeDraw() {
 }
 
 void StDiagnostics::stglDraw(unsigned int theView) {
-    if(!myContext.isNull()
-    && myContext->core20fwd != NULL) {
+    if (myContext.get() != nullptr && myContext->core20fwd != nullptr) {
         // clear the screen and the depth buffer
         myContext->core20fwd->glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
     }
 
-    if(myGUI.isNull()) {
+    if (myGUI.get() == nullptr) {
         return;
     }
 
@@ -212,13 +209,13 @@ void StDiagnostics::stglDraw(unsigned int theView) {
 }
 
 void StDiagnostics::doFullscreen(const bool theIsFullscreen) {
-    if(!myWindow.isNull()) {
+    if (myWindow.get() != nullptr) {
         myWindow->setFullScreen(theIsFullscreen);
     }
 }
 
 void StDiagnostics::doStereoMode(const size_t theMode) {
-    if(!myWindow.isNull()) {
+    if (myWindow.get() != nullptr) {
         myWindow->setStereoOutput(theMode != 0);
     }
 }

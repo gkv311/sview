@@ -9,6 +9,8 @@
 
 #include "StImagePlane.h"
 
+#include <memory>
+
 /**
  * Interface to share arbitrary memory buffer using reference counter.
  */
@@ -26,7 +28,7 @@ class StBufferCounter {
      * If theOther has the same type, than the ref counter will be reused.
      * Otherwise then new counter will be allocated.
      */
-    virtual void createReference(StHandle<StBufferCounter>& theOther) const = 0;
+    virtual void createReference(std::shared_ptr<StBufferCounter>& theOther) const = 0;
 
     /**
      * Release current reference.
@@ -142,42 +144,42 @@ class StImage {
     /**
      * @return true if all color components are stored in one plane (thus - interleaved).
      */
-    inline bool isPacked() const {
+    ST_LOCAL bool isPacked() const {
         return myPlanes[1].isNull();
     }
 
     /**
      * @return true if color components are stored in separate image planes.
      */
-    inline bool isPlanar() const {
+    ST_LOCAL bool isPlanar() const {
         return !myPlanes[1].isNull();
     }
 
     /**
      * @return color model
      */
-    inline ImgColorModel getColorModel() const {
+    ST_LOCAL ImgColorModel getColorModel() const {
         return myColorModel;
     }
 
     /**
      * Setup color model.
      */
-    inline void setColorModel(const ImgColorModel theColorModel) {
+    ST_LOCAL void setColorModel(const ImgColorModel theColorModel) {
         myColorModel = theColorModel;
     }
 
     /**
      * @return color scale (range)
      */
-    inline ImgColorScale getColorScale() const {
+    ST_LOCAL ImgColorScale getColorScale() const {
         return myColorScale;
     }
 
     /**
      * Setup color scale (range).
      */
-    inline void setColorScale(const ImgColorScale theColorScale) {
+    ST_LOCAL void setColorScale(const ImgColorScale theColorScale) {
         myColorScale = theColorScale;
     }
 
@@ -185,7 +187,7 @@ class StImage {
      * Determine the color model from image plane.
      * Valid only for packed image.
      */
-    inline void setColorModelPacked(const StImagePlane::ImgFormat theImgFormat) {
+    ST_LOCAL void setColorModelPacked(const StImagePlane::ImgFormat theImgFormat) {
         switch(theImgFormat) {
             case StImagePlane::ImgGray:
             case StImagePlane::ImgGrayF:
@@ -208,7 +210,7 @@ class StImage {
     /**
      * @return width / height.
      */
-    inline GLfloat getRatio() const {
+    ST_LOCAL GLfloat getRatio() const {
         size_t aSizeY = getSizeY();
         return (aSizeY > 0) ? (GLfloat(getSizeX()) / GLfloat(aSizeY)) : 1.0f;
     }
@@ -223,21 +225,21 @@ class StImage {
     /**
      * @return image width in pixels.
      */
-    inline size_t getSizeX() const {
+    ST_LOCAL size_t getSizeX() const {
         return myPlanes[0].getSizeX();
     }
 
     /**
      * @return image height in pixels.
      */
-    inline size_t getSizeY() const {
+    ST_LOCAL size_t getSizeY() const {
         return myPlanes[0].getSizeY();
     }
 
     /**
      * Access to the image plane by ID (from 0 to 3).
      */
-    inline const StImagePlane& getPlane(const size_t theId = 0) const {
+    ST_LOCAL const StImagePlane& getPlane(const size_t theId = 0) const {
         ST_ASSERT(theId < 4, "StImage::getPlane() - Out of range access");
         return myPlanes[theId];
     }
@@ -245,7 +247,7 @@ class StImage {
     /**
      * Access to the image plane by ID (from 0 to 3).
      */
-    inline StImagePlane& changePlane(const size_t theId = 0) {
+    ST_LOCAL StImagePlane& changePlane(const size_t theId = 0) {
         ST_ASSERT(theId < 4, "StImage::changePlane() - Out of range access");
         return myPlanes[theId];
     }
@@ -255,11 +257,11 @@ class StImage {
      * If pixels are quads than PAR = 1.0 (normal case).
      * PAR should be used to compute correct DAR (Display Aspect Ratio).
      */
-    inline GLfloat getPixelRatio() const {
+    ST_LOCAL GLfloat getPixelRatio() const {
         return myPAR;
     }
 
-    inline void setPixelRatio(const GLfloat thePAR) {
+    ST_LOCAL void setPixelRatio(const GLfloat thePAR) {
         myPAR = thePAR;
     }
 
@@ -276,16 +278,16 @@ class StImage {
     /**
      * Return reference counter for shared memory buffer.
      */
-    ST_LOCAL const StHandle<StBufferCounter>& getBufferCounter() const { return myBufCounter; }
+    ST_LOCAL const std::shared_ptr<StBufferCounter>& getBufferCounter() const { return myBufCounter; }
 
     /**
      * Dangerous method to assign reference counter for shared memory buffer.
      */
-    ST_LOCAL void setBufferCounter(const StHandle<StBufferCounter>& theCounter) { myBufCounter = theCounter; }
+    ST_LOCAL void setBufferCounter(const std::shared_ptr<StBufferCounter>& theCounter) { myBufCounter = theCounter; }
 
         protected:
 
-    ST_LOCAL inline StString getDescription() const {
+    ST_LOCAL StString getDescription() const {
        return StString() + getSizeX() + " x " + getSizeY()
             + ", " + formatImgColorModel()
             + ", " + getPlane().formatImgFormat();
@@ -299,26 +301,26 @@ class StImage {
     ST_CPPEXPORT StPixelRGB getRGBFromYUV(const size_t theRow,
                                           const size_t theCol) const;
 
-    inline float getScaleFactorX(const size_t thePlane) const {
+    ST_LOCAL float getScaleFactorX(const size_t thePlane) const {
         return float(getPlane(thePlane).getSizeX()) / float(getPlane(0).getSizeX());
     }
 
-    inline float getScaleFactorY(const size_t thePlane) const {
+    ST_LOCAL float getScaleFactorY(const size_t thePlane) const {
         return float(getPlane(thePlane).getSizeY()) / float(getPlane(0).getSizeY());
     }
 
-    inline size_t getScaledCol(const size_t thePlane,
-                               const size_t theCol) const {
+    ST_LOCAL size_t getScaledCol(const size_t thePlane,
+                                 const size_t theCol) const {
         return size_t(getScaleFactorX(thePlane) * float(theCol));
     }
 
-    inline size_t getScaledRow(const size_t thePlane,
-                               const size_t theRow) const {
+    ST_LOCAL size_t getScaledRow(const size_t thePlane,
+                                 const size_t theRow) const {
         return size_t(getScaleFactorY(thePlane) * float(theRow));
     }
 
     template<typename Type>
-    static inline uint8_t clamp(const Type x) {
+    static ST_LOCAL uint8_t clamp(const Type x) {
         return x < 0x00 ? 0x00 : (x > 0xff ? 0xff : uint8_t(x));
     }
 
@@ -330,11 +332,12 @@ class StImage {
         private:
 
     StImagePlane  myPlanes[4];  //!< color planes (only 1 used for packed formats)
-    GLfloat       myPAR;        //!< pixel aspect ratio
-    ImgColorModel myColorModel; //!< color model (RGB/YUV...)
-    ImgColorScale myColorScale; //!< color scale (range)
-    StHandle<StBufferCounter>
-                  myBufCounter; //!< reference counter for shared memory buffer
+    GLfloat       myPAR = 1.0f; //!< pixel aspect ratio
+
+    ImgColorModel myColorModel = ImgColor_RGB;  //!< color model (RGB/YUV...)
+    ImgColorScale myColorScale = ImgScale_Full; //!< color scale (range)
+
+    std::shared_ptr<StBufferCounter> myBufCounter; //!< reference counter for shared memory buffer
 
 };
 

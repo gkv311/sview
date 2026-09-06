@@ -37,8 +37,8 @@ class StOutDistorted : public StWindow {
     /**
      * Main constructor.
      */
-    ST_CPPEXPORT StOutDistorted(const StHandle<StResourceManager>& theResMgr,
-                                const StNativeWin_t                theParentWindow);
+    ST_CPPEXPORT StOutDistorted(const std::shared_ptr<StResourceManager>& theResMgr,
+                                const StNativeWin_t theParentWindow);
 
     /**
      * Destructor.
@@ -274,21 +274,24 @@ class StOutDistorted : public StWindow {
 
         private:
 
-    StOutDevicesList          myDevices;
-    StHandle<StSettings>      mySettings;
-    StString                  myAbout;           //!< about string
-    StString                  myAboutTitle;      //!< title for About dialog
-    StString                  myAboutVerString;  //!< version string for About dialog
-    StString                  myAboutDescr;      //!< description for About dialog
-    StString                  myAboutVrDevice;   //!< HMD info for About dialog
+    StOutDevicesList            myDevices;
+    std::shared_ptr<StSettings> mySettings;
 
-    int                       myDevice;          //!< currently active device
-    bool                      myToResetDevice;
-    StHandle<StGLContext>     myContext;
-    StHandle<StGLFrameBuffer> myFrBuffer;        //!< OpenGL frame buffer object
-    StHandle<StGLTexture>     myCursor;          //!< cursor texture - we can not use normal cursor due to distortions
-    StHandle<StProgramFlat>   myProgramFlat;
-    StHandle<StProgramBarrel> myProgramBarrel;
+    StString myAbout;           //!< about string
+    StString myAboutTitle;      //!< title for About dialog
+    StString myAboutVerString;  //!< version string for About dialog
+    StString myAboutDescr;      //!< description for About dialog
+    StString myAboutVrDevice;   //!< HMD info for About dialog
+
+    int  myDevice;          //!< currently active device
+    bool myToResetDevice;
+
+    std::shared_ptr<StGLContext>     myContext;
+    std::shared_ptr<StGLFrameBuffer> myFrBuffer;        //!< OpenGL frame buffer object
+    std::shared_ptr<StGLTexture>     myCursor;          //!< cursor texture - we can not use normal cursor due to distortions
+    std::shared_ptr<StProgramFlat>   myProgramFlat;
+    std::shared_ptr<StProgramBarrel> myProgramBarrel;
+
     StFPSControl              myFPSControl;
     StGLVertexBuffer          myFrVertsBuf;      //!< buffers to draw simple fullsreen quad
     StGLVertexBuffer          myFrTCrdsBuf;
@@ -311,7 +314,9 @@ class StOutDistorted : public StWindow {
     float                     myVrIOD;           //!< intra-ocular distance in meters
     bool                      myVrTrackOrient;   //!< track orientation flag
     bool                      myVrToDrawMsg;
-    StHandle<StGLTextureQuad> myVrFullscreenMsg;
+
+    std::shared_ptr<StGLTextureQuad> myVrFullscreenMsg;
+
     StTimer                   myVrMsgTimer;
 #ifdef ST_HAVE_OPENVR
     vr::IVRSystem*            myVrHmd;           //!< OpenVR session object

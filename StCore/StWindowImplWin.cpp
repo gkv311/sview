@@ -87,7 +87,7 @@ bool StWindowImpl::create() {
     myEventInitWin.reset();
     myEventInitGl.reset();
     myEventQuit.reset();
-    myMsgThread = new StThread(threadCreateWindows, (void* )this, "StWindowImplMSG");
+    myMsgThread = std::make_shared<StThread>(threadCreateWindows, (void* )this, "StWindowImplMSG");
     // wait for thread to create window
     myEventInitWin.wait();
     if(myInitState != STWIN_INIT_SUCCESS) {
@@ -102,7 +102,7 @@ bool StWindowImpl::create() {
                                            attribs.IsGlStereo,
                                            attribs.IsGlDebug);
     myEventInitGl.set();
-    myGlContext = new StGLContext(myResMgr);
+    myGlContext = std::make_shared<StGLContext>(myResMgr);
     if(!myGlContext->stglInit()) {
         stError("Critical error - broken GL context!\nInvalid OpenGL driver?");
         myInitState = STWIN_ERROR_WIN32_GLRC_ACTIVATE;
