@@ -324,8 +324,8 @@ bool StImage::initSideBySide(const StImage& theImageL,
         int aValue = (isYUV && aPlaneId != 0) ? 128 : 0;
         if(!changePlane(aPlaneId).initSideBySide(theImageL.getPlane(aPlaneId),
                                                  theImageR.getPlane(aPlaneId),
-                                                 int(aScaleX * theSeparationDx),
-                                                 int(aScaleY * theSeparationDy),
+                                                 int(round(aScaleX * theSeparationDx)),
+                                                 int(round(aScaleY * theSeparationDy)),
                                                  aValue)) {
             nullify();
             return false;

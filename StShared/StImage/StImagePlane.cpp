@@ -215,7 +215,15 @@ bool StImagePlane::initSideBySide(const StImagePlane& theImageL,
     size_t outSizeY =  theImageL.getSizeY() + dyAbsPx  * 2;
 
     setFormat(theImageL.getFormat());
-    if(!initZero(theImageL.getFormat(), outSizeX, outSizeY, outSizeX * theImageL.getSizePixelBytes(), theValue)) {
+
+    // align rows stride to at least 4 bytes
+    // TODO get alignment from FFmpeg
+    static constexpr size_t TheStrideAlign = 4;
+
+    size_t anOutRowSize = outSizeX * theImageL.getSizePixelBytes();
+    anOutRowSize = ((anOutRowSize + TheStrideAlign - 1) / TheStrideAlign) * TheStrideAlign;
+
+    if (!initZero(theImageL.getFormat(), outSizeX, outSizeY, anOutRowSize, theValue)) {
         return false;
     }
 
