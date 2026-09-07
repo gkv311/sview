@@ -286,6 +286,7 @@ StGLMenu* StImageViewerGUI::createSaveImageMenu() {
         ->signals.onItemClick.connect(myPlugin, &StImageViewer::doSaveImageAs);
     menu->addItem("PNG stereo (*.pns)", size_t(StImageFile::ST_TYPE_PNG))
         ->signals.onItemClick.connect(myPlugin, &StImageViewer::doSaveImageAs);
+    menu->addItem(myPlugin->params.ToSaveCrossEyed);
     return menu;
 }
 

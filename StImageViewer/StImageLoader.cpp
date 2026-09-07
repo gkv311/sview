@@ -686,10 +686,12 @@ bool StImageLoader::saveImage(const std::shared_ptr<StFileNode>& theSource,
     }
 
     const bool toSaveStereo = !aDataRight.isNull();
+    const bool isCrossEyed = params.ToSaveCrossEyed->getValue();
     if(toSaveStereo
-    && aDataResult->initSideBySide(aDataLeft, aDataRight,
-                                   theParams->getSeparationDx(),
-                                   theParams->getSeparationDy())) {
+    && aDataResult->initSideBySide(isCrossEyed ? aDataLeft : aDataRight,
+                                   isCrossEyed ? aDataRight : aDataLeft,
+                                   isCrossEyed ? theParams->getSeparationDx() : -theParams->getSeparationDx(),
+                                   isCrossEyed ? theParams->getSeparationDy() : -theParams->getSeparationDy())) {
         aDataLeft.nullify();
         aDataRight.nullify();
     } else {
@@ -753,7 +755,7 @@ bool StImageLoader::saveImage(const std::shared_ptr<StFileNode>& theSource,
             StString strSaveState;
             StImageFile::SaveImageParams aSaveParams;
             aSaveParams.SaveImageType = theImgType;
-            aSaveParams.StereoFormat = toSaveStereo ? StFormat_SideBySide_RL : StFormat_AUTO;
+            aSaveParams.StereoFormat = toSaveStereo ? (isCrossEyed ? StFormat_SideBySide_RL : StFormat_SideBySide_LR) : StFormat_AUTO;
             if(!aDataResult->save(aFileToSave, aSaveParams)) {
                 // TODO (Kirill Gavrilov#7)
                 myMsgQueue->pushError(aDataResult->getState());

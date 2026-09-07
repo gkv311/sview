@@ -134,6 +134,7 @@ class StImageViewer : public StApplication {
         StHandle<StInt32ParamNamed>   LastUpdateDay;    //!< the last time update has been checked
         StHandle<StInt32ParamNamed>   SrcStereoFormat;  //!< source format
         StHandle<StBoolParamNamed>    ToSwapJPS;        //!< swap JPS views order
+        StHandle<StBoolParamNamed>    ToSaveCrossEyed;  //!< save JPS views as cross-eyed or parallel pair
         StHandle<StBoolParamNamed>    ToStickPanorama;  //!< force panorama input for all files
         StHandle<StBoolParamNamed>    ToFlipCubeZ6x1;   //!< flip Z coordinate within Cube map 6x1
         StHandle<StBoolParamNamed>    ToFlipCubeZ3x2;   //!< flip Z coordinate within Cube map 3x2

@@ -19,7 +19,6 @@
 #include "StImageViewer.h"
 
 #include "StImageOpenDialog.h"
-#include "StImagePluginInfo.h"
 #include "StImageViewerStrings.h"
 
 #include <StGL/StGLContext.h>
@@ -50,32 +49,32 @@ const char* StImageViewer::ST_DRAWER_PLUGIN_NAME = "StImageViewer";
 
 namespace {
 
-    static const char ST_SETTING_LAST_FOLDER[] = "lastFolder";
-    static const char ST_SETTING_RECENT_L[]    = "recentL";
-    static const char ST_SETTING_RECENT_R[]    = "recentR";
-    static const char ST_SETTING_COMPRESS[]    = "toCompress";
-    static const char ST_SETTING_ESCAPENOQUIT[]= "escNoQuit";
+    static constexpr char ST_SETTING_LAST_FOLDER[] = "lastFolder";
+    static constexpr char ST_SETTING_RECENT_L[]    = "recentL";
+    static constexpr char ST_SETTING_RECENT_R[]    = "recentR";
+    static constexpr char ST_SETTING_COMPRESS[]    = "toCompress";
+    static constexpr char ST_SETTING_ESCAPENOQUIT[]= "escNoQuit";
 
-    static const char ST_SETTING_SLIDESHOW[]   = "slideshow";
-    static const char ST_SETTING_VIEWMODE[]    = "viewMode";
-    static const char ST_SETTING_GAMMA[]       = "viewGamma";
-    static const char ST_SETTING_BRIGHTNESS[]  = "viewBrightness";
-    static const char ST_SETTING_SATURATION[]  = "viewSaturation";
-    static const char ST_SETTING_SEP_DX[]      = "viewSepDX";
-    static const char ST_SETTING_SEP_DY[]      = "viewSepDY";
-    static const char ST_SETTING_SEP_ROT[]     = "viewSepRot";
-    static const char ST_SETTING_IMAGELIB[]    = "imageLib";
+    static constexpr char ST_SETTING_SLIDESHOW[]   = "slideshow";
+    static constexpr char ST_SETTING_VIEWMODE[]    = "viewMode";
+    static constexpr char ST_SETTING_GAMMA[]       = "viewGamma";
+    static constexpr char ST_SETTING_BRIGHTNESS[]  = "viewBrightness";
+    static constexpr char ST_SETTING_SATURATION[]  = "viewSaturation";
+    static constexpr char ST_SETTING_SEP_DX[]      = "viewSepDX";
+    static constexpr char ST_SETTING_SEP_DY[]      = "viewSepDY";
+    static constexpr char ST_SETTING_SEP_ROT[]     = "viewSepRot";
+    static constexpr char ST_SETTING_IMAGELIB[]    = "imageLib";
 
-    static const char ST_ARGUMENT_FILE_LEFT[]  = "left";
-    static const char ST_ARGUMENT_FILE_RIGHT[] = "right";
-    static const char ST_ARGUMENT_FILE_LAST[]  = "last";
-    static const char ST_ARGUMENT_FILE_DEMO[]  = "demo";
+    static constexpr char ST_ARGUMENT_FILE_LEFT[]  = "left";
+    static constexpr char ST_ARGUMENT_FILE_RIGHT[] = "right";
+    static constexpr char ST_ARGUMENT_FILE_LAST[]  = "last";
+    static constexpr char ST_ARGUMENT_FILE_DEMO[]  = "demo";
 
-    static const char ST_ARGUMENT_MONITOR[]    = "monitorId";
-    static const char ST_ARGUMENT_WINLEFT[]    = "windowLeft";
-    static const char ST_ARGUMENT_WINTOP[]     = "windowTop";
-    static const char ST_ARGUMENT_WINWIDTH[]   = "windowWidth";
-    static const char ST_ARGUMENT_WINHEIGHT[]  = "windowHeight";
+    static constexpr char ST_ARGUMENT_MONITOR[]    = "monitorId";
+    static constexpr char ST_ARGUMENT_WINLEFT[]    = "windowLeft";
+    static constexpr char ST_ARGUMENT_WINTOP[]     = "windowTop";
+    static constexpr char ST_ARGUMENT_WINWIDTH[]   = "windowWidth";
+    static constexpr char ST_ARGUMENT_WINHEIGHT[]  = "windowHeight";
 
 }
 
@@ -106,6 +105,7 @@ void StImageViewer::updateStrings() {
     params.ToShowPlayList->setName(tr(PLAYLIST));
     params.ToShowAdjustImage->setName(tr(MENU_VIEW_IMAGE_ADJUST));
     params.ToSwapJPS->setName(tr(OPTION_SWAP_JPS));
+    params.ToSaveCrossEyed->setName(tr(OPTION_SAVE_JPS_CROSSEYED));
     params.ToStickPanorama->setName(tr(MENU_VIEW_STICK_PANORAMA360));
     params.ToFlipCubeZ6x1->setName(tr(MENU_VIEW_FLIPZ_CUBE6x1));
     params.ToFlipCubeZ3x2->setName(tr(MENU_VIEW_FLIPZ_CUBE3x2));
@@ -175,6 +175,7 @@ StImageViewer::StImageViewer(const std::shared_ptr<StResourceManager>& theResMgr
     params.ToShowAdjustImage->signals.onChanged = stSlot(this, &StImageViewer::doShowAdjustImage);
     params.ToSwapJPS = new StBoolParamNamed(false, stCString("toSwapJPS"));
     params.ToSwapJPS->signals.onChanged = stSlot(this, &StImageViewer::doChangeSwapJPS);
+    params.ToSaveCrossEyed = new StBoolParamNamed(true, stCString("toSaveCrossEyed"));
     params.ToStickPanorama = new StBoolParamNamed(false, stCString("toStickPano360"));
     params.ToStickPanorama->signals.onChanged = stSlot(this, &StImageViewer::doChangeStickPano360);
     params.ToFlipCubeZ6x1= new StBoolParamNamed(true,  stCString("toFlipCube6x1"));
@@ -225,6 +226,7 @@ StImageViewer::StImageViewer(const std::shared_ptr<StResourceManager>& theResMgr
     mySettings->loadParam (params.LastUpdateDay);
     mySettings->loadParam (params.CheckUpdatesDays);
     mySettings->loadParam (params.ToSwapJPS);
+    mySettings->loadParam (params.ToSaveCrossEyed);
     mySettings->loadParam (params.ToStickPanorama);
     mySettings->loadParam (params.ToFlipCubeZ6x1);
     mySettings->loadParam (params.ToFlipCubeZ3x2);
@@ -449,6 +451,7 @@ void StImageViewer::saveAllParams() {
         mySettings->saveParam(params.CheckUpdatesDays);
         mySettings->saveString(ST_SETTING_IMAGELIB,  StImageFile::imgLibToString(params.imageLib));
         mySettings->saveParam (params.ToSwapJPS);
+        mySettings->saveParam (params.ToSaveCrossEyed);
         mySettings->saveParam (params.ToStickPanorama);
         mySettings->saveParam (params.ToFlipCubeZ6x1);
         mySettings->saveParam (params.ToFlipCubeZ3x2);
@@ -643,6 +646,7 @@ bool StImageViewer::init() {
     myLoader = std::make_shared<StImageLoader>(params.imageLib, myResMgr, myMsgQueue, myLangMap, myPlayList,
                                                myGUI->myImage->getTextureQueue(), myContext->getMaxTextureSize());
     myLoader->signals.onLoaded.connect(this, &StImageViewer::doLoaded);
+    myLoader->params.ToSaveCrossEyed = params.ToSaveCrossEyed;
     myLoader->setCompressMemory(myWindow->isMobile());
     myLoader->setSwapJPS(params.ToSwapJPS->getValue());
     myLoader->setStickPano360(params.ToStickPanorama->getValue());

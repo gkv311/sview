@@ -253,6 +253,8 @@ void loadDefaults(StLangMap& theStrings) {
                "Swap JPS/PNS views order");
     theStrings(OPTION_USE_DEEP_COLOR,
                "Prefer Deep Color (30-bit RGB)");
+    theStrings(OPTION_SAVE_JPS_CROSSEYED,
+               "Save cross-eyed stereopair");
 
     theStrings(UPDATES_NOTIFY,
                "A new version of sView is available on the official site www.sview.ru.\n"

@@ -19,6 +19,7 @@
 #ifndef __StImageLoader_h_
 #define __StImageLoader_h_
 
+#include <StSettings/StParam.h>
 #include <StStrings/StMsgQueue.h>
 #include <StFile/StMIMEList.h>
 #include <StGL/StPlayList.h>
@@ -173,6 +174,14 @@ class StImageLoader {
      * Set if JPS file should be read as Left/Right (TRUE) of as Right/Left (FALSE).
      */
     ST_LOCAL void setSwapJPS(bool theToSwap) { myToSwapJps = theToSwap; }
+
+        public: //! @name Properties
+
+    struct {
+
+        StHandle<StBoolParam> ToSaveCrossEyed;
+
+    } params;
 
         public:  //! @name Signals
 

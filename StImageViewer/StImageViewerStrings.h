@@ -146,6 +146,7 @@ namespace StImageViewerStrings {
         OPTION_OPEN_LAST_ON_STARTUP        = 1711,
         OPTION_SWAP_JPS                    = 1712,
         OPTION_USE_DEEP_COLOR              = 1713,
+        OPTION_SAVE_JPS_CROSSEYED          = 1714,
 
         // Open/Save dialogs
         DIALOG_OPEN_FILE       = 2000,
