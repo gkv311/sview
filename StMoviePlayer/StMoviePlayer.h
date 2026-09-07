@@ -216,6 +216,7 @@ class StMoviePlayer : public StApplication {
         StHandle<StInt32ParamNamed>   LastUpdateDay;     //!< the last time update has been checked
         StHandle<StInt32ParamNamed>   SrcStereoFormat;   //!< source format
         StHandle<StBoolParamNamed>    ToSwapJPS;         //!< swap JPS views order
+        StHandle<StBoolParamNamed>    ToSaveCrossEyed;   //!< save JPS views as cross-eyed or parallel pair
         StHandle<StBoolParamNamed>    ToStickPanorama;   //!< force panorama input for all files
         StHandle<StBoolParamNamed>    ToTrackHead;       //!< enable/disable head-tracking
         StHandle<StBoolParamNamed>    ToTrackHeadAudio;  //!< enable/disable head-tracking for audio listener

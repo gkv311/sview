@@ -1344,10 +1344,12 @@ bool StVideo::saveSnapshotAs(StImageFile::ImageType theImgType) {
         return false;
     }
 
-    bool toSaveStereo = !dataRight.isNull();
-    if(toSaveStereo && dataResult->initSideBySide(dataLeft, dataRight,
-                                                  myCurrParams->getSeparationDx(),
-                                                  myCurrParams->getSeparationDy())) {
+    const bool toSaveStereo = !dataRight.isNull();
+    const bool isCrossEyed = params.ToSaveCrossEyed->getValue();
+    if(toSaveStereo && dataResult->initSideBySide(isCrossEyed ? dataLeft : dataRight,
+                                                  isCrossEyed ? dataRight : dataLeft,
+                                                  isCrossEyed ? myCurrParams->getSeparationDx() : -myCurrParams->getSeparationDx(),
+                                                  isCrossEyed ? myCurrParams->getSeparationDy() : -myCurrParams->getSeparationDy())) {
         dataLeft.nullify();
         dataRight.nullify();
     } else {
@@ -1399,7 +1401,7 @@ bool StVideo::saveSnapshotAs(StImageFile::ImageType theImgType) {
         ST_DEBUG_LOG("Save snapshot to the path '" + fileToSave + '\'');
         StImageFile::SaveImageParams aSaveParams;
         aSaveParams.SaveImageType = theImgType;
-        aSaveParams.StereoFormat = toSaveStereo ? StFormat_SideBySide_RL : StFormat_AUTO;
+        aSaveParams.StereoFormat = toSaveStereo ? (isCrossEyed ? StFormat_SideBySide_RL : StFormat_SideBySide_LR) : StFormat_AUTO;
         if(!dataResult->save(fileToSave, aSaveParams)) {
             // TODO (Kirill Gavrilov#7)
             signals.onError(dataResult->getState());

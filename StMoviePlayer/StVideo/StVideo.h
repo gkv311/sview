@@ -269,6 +269,7 @@ class StVideo {
 
     struct {
 
+        StHandle<StBoolParam>         ToSaveCrossEyed;
         StHandle<StBoolParam>         UseGpu;          //!< use video decoding on GPU when available
         StHandle<StBoolParam>         UseOpenJpeg;     //!< use OpenJPEG (libopenjpeg) instead of built-in jpeg2000 decoder
         StHandle<StBoolParam>         ToAutoLoadSubs;  //!< load subtitles by default

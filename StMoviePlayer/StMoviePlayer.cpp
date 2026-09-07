@@ -185,6 +185,7 @@ void StMoviePlayer::updateStrings() {
     params.ToShowPlayList->setName(tr(VIDEO_LIST));
     params.ToShowAdjustImage->setName(tr(MENU_VIEW_IMAGE_ADJUST));
     params.ToSwapJPS->setName(tr(OPTION_SWAP_JPS));
+    params.ToSaveCrossEyed->setName(tr(OPTION_SAVE_JPS_CROSSEYED));
     params.ToStickPanorama->setName(tr(MENU_VIEW_STICK_PANORAMA360));
     params.ToTrackHead->setName(tr(MENU_VIEW_TRACK_HEAD));
     params.ToTrackHeadAudio->setName(tr(MENU_VIEW_TRACK_HEAD_AUDIO));
@@ -337,6 +338,7 @@ StMoviePlayer::StMoviePlayer(const std::shared_ptr<StResourceManager>& theResMgr
     params.ToShowAdjustImage->signals.onChanged = stSlot(this, &StMoviePlayer::doShowAdjustImage);
     params.ToSwapJPS  = new StBoolParamNamed(false, stCString("toSwapJPS"));
     params.ToSwapJPS->signals.onChanged = stSlot(this, &StMoviePlayer::doChangeSwapJPS);
+    params.ToSaveCrossEyed = new StBoolParamNamed(true, stCString("toSaveCrossEyed"));
     params.ToStickPanorama  = new StBoolParamNamed(false, stCString("toStickPano360"));
     params.ToStickPanorama->signals.onChanged = stSlot(this, &StMoviePlayer::doChangeStickPano360);
     params.ToTrackHead      = new StBoolParamNamed(true,  stCString("toTrackHead"));
@@ -428,6 +430,7 @@ StMoviePlayer::StMoviePlayer(const std::shared_ptr<StResourceManager>& theResMgr
 
     myToCheckPoorOrient = !mySettings->loadParam(params.ToTrackHead);
     mySettings->loadParam (params.ToSwapJPS);
+    mySettings->loadParam (params.ToSaveCrossEyed);
     mySettings->loadParam (params.ToStickPanorama);
     mySettings->loadParam (params.ToTrackHeadAudio);
     mySettings->loadParam (params.ToForceBFormat);
@@ -781,6 +784,7 @@ void StMoviePlayer::saveAllParams() {
         mySettings->saveParam (params.ToShowAdjustImage);
 
         mySettings->saveParam (params.ToSwapJPS);
+        mySettings->saveParam (params.ToSaveCrossEyed);
         mySettings->saveParam (params.ToStickPanorama);
         mySettings->saveParam (params.ToTrackHead);
         mySettings->saveParam (params.ToTrackHeadAudio);
@@ -1090,6 +1094,7 @@ bool StMoviePlayer::init() {
         myVideo->params.ToSearchSubs = params.ToSearchSubs;
         myVideo->params.ToTrackHeadAudio = params.ToTrackHeadAudio;
         myVideo->params.SlideShowDelay = params.SlideShowDelay;
+        myVideo->params.ToSaveCrossEyed = params.ToSaveCrossEyed;
         myVideo->setSwapJPS(params.ToSwapJPS->getValue());
         myVideo->setStickPano360(params.ToStickPanorama->getValue());
         myVideo->setForceBFormat(params.ToForceBFormat->getValue());

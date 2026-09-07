@@ -323,6 +323,8 @@ void loadDefaults(StLangMap& theStrings) {
                "Swap JPS/PNS views order");
     theStrings(OPTION_USE_DEEP_COLOR,
                "Prefer Deep Color (30-bit RGB)");
+    theStrings(OPTION_SAVE_JPS_CROSSEYED,
+               "Save cross-eyed stereopair");
 
     theStrings(FILE_VIDEO_OPEN,
                "Open another movie");

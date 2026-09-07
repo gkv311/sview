@@ -407,6 +407,7 @@ StGLMenu* StMoviePlayerGUI::createSaveImageMenu() {
          ->signals.onItemClick.connect(myPlugin, &StMoviePlayer::doSnapshot);
     aMenu->addItem("PNG stereo (*.pns)",  size_t(StImageFile::ST_TYPE_PNG))
          ->signals.onItemClick.connect(myPlugin, &StMoviePlayer::doSnapshot);
+    aMenu->addItem(myPlugin->params.ToSaveCrossEyed);
     return aMenu;
 }
 
