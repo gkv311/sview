@@ -1911,22 +1911,56 @@ void StMoviePlayerGUI::doTouch(const StTouchEvent& theEvent) {
     myAnimVisibility.doTouch(theEvent);
 }
 
+// Propagate gesture to main image region
+// and handle double tap to select and copy text from StGLTable to clipboard.
+// TODO move to base interface.
+static bool doGestureChildren(StWindow* theWindow,
+                              StGLImageRegion* theMainImage,
+                              StGLWidget* theStart,
+                              const StGestureEvent& theEvent,
+                              const StPointD_t& theCursor) {
+    static constexpr StGLVec3 aHiColor(0.7f, 0.7f, 0.7f);
+
+    for (StGLWidget* aChildIter = theStart; aChildIter != nullptr;) {
+        StGLWidget* aChildActive = aChildIter;
+        aChildIter   = aChildIter->getPrev();
+
+        if (!aChildActive->isVisibleAndPointIn(theCursor)) {
+            continue;
+        }
+
+        if (aChildActive == theMainImage) {
+            theMainImage->doGesture(theEvent);
+            return true;
+        }
+        if (theEvent.Type != stEvent_Gesture1DoubleTap) {
+            return false;
+        }
+
+        if (StGLMessageBox* aBox = dynamic_cast<StGLMessageBox*>(aChildActive)) {
+            return doGestureChildren(theWindow, nullptr, aBox->getContent()->getChildren()->getLast(), theEvent, theCursor);
+        } else if (StGLTable* aTable = dynamic_cast<StGLTable*>(aChildActive)) {
+            return doGestureChildren(theWindow, nullptr, aTable->getChildren()->getLast(), theEvent, theCursor);
+        } else if (StGLTableItem* anItem = dynamic_cast<StGLTableItem*>(aChildActive)) {
+            aChildActive = anItem->getItem();
+        }
+
+        if (StGLTextArea* aTextItem = dynamic_cast<StGLTextArea*>(aChildActive)) {
+            ST_DEBUG_LOG("Copied text to clipboard: '" + aTextItem->getText() + "'");
+            theWindow->toClipboard(aTextItem->getText());
+            aTextItem->setBorder(!aTextItem->hasBorder());
+            aTextItem->setBackColor(aHiColor);
+            return true;
+        }
+
+        return false;
+    }
+    return false;
+}
+
 void StMoviePlayerGUI::doGesture(const StGestureEvent& theEvent) {
     myAnimVisibility.doGesture(theEvent);
-    if(myImage == NULL) {
-        return;
-    }
-
-    for(StGLWidget *aChildIter(getChildren()->getLast()), *aChildActive(NULL); aChildIter != NULL;) {
-        aChildActive = aChildIter;
-        aChildIter   = aChildIter->getPrev();
-        if(aChildActive->isVisibleAndPointIn(getCursorZo())) {
-            if(aChildActive == myImage) {
-                myImage->doGesture(theEvent);
-            }
-            return;
-        }
-    }
+    doGestureChildren(myWindow, myImage, getChildren()->getLast(), theEvent, getCursorZo());
 }
 
 bool StMoviePlayerGUI::tryUnClick(const StClickEvent& theEvent,

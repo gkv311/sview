@@ -81,16 +81,23 @@ class StGLTextArea : public StGLWidget {
     }
 
     /**
+     * Return TRUE to show border with background.
+     */
+    ST_LOCAL bool hasBorder() const {
+        return myToShowBorder;
+    }
+
+    /**
      * @param theToShow - to show border with background or not
      */
-    inline void setBorder(const bool theToShow) {
+    ST_LOCAL void setBorder(const bool theToShow) {
         myToShowBorder = theToShow;
     }
 
     /**
      * @param theColor- border color
      */
-    inline void setBorderColor(const StGLVec3& theColor) {
+    ST_LOCAL void setBorderColor(const StGLVec3& theColor) {
         myBorderColor.r() = theColor.r();
         myBorderColor.g() = theColor.g();
         myBorderColor.b() = theColor.b();
