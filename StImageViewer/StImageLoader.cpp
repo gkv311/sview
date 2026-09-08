@@ -68,11 +68,7 @@ StImageLoader::StImageLoader(const StImageFile::ImageClass             theImageL
   myMsgQueue(theMsgQueue),
   myImageLib(theImageLib),
   myAction(Action_NONE),
-  myIsTheaterMode(false),
-  myToStickPano360(false),
-  myToFlipCubeZ6x1(false),
-  myToFlipCubeZ3x2(false),
-  myToSwapJps(false) {
+  myIsTheaterMode(false) {
       myPlayList->setExtensions(myMimeList.getExtensionsList());
       myThread = std::make_shared<StThread>(threadFunction, (void* )this, "StImageLoader");
 }
@@ -283,7 +279,7 @@ bool StImageLoader::loadImage(const std::shared_ptr<StFileNode>& theSource,
     anImgInfo->IsSavable = false;
 
     StString aTitleString, aFolder;
-    if(theSource->size() >= 2) {
+    if (theSource->size() >= 2) {
         StString aTitleString2;
         StFileNode::getFolderAndFile(theSource->getValue(0)->getPath(), aFolder, aTitleString);
         StFileNode::getFolderAndFile(theSource->getValue(1)->getPath(), aFolder, aTitleString2);
@@ -298,11 +294,11 @@ bool StImageLoader::loadImage(const std::shared_ptr<StFileNode>& theSource,
     StTimer aLoadTimer(true);
     StFormat  aSrcFormatCurr = myStFormatByUser;
     StPanorama aSrcPanorama = StPanorama_OFF;
-    if(anImgType == StImageFile::ST_TYPE_MPO
-    || anImgType == StImageFile::ST_TYPE_JPEG
-    || anImgType == StImageFile::ST_TYPE_JPS) {
+    if (anImgType == StImageFile::ST_TYPE_MPO
+     || anImgType == StImageFile::ST_TYPE_JPEG
+     || anImgType == StImageFile::ST_TYPE_JPS) {
         int aFileDescriptor = -1;
-        if(StFileNode::isContentProtocolPath(aFilePath)) {
+        if (StFileNode::isContentProtocolPath(aFilePath)) {
             aFileDescriptor = myResMgr->openFileDescriptor(aFilePath);
         }
 
@@ -347,24 +343,24 @@ bool StImageLoader::loadImage(const std::shared_ptr<StFileNode>& theSource,
         }
 
         // copy metadata
-        if(!aParser.getComment().isEmpty()) {
+        if (!aParser.getComment().isEmpty()) {
             StDictEntry& anEntry  = anImgInfo->Info.addChange("Jpeg.Comment");
             anEntry.changeValue() = aParser.getComment();
         }
-        if(!aParser.getJpsComment().isEmpty()) {
+        if (!aParser.getJpsComment().isEmpty()) {
             StDictEntry& anEntry  = anImgInfo->Info.addChange("Jpeg.JpsComment");
             anEntry.changeValue() = aParser.getJpsComment();
         }
-        if(!aParser.getXMP().isEmpty()) {
+        if (!aParser.getXMP().isEmpty()) {
             StDictEntry& anEntry  = anImgInfo->Info.addChange("Jpeg.XMP");
             anEntry.changeValue() = aParser.getXMP();
         }
         if (anImg1.get() != nullptr) {
-            for(size_t anExifId = 0; anExifId < anImg1->Exif.size(); ++anExifId) {
+            for (size_t anExifId = 0; anExifId < anImg1->Exif.size(); ++anExifId) {
                 metadataFromExif(anImg1->Exif[anExifId], anImgInfo);
             }
             const StString aTime = anImg1->getDateTime();
-            if(!aTime.isEmpty()) {
+            if (!aTime.isEmpty()) {
                 StDictEntry& anEntry  = anImgInfo->Info.addChange("Exif.Image.DateTime");
                 anEntry.changeValue() = aTime;
             }
@@ -380,14 +376,14 @@ bool StImageLoader::loadImage(const std::shared_ptr<StFileNode>& theSource,
         aSrcPanorama = aParser.getPanorama();
 
         //aParser.fillDictionary(anImgInfo->Info, true);
-        if(!isParsed) {
+        if (!isParsed) {
             processLoadFail(StString("Can not read the file \"") + aFilePath + '\"');
             return false;
         }
 
         anImgInfo->IsSavable = anImg2.get() == nullptr;
         anImgInfo->StInfoStream = aParser.getSrcFormat();
-        if(anImgInfo->StInfoStream != StFormat_AUTO) {
+        if (anImgInfo->StInfoStream != StFormat_AUTO) {
             StDictEntry& anEntry  = anImgInfo->Info.addChange("Jpeg.JpsStereo");
             anEntry.changeValue() = tr(StImageViewerGUI::trSrcFormatId(anImgInfo->StInfoStream));
         }
@@ -396,10 +392,10 @@ bool StImageLoader::loadImage(const std::shared_ptr<StFileNode>& theSource,
         const StJpegParser::Orient anOrient = anImg1->getOrientation();
         theParams->setZRotateZero((GLfloat )StJpegParser::getRotationAngle(anOrient));
         anImg1->getParallax(anHParallax);
-        if(!anImageFileL->load(aFilePath, StImageFile::ST_TYPE_JPEG,
-                               (uint8_t* )anImg1->Data, (int )anImg1->Length)
-        && !anImageFileL->load(aFilePath, StImageFile::ST_TYPE_JPEG,
-                               (uint8_t* )aParser.getBuffer(), (int )aParser.getSize())) {
+        if (!anImageFileL->load(aFilePath, StImageFile::ST_TYPE_JPEG,
+                                (uint8_t* )anImg1->Data, (int )anImg1->Length)
+         && !anImageFileL->load(aFilePath, StImageFile::ST_TYPE_JPEG,
+                                (uint8_t* )aParser.getBuffer(), (int )aParser.getSize())) {
             processLoadFail(formatError(aFilePath, anImageFileL->getState()));
             return false;
         }
@@ -407,33 +403,33 @@ bool StImageLoader::loadImage(const std::shared_ptr<StFileNode>& theSource,
         if (anImg2.get() != nullptr) {
             // read image from memory
             anImg2->getParallax(anHParallax); // in MPO parallax generally stored ONLY in second frame
-            if(!anImageFileR->load(aFilePath, StImageFile::ST_TYPE_JPEG,
-                                   (uint8_t* )anImg2->Data, (int )anImg2->Length)) {
+            if (!anImageFileR->load(aFilePath, StImageFile::ST_TYPE_JPEG,
+                                    (uint8_t* )anImg2->Data, (int )anImg2->Length)) {
                 processLoadFail(formatError(aFilePath, anImageFileR->getState()));
                 return false;
             }
 
             // convert percents to pixels
             const GLint aParallaxPx = GLint(anHParallax * anImageFileR->getSizeX() * 0.01);
-            if(aParallaxPx != 0) {
+            if (aParallaxPx != 0) {
                 StDictEntry& anEntry  = anImgInfo->Info.addChange("Exif.Fujifilm.Parallax");
                 anEntry.changeValue() = StString(anHParallax);
             }
             theParams->setSeparationNeutral(aParallaxPx);
-        } else if(anImgType == StImageFile::ST_TYPE_MPO) {
+        } else if (anImgType == StImageFile::ST_TYPE_MPO) {
             ST_DEBUG_LOG("MPO image \"" + aFilePath + "\" is invalid!");
         }
-    } else if(theSource->size() >= 2) {
+    } else if (theSource->size() >= 2) {
         const StString aFilePathLeft  = theSource->getValue(0)->getPath();
         const StString aFilePathRight = theSource->getValue(1)->getPath();
 
         // loading image with format autodetection
         StRawFile aRawFileL;
-        if(StFileNode::isContentProtocolPath(aFilePathLeft)) {
+        if (StFileNode::isContentProtocolPath(aFilePathLeft)) {
             int aFileDescriptor = myResMgr->openFileDescriptor(aFilePathLeft);
             aRawFileL.readFile(aFilePathLeft, aFileDescriptor);
         }
-        if(!anImageFileL->load(aFilePathLeft, anImgType, (uint8_t* )aRawFileL.getBuffer(), (int )aRawFileL.getSize())) {
+        if (!anImageFileL->load(aFilePathLeft, anImgType, (uint8_t* )aRawFileL.getBuffer(), (int )aRawFileL.getSize())) {
             processLoadFail(formatError(aFilePathLeft, anImageFileL->getState()));
             return false;
         }
@@ -441,44 +437,43 @@ bool StImageLoader::loadImage(const std::shared_ptr<StFileNode>& theSource,
         aSrcPanorama = anImageFileL->getPanoramaFormat();
 
         StRawFile aRawFileR;
-        if(StFileNode::isContentProtocolPath(aFilePathRight)) {
+        if (StFileNode::isContentProtocolPath(aFilePathRight)) {
             int aFileDescriptor = myResMgr->openFileDescriptor(aFilePathRight);
             aRawFileR.readFile(aFilePathRight, aFileDescriptor);
         }
-        if(!anImageFileR->load(aFilePathRight, anImgType, (uint8_t* )aRawFileR.getBuffer(), (int )aRawFileR.getSize())) {
+        if (!anImageFileR->load(aFilePathRight, anImgType, (uint8_t* )aRawFileR.getBuffer(), (int )aRawFileR.getSize())) {
             processLoadFail(formatError(aFilePathRight, anImageFileR->getState()));
             return false;
         }
     } else {
         StRawFile aRawFile;
-        if(StFileNode::isContentProtocolPath(aFilePath)) {
+        if (StFileNode::isContentProtocolPath(aFilePath)) {
             int aFileDescriptor = myResMgr->openFileDescriptor(aFilePath);
             aRawFile.readFile(aFilePath, aFileDescriptor);
         }
-        if(!anImageFileL->load(aFilePath, anImgType, (uint8_t* )aRawFile.getBuffer(), (int )aRawFile.getSize())) {
+        if (!anImageFileL->load(aFilePath, anImgType, (uint8_t* )aRawFile.getBuffer(), (int )aRawFile.getSize())) {
             processLoadFail(formatError(aFilePath, anImageFileL->getState()));
             return false;
         }
 
         aSrcPanorama = anImageFileL->getPanoramaFormat();
         anImgInfo->StInfoStream = anImageFileL->getFormat();
-        if(myStFormatByUser == StFormat_AUTO) {
+        if (myStFormatByUser == StFormat_AUTO) {
             aSrcFormatCurr = anImgInfo->StInfoStream;
         }
     }
     const double aLoadTimeMSec = aLoadTimer.getElapsedTimeInMilliSec();
 
     // copy metadata
-    for(size_t aTagIter = 0; aTagIter < anImageFileL->getMetadata().size(); ++aTagIter) {
+    for (size_t aTagIter = 0; aTagIter < anImageFileL->getMetadata().size(); ++aTagIter) {
         const StDictEntry& aTag = anImageFileL->getMetadata().getFromIndex(aTagIter);
         anImgInfo->Info.add(aTag);
     }
 
     // detect information from file name
     bool isAnamorphByName = false;
-    anImgInfo->StInfoFileName = st::formatFromName(aTitleString, myToSwapJps, isAnamorphByName);
-    if(aSrcFormatCurr == StFormat_AUTO
-    && anImgInfo->StInfoFileName != StFormat_AUTO) {
+    anImgInfo->StInfoFileName = st::formatFromName(aTitleString, params.ToSwapJPS->getValue(), isAnamorphByName);
+    if (aSrcFormatCurr == StFormat_AUTO && anImgInfo->StInfoFileName != StFormat_AUTO) {
         aSrcFormatCurr = anImgInfo->StInfoFileName;
     }
 
@@ -494,80 +489,76 @@ bool StImageLoader::loadImage(const std::shared_ptr<StFileNode>& theSource,
     theParams->Src2SizeX = aSizeX2;
     theParams->Src2SizeY = aSizeY2;
     StPairRatio aPairRatio = StPairRatio_1;
-    if(anImageFileR->isNull()) {
+    if (anImageFileR->isNull()) {
         aPairRatio = st::formatToPairRatio(aSrcFormatCurr);
-        if(aPairRatio == StPairRatio_HalfWidth) {
+        if (aPairRatio == StPairRatio_HalfWidth) {
             aSizeXLim *= 2;
             aSizeX1   /= 2;
-        } else if(aPairRatio == StPairRatio_HalfHeight) {
+        } else if (aPairRatio == StPairRatio_HalfHeight) {
             aSizeYLim *= 2;
             aSizeY1   /= 2;
         }
     }
 
-    if(!anImageFileR->isNull()) {
+    if (!anImageFileR->isNull()) {
         aSrcFormatCurr = StFormat_SeparateFrames;
     }
 
-    if(aSrcPanorama != StPanorama_OFF) {
+    if (aSrcPanorama != StPanorama_OFF) {
         theParams->ViewingMode = StStereoParams::getViewSurfaceForPanoramaSource(aSrcPanorama, true);
     }
-    if(myIsTheaterMode && theParams->ViewingMode == StViewSurface_Plain) {
+    if (myIsTheaterMode && theParams->ViewingMode == StViewSurface_Plain) {
         theParams->ViewingMode = StViewSurface_Theater;
-    } else if(!myIsTheaterMode && theParams->ViewingMode == StViewSurface_Theater) {
+    } else if (!myIsTheaterMode && theParams->ViewingMode == StViewSurface_Theater) {
         theParams->ViewingMode = StViewSurface_Plain;
     }
 
-    if(myToStickPano360
-    && theParams->ViewingMode == StViewSurface_Plain) {
-        StPanorama aPano = st::probePanorama(aSrcFormatCurr,
-                                             theParams->Src1SizeX, theParams->Src1SizeY,
-                                             theParams->Src2SizeX, theParams->Src2SizeY);
-        theParams->ViewingMode = StStereoParams::getViewSurfaceForPanoramaSource(aPano, true);
+    if (params.ToStickPanorama->getValue()) {
+        theParams->ViewingMode = (StViewSurface)params.LastPanoramaMode->getValue();
     }
     StCubemap aSrcCubemap = StCubemap_OFF;
-    if(theParams->ViewingMode == StViewSurface_Cubemap) {
+    if (theParams->ViewingMode == StViewSurface_Cubemap) {
         aSrcCubemap = StCubemap_Packed;
-    } else if(theParams->ViewingMode == StViewSurface_CubemapEAC) {
+    } else if (theParams->ViewingMode == StViewSurface_CubemapEAC) {
         aSrcCubemap = StCubemap_PackedEAC;
     }
 
     size_t aCubeCoeffs[2] = {0, 0};
-    if(aSrcCubemap == StCubemap_Packed
-    || aSrcCubemap == StCubemap_PackedEAC) {
-        if(aSizeX1 / 6 == aSizeY1) {
+    if (aSrcCubemap == StCubemap_Packed
+     || aSrcCubemap == StCubemap_PackedEAC) {
+        if (aSizeX1 / 6 == aSizeY1) {
             aCubeCoeffs[0] = 6;
             aCubeCoeffs[1] = 1;
-            theParams->ToFlipCubeZ = myToFlipCubeZ6x1;
-        } else if(aSizeY1 / 6 == aSizeX1) {
+            theParams->ToFlipCubeZ = params.ToFlipCubeZ6x1->getValue();
+        } else if (aSizeY1 / 6 == aSizeX1) {
             aCubeCoeffs[0] = 1;
             aCubeCoeffs[1] = 6;
-            theParams->ToFlipCubeZ = myToFlipCubeZ6x1;
-        } else if(aSizeX1 / 3 == aSizeY1 / 2) {
+            theParams->ToFlipCubeZ = params.ToFlipCubeZ6x1->getValue();
+        } else if (aSizeX1 / 3 == aSizeY1 / 2) {
             aCubeCoeffs[0] = 3;
             aCubeCoeffs[1] = 2;
-            theParams->ToFlipCubeZ = myToFlipCubeZ3x2;
-        } else if(aSizeX1 / 2 == aSizeY1 / 3) {
+            theParams->ToFlipCubeZ = params.ToFlipCubeZ3x2->getValue();
+        } else if (aSizeX1 / 2 == aSizeY1 / 3) {
             aCubeCoeffs[0] = 2;
             aCubeCoeffs[1] = 3;
-            theParams->ToFlipCubeZ = myToFlipCubeZ3x2;
-        } else if(aSrcCubemap == StCubemap_PackedEAC) {
+            theParams->ToFlipCubeZ = params.ToFlipCubeZ3x2->getValue();
+        } else if (aSrcCubemap == StCubemap_PackedEAC) {
             // EAC on ytb is so cruel, that they don't use squared cube sides!
-            if(aSizeX1 > aSizeY1) {
+            if (aSizeX1 > aSizeY1) {
                 aCubeCoeffs[0] = 3;
                 aCubeCoeffs[1] = 2;
-                theParams->ToFlipCubeZ = myToFlipCubeZ3x2;
+                theParams->ToFlipCubeZ = params.ToFlipCubeZ3x2->getValue();
             } else {
                 aCubeCoeffs[0] = 2;
                 aCubeCoeffs[1] = 3;
-                theParams->ToFlipCubeZ = myToFlipCubeZ3x2;
+                theParams->ToFlipCubeZ = params.ToFlipCubeZ3x2->getValue();
             }
         }
-        if(!anImageFileR->isNull()
-        && (aSizeX1 != aSizeX2 || aSizeY1 != aSizeY2)) {
+        if (!anImageFileR->isNull()
+         && (aSizeX1 != aSizeX2 || aSizeY1 != aSizeY2)) {
             aCubeCoeffs[0] = 0;
         }
-        if(aCubeCoeffs[0] == 0) {
+        if (aCubeCoeffs[0] == 0) {
             myMsgQueue->pushError(StString("Image(s) has unexpected dimensions: {0}x{1} ({2}x{3})\n"
                                            "Cubemap should has 6 squared images in configuration 6:1 (single row) or 3:2 (two rows).")
                        .format(aSizeX1, aSizeY1, anImageFileL->getSizeX(), anImageFileL->getSizeY()));
@@ -584,16 +575,16 @@ bool StImageLoader::loadImage(const std::shared_ptr<StFileNode>& theSource,
                                              aSrcCubemap, aCubeCoeffs, aPairRatio);
 #ifdef ST_DEBUG
     const double aScaleTimeMSec = aLoadTimer.getElapsedTimeInMilliSec() - aLoadTimeMSec;
-    if(anImageL != anImageFileL) {
+    if (anImageL != anImageFileL) {
         ST_DEBUG_LOG("Image is downscaled to fit texture limits in " + aScaleTimeMSec + " ms!");
     }
 #endif
 
 #ifdef ST_DEBUG
-    if(!anImageFileL->isNull()) {
+    if (!anImageFileL->isNull()) {
         ST_DEBUG_LOG(anImageFileL->getState());
     }
-    if(!anImageFileR->isNull()) {
+    if (!anImageFileR->isNull()) {
         ST_DEBUG_LOG(anImageFileR->getState());
     }
 #endif
@@ -605,7 +596,7 @@ bool StImageLoader::loadImage(const std::shared_ptr<StFileNode>& theSource,
         StImage anImageRefL, anImageRefR;
         StHandle<StBufferCounter> aRefL = new StImageFileCounter(anImageL);
         anImageRefL.initReference(*anImageL, aRefL);
-        if(!anImageR->isNull()) {
+        if (!anImageR->isNull()) {
             StHandle<StBufferCounter> aRefR = new StImageFileCounter(anImageR);
             anImageRefR.initReference(*anImageR, aRefR);
         }
@@ -613,19 +604,19 @@ bool StImageLoader::loadImage(const std::shared_ptr<StFileNode>& theSource,
         myTextureQueue->push(anImageRefL, anImageRefR, theParams, aSrcFormatCurr, aSrcCubemap, 0.0);
     }
 
-    if(!stAreEqual(anImageFileL->getPixelRatio(), 1.0f, 0.001f)) {
+    if (!stAreEqual(anImageFileL->getPixelRatio(), 1.0f, 0.001f)) {
         anImgInfo->Info.add(StArgument(tr(INFO_PIXEL_RATIO),
                                        StString(anImageFileL->getPixelRatio())));
     }
     const StString aFormatL = anImageFileL->formatImgPixelFormat();
-    if(!anImageFileR->isNull()) {
+    if (!anImageFileR->isNull()) {
         anImgInfo->Info.add(StArgument(tr(INFO_DIMENSIONS),
                                        formatSize(anImageL->getSizeX(), anImageL->getSizeY(),
                                                   theParams->Src1SizeX, theParams->Src1SizeY) + " " + tr(INFO_LEFT) + "\n"
                                      + formatSize(anImageR->getSizeX(), anImageR->getSizeY(),
                                                   theParams->Src2SizeX, theParams->Src2SizeY) + " " + tr(INFO_RIGHT)));
         const StString aFormatR = anImageFileR->formatImgPixelFormat();
-        if(aFormatL == aFormatR) {
+        if (aFormatL == aFormatR) {
             anImgInfo->Info.add(StArgument(tr(INFO_PIXEL_FORMAT), aFormatL));
         } else {
             anImgInfo->Info.add(StArgument(tr(INFO_PIXEL_FORMAT),

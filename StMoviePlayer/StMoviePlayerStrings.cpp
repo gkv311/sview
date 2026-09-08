@@ -204,7 +204,7 @@ void loadDefaults(StLangMap& theStrings) {
     theStrings(MENU_VIEW_TRACK_HEAD_AUDIO,
                "Orient audio");
     theStrings(MENU_VIEW_STICK_PANORAMA360,
-               "Stick at panorama 360" THE_DEGREE_SIGN);
+               "Persist panorama mode");
     theStrings(MENU_VIEW_DISPLAY_MODE_STEREO,
                "Stereo");
     theStrings(MENU_VIEW_DISPLAY_MODE_LEFT,

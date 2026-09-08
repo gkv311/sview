@@ -170,19 +170,14 @@ class StVideo {
     ST_LOCAL bool isTheaterMode() const { return myVideoMaster->isTheaterMode(); }
 
     /**
+     * Return video queue parameters.
+     */
+    ST_LOCAL StVideoQueue::Params& videoParams() { return myVideoMaster->params; }
+
+    /**
      * Set theater mode.
      */
     ST_LOCAL void setTheaterMode(bool theIsTheater) { myVideoMaster->setTheaterMode(theIsTheater); }
-
-    /**
-     * Stick to panorama 360 mode.
-     */
-    ST_LOCAL void setStickPano360(bool theToStick) { myVideoMaster->setStickPano360(theToStick); }
-
-    /**
-     * Set if JPS file should be read as Left/Right (TRUE) of as Right/Left (FALSE).
-     */
-    ST_LOCAL void setSwapJPS(bool theToSwap) { myVideoMaster->setSwapJPS(theToSwap); }
 
     /**
      * Retrieve information about currently played file.

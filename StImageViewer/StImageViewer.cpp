@@ -107,6 +107,13 @@ void StImageViewer::updateStrings() {
     params.ToSwapJPS->setName(tr(OPTION_SWAP_JPS));
     params.ToSaveCrossEyed->setName(tr(OPTION_SAVE_JPS_CROSSEYED));
     params.ToStickPanorama->setName(tr(MENU_VIEW_STICK_PANORAMA360));
+    params.LastPanoramaMode->defineOption(StViewSurface_Plain,      stCString("plain"));
+    params.LastPanoramaMode->defineOption(StViewSurface_Theater,    stCString("theater"));
+    params.LastPanoramaMode->defineOption(StViewSurface_Cubemap,    stCString("cubemap"));
+    params.LastPanoramaMode->defineOption(StViewSurface_Sphere,     stCString("sphere"));
+    params.LastPanoramaMode->defineOption(StViewSurface_Hemisphere, stCString("hemisphere"));
+    params.LastPanoramaMode->defineOption(StViewSurface_Cylinder,   stCString("cylinder"));
+    params.LastPanoramaMode->defineOption(StViewSurface_CubemapEAC, stCString("cubemapeac"));
     params.ToFlipCubeZ6x1->setName(tr(MENU_VIEW_FLIPZ_CUBE6x1));
     params.ToFlipCubeZ3x2->setName(tr(MENU_VIEW_FLIPZ_CUBE3x2));
     params.ToTrackHead->setName(tr(MENU_VIEW_TRACK_HEAD));
@@ -178,10 +185,9 @@ StImageViewer::StImageViewer(const std::shared_ptr<StResourceManager>& theResMgr
     params.ToSaveCrossEyed = new StBoolParamNamed(true, stCString("toSaveCrossEyed"));
     params.ToStickPanorama = new StBoolParamNamed(false, stCString("toStickPano360"));
     params.ToStickPanorama->signals.onChanged = stSlot(this, &StImageViewer::doChangeStickPano360);
+    params.LastPanoramaMode = new StEnumParam(StViewSurface_Sphere, stCString("lastPanoMode"));
     params.ToFlipCubeZ6x1= new StBoolParamNamed(true,  stCString("toFlipCube6x1"));
-    params.ToFlipCubeZ6x1->signals.onChanged = stSlot(this, &StImageViewer::doChangeFlipCubeZ);
     params.ToFlipCubeZ3x2= new StBoolParamNamed(false, stCString("toFlipCube3x2"));
-    params.ToFlipCubeZ3x2->signals.onChanged = stSlot(this, &StImageViewer::doChangeFlipCubeZ);
     params.ToTrackHead   = new StBoolParamNamed(true,  stCString("toTrackHead"));
     params.ToShowFps     = new StBoolParamNamed(false, stCString("toShowFps"));
     params.ToShowMenu    = new StBoolParamNamed(true,  stCString("toShowMenu"));
@@ -228,6 +234,7 @@ StImageViewer::StImageViewer(const std::shared_ptr<StResourceManager>& theResMgr
     mySettings->loadParam (params.ToSwapJPS);
     mySettings->loadParam (params.ToSaveCrossEyed);
     mySettings->loadParam (params.ToStickPanorama);
+    mySettings->loadParam (params.LastPanoramaMode);
     mySettings->loadParam (params.ToFlipCubeZ6x1);
     mySettings->loadParam (params.ToFlipCubeZ3x2);
     myToCheckPoorOrient = !mySettings->loadParam(params.ToTrackHead);
@@ -453,6 +460,7 @@ void StImageViewer::saveAllParams() {
         mySettings->saveParam (params.ToSwapJPS);
         mySettings->saveParam (params.ToSaveCrossEyed);
         mySettings->saveParam (params.ToStickPanorama);
+        mySettings->saveParam (params.LastPanoramaMode);
         mySettings->saveParam (params.ToFlipCubeZ6x1);
         mySettings->saveParam (params.ToFlipCubeZ3x2);
         mySettings->saveParam (params.ToTrackHead);
@@ -646,12 +654,13 @@ bool StImageViewer::init() {
     myLoader = std::make_shared<StImageLoader>(params.imageLib, myResMgr, myMsgQueue, myLangMap, myPlayList,
                                                myGUI->myImage->getTextureQueue(), myContext->getMaxTextureSize());
     myLoader->signals.onLoaded.connect(this, &StImageViewer::doLoaded);
+    myLoader->params.ToSwapJPS = params.ToSwapJPS;
     myLoader->params.ToSaveCrossEyed = params.ToSaveCrossEyed;
+    myLoader->params.ToStickPanorama = params.ToStickPanorama;
+    myLoader->params.LastPanoramaMode = params.LastPanoramaMode;
+    myLoader->params.ToFlipCubeZ6x1 = params.ToFlipCubeZ6x1;
+    myLoader->params.ToFlipCubeZ3x2 = params.ToFlipCubeZ3x2;
     myLoader->setCompressMemory(myWindow->isMobile());
-    myLoader->setSwapJPS(params.ToSwapJPS->getValue());
-    myLoader->setStickPano360(params.ToStickPanorama->getValue());
-    myLoader->setFlipCubeZ6x1(params.ToFlipCubeZ6x1->getValue());
-    myLoader->setFlipCubeZ3x2(params.ToFlipCubeZ3x2->getValue());
 
     // load this parameter AFTER image thread creation
     mySettings->loadParam(params.SrcStereoFormat);
@@ -1334,7 +1343,11 @@ void StImageViewer::doTheaterOnOff(const size_t ) {
         return;
     }
 
-    myLoader->setTheaterMode(!myLoader->isTheaterMode());
+    const bool newTheaterMode = !myLoader->isTheaterMode();
+    if (params.ToStickPanorama->getValue()) {
+        params.LastPanoramaMode->setValue(newTheaterMode ? StViewSurface_Theater : StViewSurface_Plain);
+    }
+    myLoader->setTheaterMode(newTheaterMode);
     if (!myPlayList->isEmpty()) {
         myLoader->doLoadNext();
     }
@@ -1352,56 +1365,54 @@ void StImageViewer::doPanoramaOnOff(const size_t ) {
         return;
     }
 
-    int aMode = myGUI->myImage->params.ViewMode->getValue();
-    if(aMode != StViewSurface_Plain) {
-        myGUI->myImage->params.ViewMode->setValue(StViewSurface_Plain);
-        return;
-    }
-
-    StPanorama aPano = st::probePanorama(aParams->StereoFormat,
-                                         aParams->Src1SizeX, aParams->Src1SizeY,
-                                         aParams->Src2SizeX, aParams->Src2SizeY);
-    if(aPano == StPanorama_OFF) {
-        size_t aSizeX = aParams->Src1SizeX;
-        size_t aSizeY = aParams->Src1SizeY;
-        StPairRatio aPairRatio = st::formatToPairRatio(aParams->StereoFormat);
-        if(aPairRatio == StPairRatio_HalfWidth) {
-            aSizeX /= 2;
-        } else if(aPairRatio == StPairRatio_HalfHeight) {
-            aSizeY /= 2;
-        }
-        if(aSizeX > 8 && aSizeY > 8) {
-            if(double(aSizeX)/double(aSizeY) > 3.5) {
-                myGUI->myImage->params.ViewMode->setValue(StViewSurface_Cylinder);
-                return;
+    const int anOldMode = myGUI->myImage->params.ViewMode->getValue();
+    StViewSurface aNewMode = StViewSurface_Plain;
+    if (anOldMode == StViewSurface_Plain) {
+        StPanorama aPano = st::probePanorama(aParams->StereoFormat,
+                                             aParams->Src1SizeX, aParams->Src1SizeY,
+                                             aParams->Src2SizeX, aParams->Src2SizeY);
+        if (aPano == StPanorama_OFF) {
+            size_t aSizeX = aParams->Src1SizeX;
+            size_t aSizeY = aParams->Src1SizeY;
+            StPairRatio aPairRatio = st::formatToPairRatio(aParams->StereoFormat);
+            if (aPairRatio == StPairRatio_HalfWidth) {
+                aSizeX /= 2;
+            } else if (aPairRatio == StPairRatio_HalfHeight) {
+                aSizeY /= 2;
+            }
+            if (aSizeX > 8 && aSizeY > 8) {
+                if (double(aSizeX)/double(aSizeY) > 3.5) {
+                    myGUI->myImage->params.ViewMode->setValue(StViewSurface_Cylinder);
+                    return;
+                }
             }
         }
+        aNewMode = StStereoParams::getViewSurfaceForPanoramaSource(aPano, true);
     }
-    myGUI->myImage->params.ViewMode->setValue(StStereoParams::getViewSurfaceForPanoramaSource(aPano, true));
+    myGUI->myImage->params.ViewMode->setValue(aNewMode);
+    params.LastPanoramaMode->setValue(aNewMode);
 }
 
 void StImageViewer::doChangeSwapJPS(const bool ) {
-    if (myLoader.get() != nullptr) {
-        myLoader->setSwapJPS(params.ToSwapJPS->getValue());
-        std::shared_ptr<StStereoParams> aParams = myGUI->myImage->getSource();
-        if (aParams.get() != nullptr && !myPlayList->isEmpty()) {
-            StString aCurrFile = myPlayList->getCurrentTitle();
-            aCurrFile.toLowerCase();
-            if(aCurrFile.isEndsWith(stCString(".jps"))
-            || aCurrFile.isEndsWith(stCString(".pps"))) {
-                myLoader->doLoadNext();
-            }
+    if (myLoader.get() == nullptr)
+        return;
+
+    std::shared_ptr<StStereoParams> aParams = myGUI->myImage->getSource();
+    if (aParams.get() != nullptr && !myPlayList->isEmpty()) {
+        StString aCurrFile = myPlayList->getCurrentTitle();
+        aCurrFile.toLowerCase();
+        if(aCurrFile.isEndsWith(stCString(".jps"))
+        || aCurrFile.isEndsWith(stCString(".pps"))) {
+            myLoader->doLoadNext();
         }
     }
 }
 
 void StImageViewer::doChangeStickPano360(const bool ) {
-    if (myLoader.get() == nullptr) {
+    if (myLoader.get() == nullptr)
         return;
-    }
 
-    myLoader->setStickPano360(params.ToStickPanorama->getValue());
-    if(!params.ToStickPanorama->getValue()) {
+    if (!params.ToStickPanorama->getValue()) {
         return;
     }
 
@@ -1411,15 +1422,6 @@ void StImageViewer::doChangeStickPano360(const bool ) {
     && !myPlayList->isEmpty()) {
         myLoader->doLoadNext();
     }
-}
-
-void StImageViewer::doChangeFlipCubeZ(const bool ) {
-    if (myLoader.get() == nullptr) {
-        return;
-    }
-
-    myLoader->setFlipCubeZ6x1(params.ToFlipCubeZ6x1->getValue());
-    myLoader->setFlipCubeZ3x2(params.ToFlipCubeZ3x2->getValue());
 }
 
 void StImageViewer::doOpen1FileFromGui(StHandle<StString> thePath) {

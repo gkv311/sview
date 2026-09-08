@@ -136,7 +136,7 @@ void loadDefaults(StLangMap& theStrings) {
     theStrings(MENU_VIEW_TRACK_HEAD_POOR,
                "Track orientation (poor)");
     theStrings(MENU_VIEW_STICK_PANORAMA360,
-               "Stick at panorama 360" THE_DEGREE_SIGN);
+               "Persist panorama mode");
     theStrings(MENU_VIEW_FLIPZ_CUBE6x1,
                "Cubemap 6x1 - flip Z");
     theStrings(MENU_VIEW_FLIPZ_CUBE3x2,

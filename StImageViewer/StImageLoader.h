@@ -149,37 +149,16 @@ class StImageLoader {
         myIsTheaterMode = theIsTheater;
     }
 
-    /**
-     * Stick to panorama 360 mode.
-     */
-    ST_LOCAL void setStickPano360(bool theToStick) {
-        myToStickPano360 = theToStick;
-    }
-
-    /**
-     * Flip Z within 6x1 cubemap input.
-     */
-    ST_LOCAL void setFlipCubeZ6x1(bool theToFlip) {
-        myToFlipCubeZ6x1 = theToFlip;
-    }
-
-    /**
-     * Flip Z within 3x2 cubemap input.
-     */
-    ST_LOCAL void setFlipCubeZ3x2(bool theToFlip) {
-        myToFlipCubeZ3x2 = theToFlip;
-    }
-
-    /**
-     * Set if JPS file should be read as Left/Right (TRUE) of as Right/Left (FALSE).
-     */
-    ST_LOCAL void setSwapJPS(bool theToSwap) { myToSwapJps = theToSwap; }
-
         public: //! @name Properties
 
     struct {
 
-        StHandle<StBoolParam> ToSaveCrossEyed;
+        StHandle<StBoolParam>  ToSwapJPS;        //!< swap JPS views order
+        StHandle<StBoolParam>  ToSaveCrossEyed;  //!< save JPS views as cross-eyed or parallel pair
+        StHandle<StBoolParam>  ToStickPanorama;  //!< persist last selected panorama mode
+        StHandle<StInt32Param> LastPanoramaMode; //!< last selected panorama mode
+        StHandle<StBoolParam>  ToFlipCubeZ6x1;   //!< flip Z coordinate within Cube map 6x1
+        StHandle<StBoolParam>  ToFlipCubeZ3x2;   //!< flip Z coordinate within Cube map 3x2
 
     } params;
 
@@ -243,10 +222,6 @@ class StImageLoader {
     volatile StImageFile::ImageClass myImageLib;
     volatile Action            myAction;
     volatile bool              myIsTheaterMode;  //!< flag indicating theater mode
-    volatile bool              myToStickPano360; //!< stick to panorama 360 mode
-    volatile bool              myToFlipCubeZ6x1; //!< flip Z within 6x1 cubemap input
-    volatile bool              myToFlipCubeZ3x2; //!< flip Z within 3x2 cubemap input
-    volatile bool              myToSwapJps;      //!< read JPS as Left/Right instead of Right/Left
 
         private: //! @name no copies, please
 

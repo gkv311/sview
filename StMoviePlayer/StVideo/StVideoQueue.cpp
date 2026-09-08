@@ -194,9 +194,7 @@ StVideoQueue::StVideoQueue(const std::shared_ptr<StGLTextureQueue>& theTextureQu
   myStFormatByUser(StFormat_AUTO),
   myStFormatByName(StFormat_AUTO),
   myStFormatInStream(StFormat_AUTO),
-  myIsTheaterMode(false),
-  myToStickPano360(false),
-  myToSwapJps(false) {
+  myIsTheaterMode(false) {
 #ifdef ST_USE64PTR
     myFrame.Frame->opaque = (void* )stAV::NOPTS_VALUE;
 #else
@@ -500,7 +498,7 @@ bool StVideoQueue::init(AVFormatContext*   theFormatCtx,
 
     // detect information from file name
     bool isAnamorphByName = false;
-    myStFormatByName = st::formatFromName(myFileName, myToSwapJps, isAnamorphByName);
+    myStFormatByName = st::formatFromName(myFileName, params.ToSwapJPS->getValue(), isAnamorphByName);
     if(myStFormatInStream == StFormat_AUTO
     && isAnamorphByName) {
         if(myStFormatByName == StFormat_SideBySide_LR
@@ -714,23 +712,23 @@ void StVideoQueue::pushFrame(const StImage&     theSrcDataLeft,
                              const StFormat     theSrcFormat,
                              const StCubemap    theCubemapFormat,
                              const double       theSrcPTS) {
-    while(!myToFlush && myTextureQueue->isFull()) {
+    while (!myToFlush && myTextureQueue->isFull()) {
         StThread::sleep(10);
     }
 
-    if(myToFlush) {
+    if (myToFlush) {
         myToFlush = false;
         return;
     }
 
-    if(!theSrcDataLeft.isNull()) {
+    if (!theSrcDataLeft.isNull()) {
         theStParams->Src1SizeX = theSrcDataLeft.getSizeX();
         theStParams->Src1SizeY = theSrcDataLeft.getSizeY();
     } else {
         theStParams->Src1SizeX = 0;
         theStParams->Src1SizeY = 0;
     }
-    if(!theSrcDataRight.isNull()) {
+    if (!theSrcDataRight.isNull()) {
         theStParams->Src2SizeX = theSrcDataRight.getSizeX();
         theStParams->Src2SizeY = theSrcDataRight.getSizeY();
     } else {
@@ -738,22 +736,19 @@ void StVideoQueue::pushFrame(const StImage&     theSrcDataLeft,
         theStParams->Src2SizeY = 0;
     }
 
-    if(myToStickPano360
-    && theStParams->ViewingMode == StViewSurface_Plain) {
-        StPanorama aPano = st::probePanorama(theSrcFormat,
-                                             theStParams->Src1SizeX, theStParams->Src1SizeY,
-                                             theStParams->Src2SizeX, theStParams->Src2SizeY);
-        theStParams->ViewingMode = StStereoParams::getViewSurfaceForPanoramaSource(aPano, true);
-    }
-    if(myIsTheaterMode && theStParams->ViewingMode == StViewSurface_Plain) {
-        theStParams->ViewingMode = StViewSurface_Theater;
-    } else if(!myIsTheaterMode && theStParams->ViewingMode == StViewSurface_Theater) {
-        theStParams->ViewingMode = StViewSurface_Plain;
+    if (params.ToStickPanorama->getValue()) {
+        theStParams->ViewingMode = (StViewSurface)params.LastPanoramaMode->getValue();
+    } else {
+        if (myIsTheaterMode && theStParams->ViewingMode == StViewSurface_Plain) {
+            theStParams->ViewingMode = StViewSurface_Theater;
+        } else if (!myIsTheaterMode && theStParams->ViewingMode == StViewSurface_Theater) {
+            theStParams->ViewingMode = StViewSurface_Plain;
+        }
     }
 
     myTextureQueue->push(theSrcDataLeft, theSrcDataRight, theStParams, theSrcFormat, theCubemapFormat, theSrcPTS);
     myTextureQueue->setConnectedStream(true);
-    if(myWasFlushed) {
+    if (myWasFlushed) {
         // force frame update after seeking regardless playback timer
         myTextureQueue->stglSwapFB(0);
         myWasFlushed = false;

@@ -20,6 +20,7 @@
 #define __StVideoQueue_h_
 
 #include <StGLStereo/StGLTextureQueue.h>
+#include <StSettings/StParam.h>
 
 #include "StAVPacketQueue.h"
 #include <StAV/StAVImage.h>
@@ -202,18 +203,6 @@ class StVideoQueue : public StAVPacketQueue {
         myIsTheaterMode = theIsTheater;
     }
 
-    /**
-     * Stick to panorama 360 mode.
-     */
-    ST_LOCAL void setStickPano360(bool theToStick) {
-        myToStickPano360 = theToStick;
-    }
-
-    /**
-     * Set if JPS file should be read as Left/Right (TRUE) of as Right/Left (FALSE).
-     */
-    ST_LOCAL void setSwapJPS(bool theToSwap) { myToSwapJps = theToSwap; }
-
     ST_LOCAL StVideoQueue(const std::shared_ptr<StGLTextureQueue>& theTextureQueue,
                           const std::shared_ptr<StVideoQueue>&     theMaster = std::shared_ptr<StVideoQueue>());
     ST_LOCAL virtual ~StVideoQueue();
@@ -287,6 +276,16 @@ class StVideoQueue : public StAVPacketQueue {
     ST_LOCAL double getPts() const {
         return myTextureQueue->getPTSCurr();
     }
+
+        public: //! @name Properties
+
+    struct Params {
+
+        StHandle<StBoolParam>  ToSwapJPS;        //!< swap JPS views order
+        StHandle<StBoolParam>  ToStickPanorama;  //!< persist last selected panorama mode
+        StHandle<StInt32Param> LastPanoramaMode; //!< last selected panorama mode
+
+    } params;
 
         private:
 
@@ -420,8 +419,6 @@ private:
     volatile StFormat          myStFormatByName;  //!< source format detected from file name
     volatile StFormat          myStFormatInStream;//!< source format information retrieved from stream
     volatile bool              myIsTheaterMode;   //!< flag indicating theater mode
-    volatile bool              myToStickPano360;  //!< stick to panorama 360 mode
-    volatile bool              myToSwapJps;       //!< read JPS as Left/Right instead of Right/Left
 
 };
 

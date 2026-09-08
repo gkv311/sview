@@ -135,7 +135,8 @@ class StImageViewer : public StApplication {
         StHandle<StInt32ParamNamed>   SrcStereoFormat;  //!< source format
         StHandle<StBoolParamNamed>    ToSwapJPS;        //!< swap JPS views order
         StHandle<StBoolParamNamed>    ToSaveCrossEyed;  //!< save JPS views as cross-eyed or parallel pair
-        StHandle<StBoolParamNamed>    ToStickPanorama;  //!< force panorama input for all files
+        StHandle<StBoolParamNamed>    ToStickPanorama;  //!< persist last selected panorama mode
+        StHandle<StEnumParam>         LastPanoramaMode; //!< last selected panorama mode
         StHandle<StBoolParamNamed>    ToFlipCubeZ6x1;   //!< flip Z coordinate within Cube map 6x1
         StHandle<StBoolParamNamed>    ToFlipCubeZ3x2;   //!< flip Z coordinate within Cube map 3x2
         StHandle<StBoolParamNamed>    ToTrackHead;      //!< enable/disable head-tracking
@@ -200,7 +201,6 @@ class StImageViewer : public StApplication {
     ST_LOCAL void doTheaterOnOff(const size_t );
     ST_LOCAL void doChangeSwapJPS(const bool );
     ST_LOCAL void doChangeStickPano360(const bool );
-    ST_LOCAL void doChangeFlipCubeZ(const bool );
     ST_LOCAL void doShowPlayList(const bool theToShow);
     ST_LOCAL void doShowAdjustImage(const bool theToShow);
     ST_LOCAL void doSwitchShuffle(const bool theShuffleOn);

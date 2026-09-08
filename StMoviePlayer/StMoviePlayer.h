@@ -217,7 +217,8 @@ class StMoviePlayer : public StApplication {
         StHandle<StInt32ParamNamed>   SrcStereoFormat;   //!< source format
         StHandle<StBoolParamNamed>    ToSwapJPS;         //!< swap JPS views order
         StHandle<StBoolParamNamed>    ToSaveCrossEyed;   //!< save JPS views as cross-eyed or parallel pair
-        StHandle<StBoolParamNamed>    ToStickPanorama;   //!< force panorama input for all files
+        StHandle<StBoolParamNamed>    ToStickPanorama;   //!< persist last selected panorama mode
+        StHandle<StEnumParam>         LastPanoramaMode;  //!< last selected panorama mode
         StHandle<StBoolParamNamed>    ToTrackHead;       //!< enable/disable head-tracking
         StHandle<StBoolParamNamed>    ToTrackHeadAudio;  //!< enable/disable head-tracking for audio listener
         StHandle<StBoolParamNamed>    ToForceBFormat;    //!< force B-Format for any 4-channels audio stream
@@ -327,8 +328,6 @@ class StMoviePlayer : public StApplication {
     ST_LOCAL void doSwitchViewMode(const int32_t theMode);
     ST_LOCAL void doPanoramaOnOff(const size_t );
     ST_LOCAL void doTheaterOnOff(const size_t );
-    ST_LOCAL void doChangeStickPano360(const bool );
-    ST_LOCAL void doChangeSwapJPS(const bool );
     ST_LOCAL void doSwitchAudioStream(const int32_t theStreamId);
     ST_LOCAL void doSwitchSubtitlesStream1(const int32_t theStreamId);
     ST_LOCAL void doSwitchSubtitlesStream2(const int32_t theStreamId);

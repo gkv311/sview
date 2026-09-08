@@ -36,21 +36,22 @@ class StParam : public StParamBase {
 
         protected:
 
-    Type myValue; //!< primitive parameter
+    // TODO switch to std::atomic<Type> after checking performance
+    volatile Type myValue; //!< primitive parameter
 
         public:
 
     /**
      * Main constructor.
      */
-    inline StParam(const Type theValue)
+    StParam(const Type theValue)
     : myValue(theValue) {}
 
     /**
      * Just retrieve the current value.
      * @return current value.
      */
-    inline virtual Type getValue() const {
+    virtual Type getValue() const {
         return myValue;
     }
 
@@ -59,7 +60,7 @@ class StParam : public StParamBase {
      * @param theValue (const Type ) - new value;
      * @return true if value was changed.
      */
-    inline virtual bool setValue(const Type theValue) {
+    virtual bool setValue(const Type theValue) {
         if(getValue() != theValue) {
             myValue = theValue;
             signals.onChanged(theValue);
@@ -116,7 +117,7 @@ class StBoolParam : public StParam<bool> {
      * Reverse current value.
      * @return new value.
      */
-    inline bool reverse() {
+    ST_LOCAL bool reverse() {
         bool aNewValue = !getValue();
         setValue(aNewValue);
         return aNewValue;
@@ -125,7 +126,7 @@ class StBoolParam : public StParam<bool> {
     /**
      * Slot method for compatibility with some widgets.
      */
-    inline void doReverse(const size_t ) {
+    ST_LOCAL void doReverse(const size_t ) {
         reverse();
     }
 

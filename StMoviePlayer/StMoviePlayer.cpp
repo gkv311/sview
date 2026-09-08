@@ -187,6 +187,13 @@ void StMoviePlayer::updateStrings() {
     params.ToSwapJPS->setName(tr(OPTION_SWAP_JPS));
     params.ToSaveCrossEyed->setName(tr(OPTION_SAVE_JPS_CROSSEYED));
     params.ToStickPanorama->setName(tr(MENU_VIEW_STICK_PANORAMA360));
+    params.LastPanoramaMode->defineOption(StViewSurface_Plain,      stCString("plain"));
+    params.LastPanoramaMode->defineOption(StViewSurface_Theater,    stCString("theater"));
+    params.LastPanoramaMode->defineOption(StViewSurface_Cubemap,    stCString("cubemap"));
+    params.LastPanoramaMode->defineOption(StViewSurface_Sphere,     stCString("sphere"));
+    params.LastPanoramaMode->defineOption(StViewSurface_Hemisphere, stCString("hemisphere"));
+    params.LastPanoramaMode->defineOption(StViewSurface_Cylinder,   stCString("cylinder"));
+    params.LastPanoramaMode->defineOption(StViewSurface_CubemapEAC, stCString("cubemapeac"));
     params.ToTrackHead->setName(tr(MENU_VIEW_TRACK_HEAD));
     params.ToTrackHeadAudio->setName(tr(MENU_VIEW_TRACK_HEAD_AUDIO));
     params.ToForceBFormat->setName(stCString("Force B-Format"));
@@ -337,10 +344,9 @@ StMoviePlayer::StMoviePlayer(const std::shared_ptr<StResourceManager>& theResMgr
     params.ToShowAdjustImage = new StBoolParamNamed(false, stCString("showAdjustImage"));
     params.ToShowAdjustImage->signals.onChanged = stSlot(this, &StMoviePlayer::doShowAdjustImage);
     params.ToSwapJPS  = new StBoolParamNamed(false, stCString("toSwapJPS"));
-    params.ToSwapJPS->signals.onChanged = stSlot(this, &StMoviePlayer::doChangeSwapJPS);
     params.ToSaveCrossEyed = new StBoolParamNamed(true, stCString("toSaveCrossEyed"));
     params.ToStickPanorama  = new StBoolParamNamed(false, stCString("toStickPano360"));
-    params.ToStickPanorama->signals.onChanged = stSlot(this, &StMoviePlayer::doChangeStickPano360);
+    params.LastPanoramaMode = new StEnumParam(StViewSurface_Sphere, stCString("lastPanoMode"));
     params.ToTrackHead      = new StBoolParamNamed(true,  stCString("toTrackHead"));
     params.ToTrackHeadAudio = new StBoolParamNamed(true,  stCString("toTrackHeadAudio"));
     params.ToForceBFormat   = new StBoolParamNamed(false, stCString("toForceBFormat"));
@@ -432,6 +438,7 @@ StMoviePlayer::StMoviePlayer(const std::shared_ptr<StResourceManager>& theResMgr
     mySettings->loadParam (params.ToSwapJPS);
     mySettings->loadParam (params.ToSaveCrossEyed);
     mySettings->loadParam (params.ToStickPanorama);
+    mySettings->loadParam (params.LastPanoramaMode);
     mySettings->loadParam (params.ToTrackHeadAudio);
     mySettings->loadParam (params.ToForceBFormat);
     mySettings->loadParam (params.AudioAlOutput);
@@ -786,6 +793,7 @@ void StMoviePlayer::saveAllParams() {
         mySettings->saveParam (params.ToSwapJPS);
         mySettings->saveParam (params.ToSaveCrossEyed);
         mySettings->saveParam (params.ToStickPanorama);
+        mySettings->saveParam (params.LastPanoramaMode);
         mySettings->saveParam (params.ToTrackHead);
         mySettings->saveParam (params.ToTrackHeadAudio);
         mySettings->saveParam (params.ToForceBFormat);
@@ -1095,8 +1103,9 @@ bool StMoviePlayer::init() {
         myVideo->params.ToTrackHeadAudio = params.ToTrackHeadAudio;
         myVideo->params.SlideShowDelay = params.SlideShowDelay;
         myVideo->params.ToSaveCrossEyed = params.ToSaveCrossEyed;
-        myVideo->setSwapJPS(params.ToSwapJPS->getValue());
-        myVideo->setStickPano360(params.ToStickPanorama->getValue());
+        myVideo->videoParams().ToStickPanorama = params.ToStickPanorama;
+        myVideo->videoParams().LastPanoramaMode = params.LastPanoramaMode;
+        myVideo->videoParams().ToSwapJPS = params.ToSwapJPS;
         myVideo->setForceBFormat(params.ToForceBFormat->getValue());
         doChangeMixImagesVideos(params.ToMixImagesVideos->getValue());
 
@@ -2100,25 +2109,27 @@ void StMoviePlayer::doAboutFile(const size_t ) {
 }
 
 void StMoviePlayer::doSwitchViewMode(const int32_t theMode) {
-    if (myVideo.get() == nullptr) {
+    if (myVideo.get() == nullptr || myGUI.get() == nullptr)
         return;
-    }
 
+    params.LastPanoramaMode->setValue(theMode);
     myVideo->setTheaterMode(theMode == StViewSurface_Theater);
 }
 
 void StMoviePlayer::doTheaterOnOff(const size_t ) {
-    if (myVideo.get() == nullptr) {
+    if (myVideo.get() == nullptr)
         return;
-    }
 
-    myVideo->setTheaterMode(!myVideo->isTheaterMode());
+    const bool newTheaterMode = !myVideo->isTheaterMode();
+    if (params.ToStickPanorama->getValue()) {
+        params.LastPanoramaMode->setValue(newTheaterMode ? StViewSurface_Theater : StViewSurface_Plain);
+    }
+    myVideo->setTheaterMode(newTheaterMode);
 }
 
 void StMoviePlayer::doPanoramaOnOff(const size_t ) {
-    if (myVideo.get() == nullptr) {
+    if (myVideo.get() == nullptr)
         return;
-    }
 
     std::shared_ptr<StStereoParams> aParams = myGUI->myImage->getSource();
     if (aParams.get() == nullptr
@@ -2127,32 +2138,17 @@ void StMoviePlayer::doPanoramaOnOff(const size_t ) {
         return;
     }
 
-    int aMode = myGUI->myImage->params.ViewMode->getValue();
-    if (aMode != StViewSurface_Plain) {
-        myGUI->myImage->params.ViewMode->setValue(StViewSurface_Plain);
-        return;
+    const int anOldMode = myGUI->myImage->params.ViewMode->getValue();
+    StViewSurface aNewMode = StViewSurface_Plain;
+    if (anOldMode == StViewSurface_Plain) {
+        StPanorama aPano = st::probePanorama(aParams->StereoFormat,
+                                             aParams->Src1SizeX, aParams->Src1SizeY,
+                                             aParams->Src2SizeX, aParams->Src2SizeY);
+        aNewMode = StStereoParams::getViewSurfaceForPanoramaSource(aPano, true);
     }
 
-    StPanorama aPano = st::probePanorama(aParams->StereoFormat,
-                                         aParams->Src1SizeX, aParams->Src1SizeY,
-                                         aParams->Src2SizeX, aParams->Src2SizeY);
-    myGUI->myImage->params.ViewMode->setValue(StStereoParams::getViewSurfaceForPanoramaSource(aPano, true));
-}
-
-void StMoviePlayer::doChangeStickPano360(const bool ) {
-    if (myVideo.get() == nullptr) {
-        return;
-    }
-
-    myVideo->setStickPano360(params.ToStickPanorama->getValue());
-}
-
-void StMoviePlayer::doChangeSwapJPS(const bool ) {
-    if (myVideo.get() == nullptr) {
-        return;
-    }
-
-    myVideo->setSwapJPS(params.ToSwapJPS->getValue());
+    myGUI->myImage->params.ViewMode->setValue(aNewMode);
+    params.LastPanoramaMode->setValue(aNewMode);
 }
 
 void StMoviePlayer::doSwitchSrcFormat(const int32_t theSrcFormat) {
