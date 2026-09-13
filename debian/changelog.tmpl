@@ -1,10 +1,27 @@
 sview (unknown_version) unknown_distrib; urgency=low
 
-  - To be added.
+  * Image Viewer now detects VR180 (hemispherical panorama) format based on
+    GPano:FullPanoWidthPixels to GPano:CroppedAreaImageWidthPixels ratio within JPEG file.
+  * Added option to save JPEG/PNG image as parallel pair instead of cross-eyed pair.
+  * Option 'Stick at panorama 360°' has been renamed to 'Persist panorama mode'
+    and now persists the last panorama mode selection instead of forcing spherical panorama;
+    the option now also overrides panorama mode information retrieved from file's metadata.
+  * GUI, double tap on an element within properties table now copies text into clipboard.
+  * Fixed a crash on saving some JPEG images in YUV420P format with odd dimensions.
 
  -- Kirill Gavrilov <kirill@sview.ru>  unknown_date
 
-sview (1:26.1-1~unknown_distrib) unknown_distrib; urgency=low
+sview (1:26.7-1~unknown_distrib) unknown_distrib; urgency=low
+
+  * Double click is now handled to switch window fullscreen mode
+    (when image/video region is not dragged, otherwise image region is reset as before).
+  * Fixed displaying of Hiragana symbols in Japanese text.
+  * VR output, added 'Mirror VR to window' option.
+  * Linux, fixed handling of double-click.
+
+ -- Kirill Gavrilov <kirill@sview.ru>  Mon, 13 Jul 2026 20:19:46 +0300
+
+sview (1:26.1-2~unknown_distrib) unknown_distrib; urgency=low
 
   + Image Viewer now supports floating-point RGB(A) formats of FFmpeg (e.g. from EXR, HDR image files).
   + Image Viewer - added shuffle playlist button.
@@ -12,7 +29,14 @@ sview (1:26.1-1~unknown_distrib) unknown_distrib; urgency=low
   + Linux, enable building with libopenvr-dev for OpenVR support (untested).
   + Removed legacy NPAPI/ActiveX plugin (browsers dropped support for native plugins since 2015-2018).
   * Linux, added workaround for XWayland session with lost keyboard focus in fullscreen mode.
+  * Linux, fixed accepting file Drag&Drop event as text/uri-list from Thunar and within XWayland session.
   * Brightness, saturation as well as stereopair separation settings are now restored on sView restart.
+    Stereopair separation settings are now common for all files in playlist.
+
+ -- Kirill Gavrilov <kirill@sview.ru>  Thu, 08 Jan 2026 13:26:29 +0300
+
+sview (1:23.02-1~unknown_distrib) unknown_distrib; urgency=low
+
     Stereopair separation settings are now common for all files in playlist.
 
  -- Kirill Gavrilov <kirill@sview.ru>  Tue, 06 Jan 2026 19:32:13 +0300
