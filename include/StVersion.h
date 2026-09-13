@@ -45,7 +45,7 @@
 // should be redefined in stconfig.conf
 #ifndef SVIEW_SDK_VERSION
     //#define SVIEW_SDK_VERSION 10, 1, 0, 0
-    #define SVIEW_SDK_VERSION 26, 7, ST_RELEASE, 13
+    #define SVIEW_SDK_VERSION 26, 9, ST_RELEASE, 13
 #endif
 
 #ifndef SVIEW_SDK_VER_STRING
@@ -223,7 +223,7 @@ class ST_LOCAL StVersionInfo {
      */
     StString toString() const {
         const int aYear  =  2026; //__YEAR__;
-        const int aMonth =     7; //(__MONTH__) + 1;
+        const int aMonth =     9; //(__MONTH__) + 1;
         const int aDay   =    13; //__DAY__;
 
         StString aState;

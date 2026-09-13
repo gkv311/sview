@@ -4,6 +4,20 @@ This document describes changes between tagged sView versions.
 
 Not all changes are documented here - please check git log for complete list.
 
+sView 26.09 (2026-09-13)
+-----------------------------------------------------------------------------------------------------------------------
+
+- Image Viewer now detects *VR180* (hemispherical panorama) format based on
+  `GPano:FullPanoWidthPixels` to `GPano:CroppedAreaImageWidthPixels` ratio within *JPEG* file.
+- Added option to save *JPEG*/*PNG* image as parallel pair instead of cross-eyed pair.
+- Option *'Stick at panorama 360°'* has been renamed to *'Persist panorama mode'*
+  and now persists the last panorama mode selection instead of forcing spherical panorama;
+  the option now also overrides panorama mode information retrieved from file's metadata.
+- GUI, double tap on an element within properties table now copies text into clipboard.
+- Fixed a crash on saving some *JPEG* images in *YUV420P* format with odd dimensions.
+- *Internals: refactored the half of the code to replace custom template classes*
+  *with `std::vector` and `std::shared_ptr` from standard templates.*
+
 sView 26.07 (2026-07-13)
 -----------------------------------------------------------------------------------------------------------------------
 
