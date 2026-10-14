@@ -405,7 +405,7 @@ inline void stMemFree(void* ptr) {
  */
 inline void* stMemAllocAligned(const size_t& theNbBytes,
                                const size_t& theAlign = ST_ALIGNMENT) {
-#if defined(_MSC_VER)
+#if defined(_MSC_VER) || defined(__MINGW64__)
     return _aligned_malloc(theNbBytes, theAlign);
 #elif defined(__ANDROID__) || defined(__QNX__)
     return memalign(theAlign, theNbBytes);
@@ -437,7 +437,7 @@ inline void* stMemAllocZeroAligned(const size_t& theNbBytes,
  * @param ptr (void* ) - pointer to a memory block previously allocated with stMemAllocAligned() to be deallocated.
  */
 inline void stMemFreeAligned(void* thePtrAligned) {
-#if defined(_MSC_VER)
+#if defined(_MSC_VER) || defined(__MINGW64__)
     _aligned_free(thePtrAligned);
 #elif defined(__ANDROID__) || defined(__QNX__)
     free(thePtrAligned);
