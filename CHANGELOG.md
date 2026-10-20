@@ -4,6 +4,11 @@ This document describes changes between tagged sView versions.
 
 Not all changes are documented here - please check git log for complete list.
 
+sView yy.MM (in development)
+-----------------------------------------------------------------------------------------------------------------------
+
+- Android, try using Mediacodec for decoding AV1 and yuv420p10 videos with GPU decoding option.
+
 sView 26.09 (2026-09-13)
 -----------------------------------------------------------------------------------------------------------------------
 

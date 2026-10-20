@@ -379,6 +379,7 @@ private:
     const AVCodec*             myCodecH264HW;     //!< h264 decoder using dedicated hardware (Android Media Codec)
     const AVCodec*             myCodecHevcHW;     //!< hevc decoder using dedicated hardware
     const AVCodec*             myCodecVp9HW;      //!< vp9  decoder using dedicated hardware
+    const AVCodec*             myCodecAv1HW;      //!< AV1  decoder using dedicated hardware
 #endif
     const AVCodec*             myCodecOpenJpeg;   //!< libopenjpeg decoder
     bool                       myUseGpu;          //!< activate decoding on GPU when possible

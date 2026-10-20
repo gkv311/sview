@@ -166,6 +166,7 @@ StVideoQueue::StVideoQueue(const std::shared_ptr<StGLTextureQueue>& theTextureQu
   myCodecH264HW(avcodec_find_decoder_by_name("h264_mediacodec")),
   myCodecHevcHW(avcodec_find_decoder_by_name("hevc_mediacodec")),
   myCodecVp9HW (avcodec_find_decoder_by_name("vp9_mediacodec")),
+  myCodecAv1HW (avcodec_find_decoder_by_name("av1_mediacodec")),
 #endif
   myCodecOpenJpeg(avcodec_find_decoder_by_name("libopenjpeg")),
   myUseGpu(false),
@@ -330,8 +331,7 @@ bool StVideoQueue::init(AVFormatContext*   theFormatCtx,
     // open VIDEO codec
 #if defined(__ANDROID__)
     const AVCodec* aCodecGpu = NULL;
-    if(myUseGpu
-    && myCodecCtx->pix_fmt == stAV::PIX_FMT::YUV420P) {
+    if (myUseGpu) { // && myCodecCtx->pix_fmt == stAV::PIX_FMT::YUV420P) {
         const StString anAutoCodecName(myCodecAuto->name);
         if(anAutoCodecName.isEquals(stCString("h264"))) {
             aCodecGpu = myCodecH264HW;
@@ -339,6 +339,9 @@ bool StVideoQueue::init(AVFormatContext*   theFormatCtx,
             aCodecGpu = myCodecHevcHW;
         } else if(anAutoCodecName.isEquals(stCString("vp9"))) {
             aCodecGpu = myCodecVp9HW;
+        } else if(anAutoCodecName.isEquals(stCString("av1"))
+               || anAutoCodecName.isEquals(stCString("libdav1d"))) {
+            aCodecGpu = myCodecAv1HW;
         }
     }
 
