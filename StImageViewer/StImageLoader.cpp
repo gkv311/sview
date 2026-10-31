@@ -776,6 +776,10 @@ bool StImageLoader::saveImageInfo(const std::shared_ptr<StImageInfo>& theInfo) {
     if(theInfo->Id->ToSwapLR) {
         aSrcFormat = st::formatReversed(aSrcFormat);
     }
+    if (!StJpegParser::isJpsFormat(aSrcFormat)) {
+        myMsgQueue->pushError(stCString("Operation is unavailable for this stereoscopic format"));
+        return false;
+    }
 
     StJpegParser aParser;
     if(!aParser.readFile(theInfo->Path)) {

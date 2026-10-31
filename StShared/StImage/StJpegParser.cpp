@@ -603,12 +603,43 @@ bool StJpegParser::insertSection(const uint8_t   theMarker,
     return true;
 }
 
+/** Return JPS stereoscopic format descriptor.  */
+static uint32_t getJpsFormatDescriptor(const StFormat theFormat) {
+    static constexpr uint32_t aStereoDesc = 0x00000001;
+    switch (theFormat) {
+        case StFormat_SideBySide_LR:
+            return aStereoDesc | SD_LAYOUT_SIDEBYSIDE | SD_LEFT_FIELD_FIRST;
+        case StFormat_SideBySide_RL:
+            return aStereoDesc | SD_LAYOUT_SIDEBYSIDE;
+        case StFormat_TopBottom_LR:
+            return aStereoDesc | SD_LAYOUT_OVERUNDER | SD_LEFT_FIELD_FIRST;
+        case StFormat_TopBottom_RL:
+            return aStereoDesc | SD_LAYOUT_OVERUNDER;
+        case StFormat_Rows:
+            return aStereoDesc | SD_LAYOUT_INTERLEAVED | SD_LEFT_FIELD_FIRST;
+        case StFormat_AnaglyphRedCyan:
+            return aStereoDesc | SD_LAYOUT_ANAGLYPH;
+        case StFormat_Mono:
+        default:
+            return 0;
+    }
+}
+
+bool StJpegParser::isJpsFormat(const StFormat theFormat) {
+    return theFormat == StFormat_Mono || getJpsFormatDescriptor(theFormat) != 0;
+}
+
 bool StJpegParser::setupJps(const StFormat theFormat) {
     if(myBuffer == NULL) {
         return false;
     }
 
+    const uint32_t aStereoDesc = getJpsFormatDescriptor(theFormat);
     if(myOffsets[Offset_Jps] == 0) {
+        if (theFormat != StFormat_Mono && aStereoDesc == 0) {
+            return false; // avoid adding JPS section with misleading format information
+        }
+
         if(myOffsets[Offset_Dqt] == 0) {
             return false;
         }
@@ -634,31 +665,6 @@ bool StJpegParser::setupJps(const StFormat theFormat) {
     }
 
     myStFormat = theFormat;
-    uint32_t aStereoDesc = 0x00000001;
-    switch(theFormat) {
-        case StFormat_SideBySide_LR:
-            aStereoDesc |= SD_LAYOUT_SIDEBYSIDE | SD_LEFT_FIELD_FIRST;
-            break;
-        case StFormat_SideBySide_RL:
-            aStereoDesc |= SD_LAYOUT_SIDEBYSIDE;
-            break;
-        case StFormat_TopBottom_LR:
-            aStereoDesc |= SD_LAYOUT_OVERUNDER | SD_LEFT_FIELD_FIRST;
-            break;
-        case StFormat_TopBottom_RL:
-            aStereoDesc |= SD_LAYOUT_OVERUNDER;
-            break;
-        case StFormat_Rows:
-            aStereoDesc |= SD_LAYOUT_INTERLEAVED | SD_LEFT_FIELD_FIRST;
-            break;
-        case StFormat_AnaglyphRedCyan:
-            aStereoDesc |= SD_LAYOUT_ANAGLYPH;
-            break;
-        case StFormat_Mono:
-        default:
-            aStereoDesc = 0x00000000;
-            break;
-    }
 
     StAlienData::Set32uBE(myBuffer + myOffsets[Offset_Jps] + 2 + 8 + 2 + 2, aStereoDesc);
     return true;
