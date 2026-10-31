@@ -824,6 +824,11 @@ void StImageLoader::mainLoop() {
                 if(!saveImageInfo(anInfo)) {
                     break;
                 }
+                if (myStFormatByUser == StFormat_AUTO
+                 && st::formatReversed(anInfo->Id->StereoFormat) != anInfo->Id->StereoFormat) {
+                    // the file now declares the swapped views, which will be read back on re-load
+                    anInfo->Id->setSwapLR(false);
+                }
                 // re-load image file
             }
             ST_FALLTHROUGH
