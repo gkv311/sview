@@ -483,6 +483,7 @@ std::shared_ptr<StJpegParser::Image> StJpegParser::parseImage(const int      the
                     if(aStereoDesc & 0x00000001) {
                         const bool isLeftFirst = (aStereoDesc & SD_LEFT_FIELD_FIRST) != 0;
                         switch(aStereoDesc & 0x0000FF00) {
+                            // TODO handle SD_LEFT_FIELD_FIRST for interleaved format
                             case SD_LAYOUT_INTERLEAVED: myStFormat = StFormat_Rows;            break;
                             case SD_LAYOUT_SIDEBYSIDE:  myStFormat = isLeftFirst
                                                                    ? StFormat_SideBySide_LR
@@ -648,7 +649,7 @@ bool StJpegParser::setupJps(const StFormat theFormat) {
             aStereoDesc |= SD_LAYOUT_OVERUNDER;
             break;
         case StFormat_Rows:
-            aStereoDesc |= SD_LAYOUT_INTERLEAVED;
+            aStereoDesc |= SD_LAYOUT_INTERLEAVED | SD_LEFT_FIELD_FIRST;
             break;
         case StFormat_AnaglyphRedCyan:
             aStereoDesc |= SD_LAYOUT_ANAGLYPH;
