@@ -225,6 +225,7 @@ namespace {
     struct StFFmpegStereoFormat {
         StFormat    stID;
         const char* name;
+        bool        isInverted;
     };
 
     static constexpr StCString THE_SRC_MODE_KEY     = stCString("STEREO_MODE");
@@ -232,26 +233,26 @@ namespace {
 
     static constexpr StFFmpegStereoFormat STEREOFLAGS[] = {
         // MKV stereoscopic mode decoded by FFmpeg into STEREO_MODE metadata tag
-        {StFormat_Mono,                 "mono"},
-        {StFormat_SideBySide_RL,        "right_left"},
-        {StFormat_SideBySide_LR,        "left_right"},
-        {StFormat_TopBottom_RL,         "bottom_top"},
-        {StFormat_TopBottom_LR,         "top_bottom"},
-        {StFormat_Rows,                 "row_interleaved_rl"},
-        {StFormat_Rows,                 "row_interleaved_lr"},
-        {StFormat_Columns,              "col_interleaved_rl"},
-        {StFormat_Columns,              "col_interleaved_lr"},
-        {StFormat_FrameSequence,        "block_lr"}, /// ???
-        {StFormat_FrameSequence,        "block_rl"},
-        {StFormat_AnaglyphRedCyan,      "anaglyph_cyan_red"},
-        {StFormat_AnaglyphGreenMagenta, "anaglyph_green_magenta"},
+        {StFormat_Mono,                 "mono", false},
+        {StFormat_SideBySide_RL,        "right_left", true},
+        {StFormat_SideBySide_LR,        "left_right", false},
+        {StFormat_TopBottom_RL,         "bottom_top", true},
+        {StFormat_TopBottom_LR,         "top_bottom", false},
+        {StFormat_Rows,                 "row_interleaved_rl", true},
+        {StFormat_Rows,                 "row_interleaved_lr", false},
+        {StFormat_Columns,              "col_interleaved_rl", true},
+        {StFormat_Columns,              "col_interleaved_lr", false},
+        {StFormat_FrameSequence,        "block_lr", false}, /// ???
+        {StFormat_FrameSequence,        "block_rl", true},
+        {StFormat_AnaglyphRedCyan,      "anaglyph_cyan_red", false},
+        {StFormat_AnaglyphGreenMagenta, "anaglyph_green_magenta", false},
         // values in WMV StereoscopicLayout tag
-        {StFormat_SideBySide_RL,        "SideBySideRF"}, // Right First
-        {StFormat_SideBySide_LR,        "SideBySideLF"},
-        {StFormat_TopBottom_LR,         "OverUnderLT"},  // Left Top
-        {StFormat_TopBottom_RL,         "OverUnderRT"},
+        {StFormat_SideBySide_RL,        "SideBySideRF", true}, // Right First
+        {StFormat_SideBySide_LR,        "SideBySideLF", false},
+        {StFormat_TopBottom_LR,         "OverUnderLT", false},  // Left Top
+        {StFormat_TopBottom_RL,         "OverUnderRT", true},
         // NULL-terminate array
-        {StFormat_AUTO, nullptr}
+        {StFormat_AUTO, nullptr, false}
     };
 
 }
@@ -484,6 +485,7 @@ bool StVideoQueue::init(AVFormatContext*   theFormatCtx,
 
     // stereoscopic mode tags
     myStFormatInStream = check720in1080() ? StFormat_Tiled4x : StFormat_AUTO;
+    myIsFrameSeqRightFirst = false;
     if(stAV::meta::readTag(myFormatCtx, THE_SRC_MODE_KEY,     aValue)
     || stAV::meta::readTag(myStream,    THE_SRC_MODE_KEY,     aValue)
     || stAV::meta::readTag(myFormatCtx, THE_SRC_MODE_KEY_WMV, aValue)) {
@@ -493,6 +495,8 @@ bool StVideoQueue::init(AVFormatContext*   theFormatCtx,
                 break;
             } else if(aValue == aFlag.name) {
                 myStFormatInStream = aFlag.stID;
+                // Matroska StereoMode 14: both eyes laced in one Block, right eye first
+                myIsFrameSeqRightFirst = aFlag.stID == StFormat_FrameSequence && aFlag.isInverted;
                 //ST_DEBUG_LOG("  read srcFormat from tags= " + myStFormatInStream);
                 break;
             }
@@ -962,6 +966,10 @@ bool StVideoQueue::decodeFrame(const StHandle<StAVPacket>& thePacket,
         if(aStereo->flags & AV_STEREO3D_FLAG_INVERT) {
             myStFormatInStream = st::formatReversed(myStFormatInStream);
         }
+        // a frame sequence has no reversed format: an inverted one starts with the right view
+        // (H.264 D.2.26 content_interpretation_type 2, Matroska StereoMode 14)
+        myIsFrameSeqRightFirst = myStFormatInStream == StFormat_FrameSequence
+                              && (aStereo->flags & AV_STEREO3D_FLAG_INVERT) != 0;
     #if(LIBAVCODEC_VERSION_INT >= AV_VERSION_INT(61, 19, 100))
         if(myStFormatInStream == StFormat_FrameSequence) {
             // technically, view_ids_available/view_pos_available codec context options should be checked
@@ -1001,6 +1009,7 @@ bool StVideoQueue::decodeFrame(const StHandle<StAVPacket>& thePacket,
                 break;
             } else if(theTagValue == aFlag.name) {
                 myStFormatInStream = aFlag.stID;
+                myIsFrameSeqRightFirst = aFlag.stID == StFormat_FrameSequence && aFlag.isInverted;
                 //ST_DEBUG_LOG("  read srcFormat from tags= " + myStFormatInStream);
                 break;
             }
@@ -1090,9 +1099,12 @@ bool StVideoQueue::decodeFrame(const StHandle<StAVPacket>& thePacket,
 
         // simple one-stream case
         if(aSrcFormat == StFormat_FrameSequence) {
-            const bool isRightView = !isOddNumber(myFramesCounter);
-            if(!isRightView) {
+            const bool isSecondFrame = !isOddNumber(myFramesCounter);
+            if (!isSecondFrame) {
                 myCachedFrame.fill(myDataAdp, false);
+            } else if (myIsFrameSeqRightFirst) {
+                // the stream starts each pair with the right view
+                pushFrame(myDataAdp, myCachedFrame, thePacket->getSource(), StFormat_FrameSequence, aCubemapFormat, myFramePts);
             } else {
                 pushFrame(myCachedFrame, myDataAdp, thePacket->getSource(), StFormat_FrameSequence, aCubemapFormat, myFramePts);
             }
@@ -1100,8 +1112,9 @@ bool StVideoQueue::decodeFrame(const StHandle<StAVPacket>& thePacket,
         } else if(myStFormatInStream == StFormat_FrameSequence) {
             // this is counter-efficient - it is better requesting single view
             // within "view_ids" decoder context when displaying MONO
-            const bool isRightView = !isOddNumber(myFramesCounter);
-            if(!isRightView) {
+            const bool isSecondFrame = !isOddNumber(myFramesCounter);
+            if (isSecondFrame == myIsFrameSeqRightFirst) {
+                // the left view
                 pushFrame(myDataAdp, myEmptyImage, thePacket->getSource(), aSrcFormat, aCubemapFormat, myFramePts);
             }
             ++myFramesCounter;

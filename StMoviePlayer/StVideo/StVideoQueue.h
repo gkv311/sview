@@ -412,6 +412,7 @@ private:
     volatile int               myAudioDelayMSec;
 
     int64_t                    myFramesCounter;
+    bool                       myIsFrameSeqRightFirst = false; //!< the stream's frame sequence starts with the right view
     StImage                    myCachedFrame;
     StImage                    myEmptyImage;
     bool                       myWasFlushed;
