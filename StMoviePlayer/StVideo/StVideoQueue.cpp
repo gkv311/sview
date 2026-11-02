@@ -900,7 +900,13 @@ bool StVideoQueue::decodeFrame(const StHandle<StAVPacket>& thePacket,
         return theToSendPacket;
     }
     toTryMoreFrames = true;
-    if(thePacket->isKeyFrame()) { // !theToSentPacket?
+    // a frame sequence restarts its pairs at a key frame; the frame decoded now may belong to an earlier packet
+    // than the one just sent (frame threading), so the decoded frame's own flag is used
+#ifdef AV_FRAME_FLAG_KEY
+    if ((myFrame.Frame->flags & AV_FRAME_FLAG_KEY) != 0) {
+#else
+    if (myFrame.Frame->key_frame != 0) {
+#endif
         myFramesCounter = 1;
     }
 
