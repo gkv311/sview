@@ -787,7 +787,12 @@ bool StImageLoader::saveImageInfo(const std::shared_ptr<StImageInfo>& theInfo) {
         return false;
     }
 
-    aParser.setupJps(aSrcFormat);
+    if (!aParser.setupJps(aSrcFormat)
+      && aParser.getSrcFormat() != aSrcFormat) {
+        // JPS section could not be added (it is placed after DQT, which lossless JPEG does not have)
+        myMsgQueue->pushError(StString("Unable to add JPS section to existing file '") + theInfo->Path + "'!");
+        return false;
+    }
     if(!aParser.saveFile(theInfo->Path)) {
         myMsgQueue->pushError(StString("File can not be saved at path '") + theInfo->Path + "'!");
         return false;
