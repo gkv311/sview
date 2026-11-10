@@ -15,11 +15,11 @@ env:
     set(CMAKE_BUILD_TYPE "Release")
   FFMPEG_REF:   'n8.0.3'
   OPENJPEG_REF: 'v2.5.4'
-  DAV1_REF:     '1.5.3'
-  LIBJXL_REF:   'v0.11.1'
+  DAV1_REF:     '1.5.4'
+  LIBJXL_REF:   'v0.11.2'
   #MBEDTLS_REF:  'v4.0.0' untested
-  MBEDTLS_REF:  'v3.6.5'
-  CACHE_REV:    'cache1'
+  MBEDTLS_REF:  'v3.6.7'
+  CACHE_REV:    'cache2'
 
 jobs:
   build-mbedtls:

@@ -17,14 +17,14 @@ env:
     set(CMAKE_CXX_FLAGS        "-fPIC")
   ANDROID_PLATFORM:    'android-26.jar'
   ANDROID_BUILD_TOOLS: 'android-build-tools-26.0.3'
-  FREETYPE_REF: 'VER-2-14-1'
+  FREETYPE_REF: 'VER-2-14-3'
   # latest tag fails building with CMAKE_CXX_COMPILER_CLANG_SCAN_DEPS-NOTFOUND
-  #OPENAL_REF:   '1.25.1'
+  #OPENAL_REF:   '1.25.2'
   OPENAL_REF:   '1.24.2'
   OPENVR_REF:   'v2.5.1'
   #LIBCONFIG_REF: 'v1.8.2' untested
   LIBCONFIG_REF: 'v1.7.3'
-  CACHE_REV:    'cache2'
+  CACHE_REV:    'cache3'
 
 jobs:
   build-freetype:

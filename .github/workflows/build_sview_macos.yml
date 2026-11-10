@@ -12,10 +12,10 @@ env:
     set(CMAKE_OSX_ARCHITECTURES "arm64")
     set(CMAKE_INSTALL_NAME_DIR  "@executable_path/../Frameworks")
     set(CMAKE_BUILD_TYPE "Release")
-  FREETYPE_REF: 'VER-2-14-1'
-  OPENAL_REF:   '1.25.1'
+  FREETYPE_REF: 'VER-2-14-3'
+  OPENAL_REF:   '1.25.2'
   #OPENVR_REF:   'v2.5.1'
-  CACHE_REV:    'cache4'
+  CACHE_REV:    'cache1'
 
 jobs:
   build-freetype:

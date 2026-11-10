@@ -16,10 +16,10 @@ env:
     set(CMAKE_FIND_ROOT_PATH_MODE_LIBRARY ONLY)
     set(CMAKE_FIND_ROOT_PATH_MODE_INCLUDE ONLY)
     set(CMAKE_BUILD_TYPE Release)
-  FREETYPE_REF: 'VER-2-14-1'
-  OPENAL_REF:   '1.25.1'
+  FREETYPE_REF: 'VER-2-14-3'
+  OPENAL_REF:   '1.25.2'
   OPENVR_REF:   'v2.5.1'
-  CACHE_REV:    'cache4'
+  CACHE_REV:    'cache1'
 
 jobs:
   build-freetype:
