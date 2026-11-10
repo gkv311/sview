@@ -98,6 +98,7 @@ StWindowImpl::StWindowImpl(const std::shared_ptr<StResourceManager>& theResMgr,
     myStEvent   .Type = stEvent_None;
     myStEvent2  .Type = stEvent_None;
     myStEventAux.Type = stEvent_None;
+    myDoubleClickEvent.Type = stEvent_None;
     myScrollAcc.reset();
     attribs.IsNoDecor      = false;
     attribs.IsStereoOutput = false;
@@ -1452,36 +1453,67 @@ void StWindowImpl::doTouch(const StTouchEvent& theTouches) {
     }
 }
 
-void StWindowImpl::checkDoubleClick(const StEvent& theEvent) {
-    if (theEvent.Type != stEvent_MouseDown
-     && theEvent.Type == stEvent_MouseCancel) {
+void StWindowImpl::checkDoubleClick(const StClickEvent* theEvent, const StPointD_t& theMovePos) {
+    if (theEvent != nullptr && (theEvent->Type == stEvent_MouseCancel || theEvent->Button != ST_MOUSE_LEFT)) {
+        myDoubleClickEvent.Type = stEvent_None;
         return;
     }
 
-    if (theEvent.Button.Button != ST_MOUSE_LEFT
-     || theEvent.Type == stEvent_MouseCancel) {
-        myDoubleClickTimer.stop();
+    if (myDoubleClickEvent.Type == stEvent_None) {
+        // just remember the last event
+        if (theEvent != nullptr) {
+            myDoubleClickEvent = *theEvent;
+        }
         return;
     }
 
     // check double click
+    static constexpr double TheClickTolerPixels = 3.0;
+    static constexpr double TheClickTolerTime = 0.4;
+
     const StRectI_t& aWinRect = attribs.IsFullScreen ? myRectFull : myRectNorm;
-    const StPointD_t aNewPnt(theEvent.Button.PointX, theEvent.Button.PointY);
-    const StPointD_t aDeltaPx = (myDoubleClickPnt - aNewPnt) * StPointD_t(aWinRect.width(), aWinRect.height());
-    if (myDoubleClickTimer.isOn()
-     && myDoubleClickTimer.getElapsedTime() < 0.4
-     && aDeltaPx.cwiseAbs().maxComp() < 3) {
+    const StPointD_t anOldPnt(myDoubleClickEvent.PointX, myDoubleClickEvent.PointY);
+    const StPointD_t aNewPnt = theEvent != nullptr ? StPointD_t(theEvent->PointX, theEvent->PointY) : theMovePos;
+    const StPointD_t aDeltaPx = (anOldPnt - aNewPnt) * StPointD_t(aWinRect.width(), aWinRect.height());
+    if (aDeltaPx.cwiseAbs().maxComp() >= TheClickTolerPixels) {
+        // abort sequence if mouse has been moved
+        myDoubleClickEvent.Type = stEvent_None;
+        return;
+    }
+
+    if (theEvent == nullptr) {
+        return;
+    }
+
+    const double aTime = theEvent->Time - myDoubleClickEvent.Time;
+    if (aTime <= 0.0 || aTime >= TheClickTolerTime) {
+        // abort sequence if mouse has been clicked too slow
+        myDoubleClickEvent.Type = stEvent_None;
+        return;
+    }
+
+    if (myDoubleClickEvent.Type == stEvent_MouseDown
+     && theEvent->Type == stEvent_MouseUp) {
+        // first click happened - update time and event type
+        myDoubleClickEvent.Type = stEvent_MouseUp;
+        myDoubleClickEvent.Time = theEvent->Time;
+        return;
+    } else if (myDoubleClickEvent.Type == stEvent_MouseUp
+            && theEvent->Type == stEvent_MouseDown) {
+        // second click started - do nothing
+        return;
+    } else if (myDoubleClickEvent.Type == stEvent_MouseUp
+            && theEvent->Type == stEvent_MouseUp) {
+        // double click detected
+        myDoubleClickEvent.Type = stEvent_None;
         myStEvent2.Type = stEvent_Gesture1DoubleTap;
         myStEvent2.Gesture.clearGesture();
-        myStEvent2.Gesture.Time = theEvent.Button.Time;
-        myStEvent2.Gesture.Point1X = (float )theEvent.Button.PointX;
-        myStEvent2.Gesture.Point1Y = (float )theEvent.Button.PointY;
-        myDoubleClickTimer.stop();
+        myStEvent2.Gesture.Time = theEvent->Time;
+        myStEvent2.Gesture.Point1X = (float )theEvent->PointX;
+        myStEvent2.Gesture.Point1Y = (float )theEvent->PointY;
         signals.onGesture->emit(myStEvent2.Gesture);
-    } else {
-        myDoubleClickTimer.restart();
+        return;
     }
-    myDoubleClickPnt = aNewPnt;
 }
 
 void StWindowImpl::swapEventsBuffers() {
@@ -1519,11 +1551,12 @@ void StWindowImpl::swapEventsBuffers() {
             }
             case stEvent_MouseDown:
                 signals.onMouseDown->emit(anEvent.Button);
+                checkDoubleClick(anEvent.Button);
                 break;
             case stEvent_MouseCancel:
             case stEvent_MouseUp: {
                 signals.onMouseUp->emit(anEvent.Button);
-                checkDoubleClick(anEvent);
+                checkDoubleClick(anEvent.Button);
                 break;
             }
             case stEvent_TouchDown:

@@ -128,9 +128,9 @@ typedef NSUInteger NSEventPhase;
             myStWin->signals.onMouseDown->emit(myStEvent.Button);
         } else {
             myStWin->signals.onMouseUp->emit(myStEvent.Button);
-            // handle double mouse click (in addition to double tap on a touchpad)
-            myStWin->checkDoubleClick(myStEvent);
         }
+        // handle double mouse click (in addition to double tap on a touchpad)
+        myStWin->checkDoubleClick(myStEvent.Button);
     }
 
     /**

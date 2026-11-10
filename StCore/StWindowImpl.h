@@ -130,9 +130,26 @@ class StWindowImpl {
     ST_LOCAL void swapEventsBuffers();
 
     /**
-     * Check stEvent_MouseUp event and generate stEvent_Gesture1DoubleTap event.
+     * Check mouse click event and generate stEvent_Gesture1DoubleTap event.
+     * @param[in] theEvent   mouse click event or NULL in case of cursor movement
+     * @param[in] theMovePos new cursor position
      */
-    ST_LOCAL void checkDoubleClick(const StEvent& theEvent);
+    ST_LOCAL void checkDoubleClick(const StClickEvent* theEvent, const StPointD_t& theMovePos);
+
+    /**
+     * Check mouse click event and generate stEvent_Gesture1DoubleTap event.
+     */
+    ST_LOCAL void checkDoubleClick(const StClickEvent& theEvent) {
+        checkDoubleClick(&theEvent, StPointD_t(theEvent.PointX, theEvent.PointY));
+    }
+
+    /**
+     * Invalidate mouse double click state after moving cursor.
+     */
+    ST_LOCAL void checkDoubleClick(const StPointD_t& theMovePos) {
+        checkDoubleClick(nullptr, theMovePos);
+    }
+
 
     /**
      * @return uptime in seconds for event
@@ -491,8 +508,7 @@ class StWindowImpl {
     StEvent        myStEvent2;         //!< temporary event object (to be used in message loop thread)
     StEvent        myStEventAux;       //!< extra temporary event object (to be used in StWindow creation thread)
     StScrollEvent  myScrollAcc;        //!< extra temporary event object accumulating mouse scroll events
-    StTimer        myDoubleClickTimer; //!< timer for detecting double click
-    StPointD_t     myDoubleClickPnt;   //!< double click point
+    StClickEvent   myDoubleClickEvent; //!< double click first event
     int            myAlignDL;          //!< extra window shift applied for alignment (left)
     int            myAlignDR;          //!< extra window shift applied for alignment (right)
     int            myAlignDT;          //!< extra window shift applied for alignment (top)

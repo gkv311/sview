@@ -1023,9 +1023,7 @@ void StWindowImpl::processEvents() {
                 }
 
                 // check double click
-                if (myStEvent.Type == stEvent_MouseUp) {
-                    checkDoubleClick(myStEvent);
-                }
+                checkDoubleClick(myStEvent.Button);
                 break;
             }
             //case ResizeRequest:
@@ -1087,6 +1085,7 @@ void StWindowImpl::processEvents() {
         StPointD_t aDspl = aNewMousePt - myMousePt;
         if(std::abs(aDspl.x()) >= 0.0008 || std::abs(aDspl.y()) >= 0.0008) {
             myIsMouseMoved = true;
+            checkDoubleClick(aNewMousePt);
         }
     }
     myMousePt = aNewMousePt;

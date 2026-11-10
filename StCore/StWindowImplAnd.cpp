@@ -556,6 +556,7 @@ void StWindowImpl::processEvents() {
         StPointD_t aDspl = myMousePt - anOldMousePt;
         if(std::abs(aDspl.x()) >= 0.0008 || std::abs(aDspl.y()) >= 0.0008) {
             myIsMouseMoved = true;
+            checkDoubleClick(myMousePt);
         }
     }
 
