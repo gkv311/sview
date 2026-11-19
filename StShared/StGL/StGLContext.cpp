@@ -89,27 +89,27 @@ static void APIENTRY debugCallbackWrap(unsigned int theSource,
 
 static constexpr StCString THE_DBGMSG_SOURCE_UNKNOWN = stCString("UNKNOWN");
 static constexpr StCString THE_DBGMSG_SOURCES[] = {
-    stCString("OpenGL"),          // GL_DEBUG_SOURCE_API
-    stCString("Window System"),   // GL_DEBUG_SOURCE_WINDOW_SYSTEM
-    stCString("Shader Compiler"), // GL_DEBUG_SOURCE_SHADER_COMPILER
-    stCString("Third Party"),     // GL_DEBUG_SOURCE_THIRD_PARTY
-    stCString("Application"),     // GL_DEBUG_SOURCE_APPLICATION
-    stCString("Other"),           // GL_DEBUG_SOURCE_OTHER
+    stCString("OpenGL"),    // GL_DEBUG_SOURCE_API
+    stCString("WinSystem"), // GL_DEBUG_SOURCE_WINDOW_SYSTEM
+    stCString("GLSL"),      // GL_DEBUG_SOURCE_SHADER_COMPILER
+    stCString("3rdParty"),  // GL_DEBUG_SOURCE_THIRD_PARTY
+    stCString("sView"),     // GL_DEBUG_SOURCE_APPLICATION
+    stCString("Other"),     // GL_DEBUG_SOURCE_OTHER
 };
 
 static constexpr StCString THE_DBGMSG_TYPE_UNKNOWN = stCString("UNKNOWN");
 static constexpr StCString THE_DBGMSG_TYPES[] = {
-    stCString("Error"),              // GL_DEBUG_TYPE_ERROR
-    stCString("Deprecated"),         // GL_DEBUG_TYPE_DEPRECATED_BEHAVIOR
-    stCString("Undefined behavior"), // GL_DEBUG_TYPE_UNDEFINED_BEHAVIOR
-    stCString("Portability"),        // GL_DEBUG_TYPE_PORTABILITY
-    stCString("Performance"),        // GL_DEBUG_TYPE_PERFORMANCE
-    stCString("Other"),              // GL_DEBUG_TYPE_OTHER
+    stCString("error"),       // GL_DEBUG_TYPE_ERROR
+    stCString("deprecated"),  // GL_DEBUG_TYPE_DEPRECATED_BEHAVIOR
+    stCString("UB"),          // GL_DEBUG_TYPE_UNDEFINED_BEHAVIOR
+    stCString("portability"), // GL_DEBUG_TYPE_PORTABILITY
+    stCString("perf"),        // GL_DEBUG_TYPE_PERFORMANCE
+    stCString("other"),       // GL_DEBUG_TYPE_OTHER
 };
 
-static constexpr StCString THE_DBGMSG_SEV_HIGH   = stCString("High");   // GL_DEBUG_SEVERITY_HIGH
-static constexpr StCString THE_DBGMSG_SEV_MEDIUM = stCString("Medium"); // GL_DEBUG_SEVERITY_MEDIUM
-static constexpr StCString THE_DBGMSG_SEV_LOW    = stCString("Low");    // GL_DEBUG_SEVERITY_LOW
+static constexpr StCString THE_DBGMSG_SEV_HIGH   = stCString(".severe_"); // GL_DEBUG_SEVERITY_HIGH
+static constexpr StCString THE_DBGMSG_SEV_MEDIUM = stCString(".");        // GL_DEBUG_SEVERITY_MEDIUM
+static constexpr StCString THE_DBGMSG_SEV_LOW    = stCString(".hint_");   // GL_DEBUG_SEVERITY_LOW
 
 void StGLContext::stglDebugCallback(unsigned int theSource,
                                     unsigned int theType,
@@ -127,6 +127,15 @@ void StGLContext::stglDebugCallback(unsigned int theSource,
             // tells that glBufferSubData() used for GL_STATIC_DRAW buffer
             return;
         }
+    } else if (myGlDriverVendor == GlVendor_Intel) {
+        if (theSource == GL_DEBUG_SOURCE_SHADER_COMPILER
+         && theType == GL_DEBUG_TYPE_OTHER
+         && theId == 0
+         && StString(theMessage).isEndsWith(stCString("#version directive missing\n\n"))) {
+            // useless message - sView doesn't put GLSL version as it relies
+            // on the lowest supported version (for which #version is not required)
+            return;
+        }
     }
 
     const StCString& aSrc = (theSource >= GL_DEBUG_SOURCE_API
@@ -142,11 +151,20 @@ void StGLContext::stglDebugCallback(unsigned int theSource,
                           : (theSeverity == GL_DEBUG_SEVERITY_MEDIUM
                            ? THE_DBGMSG_SEV_MEDIUM
                            : THE_DBGMSG_SEV_LOW);
-    StString aMsg = StString("Source:")   + aSrc
-               + StString(" | Type:")     + aType
-               + StString(" | ID:")       + theId
-               + StString(" | Severity:") + aSev
-               + StString(" | Message:\n  ") + theMessage + "\n";
+    StString aMsg;
+    aMsg = aMsg + "[" + aSrc + aSev + aType;
+    if (theId != 0)
+        aMsg = aMsg + "#" + int(theId);
+
+    aMsg = aMsg + "] " + theMessage;
+
+    // truncate bogus newlines from input message
+    if (aMsg.getLength() > 0 && aMsg.isEndsWith('\n'))
+        aMsg = aMsg.subString(0, aMsg.getLength() - 1);
+
+    if (aMsg.getLength() > 0 && aMsg.isEndsWith('\n'))
+        aMsg = aMsg.subString(0, aMsg.getLength() - 1);
+
     StLogger::GetDefault().write(aMsg,
         theType == GL_DEBUG_TYPE_ERROR ? StLogger::ST_ERROR : StLogger::ST_WARNING);
     //if(!myMsgQueue.isNull()) {
