@@ -130,26 +130,61 @@ class StWindowImpl {
     ST_LOCAL void swapEventsBuffers();
 
     /**
+     * Check mouse click event and generate stEvent_Gesture1DoubleTap
+     * and stEvent_Gesture1Tap events.
+     * @param[in] theFromTouch when TRUE the event is emulated from a touch and will generate also stEvent_Gesture1Tap
+     * @param[in] theEvent   mouse click event or NULL in case of cursor movement
+     * @param[in] theMovePos new cursor position
+     */
+    ST_LOCAL bool checkDoubleClickTap(const bool theFromTouch,
+                                      const StClickEvent* theEvent,
+                                      const StPointD_t& theMovePos);
+
+    /**
      * Check mouse click event and generate stEvent_Gesture1DoubleTap event.
      * @param[in] theEvent   mouse click event or NULL in case of cursor movement
      * @param[in] theMovePos new cursor position
      */
-    ST_LOCAL void checkDoubleClick(const StClickEvent* theEvent, const StPointD_t& theMovePos);
+    ST_LOCAL bool checkDoubleClick(const StClickEvent* theEvent, const StPointD_t& theMovePos) {
+        return checkDoubleClickTap(false, theEvent, theMovePos);
+    }
 
     /**
      * Check mouse click event and generate stEvent_Gesture1DoubleTap event.
      */
-    ST_LOCAL void checkDoubleClick(const StClickEvent& theEvent) {
-        checkDoubleClick(&theEvent, StPointD_t(theEvent.PointX, theEvent.PointY));
+    ST_LOCAL bool checkDoubleClick(const StClickEvent& theEvent) {
+        return checkDoubleClick(&theEvent, StPointD_t(theEvent.PointX, theEvent.PointY));
     }
 
     /**
      * Invalidate mouse double click state after moving cursor.
      */
-    ST_LOCAL void checkDoubleClick(const StPointD_t& theMovePos) {
-        checkDoubleClick(nullptr, theMovePos);
+    ST_LOCAL bool checkDoubleClick(const StPointD_t& theMovePos) {
+        return checkDoubleClick(nullptr, theMovePos);
     }
 
+    /**
+     * Check touch down/up event and generate stEvent_Gesture1Tap/stEvent_Gesture1DoubleTap events.
+     * @param[in] theEvent   emulated mouse click event or NULL in case of a movement
+     * @param[in] theMovePos new touch position
+     */
+    ST_LOCAL bool checkSingleDoubleTap(const StClickEvent* theEvent,
+                                       const StPointD_t& theMovePos)
+    {
+        if (checkDoubleClickTap(true, theEvent, theMovePos)) {
+            mySingleTapEvent.Type = stEvent_None;
+            return true;
+        }
+        return checkSingleTap(theEvent, theMovePos);
+    }
+
+    /**
+     * Check touch down/up event and generate stEvent_Gesture1Tap events.
+     * @param[in] theEvent   emulated mouse click event or NULL in case of a movement
+     * @param[in] theMovePos new touch position
+     */
+    ST_LOCAL bool checkSingleTap(const StClickEvent* theEvent,
+                                 const StPointD_t& theMovePos);
 
     /**
      * @return uptime in seconds for event
@@ -312,8 +347,6 @@ class StWindowImpl {
     StPointD_t         myMousePt;         //!< mouse coordinates to track activity
     bool               myIsPreciseCursor; //!< flag indicating that last mouse cursor position was updated by precise input device
     StTouchEvent       myTouches;         //!< current state of touch screen
-    StTouchEvent       myTap1Touch;       //!< previous tap touch
-    StTouch            myTap0Touch;       //!< started tap
     int                myNbTouchesMax;    //!< maximum touches within current sequence
     StRectI_t          myRectNorm;        //!< master window coordinates in normal     state
     StRectI_t          myRectFull;        //!< master window coordinates in fullscreen state
@@ -509,6 +542,8 @@ class StWindowImpl {
     StEvent        myStEventAux;       //!< extra temporary event object (to be used in StWindow creation thread)
     StScrollEvent  myScrollAcc;        //!< extra temporary event object accumulating mouse scroll events
     StClickEvent   myDoubleClickEvent; //!< double click first event
+    StClickEvent   myDoubleTapEvent;   //!< double tap   first event
+    StClickEvent   mySingleTapEvent;   //!< single tap   first event
     int            myAlignDL;          //!< extra window shift applied for alignment (left)
     int            myAlignDR;          //!< extra window shift applied for alignment (right)
     int            myAlignDT;          //!< extra window shift applied for alignment (top)

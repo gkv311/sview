@@ -99,6 +99,8 @@ StWindowImpl::StWindowImpl(const std::shared_ptr<StResourceManager>& theResMgr,
     myStEvent2  .Type = stEvent_None;
     myStEventAux.Type = stEvent_None;
     myDoubleClickEvent.Type = stEvent_None;
+    myDoubleTapEvent.Type = stEvent_None;
+    mySingleTapEvent.Type = stEvent_None;
     myScrollAcc.reset();
     attribs.IsNoDecor      = false;
     attribs.IsStereoOutput = false;
@@ -126,11 +128,6 @@ StWindowImpl::StWindowImpl(const std::shared_ptr<StResourceManager>& theResMgr,
     myTouches.Type = stEvent_TouchCancel;
     myTouches.Time = 0.0;
     myTouches.clearTouches();
-
-    myTap0Touch = StTouch::Empty();
-    myTap1Touch.Type = stEvent_TouchCancel;
-    myTap1Touch.Time = 0.0;
-    myTap1Touch.clearTouches();
 
     myMonSlave.idMaster = 0;
     myMonSlave.idSlave  = 1; // second by default
@@ -1119,11 +1116,6 @@ struct StGestThreshold {
 };
 
 namespace {
-    static const StGestThreshold THE_THRESHOLD_TAP = {
-        20.0f,
-        20.0f,
-        20.0f
-    };
     static const StGestThreshold THE_THRESHOLD_PAN = {
          4.0f,
          1.0f,
@@ -1168,7 +1160,8 @@ void StWindowImpl::doTouch(const StTouchEvent& theTouches) {
     // scale factor for conversion into dp (density-independent pixels) units
     const StRectI_t  aWinRect = attribs.IsFullScreen ? myRectFull : myRectNorm;
     const StMonitor& aMon     = myMonitors[aWinRect.center()];
-    StGLVec2 aScale((float )aWinRect.width() / aMon.getScale(), (float )aWinRect.height() / aMon.getScale());
+    const StGLVec2   aScale(float(aWinRect.width()) / aMon.getScale(),
+                            float(aWinRect.height()) / aMon.getScale());
 
     switch(theTouches.Type) {
         case stEvent_TouchDown: {
@@ -1177,9 +1170,18 @@ void StWindowImpl::doTouch(const StTouchEvent& theTouches) {
             for(int aTouchIter = 0; aTouchIter < theTouches.NbTouches; ++aTouchIter) {
                 myTouches.addTouch(theTouches.Touches[aTouchIter]);
             }
-            if(myNbTouchesMax == 0) {
+            if (myNbTouchesMax == 0) {
                 myTouches.Time = aTime;
-                myTap0Touch = theTouches.Touches[0];
+
+                const StPointD_t aPoint(theTouches.Touches[0].PointX, theTouches.Touches[0].PointY);
+                StClickEvent aClickEvent;
+                aClickEvent.Type    = stEvent_MouseDown;
+                aClickEvent.Time    = aTime;
+                aClickEvent.Button  = ST_MOUSE_LEFT;
+                aClickEvent.Buttons = 0;
+                aClickEvent.PointX  = aPoint.x();
+                aClickEvent.PointY  = aPoint.y();
+                checkSingleDoubleTap(&aClickEvent, aPoint);
             }
             myNbTouchesMax = stMax(myNbTouchesMax, theTouches.NbTouches);
 
@@ -1204,42 +1206,20 @@ void StWindowImpl::doTouch(const StTouchEvent& theTouches) {
             myStEvent2.Gesture.Time = aTime;
             signals.onGesture->emit(myStEvent2.Gesture);
 
-            if(theTouches.NbTouches == 0) {
-                if(myNbTouchesMax == 1) {
-                    if(myTap1Touch.Type != stEvent_TouchCancel
-                    && (aTime - myTap1Touch.Time) < 0.5) {
-                        StGLVec2 aDelta(myTap1Touch.Touches[0].PointX - aCopy.Touches[0].PointX,
-                                        myTap1Touch.Touches[0].PointY - aCopy.Touches[0].PointY);
-                        aDelta *= aScale;
-                        if(aDelta.modulus() <= THE_THRESHOLD_TAP.FromIdle) {
-                            myStEvent2.Type = stEvent_Gesture1DoubleTap;
-                            myStEvent2.Gesture.clearGesture();
-                            myStEvent2.Gesture.Time = aTime;
-                            myStEvent2.Gesture.Point1X = aCopy.Touches[0].PointX;
-                            myStEvent2.Gesture.Point1Y = aCopy.Touches[0].PointY;
-                            signals.onGesture->emit(myStEvent2.Gesture);
-                        }
-                        myTap1Touch.Type = stEvent_TouchCancel;
-                    } else if(aTime - aCopy.Time < 0.5) {
-                        myTap1Touch = aCopy;
-                        myTap1Touch.Type = stEvent_TouchUp;
-                        myTap1Touch.Time = aTime;
-                        StGLVec2 aDelta(myTap0Touch.PointX - aCopy.Touches[0].PointX,
-                                        myTap0Touch.PointY - aCopy.Touches[0].PointY);
-                        aDelta *= aScale;
-                        if(aDelta.modulus() <= THE_THRESHOLD_TAP.FromIdle) {
-                            myStEvent2.Type = stEvent_Gesture1Tap;
-                            myStEvent2.Gesture.clearGesture();
-                            myStEvent2.Gesture.Time = aTime;
-                            myStEvent2.Gesture.Point1X = aCopy.Touches[0].PointX;
-                            myStEvent2.Gesture.Point1Y = aCopy.Touches[0].PointY;
-                            signals.onGesture->emit(myStEvent2.Gesture);
-                        }
-                    }  else {
-                        myTap1Touch.Type = stEvent_TouchCancel;
-                    }
+            if (theTouches.NbTouches == 0) {
+                if (myNbTouchesMax == 1) {
+                    const StPointD_t aPoint(aCopy.Touches[0].PointX, aCopy.Touches[0].PointY);
+                    StClickEvent aClickEvent;
+                    aClickEvent.Type    = stEvent_MouseUp;
+                    aClickEvent.Time    = aTime;
+                    aClickEvent.Button  = ST_MOUSE_LEFT;
+                    aClickEvent.Buttons = 0;
+                    aClickEvent.PointX  = aPoint.x();
+                    aClickEvent.PointY  = aPoint.y();
+                    checkSingleDoubleTap(&aClickEvent, aPoint);
                 } else {
-                    myTap1Touch.Type = stEvent_TouchCancel;
+                    mySingleTapEvent.Type = stEvent_None;
+                    myDoubleTapEvent.Type = stEvent_None; // reset tap state
                 }
                 myNbTouchesMax = 0;
             }
@@ -1249,7 +1229,11 @@ void StWindowImpl::doTouch(const StTouchEvent& theTouches) {
             myTouches.Type = stEvent_TouchCancel;
             myTouches.clearTouches();
 
+            // reset double tap state
             myNbTouchesMax = 0;
+            mySingleTapEvent.Type = stEvent_None;
+            myDoubleTapEvent.Type = stEvent_None;
+
             myStEvent2.Type = stEvent_GestureCancel;
             myStEvent2.Gesture.clearGesture();
             myStEvent2.Gesture.Time = aTime;
@@ -1257,6 +1241,10 @@ void StWindowImpl::doTouch(const StTouchEvent& theTouches) {
             break;
         }
         case stEvent_TouchMove: {
+            if (theTouches.NbTouches != 0) {
+                const StPointD_t aPoint(theTouches.Touches[0].PointX, theTouches.Touches[0].PointY);
+                checkSingleDoubleTap(nullptr, aPoint);
+            }
             break;
         }
         default:
@@ -1453,67 +1441,155 @@ void StWindowImpl::doTouch(const StTouchEvent& theTouches) {
     }
 }
 
-void StWindowImpl::checkDoubleClick(const StClickEvent* theEvent, const StPointD_t& theMovePos) {
+/** Allow 0.4 second lag for double mouse click */
+static constexpr double TheClickTimeMaxLag = 0.4;
+/** Allow 3 pixels movement gap for double mouse click */
+static constexpr double TheMouseClickMoveGap = 3.0;
+/** Ignore too short double touches */
+static constexpr double TheDoubleTouchTimeMinLag = 0.1;
+/** Allow 20 pixels movement gap for double tap */
+static constexpr double TheTouchTapMoveGap = 20.0;
+
+bool StWindowImpl::checkSingleTap(const StClickEvent* theEvent,
+                                  const StPointD_t& theMovePos) {
+    const double aTimeLag = TheClickTimeMaxLag;
+    const double aMoveGap = TheTouchTapMoveGap;
+
+    StClickEvent& aState = mySingleTapEvent;
     if (theEvent != nullptr && (theEvent->Type == stEvent_MouseCancel || theEvent->Button != ST_MOUSE_LEFT)) {
-        myDoubleClickEvent.Type = stEvent_None;
-        return;
+        aState.Type = stEvent_None;
+        return false;
     }
 
-    if (myDoubleClickEvent.Type == stEvent_None) {
+    if (aState.Type == stEvent_None) {
         // just remember the last event
-        if (theEvent != nullptr) {
-            myDoubleClickEvent = *theEvent;
+        if (theEvent != nullptr && theEvent->Type != stEvent_MouseUp) {
+            aState = *theEvent;
         }
-        return;
+        return false;
     }
+
+    // scale factor for conversion into dp (density-independent pixels) units
+    const StRectI_t& aWinRect = attribs.IsFullScreen ? myRectFull : myRectNorm;
+    const StMonitor& aMon     = myMonitors[aWinRect.center()];
+    const StPointD_t aScale(double(aWinRect.width()) / aMon.getScale(),
+                            double(aWinRect.height()) / aMon.getScale());
 
     // check double click
-    static constexpr double TheClickTolerPixels = 3.0;
-    static constexpr double TheClickTolerTime = 0.4;
-
-    const StRectI_t& aWinRect = attribs.IsFullScreen ? myRectFull : myRectNorm;
-    const StPointD_t anOldPnt(myDoubleClickEvent.PointX, myDoubleClickEvent.PointY);
+    const StPointD_t anOldPnt(aState.PointX, aState.PointY);
     const StPointD_t aNewPnt = theEvent != nullptr ? StPointD_t(theEvent->PointX, theEvent->PointY) : theMovePos;
-    const StPointD_t aDeltaPx = (anOldPnt - aNewPnt) * StPointD_t(aWinRect.width(), aWinRect.height());
-    if (aDeltaPx.cwiseAbs().maxComp() >= TheClickTolerPixels) {
-        // abort sequence if mouse has been moved
-        myDoubleClickEvent.Type = stEvent_None;
-        return;
+    const StPointD_t aDeltaPx = (anOldPnt - aNewPnt) * aScale;
+    if (aDeltaPx.cwiseAbs().maxComp() >= aMoveGap) {
+        // abort sequence if touch has been moved
+        aState.Type = stEvent_None;
+        return false;
     }
 
     if (theEvent == nullptr) {
-        return;
+        return false;
     }
 
-    const double aTime = theEvent->Time - myDoubleClickEvent.Time;
-    if (aTime <= 0.0 || aTime >= TheClickTolerTime) {
+    const double aTime = theEvent->Time - aState.Time;
+    if (aTime <= 0.0 || aTime >= aTimeLag) {
+        // abort sequence if touch has been tapped too slow
+        aState.Type = stEvent_None;
+        return false;
+    }
+
+    if (aState.Type == stEvent_MouseDown
+     && theEvent->Type == stEvent_MouseUp) {
+        // first tap happened - update time and event type
+        aState.Type = stEvent_None;
+
+        myStEvent2.Type = stEvent_Gesture1Tap;
+        myStEvent2.Gesture.clearGesture();
+        myStEvent2.Gesture.Time = theEvent->Time;
+        myStEvent2.Gesture.Point1X = (float )aNewPnt.x();
+        myStEvent2.Gesture.Point1Y = (float )aNewPnt.y();
+        signals.onGesture->emit(myStEvent2.Gesture);
+        return true;
+    }
+    return false;
+}
+
+bool StWindowImpl::checkDoubleClickTap(const bool theFromTouch,
+                                       const StClickEvent* theEvent,
+                                       const StPointD_t& theMovePos) {
+    const double aTimeLag = TheClickTimeMaxLag;
+    const double aMoveGap = theFromTouch ? TheTouchTapMoveGap : TheMouseClickMoveGap;
+
+    StClickEvent& aState = theFromTouch ? myDoubleTapEvent : myDoubleClickEvent;
+
+    if (theEvent != nullptr && (theEvent->Type == stEvent_MouseCancel || theEvent->Button != ST_MOUSE_LEFT)) {
+        aState.Type = stEvent_None;
+        return false;
+    }
+
+    if (aState.Type == stEvent_None) {
+        // just remember the last event
+        if (theEvent != nullptr) {
+            aState = *theEvent;
+        }
+        return false;
+    }
+
+    // scale factor for conversion into dp (density-independent pixels) units
+    const StRectI_t& aWinRect = attribs.IsFullScreen ? myRectFull : myRectNorm;
+    const StMonitor& aMon     = myMonitors[aWinRect.center()];
+    const StPointD_t aScale(double(aWinRect.width()) / aMon.getScale(),
+                            double(aWinRect.height()) / aMon.getScale());
+
+    // check double click
+    const StPointD_t anOldPnt(aState.PointX, aState.PointY);
+    const StPointD_t aNewPnt = theEvent != nullptr ? StPointD_t(theEvent->PointX, theEvent->PointY) : theMovePos;
+    const StPointD_t aDeltaPx = (anOldPnt - aNewPnt) * aScale;
+    if (aDeltaPx.cwiseAbs().maxComp() >= aMoveGap) {
+        // abort sequence if mouse has been moved
+        aState.Type = stEvent_None;
+        return false;
+    }
+
+    if (theEvent == nullptr) {
+        return false;
+    }
+
+    const double aTime = theEvent->Time - aState.Time;
+    if (aTime <= 0.0 || aTime >= aTimeLag) {
         // abort sequence if mouse has been clicked too slow
-        myDoubleClickEvent.Type = stEvent_None;
-        return;
+        aState.Type = stEvent_None;
+        return false;
     }
 
-    if (myDoubleClickEvent.Type == stEvent_MouseDown
+    if (aState.Type == stEvent_MouseDown
      && theEvent->Type == stEvent_MouseUp) {
         // first click happened - update time and event type
-        myDoubleClickEvent.Type = stEvent_MouseUp;
-        myDoubleClickEvent.Time = theEvent->Time;
-        return;
-    } else if (myDoubleClickEvent.Type == stEvent_MouseUp
+        aState.Type = stEvent_MouseUp;
+        aState.Time = theEvent->Time;
+        return false;
+    } else if (aState.Type == stEvent_MouseUp
             && theEvent->Type == stEvent_MouseDown) {
         // second click started - do nothing
-        return;
-    } else if (myDoubleClickEvent.Type == stEvent_MouseUp
+        return false;
+    } else if (aState.Type == stEvent_MouseUp
             && theEvent->Type == stEvent_MouseUp) {
         // double click detected
-        myDoubleClickEvent.Type = stEvent_None;
+        aState.Type = stEvent_None;
+        if (theFromTouch && aTime <= TheDoubleTouchTimeMinLag) {
+            // ignore double touch that happenned too fast,
+            // as it likely to be an accident
+            return false;
+        }
+
         myStEvent2.Type = stEvent_Gesture1DoubleTap;
         myStEvent2.Gesture.clearGesture();
         myStEvent2.Gesture.Time = theEvent->Time;
-        myStEvent2.Gesture.Point1X = (float )theEvent->PointX;
-        myStEvent2.Gesture.Point1Y = (float )theEvent->PointY;
+        myStEvent2.Gesture.Point1X = (float )aNewPnt.x();
+        myStEvent2.Gesture.Point1Y = (float )aNewPnt.y();
         signals.onGesture->emit(myStEvent2.Gesture);
-        return;
+        return true;
     }
+
+    return false;
 }
 
 void StWindowImpl::swapEventsBuffers() {
