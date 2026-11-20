@@ -219,6 +219,11 @@ class StAndroidGlue {
      */
     ST_CPPEXPORT int openFileDescriptor(const StString& thePath);
 
+    /**
+     * Copy text to clipboard.
+     */
+    ST_CPPEXPORT bool toClipboardText(const StString& thePath);
+
         public:
 
     /**

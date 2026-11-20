@@ -295,6 +295,30 @@ int StAndroidGlue::openFileDescriptor(const StString& thePath) {
     return aFileDesc;
 }
 
+bool StAndroidGlue::toClipboardText(const StString& theText) {
+    if (myJavaVM == nullptr) {
+        return false;
+    }
+
+    StJNIEnv aJniEnv(myJavaVM);
+    if (aJniEnv.isNull()) {
+        return false;
+    }
+
+    jclass    aJClass_Activity = aJniEnv->GetObjectClass(myActivity->clazz);
+    jmethodID aJMet_toClipboard = aJniEnv->GetMethodID(aJClass_Activity, "toClipboard", "(Ljava/lang/String;)Z");
+    if (aJMet_toClipboard == nullptr) {
+        ST_ERROR_LOG("StAndroidGlue::toClipboard() - method is unavailable!");
+        return -1;
+    }
+
+    jstring aJStr = aJniEnv->NewStringUTF(theText.toCString());
+    const bool aResult = aJniEnv->CallBooleanMethod(myActivity->clazz, aJMet_toClipboard, aJStr) != JNI_FALSE;
+    aJniEnv->DeleteLocalRef(aJStr);
+    return aResult;
+
+}
+
 void StAndroidGlue::start() {
     myThread = std::make_shared<StThread>(threadEntryWrapper, this, "StAndroidGlue");
 

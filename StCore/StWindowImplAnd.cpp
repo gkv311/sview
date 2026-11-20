@@ -571,8 +571,8 @@ void StWindowImpl::processEvents() {
 }
 
 bool StWindowImpl::toClipboard(const StString& theText) {
-    (void)theText;
-    return false;
+    return myParentWin != nullptr
+        && myParentWin->toClipboardText(theText);
 }
 
 bool StWindowImpl::fromClipboard(StString& theText) {

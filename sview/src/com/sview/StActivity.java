@@ -687,6 +687,25 @@ public class StActivity extends NativeActivity implements SensorEventListener {
         }});
     }
 
+    /**
+     * Put text into system clipboard.
+     */
+    public boolean toClipboard(String theText) {
+        final String aText = theText;
+        this.runOnUiThread (new Runnable() { public void run() {
+            try {
+                android.content.ClipboardManager aClipMgr =
+                    (android.content.ClipboardManager)getSystemService(Context.CLIPBOARD_SERVICE);
+                if (aClipMgr != null) {
+                    aClipMgr.setPrimaryClip(android.content.ClipData.newPlainText("sView", aText));
+                }
+            } catch (Exception theError) {
+                //
+            }
+        }});
+        return true;
+    }
+
 //endregion
 
 //region Methods to call C++ code
