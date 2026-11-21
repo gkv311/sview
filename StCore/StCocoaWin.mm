@@ -57,7 +57,7 @@
      */
     - (void ) resignKeyWindow {
         // reset any pressed keys
-        myStWin->myKeysState.reset();
+        myStWin->handleFocusLost();
         [super resignKeyWindow];
 
         // release topmost state

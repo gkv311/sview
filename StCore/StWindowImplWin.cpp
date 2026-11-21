@@ -81,7 +81,7 @@ bool StWindowImpl::create() {
         }
     }
 
-    myKeysState.reset();
+    handleFocusLost();
     myInitState = STWIN_INITNOTSTART;
 
     myEventInitWin.reset();
@@ -458,7 +458,7 @@ LRESULT StWindowImpl::stWndProc(HWND theWin, UINT uMsg, WPARAM wParam, LPARAM lP
         case WM_ACTIVATE: {        // Watch For Window Activate Message
             if(LOWORD(wParam) == WA_INACTIVE) {
               // input focus loss - release pressed keys cached state
-              myKeysState.reset();
+              handleFocusLost();
             }
             /*if(!HIWORD(wParam)) {
                 //active = true;   // Check Minimization State

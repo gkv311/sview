@@ -209,6 +209,18 @@ class StWindowImpl {
     ST_LOCAL void postKeyUp(StEvent& theEvent);
 
     /**
+     * Handle focus lost.
+     */
+    ST_LOCAL void handleFocusLost() {
+        // reset any pressed keys
+        myKeysState.reset();
+        // probably not a good place for this...
+        //myDoubleClickEvent.Type = stEvent_None;
+        //myDoubleTapEvent.Type = stEvent_None;
+        //mySingleTapEvent.Type = stEvent_None;
+    }
+
+    /**
      * Tiles configuration (multiple viewports within the same window).
      */
     enum TiledCfg {

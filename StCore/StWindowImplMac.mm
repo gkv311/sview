@@ -283,7 +283,7 @@ void StWindowImpl::doCreateWindows(NSOpenGLContext* theGLContextMaster,
 
 bool StWindowImpl::create() {
     myEventsThreaded = ![NSThread isMainThread];
-    myKeysState.reset();
+    handleFocusLost();
     myInitState = STWIN_INITNOTSTART;
     updateChildRect();
 

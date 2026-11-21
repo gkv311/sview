@@ -85,7 +85,7 @@ void StWindowImpl::convertRectToBacking(StGLBoxPx& ,
 
 // function create GUI window
 bool StWindowImpl::create() {
-    myKeysState.reset();
+    handleFocusLost();
 
     // replace default XError handler to ignore some errors
     XSetErrorHandler(stXErrorHandler);
@@ -1063,7 +1063,7 @@ void StWindowImpl::processEvents() {
             //case FocusIn:
             case FocusOut: {
                 // input focus loss - release pressed keys cached state
-                myKeysState.reset();
+                handleFocusLost();
                 break;
             }
             default: {

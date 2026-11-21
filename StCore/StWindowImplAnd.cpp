@@ -24,7 +24,7 @@ void StWindowImpl::convertRectToBacking(StGLBoxPx& ,
 
 // function create GUI window
 bool StWindowImpl::create() {
-    myKeysState.reset();
+    handleFocusLost();
     myInitState     = STWIN_INITNOTSTART;
     myToResetDevice = false;
     if(myParentWin == NULL) {
@@ -458,7 +458,7 @@ void StWindowImpl::onAndroidCommand(int32_t theCommand) {
             return;
         }
         case StAndroidGlue::CommandId_FocusLost: {
-            myKeysState.reset();
+            handleFocusLost();
             return;
         }
         case StAndroidGlue::CommandId_ConfigChanged: {
